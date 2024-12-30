@@ -23,6 +23,7 @@ import AddIcon from '@mui/icons-material/Add';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
   const toastConfig = useContext(CustomToastContext);
@@ -326,17 +327,17 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
             <Box display="flex" justifyContent="space-between" m={1} mb={0}>
               <Box display="flex"></Box>
               <Box display="flex">
-                <Button
-                  variant={'outlined'}
-                  color="primary"
-                  size="small"
+                <ThemeButton
+                  borderColor="yellow"
+                  backgroundColor="yellow"
+                  mobileTooltip="Actions"
                   onClick={handleClick}
                   disabled={selectedRecords?.length ? false : true}
                   endIcon={<BiChevronDown />}
-                  className="new-dropdown-v1"
+                  iconForMobile={<BiChevronDown />}
                 >
                   Actions
-                </Button>
+                </ThemeButton>
                 <Menu
                   anchorEl={anchorEl}
                   open={open}

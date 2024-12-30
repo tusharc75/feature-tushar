@@ -6,7 +6,6 @@ import { Skeleton } from '@mui/material';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
-import { IoMdDownload } from 'react-icons/io';
 import { VscVersions } from 'react-icons/vsc';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
@@ -41,6 +40,7 @@ import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Step from '../DynamicForm/Step';
 import { RiExchange2Line } from 'react-icons/ri';
+import { DownloadIcon } from 'src/assets/svg/svgIcons';
 
 const InvoiceDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -243,10 +243,10 @@ const InvoiceDetails = () => {
                   onClick={(e) => {
                     handleDownload();
                   }}
-                  startIcon={<IoMdDownload />}
+                  startIcon={<DownloadIcon />}
                   disabled={isDownloading ? true : false}
                   mobileTooltip={isDownloading ? 'Please wait...' : 'Download'}
-                  iconForMobile={<IoMdDownload size={24} style={{ color: 'var(--primary-text)' }} />}
+                  iconForMobile={<DownloadIcon />}
                 >
                   {isDownloading ? 'Please wait...' : 'Download'}
                 </ThemeButton>

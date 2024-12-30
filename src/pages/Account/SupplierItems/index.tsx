@@ -1,4 +1,4 @@
-import { Button, IconButton } from '@mui/material';
+import { IconButton } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
@@ -20,6 +20,7 @@ import { useHistory } from 'react-router-dom';
 import queryString from 'query-string';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
   const history = useHistory();
@@ -201,10 +202,7 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
       <Box display="flex" justifyContent={'space-between'}>
         {allowedToEdit && (
           <>
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
+            <ThemeButton
               onClick={() => {
                 if (tabValue === 0) {
                   setAssignDialog({ open: true, type: 'productCategory', data: dataRows });
@@ -216,18 +214,17 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
               }}
             >
               Add {tabValue === 0 ? 'Product Category' : tabValue === 1 ? 'Product' : 'Asset'}
-            </Button>
-            <Button
-              variant="outlined"
-              size="small"
+            </ThemeButton>
+            <ThemeButton
               onClick={openActions}
-              aria-controls="action-menu"
+              mobileTooltip="Actions"
               disabled={selectedRecords.length === 0}
               endIcon={<ExpandMore />}
-              className="new-dropdown-v1"
+              borderColor="yellow"
+              backgroundColor="yellow"
             >
               Actions
-            </Button>
+            </ThemeButton>
             <Menu
               anchorEl={anchorEl}
               keepMounted

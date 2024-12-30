@@ -40,6 +40,7 @@ import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import AssignSerialNumbersDialog from 'src/components/AssignRolesDialog/AssignSerialNumbersDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const Consumables = ({
   isCreate,
@@ -592,17 +593,17 @@ const Consumables = ({
               </Button>
             )}
             <Box ml={1}></Box>
-            <Button
-              variant={'outlined'}
-              color="primary"
-              size="small"
+            <ThemeButton
+                  mobileTooltip="Actions"
+                  borderColor="yellow"
+                  backgroundColor="yellow"
+                  iconForMobile={<BiChevronDown />}
               onClick={handleClickAction}
               disabled={selectedRecords?.length ? false : true}
               endIcon={<BiChevronDown />}
-              className="new-dropdown-v1"
             >
               Actions
-            </Button>
+            </ThemeButton>
             <Menu
               anchorEl={anchorEl}
               open={open}

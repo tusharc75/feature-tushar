@@ -1,4 +1,4 @@
-import { Button, IconButton } from '@mui/material';
+import { IconButton } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -15,6 +15,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 let renderedFrom = `${camelCase(sidebarResource.user)}_warehouse_master`;
 
@@ -189,31 +190,30 @@ const Users = ({ warehouse }) => {
     <Fragment>
       <Box p={1} pb={2}>
         <Grid container>
-          <Grid size={{xs:3, md:3, sm:3}}>
-            <Button
-              size="small"
-              variant="contained"
-              color="primary"
+          <Grid size={{ xs: 3, md: 3, sm: 3 }}>
+            <ThemeButton
               onClick={() => {
                 setOpenDialog(true);
               }}
+              mobileTooltip="Assign Users"
+              iconForMobile={false}
             >
               Assign Users
-            </Button>
+            </ThemeButton>
           </Grid>
-          <Grid size={{xs:9, md:9, sm:9}}>
+          <Grid size={{ xs: 9, md: 9, sm: 9 }}>
             <Box display={'flex'} justifyContent={'flex-end'} alignItems="center">
-              <Button
-                variant="outlined"
-                size="small"
+              <ThemeButton
                 onClick={openActions}
-                aria-controls="action-menu"
-                disabled={selectedRecords.length === 0}
                 endIcon={<ExpandMore />}
-                className="new-dropdown-v1"
+                mobileTooltip="Actions"
+                borderColor="yellow"
+                backgroundColor="yellow"
+                disabled={selectedRecords.length === 0}
+                iconForMobile={<ExpandMore />}
               >
                 Actions
-              </Button>
+              </ThemeButton>
               <Menu
                 anchorEl={anchorEl}
                 keepMounted

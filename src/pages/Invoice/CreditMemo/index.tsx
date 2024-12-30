@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, Menu, MenuItem } from '@mui/material';
+import { Box, IconButton, Menu, MenuItem } from '@mui/material';
 import { camelCase, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -21,6 +21,7 @@ import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { isMobile, isTablet } from 'react-device-detect';
 import MaterialDialog from './MaterialDialog';
 import { FiExternalLink } from 'react-icons/fi';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 function CreditMemo({ invoiceData, allowedToEdit }) {
   const renderedFrom = `${camelCase(sidebarResource.invoice)}_credit_memo`;
@@ -287,26 +288,23 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
     <Fragment>
       <Box pb={2} justifyContent={'space-between'} className="flex gap-2">
         {allowedToEdit && permissions?.creditMemo?.isCreate && (
-          <Button variant={'outlined'} color="primary" size="small" startIcon={<Add />} onClick={() => setCreditMemoDialog({ open: true, id: null })}>
+          <ThemeButton startIcon={<Add />} iconForMobile={<Add />} mobileTooltip='Create' onClick={() => setCreditMemoDialog({ open: true, id: null })}>
             Create
-          </Button>
+          </ThemeButton>
         )}
         <div className="flex items-center gap-2">
           {invoiceColumns && dataRows?.length > 0 && <PreviewDownload {...previewDownloadProps} />}
           {allowedToEdit && (
-            <Button
-              variant={'outlined'}
-              color="primary"
-              aria-controls="simple-menu"
-              aria-haspopup="true"
+            <ThemeButton
               disabled={selectedRecords.length === 0}
-              size="small"
               onClick={handleClick}
               endIcon={<ArrowDropDownIcon />}
-              className="new-dropdown-v1"
-            >
+              mobileTooltip="Actions"
+              borderColor="yellow"
+              backgroundColor="yellow"
+              iconForMobile={<ArrowDropDownIcon />}            >
               {'Actions'}
-            </Button>
+            </ThemeButton>
           )}
         </div>
         <Menu
