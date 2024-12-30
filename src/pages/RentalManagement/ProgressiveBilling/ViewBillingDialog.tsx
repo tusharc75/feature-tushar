@@ -33,7 +33,7 @@ import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { useData } from 'src/StateProvider/Provider';
 import { FiExternalLink } from 'react-icons/fi';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess, allowCreateInvoice, isLatestInvoice }) => {
   const renderedFrom = `${camelCase(sidebarResource.rentalManagementInvoice)}_view_invoice`;
@@ -415,17 +415,18 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
                 {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />}
                 <Box ml={1} />
                 {allowedToEdit && (
-                  <Button
-                    variant="outlined"
-                    size="small"
+                  <ThemeButton
+                    mobileTooltip="Actions"
+                    borderColor="yellow"
+                    backgroundColor="yellow"
+                    iconForMobile={<ExpandMore />}
                     onClick={handleClick}
                     aria-controls="action-menu"
                     disabled={selectedRecords?.length && isLatestInvoice ? false : true}
                     endIcon={<ExpandMore />}
-                    className="new-dropdown-v1"
                   >
                     Actions
-                  </Button>
+                  </ThemeButton>
                 )}
                 <Menu
                   id="action-menu"

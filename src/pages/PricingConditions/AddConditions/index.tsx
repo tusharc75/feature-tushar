@@ -24,6 +24,7 @@ import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicD
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { addDisable, deleteDisable, editDisable, updateDisable } from 'src/constants/messageHelpers';
 import { FiExternalLink } from 'react-icons/fi';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const AddConditions = ({ pricingConditionId, detailData }) => {
   const renderedFrom = camelCase(`${sidebarResource?.pricingCondition}_condition_selected`);
@@ -59,22 +60,24 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       .then(({ data: { data, count } }) => {
         setCondition(JSON.parse(JSON.stringify(data)));
         data.forEach((element) => {
-          element.detail = `${element.materialType === MATERIAL_TYPE.product
-            ? element.productDetail?.productName
-            : element.materialType === MATERIAL_TYPE.service
-              ? element.serviceDetail?.serviceName
-              : element.materialType === MATERIAL_TYPE.package
-                ? element.packageDetail?.packageName
-                : element.competencyDetail.competencyName
-            }`;
-          element.description = `${element.materialType === MATERIAL_TYPE.product
-            ? element.productDetail?.productDescription
-            : element.materialType === MATERIAL_TYPE.service
-              ? element.serviceDetail?.serviceDescription
-              : element.materialType === MATERIAL_TYPE.package
-                ? element.packageDetail?.packageDescription
-                : ''
-            }`;
+          element.detail = `${
+            element.materialType === MATERIAL_TYPE.product
+              ? element.productDetail?.productName
+              : element.materialType === MATERIAL_TYPE.service
+                ? element.serviceDetail?.serviceName
+                : element.materialType === MATERIAL_TYPE.package
+                  ? element.packageDetail?.packageName
+                  : element.competencyDetail.competencyName
+          }`;
+          element.description = `${
+            element.materialType === MATERIAL_TYPE.product
+              ? element.productDetail?.productDescription
+              : element.materialType === MATERIAL_TYPE.service
+                ? element.serviceDetail?.serviceDescription
+                : element.materialType === MATERIAL_TYPE.package
+                  ? element.packageDetail?.packageDescription
+                  : ''
+          }`;
           element.materialType = startCase(element.materialType);
           element.conditionType = PRICING_TYPE?.filter((e) => element.conditionType?.includes(e.optionValue))
             ?.map((e) => e.optionLabel)
@@ -199,13 +202,14 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
               size="small"
               onClick={() => {
                 window.open(
-                  `${row?.original?.materialType === 'Product'
-                    ? routes.productDetail.path
-                    : row?.original?.materialType === 'Service'
-                      ? routes.serviceMasterDetail.path
-                      : row?.original?.materialType === 'Package'
-                        ? routes.packagesDetail.path
-                        : routes?.competenciesDetail.path
+                  `${
+                    row?.original?.materialType === 'Product'
+                      ? routes.productDetail.path
+                      : row?.original?.materialType === 'Service'
+                        ? routes.serviceMasterDetail.path
+                        : row?.original?.materialType === 'Package'
+                          ? routes.packagesDetail.path
+                          : routes?.competenciesDetail.path
                   }/${row?.original?.materialId}`
                 );
               }}
@@ -453,17 +457,17 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
           <Box ml={2}>
             <HtmlTooltip title={permissions?.pricingCondition?.isUpdate ? '' : updateDisable}>
               <span>
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                  size="small"
-                  className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
+                <ThemeButton
+                  mobileTooltip="Actions"
+                  borderColor="yellow"
+                  backgroundColor="yellow"
+                  iconForMobile={<ExpandMore />}
                   onClick={openActions}
-                  aria-controls="action-menu"
                   disabled={selectedRecords.length && permissions?.pricingCondition?.isUpdate ? false : true}
                   endIcon={<ExpandMore />}
                 >
                   {isMobile && !isTablet ? '' : 'Actions'}
-                </Button>
+                </ThemeButton>
               </span>
             </HtmlTooltip>
             <Menu
@@ -500,7 +504,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
           </Box>
         </Box>
       </Box>
-      <Grid size={{xs:12, md:12, sm:12}} className="mt-3">
+      <Grid size={{ xs: 12, md: 12, sm: 12 }} className="mt-3">
         {columns && condition ? (
           <CustomReactTable
             height={'calc(100vh - 393px)'}
@@ -587,8 +591,9 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete pricing setup condition  ${deleteRecord?.productDetail?.productName || deleteRecord?.packageDetail?.packageName || ''
-            } ?`}
+          message={`Are you sure you want to delete pricing setup condition  ${
+            deleteRecord?.productDetail?.productName || deleteRecord?.packageDetail?.packageName || ''
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

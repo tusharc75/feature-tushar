@@ -1,10 +1,11 @@
-import { Box, Button, Menu, MenuItem } from '@mui/material';
+import { Box, Menu, MenuItem } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { ExpandMore } from '@mui/icons-material';
 import { useState } from 'react';
 import SearchBox from '../../components/Helpers/SearchBox';
 
 import styles from '../Leads/Header.module.scss';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 function DoaHeader(props) {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -29,17 +30,17 @@ function DoaHeader(props) {
 
           {DoaPermissions.isDelete && (
             <>
-              <Button
+              <ThemeButton
                 disabled={canDelete}
-                variant="outlined"
-                size="small"
+                mobileTooltip="Actions"
+                borderColor="yellow"
+                backgroundColor="yellow"
                 onClick={openActions}
-                className={`${styles.action_submit_btn} new-dropdown-v1`}
-                aria-controls="action-menu"
                 endIcon={<ExpandMore />}
+                iconForMobile={<ExpandMore />}
               >
                 Actions
-              </Button>
+              </ThemeButton>
               <Menu
                 anchorEl={anchorEl}
                 keepMounted

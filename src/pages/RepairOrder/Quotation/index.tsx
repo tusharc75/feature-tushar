@@ -36,6 +36,7 @@ import {
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateCompleteStepData, nextButtonStep } from 'src/pages/RepairOrder/walkmeSteps';
 import { flattenArray } from 'src/constants/columns';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const dataAdded = {
   completeDataAdded: false,
@@ -710,17 +711,17 @@ const Quotation = ({
               {![QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                 quotationData?.versions[currentVersion]?.status
               ) && (
-                  <Button
-                    variant="outlined"
-                    size="small"
+                  <ThemeButton
+                    mobileTooltip="Actions"
+                    borderColor="yellow"
+                    backgroundColor="yellow"
+                    iconForMobile={<ExpandMore />}
                     onClick={openActions}
-                    aria-controls="action-menu"
                     disabled={selectedRecords?.length === 0}
                     endIcon={<ExpandMore />}
-                    className="new-dropdown-v1"
                   >
                     Actions
-                  </Button>
+                  </ThemeButton>
                 )}
               <Menu
                 anchorEl={anchorEl}

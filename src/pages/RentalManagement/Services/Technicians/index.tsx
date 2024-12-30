@@ -24,6 +24,7 @@ import { camelCase } from 'lodash';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { calculatePrice, fetch_rental_technician_fields } from 'src/components/RentalManagment/helper';
 import { FiExternalLink } from 'react-icons/fi';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, services }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -369,18 +370,18 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
               </Button>
             </Box>
             <Box display="flex" ml={1}>
-              <Button
-                variant="outlined"
-                color="primary"
-                size="small"
+              <ThemeButton
+                mobileTooltip="Actions"
+                borderColor="yellow"
+                backgroundColor="yellow"
+                iconForMobile={<BiChevronDown />}
                 id="demo-positioned-button"
                 onClick={handleClick}
                 disabled={!Boolean(selectedRecords?.length)}
                 endIcon={<BiChevronDown />}
-                className="new-dropdown-v1"
               >
                 Actions
-              </Button>
+              </ThemeButton>
               <Menu
                 anchorEl={anchorEl}
                 keepMounted
