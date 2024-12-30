@@ -2,8 +2,6 @@ import React, { useState, useContext } from 'react';
 import CustomDialogFooter from './CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from './CustomDialog/CustomDialogHeader';
 import Dialog from '@mui/material/Dialog';
-import Button from '@mui/material/Button';
-import CircularProgress from '@mui/material/CircularProgress';
 import DialogContent from '@mui/material/DialogContent';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -14,6 +12,7 @@ import ConfirmationDialog from './Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from '../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomDialogTransition, entity } from '../constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export default function ResourceTransferDialog(props) {
   const { resource = '', open, onClose, allResourceData, fromResource, handleDelete, selectedRecords = [] } = props;
@@ -118,14 +117,21 @@ export default function ResourceTransferDialog(props) {
           />
         </Box>
       </DialogContent>
-
       <CustomDialogFooter>
-        <Button variant="outlined" color="primary" size="small" disabled={loading} onClick={onClose}>
+        <ThemeButton
+          onClick={onClose}
+          buttonType='transparent'
+        >
           Cancel
-        </Button>
-        <Button variant="contained" color="primary" size="small" onClick={handleTransfer} disabled={loading || !toResource}>
-          {loading ? <CircularProgress size={22} /> : 'Submit'}
-        </Button>
+        </ThemeButton>
+        <ThemeButton
+          onClick={handleTransfer}
+          disabled={loading || !toResource}
+          isLoading={loading}
+          buttonType='theme'
+        >
+          Submit
+        </ThemeButton>
       </CustomDialogFooter>
       {showConfirmDialog ? (
         <ConfirmationDialog
