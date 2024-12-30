@@ -216,12 +216,10 @@ const Steps = ({
                     </Box>
                     <Typography className={styles.label}>{step.title}</Typography>
                     {!isStepEnded && setStepFullScreen && currentStep === i && (
-                      <HtmlTooltip title={`${stepFullScreen ? `Exit full` : `Full`} screen`}>
-                        <Box className={styles.fullScrceen}>
-                          <IconButton aria-label="Full Screen" onClick={setStepFullScreen} size="small">
-                            <FiMaximize2 />
-                          </IconButton>
-                        </Box>
+                      <HtmlTooltip title={`${stepFullScreen ? `Exit full` : `Full`} screen`} className={styles.fullScrceen}>
+                        <IconButton aria-label="Full Screen" onClick={setStepFullScreen} size="small">
+                          <FiMaximize2 />
+                        </IconButton>
                       </HtmlTooltip>
                     )}
                   </div>

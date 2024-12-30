@@ -58,7 +58,13 @@ const getButtonStyle = ({
       height: '32px',
       fontSize: '13px',
       gap: '5px',
-      '& .MuiButton-icon': { margin: 0 },
+      alignItems: 'center',
+      '& .MuiButton-icon': {
+        margin: 0,
+        '&>:nth-of-type(1)': {
+          fontSize: '18px'
+        }
+      },
       '& .MuiButton-endIcon': { marginRight: '-5px' },
       '& .MuiButton-startIcon': { marginLeft: '-5px' },
       fontWeight: 500,
@@ -107,7 +113,7 @@ const getButtonStyle = ({
         ...buttonProps.sx,
         background: 'var(--new-theme-secondary-color)',
         color: 'black',
-        '&:disabled': { background: 'var(--new-theme-secondary-color-hover)', opacity: 0.7 },
+        '&:disabled': { background: 'var(--new-theme-secondary-color-hover)', opacity: 0.7, color: 'black' },
         '&:hover': { background: 'var(--new-theme-secondary-color-hover)' }
       };
       buttonProps.variant = 'contained';
