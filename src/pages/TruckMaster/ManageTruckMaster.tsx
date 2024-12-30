@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
 import { Formik, Form } from 'formik';
-import { Box, CircularProgress } from '@mui/material';
+import { Box } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
 import Dialog from '@mui/material/Dialog';
 import { isEqual } from 'lodash';
@@ -199,7 +199,6 @@ const ManageTruckMaster = ({ isClone = false, id = null, onClose, onSuccess }) =
                 <ThemeButton
                   isLoading={loading}
                   buttonType="theme"
-                  // startIcon={submitting && <CircularProgress size={20} color="inherit" />}
                   disabled={submitting}
                   onClick={(e) => {
                     e.preventDefault();

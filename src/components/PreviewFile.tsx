@@ -1,4 +1,4 @@
-import { CircularProgress, Dialog, Icon, IconButton, MenuItem } from '@mui/material';
+import { Dialog, IconButton, MenuItem } from '@mui/material';
 import { GetApp } from '@mui/icons-material';
 import PreviewIcon from '@mui/icons-material/Visibility';
 import { createElement, useContext, useState } from 'react';
@@ -163,18 +163,6 @@ export const PreviewFile = ({ fileName, component = 'IconButton', showDownload =
           close={() => setImageDialogData({ open: false, url: '', fileName })}
         />
       )}
-      {/* {showDownload && downloading && (
-        <div className="flex items-center">
-          {downloadProgress === 100 ? 'Downloaded' : 'Downloading'}
-
-          <div className="relative ml-1 inline-flex">
-            <CircularProgress size={30} variant="determinate" value={downloadProgress} />
-            <div className="absolute inset-0 bottom-0 left-0 right-0 top-0 flex items-center justify-center">
-              <p>{downloadProgress}%</p>
-            </div>
-          </div>
-        </div>
-      )} */}
     </div>
   );
 };
