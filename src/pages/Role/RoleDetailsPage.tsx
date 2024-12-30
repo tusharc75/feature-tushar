@@ -1,4 +1,4 @@
-import { Box, Button, Checkbox, CircularProgress, FormControlLabel, IconButton, TextField, Typography } from '@mui/material';
+import { Box, Button, Checkbox, FormControlLabel, IconButton, TextField, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { ControlPoint } from '@mui/icons-material';
 import { Autocomplete, Skeleton } from '@mui/material';
@@ -6,7 +6,7 @@ import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { FaEye } from 'react-icons/fa';
 import { useHistory, useParams } from 'react-router-dom';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -545,15 +545,14 @@ const RoleDetailsPage = () => {
                     </Button>
                   )}
                   {permissions?.role.isUpdate && isEdit && (
-                    <Button
+                    <ThemeButton
                       disabled={isUpdating || checkError() || !isEdit}
-                      variant="contained"
-                      color="primary"
-                      size="medium"
+                      buttonType='theme'
+                      isLoading={isUpdating}
                       onClick={handleUpdateRole}
                     >
-                      {isUpdating ? <CircularProgress size={22} /> : 'Update'}
-                    </Button>
+                      Update
+                    </ThemeButton>
                   )}
                   {permissions?.role.isDelete && !isEditDeleteDisable && (
                     <DeleteButton

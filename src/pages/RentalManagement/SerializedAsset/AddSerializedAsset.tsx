@@ -1,4 +1,4 @@
-import { Box, CircularProgress } from '@mui/material';
+import { Box } from '@mui/material';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog/Dialog';
 import TextField from '@mui/material/TextField';
@@ -607,21 +607,17 @@ const AddSerializedAsset = ({
                 {Number(tabValue) === 2 && (
                   <Box ml={2}>
                     <HtmlTooltip title={'Add to Job'}>
-                      <Button
-                        color="primary"
-                        size="small"
-                        style={{ minWidth: 'max-content' }}
+                      <ThemeButton
+                        disabled={isSubmitting || checkUniqRentalJob() || serializedProducts.some((d) => d?.qty < 0)}
                         onClick={() => {
                           setInuseAssetConfirmBox(true);
                         }}
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        disabled={isSubmitting || checkUniqRentalJob() || serializedProducts.some((d) => d?.qty < 0)}
-                        className={`${isMobile && !isTablet ? 'mobile_button' : ''}  `}
-                        endIcon={isSubmitting && <CircularProgress size={20} />}
+                        buttonType='theme'
+                        isLoading={isSubmitting}
                       >
                         {`Add to Job`}
                         {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
-                      </Button>
+                      </ThemeButton>
                     </HtmlTooltip>
                   </Box>
                 )}

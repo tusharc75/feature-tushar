@@ -1,5 +1,5 @@
 import { Form, Formik } from 'formik';
-import { Button, CircularProgress, Dialog, Box } from '@mui/material';
+import { Dialog, Box } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -13,6 +13,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, isBulkUpdate, records, rentalId }) => {
   const {
@@ -158,19 +159,19 @@ const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, isBulkUp
                 </Box>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button disabled={loading} size="small" variant="outlined" color="primary" onClick={onClose}>
+                <ThemeButton
+                  onClick={onClose}
+                  buttonType='transparent'
+                >
                   Close
-                </Button>
-                <Button
+                </ThemeButton>
+                <ThemeButton
                   disabled={loading}
-                  startIcon={loading && <CircularProgress size={18} color="inherit" />}
-                  size="small"
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+                  buttonType='theme'
+                  isLoading={loading}
                 >
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
             </Form>
           )}
