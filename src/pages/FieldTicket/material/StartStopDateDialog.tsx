@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog } from '@mui/material';
+import { Box, Dialog } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Form, Formik } from 'formik';
 import { useEffect, useState } from 'react';
@@ -7,6 +7,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition, displayDate, normalizeDate } from 'src/constants/helpers';
 import CustomDatePicker from 'src/components/CustomDatePicker';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export default function StartStopDate({ onClose, type, loading, handleSubmit, data = null, minStartDate = null, maxEndDate = null }) {
   const [initialValues, setInitialValues] = useState({ startDate: new Date(), endDate: new Date() });
@@ -108,19 +109,19 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button disabled={loading} size="small" variant="outlined" color="primary" onClick={onClose}>
-                Close
-              </Button>
-              <Button
-                disabled={loading}
-                startIcon={loading && <CircularProgress size={18} color="inherit" />}
-                size="small"
-                variant="contained"
-                color="primary"
-                type="submit"
-              >
-                Save
-              </Button>
+              <ThemeButton
+                  onClick={onClose}
+                  buttonType='transparent'
+                >
+                  Close
+                </ThemeButton>
+                <ThemeButton
+                  disabled={loading}
+                  isLoading={loading}
+                  buttonType='theme'
+                >
+                  Save
+                </ThemeButton>
             </CustomDialogFooter>
           </Form>
         )}

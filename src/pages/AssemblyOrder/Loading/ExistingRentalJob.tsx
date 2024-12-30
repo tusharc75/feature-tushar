@@ -1,9 +1,10 @@
-import { Box, Button, CircularProgress, Dialog } from '@mui/material';
+import { Box, Dialog } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { ASSET_STATUS, CustomDialogTransition, gridLoadingTimeout, prepareDataForGrid, rentalManagement } from 'src/constants/helpers';
@@ -107,29 +108,25 @@ const ExistingRentalJob = ({ onClose, referenceData, managedPackageIds, inventor
       <div className="listing-grid p-3">
         <Box mb={2}>
           <Grid size={{ xs:12, sm:12, md:12}} container justifyContent="flex-end">
-            <Button
-              size="small"
-              color="primary"
+            <ThemeButton
               onClick={() => {
                 setShowRentalDialog(true);
               }}
-              variant="contained"
+              buttonType='theme'
             >
               {`Create ${resources?.rentalManagement?.titleSingular}`}
-            </Button>
+            </ThemeButton>
             <Box mx={1} />
-            <Button
-              size="small"
-              color="primary"
+            <ThemeButton
               onClick={() => {
                 handleAdd(selectedRecords[0]?._id);
               }}
-              variant={'contained'}
               disabled={isSubmitting || selectedRecords.length > 1 || selectedRecords.length === 0}
-              endIcon={isSubmitting && <CircularProgress color="inherit" size={18} />}
+              isLoading={isSubmitting}
+              buttonType='theme'
             >
               Add
-            </Button>
+            </ThemeButton>
           </Grid>
         </Box>
         {columns ? (

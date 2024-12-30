@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog } from '@mui/material';
+import { Box, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -14,6 +14,7 @@ import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ManageBlog = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const {
@@ -163,29 +164,23 @@ const ManageBlog = ({ onClose, onSuccess, isClone = false, id = null }) => {
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
-                  disabled={submitting}
+                <ThemeButton
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
+                  buttonType='transparent'
                 >
                   Cancel
-                </Button>
-                <Button
-                  disabled={loading || submitting}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
-                  size="small"
+                </ThemeButton>
+                <ThemeButton
                   onClick={submitForm}
-                  endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                  disabled={loading || submitting}
+                  isLoading={submitting}
+                  buttonType='theme'
                 >
-                  {' '}
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog

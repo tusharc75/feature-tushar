@@ -1,8 +1,9 @@
-import { Box, Button, CircularProgress, TextField } from '@mui/material';
+import { Box, TextField } from '@mui/material';
 import React from 'react';
 import { backendApi } from 'src/config';
 import { FiLock } from 'react-icons/fi';
 import axiosInstance from 'src/axios/axiosInstance';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 function SSOLoginButton() {
   const [checking, setChecking] = React.useState(false);
@@ -47,20 +48,17 @@ function SSOLoginButton() {
           <Box mt={1} />
         </>
       )}
-      <Button
-        disabled={checking}
-        fullWidth
-        startIcon={checking ? <CircularProgress color="inherit" size={20} /> : <FiLock color="gray" />}
-        variant="outlined"
-        type="button"
-        className={'azure-login'}
+      <ThemeButton
         onClick={() => {
           if (!textFieldShow) setTextFieldShow(true);
           if (textFieldShow) handleBrandCheck();
         }}
+        disabled={checking}
+        isLoading={checking}
+        buttonType='theme'
       >
         Continue with SAML SSO
-      </Button>
+      </ThemeButton>
     </>
   );
 }

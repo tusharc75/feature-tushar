@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress } from '@mui/material';
+import { Box, CircularProgress } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -15,6 +15,7 @@ import DropContainer, { SingleSection } from './DropContainer';
 import Sidebar, { SidebarItem } from './Sidebar';
 import { useDndSensors } from 'src/hooks';
 import { useData } from 'src/StateProvider/Provider';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const useClasses = makeStyles(() => ({
   root: {
@@ -212,16 +213,14 @@ const EcommerceHome = () => {
               {isMobile && !isTablet ? <MobileImportIcon size={18} color={'var(--primary-text)'} /> : 'Import'}
             </label>
 
-            <Button
-              color="primary"
-              variant="contained"
-              size="small"
+            <ThemeButton
               disabled={isSubmitting || loading}
               onClick={handleClickSave}
-              startIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
+              isLoading={isSubmitting}
+              buttonType='theme'
             >
               Save
-            </Button>
+            </ThemeButton>
           </Box>
         </Box>
       </Box>

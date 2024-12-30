@@ -1,8 +1,6 @@
 import React, { useContext, useState } from 'react';
 import {
   Box,
-  Button,
-  CircularProgress,
   Dialog,
   Paper,
   Table,
@@ -19,6 +17,7 @@ import { CustomDialogTransition, cycleCountPhysicalInventory } from 'src/constan
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const Products = ({ handleClose, handleSucess, _id, products, warehouse }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -107,17 +106,14 @@ const Products = ({ handleClose, handleSucess, _id, products, warehouse }) => {
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button
-          type="submit"
-          variant="contained"
-          size="small"
-          color="primary"
-          endIcon={isSubmitting && <CircularProgress size={18} />}
+        <ThemeButton
           onClick={handleSubmit}
           disabled={tableData?.find((d) => d.qty === null)}
+          isLoading={isSubmitting}
+          buttonType='theme'
         >
           Save
-        </Button>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

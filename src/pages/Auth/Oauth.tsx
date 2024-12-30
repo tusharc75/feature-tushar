@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
-import { CssBaseline, Button, Box, TextField, CircularProgress, Link as MuiLink } from '@mui/material';
+import { CssBaseline, Box, TextField, Link as MuiLink } from '@mui/material';
 import { Formik, Form } from 'formik';
 import axiosInstance from './../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -12,6 +12,7 @@ import { Logo } from 'src/assets/authenticationAssets';
 import AuthSlider from './AuthSlider';
 
 import styles from './index.module.scss';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 export const userManual = {
   description: 'View our user manual in just a click.',
   link: 'https://docs.equip-t.com/auth/login'
@@ -122,18 +123,14 @@ const Oauth = () => {
                     </Box>
 
                     <Box>
-                      <Button
-                        disabled={isSubmitting}
-                        fullWidth
-                        variant="contained"
-                        color="primary"
-                        type="submit"
-                        className={styles.submitButton}
+                      <ThemeButton
                         onClick={submitForm}
-                        startIcon={isSubmitting && <CircularProgress color="inherit" size={20} />}
+                        disabled={isSubmitting}
+                        isLoading={isSubmitting}
+                        buttonType='theme'
                       >
                         Sign In
-                      </Button>
+                      </ThemeButton>
                     </Box>
                   </Form>
                 )}

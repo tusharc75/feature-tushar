@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog, TextField } from '@mui/material';
+import { Box, Dialog, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import React, { useContext, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -7,6 +7,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { CustomDialogTransition } from 'src/constants/helpers';
@@ -162,29 +163,24 @@ const ReceiverDialog = ({ handleClose, handleSucess, data }) => {
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button
-          type="button"
-          variant="outlined"
-          color="primary"
-          size="small"
+        <ThemeButton
           onClick={() => {
             handleClose();
           }}
+          buttonType='transparent'
         >
           Cancel
-        </Button>
-        <CustomButton
-          loading={false}
-          variant="contained"
-          color="primary"
-          startIcon={submitting && <CircularProgress size={20} color="inherit" />}
-          disabled={submitting}
+        </ThemeButton>
+        <ThemeButton
           onClick={(e) => {
             handleReceive();
           }}
+          disabled={submitting}
+          isLoading={submitting}
+          buttonType='theme'
         >
           Receive
-        </CustomButton>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, CssBaseline, FormControl, MenuItem, Select } from '@mui/material';
+import { Box, CssBaseline, FormControl, MenuItem, Select } from '@mui/material';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useCallback, useContext, useEffect, useState } from 'react';
@@ -183,9 +183,12 @@ const LoginMFA = () => {
               </FormControl>
               {selectedMethod === MFA_METHOD.emailOtp && tokenData?.authenticationMethod === MFA_METHOD.totp ? (
                 <Box mt={2} mb={2}>
-                  <Button disableElevation variant="contained" color="primary" onClick={handleResendCode}>
+                  <ThemeButton
+                    onClick={handleResendCode}
+                    buttonType='theme'
+                  >
                     Send Code
-                  </Button>
+                  </ThemeButton>
                 </Box>
               ) : (
                 <form
@@ -228,7 +231,6 @@ const LoginMFA = () => {
                     </div>
                   )}
                   <ThemeButton
-                    disableElevation
                     buttonType="theme"
                     type="submit"
                     fullWidth

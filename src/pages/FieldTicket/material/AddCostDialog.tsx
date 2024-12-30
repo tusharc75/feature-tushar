@@ -2,7 +2,7 @@ import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { Box, Button, CircularProgress, Dialog } from '@mui/material';
+import { Box, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { CHILD_RESOURCE, CustomDialogTransition, MATERIAL_TYPE, getObjKeys, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -18,6 +18,7 @@ import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineCo
 import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 import InputField from 'src/components/Helpers/InputField';
 import dayjs from 'dayjs';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, handleUpdateCost, showSaveAndNext, loadingEdit }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -171,48 +172,39 @@ const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, hand
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
+                  buttonType='transparent'
                 >
                   Cancel
-                </Button>
+                </ThemeButton>
                 {showSaveAndNext && (
-                  <Button
-                    disabled={loadingEdit}
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    type="submit"
+                  <ThemeButton
                     onClick={() => {
                       setSaveAndNext(true);
                       submitForm();
                     }}
-                    endIcon={loadingEdit && <CircularProgress color="inherit" size={18} />}
+                    disabled={loadingEdit}
+                    isLoading={loadingEdit}
+                    buttonType='theme'
                   >
-                    {' '}
                     Save & Next
-                  </Button>
+                  </ThemeButton>
                 )}
-                <Button
-                  id={'dialog-save-button'}
-                  disabled={loadingEdit}
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  type="submit"
+                <ThemeButton
                   onClick={() => {
                     setSaveAndNext(false);
                     submitForm();
                   }}
-                  endIcon={loadingEdit && <CircularProgress color="inherit" size={18} />}
+                  disabled={loadingEdit}
+                  isLoading={loadingEdit}
+                  buttonType='theme'
                 >
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog

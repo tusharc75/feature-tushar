@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext, Fragment } from 'react';
-import { Dialog, Button, CircularProgress, useTheme, Box } from '@mui/material';
+import { Dialog, CircularProgress, useTheme, Box } from '@mui/material';
 import { Formik, Form } from 'formik';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
@@ -14,6 +14,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 interface InitialData {
   fields: any[];
   values: object;
@@ -162,21 +163,23 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  size="small"
-                  disabled={isSubmitting || loading}
+                <ThemeButton
                   onClick={() => {
                     if (isEqual(initialData.values, values)) close();
                     else setShowConfirmDialog(true);
                   }}
+                  buttonType='transparent'
                 >
                   Cancel
-                </Button>
-                <Button variant="contained" color="primary" size="small" onClick={submitForm} disabled={isSubmitting || loading}>
+                </ThemeButton>
+                <ThemeButton
+                  onClick={submitForm}
+                  disabled={isSubmitting || loading}
+                  isLoading={isSubmitting}
+                  buttonType='theme'
+                >
                   {isSubmitting ? <CircularProgress size={22} /> : 'Submit'}
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
