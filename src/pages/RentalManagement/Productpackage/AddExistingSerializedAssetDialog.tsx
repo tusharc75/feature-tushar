@@ -29,6 +29,7 @@ import { camelCase, map, uniq } from 'lodash';
 import ManageTransferAsset from 'src/pages/TransferAssets/ManageTransferAsset';
 import AssetDetailsChangeDialog from 'src/pages/RentalManagement/ReceivingTicket/AssetDetailsChangeDialog';
 import { Link } from 'react-router-dom';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, referenceData = null }) => {
   const renderedFrom = `${camelCase(sidebarResource?.serializedAsset)}`;
@@ -399,52 +400,34 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
                 {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
               </Button>
             )}
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              disabled={isSubmitting || selectedRecords?.length === 0}
-              onClick={() => {
-                if (checkAssetPolicy(ASSET_STATUS.reserved)) {
-                  const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.reserved);
-                  setOpenAssetDataDialog({
-                    open: true,
-                    statusPolicy: statusPolicy,
-                    _ids: assetIds,
-                    type: 'add'
-                  });
-                } else if (checkMTRValidation) {
-                  if (selectedRecords?.some((e) => e.mtrAttached !== true)) {
-                    setMtrConfirmBox(true);
-                  } else {
-                    handleAddAsset();
-                  }
-                } else {
-                  handleAddAsset();
-                }
-              }}
-              endIcon={isSubmitting && <CircularProgress size={20} />}
-            >
-              Add {selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : ''}
-            </Button>
           </>
-        )}
-        {Number(tabValue) === 2 && (
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            disabled={isSubmitting || selectedRecords?.length === 0}
-            onClick={() => {
-              setInuseAssetConfirmBox(true);
-            }}
-            endIcon={isSubmitting && <CircularProgress size={20} />}
-          >
-            Add {selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : ''}
-          </Button>
         )}
       </Box>
     );
+  };
+
+  const addButtonOnClick = () => {
+    if (Number(tabValue) === 2) {
+      setInuseAssetConfirmBox(true);
+    } else if (Number(tabValue) === 0 || Number(tabValue) === 1) {
+      if (checkAssetPolicy(ASSET_STATUS.reserved)) {
+        const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.reserved);
+        setOpenAssetDataDialog({
+          open: true,
+          statusPolicy: statusPolicy,
+          _ids: assetIds,
+          type: 'add'
+        });
+      } else if (checkMTRValidation) {
+        if (selectedRecords?.some((e) => e.mtrAttached !== true)) {
+          setMtrConfirmBox(true);
+        } else {
+          handleAddAsset();
+        }
+      } else {
+        handleAddAsset();
+      }
+    }
   };
 
   return (
@@ -471,7 +454,15 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
           isActionButtonVisible={false}
           leftSideContentsOfSearchFilter={leftSideContentsOfSearchFilter()}
           rightSideContents={rightSideContents()}
-          isAddButtonVisible={false}
+          isAddButtonVisible={true}
+          addButtonOnclick={addButtonOnClick}
+          addButtonProps={{
+            textAddShow: true,
+            text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : '',
+            iconsEnabled: false,
+            disabled: isSubmitting || selectedRecords?.length === 0,
+            loading: isSubmitting
+          }}
           setQueryString={false}
         />
         <Box pt={1}>
@@ -569,7 +560,7 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
         <AssetDetailsChangeDialog
           ids={openAssetDataDialog._ids}
           statusPolicy={openAssetDataDialog.statusPolicy}
-          setAssetsData={() => { }}
+          setAssetsData={() => {}}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: '' })}
           onSuccess={(data) => {
             if (Number(tabValue) === 2) {

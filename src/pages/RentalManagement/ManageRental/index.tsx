@@ -276,7 +276,7 @@ const ManageRentalManagementDialog = ({
                             <Box marginY={2}>
                               <Grid spacing={3} container>
                                 {form.sectionFields.map((field) => (
-                                  <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
+                                  <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                     {field.fieldName === 'estimateStartDate' ? (
                                       <FormTypes
                                         {...field}

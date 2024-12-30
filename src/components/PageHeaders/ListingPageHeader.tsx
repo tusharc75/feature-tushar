@@ -234,7 +234,7 @@ const ListingPageHeader = ({
                     >
                       {renderButtonText({
                         text: textAddShow ? 'Add' : `Create`,
-                        loading: addButtonLoading,
+                        loading: false,
                         iconText: addButtonText
                       })}
                     </ThemeButton>
