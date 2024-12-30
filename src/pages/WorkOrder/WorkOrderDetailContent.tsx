@@ -14,7 +14,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { ThemeButton, ButtonType } from 'src/components/Helpers/Buttons';
+import { ThemeButton, ThemeButtonProps } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import routes from 'src/components/Helpers/Routes';
@@ -60,7 +60,7 @@ type ToolbarElement<T> = {
   type: 'element';
   id: string;
   isVisible?: boolean;
-  component: React.ReactNode;
+  component: any;
 } & T;
 
 type ToolbarButton = {
@@ -71,7 +71,7 @@ type ToolbarButton = {
   isVisible?: boolean;
   onClick: (e: any) => void;
   ripple?: boolean;
-} & ButtonType;
+} & ThemeButtonProps;
 
 type ToolbarComponents<T> = ToolbarElement<T> | ToolbarButton | ToolbarMenuItem;
 
@@ -377,7 +377,7 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
     return result;
   };
 
-  const toolbarButtons: ToolbarComponents<ButtonType | MenuItemProps>[] = [
+  const toolbarButtons: ToolbarComponents<ThemeButtonProps | MenuItemProps>[] = [
     {
       id: `Repair Job`,
       type: 'menuItem',
@@ -610,7 +610,7 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
             ) : (
               <Box pt={2}>
                 <Grid container spacing={2}>
-                  <Grid size={{xs:12, sm:6, md:6, xl:6}}>
+                  <Grid size={{ xs: 12, sm: 6, md: 6, xl: 6 }}>
                     <div style={{ overflow: 'hidden' }} className="single-form-v1">
                       <Box display={'flex'} justifyContent="space-between" className={'form-head-v1'}>
                         <Box display="flex" alignItems="center">
@@ -854,7 +854,7 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
 
 export default WorkOrderDetailContent;
 
-const RenderHeaderButtons = ({ buttonOptions }: { buttonOptions: ToolbarComponents<ButtonType | MenuItemProps>[] }) => {
+const RenderHeaderButtons = ({ buttonOptions }: { buttonOptions: ToolbarComponents<ThemeButtonProps | MenuItemProps>[] }) => {
   const isMobile = useMediaQuery('(max-width:600px)');
   const [actionAnchor, setActionAnchor] = useState<null | HTMLElement>(null);
 
@@ -866,7 +866,7 @@ const RenderHeaderButtons = ({ buttonOptions }: { buttonOptions: ToolbarComponen
     setActionAnchor(event.currentTarget);
   };
 
-  const renderComponent = (componentOptions: ToolbarComponents<ButtonType | MenuItemProps>) => {
+  const renderComponent = (componentOptions: ToolbarComponents<ThemeButtonProps | MenuItemProps>) => {
     if (componentOptions.isVisible === false) return null;
     if (componentOptions.type === 'menuItem') {
       const { children, type, id, button, ...rest } = componentOptions;

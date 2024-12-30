@@ -1,16 +1,16 @@
-import { Chip, IconButton } from '@mui/material';
 import { ArrowBackIos, ArrowForwardIos, DeleteOutline, FormatQuote, Message, MoreHoriz, People } from '@mui/icons-material';
-import React, { useEffect, useState } from 'react';
+import { Chip, IconButton } from '@mui/material';
+import React, { useState } from 'react';
+import { MdKeyboardDoubleArrowUp } from 'react-icons/md';
 import { PostWorkIcon, PreWorkIcon, WorkStations } from 'src/assets/svg/svgIcons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { ButtonType, ThemeButton } from 'src/components/Helpers/Buttons';
+import { ThemeButton, ThemeButtonProps } from 'src/components/Helpers/Buttons';
 import { WORKORDER_SERVICE_STATUS, cn, getChipColor, sidebarResource } from 'src/constants/helpers';
 import { RenderStatusIcon } from '../index';
 import RenderTotalTime from './RenderTotalTime';
 import useTab from './useTab';
-import { MdKeyboardDoubleArrowUp } from 'react-icons/md';
 
-export type ServicesButtons = { visible: boolean; id: string | number } & ButtonType;
+export type ServicesButtons = { visible: boolean; id: string | number } & ThemeButtonProps;
 
 type RenderServiceProps = {
   isColapsed: boolean;
