@@ -262,22 +262,20 @@ const Steps = (props) => {
             </>
           </CustomDialogContent>
           <CustomDialogFooter>
-
             <ThemeButton
-              buttonType='transparent'
               onClick={closeManualDiaog}
+              buttonType='transparent'
             >
               Cancel
             </ThemeButton>
             <ThemeButton
-              buttonType='theme'
               disabled={!Boolean(selectedOption) || submitting}
               onClick={manualSendToCustomer}
+              buttonType='theme'
               isLoading={submitting}
             >
               Save
             </ThemeButton>
-
           </CustomDialogFooter>
         </Dialog>
       )}

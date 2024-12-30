@@ -1,5 +1,4 @@
 import { useState, useContext, useEffect } from 'react';
-import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid2';
 import TextField from '@mui/material/TextField';
 import { makeStyles } from '@mui/styles';
@@ -509,43 +508,37 @@ export default function NewCreateQuotePdfTemplate() {
                   />
                 </div>
                 <div className="flex flex-wrap gap-2">
-
                   <ThemeButton
-                    buttonType='theme'
                     disabled={isUpdating || (!isClone && !hasPermissionToUpdate)}
                     onClick={submitForm}
+                    buttonType='theme'
                     isLoading={isUpdating}
                   >
                     Save
                   </ThemeButton>
 
                   {!quoteData && (
-
                     <ThemeButton
-                      buttonType='theme'
                       disabled={!isClone && (isUpdatingAndPreview || !hasPermissionToUpdate)}
                       onClick={() => {
                         setIsPreview(true);
                         submitForm();
                       }}
-                      isLoading={isUpdating}
+                      buttonType='theme'
+                      isLoading={isUpdatingAndPreview}
                     >
                       Save & Preview
                     </ThemeButton>
-
-
                   )}
 
-                  <Button
-                    size="small"
-                    color="primary"
-                    variant="contained"
+                  <ThemeButton
                     onClick={() => {
                       handleClose();
                     }}
+                    buttonType='transparent'
                   >
                     Close
-                  </Button>
+                  </ThemeButton>
                 </div>
               </div>
               <div className={`main-container ${classes.mainContainer}`}>

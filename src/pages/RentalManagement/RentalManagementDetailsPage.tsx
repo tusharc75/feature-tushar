@@ -1,4 +1,4 @@
-import { Box, CircularProgress } from '@mui/material';
+import { Box } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import { camelCase, findIndex } from 'lodash';
 import queryString from 'query-string';
@@ -468,13 +468,12 @@ const RentalManagementDetailsPage = () => {
 
                   {user?.role?.selectedEntity?.policy?.isRentalReopen && rentalManagementData?.status === RENTAL_STATUS.closed && (
                     <ThemeButton
-                      id={'rental-management-re-open-button'}
-                      buttonType="theme"
-                      endIcon={reOpening ? <CircularProgress size={20} /> : null}
                       disabled={reOpening}
                       onClick={() => {
                         handleRentalReOpen();
                       }}
+                      buttonType='theme'
+                      isLoading={reOpening}
                     >
                       Re-Open
                     </ThemeButton>

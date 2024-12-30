@@ -325,22 +325,19 @@ const ChangePreviousAssetDataDialog = ({ onClose, statusPolicy, staticLookUpFilt
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-
                 <ThemeButton
-                  buttonType='transparent'
-                  id={'asset-data-dialog-cancel-button'}
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
+                  buttonType='transparent'
                 >
                   Cancel
                 </ThemeButton>
                 <ThemeButton
-                  buttonType='theme'
                   disabled={loading || isEqual(initialData.values, values)}
                   onClick={submitForm}
-                  id={'asset-data-dialog-save-button'}
+                  buttonType='theme'
                   isLoading={loading}
                 >
                   Save
