@@ -1,5 +1,4 @@
 import { useState, useEffect, Fragment, useContext } from 'react';
-import Button from '@mui/material/Button';
 import { Formik, Form } from 'formik';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
@@ -7,14 +6,9 @@ import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter
 import Dialog from '@mui/material/Dialog';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomButton from '../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { isMobile, isTablet } from 'react-device-detect';
-import {
-  CustomDialogTransition,
-  bulkAssetCreation,
-  GenerateResourceLineNumber,
-  sidebarResource
-} from '../../constants/helpers';
+import { CustomDialogTransition, bulkAssetCreation, GenerateResourceLineNumber, sidebarResource } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box } from '@mui/material';
@@ -207,20 +201,18 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType="transparent"
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
                 >
                   Cancel
-                </Button>
-                <CustomButton
-                  loading={loading}
-                  variant="contained"
-                  color="primary"
+                </ThemeButton>
+                <ThemeButton
+                  isLoading={loading}
+                  buttonType="theme"
                   onClick={(e) => {
                     e.preventDefault();
                     handleScroll(errors);
@@ -230,7 +222,7 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
                 >
                   {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog

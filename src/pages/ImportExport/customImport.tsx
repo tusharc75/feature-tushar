@@ -1,7 +1,6 @@
 import { useContext, useState } from 'react';
 import {
   Dialog,
-  Button,
   TextField,
   TableBody,
   TableCell,
@@ -19,7 +18,7 @@ import { CustomDialogTransition } from 'src/constants/helpers';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
-import CustomButton from '../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Autocomplete from '@mui/material/Autocomplete';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -97,9 +96,9 @@ export const CustomImport = ({
                 accept=".xlsx,.csv"
               />
               <label htmlFor={`customImportFile`}>
-                <Button size="medium" variant="outlined" component="span" disabled={isImgUploading} startIcon={<AiOutlineImport />}>
+                <ThemeButton buttonType="theme" component="span" disabled={isImgUploading} startIcon={<AiOutlineImport />}>
                   Import File
-                </Button>
+                </ThemeButton>
               </label>
             </Grid>
             <Grid  style={{ display: 'flex' }}>
@@ -166,12 +165,12 @@ export const CustomImport = ({
           )}
         </CustomDialogContent>
         <CustomDialogFooter>
-          <Button color="primary" size="small" onClick={handleClose}>
+          <ThemeButton buttonType="transparent" onClick={handleClose}>
             Cancel
-          </Button>
-          <CustomButton onClick={handleCustomImport} variant="contained" color="primary" disabled={loading} loading={loading}>
+          </ThemeButton>
+          <ThemeButton onClick={handleCustomImport} buttonType="theme" disabled={loading} isLoading={loading}>
             Save
-          </CustomButton>
+          </ThemeButton>
         </CustomDialogFooter>
       </Dialog>
     </>

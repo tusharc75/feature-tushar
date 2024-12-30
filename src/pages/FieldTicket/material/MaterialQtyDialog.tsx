@@ -1,5 +1,5 @@
 import { FC, useEffect, useState, Fragment, useRef, useContext } from 'react';
-import { Button, Dialog, Box } from '@mui/material';
+import { Dialog, Box } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
@@ -12,7 +12,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomButton from '../../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
@@ -658,9 +658,8 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+buttonType="transparent"
                   onClick={() => {
                     if (!isEqual(ref.current.values, initialData.values)) {
                       setShowConfirmDialog(true);
@@ -670,30 +669,26 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                   }}
                 >
                   {'Close'}
-                </Button>
+                </ThemeButton>
                 {isBulkedit === false &&
                   showSaveAndNext &&
                   (isEqual(ref?.current?.values, initialData.values) ? (
-                    <CustomButton
-                      loading={fetchingData}
+                    <ThemeButton
+                      isLoading={fetchingData}
                       disabled={fetchingData}
-                      variant="contained"
-                      color="primary"
-                      type="submit"
+ buttonType="theme"
                       onClick={() => {
                         setSaveAndNext(true);
                         submitForm();
                       }}
                     >
                       {'Next'}
-                    </CustomButton>
+                    </ThemeButton>
                   ) : (
-                    <CustomButton
-                      loading={loading}
+                    <ThemeButton
+                      isLoading={loading}
                       disabled={loading || isEqual(ref?.current?.values, initialData.values)}
-                      variant="contained"
-                      color="primary"
-                      type="submit"
+buttonType="theme"
                       onClick={() => {
                         setSaveAndNext(true);
                         submitForm();
@@ -701,15 +696,13 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                     >
                       {' '}
                       Save & Next
-                    </CustomButton>
+                    </ThemeButton>
                   ))}
-                <CustomButton
+                <ThemeButton
                   id="dialog-save-button"
-                  loading={loading}
+                  isLoading={loading}
                   disabled={loading || isEqual(ref?.current?.values, initialData.values)}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+buttonType="theme"
                   onClick={() => {
                     setSaveAndNext(false);
                     submitForm();
@@ -717,7 +710,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                 >
                   {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmationDialog && (
                 <ConfirmationDialog

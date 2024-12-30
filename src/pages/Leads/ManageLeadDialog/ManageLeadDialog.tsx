@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext, Fragment } from 'react';
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import { Formik, Form } from 'formik';
 import { useHistory } from 'react-router-dom';
 import Dialog from '@mui/material/Dialog';
@@ -8,7 +8,7 @@ import { getObjKeys, yupSchema, getObjKeysWithValues } from '../../../constants/
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomButton from '../../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { useData } from '../../../StateProvider/Provider';
@@ -198,22 +198,18 @@ export default function ManageLeadDialog({
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                  <Button
-                    type="button"
-                    variant="outlined"
-                    color="primary"
-                    size="small"
+                  <ThemeButton
+                    buttonType="transparent"
                     onClick={() => {
                       if (isEqual(initialData.values, values)) onClose();
                       else setShowConfirmDialog(true);
                     }}
                   >
                     Cancel
-                  </Button>
-                  <CustomButton
-                    loading={loading}
-                    variant="contained"
-                    color="primary"
+                  </ThemeButton>
+                  <ThemeButton
+                    isLoading={loading}
+                    buttonType="theme"
                     disabled={uploadingImageOrFileProgress > 0 || loading}
                     onClick={(e) => {
                       e.preventDefault();
@@ -222,7 +218,7 @@ export default function ManageLeadDialog({
                     }}
                   >
                     Save
-                  </CustomButton>
+                  </ThemeButton>
                 </CustomDialogFooter>
                 {showConfirmDialog && (
                   <ConfirmCancelDialog

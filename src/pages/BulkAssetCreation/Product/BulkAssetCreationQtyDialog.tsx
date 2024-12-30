@@ -1,5 +1,5 @@
 import { FC, useEffect, useState, Fragment } from 'react';
-import { Button, Dialog, Box } from '@mui/material';
+import { Dialog, Box } from '@mui/material';
 import { arrayToDropwdownOption, CHILD_RESOURCE } from '../../../constants/helpers';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
@@ -9,7 +9,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomButton from '../../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import InputField from 'src/components/Helpers/InputField';
@@ -160,19 +160,18 @@ const BulkAssetCreationQtyDialog: FC<BulkAssetCreationQtyDialogProps> = ({
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType="transparent"
                   onClick={() => {
                     onClose();
                   }}
                 >
                   {'Close'}
-                </Button>
-                <CustomButton variant="contained" color="primary" type="submit" onClick={submitForm}>
+                </ThemeButton>
+                <ThemeButton buttonType="theme" onClick={submitForm}>
                   {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
             </Fragment>
           )}

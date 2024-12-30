@@ -1,11 +1,11 @@
 import { Fragment, useState, useEffect, useContext } from 'react';
-import { Box, Button, Dialog, Divider, List, ListItem, ListItemAvatar, ListItemText, TextField } from '@mui/material';
+import { Box, Dialog, Divider, List, ListItem, ListItemText, TextField } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Formik, Form } from 'formik';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import axiosInstance from 'src/axios/axiosInstance';
 import { convertInventory, CustomDialogTransition, productInventory, sidebarResource } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -319,12 +319,12 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
                 ) : null}
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button color="primary" size="small" onClick={handleClose}>
+                <ThemeButton buttonType="transparent" onClick={handleClose}>
                   Cancel
-                </Button>
-                <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit">
+                </ThemeButton>
+                <ThemeButton isLoading={loading} disabled={loading} buttonType="theme">
                   Convert
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
             </Form>
           )}

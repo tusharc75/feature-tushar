@@ -1,6 +1,5 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
 import Grid from '@mui/material/Grid2';
-import Button from '@mui/material/Button';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import { Box, Dialog, IconButton } from '@mui/material';
@@ -21,7 +20,7 @@ import moment from 'moment';
 import { useData } from 'src/StateProvider/Provider';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import InvoiceDataDialog from 'src/pages/RentalManagement/ProgressiveBilling/InvoiceDataDialog';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 
@@ -451,19 +450,17 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
                       <Box>
                         <HtmlTooltip title={selectedRecords?.length ? '' : 'Please select items to apply'}>
                           <span>
-                            <CustomButton
+                            <ThemeButton
                               id="dialog-apply-button"
-                              loading={isDateApplying}
+                              isLoading={isDateApplying}
                               disabled={selectedRecords?.length && moment(endDate)?.isValid() ? isDateApplying : true}
-                              variant="contained"
-                              color="primary"
-                              type="button"
+buttonType="theme"
                               onClick={() => {
                                 handleApplyDate();
                               }}
                             >
                               Apply
-                            </CustomButton>
+                            </ThemeButton>
                           </span>
                         </HtmlTooltip>
                       </Box>
@@ -500,17 +497,14 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
           </Fragment>
         </CustomDialogContent>
         <CustomDialogFooter>
-          <Button
-            type="button"
-            variant="outlined"
-            color="primary"
-            size="small"
+          <ThemeButton
+buttonType="transparent"
             onClick={() => {
               onClose();
             }}
           >
             Cancel
-          </Button>
+          </ThemeButton>
           <HtmlTooltip
             title={
               !appliedDate && progressiveBilling
@@ -521,15 +515,13 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
             }
           >
             <span>
-              <CustomButton
+              <ThemeButton
                 id="dialog-save-button"
-                loading={isUpdating}
+                isLoading={isUpdating}
                 disabled={
                   progressiveBilling ? isUpdating || !appliedDate || !rowsApplied?.length || rowsApplied.some((d) => d.invalidDate === true) : false
                 }
-                variant="contained"
-                color="primary"
-                type="button"
+buttonType="theme"
                 onClick={() => {
                   if (resource === sidebarResource.fieldTicket && invoiceResourceData?.policy?.fieldTicketInvoiceFields?.length > 0) {
                     setOpenInvoiceDataDialog(true);
@@ -539,7 +531,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
                 }}
               >
                 Create Invoice
-              </CustomButton>
+              </ThemeButton>
             </span>
           </HtmlTooltip>
         </CustomDialogFooter>

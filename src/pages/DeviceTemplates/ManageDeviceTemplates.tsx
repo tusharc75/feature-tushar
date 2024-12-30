@@ -1,20 +1,14 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
 import { Formik, Form } from 'formik';
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
-import CustomButton from '../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import { useData } from '../../StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
-import {
-  CustomDialogTransition,
-  getObjKeys,
-  getObjKeysWithValues,
-  yupSchema,
-  sidebarResource,
-} from '../../constants/helpers';
+import { CustomDialogTransition, getObjKeys, getObjKeysWithValues, yupSchema, sidebarResource } from '../../constants/helpers';
 import axiosInstance from '../../axios/axiosInstance';
 import Dialog from '@mui/material/Dialog';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
@@ -182,11 +176,8 @@ const ManageDeviceTemplates = ({ isClone, deviceTemplatesId, onClose, onSuccess,
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                  <Button
-                    type="button"
-                    variant="outlined"
-                    color="primary"
-                    size="small"
+                  <ThemeButton
+                    buttonType="transparent"
                     onClick={() => {
                       if (isEqual(initialData.values, values)) {
                         onClose();
@@ -196,18 +187,17 @@ const ManageDeviceTemplates = ({ isClone, deviceTemplatesId, onClose, onSuccess,
                     }}
                   >
                     Cancel
-                  </Button>
-                  <CustomButton
-                    loading={loading}
-                    variant="contained"
-                    color="primary"
+                  </ThemeButton>
+                  <ThemeButton
+                    isLoading={loading}
+                    buttonType="theme"
                     onClick={(e) => {
                       e.preventDefault();
                       submitForm();
                     }}
                   >
                     Save
-                  </CustomButton>
+                  </ThemeButton>
                 </CustomDialogFooter>
                 {showConfirmDialog ? (
                   <ConfirmCancelDialog
