@@ -5,8 +5,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import Checkbox from '@mui/material/Checkbox';
 import ListItemText from '@mui/material/ListItemText';
-import CustomButton from './Helpers/CustomButton';
-import Button from '@mui/material/Button';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDialogContent from './CustomDialog/CustomDialogContent';
 import CustomDialogFooter from './CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from './CustomDialog/CustomDialogHeader';
@@ -163,13 +162,13 @@ function EntitySelections(props) {
           )}
         </CustomDialogContent>
         <CustomDialogFooter>
-          <Button size="small" color="primary" onClick={onClose}>
+          <ThemeButton buttonType="transparent" onClick={onClose}>
             Cancel
-          </Button>
-          <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit" onClick={onUpdateEntity}>
+          </ThemeButton>
+          <ThemeButton isLoading={loading} disabled={loading} buttonType="theme" onClick={onUpdateEntity}>
             {' '}
             Save
-          </CustomButton>
+          </ThemeButton>
         </CustomDialogFooter>
       </Dialog>
     </>

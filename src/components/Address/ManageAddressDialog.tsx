@@ -1,5 +1,5 @@
 import { useState, useEffect, Fragment, useContext, useCallback } from 'react';
-import Button from '@mui/material/Button';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { Formik, Form } from 'formik';
 import { GoogleMap, GoogleMapProps, Marker } from '@react-google-maps/api';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
@@ -8,7 +8,6 @@ import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter
 import Dialog from '@mui/material/Dialog';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomButton from '../../components/Helpers/CustomButton';
 import { isMobile, isTablet } from 'react-device-detect';
 import { address, CustomDialogTransition, setFieldsInAscendingOrder } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
@@ -328,21 +327,21 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
                                           ? null
                                           : field.fieldName === 'fullAddress' || field.fieldName === 'searchAddress'
                                             ? (_, val) => {
-                                              if (typeof val !== 'object') return;
-                                              getFullAddress(val);
-                                              if (!val?.place_id) {
-                                                setAddressDetail(null);
+                                                if (typeof val !== 'object') return;
+                                                getFullAddress(val);
+                                                if (!val?.place_id) {
+                                                  setAddressDetail(null);
+                                                }
                                               }
-                                            }
                                             : (e: React.ChangeEvent<HTMLInputElement>) => {
-                                              const { name, value } = e.target;
-                                              if (['latitude', 'longitude'].includes(name) && isNaN(Number(value))) return;
-                                              setAddressDetail((prevState: any) => ({
-                                                ...prevState,
-                                                [name]: value
-                                              }));
-                                              setLatLngChangedManually(true);
-                                            }
+                                                const { name, value } = e.target;
+                                                if (['latitude', 'longitude'].includes(name) && isNaN(Number(value))) return;
+                                                setAddressDetail((prevState: any) => ({
+                                                  ...prevState,
+                                                  [name]: value
+                                                }));
+                                                setLatLngChangedManually(true);
+                                              }
                                       }
                                     />
                                   ) : (
@@ -410,20 +409,19 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
                 </div>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType="transparent"
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
                 >
                   Cancel
-                </Button>
-                <CustomButton disabled={loading} loading={loading} variant="contained" color="primary" type="submit" onClick={submitForm}>
+                </ThemeButton>
+                <ThemeButton disabled={loading} isLoading={loading} buttonType="theme" onClick={submitForm}>
                   {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog

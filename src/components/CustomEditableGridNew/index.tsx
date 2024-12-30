@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, IconButton, MenuItem } from '@mui/material';
+import { Box, Dialog, IconButton, MenuItem } from '@mui/material';
 import { isEmpty, orderBy, sortBy, uniqBy } from 'lodash';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -13,7 +13,7 @@ import { useGridMetaData } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { AddField } from 'src/components/FormBuilder/AddField';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import AddExistingProduct from 'src/components/productBuilder/AddExistingProduct';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
@@ -188,16 +188,14 @@ const CustomEditableGrid = ({
           expander={false}
           appliedView={tableData}
         />
-        <Button
-          size="small"
-          variant="contained"
-          color="primary"
+        <ThemeButton
+          buttonType="transparent"
           onClick={() => {
             setIsAddField(true);
           }}
         >
           Add Field
-        </Button>
+        </ThemeButton>
       </>
     );
   };
@@ -275,15 +273,13 @@ const CustomEditableGrid = ({
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button size="small" color="primary" onClick={onClose}>
+              <ThemeButton buttonType="transparent" onClick={onClose}>
                 Close
-              </Button>
-              <CustomButton
-                loading={isSubmitting}
+              </ThemeButton>
+              <ThemeButton
+                isLoading={isSubmitting}
                 disabled={isSubmitting}
-                variant="contained"
-                color="primary"
-                type="submit"
+                buttonType="theme"
                 onClick={() => {
                   if (isEmpty(error)) {
                     handleSave([...flatRows?.map((f) => ({ ...f, fields: [...(f?.fields || []), ...addedField] })), ...restData]);
@@ -296,7 +292,7 @@ const CustomEditableGrid = ({
                 }}
               >
                 Save
-              </CustomButton>
+              </ThemeButton>
             </CustomDialogFooter>
           </>
         ) : (

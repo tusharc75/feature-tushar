@@ -1,4 +1,4 @@
-import { Box, Button, Checkbox, Dialog, FormControlLabel, Radio, RadioGroup, TextField } from '@mui/material';
+import { Box, Checkbox, Dialog, FormControlLabel, Radio, RadioGroup, TextField } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Form, Formik } from 'formik';
 import { startCase } from 'lodash';
@@ -8,7 +8,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { boolean, object, string } from 'yup';
 
@@ -236,12 +236,12 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button size="small" color="primary" onClick={handleClose}>
+              <ThemeButton buttonType="transparent" onClick={handleClose}>
                 Cancel
-              </Button>
-              <CustomButton loading={loading} variant="contained" color="primary" type="submit" onClick={submitForm} disabled={loading}>
+              </ThemeButton>
+              <ThemeButton isLoading={loading} buttonType="theme" onClick={submitForm} disabled={loading}>
                 Save
-              </CustomButton>
+              </ThemeButton>
             </CustomDialogFooter>
           </Fragment>
         )}

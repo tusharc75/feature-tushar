@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
-import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid2';
 import { Formik, Form } from 'formik';
 import { object, string } from 'yup';
 import PropTypes from 'prop-types';
@@ -11,7 +10,6 @@ import CustomDialogFooter from '../../CustomDialog/CustomDialogFooter';
 import FormTypes from '../../Helpers/FormTypes';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomButton from '../../../components/Helpers/CustomButton';
 import TextField from '@mui/material/TextField';
 
 import ImagePreview from '../Email/ImagePreview';
@@ -23,6 +21,7 @@ import { isEqual } from 'lodash';
 import DocumentScanner from '../Helpers/DocumentScanner';
 import { ATTACHMENT_TYPE } from 'src/constants/helpers';
 import Autocomplete from '@mui/material/Autocomplete';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const AttachmentSchema = object().shape({
   name: string().required('Attachment Name is required'),
@@ -233,7 +232,7 @@ export default function ManageAttachment({
               <Form autoComplete="off" autoCorrect="off" noValidate>
                 <Box padding={1}>
                   <Grid container spacing={2}>
-                    <Grid item xs={12} md={type === 'file' ? 6 : 12}>
+                    <Grid size={{ xs: 12, md: type === 'file' ? 6 : 12 }}>
                       <TextField
                         variant="outlined"
                         type="text"
@@ -253,7 +252,7 @@ export default function ManageAttachment({
                       />
                     </Grid>
                     {type === 'file' && (
-                      <Grid item xs={12} md={6}>
+                      <Grid size={{ xs: 12, md: 6 }}>
                         <Autocomplete
                           id="attachmentType"
                           size="small"
@@ -270,8 +269,8 @@ export default function ManageAttachment({
                       </Grid>
                     )}
                     {type === 'file' && (
-                      <Grid container item xs={12}>
-                        <Grid item xs={12}>
+                      <Grid container size={{ xs: 12 }}>
+                        <Grid size={{ xs: 12 }}>
                           <div style={{ width: '100%' }}>
                             <div className="flex flex-wrap items-center gap-2">
                               <div className="ml-0">
@@ -295,13 +294,13 @@ export default function ManageAttachment({
                                   }}
                                 />
                               </div>
-                              <CustomButton variant="contained" color="primary" disabled={!canEdit} onClick={() => setDocumentScanDialog(true)}>
+                              <ThemeButton buttonType="theme" disabled={!canEdit} onClick={() => setDocumentScanDialog(true)}>
                                 Scan Document
-                              </CustomButton>
+                              </ThemeButton>
                             </div>
                           </div>
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid size={{ xs: 12 }}>
                           <AttachmentThumbnail
                             attachments={otherAttachments}
                             handleDeleteAttachment={handleDeleteAttachment}
@@ -315,27 +314,24 @@ export default function ManageAttachment({
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button
-                color="primary"
-                size="small"
+              <ThemeButton
+                buttonType="transparent"
                 onClick={() => {
                   if (isEqual(initialValues, values)) handleClose();
                   else setShowConfirmDialog(true);
                 }}
               >
                 Cancel
-              </Button>
+              </ThemeButton>
               {(canEdit || isClone) && (
-                <CustomButton
-                  type="button"
-                  color="primary"
+                <ThemeButton
+                  buttonType="theme"
                   disabled={loading || ((uploadingImageOrFileProgress > 0 || otherAttachments.length === 0) && type === 'file')}
-                  loading={loading}
-                  variant="contained"
+                  isLoading={loading}
                   onClick={submitForm}
                 >
                   Save
-                </CustomButton>
+                </ThemeButton>
               )}
             </CustomDialogFooter>
             {showConfirmDialog ? (

@@ -1,7 +1,7 @@
-import { useState, Fragment, useContext } from 'react';
-import { Box, Button, TextField } from '@mui/material';
+import { useState, Fragment } from 'react';
+import { Box, TextField } from '@mui/material';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import CustomButton from '../../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { CustomDialogTransition } from '../../../constants/helpers';
@@ -43,12 +43,12 @@ const ReplaceAssetReason = ({ handleClose, loading, handleSucess }) => {
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button size="small" variant="outlined" onClick={handleClose} color="primary">
+              <ThemeButton buttonType="transparent" onClick={handleClose}>
                 Cancel
-              </Button>
-              <CustomButton loading={loading} variant="contained" color="primary" type="button" disabled={loading} onClick={submitForm}>
+              </ThemeButton>
+              <ThemeButton isLoading={loading} buttonType="theme" disabled={loading} onClick={submitForm}>
                 Save
-              </CustomButton>
+              </ThemeButton>
             </CustomDialogFooter>
           </Fragment>
         )}

@@ -25,10 +25,8 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import CustomButton from 'src/components/Helpers/CustomButton';
 import _, { isEmpty, uniqBy } from 'lodash';
 import { read, utils, write, writeFile } from 'xlsx';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { AddField } from 'src/components/FormBuilder/AddField';
 import { AddColumnDialog } from 'src/components/productBuilder/CustomImport/AddColumnDialog';
 import { Add, Delete } from '@mui/icons-material';
@@ -652,13 +650,12 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
             ) : null}
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button color="primary" size="small" onClick={handleClose}>
+            <ThemeButton buttonType="transparent" onClick={handleClose}>
               Cancel
-            </Button>
-            <CustomButton
+            </ThemeButton>
+            <ThemeButton
               onClick={handleCustomImport}
-              variant="contained"
-              color="primary"
+buttonType="theme"
               disabled={
                 loading ||
                 // !values?.productCategory ||
@@ -667,10 +664,10 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                 templateImportHeader?.length === 0 ||
                 customImportHeader?.length === 0
               }
-              loading={loading}
+              isLoading={loading}
             >
               Submit
-            </CustomButton>
+            </ThemeButton>
           </CustomDialogFooter>
           {addSystemColumn && (
             <AddField

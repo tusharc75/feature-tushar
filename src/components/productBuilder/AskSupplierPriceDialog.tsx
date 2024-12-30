@@ -1,11 +1,12 @@
-import { Box, Button, Grid, IconButton, Paper, TextField, Typography } from '@mui/material';
+import { Box, IconButton, Paper, TextField, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import Dialog from '@mui/material/Dialog';
 import { CustomDialogTransition, imageUploadMaxSize } from 'src/constants/helpers';
 import ImageAttachments from '../Activity/Email/ImageAttachments';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
-import CustomButton from '../Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import TinyMce from '../TinyMCE';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { GoArrowDown } from 'react-icons/go';
@@ -128,7 +129,7 @@ const AskSupplierPriceDialog = (props) => {
           {otherAttachments.map((attachment, i) => {
             return (
               <>
-                <Grid item key={i} sm={3} xs={3} md={3} xl={3}>
+                <Grid key={i} size={{sm:3, xs:3, md:3, xl:3}}>
                   <Paper className={emailStyles.fileContainer}>
                     <img src={getFileIconSrc(attachment)} className={emailStyles.file} alt="attchment" />
                     <Typography noWrap variant="body2">
@@ -189,7 +190,7 @@ const AskSupplierPriceDialog = (props) => {
         <CustomDialogContent>
           <Box padding={1}>
             <Grid container spacing={1}>
-              <Grid item xs={12}>
+              <Grid size={{xs:12}}>
                 {from != 'SupplierAskPrice' && (
                   <Autocomplete
                     multiple
@@ -212,12 +213,21 @@ const AskSupplierPriceDialog = (props) => {
                         : setContactId(val && val?.map((d) => d._id));
                     }}
                     renderInput={(params) => (
-                      <TextField {...params} margin="dense" size="small" name="contact" label="Supplier Contact" variant="outlined" required fullWidth />
+                      <TextField
+                        {...params}
+                        margin="dense"
+                        size="small"
+                        name="contact"
+                        label="Supplier Contact"
+                        variant="outlined"
+                        required
+                        fullWidth
+                      />
                     )}
                   />
                 )}
               </Grid>
-              <Grid item xs={12}>
+              <Grid size={{xs:12}}>
                 <Box>
                   {otherAttachments && otherAttachments.length > 0 && renderFileThumbnails}
                   {otherAttachments && otherAttachments.length > 0 && (
@@ -260,7 +270,7 @@ const AskSupplierPriceDialog = (props) => {
                   />
                 </Box>
               </Grid>
-              <Grid item xs={12}>
+              <Grid size={{xs:12}}>
                 {from != 'SupplierAskPrice' && (
                   <Autocomplete
                     multiple
@@ -277,12 +287,21 @@ const AskSupplierPriceDialog = (props) => {
                         : setDisplayColumns(val && val?.map((d) => d?.fieldName));
                     }}
                     renderInput={(params) => (
-                      <TextField {...params} margin="dense" size="small" name="displayColumns" label="Display Columns" variant="outlined" required fullWidth />
+                      <TextField
+                        {...params}
+                        margin="dense"
+                        size="small"
+                        name="displayColumns"
+                        label="Display Columns"
+                        variant="outlined"
+                        required
+                        fullWidth
+                      />
                     )}
                   />
                 )}
               </Grid>
-              <Grid item xs={12}>
+              <Grid size={{xs:12}}>
                 {from != 'SupplierAskPrice' && (
                   <Autocomplete
                     multiple
@@ -301,12 +320,12 @@ const AskSupplierPriceDialog = (props) => {
                     onChange={(e, val: any) => {
                       val?.some((d) => d?.fieldName === 'All')
                         ? setSelectedFields(
-                          fields
-                            ?.filter(
-                              (d) => d.sectionName === 'Cost Calculation' && (d.formula === undefined || d.formula === null || d.formula === '')
-                            )
-                            .map((d) => d?.fieldName)
-                        )
+                            fields
+                              ?.filter(
+                                (d) => d.sectionName === 'Cost Calculation' && (d.formula === undefined || d.formula === null || d.formula === '')
+                              )
+                              .map((d) => d?.fieldName)
+                          )
                         : setSelectedFields(val && val?.map((d) => d?.fieldName));
                     }}
                     renderInput={(params) => (
@@ -320,31 +339,27 @@ const AskSupplierPriceDialog = (props) => {
         </CustomDialogContent>
 
         <CustomDialogFooter>
-          <Button
-            type="button"
-            variant="outlined"
-            color="primary"
-            size="small"
+          <ThemeButton
+            buttonType="transparent"
             onClick={() => {
               setAskSupplierPriceDialog(false);
             }}
           >
             Cancel
-          </Button>
+          </ThemeButton>
 
           {from === 'SupplierAskPrice' ? (
-            <CustomButton variant="contained" color="primary" onClick={() => handleReject(contantValue)}>
+            <ThemeButton buttonType="theme" onClick={() => handleReject(contantValue)}>
               Submit
-            </CustomButton>
+            </ThemeButton>
           ) : (
-            <CustomButton
-              variant="contained"
-              color="primary"
+            <ThemeButton
+              buttonType="theme"
               disabled={contactId.length === 0 || selectedFields.length === 0 || displayColumns.length === 0}
               onClick={() => handelAskPriceToSupplier(contantValue, contactId, selectedFields, displayColumns)}
             >
               Send
-            </CustomButton>
+            </ThemeButton>
           )}
         </CustomDialogFooter>
       </Dialog>

@@ -26,7 +26,7 @@ import { getObjKeys, getObjKeysWithValues, getUniqueCurrencies, yupSchema } from
 import CreateProductCategory from '../../pages/ProductCategory/CreateProductCategory';
 import HtmlTooltip from '../CustomTooltipTitle';
 import { AddField } from '../FormBuilder/AddField';
-import CustomButton from '../Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import FormTypes from '../Helpers/FormTypes';
 import { CustomDialogTransition } from './../../constants/helpers';
 
@@ -901,10 +901,9 @@ const CreateProduct = (props) => {
                 </Box>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
+                <ThemeButton
                   disabled={uploadingImageOrFileProgress > 0 || submitting}
-                  size="small"
-                  color="primary"
+                  buttonType="transparent"
                   id="dialog-cancel-button"
                   onClick={() => {
                     if (!isEqual(ref.current.values, initialData.values)) {
@@ -915,12 +914,10 @@ const CreateProduct = (props) => {
                   }}
                 >
                   Cancel
-                </Button>
-                <CustomButton
-                  loading={submitting}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+                </ThemeButton>
+                <ThemeButton
+                  isLoading={submitting}
+                  buttonType="theme"
                   id="dialog-save-button"
                   disabled={uploadingImageOrFileProgress > 0 || submitting}
                   onClick={(e) => {
@@ -930,7 +927,7 @@ const CreateProduct = (props) => {
                   }}
                 >
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog

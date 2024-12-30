@@ -1,11 +1,11 @@
-import { Box, Button, Dialog, TextField } from '@mui/material';
+import { Box, Dialog, TextField } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import { useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { cn, CustomDialogTransition } from 'src/constants/helpers';
 
 const cellClassName =
@@ -101,12 +101,12 @@ const ImportedDataDialog = ({ handleClose, data, productCategory, productTemplat
           </Box>
         </CustomDialogContent>
         <CustomDialogFooter>
-          <Button color="primary" size="small" onClick={handleClose}>
+          <ThemeButton buttonType="transparent" onClick={handleClose}>
             Cancel
-          </Button>
-          <CustomButton onClick={handleSave} variant="contained" color="primary" disabled={!rows?.every((r) => r[0])}>
+          </ThemeButton>
+          <ThemeButton onClick={handleSave} buttonType="theme" disabled={!rows?.every((r) => r[0])}>
             Submit
-          </CustomButton>
+          </ThemeButton>
         </CustomDialogFooter>
       </>
     </Dialog>

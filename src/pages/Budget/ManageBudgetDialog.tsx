@@ -1,8 +1,7 @@
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
-import moment from 'moment';
 import PropTypes from 'prop-types';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -14,7 +13,7 @@ import CustomDialogContent from '../../components/CustomDialog/CustomDialogConte
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import CustomButton from '../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import {
   CustomDialogTransition,
   GenerateResourceLineNumber,
@@ -202,22 +201,18 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                  <Button
-                    type="button"
-                    variant="outlined"
-                    color="primary"
-                    size="small"
+                  <ThemeButton
+buttonType="transparent"
                     onClick={() => {
                       if (isEqual(initialData.values, values)) onClose();
                       else setShowConfirmDialog(true);
                     }}
                   >
                     Cancel
-                  </Button>
-                  <CustomButton
-                    loading={loading}
-                    variant="contained"
-                    color="primary"
+                  </ThemeButton>
+                  <ThemeButton
+                    isLoading={loading}
+buttonType="theme"
                     disabled={loading}
                     onClick={(e) => {
                       e.preventDefault();
@@ -226,7 +221,7 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
                     }}
                   >
                     Save
-                  </CustomButton>
+                  </ThemeButton>
                 </CustomDialogFooter>
                 {showConfirmDialog ? (
                   <ConfirmCancelDialog
