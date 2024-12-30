@@ -155,7 +155,7 @@ export const CreateTask = ({
     const dueDate = dayjs(values.dueDate, dateFormatForInputControl).startOf('day');
     const startDate = dayjs(values.startDate, dateFormatForInputControl).startOf('day');
     if (dueDate.isBefore(startDate) && !startDate.isSame(dueDate)) {
-      errors['dueDate'] = 'Due date must greater then start date';
+      errors['dueDate'] = 'The due date must be greater than the start date';
     }
     return errors;
   }
@@ -342,7 +342,6 @@ export const CreateTask = ({
                                     size="small"
                                     value={values.startDate}
                                     onChange={(value) => {
-                                      setFieldValue('dueDate', value);
                                       setFieldValue('startDate', value);
                                     }}
                                     maxDate={initialValues.parentData && initialValues.parentData.dueDate}
