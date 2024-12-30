@@ -21,6 +21,7 @@ type SendMessageProps = {
   editorId?: string;
   channelData?: ChannelData;
   disabled?: boolean;
+  parentMessageId?: string | null;
 };
 
 const SendMessage = ({
@@ -31,7 +32,8 @@ const SendMessage = ({
   onEditComplete = () => {},
   editorId = '',
   channelData,
-  disabled = false
+  disabled = false,
+  parentMessageId = null,
 }: SendMessageProps) => {
   const toastConfig = useContext(CustomToastContext);
   const [themeColor] = useAppTheme();
@@ -59,7 +61,9 @@ const SendMessage = ({
     setIsLoading(true);
     try {
       if (initialMessage) {
-        await axiosInstance().put(`/work-space/channel/message`, { message, messageId });
+        await axiosInstance().put(`/work-space/channel/message`, { message, messageId }).then(() => {
+          socket.emit('messageUpdated', { channelId, messageId });
+        });
         onEditComplete();
       } else {
         let formData = new FormData();
@@ -68,12 +72,13 @@ const SendMessage = ({
           formData.append('files', file);
         });
         formData.append('channelId', channelId);
-        if (messageId) formData.append('parentId', messageId);
-        await axiosInstance().post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+        if (parentMessageId) formData.append('parentId', parentMessageId);
+        await axiosInstance().post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(() => {
+          socket.emit('newMessagePosted', { channelId, messageId });
+        });
       }
       setMessage('');
       setFiles([]);
-      socket.emit('newMessagePosted', { channelId, messageId });
     } catch (error) {
       toastConfig.setToastConfig(error);
     } finally {
