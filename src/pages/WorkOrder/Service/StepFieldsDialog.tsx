@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from 'react';
-import { Dialog, Box, Button, Typography, IconButton } from '@mui/material';
+import { Dialog, Box, Typography, IconButton } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Theme, createStyles } from '@mui/material/styles';
 import { makeStyles } from '@mui/styles';
@@ -140,10 +140,10 @@ const StepFieldsDialog = ({
     const [time, setTime] = React.useState(
       user?.brandPolicy?.workOrderTimer
         ? convertMsToTime(
-            stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
-              ? (stepData?.duration || 0) + (new Date().getTime() - new Date(stepData?.pauseDate || stepData?.startDate).getTime())
-              : stepData?.duration || 0
-          )
+          stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
+            ? (stepData?.duration || 0) + (new Date().getTime() - new Date(stepData?.pauseDate || stepData?.startDate).getTime())
+            : stepData?.duration || 0
+        )
         : 0
     );
 
@@ -345,11 +345,12 @@ const StepFieldsDialog = ({
                                       <Grid
                                         key={index2}
                                         size={{
-                                        xs:12,
-                                        sm:field?.columnSize ? field?.columnSize : gridSize(field.type),
-                                        md:field?.columnSize ? field?.columnSize : gridSize(field.type),
-                                        lg:field?.columnSize ? field?.columnSize : gridSize(field.type),
-                                        xl:field?.columnSize ? field?.columnSize : gridSize(field.type)}}
+                                          xs: 12,
+                                          sm: field?.columnSize ? field?.columnSize : gridSize(field.type),
+                                          md: field?.columnSize ? field?.columnSize : gridSize(field.type),
+                                          lg: field?.columnSize ? field?.columnSize : gridSize(field.type),
+                                          xl: field?.columnSize ? field?.columnSize : gridSize(field.type)
+                                        }}
                                       >
                                         <FormTypes
                                           {...field}
@@ -449,34 +450,41 @@ const StepFieldsDialog = ({
                     {!isEditing ? (
                       <>
                         <Box ml={1} />
-                        <Button variant="outlined" size="small" onClick={handleClose} color="primary">
+                        <ThemeButton
+                          buttonType="transparent"
+                          onClick={handleClose}
+                        >
                           Cancel
-                        </Button>
+                        </ThemeButton>
                         <Box ml={1} />
                         {allowedToEdit && fieldData?.fields?.length > 0 && (
-                          <Button variant="contained" size="small" onClick={() => setEditing(true)} color="primary">
+                          <ThemeButton
+                            buttonType="theme"
+                            onClick={() => setEditing(true)}
+                          >
                             Edit
-                          </Button>
+                          </ThemeButton>
                         )}
                       </>
                     ) : (
                       <>
                         <Box ml={1} />
-                        <Button variant="outlined" size="small" onClick={handleClose} color="primary">
+                        <ThemeButton
+                          buttonType="transparent"
+                          onClick={handleClose}
+                        >
                           Cancel
-                        </Button>
+                        </ThemeButton>
                         <Box ml={1} />
                         <ThemeButton
                           disabled={isSubmitting}
                           isLoading={isSubmitting}
-                         buttonType="theme"
+                          buttonType="theme"
                           onClick={() => {
                             setSaveAndComplete({ saveAndComplete: false, saveAndNextAndComplete: false });
                             submitForm();
                           }}
-                        >
-                          {' '}
-                          Save
+                        >  Save
                         </ThemeButton>
                         {!step?.isPassFail && (
                           <>
@@ -489,9 +497,7 @@ const StepFieldsDialog = ({
                                 setSaveAndComplete({ saveAndComplete: true, saveAndNextAndComplete: false });
                                 submitForm();
                               }}
-                            >
-                              {' '}
-                              Complete
+                            >  Complete
                             </ThemeButton>
                             {nextStep && (
                               <>
@@ -504,9 +510,7 @@ const StepFieldsDialog = ({
                                     setSaveAndComplete({ saveAndComplete: true, saveAndNextAndComplete: true });
                                     submitForm();
                                   }}
-                                >
-                                  {' '}
-                                  Complete & Next
+                                >  Complete & Next
                                 </ThemeButton>
                               </>
                             )}

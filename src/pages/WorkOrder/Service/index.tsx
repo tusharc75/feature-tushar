@@ -628,7 +628,6 @@ const Service = ({
               />
             </div>
           )}
-          {/* add Button menu */}
           {!isColapsed && resource === sidebarResource.workOrder && (
             <>
               <Menu
@@ -704,8 +703,8 @@ const Service = ({
                 <MenuItem
                   disabled={
                     [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                    isAllowedToServiceEdit &&
-                    selectedService?.clickable
+                      isAllowedToServiceEdit &&
+                      selectedService?.clickable
                       ? false
                       : true
                   }
@@ -721,8 +720,8 @@ const Service = ({
                 <MenuItem
                   disabled={
                     allowedToEdit &&
-                    ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
-                    !completed
+                      ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
+                      !completed
                       ? false
                       : true
                   }
@@ -777,8 +776,8 @@ const Service = ({
               <MenuItem
                 disabled={
                   isAllowedToServiceEdit &&
-                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                  selectedService?.clickable
+                    [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                    selectedService?.clickable
                     ? false
                     : true
                 }
@@ -792,8 +791,8 @@ const Service = ({
               <MenuItem
                 disabled={
                   isAllowedToServiceEdit &&
-                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                  selectedService?.clickable
+                    [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                    selectedService?.clickable
                     ? false
                     : true
                 }
