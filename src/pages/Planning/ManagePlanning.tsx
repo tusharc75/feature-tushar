@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog } from '@mui/material';
+import { Box, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -17,6 +17,7 @@ import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/hel
 import { useHistory } from 'react-router-dom';
 import moment from 'moment';
 import InputField from 'src/components/Helpers/InputField';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const {
@@ -190,29 +191,23 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
-                  disabled={submitting}
+                <ThemeButton
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
+                  buttonType='transparent'
                 >
                   Cancel
-                </Button>
-                <Button
-                  disabled={loading || submitting}
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  type="submit"
+                </ThemeButton>
+                <ThemeButton
                   onClick={submitForm}
-                  endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                  disabled={loading || submitting}
+                  isLoading={submitting}
+                  buttonType='theme'
                 >
-                  {' '}
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog

@@ -1,7 +1,5 @@
 import {
-  Button,
   Checkbox,
-  CircularProgress,
   Dialog,
   FormControl,
   FormControlLabel,
@@ -23,6 +21,7 @@ import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import SearchBox from '../../components/Helpers/SearchBox';
 import Loader from '../../components/Loader';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const AssignDataDialog = (props) => {
   const { dialogOpen, onSuccess, handleCloseDialog, type, projectID, existingData, accountId = '', entityIds = [], users } = props;
@@ -272,12 +271,20 @@ const AssignDataDialog = (props) => {
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button disabled={isAssigning} onClick={handleCloseDialog} color="primary" size="small">
+        <ThemeButton
+          onClick={handleCloseDialog}
+          buttonType='transparent'
+        >
           Cancel
-        </Button>
-        <Button disabled={!selectedData.length || isAssigning} onClick={handleSave} color="primary" size="small" variant="contained">
-          {isAssigning ? <CircularProgress size={22} /> : 'Save'}
-        </Button>
+        </ThemeButton>
+        <ThemeButton
+          onClick={handleSave}
+          disabled={!selectedData.length || isAssigning}
+          buttonType='theme'
+          isLoading={isAssigning}
+        >
+          Save
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );
