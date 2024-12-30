@@ -157,7 +157,7 @@ const RenderService = ({
                 );
               })}
               <IconButton size={'small'} onClick={handleColapse}>
-                {isColapsed ? <ArrowForwardIos /> : <ArrowBackIos />}
+                <ArrowForwardIos fontSize="small" className={cn('transition-all', isColapsed ? '' : '[transform:rotate(180deg)]')} />
               </IconButton>
             </div>
             <div className={`max-h-[calc(100vh-300px)] overflow-y-auto overflow-x-hidden`}>
