@@ -1,102 +1,100 @@
-import React, { useContext, useEffect } from 'react';
-import { Dialog, Box, Button, Typography, IconButton } from '@mui/material';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import ControlPointIcon from '@mui/icons-material/ControlPoint';
+import SettingsIcon from '@mui/icons-material/Settings';
+import { Box, Button, Dialog, IconButton, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import { Theme, createStyles } from '@mui/material/styles';
+import { Theme } from '@mui/material/styles';
 import { makeStyles } from '@mui/styles';
 import { Form, Formik } from 'formik';
+import React, { useContext, useEffect } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
+import { MdKeyboardArrowDown } from 'react-icons/md';
+import axiosInstance from 'src/axios/axiosInstance';
+import { AddField } from 'src/components/FormBuilder/AddField';
+import CustomButton from 'src/components/Helpers/CustomButton';
 import FormTypes from 'src/components/Helpers/FormTypes';
+import DetailsPage from 'src/components/Shared/DetailsPage';
 import {
+  convertMsToTime,
+  CustomDialogTransition,
+  displayDateTime,
+  gridSize,
+  sidebarResource,
   workOrder,
   WORKORDER_SERVICE_STEP_STATUS,
-  yupSchema,
-  convertMsToTime,
-  sidebarResource,
-  CustomDialogTransition,
-  gridSize,
-  displayDateTime
+  yupSchema
 } from 'src/constants/helpers';
-import styles from './StepFieldsDialog.module.scss';
-import DetailsPage from 'src/components/Shared/DetailsPage';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import SettingsIcon from '@mui/icons-material/Settings';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
-import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import { RenderPassFailChip } from './Steps';
-import { MdKeyboardArrowDown } from 'react-icons/md';
-import ControlPointIcon from '@mui/icons-material/ControlPoint';
-import { AddField } from 'src/components/FormBuilder/AddField';
-import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
-import { isMobile, isTablet } from 'react-device-detect';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import styles from './StepFieldsDialog.module.scss';
+import { RenderPassFailChip } from './Steps';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    stepTags: {
-      minHeight: '26px',
-      paddingInline: '5px',
-      fontWeight: 500
-    },
-    sectionContainer: {
-      padding: '0 15px 18px',
-      marginTop: '20px'
-    },
-    sectionHead: {
+const useStyles = makeStyles((theme: Theme) => ({
+  stepTags: {
+    minHeight: '26px',
+    paddingInline: '5px',
+    fontWeight: 500
+  },
+  sectionContainer: {
+    padding: '0 15px 18px',
+    marginTop: '20px'
+  },
+  sectionHead: {
+    fontWeight: 600,
+    fontSize: '16px',
+    lineHeight: '1.6',
+    color: 'var(--dark-primary-text,#2A3042)',
+    '& span': {
       fontWeight: 600,
+      width: '19px',
+      height: '19px',
       fontSize: '16px',
-      lineHeight: '1.6',
-      color: 'var(--dark-primary-text,#2A3042)',
-      '& span': {
-        fontWeight: 600,
-        width: '19px',
-        height: '19px',
-        fontSize: '16px',
-        borderRadius: '3px',
-        display: 'inline-grid',
-        placeItems: 'center',
-        marginRight: '6px',
-        verticalAlign: 'text-top',
-        cursor: 'pointer'
-      }
-    },
-    sectionRow: {
-      overflow: 'hidden',
-      '& > div': {
-        display: 'flex',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        marginBlock: '11px',
-        gap: '23px'
-      }
-    },
-    sectionColTItle: {
-      flexBasis: '125px',
-      fontWeight: 500,
-      fontSize: '12px',
-      lineHeight: '1.5',
-      color: 'var(--dark-primary-text,#8A8A8A)'
-    },
-    sectionColDetail: {
-      fontWeight: 400,
-      fontSize: '12px',
-      lineHeight: 1.5,
-      color: 'var(--dark-primary-text,#2A3042)',
-      textTransform: 'capitalize'
-    },
-    centerText: {
-      textAlign: 'center',
-      marginBlock: '30px'
-    },
-    transition: {
-      overflow: 'hidden',
-      transition: 'height .3s'
+      borderRadius: '3px',
+      display: 'inline-grid',
+      placeItems: 'center',
+      marginRight: '6px',
+      verticalAlign: 'text-top',
+      cursor: 'pointer'
     }
-  })
-);
+  },
+  sectionRow: {
+    overflow: 'hidden',
+    '& > div': {
+      display: 'flex',
+      alignItems: 'center',
+      flexWrap: 'wrap',
+      marginBlock: '11px',
+      gap: '23px'
+    }
+  },
+  sectionColTItle: {
+    flexBasis: '125px',
+    fontWeight: 500,
+    fontSize: '12px',
+    lineHeight: '1.5',
+    color: 'var(--dark-primary-text,#8A8A8A)'
+  },
+  sectionColDetail: {
+    fontWeight: 400,
+    fontSize: '12px',
+    lineHeight: 1.5,
+    color: 'var(--dark-primary-text,#2A3042)',
+    textTransform: 'capitalize'
+  },
+  centerText: {
+    textAlign: 'center',
+    marginBlock: '30px'
+  },
+  transition: {
+    overflow: 'hidden',
+    transition: 'height .3s'
+  }
+}));
 
 const StepFieldsDialog = ({
   handleClose,
@@ -345,11 +343,12 @@ const StepFieldsDialog = ({
                                       <Grid
                                         key={index2}
                                         size={{
-                                        xs:12,
-                                        sm:field?.columnSize ? field?.columnSize : gridSize(field.type),
-                                        md:field?.columnSize ? field?.columnSize : gridSize(field.type),
-                                        lg:field?.columnSize ? field?.columnSize : gridSize(field.type),
-                                        xl:field?.columnSize ? field?.columnSize : gridSize(field.type)}}
+                                          xs: 12,
+                                          sm: field?.columnSize ? field?.columnSize : gridSize(field.type),
+                                          md: field?.columnSize ? field?.columnSize : gridSize(field.type),
+                                          lg: field?.columnSize ? field?.columnSize : gridSize(field.type),
+                                          xl: field?.columnSize ? field?.columnSize : gridSize(field.type)
+                                        }}
                                       >
                                         <FormTypes
                                           {...field}

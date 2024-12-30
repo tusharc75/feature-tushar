@@ -14,39 +14,37 @@ import { CustomDialogTransition, WORKORDER_SERVICE_STATUS, WORKORDER_SERVICE_STE
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    heading: {
-      fontSize: theme.typography.pxToRem(16)
+const useStyles = makeStyles((theme: Theme) => ({
+  heading: {
+    fontSize: theme.typography.pxToRem(16)
+  },
+  accordionHeading: {
+    padding: '16px 16px 16px 16px',
+    "['@media (min-width:768px)']": {
+      padding: '16px 20px 16px 16px'
     },
-    accordionHeading: {
-      padding: '16px 16px 16px 16px',
-      ['@media (min-width:768px)']: {
-        padding: '16px 20px 16px 16px'
-      },
-      ['@media (min-width:1024px)']: {
-        padding: '16px 40px 16px 16px'
-      },
+    "['@media (min-width:1024px)']": {
+      padding: '16px 40px 16px 16px'
+    },
 
-      '& > div': {
-        alignItems: 'center',
-        justifyContent: 'space-between'
-      }
-      // '&:first-of-type': {
-      //   borderRadius: '8px 8px 0 0'
-      // }
-      // '&:last-of-type': {
-      //   borderRadius: '0 0 8px 8px'
-      // }
-    },
-    red: {
-      backgroundColor: 'rgba(255,0,0,.1)'
-    },
-    white: {
-      backgroundColor: 'var(--dark-secondary, white)'
+    '& > div': {
+      alignItems: 'center',
+      justifyContent: 'space-between'
     }
-  })
-);
+    // '&:first-of-type': {
+    //   borderRadius: '8px 8px 0 0'
+    // }
+    // '&:last-of-type': {
+    //   borderRadius: '0 0 8px 8px'
+    // }
+  },
+  red: {
+    backgroundColor: 'rgba(255,0,0,.1)'
+  },
+  white: {
+    backgroundColor: 'var(--dark-secondary, white)'
+  }
+}));
 
 const StepsInOtherServices = ({ workOrderId, resource, service, allowedToEdit, onClose }) => {
   const classes = useStyles();
