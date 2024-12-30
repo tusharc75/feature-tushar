@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, TextField } from '@mui/material';
+import { Box, Dialog, TextField } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -6,7 +6,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomDialogTransition, MATERIAL_TYPE, rentalManagement } from 'src/constants/helpers';
 
 const PackageDialog = ({ onClose, rentalManagementData, onSuccess }) => {
@@ -61,19 +61,18 @@ const PackageDialog = ({ onClose, rentalManagementData, onSuccess }) => {
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button variant="outlined" color="primary" size="small" onClick={onClose}>
+        <ThemeButton buttonType="transparent" onClick={onClose}>
           Cancel
-        </Button>
-        <CustomButton
-          loading={false}
-          variant="contained"
-          color="primary"
+        </ThemeButton>
+        <ThemeButton
+          isLoading={false}
+          buttonType="theme"
           onClick={(e) => {
             onSuccess(selectedPackage);
           }}
         >
           Save
-        </CustomButton>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

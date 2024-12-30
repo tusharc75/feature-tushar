@@ -1,4 +1,4 @@
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import Dialog from '@mui/material/Dialog';
 import { Form, Formik } from 'formik';
@@ -15,7 +15,6 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomButton from '../../../components/Helpers/CustomButton';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import routes from '../../../components/Helpers/Routes';
 import {
@@ -31,6 +30,7 @@ import {
 } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ManageRepairOrder = ({
   isClone = false,
@@ -448,11 +448,8 @@ const ManageRepairOrder = ({
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                  <Button
-                    type="button"
-                    variant="outlined"
-                    color="primary"
-                    size="small"
+                  <ThemeButton
+                    buttonType="transparent"
                     id="dialog-cancel-button"
                     onClick={() => {
                       if (isEqual(initialData.values, values)) onClose();
@@ -460,11 +457,10 @@ const ManageRepairOrder = ({
                     }}
                   >
                     Cancel
-                  </Button>
-                  <CustomButton
-                    loading={loading}
-                    variant="contained"
-                    color="primary"
+                  </ThemeButton>
+                  <ThemeButton
+                    isLoading={loading}
+                    buttonType="transparent"
                     id="dialog-save-button"
                     disabled={uploadingImageOrFileProgress > 0 || loading}
                     onClick={(e) => {
@@ -474,7 +470,7 @@ const ManageRepairOrder = ({
                     }}
                   >
                     Save
-                  </CustomButton>
+                  </ThemeButton>
                 </CustomDialogFooter>
                 {showConfirmDialog && (
                   <ConfirmCancelDialog
