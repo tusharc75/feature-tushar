@@ -6,7 +6,7 @@ import {
   sidebarResource,
   workOrder
 } from '../../constants/helpers';
-import { Dialog, TextField, Box, Button } from '@mui/material';
+import { Dialog, TextField, Box } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
@@ -15,12 +15,12 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import Autocomplete from '@mui/material/Autocomplete';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import CustomButton from 'src/components/Helpers/CustomButton';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Formik, Form } from 'formik';
 import moment from 'moment';
 import { useData } from 'src/StateProvider/Provider';
 import CustomDatePicker from 'src/components/CustomDatePicker';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
   const toastConfig = useContext(CustomToastContext);
@@ -140,7 +140,7 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                 <CustomDialogContent style={{ flex: 1, overflowY: 'auto' }}>
                   <div className="flex flex-col p-3">
                     <Grid container spacing={3}>
-                      <Grid size={{xs:12}}>
+                      <Grid size={{ xs: 12 }}>
                         <Autocomplete
                           size="small"
                           options={productOptions}
@@ -162,7 +162,7 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                           )}
                         />
                       </Grid>
-                      <Grid size={{xs:12}}>
+                      <Grid size={{ xs: 12 }}>
                         <Autocomplete
                           size="small"
                           options={assetOptions}
@@ -182,7 +182,7 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                           )}
                         />
                       </Grid>
-                      <Grid size={{xs:12}}>
+                      <Grid size={{ xs: 12 }}>
                         <Autocomplete
                           multiple
                           size="small"
@@ -207,7 +207,7 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                           )}
                         />
                       </Grid>
-                      <Grid size={{xs:12}}>
+                      <Grid size={{ xs: 12 }}>
                         <CustomDatePicker
                           fullWidth
                           size="small"
@@ -226,12 +226,13 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                   </div>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                  <Button size="small" color="primary" onClick={() => onClose()}>
+                  <ThemeButton buttonType="transparent" onClick={() => onClose()}>
                     Cancel
-                  </Button>
-                  <CustomButton variant="contained" color="primary" type="submit">
+                  </ThemeButton>
+                  <ThemeButton isLoading={loading}
+                    buttonType="theme">
                     Save
-                  </CustomButton>
+                  </ThemeButton>
                 </CustomDialogFooter>
               </Form>
             )}

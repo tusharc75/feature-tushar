@@ -5,8 +5,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { asyncForEach, convertBlobToBase64 } from 'src/constants/helpers';
 import { Box, Button, FormControl, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import CustomButton from 'src/components/Helpers/CustomButton';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 
 fabric.IText.prototype.initHiddenTextarea = (function (initHiddenTextarea) {
   return function () {
@@ -485,23 +484,21 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
         )}
 
         <div className="flex flex-wrap items-center gap-2">
-          <CustomButton
+          <ThemeButton
             disabled={isSubmitting || loading}
-            loading={isSubmitting}
-            variant="contained"
-            color="primary"
-            type="submit"
+            isLoading={isSubmitting}
+            buttonType="theme"
             onClick={handleSave}
           >
             Save
-          </CustomButton>
+          </ThemeButton>
           <Button disabled={loading} variant="contained" color="primary" size="small" onClick={handleDownload}>
             Download
           </Button>
         </div>
       </div>
       <Grid container spacing={2}>
-        <Grid size={{xs:12}} style={{ height: 'calc(100vh - 140px)', overflow: 'auto' }}>
+        <Grid size={{ xs: 12 }} style={{ height: 'calc(100vh - 140px)', overflow: 'auto' }}>
           {loading ? (
             <Box pt={2}>
               <Typography>Pdf Pages Loading...</Typography>
