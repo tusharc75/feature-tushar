@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog, Typography } from '@mui/material';
+import { Box, Dialog, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { FieldArray, Form, Formik } from 'formik';
 import { isArray, isEqual } from 'lodash';
@@ -9,6 +9,7 @@ import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { CustomDialogTransition, getObjKeysWithValues, serializedAsset, sidebarResource } from 'src/constants/helpers';
@@ -324,31 +325,23 @@ const ChangePreviousAssetDataDialog = ({ onClose, statusPolicy, staticLookUpFilt
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
-                  id={'asset-data-dialog-cancel-button'}
-                  disabled={loading}
+                <ThemeButton
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
+                  buttonType='transparent'
                 >
                   Cancel
-                </Button>
-                <Button
+                </ThemeButton>
+                <ThemeButton
                   disabled={loading || isEqual(initialData.values, values)}
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  type="submit"
                   onClick={submitForm}
-                  id={'asset-data-dialog-save-button'}
-                  endIcon={loading && <CircularProgress color="inherit" size={18} />}
+                  buttonType='theme'
+                  isLoading={loading}
                 >
-                  {' '}
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog

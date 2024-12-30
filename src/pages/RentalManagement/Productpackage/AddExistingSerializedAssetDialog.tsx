@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog, TextField } from '@mui/material';
+import { Box, Dialog, TextField } from '@mui/material';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -374,31 +374,27 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
         {(Number(tabValue) === 0 || Number(tabValue) === 1) && (
           <>
             {permissions?.transferAsset?.isCreate && selectedRecords?.length !== 0 && !checkUniqWarehouse() && (
-              <Button
-                style={{ minWidth: 'max-content', marginRight: '10px' }}
-                size="small"
-                color="primary"
-                onClick={() => {
-                  if (checkAssetPolicy(ASSET_STATUS.reserved)) {
-                    const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.reserved);
-                    setOpenAssetDataDialog({
-                      open: true,
-                      statusPolicy: statusPolicy,
-                      _ids: assetIds,
-                      type: 'transfer'
-                    });
-                  } else {
-                    setShowTransferAssetDialog({ open: true, data: null });
-                  }
-                }}
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                disabled={isSubmitting}
-                className={`${isMobile && !isTablet ? 'mobile_button' : ''}  `}
-                endIcon={isSubmitting && <CircularProgress size={20} />}
-              >
-                {`Transfer to ${referenceData?.warehouse?.optionLabel}`}
-                {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
-              </Button>
+            <ThemeButton
+              disabled={isSubmitting}
+              buttonType='theme'
+              isLoading={isSubmitting}
+              onClick={() => {
+                if (checkAssetPolicy(ASSET_STATUS.reserved)) {
+                  const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.reserved);
+                  setOpenAssetDataDialog({
+                    open: true,
+                    statusPolicy: statusPolicy,
+                    _ids: assetIds,
+                    type: 'transfer'
+                  });
+                } else {
+                  setShowTransferAssetDialog({ open: true, data: null });
+                }
+              }}
+            >
+              {`Transfer to ${referenceData?.warehouse?.optionLabel}`}
+              {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
+            </ThemeButton>
             )}
           </>
         )}

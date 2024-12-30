@@ -1,5 +1,4 @@
 import { useState, useContext, useEffect } from 'react';
-import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid2';
 import TextField from '@mui/material/TextField';
 import { makeStyles } from '@mui/styles';
@@ -14,7 +13,6 @@ import routes from '../../components/Helpers/Routes';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import TinyMce from './../../components/TinyMCE/index';
-import CircularProgress from '@mui/material/CircularProgress';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { Autocomplete, Theme } from '@mui/material';
 import { useData } from '../../StateProvider/Provider';
@@ -26,6 +24,7 @@ import queryString from 'query-string';
 import { quotation } from '../../constants/helpers';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 import { camelCase, startCase } from 'lodash';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const defaultProductColumns = 7;
 
@@ -509,43 +508,37 @@ export default function NewCreateQuotePdfTemplate() {
                   />
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <Button
+                  <ThemeButton
                     disabled={isUpdating || (!isClone && !hasPermissionToUpdate)}
-                    size="small"
-                    color="primary"
                     onClick={submitForm}
-                    variant="contained"
-                    endIcon={isUpdating && <CircularProgress color="inherit" size={18} />}
+                    buttonType='theme'
+                    isLoading={isUpdating}
                   >
                     Save
-                  </Button>
+                  </ThemeButton>
 
                   {!quoteData && (
-                    <Button
+                    <ThemeButton
                       disabled={!isClone && (isUpdatingAndPreview || !hasPermissionToUpdate)}
-                      size="small"
-                      color="primary"
                       onClick={() => {
                         setIsPreview(true);
                         submitForm();
                       }}
-                      variant="contained"
-                      endIcon={isUpdatingAndPreview && <CircularProgress color="inherit" size={18} />}
+                      buttonType='theme'
+                      isLoading={isUpdatingAndPreview}
                     >
                       Save & Preview
-                    </Button>
+                    </ThemeButton>
                   )}
 
-                  <Button
-                    size="small"
-                    color="primary"
-                    variant="contained"
+                  <ThemeButton
                     onClick={() => {
                       handleClose();
                     }}
+                    buttonType='transparent'
                   >
                     Close
-                  </Button>
+                  </ThemeButton>
                 </div>
               </div>
               <div className={`main-container ${classes.mainContainer}`}>

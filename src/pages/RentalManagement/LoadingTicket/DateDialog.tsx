@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Form, Formik } from 'formik';
-import { Button, CircularProgress, Dialog, Box, Typography, FormControl, RadioGroup, FormControlLabel, Radio } from '@mui/material';
+import { Dialog, Box, Typography, FormControl, RadioGroup, FormControlLabel, Radio } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -9,6 +9,7 @@ import { ASSET_STATUS, CustomDialogTransition, convertDateInDateTime, displayDat
 import moment from 'moment';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDatePicker from 'src/components/CustomDatePicker';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const DateDialog = ({ title, type, status, onClose, handleSubmit, loading, assets = [] }) => {
   const [minDate, setMinDate] = useState(new Date());
@@ -109,19 +110,19 @@ const DateDialog = ({ title, type, status, onClose, handleSubmit, loading, asset
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button disabled={loading} size="small" variant="outlined" color="primary" onClick={onClose}>
+              <ThemeButton
+                onClick={onClose}
+                buttonType='transparent'
+              >
                 Close
-              </Button>
-              <Button
+              </ThemeButton>
+              <ThemeButton
                 disabled={loading}
-                startIcon={loading && <CircularProgress size={18} color="inherit" />}
-                size="small"
-                variant="contained"
-                color="primary"
-                type="submit"
+                buttonType='theme'
+                isLoading={loading}
               >
                 Save
-              </Button>
+              </ThemeButton>
             </CustomDialogFooter>
           </Form>
         )}
