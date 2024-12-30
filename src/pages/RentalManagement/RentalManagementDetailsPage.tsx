@@ -468,6 +468,7 @@ const RentalManagementDetailsPage = () => {
 
                   {user?.role?.selectedEntity?.policy?.isRentalReopen && rentalManagementData?.status === RENTAL_STATUS.closed && (
                     <ThemeButton
+                      id={'rental-management-re-open-button'}
                       disabled={reOpening}
                       onClick={() => {
                         handleRentalReOpen();
@@ -477,7 +478,7 @@ const RentalManagementDetailsPage = () => {
                     >
                       Re-Open
                     </ThemeButton>
-                  )}
+                   )} 
                   {permissions?.rentalManagement?.isUpdate &&
                     !isOffline &&
                     ![RENTAL_STATUS.cancelled, RENTAL_STATUS.closed].includes(rentalManagementData?.status) && (

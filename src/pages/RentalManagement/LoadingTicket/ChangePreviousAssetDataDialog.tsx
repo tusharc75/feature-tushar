@@ -331,6 +331,7 @@ const ChangePreviousAssetDataDialog = ({ onClose, statusPolicy, staticLookUpFilt
                     else setShowConfirmDialog(true);
                   }}
                   buttonType='transparent'
+                  id={'asset-data-dialog-cancel-button'}
                 >
                   Cancel
                 </ThemeButton>
@@ -339,6 +340,7 @@ const ChangePreviousAssetDataDialog = ({ onClose, statusPolicy, staticLookUpFilt
                   onClick={submitForm}
                   buttonType='theme'
                   isLoading={loading}
+                  id={'asset-data-dialog-save-button'}
                 >
                   Save
                 </ThemeButton>
