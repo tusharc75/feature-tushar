@@ -7,7 +7,6 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomDialogTransition, QUOTATION_STATUS, rentalManagement } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ReponseDialog = ({ rentalId, onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);

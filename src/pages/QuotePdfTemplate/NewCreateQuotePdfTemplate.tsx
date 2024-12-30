@@ -516,7 +516,6 @@ export default function NewCreateQuotePdfTemplate() {
                   >
                     Save
                   </ThemeButton>
-                  </ThemeButton>
 
                   {!quoteData && (
                     <ThemeButton

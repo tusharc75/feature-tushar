@@ -1,5 +1,4 @@
 import { Box, Dialog, Typography } from '@mui/material';
-import { Box, Dialog, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { FieldArray, Form, Formik } from 'formik';
 import { isArray, isEqual } from 'lodash';
@@ -10,7 +9,6 @@ import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import FormTypes from 'src/components/Helpers/FormTypes';
@@ -343,7 +341,6 @@ const ChangePreviousAssetDataDialog = ({ onClose, statusPolicy, staticLookUpFilt
                   isLoading={loading}
                 >
                   Save
-                </ThemeButton>
                 </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
