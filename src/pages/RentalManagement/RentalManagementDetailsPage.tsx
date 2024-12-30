@@ -1,10 +1,9 @@
-import { Box, Button, CircularProgress } from '@mui/material';
+import { Box, CircularProgress } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import { camelCase, findIndex } from 'lodash';
 import queryString from 'query-string';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { IoMdDownload } from 'react-icons/io';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
@@ -52,6 +51,7 @@ import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { generateAddExistingProduct } from 'src/pages/RentalManagement/walkmeSteps';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { DownloadIcon } from 'src/assets/svg/svgIcons';
 
 const RentalManagementDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -199,7 +199,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const checkDeliveryTicketFields = () => {
@@ -217,7 +217,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   useEffect(() => {
@@ -431,13 +431,14 @@ const RentalManagementDetailsPage = () => {
                     id={'rental-management-download-button'}
                     type="button"
                     disabled={isDownloading ? true : false}
-                    iconForMobile={<IoMdDownload />}
-                    startIcon={isMobile ? '' : <IoMdDownload />}
+                    iconForMobile={<DownloadIcon />}
+                    startIcon={<DownloadIcon />}
                     onClick={(e) => {
                       handleDownload();
                     }}
+                    mobileTooltip={isDownloading ? 'Please wait...' : 'Download'}
                   >
-                    {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloading ? 'Please wait...' : 'Download'}
+                    {isDownloading ? 'Please wait...' : 'Download'}
                   </ThemeButton>
                   {['Add Products', 'Add Services', 'Add-on'].includes(rentalSteps[currentStep]?.name) &&
                     versionNotClonned &&
@@ -541,11 +542,11 @@ const RentalManagementDetailsPage = () => {
                 setCurrentStep={setCurrentStep}
                 handlePrev={
                   rentalSteps[currentStep]?.name === 'Quotation' &&
-                  allowedToEdit &&
-                  [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer].includes(quotationData?.versions[currentVersion]?.status)
+                    allowedToEdit &&
+                    [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer].includes(quotationData?.versions[currentVersion]?.status)
                     ? () => {
-                        setShowCancelConfirmBox({ open: true, isQuote: true });
-                      }
+                      setShowCancelConfirmBox({ open: true, isQuote: true });
+                    }
                     : null
                 }
                 isStepEnded={[RENTAL_STATUS.invoiced, RENTAL_STATUS.closed, RENTAL_STATUS.cancelled].includes(rentalManagementData?.status)}
@@ -569,12 +570,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                    [
-                      QUOTATION_STATUS.acceptByCustomer,
-                      QUOTATION_STATUS.rejectByCustomer,
-                      QUOTATION_STATUS.sentToCustomer,
-                      QUOTATION_STATUS.waitingForSupplierPrice
-                    ].includes(quotationData?.versions[currentVersion]?.status)
+                      [
+                        QUOTATION_STATUS.acceptByCustomer,
+                        QUOTATION_STATUS.rejectByCustomer,
+                        QUOTATION_STATUS.sentToCustomer,
+                        QUOTATION_STATUS.waitingForSupplierPrice
+                      ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }
@@ -593,12 +594,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                    [
-                      QUOTATION_STATUS.acceptByCustomer,
-                      QUOTATION_STATUS.rejectByCustomer,
-                      QUOTATION_STATUS.sentToCustomer,
-                      QUOTATION_STATUS.waitingForSupplierPrice
-                    ].includes(quotationData?.versions[currentVersion]?.status)
+                      [
+                        QUOTATION_STATUS.acceptByCustomer,
+                        QUOTATION_STATUS.rejectByCustomer,
+                        QUOTATION_STATUS.sentToCustomer,
+                        QUOTATION_STATUS.waitingForSupplierPrice
+                      ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }
