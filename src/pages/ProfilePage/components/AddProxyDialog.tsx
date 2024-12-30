@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect } from 'react';
-import { Dialog, Button, TextField, CircularProgress } from '@mui/material';
+import { Dialog, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -12,6 +12,7 @@ import { object, string } from 'yup';
 import { Formik, Form } from 'formik';
 import Autocomplete from '@mui/material/Autocomplete';
 import CustomDatePicker from 'src/components/CustomDatePicker';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const AddProxySchema = object().shape({
   user: string().required('Please select user'),
@@ -151,12 +152,20 @@ export default function AddProxyDialog({ open, onClose, onSuccess, userId }) {
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button size="small" onClick={onClose} variant="contained">
+                <ThemeButton
+                  onClick={onClose}
+                  buttonType='transparent'
+                >
                   Cancel
-                </Button>
-                <Button disabled={isSubmitting} type="button" color="primary" variant="contained" size="small" onClick={submitForm}>
-                  {isSubmitting ? <CircularProgress size={22} /> : 'Save'}
-                </Button>
+                </ThemeButton>
+                <ThemeButton
+                  onClick={submitForm}
+                  disabled={isSubmitting}
+                  isLoading={isSubmitting}
+                  buttonType='theme'
+                >
+                  Save
+                </ThemeButton>
               </CustomDialogFooter>
             </Dialog>
           </>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dialog, Box, Button, CircularProgress } from '@mui/material';
+import { Dialog, Box } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
@@ -8,6 +8,7 @@ import { CustomDialogTransition, getObjKeys } from '../../../constants/helpers';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const AddConfigurationDialog = (props) => {
   const { data, fields, close, id, fetchData } = props;
@@ -134,18 +135,20 @@ const AddConfigurationDialog = (props) => {
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button disabled={submitting} variant="outlined" color="primary" onClick={close}>
+        <ThemeButton
+          onClick={close}
+          buttonType='transparent'
+        >
           Close
-        </Button>
-        <Button
-          disabled={submitting}
-          variant="contained"
-          color="primary"
+        </ThemeButton>
+        <ThemeButton
           onClick={postImages}
-          endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+          disabled={submitting}
+          isLoading={submitting}
+          buttonType='theme'
         >
           Save
-        </Button>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

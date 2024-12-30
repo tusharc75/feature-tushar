@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment, useRef } from 'react';
-import { Box, Button, Menu, MenuItem, IconButton, CircularProgress, useMediaQuery, Theme } from '@mui/material';
+import { Box, Button, Menu, MenuItem, IconButton, useMediaQuery, Theme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { useParams, useHistory } from 'react-router-dom';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
@@ -464,15 +464,14 @@ const ProductTemplate = () => {
                         <HistoryButton onClick={() => setShowHistory(true)} />
                         <Box>
                           {((id === '0' && productTemplatePermissions.isCreate) || (id !== '0' && productTemplatePermissions.isUpdate)) && (
-                            <Button
-                              disabled={isUpdating || !hasPermissionToUpdate}
-                              color="primary"
-                              size="small"
+                            <ThemeButton
                               onClick={submitForm}
-                              variant="contained"
+                              disabled={isUpdating || !hasPermissionToUpdate}
+                              isLoading={isUpdating}
+                              buttonType='theme'
                             >
-                              Save{isUpdating && <CircularProgress size={24} />}
-                            </Button>
+                              Save
+                            </ThemeButton>
                           )}
                         </Box>
                         <Box ml={1}>
