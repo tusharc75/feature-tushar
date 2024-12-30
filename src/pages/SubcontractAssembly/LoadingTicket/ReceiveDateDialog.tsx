@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import Button from '@mui/material/Button';
 import { Box } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import { Form, Formik } from 'formik';
@@ -7,11 +6,11 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import { convertDateInDateTime, CustomDialogTransition, productInventory } from 'src/constants/helpers';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import CustomButton from 'src/components/Helpers/CustomButton';
 import moment from 'moment';
 import axiosInstance from 'src/axios/axiosInstance';
 import { useData } from 'src/StateProvider/Provider';
 import CustomDatePicker from 'src/components/CustomDatePicker';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ReceiveDateDialog = ({ handleClose, handleSucess, loading, refrenceData }) => {
   const [lockDate, setLockDate] = useState(null);
@@ -88,12 +87,12 @@ const ReceiveDateDialog = ({ handleClose, handleSucess, loading, refrenceData })
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button color="primary" size="small" onClick={handleClose}>
+              <ThemeButton buttonType="transparent" onClick={handleClose}>
                 Cancel
-              </Button>
-              <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit" onClick={submitForm}>
+              </ThemeButton>
+              <ThemeButton isLoading={loading} disabled={loading}  buttonType="theme" onClick={submitForm}>
                 {'Deliver'}
-              </CustomButton>
+              </ThemeButton>
             </CustomDialogFooter>
           </Form>
         )}
