@@ -56,7 +56,8 @@ const getButtonStyle = ({
   const buttonProps: ButtonProps = {
     sx: {
       height: '32px',
-      fontSize: '13px',
+      fontSize: '14.7px',
+      lineHeight: '17px',
       gap: '5px',
       '& .MuiButton-icon': { margin: 0 },
       '& .MuiButton-endIcon': { marginRight: '-5px' },
@@ -71,8 +72,6 @@ const getButtonStyle = ({
       buttonProps.variant = 'outlined';
       buttonProps.sx = {
         ...buttonProps.sx,
-        fontSize: '14.7px',
-        lineHeight: '17px',
         ...(mode === 'dark' ? { background: 'var(--dark-primary, white)' } : { background: 'var(--dark-secondary, white)' })
       };
       break;
