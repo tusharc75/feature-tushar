@@ -44,7 +44,7 @@ const getButtonStyle = ({ buttonType = 'default', mode = 'dark', iconForMobile =
   const buttonProps: ButtonProps = {
     sx: {
       height: '32px',
-      fontSize: '13px',
+      fontSize: '14px',
       gap: '5px',
       alignItems: 'center',
       '& .MuiButton-icon': {
@@ -55,7 +55,7 @@ const getButtonStyle = ({ buttonType = 'default', mode = 'dark', iconForMobile =
       },
       '& .MuiButton-endIcon': { marginRight: '-5px' },
       '& .MuiButton-startIcon': { marginLeft: '-5px' },
-      fontWeight: 500,
+      fontWeight: 400,
       ...sx
     }
   };
@@ -66,7 +66,10 @@ const getButtonStyle = ({ buttonType = 'default', mode = 'dark', iconForMobile =
       buttonProps.sx = {
         ...buttonProps.sx,
         ...(mode === 'dark' ? { background: 'var(--dark-primary, white)' } : { background: 'var(--dark-secondary, white)' }),
-        border: '1px solid var(--common-border-color)'
+        border: '1px solid var(--common-border-color)',
+        '&:disabled': {
+          backgroundColor: '#e5e5e5',
+        }
       };
       break;
     }
@@ -90,6 +93,8 @@ const getButtonStyle = ({ buttonType = 'default', mode = 'dark', iconForMobile =
         ...buttonProps.sx,
         background: 'var(--new-theme-color)',
         padding: '4px 10px',
+        fontWeight: 500,
+        fontSize: '13.5px',
         color: 'white',
         '&:hover': {
           backgroundColor: 'var(--new-theme-color-hover)'
@@ -106,6 +111,7 @@ const getButtonStyle = ({ buttonType = 'default', mode = 'dark', iconForMobile =
     case 'yellow': {
       buttonProps.sx = {
         ...buttonProps.sx,
+        fontWeight: 500,
         background: 'var(--new-theme-secondary-color)',
         color: 'black',
         '&:disabled': { background: 'var(--new-theme-secondary-color-hover)', opacity: 0.7, color: 'black' },
