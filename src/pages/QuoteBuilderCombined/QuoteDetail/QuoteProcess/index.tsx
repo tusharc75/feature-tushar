@@ -1,4 +1,4 @@
-import { Button, Dialog, MenuItem, Typography } from '@mui/material';
+import { Dialog, MenuItem, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -227,10 +227,10 @@ export default function QuoteProcess(props) {
               setDOAApproved(data.canApprove);
               setDOARequestId(data.requestId);
             })
-            .catch((err) => {});
+            .catch((err) => { });
         }
       })
-      .catch((error) => {});
+      .catch((error) => { });
   }, [currentVersion]);
 
   useEffect(() => {
@@ -338,7 +338,7 @@ export default function QuoteProcess(props) {
         data['commissionPercentPerUnit'] === null || data['commissionPercentPerUnit'] === undefined ? 0 : data['commissionPercentPerUnit'],
       [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
         data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === null ||
-        data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
+          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
           ? 0
           : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]
     }));
@@ -668,36 +668,36 @@ export default function QuoteProcess(props) {
 
   const previewDownloadProps = ![QUOTE_PROCESS_STATUS.new, QUOTE_PROCESS_STATUS.priceBuilder].includes(processStatus)
     ? {
-        resource: sidebarResource.quoteBuilder,
-        referenceId: quoteData?._id,
-        fileName: `${`Quote-${quoteData?.quoteName}-V(${currentVersion})`}`,
-        columns: columns,
-        hideDetailButton: true,
-        isSendEmail:
-          processStatus === QUOTE_PROCESS_STATUS.sendToCustomer &&
+      resource: sidebarResource.quoteBuilder,
+      referenceId: quoteData?._id,
+      fileName: `${`Quote-${quoteData?.quoteName}-V(${currentVersion})`}`,
+      columns: columns,
+      hideDetailButton: true,
+      isSendEmail:
+        processStatus === QUOTE_PROCESS_STATUS.sendToCustomer &&
           versionStatus !== 'Send To Customer' &&
           !ifQuoteApproved.approved &&
           !quoteData?.versions[currentVersion]?.offered &&
           allowedToEdit
-            ? true
-            : false,
-        isExcelDownload: true,
-        extraQueryParams: { uniqueId: quoteData?.versions[currentVersion]?._id },
-        versionNumber: currentVersion,
-        subject: `${user?.user?.brandName ?? 'Brand'} Offer - ${quoteData?.quoteName ?? ''}`,
-        defaultColumns: [
-          'productName',
-          'unit',
-          'qty',
-          `salesPricePerUnit_${quoteData?.currency?.toLowerCase()}`,
-          `totalSalesPrice_${quoteData?.currency?.toLowerCase()}`
-        ],
-        handleRefresh: () => {
-          fetchQuoteData(currentVersion);
-        },
-        toEmails: userEmails?.to,
-        ccEmails: userEmails?.cc ?? []
-      }
+          ? true
+          : false,
+      isExcelDownload: true,
+      extraQueryParams: { uniqueId: quoteData?.versions[currentVersion]?._id },
+      versionNumber: currentVersion,
+      subject: `${user?.user?.brandName ?? 'Brand'} Offer - ${quoteData?.quoteName ?? ''}`,
+      defaultColumns: [
+        'productName',
+        'unit',
+        'qty',
+        `salesPricePerUnit_${quoteData?.currency?.toLowerCase()}`,
+        `totalSalesPrice_${quoteData?.currency?.toLowerCase()}`
+      ],
+      handleRefresh: () => {
+        fetchQuoteData(currentVersion);
+      },
+      toEmails: userEmails?.to,
+      ccEmails: userEmails?.cc ?? []
+    }
     : null;
 
   const leftSideContents = () => {

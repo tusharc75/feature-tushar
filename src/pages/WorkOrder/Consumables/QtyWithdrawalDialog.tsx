@@ -1,4 +1,4 @@
-import { Button, Dialog, TextField } from '@mui/material';
+import { Dialog, TextField } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { useContext, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -88,7 +88,10 @@ function QtyWithdrawalDialog({ referenceId, referenceType, onClose, data, onSucc
               >
                 Cancel
               </ThemeButton>
-              <ThemeButton isLoading={loading} buttonType="theme" disabled={loading}>
+              <ThemeButton
+                isLoading={loading}
+                buttonType="theme"
+                disabled={loading}>
                 Close Request
               </ThemeButton>
             </CustomDialogFooter>

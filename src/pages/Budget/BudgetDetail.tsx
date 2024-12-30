@@ -1,8 +1,7 @@
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import EditIcon from '@mui/icons-material/Edit';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
