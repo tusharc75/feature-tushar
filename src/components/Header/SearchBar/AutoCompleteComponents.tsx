@@ -9,6 +9,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import * as React from 'react';
 import { ListChildComponentProps, VariableSizeList } from 'react-window';
 import UserFavoriteIcon from 'src/components/UserFavouriteIcon';
+import { PiSmileySad } from 'react-icons/pi';
 
 const LISTBOX_PADDING = 8; // px
 
@@ -22,7 +23,7 @@ function renderRow(props: ListChildComponentProps) {
 
   if (dataSet.hasOwnProperty('group')) {
     return (
-      <ListSubheader key={dataSet.key} component="div" style={inlineStyle}>
+      <ListSubheader key={dataSet.key} className="text-[14px] font-medium text-[#828282] dark:text-[#9c9b9e]" component="div" style={inlineStyle}>
         {dataSet.group}
       </ListSubheader>
     );
@@ -36,11 +37,7 @@ function renderRow(props: ListChildComponentProps) {
         <CallMade style={{ fontSize: 16 }} />
       </ListItemIcon>
       <ListItemText
-        primary={
-          <span style={{ fontWeight: 500, fontSize: '15px' }}>
-            <Typography noWrap component="li">{`${dataSet[1].resourceLabel}`}</Typography>
-          </span>
-        }
+        primary={<p className="line-clamp-1 text-[15px] font-medium text-[#232529] dark:text-white">{`${dataSet[1].resourceLabel}`}</p>}
       />
       <UserFavoriteIcon item={dataSet[1]} />
     </Typography>
@@ -134,3 +131,12 @@ export const StyledPopper = styled(Popper)({
     }
   }
 });
+
+export const NoResultFound = () => {
+  return (
+    <div className="flex flex-col items-center justify-center py-[20px] text-[--grey]">
+      <PiSmileySad size={50} className="mx-auto mb-[10px]" />
+      <p className="select-none text-center text-[14px] font-normal">Sorry, we couldn&apos;t find any result</p>
+    </div>
+  );
+};
