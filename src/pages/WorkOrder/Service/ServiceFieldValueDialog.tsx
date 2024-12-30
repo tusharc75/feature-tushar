@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog } from '@mui/material';
+import { Box, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { useContext, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -11,6 +11,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomDialogTransition, workOrder, yupSchema } from 'src/constants/helpers';
 import DetailsPage from 'src/components/Shared/DetailsPage';
 import InputField from 'src/components/Helpers/InputField';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ServiceFieldValueDialog = ({ workOrderId, fields = [], fieldsValue = {}, service, handleClose, handleSuccess, editable = false }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -86,39 +87,34 @@ const ServiceFieldValueDialog = ({ workOrderId, fields = [], fieldsValue = {}, s
                 </Box>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button size="small" color="primary" disabled={submitting} onClick={handleClose}>
+                <ThemeButton
+                  buttonType='transparent'
+                  onClick={handleClose}
+                >
                   Cancel
-                </Button>
+                </ThemeButton>
                 {isEditing ? (
-                  <Button
-                    disabled={submitting}
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    type="submit"
+                  <ThemeButton
                     onClick={() => {
                       submitForm();
                     }}
-                    endIcon={submitting && <CircularProgress color="inherit" size={18} />}
-                  >
-                    {' '}
-                    Save
-                  </Button>
-                ) : (
-                  <Button
+                    buttonType='theme'
                     disabled={submitting}
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    type="submit"
+                    isLoading={submitting}
+                  >
+                    Save
+                  </ThemeButton>
+                ) : (
+                  <ThemeButton
                     onClick={() => {
                       setIsEditing(true);
                     }}
-                    endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                    buttonType='theme'
+                    disabled={submitting}
+                    isLoading={submitting}
                   >
-                    {' '}
                     Edit
-                  </Button>
+                  </ThemeButton>
                 )}
               </CustomDialogFooter>
             </>
