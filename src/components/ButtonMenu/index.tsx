@@ -2,7 +2,7 @@ import { MenuProps } from '@aws-amplify/ui-react';
 import { ButtonProps, IconButtonProps, Menu, MenuItem, MenuItemProps } from '@mui/material';
 import React from 'react';
 import { BiChevronDown } from 'react-icons/bi';
-import { ButtonType, ThemeButton } from 'src/components/Helpers/Buttons';
+import { ThemeButtonProps, ThemeButton } from 'src/components/Helpers/Buttons';
 import { cn } from 'src/constants/helpers';
 
 export type ButtonMenuProps<D> = {
@@ -13,7 +13,7 @@ export type ButtonMenuProps<D> = {
   slot?: (props: any) => JSX.Element;
   showChevron?: boolean;
   horizontal?: 'left' | 'right' | 'center';
-} & Omit<ButtonType, 'iconForMobile'>;
+} & Omit<ThemeButtonProps, 'iconForMobile'>;
 
 export type Items<D> = {
   label: React.ReactNode;
@@ -27,9 +27,9 @@ const ButtonMenu = <D,>({
   items,
   iconForMobile = false,
   children,
-  onClick = () => { },
+  onClick = () => {},
   menuProps,
-  onItemClick = () => { },
+  onItemClick = () => {},
   slot = undefined,
   showChevron = false,
   horizontal = 'left',
@@ -75,7 +75,7 @@ const ButtonMenu = <D,>({
         {...menuProps}
       >
         {items.map((item, index) => {
-          const { onClick = () => { }, startIcon, endIcon, visible = true, ...rest } = item;
+          const { onClick = () => {}, startIcon, endIcon, visible = true, ...rest } = item;
           if (!visible) return null;
           return (
             <MenuItem
