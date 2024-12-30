@@ -197,7 +197,7 @@ const Login = () => {
                                   </IconButton>
                                 </InputAdornment>
                               )
-                            },
+                            }
                           }}
                         />
                       </div>
@@ -210,6 +210,9 @@ const Login = () => {
 
                     <Box>
                       <ThemeButton
+                        fullWidth
+                        buttonType="theme"
+                        type="submit"
                         onClick={submitForm}
                         disabled={isSubmitting}
                         isLoading={isSubmitting}

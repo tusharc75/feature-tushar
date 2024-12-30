@@ -8,11 +8,15 @@
 
 @layer components {
   .hide-scrollbar {
-    -ms-overflow-style: none; /* Internet Explorer 10+ */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+    /* Internet Explorer 10+ */
+    scrollbar-width: none;
+    /* Firefox */
   }
+
   .hide-scrollbar::-webkit-scrollbar {
-    display: none; /* Safari and Chrome */
+    display: none;
+    /* Safari and Chrome */
   }
 }
 
@@ -107,6 +111,10 @@
   --chip-border-pending: rgb(255 243 202);
   --chip-background-pending: #fffbd1;
   --table-loader-bg-blur: 2px;
+
+  --outlined-button-text: #424242;
+  --outlined-button-disabled-bg: #e5e5e5;
+  --outlined-button-disabled-text: #5b5b5b;
 }
 
 // Dark Theme
@@ -182,6 +190,10 @@
   --success-dark: #1c592a;
   --error-dark: #5e1c23;
   --ag-control-panel-background-color: var(--dark-primary);
+
+  --outlined-button-text: #fff;
+  --outlined-button-disabled-bg: #22223d;
+  --outlined-button-disabled-text: #a4a4ad;
 }
 
 [data-mode='dark'] {
@@ -271,6 +283,7 @@ body {
   font-family: 'Inter', sans-serif !important;
   font-optical-sizing: auto;
   font-style: normal;
+
   & * {
     font-family: 'Inter', sans-serif !important;
     font-optical-sizing: auto;
@@ -281,6 +294,7 @@ body {
 .poppins {
   font-family: 'Poppins', sans-serif !important;
   font-style: normal;
+
   & * {
     font-family: 'Poppins', sans-serif !important;
     font-style: normal;
@@ -1132,6 +1146,7 @@ body::-webkit-scrollbar-thumb {
     color: var(--white);
   }
 }
+
 .detail-box-content {
   display: flex;
   align-items: center;
@@ -2920,6 +2935,7 @@ svg.MuiSvgIcon-root {
 
 .main-container-v1 {
   margin-bottom: 20px;
+
   @media all and (min-width: 768px) {
     --header-mb: 35px;
     --container-padding: 26px;
@@ -3009,10 +3025,11 @@ svg.MuiSvgIcon-root {
       width: 100%;
       justify-content: center;
     }
-    button {
-      font-size: 14.74px !important;
-      line-height: 17px;
-    }
+
+    // button {
+    //   font-size: 14.74px !important;
+    //   line-height: 17px;
+    // }
   }
 
   .activity-new-v1 {
@@ -3026,6 +3043,7 @@ svg.MuiSvgIcon-root {
     overflow: auto;
     background-color: var(--dark-secondary, white);
     border-radius: 7px 0 0 7px;
+
     @media all and (min-width: 500px) {
       --width: 450px;
     }
@@ -3350,6 +3368,7 @@ body {
       font-size: 0.8rem;
     }
   }
+
   span.html-custom-tooltip,
   span.ling {
     padding: 0;
@@ -3851,6 +3870,7 @@ $isAppliedBillDark: #234623;
     background-color: var(--new-theme-secondary-color) !important;
     opacity: 0.7 !important;
   }
+
   &:hover {
     background-color: var(--new-theme-secondary-color-hover) !important;
   }
@@ -4376,6 +4396,7 @@ body .btn-outline-red-v1 {
     }
   }
 }
+
 .main-sidebar {
   .MuiToolbar-root {
     @media all and (max-width: 959px) {
@@ -4384,6 +4405,7 @@ body .btn-outline-red-v1 {
     }
   }
 }
+
 .has-mobile-step {
   .detail-container-v1,
   .detail-container {
@@ -4538,6 +4560,7 @@ span.MuiStepLabel-root.MuiStepLabel-horizontal.Mui-disabled.MuiStepLabel-alterna
     border: 1px solid var(--common-border-color);
     @apply shadow-lg;
   }
+
   &::after {
     content: '';
     left: -3px;
@@ -4559,6 +4582,7 @@ span.MuiStepLabel-root.MuiStepLabel-horizontal.Mui-disabled.MuiStepLabel-alterna
   margin-bottom: -0.9em;
   width: 3em;
   height: 1em;
+
   &::before {
     content: '';
     margin: auto;
@@ -4598,6 +4622,7 @@ td.google-visualization-orgchart-node {
   li[aria-hidden='true'] {
     margin: 0 2px;
   }
+
   li {
     display: flex;
     align-items: center;
@@ -4614,29 +4639,36 @@ td.google-visualization-orgchart-node {
     button {
       color: white;
       background-color: var(--new-theme-color);
+
       &:hover {
         background-color: var(--new-theme-color);
       }
     }
   }
+
   .rdp-range_start[data-outside='true'],
   .rdp-range_end[data-outside='true'] {
     @apply bg-gray-200 dark:bg-gray-800;
   }
+
   .rdp-range_middle {
     @apply bg-gray-200 dark:bg-gray-800;
+
     &:last-child {
       @apply rounded-r-md;
     }
+
     &:first-child {
       @apply rounded-l-md;
     }
   }
+
   .rdp-range_start,
   .rdp-range_end {
     @apply rounded-md;
   }
 }
+
 .rbc-agenda-empty {
   display: none;
 }
