@@ -1,4 +1,4 @@
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import Dialog from '@mui/material/Dialog';
 import { Form, Formik } from 'formik';
@@ -14,7 +14,6 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import CustomButton from '../../../components/Helpers/CustomButton';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import routes from '../../../components/Helpers/Routes';
 import {
@@ -29,6 +28,7 @@ import {
 } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ManageRentalManagementDialog = ({
   isClone,
@@ -413,10 +413,8 @@ const ManageRentalManagementDialog = ({
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  type="button"
-                  color="primary"
-                  size="small"
+                <ThemeButton
+                  buttonType="transparent"
                   onClick={() => {
                     if (isEqual(rentalData.initialValues, values)) {
                       onClose();
@@ -426,12 +424,11 @@ const ManageRentalManagementDialog = ({
                   }}
                 >
                   Cancel
-                </Button>
-                <CustomButton
-                  loading={loading}
+                </ThemeButton>
+                <ThemeButton
                   id="dialog-save-button"
-                  variant="contained"
-                  color="primary"
+                  buttonType="theme"
+                  isLoading={loading}
                   disabled={uploadingImageOrFileProgress > 0 || loading || (!isClone && isEqual(rentalData.initialValues, values))}
                   onClick={(e) => {
                     e.preventDefault();
@@ -440,7 +437,7 @@ const ManageRentalManagementDialog = ({
                   }}
                 >
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog && (
                 <ConfirmCancelDialog
