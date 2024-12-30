@@ -1,4 +1,4 @@
-import { Button, IconButton } from '@mui/material';
+import { IconButton } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import EditIcon from '@mui/icons-material/Edit';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -16,6 +16,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const renderedFrom = camelCase(sidebarResource.storageLocation);
 
@@ -188,35 +189,34 @@ const StorageLocation = ({ warehouse }) => {
     <Fragment>
       <Box p={1} pb={2}>
         <Grid container>
-          <Grid size={{xs:3, md:3, sm:3}}>
+          <Grid size={{ xs: 3, md: 3, sm: 3 }}>
             {permissions?.storageLocation?.isCreate && (
-              <Button
-                size="small"
-                variant="contained"
-                color="primary"
+              <ThemeButton
                 onClick={() => {
                   setOpenDialog({ open: true, id: null });
                 }}
+                mobileTooltip="Add"
                 startIcon={<AddOutlined />}
+                iconForMobile={<AddOutlined />}
               >
                 Add
-              </Button>
+              </ThemeButton>
             )}
           </Grid>
-          <Grid size={{xs:9, md:9, sm:9}}>
+          <Grid size={{ xs: 9, md: 9, sm: 9 }}>
             {permissions?.storageLocation?.isDelete && (
               <Box display={'flex'} justifyContent={'flex-end'} alignItems="center">
-                <Button
-                  variant="outlined"
-                  size="small"
+                <ThemeButton
                   onClick={openActions}
-                  aria-controls="action-menu"
-                  disabled={selectedRecords.length === 0}
                   endIcon={<ExpandMore />}
-                  className="new-dropdown-v1"
+                  mobileTooltip="Actions"
+                  borderColor="yellow"
+                  backgroundColor="yellow"
+                  disabled={selectedRecords.length === 0}
+                  iconForMobile={<ExpandMore />}
                 >
                   Actions
-                </Button>
+                </ThemeButton>
                 <Menu
                   anchorEl={anchorEl}
                   keepMounted
