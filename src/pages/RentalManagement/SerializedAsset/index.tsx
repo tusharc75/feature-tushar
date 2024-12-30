@@ -1,4 +1,4 @@
-import { Button, IconButton, Menu, MenuItem } from '@mui/material';
+import { IconButton, Menu, MenuItem } from '@mui/material';
 import Box from '@mui/material/Box/Box';
 import { Delete, ExpandMore } from '@mui/icons-material';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
@@ -47,6 +47,7 @@ import AddNonSerializedInventory from './AddNonSerializedInventory';
 import { FiExternalLink } from 'react-icons/fi';
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateAssignStepAssignSerializedAsset, nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip, stepFullScreen, allowedToEdit }) => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -993,38 +994,30 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   const rightSideContents = () => {
     return (
       <>
-        <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : ``}>
-          <span>
-            <Button
-              variant="contained"
-              color="primary"
-              type="button"
-              size="small"
-              id="assign-serialized-asset-button"
-              disabled={disableAssignSerializedAssets(selectedRecords)}
-              onClick={() => {
-                if (isOffline) {
-                  setAddNonSerializedAssetDialog(true);
-                } else {
-                  setAddSerializedAssetDialog({ open: true });
-                }
-              }}
-            >
-              {`Assign ${resources?.serializedAsset?.titleSingular}`}
-            </Button>
-          </span>
-        </HtmlTooltip>
+        <ThemeButton
+          id="assign-serialized-asset-button"
+          disabled={disableAssignSerializedAssets(selectedRecords)}
+          onClick={() => {
+            if (isOffline) {
+              setAddNonSerializedAssetDialog(true);
+            } else {
+              setAddSerializedAssetDialog({ open: true });
+            }
+          }}
+          tooltip={!allowedToEdit ? ownerAndColaborator : ``}
+          borderColor="none"
+          backgroundColor="theme"
+          textColor="white"
+        >
+          {`Assign ${resources?.serializedAsset?.titleSingular}`}
+        </ThemeButton>
         {(purchaseOrderCount > 0 || subleaseCount > 0 || transferAssetCount > 0 || bulkAssetCreationCount > 0) && (
-          <Button
+          <ThemeButton
             onClick={openLinkActions}
-            variant="outlined"
-            size="small"
-            aria-controls="action-menu"
-            className="normal-case"
-            endIcon={<ExpandMore fontSize="inherit" />}
+            endIcon={<ExpandMore />}
           >
-            Order(s)
-          </Button>
+            {`Order(s)`}
+          </ThemeButton>
         )}
       </>
     );
