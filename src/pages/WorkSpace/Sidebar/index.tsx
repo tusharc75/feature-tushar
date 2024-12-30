@@ -78,6 +78,9 @@ const Sidebar = ({
         </div>
         <SearchBox value={searchValue} onChange={handleFilter} />
         <div>
+          <ThemeButton>
+
+          </ThemeButton>
           <Button
             size={'small'}
             className="group"
