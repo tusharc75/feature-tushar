@@ -7,8 +7,8 @@ import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
-import CustomButton from '../../components/Helpers/CustomButton';
 import axiosInstance from '../../axios/axiosInstance';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const CodeValidation = ({ open, title, close, email, quoteId, versionNumber, handleSave }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -114,21 +114,18 @@ const CodeValidation = ({ open, title, close, email, quoteId, versionNumber, han
           </Box>
         </CustomDialogContent>
         <CustomDialogFooter>
-          <Button type="button" variant="outlined" color="primary" size="small" onClick={close}>
+          <ThemeButton  buttonType="transparent" onClick={close}>
             Cancel
-          </Button>
-
-          <CustomButton
-            // loading={loading}
-            variant="contained"
-            color="primary"
+          </ThemeButton>
+          <ThemeButton
+            buttonType="theme"
             disabled={fieldValue.code.length !== 4}
             onClick={(e) => {
               handleSave(fieldValue);
             }}
           >
             Submit
-          </CustomButton>
+          </ThemeButton>
         </CustomDialogFooter>
       </Dialog>
     </>

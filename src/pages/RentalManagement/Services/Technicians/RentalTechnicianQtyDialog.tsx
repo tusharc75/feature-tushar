@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { Box, Button, Dialog } from '@mui/material';
+import { Box, Dialog } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Form, Formik } from 'formik';
@@ -7,7 +7,6 @@ import { CustomDialogTransition, arrayToDropwdownOption, getObjKeys, getObjKeysW
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomButton from 'src/components/Helpers/CustomButton';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { orderBy, uniq, map, uniqBy } from 'lodash';
@@ -15,6 +14,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { FaDiceOne } from 'react-icons/fa';
 import { calculatePrice, fetch_rental_technician_fields } from 'src/components/RentalManagment/helper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const rateChangeFields = ['pricingMethod', 'pricingCondition'];
 
@@ -225,7 +225,7 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
                                       size="small"
                                     />
                                   ) : rateChangeFields.includes(field.fieldName) && !bulkEdit ? (
-                                    <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
+                                    <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                       <Box display="flex">
                                         <Box flexGrow={1}>
                                           <FormTypes
@@ -305,7 +305,7 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
                                       </Box>
                                     </Grid>
                                   ) : field.fieldName === 'competence' ? (
-                                    <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
+                                    <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                       <Box display="flex">
                                         <Box flexGrow={1}>
                                           <FormTypes
@@ -363,7 +363,7 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
                                       </Box>
                                     </Grid>
                                   ) : (
-                                    <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
+                                    <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                       <Box display="flex">
                                         <Box flexGrow={1}>
                                           <FormTypes
@@ -398,22 +398,19 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                  <Button
-                    size="small"
-                    color="primary"
+                  <ThemeButton
+                    buttonType="transparent"
                     onClick={() => {
                       onClose();
                     }}
                   >
                     {'Close'}
-                  </Button>
+                  </ThemeButton>
                   {bulkEdit === false && showSaveAndNext && (
-                    <CustomButton
-                      loading={loadingEdit}
+                    <ThemeButton
+                      isLoading={loadingEdit}
                       disabled={loadingEdit}
-                      variant="contained"
-                      color="primary"
-                      type="submit"
+                      buttonType="theme"
                       onClick={() => {
                         setSaveAndNext(true);
                         submitForm();
@@ -421,21 +418,19 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
                     >
                       {' '}
                       Save & Next
-                    </CustomButton>
+                    </ThemeButton>
                   )}
-                  <CustomButton
-                    loading={loadingEdit}
+                  <ThemeButton
+                    isLoading={loadingEdit}
                     disabled={loadingEdit}
-                    variant="contained"
-                    color="primary"
-                    type="submit"
+                    buttonType="theme"
                     onClick={() => {
                       setSaveAndNext(false);
                       submitForm();
                     }}
                   >
                     Save
-                  </CustomButton>
+                  </ThemeButton>
                 </CustomDialogFooter>
               </Fragment>
             )}
