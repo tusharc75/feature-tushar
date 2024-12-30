@@ -46,10 +46,9 @@ const SingleColumn = ({ column, loading, type, setSelectedStatus, setOpenDialog,
               {' (' + column.items.length + ')'}
             </Typography>
             {permissions && permissions[type?.toLowerCase()]?.isCreate ? (
-              <HtmlTooltip title={`Create ${type}`}>
+              <HtmlTooltip title={`Create ${type}`} style={{ float: 'right', marginTop: '-25px' }}>
                 <IconButton
                   size="small"
-                  style={{ float: 'right', marginTop: '-25px' }}
                   onClick={() => {
                     setSelectedStatus(column.status);
                     setOpenDialog(true);
