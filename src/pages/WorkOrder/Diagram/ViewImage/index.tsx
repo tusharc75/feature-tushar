@@ -4,9 +4,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { b64toBlob } from 'src/constants/helpers';
 import { Box, Button, FormControl, Typography } from '@mui/material';
-import CustomButton from 'src/components/Helpers/CustomButton';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 
 fabric.IText.prototype.initHiddenTextarea = (function (initHiddenTextarea) {
   return function () {
@@ -453,18 +451,16 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
           </Box>
         )}
         <div className="flex flex-wrap items-center gap-2">
-          <CustomButton
+          <ThemeButton
             disabled={isSubmitting || loading}
-            loading={isSubmitting}
-            variant="contained"
-            color="primary"
-            type="submit"
+            isLoading={isSubmitting}
+            buttonType="theme"
             onClick={(e) => {
               handleSave();
             }}
           >
             Save
-          </CustomButton>
+          </ThemeButton>
           <Button disabled={loading} variant="contained" color="primary" size="small" onClick={handleDownload}>
             Download
           </Button>

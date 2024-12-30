@@ -10,7 +10,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, WORK_FLOW_STATUS } from '../../constants/helpers';
-import { Box, CircularProgress, TextField } from '@mui/material';
+import { Box, TextField } from '@mui/material';
 import { useHistory } from 'react-router-dom';
 import { isEqual } from 'lodash';
 import { getLookupResource } from 'src/components/FormBuilder/helper';
@@ -19,6 +19,7 @@ import { object, string } from 'yup';
 import ConfirmationCancelDialog from '../../components/ConfirmCancelDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const workFlowSchema = object().shape({
   workflowName: string().required('Please enter Workflow Name'),
@@ -177,29 +178,25 @@ const ManageWorkFlow = ({ onClose, onSuccess, isRedirectToDetailPage = false, da
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
-                  disabled={submitting}
+
+
+                <ThemeButton
+                  buttonType='transparent'
                   onClick={() => {
                     if (isEqual(initialValues, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
                 >
                   Cancel
-                </Button>
-                <Button
+                </ThemeButton>
+                <ThemeButton
+                  buttonType='theme'
                   disabled={submitting}
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  type="submit"
                   onClick={submitForm}
-                  endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                  isLoading={submitting}
                 >
-                  {' '}
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
 
               {showConfirmDialog ? (

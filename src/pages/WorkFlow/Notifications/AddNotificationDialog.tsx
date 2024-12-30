@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Button, CircularProgress, Dialog, TextField } from '@mui/material';
+import { Box, Dialog, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Form, Formik } from 'formik';
 import { camelCase, isEqual } from 'lodash';
@@ -13,6 +13,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Autocomplete, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import routes from 'src/components/Helpers/Routes';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const NotifSendType = [
   {
@@ -220,29 +221,25 @@ const AddNotificationDialog = ({ data, type, onSuccess, onClose, id }) => {
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button
-                size="small"
-                color="primary"
-                disabled={submitting}
+
+
+              <ThemeButton
+                buttonType='transparent'
                 onClick={() => {
                   if (isEqual(initialValues, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
               >
                 Cancel
-              </Button>
-              <Button
+              </ThemeButton>
+              <ThemeButton
+                buttonType='theme'
                 disabled={submitting}
-                variant="contained"
-                color="primary"
-                size="small"
-                type="submit"
                 onClick={submitForm}
-                endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                isLoading={submitting}
               >
-                {' '}
                 Save
-              </Button>
+              </ThemeButton>
             </CustomDialogFooter>
 
             {showConfirmDialog ? (

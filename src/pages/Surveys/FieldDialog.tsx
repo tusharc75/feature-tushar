@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog } from '@mui/material';
+import { Box, Dialog } from '@mui/material';
 import { map, uniq } from 'lodash';
 import React from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -6,6 +6,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { FormBuilder } from 'src/components/FormBuilder';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { checkFormulaLoop } from 'src/constants/formulaUtility';
 import { CustomDialogTransition, fieldLabelToFieldName } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -139,20 +140,22 @@ const FieldDialog = ({ handleClose, handleSuccess, surveyId, notEditable = false
         />
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button disabled={isSubmitting} variant="outlined" size="small" color="primary" onClick={handleClose}>
-          Close
-        </Button>
+
+        <ThemeButton
+          buttonType='transparent'
+          onClick={handleClose}
+        >
+          Cancel
+        </ThemeButton>
         {notEditable ? null : (
-          <Button
-            variant="contained"
-            size="small"
-            color="primary"
+          <ThemeButton
+            buttonType='theme'
             disabled={isSubmitting}
             onClick={handleSave}
-            endIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
+            isLoading={isSubmitting}
           >
             Save
-          </Button>
+          </ThemeButton>
         )}
       </CustomDialogFooter>
     </Dialog>

@@ -1,9 +1,8 @@
 import { useState, useEffect, useContext, useRef, Fragment } from 'react';
 import { Formik, Form } from 'formik';
-import { Box, Button, CircularProgress } from '@mui/material';
+import { Box, CircularProgress } from '@mui/material';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import CustomButton from '../../../components/Helpers/CustomButton';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -24,6 +23,7 @@ import { isArray, isEqual } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import InputField from 'src/components/Helpers/InputField';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuccess, referenceData = null, isRedirectToDetailPage = true }) => {
   const history = useHistory();
@@ -204,12 +204,9 @@ const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuc
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
+                <ThemeButton
                   disabled={submitting}
-                  type="button"
-                  variant="outlined"
-                  color="primary"
-                  size="small"
+                  buttonType="transparent"
                   onClick={() => {
                     if (!isEqual(ref.current.values, initialData.values)) {
                       setShowConfirmDialog(true);
@@ -219,12 +216,11 @@ const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuc
                   }}
                 >
                   Cancel
-                </Button>
-                <CustomButton
-                  loading={loading}
-                  variant="contained"
-                  color="primary"
-                  startIcon={submitting && <CircularProgress size={20} color="inherit" />}
+                </ThemeButton>
+                <ThemeButton
+                  isLoading={loading}
+                  buttonType="theme"
+                  // startIcon={submitting && <CircularProgress size={20} color="inherit" />}
                   disabled={submitting}
                   onClick={(e) => {
                     e.preventDefault();
@@ -233,7 +229,7 @@ const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuc
                   }}
                 >
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog

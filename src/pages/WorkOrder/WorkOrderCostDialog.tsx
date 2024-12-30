@@ -1,6 +1,5 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import { CustomDialogTransition, getObjKeys, yupSchema } from '../../constants/helpers';
 import Dialog from '@mui/material/Dialog';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
@@ -16,7 +15,7 @@ import routes from 'src/components/Helpers/Routes';
 import InputField from 'src/components/Helpers/InputField';
 import { isMobile, isTablet } from 'react-device-detect';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export default function WorkOrderCostDialog({ onClose, workOrderCostFields, onSuccess, isSubmitting, currency, id }) {
   const toastConfig = useContext(CustomToastContext);
@@ -96,9 +95,8 @@ export default function WorkOrderCostDialog({ onClose, workOrderCostFields, onSu
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType="transparent"
                   disabled={isSubmitting}
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
@@ -106,13 +104,11 @@ export default function WorkOrderCostDialog({ onClose, workOrderCostFields, onSu
                   }}
                 >
                   Cancel
-                </Button>
-                <CustomButton
+                </ThemeButton>
+                <ThemeButton
                   disabled={isSubmitting}
-                  loading={isSubmitting}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+                  isLoading={isSubmitting}
+                  buttonType="theme"
                   onClick={(e) => {
                     e.preventDefault();
                     submitForm();
@@ -120,7 +116,7 @@ export default function WorkOrderCostDialog({ onClose, workOrderCostFields, onSu
                 >
                   {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog

@@ -1,16 +1,16 @@
-import { Button, IconButton } from '@mui/material';
+import { IconButton } from '@mui/material';
 import { AttachFile, Close, Send } from '@mui/icons-material';
 import { Editor } from '@tinymce/tinymce-react';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomButton from 'src/components/Helpers/CustomButton';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { cn, getFileIconSrc } from 'src/constants/helpers';
 import Mention from 'src/pages/WorkSpace/MessagePanel/Mention';
 import { ChannelData } from 'src/pages/WorkSpace/types';
 import { fileToBase64, isImageFile } from 'src/pages/WorkSpace/utils';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 type SendMessageProps = {
   channelId: string;
@@ -28,7 +28,7 @@ const SendMessage = ({
   socket,
   messageId = null,
   initialMessage = '',
-  onEditComplete = () => {},
+  onEditComplete = () => { },
   editorId = '',
   channelData,
   disabled = false
@@ -135,7 +135,7 @@ const SendMessage = ({
           top: elementRect.top + frameRect.top,
           x: elementRect.x + frameRect.x,
           y: elementRect.y + frameRect.y,
-          toJSON: () => {}
+          toJSON: () => { }
         })
       });
     }
@@ -287,19 +287,17 @@ const SendMessage = ({
             </>
           ) : (
             <>
-              <Button size="small" color="primary" onClick={onEditComplete}>
+              <ThemeButton buttonType="transparent" onClick={onEditComplete}>
                 Cancel
-              </Button>
-              <CustomButton
-                loading={isLoading}
+              </ThemeButton>
+              <ThemeButton
+                isLoading={isLoading}
+                buttonType="theme"
                 disabled={!message || message === initialMessage || isLoading}
-                variant="contained"
-                color="primary"
-                type="submit"
                 onClick={postMessage}
               >
                 Save
-              </CustomButton>
+              </ThemeButton>
             </>
           )}
         </div>
