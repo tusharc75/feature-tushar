@@ -1,4 +1,5 @@
-import { Box, Button, Dialog, FormControl, FormControlLabel, FormLabel, Grid, Radio, RadioGroup, TextField } from '@mui/material';
+import { Box, Dialog, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Form, Formik } from 'formik';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -7,7 +8,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { object, string } from 'yup';
@@ -83,7 +84,7 @@ const ViewDialog = ({ onClose, resource, extraData = null, selectedView = null, 
                 <Form autoComplete="off" autoCorrect="off" noValidate>
                   <Box mt={1}>
                     <Grid container spacing={2}>
-                      <Grid item xs={12} sm={12} md={12} lg={12}>
+                      <Grid size={{xs:12, sm:12, md:12, lg:12}}>
                         <TextField
                           fullWidth
                           value={values['name']}
@@ -101,7 +102,7 @@ const ViewDialog = ({ onClose, resource, extraData = null, selectedView = null, 
                           helperText={touched['name'] && errors['name']}
                         />
                       </Grid>
-                      <Grid item xs={12} sm={12} md={12} lg={12}>
+                      <Grid size={{xs:12, sm:12, md:12, lg:12}}>
                         <FormControl size="small">
                           <FormLabel id="view-access-radio-button">Access</FormLabel>
                           <RadioGroup
@@ -123,13 +124,12 @@ const ViewDialog = ({ onClose, resource, extraData = null, selectedView = null, 
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button type="button" variant="outlined" color="primary" size="small" onClick={onClose}>
+                <ThemeButton buttonType="transparent" onClick={onClose}>
                   Cancel
-                </Button>
-                <CustomButton
-                  loading={loading}
-                  variant="contained"
-                  color="primary"
+                </ThemeButton>
+                <ThemeButton
+                  isLoading={loading}
+buttonType="theme"
                   disabled={loading}
                   onClick={(e) => {
                     e.preventDefault();
@@ -137,7 +137,7 @@ const ViewDialog = ({ onClose, resource, extraData = null, selectedView = null, 
                   }}
                 >
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
             </>
           )}

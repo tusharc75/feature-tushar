@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Button, Dialog } from '@mui/material';
+import { Box, Dialog } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, getObjKeys, setFieldsInAscendingOrder, yupSchema } from '../constants/helpers';
@@ -9,7 +9,7 @@ import CommonSkeleton from './Helpers/CommonSkeleton';
 import { Form, Formik } from 'formik';
 import FormTypes from './Helpers/FormTypes';
 import CustomDialogFooter from './CustomDialog/CustomDialogFooter';
-import CustomButton from './Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const arr = [...Array(9).keys()];
 
@@ -107,14 +107,12 @@ const AdditionalDialogPopUp = ({ open, close, title, handleSave, fieldData }) =>
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                  <Button type="button" variant="outlined" color="primary" size="small" onClick={close}>
+                  <ThemeButton buttonType="transparent" onClick={close}>
                     Cancel
-                  </Button>
+                  </ThemeButton>
 
-                  <CustomButton
-                    // loading={loading}
-                    variant="contained"
-                    color="primary"
+                  <ThemeButton
+                    buttonType="theme"
                     disabled={Object.keys(errors).length > 0 ? true : false}
                     onClick={(e) => {
                       e.preventDefault();
@@ -122,7 +120,7 @@ const AdditionalDialogPopUp = ({ open, close, title, handleSave, fieldData }) =>
                     }}
                   >
                     Save
-                  </CustomButton>
+                  </ThemeButton>
                 </CustomDialogFooter>
               </>
             )}

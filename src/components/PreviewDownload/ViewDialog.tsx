@@ -1,5 +1,5 @@
-import { Box, Button, Checkbox, Dialog, FormControlLabel, Radio, RadioGroup, TextField } from '@mui/material';
-import CustomButton from '../Helpers/CustomButton';
+import { Box, Dialog, FormControlLabel, Radio, RadioGroup, TextField } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
@@ -142,12 +142,12 @@ export const ViewDialog = ({ columns, resource, handleSucess, handleClose, viewD
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button size="small" color="primary" onClick={handleClose}>
+              <ThemeButton buttonType="transparent" onClick={handleClose}>
                 Cancel
-              </Button>
-              <CustomButton loading={loading} variant="contained" color="primary" type="submit" onClick={submitForm} disabled={loading}>
+              </ThemeButton>
+              <ThemeButton isLoading={loading} buttonType="theme" onClick={submitForm} disabled={loading}>
                 Save
-              </CustomButton>
+              </ThemeButton>
             </CustomDialogFooter>
           </Fragment>
         )}

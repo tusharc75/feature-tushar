@@ -238,8 +238,7 @@ const LoginMFA = () => {
                     sx={{ paddingBlock: 10, height: 40 }}
                     disabled={otp.length < 6 || isSubmitting}
                     onClick={handleSubmit}
-                    isLoading={isSubmitting}
-                    buttonType='theme'
+                    startIcon={isSubmitting && <CircularProgress color="inherit" size={20} />}
                   >
                     Submit
                   </ThemeButton>

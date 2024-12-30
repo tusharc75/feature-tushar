@@ -1,12 +1,11 @@
 import { useState, Fragment } from 'react';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import { Formik, Form } from 'formik';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import Dialog from '@mui/material/Dialog';
-import CustomButton from '../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from './../../constants/helpers';
 import FormTypes from '../../components/Helpers/FormTypes';
@@ -134,13 +133,13 @@ const AddDisplayTypeDialog = (props) => {
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button size="small" color="primary" onClick={handleClose}>
+              <ThemeButton buttonType="transparent" onClick={handleClose}>
                 Cancel
-              </Button>
-              <CustomButton variant="contained" color="primary" type="submit" loading={loading} disabled={loading} size="small" onClick={submitForm}>
+              </ThemeButton>
+              <ThemeButton buttonType="theme" isLoading={loading} disabled={loading} size="small" onClick={submitForm}>
                 {' '}
                 Add
-              </CustomButton>
+              </ThemeButton>
             </CustomDialogFooter>
           </Fragment>
         )}

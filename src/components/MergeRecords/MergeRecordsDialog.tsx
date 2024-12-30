@@ -1,11 +1,11 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Box, Button, Dialog, TextField } from '@mui/material';
+import { Box, Dialog, TextField } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
-import CustomButton from '../Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import axiosInstance from 'src/axios/axiosInstance';
 import Autocomplete from '@mui/material/Autocomplete';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -118,12 +118,12 @@ const MergeRecordsDialog = ({ ids, onClose, resource, onSuccess }) => {
             </Box>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button size="small" color="primary" onClick={onClose}>
+            <ThemeButton buttonType="transparent" onClick={onClose}>
               Cancel
-            </Button>
-            <CustomButton loading={loading} disabled={loading || !mergeValue} variant="contained" color="primary" type="submit" onClick={handleSave}>
+            </ThemeButton>
+            <ThemeButton isLoading={loading} disabled={loading || !mergeValue} buttonType="theme" onClick={handleSave}>
               Save
-            </CustomButton>
+            </ThemeButton>
           </CustomDialogFooter>
         </Fragment>
       ) : (

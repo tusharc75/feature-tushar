@@ -210,11 +210,17 @@ const Login = () => {
 
                     <Box>
                       <ThemeButton
+<<<<<<< HEAD
                         disabled={isSubmitting}
                         fullWidth
                         buttonType="theme"
                         type="submit"
                         className={styles.submitButton}
+=======
+                        fullWidth
+                        buttonType="theme"
+                        type="submit"
+>>>>>>> c002e97b36ab298fc424c05c6838576d7f18e682
                         onClick={submitForm}
                         startIcon={isSubmitting && <CircularProgress color="inherit" size={20} />}
                       >
