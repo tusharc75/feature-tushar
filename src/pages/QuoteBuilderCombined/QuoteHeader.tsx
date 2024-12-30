@@ -100,12 +100,7 @@ function QuoteHeader({
 
         <div className="flex flex-wrap items-center gap-[8px]">
           {QuotePermissions.isCreate && (
-            <ThemeButton
-              mobileTooltip="Add"
-              iconForMobile={<AddOutlined />}
-              onClick={onCreate}
-              startIcon={<AddOutlined />}
-            >
+            <ThemeButton mobileTooltip="Add" iconForMobile={<AddOutlined />} onClick={onCreate} startIcon={<AddOutlined />}>
               Add
             </ThemeButton>
           )}
@@ -114,8 +109,7 @@ function QuoteHeader({
               <ThemeButton
                 disabled={canDelete}
                 mobileTooltip="Actions"
-                borderColor="yellow"
-                backgroundColor="yellow"
+                buttonType="yellow"
                 iconForMobile={<ExpandMore />}
                 onClick={openActions}
                 endIcon={<ExpandMore />}

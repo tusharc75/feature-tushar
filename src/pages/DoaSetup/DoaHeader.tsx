@@ -21,10 +21,10 @@ function DoaHeader(props) {
   const { onSearch, searchVal, DoaPermissions, showConfirmBox, canDelete, icon, heading } = props;
   return (
     <Grid className={styles.filter_side_container} container>
-      <Grid size={{xs:6}} className="d-flex align-items-center gap-1">
+      <Grid size={{ xs: 6 }} className="d-flex align-items-center gap-1">
         {icon} <span className="listingHeader">{heading}</span>
       </Grid>
-      <Grid size={{xs:6}} className={styles.filter_side}>
+      <Grid size={{ xs: 6 }} className={styles.filter_side}>
         <Box className={styles.filter_side_header} component="div">
           <SearchBox onChange={onSearch} value={searchVal} width="242px" />
 
@@ -33,8 +33,7 @@ function DoaHeader(props) {
               <ThemeButton
                 disabled={canDelete}
                 mobileTooltip="Actions"
-                borderColor="yellow"
-                backgroundColor="yellow"
+                buttonType="yellow"
                 onClick={openActions}
                 endIcon={<ExpandMore />}
                 iconForMobile={<ExpandMore />}

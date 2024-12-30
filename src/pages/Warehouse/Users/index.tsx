@@ -207,8 +207,7 @@ const Users = ({ warehouse }) => {
                 onClick={openActions}
                 endIcon={<ExpandMore />}
                 mobileTooltip="Actions"
-                borderColor="yellow"
-                backgroundColor="yellow"
+                buttonType="yellow"
                 disabled={selectedRecords.length === 0}
                 iconForMobile={<ExpandMore />}
               >

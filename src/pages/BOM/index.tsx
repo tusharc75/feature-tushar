@@ -254,14 +254,14 @@ const BOMTable = () => {
                   }}
                   mobileTooltip="Add"
                   startIcon={<AddOutlined />}
-                  iconForMobile={<AddOutlined />}>
+                  iconForMobile={<AddOutlined />}
+                >
                   Add
                 </ThemeButton>
                 <ThemeButton
                   onClick={openActions}
                   mobileTooltip="Actions"
-                  borderColor="yellow"
-                  backgroundColor="yellow"
+                  buttonType="yellow"
                   endIcon={<ExpandMore />}
                   iconForMobile={<ExpandMore />}
                   disabled={selectedRecords?.length ? false : true}
@@ -318,11 +318,12 @@ const BOMTable = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord
-            ? `${resources?.product?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.product?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.productName || ''}`
-            : resources?.product?.titlePlural?.toLowerCase()
-            } ?`}
+              : resources?.product?.titlePlural?.toLowerCase()
+          } ?`}
           okBtnLoading={isDeleting}
           onClose={() => {
             setDeleteRecord(null);

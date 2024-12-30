@@ -459,8 +459,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
               <span>
                 <ThemeButton
                   mobileTooltip="Actions"
-                  borderColor="yellow"
-                  backgroundColor="yellow"
+                  buttonType="yellow"
                   iconForMobile={<ExpandMore />}
                   onClick={openActions}
                   disabled={selectedRecords.length && permissions?.pricingCondition?.isUpdate ? false : true}

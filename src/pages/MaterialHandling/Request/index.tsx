@@ -269,8 +269,7 @@ const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false
         <Box>
           <ThemeButton
             mobileTooltip="Actions"
-            borderColor="yellow"
-            backgroundColor="yellow"
+            buttonType="yellow"
             iconForMobile={<ExpandMore />}
             onClick={openActions}
             disabled={selectedRecords?.length ? false : true}
@@ -292,7 +291,7 @@ const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false
             <MenuItem
               disabled={
                 selectedRecords?.length > 0 &&
-                  selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
+                selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
                   ? false
                   : true
               }
@@ -306,7 +305,7 @@ const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false
             <MenuItem
               disabled={
                 selectedRecords?.length > 0 &&
-                  selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
+                selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
                   ? false
                   : true
               }

@@ -155,8 +155,7 @@ const DetailsPageHeader = ({
               size="small"
               onClick={ActionClick}
               aria-controls="action-menu"
-              borderColor="yellow"
-              backgroundColor="yellow"
+              buttonType="yellow"
               {...restOfActionButtonProps}
               iconForMobile={<FaCircleChevronDown size={16} className="" />}
               endIcon={<ExpandMore fontSize="small" />}

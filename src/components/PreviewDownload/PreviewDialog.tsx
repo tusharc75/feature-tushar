@@ -231,8 +231,7 @@ export const PreviewDialog = ({
                     setShowSaveViewDialog({ open: true, data: type === 'Excel' ? selectedExcelView : selectedPdfView });
                   }}
                   disabled={visibleColumnsPdf?.length == 0 || (sortBy && !orderBy) || (selectedPdfView?.user && user?._id !== selectedPdfView?.user)}
-                  borderColor="yellow"
-                  backgroundColor="yellow"
+                  buttonType="yellow"
                 >
                   {type === 'Excel' ? (selectedExcelView ? 'Update View' : 'Save View') : selectedPdfView ? 'Update View' : 'Save View'}
                 </ThemeButton>
@@ -241,9 +240,7 @@ export const PreviewDialog = ({
           )}
           {operation === 'Send Email' ? (
             <ThemeButton
-              borderColor="none"
-              backgroundColor="theme"
-              textColor="white"
+              buttonType="theme"
               isLoading={loadingType === 'Regular'}
               disabled={loadingType || visibleColumnsPdf?.length === 0}
               onClick={(e) => {
@@ -256,9 +253,7 @@ export const PreviewDialog = ({
           ) : (
             <>
               <ThemeButton
-                borderColor="none"
-                backgroundColor="theme"
-                textColor="white"
+                buttonType="theme"
                 id={'show-column-dialog-export-button'}
                 isLoading={loadingType === 'Regular'}
                 disabled={loadingType || visibleColumnsPdf?.length === 0 || (sortBy && !orderBy)}
@@ -270,9 +265,7 @@ export const PreviewDialog = ({
               </ThemeButton>
               {hideDetailButton || type === 'Excel' ? null : (
                 <ThemeButton
-                  borderColor="none"
-                  backgroundColor="theme"
-                  textColor="white"
+                  buttonType="theme"
                   id={'show-column-dialog-operation-2-button'}
                   isLoading={loadingType === 'Detail'}
                   disabled={loadingType || visibleColumnsPdf?.length === 0 || (sortBy && !orderBy)}

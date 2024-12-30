@@ -97,13 +97,11 @@ const RenderFields = ({ fields, handleSubmit, disabled = false, setState, state,
             </Form>
             <div className={cn('text-right', fullScreen ? 'md:mt-5' : 'mt-3')}>
               <ThemeButton
-                borderColor="none"
                 disabled={disabled}
                 iconForMobile={false}
                 id="dialog-save-button"
                 fullWidth={!fullScreen}
-                textColor="white"
-                backgroundColor="theme"
+                buttonType="theme"
                 style={{ padding: '6px 25px' }}
                 onClick={(e) => {
                   e.preventDefault();

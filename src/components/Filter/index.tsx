@@ -321,9 +321,7 @@ const Filter = ({
         )}
         <ThemeButton
           iconForMobile={false}
-          borderColor="none"
-          backgroundColor="theme"
-          textColor="white"
+          buttonType="theme"
           onClick={() => {
             handleApplyFilter();
           }}

@@ -317,19 +317,18 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
     setDeleteData(obj);
   };
 
-  const handleAssignAssets = (data) => { };
+  const handleAssignAssets = (data) => {};
 
   return (
     <Fragment>
       <Grid container spacing={2}>
         {allowedToEdit && (
-          <Grid size={{xs:12, md:12, sm:12}}>
+          <Grid size={{ xs: 12, md: 12, sm: 12 }}>
             <Box display="flex" justifyContent="space-between" m={1} mb={0}>
               <Box display="flex"></Box>
               <Box display="flex">
                 <ThemeButton
-                  borderColor="yellow"
-                  backgroundColor="yellow"
+                  buttonType="yellow"
                   mobileTooltip="Actions"
                   onClick={handleClick}
                   disabled={selectedRecords?.length ? false : true}
@@ -384,7 +383,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
             </Box>
           </Grid>
         )}
-        <Grid size={{xs:12, md:12, sm:12}}>
+        <Grid size={{ xs: 12, md: 12, sm: 12 }}>
           {columns ? (
             <Box zIndex={5}>
               <CustomReactTable

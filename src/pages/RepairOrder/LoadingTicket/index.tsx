@@ -304,8 +304,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
             <Fragment>
               <ThemeButton
                 mobileTooltip="Actions"
-                borderColor="yellow"
-                backgroundColor="yellow"
+                buttonType="yellow"
                 iconForMobile={<ExpandMore />}
                 onClick={openActions}
                 disabled={selectedRecords.length === 0}
@@ -352,7 +351,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
           )}
         </Box>
       </Box>
-      <Grid size={{xs:12, md:12, sm:12}} className="mt-3">
+      <Grid size={{ xs: 12, md: 12, sm: 12 }} className="mt-3">
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 393px)'}

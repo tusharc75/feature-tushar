@@ -61,9 +61,7 @@ const Sidebar = ({
       >
         <div className="flex items-center justify-between gap-2">
           <ThemeButton
-            borderColor="none"
-            backgroundColor="theme"
-            textColor="white"
+            buttonType="theme"
             onClick={() => setCreateChannelDialog(true)}
             iconForMobile={<Add />}
             mobileTooltip="New Channel"

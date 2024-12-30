@@ -243,9 +243,7 @@ const CustomIntro = () => {
                 )}
                 {!isLastStep || isWaiting || currentStepData.waitForStepInsertion ? (
                   <ThemeButton
-                    borderColor="none"
-                    backgroundColor="theme"
-                    textColor="white"
+                    buttonType="theme"
                     iconForMobile={false}
                     onClick={() => {
                       handleNext();
@@ -257,9 +255,7 @@ const CustomIntro = () => {
                   </ThemeButton>
                 ) : (
                   <ThemeButton
-                    borderColor="none"
-                    backgroundColor="theme"
-                    textColor="white"
+                    buttonType="theme"
                     iconForMobile={false}
                     disabled={isWaiting}
                     onClick={() => {

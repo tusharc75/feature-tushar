@@ -210,8 +210,7 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
         </div>
         <div className="mt-4 pt-2 text-right [border-top:1px_solid_var(--common-border-color)]">
           <ThemeButton
-            borderColor="yellow"
-            backgroundColor="yellow"
+            buttonType="yellow"
             onClick={() => {
               setIsSaveFilter({ open: true, data: selectedKpiFilter });
             }}

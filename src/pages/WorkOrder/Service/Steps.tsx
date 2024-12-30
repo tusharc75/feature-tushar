@@ -1048,9 +1048,7 @@ const Steps = ({
                           onClick={completeAllSteps}
                           isLoading={isCompleteAllLoading}
                           disabled={selectedSteps.length ? false : true}
-                          borderColor="none"
-                          backgroundColor="theme"
-                          textColor="white"
+                          buttonType="theme"
                           className={isMobile ? '' : 'ml-2'}
                         >
                           Complete {`(${isAllChecked() ? 'All' : selectedSteps.length})`}

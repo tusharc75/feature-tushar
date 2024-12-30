@@ -7,27 +7,25 @@ type BackgroundColors = ButtonProps['color'] | 'yellow' | 'theme';
 type BorderColors = 'none' | 'theme' | 'red' | 'yellow' | 'default';
 type TextColors = 'primary' | 'red' | 'white' | 'theme';
 
+type ButtonTypes = 'default' | 'yellow' | 'theme' | 'red' | 'transparent' | 'themeBorder';
+
 export type ButtonType = {
+  buttonType?: ButtonTypes;
   tooltip?: string;
   mobileTooltip?: string;
   isLoading?: boolean;
   visible?: boolean;
-  backgroundColor?: BackgroundColors;
   iconForMobile?: ReactNode;
-  borderColor?: BorderColors;
-  textColor?: TextColors;
 } & Partial<GetButtonStyle> &
   MButtonProps;
 
 export type BorderedButtonType = {
+  buttonType?: ButtonTypes;
   tooltip?: string;
   mobileTooltip?: string;
   isLoading?: boolean;
   visible?: boolean;
-  backgroundColor?: 'none';
   iconForMobile?: ReactNode;
-  borderColor?: BorderColors;
-  textColor?: TextColors;
   mode?: 'dark' | 'light';
 } & Partial<GetButtonStyle> &
   MButtonProps;
@@ -35,24 +33,14 @@ export type BorderedButtonType = {
 export type ThemeButtonProps = BorderedButtonType | ButtonType;
 
 type GetButtonStyle = {
-  borderColor: BorderColors;
-  backgroundColor: BackgroundColors | 'none';
+  buttonType?: ButtonTypes;
   iconForMobile?: ReactNode;
-  textColor: TextColors;
   isMobile: boolean;
   mode?: 'dark' | 'light';
   sx: ButtonProps['sx'];
 };
 
-const getButtonStyle = ({
-  borderColor = 'default',
-  backgroundColor = 'none',
-  mode = 'dark',
-  textColor = 'primary',
-  iconForMobile = false,
-  isMobile,
-  sx = {}
-}: GetButtonStyle): ButtonProps => {
+const getButtonStyle = ({ buttonType = 'default', mode = 'dark', iconForMobile = false, isMobile, sx = {} }: GetButtonStyle): ButtonProps => {
   const buttonProps: ButtonProps = {
     sx: {
       height: '32px',
@@ -72,40 +60,47 @@ const getButtonStyle = ({
     }
   };
 
-  switch (backgroundColor) {
-    case 'none': {
+  switch (buttonType) {
+    case 'default': {
       buttonProps.variant = 'outlined';
       buttonProps.sx = {
         ...buttonProps.sx,
-        ...(mode === 'dark' ? { background: 'var(--dark-primary, white)' } : { background: 'var(--dark-secondary, white)' })
+        ...(mode === 'dark' ? { background: 'var(--dark-primary, white)' } : { background: 'var(--dark-secondary, white)' }),
+        border: '1px solid var(--common-border-color)'
       };
       break;
     }
-    case 'error':
-    case 'info':
-    case 'inherit':
-    case 'primary':
-    case 'secondary':
-    case 'success':
-    case 'warning': {
-      buttonProps.variant = 'contained';
-      buttonProps.color = backgroundColor;
-      buttonProps.sx = { ...buttonProps.sx, padding: '4px 10px' };
+    case 'red': {
+      buttonProps.variant = 'outlined';
+      buttonProps.sx = {
+        ...buttonProps.sx,
+        ...(mode === 'dark' ? { background: 'var(--dark-primary, white)' } : { background: 'var(--dark-secondary, white)' }),
+        border: '1px solid var(--common-red-border-color)',
+        color: '#d43e3e',
+        '&:disabled': {
+          border: '1px solid var(--common-red-border-color)',
+          color: '#d43e3e',
+          opacity: 0.7
+        }
+      };
       break;
     }
     case 'theme': {
       buttonProps.sx = {
         ...buttonProps.sx,
         background: 'var(--new-theme-color)',
+        padding: '4px 10px',
+        color: 'white',
         '&:hover': {
           backgroundColor: 'var(--new-theme-color-hover)'
         },
         '&:disabled': {
-          backgroundColor: 'var(--new-theme-color-hover)'
+          backgroundColor: 'var(--new-theme-color)',
+          color: 'white',
+          opacity: 0.7
         }
       };
       buttonProps.variant = 'contained';
-      buttonProps.sx = { ...buttonProps.sx, padding: '4px 10px' };
       break;
     }
     case 'yellow': {
@@ -114,55 +109,130 @@ const getButtonStyle = ({
         background: 'var(--new-theme-secondary-color)',
         color: 'black',
         '&:disabled': { background: 'var(--new-theme-secondary-color-hover)', opacity: 0.7, color: 'black' },
-        '&:hover': { background: 'var(--new-theme-secondary-color-hover)' }
+        '&:hover': { background: 'var(--new-theme-secondary-color-hover)' },
+        border: '1px solid var(--new_theme_secondary_border_color)'
       };
       buttonProps.variant = 'contained';
       buttonProps.sx = { ...buttonProps.sx, padding: '4px 10px' };
       break;
     }
-  }
-  switch (borderColor) {
-    case 'default': {
-      buttonProps.sx = { ...buttonProps.sx, border: '1px solid var(--common-border-color)' };
+    case 'themeBorder': {
+      buttonProps.variant = 'outlined';
+      buttonProps.sx = {
+        ...buttonProps.sx,
+        border: '2px solid var(--new-theme-color)',
+        color: 'var(--new-theme-color)',
+        '&:hover': {
+          backgroundColor: 'var(--new-theme-color)',
+          color: 'white'
+        },
+        fontWeight: '600'
+      };
+      buttonProps.sx = { ...buttonProps.sx, padding: '4px 10px' };
       break;
     }
-    case 'none': {
-      buttonProps.sx = { ...buttonProps.sx, border: '1px solid transparent' };
-      break;
-    }
-    case 'red': {
-      buttonProps.sx = { ...buttonProps.sx, border: '1px solid var(--common-red-border-color)' };
-      break;
-    }
-    case 'theme': {
-      buttonProps.sx = { ...buttonProps.sx, border: '1px solid var(--new-theme-color)', fontWeight: '600' };
-      break;
-    }
-    case 'yellow': {
-      buttonProps.sx = { ...buttonProps.sx, border: '1px solid var(--new_theme_secondary_border_color)', color: 'black' };
-      break;
-    }
-  }
-  switch (textColor) {
-    case 'primary': {
-      if (borderColor !== 'yellow' && backgroundColor !== 'yellow') {
-        buttonProps.sx = { ...buttonProps.sx, color: 'var(--primary-button-text)' };
-      }
-      break;
-    }
-    case 'red': {
-      buttonProps.sx = { ...buttonProps.sx, color: '#d43e3e' };
-      break;
-    }
-    case 'white': {
-      buttonProps.sx = { ...buttonProps.sx, color: 'white', '&:disabled': { color: 'white' } };
-      break;
-    }
-    case 'theme': {
-      buttonProps.sx = { ...buttonProps.sx, color: 'var(--new-theme-color)' };
+    case 'transparent': {
+      buttonProps.sx = {
+        ...buttonProps.sx,
+        border: '1px solid transparent'
+      };
       break;
     }
   }
+
+  // switch (backgroundColor) {
+  //   case 'none': {
+  //     buttonProps.variant = 'outlined';
+  //     buttonProps.sx = {
+  //       ...buttonProps.sx,
+  //       ...(mode === 'dark' ? { background: 'var(--dark-primary, white)' } : { background: 'var(--dark-secondary, white)' })
+  //     };
+  //     break;
+  //   }
+  //   case 'error':
+  //   case 'info':
+  //   case 'inherit':
+  //   case 'primary':
+  //   case 'secondary':
+  //   case 'success':
+  //   case 'warning': {
+  //     buttonProps.variant = 'contained';
+  //     buttonProps.color = backgroundColor;
+  //     buttonProps.sx = { ...buttonProps.sx, padding: '4px 10px' };
+  //     break;
+  //   }
+  //   case 'theme': {
+  //     buttonProps.sx = {
+  //       ...buttonProps.sx,
+  //       background: 'var(--new-theme-color)',
+  //       '&:hover': {
+  //         backgroundColor: 'var(--new-theme-color-hover)'
+  //       },
+  //       '&:disabled': {
+  //         backgroundColor: 'var(--new-theme-color-hover)'
+  //       }
+  //     };
+  //     buttonProps.variant = 'contained';
+  //     buttonProps.sx = { ...buttonProps.sx, padding: '4px 10px' };
+  //     break;
+  //   }
+  //   case 'yellow': {
+  //     buttonProps.sx = {
+  //       ...buttonProps.sx,
+  //       background: 'var(--new-theme-secondary-color)',
+  //       color: 'black',
+  //       '&:disabled': { background: 'var(--new-theme-secondary-color-hover)', opacity: 0.7, color: 'black' },
+  //       '&:hover': { background: 'var(--new-theme-secondary-color-hover)' }
+  //     };
+  //     buttonProps.variant = 'contained';
+  //     buttonProps.sx = { ...buttonProps.sx, padding: '4px 10px' };
+  //     break;
+  //   }
+  // }
+
+  // switch (borderColor) {
+  //   case 'default': {
+  //     buttonProps.sx = { ...buttonProps.sx, border: '1px solid var(--common-border-color)' };
+  //     break;
+  //   }
+  //   case 'none': {
+  //     buttonProps.sx = { ...buttonProps.sx, border: '1px solid transparent' };
+  //     break;
+  //   }
+  //   case 'red': {
+  //     buttonProps.sx = { ...buttonProps.sx, border: '1px solid var(--common-red-border-color)' };
+  //     break;
+  //   }
+  //   case 'theme': {
+  //     buttonProps.sx = { ...buttonProps.sx, border: '1px solid var(--new-theme-color)', fontWeight: '600' };
+  //     break;
+  //   }
+  //   case 'yellow': {
+  //     buttonProps.sx = { ...buttonProps.sx, border: '1px solid var(--new_theme_secondary_border_color)', color: 'black' };
+  //     break;
+  //   }
+  // }
+  // switch (textColor) {
+  //   case 'primary': {
+  //     if (borderColor !== 'yellow' && backgroundColor !== 'yellow') {
+  //       buttonProps.sx = { ...buttonProps.sx, color: 'var(--primary-button-text)' };
+  //     }
+  //     break;
+  //   }
+  //   case 'red': {
+  //     buttonProps.sx = { ...buttonProps.sx, color: '#d43e3e' };
+  //     break;
+  //   }
+  //   case 'white': {
+  //     buttonProps.sx = { ...buttonProps.sx, color: 'white', '&:disabled': { color: 'white' } };
+  //     break;
+  //   }
+  //   case 'theme': {
+  //     buttonProps.sx = { ...buttonProps.sx, color: 'var(--new-theme-color)' };
+  //     break;
+  //   }
+  // }
+
   if (isMobile && iconForMobile) {
     buttonProps.sx = {
       ...buttonProps.sx,
@@ -210,18 +280,16 @@ const getChildren = ({
 const ThemeButton = React.forwardRef<HTMLButtonElement, ThemeButtonProps>(
   (
     {
-      borderColor = 'default',
       mode = 'dark',
       iconForMobile,
       tooltip = '',
       mobileTooltip = '',
       isLoading,
       visible = true,
-      backgroundColor = 'none',
       startIcon,
       endIcon,
-      textColor = 'primary',
       children,
+      buttonType = 'default',
       disabled,
       sx,
       ...rest
@@ -235,14 +303,12 @@ const ThemeButton = React.forwardRef<HTMLButtonElement, ThemeButtonProps>(
       () => getChildren({ isMobile, children, iconForMobile, loader, isLoading }),
       [children, iconForMobile, isLoading, isMobile, loader]
     );
-    const buttonStyles = useMemo(
-      () => getButtonStyle({ borderColor, backgroundColor, mode, textColor, iconForMobile, isMobile, sx }),
-      [borderColor, backgroundColor, mode, textColor, iconForMobile, isMobile, sx]
-    );
+    const buttonStyles = useMemo(() => getButtonStyle({ buttonType, mode, iconForMobile, isMobile, sx }), [mode, iconForMobile, isMobile, sx]);
 
     return (
       <HtmlTooltip title={tooltip ? tooltip : mobileTooltip && isMobile ? mobileTooltip : ''}>
         <Button
+          datatype={buttonType}
           ref={ref}
           disableElevation
           disabled={disabled || isLoading}
