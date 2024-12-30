@@ -4,7 +4,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomDialogTransition, fieldTicket, rentalManagement } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
@@ -61,12 +61,12 @@ function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleCl
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button size="small" color="primary" onClick={handleClose}>
+        <ThemeButton buttonType="transparent"  onClick={handleClose}>
           Close
-        </Button>
-        <CustomButton loading={isSubmitting} variant="contained" color="primary" type="submit" onClick={handleAssign} disabled={isSubmitting}>
+        </ThemeButton>
+        <ThemeButton isLoading={isSubmitting} buttonType="theme" onClick={handleAssign} disabled={isSubmitting}>
           Assign
-        </CustomButton>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

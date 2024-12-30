@@ -1,5 +1,5 @@
 import { FC, useEffect, useState, Fragment, useRef } from 'react';
-import { Button, Dialog, Box } from '@mui/material';
+import { Dialog, Box } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
@@ -10,7 +10,6 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomButton from '../../../components/Helpers/CustomButton';
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
@@ -19,6 +18,7 @@ import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import moment from 'moment';
 import { bulkUpdate, calculateRowsField } from 'src/components/RentalManagment/helper';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -435,9 +435,8 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType="transparent"
                   onClick={() => {
                     if (!isEqual(ref.current.values, initialData.values)) {
                       setShowConfirmDialog(true);
@@ -447,14 +446,12 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
                   }}
                 >
                   {'Close'}
-                </Button>
+                </ThemeButton>
                 {isBulkedit === false && showSaveAndNext && (
-                  <CustomButton
-                    loading={loadingEdit}
-                    disabled={isEqual(ref?.current?.values, initialData.values) || loadingEdit}
-                    variant="contained"
-                    color="primary"
-                    type="submit"
+                  <ThemeButton
+                    isLoading={Boolean(loadingEdit)}
+                    disabled={Boolean(isEqual(ref?.current?.values, initialData.values))|| Boolean(loadingEdit)}
+                    buttonType="theme"
                     onClick={() => {
                       setSaveAndNext(true);
                       submitForm();
@@ -462,14 +459,12 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
                   >
                     {' '}
                     Save & Next
-                  </CustomButton>
+                  </ThemeButton>
                 )}
-                <CustomButton
-                  loading={loadingEdit}
-                  disabled={isEqual(ref?.current?.values, initialData.values) || loadingEdit}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+                <ThemeButton
+                  isLoading={Boolean(loadingEdit)}
+                  disabled={Boolean(isEqual(ref?.current?.values, initialData.values)) || Boolean(loadingEdit)}
+                  buttonType="theme"
                   onClick={() => {
                     setSaveAndNext(false);
                     submitForm();
@@ -477,7 +472,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
                 >
                   {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmationDialog && (
                 <ConfirmationDialog

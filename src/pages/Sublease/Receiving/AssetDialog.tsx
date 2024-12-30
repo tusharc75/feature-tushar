@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Dialog, Box, TextField, Table, TableHead, Paper, TableContainer, TableBody, TableCell, TableRow, Link } from '@mui/material';
 import { ASSET_NUMBER_TYPE, CustomDialogTransition, sublease } from '../../../constants/helpers';
 import { Formik, Form, FieldArray } from 'formik';
-import CustomButton from 'src/components/Helpers/CustomButton';
 import { read, utils, writeFile } from 'xlsx';
 import Autocomplete from '@mui/material/Autocomplete';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -12,6 +11,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import axiosInstance from 'src/axios/axiosInstance';
 import { uniqBy } from 'lodash';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const AssetDialog = ({ products, loading, handleClose, handleSuccess, subleaseId }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -306,16 +306,15 @@ const AssetDialog = ({ products, loading, handleClose, handleSuccess, subleaseId
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <CustomButton
+                <ThemeButton
                   id="receive-dialog-submit-button"
                   onClick={submitForm}
-                  variant="contained"
-                  color="primary"
+                   buttonType="theme"
                   disabled={loading}
-                  loading={loading}
+                  isLoading={loading}
                 >
                   Submit
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
             </>
           )}

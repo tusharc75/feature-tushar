@@ -1,6 +1,5 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import { Form, Formik } from 'formik';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -10,7 +9,6 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import InputField from 'src/components/Helpers/InputField';
 import { isMobile, isTablet } from 'react-device-detect';
-import CustomButton from 'src/components/Helpers/CustomButton';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import {
   CHILD_RESOURCE,
@@ -27,6 +25,7 @@ import routes from 'src/components/Helpers/Routes';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import Grid from '@mui/material/Grid2';
 import CustomDatePicker from 'src/components/CustomDatePicker';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export default function ReceivingCostDialog({ onClose, onSuccess, _id, subcontractAssemblyData }) {
   const toastConfig = useContext(CustomToastContext);
@@ -165,9 +164,8 @@ export default function ReceivingCostDialog({ onClose, onSuccess, _id, subcontra
                 </Grid>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType="transparent"
                   disabled={isSubmitting}
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
@@ -175,13 +173,11 @@ export default function ReceivingCostDialog({ onClose, onSuccess, _id, subcontra
                   }}
                 >
                   Cancel
-                </Button>
-                <CustomButton
+                </ThemeButton>
+                <ThemeButton
                   disabled={validateDate()?.receiveDate || isSubmitting}
-                  loading={isSubmitting}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+                  isLoading={isSubmitting}
+                   buttonType="theme"
                   onClick={(e) => {
                     e.preventDefault();
                     submitForm();
@@ -189,7 +185,7 @@ export default function ReceivingCostDialog({ onClose, onSuccess, _id, subcontra
                 >
                   {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
