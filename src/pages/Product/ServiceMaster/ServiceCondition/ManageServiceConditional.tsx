@@ -1,11 +1,11 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { Box, Button, Dialog, IconButton, MenuItem, TextField } from '@mui/material';
+import { Box, Dialog, IconButton, MenuItem, TextField } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomDialogTransition, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -443,22 +443,21 @@ const ManageServiceConditional = ({ onClose, onSuccess, productId, id }) => {
                     </div>
                   </CustomDialogContent>
                   <CustomDialogFooter>
-                    <Button type="button" variant="outlined" color="primary" size="small" onClick={onClose}>
+                    <ThemeButton buttonType="transparent" onClick={onClose}>
                       Cancel
-                    </Button>
-                    <CustomButton
+                    </ThemeButton>
+                    <ThemeButton
                       disabled={
                         values?.condition?.length === 0 ||
                         dataRows?.length === 0 ||
                         isEqual(initialData, { ...values, services: dataRows?.map((e) => e._id) })
                       }
-                      loading={loading}
-                      variant="contained"
-                      color="primary"
+                      isLoading={loading}
+                      buttonType="theme"
                       onClick={submitForm}
                     >
                       Save
-                    </CustomButton>
+                    </ThemeButton>
                   </CustomDialogFooter>
                 </>
               )}
