@@ -96,10 +96,7 @@ const DetailsPageHeader = ({
             <ThemeButton
               tooltip={addButtonTooltip ?? ''}
               id={'add-menu-button'}
-              borderColor="none"
-              backgroundColor="theme"
               mobileTooltip="Add"
-              textColor="white"
               startIcon={isMobile ? null : <Add />}
               onClick={AddClick}
               {...restOfAddButtonProps}
@@ -136,9 +133,6 @@ const DetailsPageHeader = ({
               tooltip={addButtonTooltip ?? ''}
               id={'details-page-add-button'}
               startIcon={isMobile ? null : <Add />}
-              borderColor="none"
-              backgroundColor="theme"
-              textColor="white"
               onClick={AddClick}
               {...restOfAddButtonProps}
               aria-controls="add-menu"

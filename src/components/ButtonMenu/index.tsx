@@ -1,5 +1,4 @@
-import { MenuProps } from '@aws-amplify/ui-react';
-import { ButtonProps, IconButtonProps, Menu, MenuItem, MenuItemProps } from '@mui/material';
+import { ButtonProps, IconButtonProps, Menu, MenuItem, MenuItemProps, MenuProps } from '@mui/material';
 import React from 'react';
 import { BiChevronDown } from 'react-icons/bi';
 import { ThemeButtonProps, ThemeButton } from 'src/components/Helpers/Buttons';
@@ -21,7 +20,7 @@ export type Items<D> = {
   endIcon?: React.ReactNode;
   value?: D;
   visible?: boolean;
-} & Omit<MenuItemProps, 'children' | 'button'>;
+} & Omit<MenuItemProps, 'children'>;
 
 const ButtonMenu = <D,>({
   items,
@@ -80,7 +79,6 @@ const ButtonMenu = <D,>({
           return (
             <MenuItem
               key={index}
-              button={true}
               onClick={(e) => {
                 onClick?.(e);
                 onItemClick?.(e, item);

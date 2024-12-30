@@ -3,11 +3,8 @@ import Button from '@mui/material/Button';
 import { camelCase, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { FaFileInvoice } from 'react-icons/fa';
-import { FaFileZipper } from 'react-icons/fa6';
-import { IoMdDownload } from 'react-icons/io';
 import { useData } from 'src/StateProvider/Provider';
-import { CancelInvoiceIcon } from 'src/assets/svg/svgIcons';
+import { CancelInvoiceIcon, DownloadIcon } from 'src/assets/svg/svgIcons';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import CommentDialog from 'src/components/CommentDialog';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -171,15 +168,14 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
     const rows = data.material.filter((e) => !e.parentId);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.package
-            ? parent.packageDetail?.packageName
-            : parent.type === MATERIAL_TYPE.serializedAsset
-              ? parent.serializedAssetDetail?.assetNumber
-              : parent.serviceDetail?.serviceName
-      }`;
+      parent.detail = `${parent.type === MATERIAL_TYPE.product
+        ? parent.productDetail?.productName
+        : parent.type === MATERIAL_TYPE.package
+          ? parent.packageDetail?.packageName
+          : parent.type === MATERIAL_TYPE.serializedAsset
+            ? parent.serializedAssetDetail?.assetNumber
+            : parent.serviceDetail?.serviceName
+        }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -211,15 +207,14 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow?.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productName
-          : _subRow?.type === MATERIAL_TYPE.package
-            ? _subRow?.packageDetail?.packageName
-            : _subRow?.type === MATERIAL_TYPE.serializedAsset
-              ? _subRow?.serializedAssetDetail?.assetNumber
-              : _subRow?.serviceDetail?.serviceName
-      }`;
+      _subRow.detail = `${_subRow?.type === MATERIAL_TYPE.product
+        ? _subRow?.productDetail?.productName
+        : _subRow?.type === MATERIAL_TYPE.package
+          ? _subRow?.packageDetail?.packageName
+          : _subRow?.type === MATERIAL_TYPE.serializedAsset
+            ? _subRow?.serializedAssetDetail?.assetNumber
+            : _subRow?.serviceDetail?.serviceName
+        }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
@@ -329,10 +324,10 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
         {resource === sidebarResource.fieldTicket && (
           <>
             <ThemeButton
-              iconForMobile={<FaFileZipper />}
+              iconForMobile={<DownloadIcon />}
               type="button"
               disabled={isDownloadingZip ? true : false}
-              startIcon={isMobile ? '' : <IoMdDownload />}
+              startIcon={<DownloadIcon />}
               onClick={(e) => {
                 handleDownloadZip();
               }}
@@ -342,9 +337,9 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
             </ThemeButton>
             <ThemeButton
               type="button"
-              iconForMobile={<FaFileInvoice />}
+              iconForMobile={<DownloadIcon />}
               disabled={isDownloadingPdf ? true : false}
-              startIcon={<IoMdDownload />}
+              startIcon={<DownloadIcon />}
               onClick={(e) => {
                 handleDownloadPdf();
               }}
