@@ -2,11 +2,7 @@ import { Button, ButtonProps, CircularProgress, useMediaQuery } from '@mui/mater
 import React, { ReactNode, useMemo } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
-type MButtonProps = Omit<ButtonProps, 'variant' | 'color'>;
-type BackgroundColors = ButtonProps['color'] | 'yellow' | 'theme';
-type BorderColors = 'none' | 'theme' | 'red' | 'yellow' | 'default';
-type TextColors = 'primary' | 'red' | 'white' | 'theme';
-
+type MButtonProps = Omit<ButtonProps, 'variant' | 'color' | 'size'>;
 type ButtonTypes = 'default' | 'yellow' | 'theme' | 'red' | 'transparent' | 'themeBorder';
 
 export type ButtonType = {
@@ -44,7 +40,7 @@ const getButtonStyle = ({ buttonType = 'default', mode = 'dark', iconForMobile =
   const buttonProps: ButtonProps = {
     sx: {
       height: '32px',
-      fontSize: '13px',
+      fontSize: '14px',
       gap: '5px',
       alignItems: 'center',
       '& .MuiButton-icon': {
@@ -55,7 +51,7 @@ const getButtonStyle = ({ buttonType = 'default', mode = 'dark', iconForMobile =
       },
       '& .MuiButton-endIcon': { marginRight: '-5px' },
       '& .MuiButton-startIcon': { marginLeft: '-5px' },
-      fontWeight: 500,
+      fontWeight: 400,
       ...sx
     }
   };
@@ -66,7 +62,13 @@ const getButtonStyle = ({ buttonType = 'default', mode = 'dark', iconForMobile =
       buttonProps.sx = {
         ...buttonProps.sx,
         ...(mode === 'dark' ? { background: 'var(--dark-primary, white)' } : { background: 'var(--dark-secondary, white)' }),
-        border: '1px solid var(--common-border-color)'
+        border: '1px solid var(--common-border-color)',
+        color: 'var(--outlined-button-text)',
+        '&:disabled': {
+          backgroundColor: 'var(--outlined-button-disabled-bg)',
+          borderWidth: 0,
+          color: 'var(--outlined-button-disabled-text)'
+        }
       };
       break;
     }
@@ -90,6 +92,8 @@ const getButtonStyle = ({ buttonType = 'default', mode = 'dark', iconForMobile =
         ...buttonProps.sx,
         background: 'var(--new-theme-color)',
         padding: '4px 10px',
+        fontWeight: 500,
+        fontSize: '13.5px',
         color: 'white',
         '&:hover': {
           backgroundColor: 'var(--new-theme-color-hover)'
@@ -106,6 +110,7 @@ const getButtonStyle = ({ buttonType = 'default', mode = 'dark', iconForMobile =
     case 'yellow': {
       buttonProps.sx = {
         ...buttonProps.sx,
+        fontWeight: 500,
         background: 'var(--new-theme-secondary-color)',
         color: 'black',
         '&:disabled': { background: 'var(--new-theme-secondary-color-hover)', opacity: 0.7, color: 'black' },
@@ -120,7 +125,7 @@ const getButtonStyle = ({ buttonType = 'default', mode = 'dark', iconForMobile =
       buttonProps.variant = 'outlined';
       buttonProps.sx = {
         ...buttonProps.sx,
-        border: '2px solid var(--new-theme-color)',
+        border: '1px solid var(--new-theme-color)',
         color: 'var(--new-theme-color)',
         '&:hover': {
           backgroundColor: 'var(--new-theme-color)',

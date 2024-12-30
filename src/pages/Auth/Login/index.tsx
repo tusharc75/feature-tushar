@@ -19,6 +19,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import AuthSlider from '../AuthSlider';
 import styles from '../index.module.scss';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export type BrandData = {
   companyName: string;
@@ -197,7 +198,7 @@ const Login = () => {
                                   </IconButton>
                                 </InputAdornment>
                               )
-                            },
+                            }
                           }}
                         />
                       </div>
@@ -210,10 +211,13 @@ const Login = () => {
 
                     <Box>
                       <ThemeButton
-                        onClick={submitForm}
                         disabled={isSubmitting}
-                        isLoading={isSubmitting}
-                        buttonType='theme'
+                        fullWidth
+                        buttonType="theme"
+                        type="submit"
+                        className={styles.submitButton}
+                        onClick={submitForm}
+                        startIcon={isSubmitting && <CircularProgress color="inherit" size={20} />}
                       >
                         Sign In
                       </ThemeButton>
