@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect, Fragment, useRef } from 'react';
-import { Box, Button, Dialog } from '@mui/material';
+import { Box, Dialog } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
@@ -15,8 +15,8 @@ import FormTypes from '../../../components/Helpers/FormTypes';
 import { uniq, map, orderBy } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
-import CustomButton from 'src/components/Helpers/CustomButton';
 import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export default function ManageAssetDialog({
   allFields,
@@ -233,16 +233,14 @@ export default function ManageAssetDialog({
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                  <Button size="small" variant="outlined" color="primary" onClick={onClose}>
+                  <ThemeButton buttonType="transparent" onClick={onClose}>
                     Close
-                  </Button>
+                  </ThemeButton>
                   {isBulkedit === false && showSaveAndNext && (
-                    <CustomButton
-                      loading={loadingEdit}
+                    <ThemeButton
+                      isLoading={loadingEdit}
                       disabled={loadingEdit}
-                      variant="contained"
-                      color="primary"
-                      type="submit"
+                      buttonType="theme"
                       onClick={() => {
                         setSaveAndNext(true);
                         submitForm();
@@ -250,14 +248,12 @@ export default function ManageAssetDialog({
                     >
                       {' '}
                       Save & Next
-                    </CustomButton>
+                    </ThemeButton>
                   )}
-                  <CustomButton
-                    loading={loadingEdit}
+                  <ThemeButton
+                    isLoading={loadingEdit}
                     disabled={loadingEdit}
-                    variant="contained"
-                    color="primary"
-                    type="submit"
+                    buttonType="theme"
                     onClick={() => {
                       setSaveAndNext(false);
                       submitForm();
@@ -265,7 +261,7 @@ export default function ManageAssetDialog({
                     id={'dialog-save-button'}
                   >
                     Save
-                  </CustomButton>
+                  </ThemeButton>
                 </CustomDialogFooter>
               </Fragment>
             )}

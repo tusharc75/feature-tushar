@@ -5,7 +5,7 @@ import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import DashboardModal from 'src/components/DashboardModal';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
@@ -74,9 +74,8 @@ const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
         fullScreenOption: true
       }}
       footer={
-        <CustomButton
-          variant="contained"
-          color="primary"
+        <ThemeButton
+          buttonType="theme"
           disabled={selectedUsers.length === 0}
           onClick={(e) => {
             e.preventDefault();
@@ -85,7 +84,7 @@ const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
           }}
         >
           Add
-        </CustomButton>
+        </ThemeButton>
       }
     >
       <Autocomplete

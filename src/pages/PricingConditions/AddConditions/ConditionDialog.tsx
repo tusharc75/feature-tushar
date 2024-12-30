@@ -1,5 +1,4 @@
 import { useState, useEffect, Fragment, useContext } from 'react';
-import Button from '@mui/material/Button';
 import { Formik, Form } from 'formik';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
@@ -7,7 +6,7 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import Dialog from '@mui/material/Dialog';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomButton from '../../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, MATERIAL_TYPE, PRICING_TYPE, getUniqueCurrencies } from './../../../constants/helpers';
 import { pricingCondition } from '../../../constants/helpers';
@@ -88,14 +87,14 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
       }
       setHeaderLabel(
         startCase(conditionData?.materialType) +
-        ' - ' +
-        (conditionData?.materialType === 'product'
-          ? details?.productName
-          : conditionData?.materialType === 'service'
-            ? details?.serviceName
-            : conditionData?.materialType === 'package'
-              ? details?.packageName
-              : details?.competencyName)
+          ' - ' +
+          (conditionData?.materialType === 'product'
+            ? details?.productName
+            : conditionData?.materialType === 'service'
+              ? details?.serviceName
+              : conditionData?.materialType === 'package'
+                ? details?.packageName
+                : details?.competencyName)
       );
       currency.forEach((_currency) => {
         if (conditionData.materialType === 'competency') {
@@ -111,7 +110,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
             details?.pricingMethod?.map((_pricingMethod) => {
               if (
                 conditionData[
-                'rent_' + camelCase(_pricingMethod.toLowerCase()) + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())
+                  'rent_' + camelCase(_pricingMethod.toLowerCase()) + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())
                 ] == undefined
               )
                 conditionData[
@@ -318,7 +317,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                     </div>
                     <Box marginTop={1} marginBottom={1}>
                       <Grid spacing={3} container>
-                        <Grid size={{xs:12, sm:6, md:6}}>
+                        <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                           <Autocomplete
                             multiple
                             id="conditionType"
@@ -351,7 +350,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                           />
                         </Grid>
                         {conditionData?.materialType !== 'competency' && (
-                          <Grid size={{xs:12, sm:6, md:6}}>
+                          <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                             <Autocomplete
                               multiple
                               disableCloseOnSelect={true}
@@ -398,7 +397,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                               (_currency, i) =>
                                 values['unit'] &&
                                 values['unit'].map((_unit, j) => (
-                                  <Grid size={{xs:12, sm:6, md:6}} key={i + j + 1}>
+                                  <Grid size={{ xs: 12, sm: 6, md: 6 }} key={i + j + 1}>
                                     <TextField
                                       id="mrp"
                                       name="mrp"
@@ -457,7 +456,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                       </div>
                       <Box marginTop={1} marginBottom={1}>
                         <Grid spacing={3} container>
-                          <Grid size={{xs:12, sm:6, md:6}}>
+                          <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                             <Autocomplete
                               multiple
                               id="tags-filled"
@@ -527,22 +526,22 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                                 style={{ margin: 0 }}
                                                 value={
                                                   values[
-                                                  'rent_' +
-                                                  camelCase(_pricingMethod.toLowerCase()) +
-                                                  '_' +
-                                                  _currency.toLowerCase() +
-                                                  '_' +
-                                                  camelCase(_unit.toLowerCase())
+                                                    'rent_' +
+                                                      camelCase(_pricingMethod.toLowerCase()) +
+                                                      '_' +
+                                                      _currency.toLowerCase() +
+                                                      '_' +
+                                                      camelCase(_unit.toLowerCase())
                                                   ]
                                                 }
                                                 onChange={(e) => {
                                                   setFieldValue(
                                                     'rent_' +
-                                                    camelCase(_pricingMethod.toLowerCase()) +
-                                                    '_' +
-                                                    _currency.toLowerCase() +
-                                                    '_' +
-                                                    camelCase(_unit.toLowerCase()),
+                                                      camelCase(_pricingMethod.toLowerCase()) +
+                                                      '_' +
+                                                      _currency.toLowerCase() +
+                                                      '_' +
+                                                      camelCase(_unit.toLowerCase()),
                                                     parseFloat(e.target.value)
                                                   );
                                                 }}
@@ -563,40 +562,40 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                                 }}
                                                 error={
                                                   touched[
-                                                  'rent_' +
-                                                  camelCase(_pricingMethod.toLowerCase()) +
-                                                  '_' +
-                                                  _currency.toLowerCase() +
-                                                  '_' +
-                                                  camelCase(_unit.toLowerCase())
+                                                    'rent_' +
+                                                      camelCase(_pricingMethod.toLowerCase()) +
+                                                      '_' +
+                                                      _currency.toLowerCase() +
+                                                      '_' +
+                                                      camelCase(_unit.toLowerCase())
                                                   ] &&
                                                   Boolean(
                                                     errors[
-                                                    'rent_' +
-                                                    camelCase(_pricingMethod.toLowerCase()) +
-                                                    '_' +
-                                                    _currency.toLowerCase() +
-                                                    '_' +
-                                                    camelCase(_unit.toLowerCase())
+                                                      'rent_' +
+                                                        camelCase(_pricingMethod.toLowerCase()) +
+                                                        '_' +
+                                                        _currency.toLowerCase() +
+                                                        '_' +
+                                                        camelCase(_unit.toLowerCase())
                                                     ]
                                                   )
                                                 }
                                                 helperText={
                                                   touched[
-                                                  'rent_' +
-                                                  camelCase(_pricingMethod.toLowerCase()) +
-                                                  '_' +
-                                                  _currency.toLowerCase() +
-                                                  '_' +
-                                                  camelCase(_unit.toLowerCase())
+                                                    'rent_' +
+                                                      camelCase(_pricingMethod.toLowerCase()) +
+                                                      '_' +
+                                                      _currency.toLowerCase() +
+                                                      '_' +
+                                                      camelCase(_unit.toLowerCase())
                                                   ] &&
                                                   errors[
-                                                  'rent_' +
-                                                  camelCase(_pricingMethod.toLowerCase()) +
-                                                  '_' +
-                                                  _currency.toLowerCase() +
-                                                  '_' +
-                                                  camelCase(_unit.toLowerCase())
+                                                    'rent_' +
+                                                      camelCase(_pricingMethod.toLowerCase()) +
+                                                      '_' +
+                                                      _currency.toLowerCase() +
+                                                      '_' +
+                                                      camelCase(_unit.toLowerCase())
                                                   ]
                                                 }
                                               />
@@ -664,10 +663,8 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                         <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Discount</h2>
                       </div>
                       <Box marginTop={2} marginBottom={1}>
-                        <Button
-                          variant="outlined"
-                          color="primary"
-                          size="small"
+                        <ThemeButton
+                          buttonType="transparent"
                           onClick={() => {
                             setDiscount([
                               ...discount,
@@ -682,14 +679,14 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                           }}
                         >
                           Add Discount
-                        </Button>
+                        </ThemeButton>
                       </Box>
                       {discount.map((val, index) => (
                         <Box key={index} mb={2}>
                           <Badge badgeContent={index + 1} color="primary"></Badge>
                           <Box p={2} border={1} borderColor="var(--common-border-color)">
                             <Grid spacing={3} container>
-                              <Grid size={{xs:12, sm:2, md:2}}>
+                              <Grid size={{ xs: 12, sm: 2, md: 2 }}>
                                 <FormControl fullWidth margin="dense" size="small" variant="outlined">
                                   <InputLabel id="demo-simple-select-outlined-label">Discount Type</InputLabel>
                                   <Select
@@ -712,7 +709,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                               </Grid>
                               {(val.type === 'Flat' || val.type === 'Percentage') && (
                                 <Fragment>
-                                  <Grid size={{xs:12, sm:2, md:2}}>
+                                  <Grid size={{ xs: 12, sm: 2, md: 2 }}>
                                     <TextField
                                       id="amount"
                                       name="amount"
@@ -727,7 +724,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                       onChange={(e) => handleChangeValue(index, 'amount', parseFloat(e.target.value))}
                                     />
                                   </Grid>
-                                  <Grid size={{xs:12, sm:2, md:2}}>
+                                  <Grid size={{ xs: 12, sm: 2, md: 2 }}>
                                     <TextField
                                       id="minTransAmount"
                                       name="minTransAmount"
@@ -742,7 +739,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                       onChange={(e) => handleChangeValue(index, 'minTransAmount', parseFloat(e.target.value))}
                                     />
                                   </Grid>
-                                  <Grid item xs={12} sm={2} md={2}>
+                                  <Grid size={{ xs: 12, sm: 2, md: 2 }}>
                                     <TextField
                                       id="maxDiscount"
                                       name="maxDiscount"
@@ -763,9 +760,10 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                 container
                                 justifyContent="flex-end"
                                 size={{
-                                xs:12,
-                                sm:val.type === 'Flat' || val.type === 'Percentage' ? 4 : 10,
-                                md:val.type === 'Flat' || val.type === 'Percentage' ? 4 : 10}}
+                                  xs: 12,
+                                  sm: val.type === 'Flat' || val.type === 'Percentage' ? 4 : 10,
+                                  md: val.type === 'Flat' || val.type === 'Percentage' ? 4 : 10
+                                }}
                               >
                                 <IconButton
                                   size="small"
@@ -782,7 +780,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                             </Grid>
                             {(val.type === 'Group Flat' || val.type === 'Group Percentage') && (
                               <Grid container>
-                                <Grid size={{xs:12, sm:6, md:6}}>
+                                <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                                   <MultipleEntry
                                     discount={discount}
                                     index={index}
@@ -807,10 +805,8 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                         <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Charge</h2>
                       </div>
                       <Box marginTop={2} marginBottom={1}>
-                        <Button
-                          variant="outlined"
-                          color="primary"
-                          size="small"
+                        <ThemeButton
+                          buttonType="transparent"
                           onClick={() => {
                             setCharge([
                               ...charge,
@@ -823,14 +819,14 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                           }}
                         >
                           Add Charge
-                        </Button>
+                        </ThemeButton>
                       </Box>
                       {charge.map((val, index) => (
                         <Box key={index} mb={2}>
                           <Badge badgeContent={index + 1} color="primary"></Badge>
                           <Box p={2} border={1} borderColor="var(--common-border-color)">
                             <Grid spacing={3} container>
-                              <Grid size={{xs:12, sm:2, md:2}}>
+                              <Grid size={{ xs: 12, sm: 2, md: 2 }}>
                                 <TextField
                                   id="label"
                                   name="label"
@@ -844,7 +840,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                   onChange={(e) => handleChangeChargeValue(index, 'label', e.target.value)}
                                 />
                               </Grid>
-                              <Grid size={{xs:12, sm:2, md:2}}>
+                              <Grid size={{ xs: 12, sm: 2, md: 2 }}>
                                 <FormControl fullWidth margin="dense" size="small" variant="outlined">
                                   <InputLabel id="demo-simple-select-outlined-label">Charge Type</InputLabel>
                                   <Select
@@ -863,7 +859,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                   </Select>
                                 </FormControl>
                               </Grid>
-                              <Grid size={{xs:12, sm:2, md:2}}>
+                              <Grid size={{ xs: 12, sm: 2, md: 2 }}>
                                 <TextField
                                   id="amount"
                                   name="amount"
@@ -878,7 +874,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                   onChange={(e) => handleChangeChargeValue(index, 'amount', parseFloat(e.target.value))}
                                 />
                               </Grid>
-                              <Grid container justifyContent="flex-end" size={{xs:12, sm:6, md:6}}>
+                              <Grid container justifyContent="flex-end" size={{ xs: 12, sm: 6, md: 6 }}>
                                 <IconButton
                                   size="small"
                                   aria-label="delete"
@@ -905,10 +901,8 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                         <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Tax</h2>
                       </div>
                       <Box marginTop={2} marginBottom={1}>
-                        <Button
-                          variant="outlined"
-                          color="primary"
-                          size="small"
+                        <ThemeButton
+                          buttonType="transparent"
                           onClick={() => {
                             setTax([
                               ...tax,
@@ -921,14 +915,14 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                           }}
                         >
                           Add Tax
-                        </Button>
+                        </ThemeButton>
                       </Box>
                       {tax.map((val, index) => (
                         <Box key={index} mb={2}>
                           <Badge badgeContent={index + 1} color="primary"></Badge>
                           <Box p={2} border={1} borderColor="var(--common-border-color)">
                             <Grid spacing={3} container>
-                              <Grid size={{xs:12, sm:2, md:2}}>
+                              <Grid size={{ xs: 12, sm: 2, md: 2 }}>
                                 <TextField
                                   id="taxCode"
                                   name="taxCode"
@@ -942,7 +936,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                   onChange={(e) => handleChangeTaxValue(index, 'taxCode', e.target.value)}
                                 />
                               </Grid>
-                              <Grid size={{xs:12, sm:2, md:2}}>
+                              <Grid size={{ xs: 12, sm: 2, md: 2 }}>
                                 <FormControl fullWidth margin="dense" size="small" variant="outlined">
                                   <InputLabel id="demo-simple-select-outlined-label">Tax Type</InputLabel>
                                   <Select
@@ -960,7 +954,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                   </Select>
                                 </FormControl>
                               </Grid>
-                              <Grid size={{xs:12, sm:2, md:2}}>
+                              <Grid size={{ xs: 12, sm: 2, md: 2 }}>
                                 <TextField
                                   id="amount"
                                   name="amount"
@@ -975,7 +969,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                   onChange={(e) => handleChangeTaxValue(index, 'amount', parseFloat(e.target.value))}
                                 />
                               </Grid>
-                              <Grid container justifyContent="flex-end" size={{xs:12, sm:6, md:6}}>
+                              <Grid container justifyContent="flex-end" size={{ xs: 12, sm: 6, md: 6 }}>
                                 <IconButton
                                   size="small"
                                   aria-label="delete"
@@ -997,20 +991,19 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType="transparent"
                   onClick={() => {
                     handleClose();
                   }}
                 >
                   {'Close'}
-                </Button>
+                </ThemeButton>
                 {allowedToEdit && (
-                  <CustomButton loading={loading} variant="contained" color="primary" type="submit" onClick={submitForm}>
+                  <ThemeButton isLoading={loading} buttonType="theme" onClick={submitForm}>
                     {' '}
                     Save
-                  </CustomButton>
+                  </ThemeButton>
                 )}
               </CustomDialogFooter>
               {showConfirmDialog ? (

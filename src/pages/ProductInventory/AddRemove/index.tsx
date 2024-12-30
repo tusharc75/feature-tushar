@@ -1,5 +1,5 @@
 import { Fragment, useState, useEffect, useContext } from 'react';
-import { Box, Button, Dialog, Divider, InputAdornment, List, ListItem, ListItemText, TextField, Typography } from '@mui/material';
+import { Box, Dialog, Divider, InputAdornment, List, ListItem, ListItemText, TextField, Typography } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -7,7 +7,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Formik, Form } from 'formik';
 import { read, utils, writeFile } from 'xlsx';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { capitalize } from 'lodash';
 import axiosInstance from 'src/axios/axiosInstance';
 import {
@@ -549,12 +549,12 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                   )}
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                  <Button color="primary" size="small" onClick={handleClose}>
+                  <ThemeButton buttonType="transparent" onClick={handleClose}>
                     Cancel
-                  </Button>
-                  <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit">
+                  </ThemeButton>
+                  <ThemeButton isLoading={loading} disabled={loading} buttonType="theme">
                     {capitalize(type)}
-                  </CustomButton>
+                  </ThemeButton>
                 </CustomDialogFooter>
               </Form>
             )}

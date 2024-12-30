@@ -1,19 +1,13 @@
 import React, { useEffect, useState, useContext, Fragment, useRef } from 'react';
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import { Formik, Form } from 'formik';
 import Dialog from '@mui/material/Dialog';
 import axiosInstance from '../../../axios/axiosInstance';
-import {
-  getObjKeys,
-  yupSchema,
-  getObjKeysWithValues,
-  opportunity,
-  GenerateResourceLineNumber
-} from '../../../constants/helpers';
+import { getObjKeys, yupSchema, getObjKeysWithValues, opportunity, GenerateResourceLineNumber } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomButton from '../../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { useData } from '../../../StateProvider/Provider';
@@ -201,11 +195,8 @@ export default function ManageOpportunityDialog({
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                  <Button
-                    type="button"
-                    variant="outlined"
-                    color="primary"
-                    size="small"
+                  <ThemeButton
+                    buttonType="transparent"
                     onClick={() => {
                       if (!isEqual(values, initialData.values)) {
                         setShowConfirmDialog(true);
@@ -215,11 +206,10 @@ export default function ManageOpportunityDialog({
                     }}
                   >
                     Cancel
-                  </Button>
-                  <CustomButton
-                    loading={loading}
-                    variant="contained"
-                    color="primary"
+                  </ThemeButton>
+                  <ThemeButton
+                    isLoading={loading}
+                    buttonType="theme"
                     disabled={loading}
                     onClick={(e) => {
                       e.preventDefault();
@@ -228,7 +218,7 @@ export default function ManageOpportunityDialog({
                     }}
                   >
                     Save
-                  </CustomButton>
+                  </ThemeButton>
                 </CustomDialogFooter>
                 {showConfirmDialog ? (
                   <ConfirmCancelDialog

@@ -1,8 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import {
   Box,
-  Button,
-  CircularProgress,
   TextField,
   Dialog,
   TableContainer,
@@ -26,6 +24,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isArray } from 'lodash';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import Grid from '@mui/material/Grid2';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const recordOptions: string[] = ['All', 'My'];
 
@@ -187,20 +186,20 @@ const DefaultRecordDialog = ({ userData, handleClose, onSuccess }) => {
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button size="small" color="primary" onClick={handleClose}>
+                <ThemeButton
+                  onClick={handleClose}
+                  buttonType='transparent'
+                >
                   Cancel
-                </Button>
-                <Button
-                  disabled={isSubmitting}
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  type="submit"
+                </ThemeButton>
+                <ThemeButton
                   onClick={submitForm}
-                  endIcon={isSubmitting && <CircularProgress color="inherit" size={18} />}
+                  disabled={isSubmitting}
+                  buttonType='theme'
+                  isLoading={isSubmitting}
                 >
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
             </>
           )}

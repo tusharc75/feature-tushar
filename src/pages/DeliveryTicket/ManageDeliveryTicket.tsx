@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, IconButton } from '@mui/material';
+import { Box, Dialog, IconButton } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import AddIcon from '@mui/icons-material/AddCircle';
 import { Form, Formik } from 'formik';
@@ -17,7 +17,7 @@ import CustomDialogContent from '../../components/CustomDialog/CustomDialogConte
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import CustomButton from '../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import FormTypes from '../../components/Helpers/FormTypes';
 import {
   DELIVERY_FROM_TO_TYPE,
@@ -555,7 +555,6 @@ const ManageDeliveryTicket = ({
   function validate(values) {
     const errors = {};
     if (initialData?.fields?.find((e) => e?.fieldName === 'pickUpDate') && initialData?.fields?.find((e) => e?.fieldName === 'deliveryDate')) {
-
       let pickUpDate = dayjs(values?.pickUpDate);
       let deliveryDate = dayjs(values?.deliveryDate);
       if (deliveryDate.diff(pickUpDate, 'days') < 0) {
@@ -698,7 +697,7 @@ const ManageDeliveryTicket = ({
                                   'deliveryToType'
                                 ].includes(field.fieldName) ? null : ['returnReason'].includes(field.fieldName) &&
                                   values['ticketType'] !== DELIVERY_TICKET_TYPE.return ? null : (
-                                  <Grid key={index2} size={{xs:12, sm:6, md:6}}>
+                                  <Grid key={index2} size={{ xs: 12, sm: 6, md: 6 }}>
                                     {field.fieldName === 'pickUpDate' ? (
                                       <FormTypes
                                         {...field}
@@ -1037,11 +1036,9 @@ const ManageDeliveryTicket = ({
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  variant="outlined"
-                  color="primary"
+                <ThemeButton
+                  buttonType="transparent"
                   id={'manage-ticket-dialog-cancel-button'}
-                  size="small"
                   disabled={isSubmitting || loading}
                   onClick={() => {
                     if (!isEqual(ref.current.values, initialData.values)) {
@@ -1052,13 +1049,11 @@ const ManageDeliveryTicket = ({
                   }}
                 >
                   Cancel
-                </Button>
-                <CustomButton
+                </ThemeButton>
+                <ThemeButton
                   disabled={isSubmitting || loading}
-                  loading={loading}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+                  isLoading={loading}
+                  buttonType="theme"
                   id={'manage-ticket-dialog-save-button'}
                   onClick={(e) => {
                     e.preventDefault();
@@ -1068,7 +1063,7 @@ const ManageDeliveryTicket = ({
                 >
                   {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog

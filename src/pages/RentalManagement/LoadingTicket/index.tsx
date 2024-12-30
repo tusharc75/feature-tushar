@@ -1,4 +1,4 @@
-import { Button, CircularProgress, Dialog, IconButton, Menu, MenuItem, TextField, Theme, useMediaQuery } from '@mui/material';
+import { Button, Dialog, IconButton, Menu, MenuItem, TextField, Theme, useMediaQuery } from '@mui/material';
 import Box from '@mui/material/Box/Box';
 import { makeStyles } from '@mui/styles';
 import AddBoxRoundedIcon from '@mui/icons-material/AddBoxRounded';
@@ -61,6 +61,7 @@ import ChangePreviousAssetDataDialog from 'src/pages/RentalManagement/LoadingTic
 import GpsLocationCell from 'src/components/CustomReactTable/Cells/GpsLocationCell';
 import WarningIcon from '@mui/icons-material/Warning';
 import FreeStyleMultiSelect from 'src/components/CustomReactTable/Cells/FreeStyleMultiSelect';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const stepGlobalDataAdded = {
   createTicket: false,
@@ -1529,11 +1530,14 @@ const LoadingTicket = ({
             </Box>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button size="small" variant="outlined" color="primary" onClick={() => setStatusToUpdate((prevState) => ({ ...prevState, open: false }))}>
+            <ThemeButton
+              onClick={() => setStatusToUpdate((prevState) => ({ ...prevState, open: false }))}
+              buttonType='transparent'
+            >
               Cancel
-            </Button>
-            <Button
-              size="small"
+            </ThemeButton>
+            <ThemeButton
+              disabled={statusToUpdate.isUpdating}
               onClick={() => {
                 setStatusToUpdate((prevState) => ({ ...prevState, isUpdating: true }));
                 axiosInstance()
@@ -1559,13 +1563,11 @@ const LoadingTicket = ({
                     toastConfig.setToastConfig(error);
                   });
               }}
-              disabled={statusToUpdate.isUpdating}
-              variant="contained"
-              color="primary"
+              buttonType='theme'
+              isLoading={statusToUpdate.isUpdating}
             >
-              {statusToUpdate.isUpdating ? <CircularProgress style={{ marginRight: '8px' }} size={20} color="inherit" /> : null}
               Change Status
-            </Button>
+            </ThemeButton>
           </CustomDialogFooter>
         </Dialog>
       )}

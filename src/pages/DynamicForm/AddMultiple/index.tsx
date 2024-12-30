@@ -7,7 +7,6 @@ import { isEmpty, isEqual } from 'lodash';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import CustomButton from '../../../components/Helpers/CustomButton';
 import ConfirmCancelDialog from 'src/components/ConfirmCancelDialog';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';

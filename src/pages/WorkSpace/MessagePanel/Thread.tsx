@@ -107,7 +107,7 @@ const Thread = ({ message, onClose, socket, channelId, deleteMessage, open, chan
           )}
         </div>
         <div className="footer">
-          <SendMessage channelId={channelId} socket={socket} messageId={message?._id} editorId={'from-thread'} channelData={channelData} />
+          <SendMessage channelId={channelId} socket={socket} parentMessageId={message?._id} editorId={'from-thread'} channelData={channelData} />
         </div>
 
         <MoreMenuAndDeleteConfirmDialog

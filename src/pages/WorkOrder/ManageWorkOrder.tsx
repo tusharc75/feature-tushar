@@ -1,5 +1,5 @@
-import { useState, useEffect, useContext, useRef, Fragment } from 'react';
-import { Box, Dialog, Button } from '@mui/material';
+import { useState, useEffect, useContext, Fragment } from 'react';
+import { Box, Dialog, } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Formik, Form } from 'formik';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
@@ -23,10 +23,10 @@ import { FaDiceOne } from 'react-icons/fa';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
-import CustomButton from '../../components/Helpers/CustomButton';
 import routes from 'src/components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
 import { ASSET_STATUS } from '../../constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const disabledFieldArray = ['type', 'product', 'warehouse', 'serializedAsset', 'status'];
 
@@ -238,7 +238,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
                             <Box marginY={2}>
                               <Grid spacing={3} container>
                                 {form.sectionFields.map((field, index2) => (
-                                  <Grid key={index2} side={{xs:12, sm:6, md:6}}>
+                                  <Grid key={index2} size={{ xs: 12, sm: 6, md: 6 }}>
                                     {field.fieldName === 'warehouse' ? (
                                       <FormTypes
                                         {...field}
@@ -358,10 +358,8 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  size="small"
+                <ThemeButton
+                  buttonType="transparent"
                   disabled={isSubmitting || loading}
                   onClick={() => {
                     if (!isEqual(values, initialData.values)) {
@@ -372,13 +370,11 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
                   }}
                 >
                   Cancel
-                </Button>
-                <CustomButton
+                </ThemeButton>
+                <ThemeButton
                   disabled={isSubmitting || loading}
-                  loading={loading}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+                  isLoading={loading}
+                  buttonType="theme"
                   onClick={(e) => {
                     e.preventDefault();
                     handleScroll(errors);
@@ -387,7 +383,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
                 >
                   {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog

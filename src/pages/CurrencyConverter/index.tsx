@@ -14,7 +14,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
-import CustomButton from '../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { getUniqueCurrencies } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
@@ -188,16 +188,10 @@ const CurrencyConverter = () => {
         <ListingPageHeader
           rightSideContents={
             currencyConverterPermissions.isUpdate ? (
-              <Button
-                onClick={handleUpdate}
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                size="small"
-                color="primary"
-                style={isMobile && !isTablet ? { color: 'var(--info)' } : {}}
-              >
+              <ThemeButton onClick={handleUpdate} buttonType="yellow">
                 {' '}
                 {isMobile && !isTablet ? <MdUpdate size={20} /> : 'Update'}{' '}
-              </Button>
+              </ThemeButton>
             ) : null
           }
           isActionButtonVisible={false}
@@ -214,7 +208,7 @@ const CurrencyConverter = () => {
                 padding: '10px 10px'
               }}
             >
-              <Grid size={{ xs: 12, sm: 8, md: 8}}>
+              <Grid size={{ xs: 12, sm: 8, md: 8 }}>
                 <Autocomplete
                   fullWidth
                   multiple
@@ -233,13 +227,13 @@ const CurrencyConverter = () => {
                   renderInput={(params) => (
                     <TextField {...params} margin="dense" size="small" variant="outlined" label="Currency in use" placeholder="Currency in use" />
                   )}
-                // renderOption={(option) => {
-                //   const { currencyCode, symbolNative, currencyName } = getUniqueCurrencies().find(d => d.currencyCode === option);
-                //   return `${currencyCode} - ${currencyName} - (${symbolNative})`
-                // }}
+                  // renderOption={(option) => {
+                  //   const { currencyCode, symbolNative, currencyName } = getUniqueCurrencies().find(d => d.currencyCode === option);
+                  //   return `${currencyCode} - ${currencyName} - (${symbolNative})`
+                  // }}
                 />
               </Grid>
-              <Grid size={{xs:12, md:4, sm:4}} container justifyContent="flex-end">
+              <Grid size={{ xs: 12, md: 4, sm: 4 }} container justifyContent="flex-end">
                 <FormControlLabel
                   control={<Checkbox name="required" checked={isApiUpdate} onChange={(e) => setIsApiUpdate(e.target.checked)} color="primary" />}
                   label="Auto Update Daily Through API"
@@ -251,11 +245,11 @@ const CurrencyConverter = () => {
             {option && option.length > 0 && (
               <Fragment>
                 <Grid container>
-                  <Grid size={{xs:12}} container justifyContent="flex-end">
-                    <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" onClick={getcurrencyrates} size="small">
+                  <Grid size={{ xs: 12 }} container justifyContent="flex-end">
+                    <ThemeButton isLoading={loading} disabled={loading} buttonType="theme" onClick={getcurrencyrates}>
                       {' '}
                       Fetch Rates
-                    </CustomButton>
+                    </ThemeButton>
                   </Grid>
                 </Grid>
                 <Box mt={1} border={1} p={1} borderColor="var(--common-border-color)" style={{ overflowX: 'auto' }}>

@@ -7,7 +7,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
@@ -114,8 +114,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
           accessor: element.fieldName,
           Header: element.fieldLabel,
           disableFilters: true,
-          Cell: ({ row }) =>
-            row.original[element.fieldName] ? <p>{displayDate(row.original[element.fieldName].slice(0, 10))}</p> : <NoDataCell />
+          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{displayDate(row.original[element.fieldName].slice(0, 10))}</p> : <NoDataCell />)
         });
       } else if (element.fieldName === 'supplierAccount') {
         coloum.push({
@@ -355,32 +354,28 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
               ) : (
                 <>
                   <HtmlTooltip title="Accept">
-                    <CustomButton
-                      loading={isSubmitting.accept}
-                      variant="contained"
-                      color="primary"
-                      size="small"
+                    <ThemeButton
+                      isLoading={isSubmitting.accept}
+                      buttonType="theme"
                       disabled={isSubmitting.accept}
                       onClick={() => {
                         setIsSubmitting({ accept: true, reject: false });
                       }}
                     >
                       Accept
-                    </CustomButton>
+                    </ThemeButton>
                   </HtmlTooltip>
                   <HtmlTooltip title="Reject">
-                    <CustomButton
-                      loading={isSubmitting.reject}
-                      variant="contained"
-                      color="primary"
-                      size="small"
+                    <ThemeButton
+                      isLoading={isSubmitting.reject}
+                      buttonType="theme"
                       disabled={isSubmitting.reject}
                       onClick={() => {
                         setIsSubmitting({ accept: false, reject: true });
                       }}
                     >
                       Reject
-                    </CustomButton>
+                    </ThemeButton>
                   </HtmlTooltip>
                 </>
               )}

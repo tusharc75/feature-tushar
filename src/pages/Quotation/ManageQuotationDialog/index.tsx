@@ -1,9 +1,9 @@
 import { useState, useEffect, useContext } from 'react';
 import { Formik, Form } from 'formik';
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import CustomButton from '../../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { useData } from '../../../StateProvider/Provider';
@@ -286,11 +286,8 @@ const ManageQuotationDialog = ({
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  type="button"
-                  variant="outlined"
-                  color="primary"
-                  size="small"
+                <ThemeButton
+buttonType="transparent"
                   onClick={() => {
                     if (!isEqual(values, initialData.values)) {
                       setShowConfirmDialog(true);
@@ -300,12 +297,10 @@ const ManageQuotationDialog = ({
                   }}
                 >
                   Cancel
-                </Button>
-                <CustomButton
-                  loading={loading}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+                </ThemeButton>
+                <ThemeButton
+                  isLoading={loading}
+buttonType="theme"
                   onClick={(e) => {
                     e.preventDefault();
                     handleScroll(errors);
@@ -315,7 +310,7 @@ const ManageQuotationDialog = ({
                 >
                   {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog

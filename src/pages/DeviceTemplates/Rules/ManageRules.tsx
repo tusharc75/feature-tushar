@@ -1,12 +1,12 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { Box, Button, Checkbox, Dialog, FormControlLabel, IconButton, TextField } from '@mui/material';
+import { Box, Checkbox, Dialog, FormControlLabel, IconButton, TextField } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { FieldArray, Form, Formik } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
@@ -406,11 +406,8 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                  <Button
-                    type="button"
-                    variant="outlined"
-                    color="primary"
-                    size="small"
+                  <ThemeButton
+buttonType="transparent"
                     onClick={() => {
                       if (isEqual(initialValue, values)) {
                         onClose();
@@ -420,11 +417,10 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
                     }}
                   >
                     Cancel
-                  </Button>
-                  <CustomButton
-                    loading={loading}
-                    variant="contained"
-                    color="primary"
+                  </ThemeButton>
+                  <ThemeButton
+                    isLoading={loading}
+buttonType="theme"
                     disabled={isEqual(initialValue, values)}
                     onClick={(e) => {
                       e.preventDefault();
@@ -432,7 +428,7 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
                     }}
                   >
                     Save
-                  </CustomButton>
+                  </ThemeButton>
                 </CustomDialogFooter>
 
                 {showConfirmDialog ? (

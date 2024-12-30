@@ -1,4 +1,4 @@
-import { Box, Button, Collapse, Grid, InputAdornment } from '@mui/material';
+import { Box, Collapse, Grid, InputAdornment } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import IconButton from '@mui/material/IconButton';
 import AddIcon from '@mui/icons-material/AddCircle';
@@ -532,9 +532,8 @@ const CreateProduct = (props) => {
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={`${
-                  productId && !isClone ? `Edit Product - ${values?.productName}` : productId && isClone ? `Clone - ${cloneHeading}` : `New Product`
-                }`}
+                title={`${productId && !isClone ? `Edit Product - ${values?.productName}` : productId && isClone ? `Clone - ${cloneHeading}` : `New Product`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -873,8 +872,8 @@ const CreateProduct = (props) => {
                                               imageOrFileUploadCompletePercentage={
                                                 ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                                   ? (completePercentage) => {
-                                                      setUploadingImageOrFileProgress(completePercentage);
-                                                    }
+                                                    setUploadingImageOrFileProgress(completePercentage);
+                                                  }
                                                   : null
                                               }
                                             />

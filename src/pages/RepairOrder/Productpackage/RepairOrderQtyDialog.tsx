@@ -1,5 +1,5 @@
 import { FC, useEffect, useState, Fragment, useRef } from 'react';
-import { Button, Dialog, Box } from '@mui/material';
+import { Dialog, Box } from '@mui/material';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -8,11 +8,11 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomButton from '../../../components/Helpers/CustomButton';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import InputField from 'src/components/Helpers/InputField';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -139,9 +139,8 @@ const RepairOrderQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, re
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType="transparent"
                   onClick={() => {
                     if (!isEqual(ref.current.values, initialData.values)) {
                       setShowConfirmDialog(true);
@@ -151,18 +150,15 @@ const RepairOrderQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, re
                   }}
                 >
                   {'Close'}
-                </Button>
-                <CustomButton
-                  loading={loading}
-                  disabled={loading || isEqual(ref?.current?.values, initialData.values)}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+                </ThemeButton>
+                <ThemeButton
+                  isLoading={loading}
+                  disabled={loading || isEqual(ref?.current?.values, initialData.values)}  
                   onClick={submitForm}
                 >
                   {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog

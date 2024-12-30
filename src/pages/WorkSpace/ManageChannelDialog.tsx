@@ -1,4 +1,4 @@
-import { Box, Button, FormControlLabel, FormLabel, Radio, RadioGroup, TextField } from '@mui/material';
+import { Box, FormControlLabel, FormLabel, Radio, RadioGroup, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
@@ -8,9 +8,9 @@ import DashboardModal from 'src/components/DashboardModal';
 import { object, string } from 'yup';
 import axiosInstance from '../../axios/axiosInstance';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
-import CustomButton from '../../components/Helpers/CustomButton';
 import { CustomDialogTransition } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ManageChannel = ({ onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -93,10 +93,8 @@ const ManageChannel = ({ onClose, onSuccess }) => {
             }}
             footer={
               <>
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  size="small"
+                <ThemeButton
+                  buttonType="transparent"
                   disabled={isSubmitting || loading}
                   onClick={() => {
                     if (!isEqual(values, initialValues)) {
@@ -107,13 +105,11 @@ const ManageChannel = ({ onClose, onSuccess }) => {
                   }}
                 >
                   Cancel
-                </Button>
-                <CustomButton
+                </ThemeButton>
+                <ThemeButton
                   disabled={isSubmitting || loading}
-                  loading={loading}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+                  isLoading={loading}
+                  buttonType="theme"
                   onClick={(e) => {
                     e.preventDefault();
                     handleScroll(errors);
@@ -122,7 +118,7 @@ const ManageChannel = ({ onClose, onSuccess }) => {
                 >
                   {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </>
             }
           >
@@ -130,7 +126,7 @@ const ManageChannel = ({ onClose, onSuccess }) => {
               <Form autoComplete="off" autoCorrect="off" noValidate>
                 <Box>
                   <Grid container spacing={1}>
-                    <Grid size={{xs:12}}>
+                    <Grid size={{ xs: 12 }}>
                       <TextField
                         variant="outlined"
                         type="text"
@@ -148,7 +144,7 @@ const ManageChannel = ({ onClose, onSuccess }) => {
                         }}
                       />
                     </Grid>
-                    <Grid size={{xs:12}}>
+                    <Grid size={{ xs: 12 }}>
                       <TextField
                         variant="outlined"
                         type="text"
@@ -165,7 +161,7 @@ const ManageChannel = ({ onClose, onSuccess }) => {
                         }}
                       />
                     </Grid>
-                    <Grid size={{xs:12, md:6, sm:6}}>
+                    <Grid size={{ xs: 12, md: 6, sm: 6 }}>
                       <FormLabel component="legend" required={true}>
                         Access
                       </FormLabel>

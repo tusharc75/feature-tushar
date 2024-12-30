@@ -3,7 +3,7 @@ import Box from '@mui/material/Box';
 import Checkbox from '@mui/material/Checkbox';
 import Dialog from '@mui/material/Dialog';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Grid2';
 import IconButton from '@mui/material/IconButton';
 import ControlPointIcon from '@mui/icons-material/ControlPoint';
 import ExpandLess from '@mui/icons-material/ExpandLess';
@@ -323,7 +323,7 @@ const BulkEditDialog = ({ productDataList, productBuilderId, handleClose, handle
                                 {section.sectionFields &&
                                   section.sectionFields.map((field) =>
                                     field.fieldName === 'priceTemplate' && !isShowProductTemplate ? (
-                                      <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                      <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
                                         <FormControlLabel
                                           control={
                                             <Checkbox
@@ -361,7 +361,7 @@ const BulkEditDialog = ({ productDataList, productBuilderId, handleClose, handle
                                         removeDisplayType={removeDisplayType}
                                       />
                                     ) : (
-                                      <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                      <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
                                         <Box display="flex">
                                           <Box flexGrow={1}>
                                             <FormTypes

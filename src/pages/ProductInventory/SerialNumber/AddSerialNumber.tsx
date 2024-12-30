@@ -8,7 +8,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { Formik, Form } from 'formik';
 import Autocomplete from '@mui/material/Autocomplete';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 
@@ -106,9 +106,9 @@ const AddSerialNumber = ({ handleClose, handleSucess, product, warehouse, serial
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="button" onClick={submitForm}>
+              <ThemeButton isLoading={loading} disabled={loading} buttonType="theme" onClick={submitForm}>
                 Add
-              </CustomButton>
+              </ThemeButton>
             </CustomDialogFooter>
           </Form>
         )}

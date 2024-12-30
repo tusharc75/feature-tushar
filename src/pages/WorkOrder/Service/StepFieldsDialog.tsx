@@ -1,7 +1,4 @@
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import ControlPointIcon from '@mui/icons-material/ControlPoint';
-import SettingsIcon from '@mui/icons-material/Settings';
-import { Box, Button, Dialog, IconButton, Typography } from '@mui/material';
+import { Box, Dialog, IconButton, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Theme } from '@mui/material/styles';
 import { makeStyles } from '@mui/styles';
@@ -12,7 +9,7 @@ import { FaDiceOne } from 'react-icons/fa';
 import { MdKeyboardArrowDown } from 'react-icons/md';
 import axiosInstance from 'src/axios/axiosInstance';
 import { AddField } from 'src/components/FormBuilder/AddField';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import DetailsPage from 'src/components/Shared/DetailsPage';
 import {
@@ -30,9 +27,6 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
-import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import styles from './StepFieldsDialog.module.scss';
-import { RenderPassFailChip } from './Steps';
 
 const useStyles = makeStyles((theme: Theme) => ({
   stepTags: {
@@ -448,28 +442,27 @@ const StepFieldsDialog = ({
                     {!isEditing ? (
                       <>
                         <Box ml={1} />
-                        <Button variant="outlined" size="small" onClick={handleClose} color="primary">
+                        <ThemeButton buttonType="transparent" onClick={handleClose}>
                           Cancel
-                        </Button>
+                        </ThemeButton>
                         <Box ml={1} />
                         {allowedToEdit && fieldData?.fields?.length > 0 && (
-                          <Button variant="contained" size="small" onClick={() => setEditing(true)} color="primary">
+                          <ThemeButton buttonType="theme" onClick={() => setEditing(true)}>
                             Edit
-                          </Button>
+                          </ThemeButton>
                         )}
                       </>
                     ) : (
                       <>
                         <Box ml={1} />
-                        <Button variant="outlined" size="small" onClick={handleClose} color="primary">
+                        <ThemeButton buttonType="transparent" onClick={handleClose}>
                           Cancel
-                        </Button>
+                        </ThemeButton>
                         <Box ml={1} />
-                        <CustomButton
+                        <ThemeButton
                           disabled={isSubmitting}
-                          loading={isSubmitting}
-                          variant="contained"
-                          color="primary"
+                          isLoading={isSubmitting}
+                          buttonType="theme"
                           onClick={() => {
                             setSaveAndComplete({ saveAndComplete: false, saveAndNextAndComplete: false });
                             submitForm();
@@ -477,15 +470,14 @@ const StepFieldsDialog = ({
                         >
                           {' '}
                           Save
-                        </CustomButton>
+                        </ThemeButton>
                         {!step?.isPassFail && (
                           <>
                             <Box ml={1} />
-                            <CustomButton
+                            <ThemeButton
                               disabled={isSubmitting}
-                              loading={isSubmitting}
-                              variant="contained"
-                              color="primary"
+                              isLoading={isSubmitting}
+                              buttonType="theme"
                               onClick={() => {
                                 setSaveAndComplete({ saveAndComplete: true, saveAndNextAndComplete: false });
                                 submitForm();
@@ -493,15 +485,14 @@ const StepFieldsDialog = ({
                             >
                               {' '}
                               Complete
-                            </CustomButton>
+                            </ThemeButton>
                             {nextStep && (
                               <>
                                 <Box ml={1} />
-                                <CustomButton
+                                <ThemeButton
                                   disabled={isSubmitting}
-                                  loading={isSubmitting}
-                                  variant="contained"
-                                  color="primary"
+                                  isLoading={isSubmitting}
+                                  buttonType="theme"
                                   onClick={() => {
                                     setSaveAndComplete({ saveAndComplete: true, saveAndNextAndComplete: true });
                                     submitForm();
@@ -509,7 +500,7 @@ const StepFieldsDialog = ({
                                 >
                                   {' '}
                                   Complete & Next
-                                </CustomButton>
+                                </ThemeButton>
                               </>
                             )}
                           </>

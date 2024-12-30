@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment, useRef } from 'react';
-import { Box, Button, CircularProgress, Menu, MenuItem, IconButton, useMediaQuery, Theme } from '@mui/material';
+import { Box, Button, Menu, MenuItem, IconButton, useMediaQuery, Theme } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
 import { useParams, useHistory } from 'react-router-dom';
@@ -22,6 +22,7 @@ import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { IoIosArrowDropdown } from 'react-icons/io';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -457,15 +458,14 @@ const PriceTemplate = () => {
                           <HistoryButton onClick={() => setShowHistory(true)} />
                           <Box>
                             {((id === '0' && priceTemplatePermissions.isCreate) || (id !== '0' && priceTemplatePermissions.isUpdate)) && (
-                              <Button
-                                disabled={isUpdating || !hasPermissionToUpdate}
-                                size="small"
-                                color="primary"
-                                onClick={submitForm}
-                                variant="contained"
-                              >
-                                Save{isUpdating && <CircularProgress size={24} />}
-                              </Button>
+                            <ThemeButton
+                              onClick={submitForm}
+                              disabled={isUpdating || !hasPermissionToUpdate}
+                              isLoading={isUpdating}
+                              buttonType='theme'
+                            >
+                              Save
+                            </ThemeButton>
                             )}
                           </Box>
                           <Box ml={1}>

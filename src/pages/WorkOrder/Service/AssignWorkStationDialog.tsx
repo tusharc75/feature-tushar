@@ -1,8 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
-import Button from '@mui/material/Button';
 import { CustomDialogTransition, workOrder } from 'src/constants/helpers';
 import { Box, Dialog, TextField } from '@mui/material';
-import CustomButton from 'src/components/Helpers/CustomButton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -11,6 +9,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import Autocomplete from '@mui/material/Autocomplete/Autocomplete';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import routes from 'src/components/Helpers/Routes';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const AssignWorkStationDialog = ({ warehouse, workOrderData, workStations, handleClose, handleSucess }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -105,13 +104,11 @@ const AssignWorkStationDialog = ({ warehouse, workOrderData, workStations, handl
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button variant="outlined" color="primary" size="small" onClick={handleClose}>
+        <ThemeButton buttonType="transparent" onClick={handleClose}>
           Cancel
-        </Button>
-        <CustomButton
-          variant="contained"
-          color="primary"
-          type="submit"
+        </ThemeButton>
+        <ThemeButton
+          buttonType="theme"
           onClick={(e) => {
             e.preventDefault();
             handleAssign();
@@ -119,7 +116,7 @@ const AssignWorkStationDialog = ({ warehouse, workOrderData, workStations, handl
         >
           {' '}
           Save
-        </CustomButton>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

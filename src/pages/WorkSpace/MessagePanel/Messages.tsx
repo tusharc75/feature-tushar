@@ -34,7 +34,7 @@ export const groupByDate = (messages: Message[]) => {
 const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, channelData }: MessagesProps) => {
   const [messages, setMessages] = useState<{ [key: string]: Message[] }>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [lastMessageId, setLastMessageId] = useState(null);
+  const [lastMessageSeen, setLastMessageSeen] = useState(null);
   const toastConfig = useContext(CustomToastContext);
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, _id: null });
   const [anchorEl, setAnchorEl] = useState(null);
@@ -42,35 +42,44 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, ch
   const [editingMessage, setEditingMessage] = useState(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const fetchMessages = async (after: string = null) => {
+  const fetchMessages = async (messageId: string = null, updateMessage: Boolean = false) => {
     try {
       let api = `/work-space/channel/message/${channelId}`;
-      if (after) {
-        api += `?after=${after}`;
+      if (updateMessage && messageId) {
+        api += `/${messageId}`;
+      } else if (messageId) {
+        api += `?after=${messageId}`;
       } else {
         setIsLoading(true);
       }
+
       const { data } = await axiosInstance().get(api);
 
       setMessages((prevMessages) => {
         let newMessages = data?.data || [];
-        if (after) {
-          return groupByDate([...Object.values(prevMessages).flat().slice(0, -1), ...newMessages]);
+        if (updateMessage) {
+          const updatedMessages: Message[] = Object?.values(prevMessages)?.flat();
+          const index: number = updatedMessages?.findIndex((message) => message._id === messageId);
+          updatedMessages[index] = data?.data;
+          return groupByDate(updatedMessages);
+        } else if (!updateMessage && messageId) {
+          return groupByDate([...Object?.values(prevMessages)?.flat()?.slice(0, -1), ...newMessages]);
         } else {
           return groupByDate(newMessages);
         }
       });
+
       setTimeout(() => {
         containerRef.current?.scrollTo(0, containerRef.current?.scrollHeight || 0);
       }, 100);
       setThreadDialogOpen((prevDialog) => {
-        if (prevDialog.open && (prevDialog.message?._id === after || !after)) {
+        if (prevDialog.open && (prevDialog.message?._id === messageId || !messageId)) {
           const updatedMessage = data?.data?.find((message) => message._id === prevDialog.message?._id);
           return { open: true, message: updatedMessage || prevDialog.message };
         }
         return prevDialog;
       });
-      if (data?.data?.length > 0) setLastMessageId(data.data[data.data.length - 1]?._id);
+      if (data?.data?.length > 0) setLastMessageSeen(data?.data[data.data.length - 1]?._id);
     } catch (error) {
       toastConfig.setToastConfig(error);
     } finally {
@@ -80,15 +89,11 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, ch
 
   useEffect(() => {
     if (socket) {
-      socket.on('fetchNewMessage', (messageId) => {
-        if (messageId) {
-          fetchMessages(messageId);
-        } else {
-          fetchMessages(lastMessageId);
-        }
+      socket.on('fetchUpdatedMessage', (messageId) => {
+        fetchMessages(messageId, true);
       });
-      socket.on('fetchMessages', () => {
-        fetchMessages();
+      socket.on('fetchMessages', (messageId) => {
+        fetchMessages(messageId);
       });
       socket.on('addReaction', ({ messageId, emoji, user }) => {
         setMessages((prevMessages) => {
@@ -120,7 +125,15 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, ch
         });
       });
     }
-  }, [socket, lastMessageId]);
+    return () => {
+      if (socket) {
+        socket.off('fetchUpdatedMessage');
+        socket.off('fetchMessages');
+        socket.off('addReaction');
+        socket.off('removeReaction');
+      }
+    };
+  }, [socket, channelId]);
 
   useEffect(() => {
     fetchMessages();
@@ -195,7 +208,7 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, ch
           </div>
         )}
       </div>
-      <SendMessage channelId={channelId} socket={socket} channelData={channelData} disabled={isLoading} />
+      <SendMessage channelId={channelId} socket={socket} channelData={channelData} disabled={isLoading} messageId={lastMessageSeen} />
       <MoreMenuAndDeleteConfirmDialog
         anchorEl={anchorEl}
         handleMenuClose={handleMenuClose}

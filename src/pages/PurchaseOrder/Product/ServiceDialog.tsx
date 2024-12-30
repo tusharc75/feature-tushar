@@ -1,5 +1,5 @@
 import { useEffect, useState, Fragment, useRef } from 'react';
-import { Button, Dialog, Box } from '@mui/material';
+import { Dialog, Box } from '@mui/material';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -8,7 +8,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomButton from '../../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import InputField from 'src/components/Helpers/InputField';
@@ -159,22 +159,19 @@ const ServiceDialog = ({ onClose, purchaseOrderData, handleUpdateService, servic
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+buttonType="transparent"
                   onClick={() => {
                     onClose();
                   }}
                 >
                   {'Close'}
-                </Button>
+                </ThemeButton>
                 {bulkEdit === false && showSaveAndNext && (
-                  <CustomButton
-                    loading={loadingEdit}
+                  <ThemeButton
+                    isLoading={loadingEdit}
                     disabled={loadingEdit}
-                    variant="contained"
-                    color="primary"
-                    type="submit"
+buttonType="theme"
                     onClick={() => {
                       setSaveAndNext(true);
                       submitForm();
@@ -182,22 +179,20 @@ const ServiceDialog = ({ onClose, purchaseOrderData, handleUpdateService, servic
                   >
                     {' '}
                     Save & Next
-                  </CustomButton>
+                  </ThemeButton>
                 )}
-                <CustomButton
+                <ThemeButton
                   id={'dialog-save-button'}
-                  loading={loadingEdit}
+                  isLoading={loadingEdit}
                   disabled={loadingEdit}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+buttonType="theme"
                   onClick={() => {
                     setSaveAndNext(false);
                     submitForm();
                   }}
                 >
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
             </Fragment>
           )}

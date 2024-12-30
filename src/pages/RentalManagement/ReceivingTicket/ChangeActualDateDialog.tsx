@@ -87,9 +87,9 @@ const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, isBulkUp
           initialValues={
             data?.isAllowedStartDate && data?.isAllowedEndDate
               ? {
-                  manualStartDate: new Date(data?.manualStartDate),
-                  manualEndDate: new Date(data?.manualEndDate)
-                }
+                manualStartDate: new Date(data?.manualStartDate),
+                manualEndDate: new Date(data?.manualEndDate)
+              }
               : data?.isAllowedStartDate
                 ? { manualStartDate: new Date(data?.manualStartDate) }
                 : data?.isAllowedEndDate
@@ -118,7 +118,7 @@ const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, isBulkUp
                 <Box p={2}>
                   <Grid container spacing={2}>
                     {data?.isAllowedStartDate && (
-                      <Grid size={{xs:12, sm:12}}>
+                      <Grid size={{ xs: 12, sm: 12 }}>
                         <FormTypes
                           size="small"
                           fullWidth
@@ -137,7 +137,7 @@ const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, isBulkUp
                       </Grid>
                     )}
                     {data?.isAllowedEndDate && (
-                      <Grid size={{xs:12, sm:12}}>
+                      <Grid size={{ xs: 12, sm: 12 }}>
                         <FormTypes
                           size="small"
                           fullWidth

@@ -1,9 +1,9 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
 import { Formik, Form } from 'formik';
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import CustomButton from '../../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { useData } from '../../../StateProvider/Provider';
@@ -209,11 +209,8 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                  <Button
-                    type="button"
-                    variant="outlined"
-                    color="primary"
-                    size="small"
+                  <ThemeButton
+                    buttonType="transparent"
                     onClick={() => {
                       if (isEqual(initialData.values, values)) {
                         onClose();
@@ -223,11 +220,10 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
                     }}
                   >
                     Cancel
-                  </Button>
-                  <CustomButton
-                    loading={loading}
-                    variant="contained"
-                    color="primary"
+                  </ThemeButton>
+                  <ThemeButton
+                    isLoading={loading}
+                    buttonType="theme"
                     disabled={loading}
                     onClick={(e) => {
                       e.preventDefault();
@@ -236,7 +232,7 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
                     }}
                   >
                     Save
-                  </CustomButton>
+                  </ThemeButton>
                 </CustomDialogFooter>
                 {showConfirmDialog ? (
                   <ConfirmCancelDialog

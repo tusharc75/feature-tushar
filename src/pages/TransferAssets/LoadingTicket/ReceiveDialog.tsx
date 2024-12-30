@@ -1,5 +1,4 @@
 import React, { useContext, useEffect, useState } from 'react';
-import Button from '@mui/material/Button';
 import { Box } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import { Form, Formik } from 'formik';
@@ -13,12 +12,12 @@ import {
   displayDate
 } from 'src/constants/helpers';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import CustomButton from 'src/components/Helpers/CustomButton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { uniq, map } from 'lodash';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import CustomDatePicker from 'src/components/CustomDatePicker';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ReceiveDialog = ({ handleClose, selectedRecords, handleSuccess, transferAssetId, type }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -159,12 +158,12 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSuccess, transferAs
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button color="primary" size="small" onClick={handleClose}>
+              <ThemeButton  buttonType="transparent"  onClick={handleClose}>
                 Cancel
-              </Button>
-              <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit" onClick={submitForm}>
+              </ThemeButton>
+              <ThemeButton isLoading={loading} disabled={loading}    buttonType="theme" onClick={submitForm}>
                 {'Receive'}
-              </CustomButton>
+              </ThemeButton>
             </CustomDialogFooter>
           </Form>
         )}

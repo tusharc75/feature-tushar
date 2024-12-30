@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import { Box, Checkbox, FormControlLabel, Typography, Button, CircularProgress, Theme } from '@mui/material';
+import { Box, Checkbox, FormControlLabel, Typography, Theme } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
 import Table from '@mui/material/Table';
@@ -12,6 +12,7 @@ import { BsEnvelopeOpen, BsDisplay } from 'react-icons/bs';
 import styles from '../profilePage.module.scss';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const useStyles = makeStyles((theme: Theme) => ({
   tableCell: {
@@ -155,31 +156,26 @@ export default function NotificationPreference({ notificationPreferenceData, use
         <div className="header-panel">
           <div className="flex flex-wrap justify-end gap-[8px]">
             {isEdit && (
-              <Button
-                disabled={isUpdating}
-                variant="contained"
-                color="primary"
-                size="small"
+              <ThemeButton
                 onClick={() => {
                   updateNotificationPref();
                 }}
+                disabled={isUpdating}
+                isLoading={isUpdating}
+                buttonType='theme'
               >
-                {isUpdating && <CircularProgress size={22} />}
                 Update
-              </Button>
+              </ThemeButton>
             )}
             {!isEdit && (
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
+              <ThemeButton
                 onClick={() => {
                   setIsEdit(!isEdit);
                 }}
+                buttonType='theme'
               >
-                {isUpdating && <CircularProgress size={22} />}
                 Edit
-              </Button>
+              </ThemeButton>
             )}
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog } from '@mui/material';
+import { Box, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -16,6 +16,7 @@ import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema, termsAndCondition } from '../../constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ManageTermsAndCondition = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null }) => {
   const history = useHistory();
@@ -141,13 +142,12 @@ const ManageTermsAndCondition = ({ onClose, onSuccess, isClone = false, id = nul
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${
-                  id
-                    ? isClone
-                      ? `Clone - ${cloneHeading}`
-                      : `Update ${initialData.values?.name ? `(${initialData.values?.name})` : ''}`
-                    : `Create ${resources?.termsAndConditions?.titleSingular}`
-                }`}
+                title={`${id
+                  ? isClone
+                    ? `Clone - ${cloneHeading}`
+                    : `Update ${initialData.values?.name ? `(${initialData.values?.name})` : ''}`
+                  : `Create ${resources?.termsAndConditions?.titleSingular}`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -168,29 +168,24 @@ const ManageTermsAndCondition = ({ onClose, onSuccess, isClone = false, id = nul
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
-                  disabled={submitting}
+                <ThemeButton
+                  buttonType='transparent'
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
                 >
                   Cancel
-                </Button>
-                <Button
+                </ThemeButton>
+                <ThemeButton
+                  buttonType='theme'
                   disabled={loading || submitting}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
-                  size="small"
                   onClick={submitForm}
-                  endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                  isLoading={submitting}
                 >
-                  {' '}
                   Save
-                </Button>
+                </ThemeButton>
+
               </CustomDialogFooter>
               {showConfirmDialog && (
                 <ConfirmationCancelDialog

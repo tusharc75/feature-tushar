@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
 import { Formik, Form } from 'formik';
-import { Box, Button, CircularProgress } from '@mui/material';
+import { Box } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
 import Dialog from '@mui/material/Dialog';
 import { isEqual } from 'lodash';
@@ -9,13 +9,13 @@ import ConfirmCancelDialog from 'src/components/ConfirmCancelDialog';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomButton from 'src/components/Helpers/CustomButton';
 import { getObjKeysWithValues, getObjKeys, CustomDialogTransition, yupSchema, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import { useData } from 'src/StateProvider/Provider';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ManageTruckMaster = ({ isClone = false, id = null, onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -183,12 +183,9 @@ const ManageTruckMaster = ({ isClone = false, id = null, onClose, onSuccess }) =
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
+                <ThemeButton
                   disabled={submitting}
-                  type="button"
-                  variant="outlined"
-                  color="primary"
-                  size="small"
+                  buttonType="transparent"
                   onClick={() => {
                     if (!isEqual(values, initialData.values)) {
                       setShowConfirmDialog(true);
@@ -198,12 +195,10 @@ const ManageTruckMaster = ({ isClone = false, id = null, onClose, onSuccess }) =
                   }}
                 >
                   Cancel
-                </Button>
-                <CustomButton
-                  loading={loading}
-                  variant="contained"
-                  color="primary"
-                  startIcon={submitting && <CircularProgress size={20} color="inherit" />}
+                </ThemeButton>
+                <ThemeButton
+                  isLoading={loading}
+                  buttonType="theme"
                   disabled={submitting}
                   onClick={(e) => {
                     e.preventDefault();
@@ -212,7 +207,7 @@ const ManageTruckMaster = ({ isClone = false, id = null, onClose, onSuccess }) =
                   }}
                 >
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog

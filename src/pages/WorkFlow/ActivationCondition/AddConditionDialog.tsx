@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog, TextField } from '@mui/material';
+import { Box, Dialog, TextField } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import { useContext, useEffect, useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -10,6 +10,7 @@ import { Form, Formik } from 'formik';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ConditionDialog = ({ onClose, data, fields, activationCondition, onSuccess, id }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -218,20 +219,22 @@ const ConditionDialog = ({ onClose, data, fields, activationCondition, onSuccess
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button size="small" onClick={onClose} disabled={submitting} color="primary">
+
+
+              <ThemeButton
+                buttonType='transparent'
+                onClick={onClose}
+              >
                 Cancel
-              </Button>
-              <Button
-                size="small"
-                type="submit"
+              </ThemeButton>
+              <ThemeButton
+                buttonType='theme'
                 disabled={submitting}
-                color="primary"
-                variant="contained"
                 onClick={submitForm}
-                endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                isLoading={submitting}
               >
                 Save
-              </Button>
+              </ThemeButton>
             </CustomDialogFooter>
           </>
         )}

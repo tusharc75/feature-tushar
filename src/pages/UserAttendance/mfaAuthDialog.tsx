@@ -1,4 +1,4 @@
-import { Button, CircularProgress, Dialog, TextField } from '@mui/material';
+import { Dialog, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { useContext, useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -10,6 +10,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const schema = object().shape({
   employeeNumber: string().required('Please enter employee number'),
@@ -59,7 +60,7 @@ function MfaAuthDialog({ onClose }) {
             <CustomDialogContent>
               <Form autoComplete="off" autoCorrect="off" noValidate>
                 <Grid container spacing={2}>
-                  <Grid size={{xs:12}}>
+                  <Grid size={{ xs: 12 }}>
                     <TextField
                       label="Employee Number"
                       name="employeeNumber"
@@ -74,7 +75,7 @@ function MfaAuthDialog({ onClose }) {
                       helperText={touched.employeeNumber && errors.employeeNumber}
                     />
                   </Grid>
-                  <Grid size={{xs:12}}>
+                  <Grid size={{ xs: 12 }}>
                     <TextField
                       label="OTP"
                       name="otp"
@@ -93,12 +94,22 @@ function MfaAuthDialog({ onClose }) {
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button size="small" onClick={onClose} variant="outlined">
+
+
+              <ThemeButton
+                buttonType='transparent'
+                onClick={onClose}
+              >
                 Cancel
-              </Button>
-              <Button disabled={isSubmitting} type="submit" color="primary" variant="contained" size="small" onClick={submitForm}>
-                {isSubmitting ? <CircularProgress size={22} /> : 'Process'}
-              </Button>
+              </ThemeButton>
+              <ThemeButton
+                buttonType='theme'
+                disabled={isSubmitting}
+                onClick={submitForm}
+                isLoading={isSubmitting}
+              >
+                Save
+              </ThemeButton>
             </CustomDialogFooter>
           </div>
         )}

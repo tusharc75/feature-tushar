@@ -1,10 +1,10 @@
-import { Box, Button, Dialog, TextField } from '@mui/material';
+import { Box, Dialog, TextField } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Form, Formik } from 'formik';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomDialogTransition, MATERIAL_REQUEST_STATUS, PRODUCT_SERIAL_NUMBER_STATUS } from 'src/constants/helpers';
 
 function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
@@ -116,20 +116,17 @@ function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
               />
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button
-                type="button"
-                variant="outlined"
-                color="primary"
-                size="small"
+              <ThemeButton
+                buttonType="transparent"
                 onClick={() => {
                   onClose();
                 }}
               >
                 Cancel
-              </Button>
-              <CustomButton loading={loading} variant="contained" color="primary" disabled={loading} type="submit">
+              </ThemeButton>
+              <ThemeButton isLoading={loading} buttonType="theme" disabled={loading} type="submit">
                 Submit
-              </CustomButton>
+              </ThemeButton>
             </CustomDialogFooter>
           </Form>
         )}

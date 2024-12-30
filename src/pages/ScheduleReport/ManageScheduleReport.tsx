@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext, useRef } from 'react';
-import { Dialog, Box, Button, TextField, Typography, CircularProgress } from '@mui/material';
+import { Dialog, Box, TextField, Typography, CircularProgress } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Autocomplete, ToggleButtonGroup, ToggleButton } from '@mui/material';
 import { Form, Formik, FormikProps } from 'formik';
@@ -16,6 +16,7 @@ import Loader from 'src/components/Loader';
 import { useData } from '../../StateProvider/Provider';
 import { camelCase, isEmpty, kebabCase } from 'lodash';
 import React from 'react';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 type ValueTypes = {
   scheduleName: string;
@@ -476,7 +477,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                   </div>
                   <Box my={2}>
                     <Grid container spacing={2}>
-                      <Grid size={{xs:12, sm:6}}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
                         <TextField
                           value={values.scheduleName}
                           required
@@ -490,7 +491,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                           helperText={touched['scheduleName'] && errors['scheduleName']}
                         />
                       </Grid>
-                      <Grid size={{xs:12, sm:6}}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
                         <Autocomplete
                           options={resourceOption}
                           fullWidth
@@ -528,7 +529,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                   </div>
                   <Box my={2}>
                     <Grid container spacing={2}>
-                      <Grid size={{xs:12, sm:6}}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
                         <Autocomplete
                           options={filterOptions}
                           fullWidth
@@ -577,7 +578,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                         setStatusPeriodDate={setStatusPeriodDate}
                         setStatusTimeFrame={setStatusTimeFrame}
                       />
-                      <Grid size={{xs:12, sm:6}}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
                         <Autocomplete
                           options={resourceColumns.map((item) => item.fieldData)}
                           fullWidth
@@ -618,7 +619,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                   </div>
                   <Box my={2}>
                     <Grid container spacing={2}>
-                      <Grid size={{xs:12, sm:6}}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
                         <Autocomplete
                           options={sharepointOptions ? ['Email', 'Sharepoint Upload'] : ['Email']}
                           fullWidth
@@ -640,7 +641,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                           )}
                         />
                       </Grid>
-                      <Grid size={{xs:12, sm:6}}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
                         <Autocomplete
                           options={['xslx', 'csv']}
                           fullWidth
@@ -667,7 +668,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                   <Box my={2}>
                     <Grid container spacing={2}>
                       {values?.reportAction === 'Email' && (
-                        <Grid size={{xs:12, sm:6}}>
+                        <Grid size={{ xs: 12, sm: 6 }}>
                           <Autocomplete
                             options={usersList}
                             fullWidth
@@ -692,7 +693,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                         </Grid>
                       )}
                       {values?.reportAction === 'Sharepoint Upload' && sharepointOptions && (
-                        <Grid size={{xs:12, sm:6}}>
+                        <Grid size={{ xs: 12, sm: 6 }}>
                           <Autocomplete
                             options={sharepointOptions}
                             fullWidth
@@ -719,7 +720,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                   </Box>
                   <Box my={2}>
                     <Grid container spacing={2}>
-                      <Grid size={{xs:12}}>
+                      <Grid size={{ xs: 12 }}>
                         <Box>
                           <Typography color="textPrimary">Schedule Frequency</Typography>
                           <Box mt={1} />
@@ -797,7 +798,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                           )}
                         </Box>
                       </Grid>
-                      <Grid size={{xs:12, sm:6}}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
                         <Autocomplete
                           options={getTimeOption()}
                           fullWidth
@@ -825,19 +826,21 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                   </Box>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                  <Button disabled={isSubmitting} color="primary" size="small" onClick={handleClose}>
+
+                  <ThemeButton
+                    buttonType='transparent'
+                    onClick={handleClose}
+                  >
                     Cancel
-                  </Button>
-                  <Button
-                    startIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
+                  </ThemeButton>
+                  <ThemeButton
+                    buttonType='theme'
                     disabled={isSubmitting}
-                    variant="contained"
-                    color="primary"
-                    size="small"
                     onClick={submitForm}
+                    isLoading={isSubmitting}
                   >
                     {id ? 'Update' : 'Save'}
-                  </Button>
+                  </ThemeButton>
                 </CustomDialogFooter>
               </Form>
             </>

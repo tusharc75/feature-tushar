@@ -1,6 +1,5 @@
 import { useState, Fragment, useContext } from 'react';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import { Formik, Form } from 'formik';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
@@ -8,7 +7,7 @@ import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter
 import Dialog from '@mui/material/Dialog';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomButton from '../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import TextField from '@mui/material/TextField';
 import { object, string } from 'yup';
 import { useHistory } from 'react-router-dom';
@@ -102,13 +101,13 @@ const CreateNewDialog = (props) => {
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button size="small" color="primary" onClick={handleClose}>
+              <ThemeButton buttonType="transparent" onClick={handleClose}>
                 Cancel
-              </Button>
-              <CustomButton loading={loading} variant="contained" color="primary" type="submit" size="small" onClick={submitForm}>
+              </ThemeButton>
+              <ThemeButton isLoading={loading} buttonType="theme" onClick={submitForm}>
                 {' '}
                 Save
-              </CustomButton>
+              </ThemeButton>
             </CustomDialogFooter>
           </Fragment>
         )}

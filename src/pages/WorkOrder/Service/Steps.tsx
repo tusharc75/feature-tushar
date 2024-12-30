@@ -132,12 +132,6 @@ const useStyles = makeStyles((theme: Theme) => ({
       alignItems: 'center',
       justifyContent: 'space-between'
     }
-    // '&:first-of-type': {
-    //   borderRadius: '8px 8px 0 0'
-    // }
-    // '&:last-of-type': {
-    //   borderRadius: '0 0 8px 8px'
-    // }
   },
   badge: {
     backgroundColor: 'var(--primary)',

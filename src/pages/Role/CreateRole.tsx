@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Dialog, Button, CircularProgress, Box, TextField, Paper, useTheme } from '@mui/material';
+import { Dialog, Button, Box, TextField, Paper, useTheme } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { useHistory } from 'react-router-dom';
 import { Autocomplete, Skeleton } from '@mui/material';
@@ -14,6 +14,7 @@ import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from '../../StateProvider/Provider';
 import ImportExportRole from 'src/pages/Role/ImportExportRole';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selectedEntity, isClone = false, roleId = null }) => {
   const {
@@ -215,7 +216,7 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
             <Skeleton width="100%" height="70px" />
             <Grid container spacing={2}>
               {[1, 2, 3, 4, 5, 6, 7].map((i) => (
-                <Grid key={i} size={{xs:12, sm:6, md:6}}>
+                <Grid key={i} size={{ xs: 12, sm: 6, md: 6 }}>
                   <Skeleton width="100%" height="60px" />
                 </Grid>
               ))}
@@ -333,27 +334,23 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
             </Box>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button
-              variant="outlined"
-              color="primary"
-              size="small"
-              disabled={isSubmitting}
+            <ThemeButton
+              buttonType='transparent'
               onClick={() => {
                 if ((Boolean(!values.name) && Boolean(!values.description)) || Boolean(!values.tier)) close();
                 else setShowConfirmDialog(true);
               }}
             >
               Cancel
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={handleSubmit}
+            </ThemeButton>
+            <ThemeButton
+              buttonType='theme'
               disabled={isSubmitting || Boolean(!values.name) || Boolean(!values.description) || Boolean(!values.tier)}
+              onClick={handleSubmit}
+              isLoading={isSubmitting}
             >
-              {isSubmitting ? <CircularProgress size={22} /> : 'Submit'}
-            </Button>
+              Save
+            </ThemeButton>
           </CustomDialogFooter>
           {showConfirmDialog ? (
             <ConfirmCancelDialog

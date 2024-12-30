@@ -1,6 +1,5 @@
 import React, { useState, useContext } from 'react';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid2';
 import { Formik, Form } from 'formik';
 import { object, string } from 'yup';
@@ -10,7 +9,7 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import axiosInstance from '../../../axios/axiosInstance';
-import CustomButton from '../../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { IconButton, TextField } from '@mui/material';
 import Visibility from '@mui/icons-material/Visibility';
@@ -251,14 +250,13 @@ export default function ManageUpdateEmailAndPassword({
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button type="button" variant="outlined" color="primary" size="small" onClick={onClose}>
+              <ThemeButton buttonType="transparent" onClick={onClose}>
                 Cancel
-              </Button>
+              </ThemeButton>
 
-              <CustomButton
-                loading={loading}
-                variant="contained"
-                color="primary"
+              <ThemeButton
+                isLoading={loading}
+buttonType="theme"
                 disabled={loading ? true : (isUpdateEmail && values.email === userData.email) || false}
                 onClick={() => {
                   if (isUpdatePassword) {
@@ -273,7 +271,7 @@ export default function ManageUpdateEmailAndPassword({
                 }}
               >
                 Update
-              </CustomButton>
+              </ThemeButton>
             </CustomDialogFooter>
           </>
         )}

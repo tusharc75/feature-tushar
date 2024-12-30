@@ -1,9 +1,8 @@
 import { useState, useEffect, useContext, useRef } from 'react';
 import { Formik, Form } from 'formik';
-import { Box, Button, CircularProgress } from '@mui/material';
+import { Box } from '@mui/material';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import CustomButton from '../../../components/Helpers/CustomButton';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -27,6 +26,7 @@ import { isEqual } from 'lodash';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 import InputField from 'src/components/Helpers/InputField';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSuccess, referenceType = null, referenceData = null }) => {
   const history = useHistory();
@@ -263,13 +263,10 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
+                <ThemeButton
                   disabled={submitting}
-                  type="button"
-                  variant="outlined"
-                  color="primary"
+                  buttonType="transparent"
                   id="dialog-cancel-button"
-                  size="small"
                   onClick={() => {
                     if (isEqual(values, initialData.values)) {
                       onClose();
@@ -279,20 +276,18 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
                   }}
                 >
                   Cancel
-                </Button>
-                <CustomButton
-                  loading={loading}
-                  variant="contained"
+                </ThemeButton>
+                <ThemeButton
+                  isLoading={loading}
+                  buttonType="theme"
                   id="dialog-save-button"
-                  color="primary"
-                  startIcon={submitting && <CircularProgress size={20} color="inherit" />}
                   disabled={submitting}
                   onClick={(e) => {
                     submitForm();
                   }}
                 >
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog && (
                 <ConfirmCancelDialog

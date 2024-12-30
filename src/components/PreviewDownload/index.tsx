@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, useMediaQuery } from '@mui/material';
+import { Box, Dialog, useMediaQuery } from '@mui/material';
 import { useContext, useState } from 'react';
 import { MdEmail } from 'react-icons/md';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
