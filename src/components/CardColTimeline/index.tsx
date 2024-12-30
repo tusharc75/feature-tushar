@@ -154,6 +154,8 @@ const CardColTimeline = <D,>({
                   state={state}
                   dispatch={dispatch}
                   fetchSingleColumn={fetchSingleColumn}
+                  background={background}
+                  color={color}
                 />
               </div>
             </div>

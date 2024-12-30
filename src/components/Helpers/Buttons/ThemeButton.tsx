@@ -2,11 +2,7 @@ import { Button, ButtonProps, CircularProgress, useMediaQuery } from '@mui/mater
 import React, { ReactNode, useMemo } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
-type MButtonProps = Omit<ButtonProps, 'variant' | 'color'>;
-type BackgroundColors = ButtonProps['color'] | 'yellow' | 'theme';
-type BorderColors = 'none' | 'theme' | 'red' | 'yellow' | 'default';
-type TextColors = 'primary' | 'red' | 'white' | 'theme';
-
+type MButtonProps = Omit<ButtonProps, 'variant' | 'color' | 'size'>;
 type ButtonTypes = 'default' | 'yellow' | 'theme' | 'red' | 'transparent' | 'themeBorder';
 
 export type ButtonType = {
@@ -67,8 +63,11 @@ const getButtonStyle = ({ buttonType = 'default', mode = 'dark', iconForMobile =
         ...buttonProps.sx,
         ...(mode === 'dark' ? { background: 'var(--dark-primary, white)' } : { background: 'var(--dark-secondary, white)' }),
         border: '1px solid var(--common-border-color)',
+        color: 'var(--outlined-button-text)',
         '&:disabled': {
-          backgroundColor: '#e5e5e5',
+          backgroundColor: 'var(--outlined-button-disabled-bg)',
+          borderWidth: 0,
+          color: 'var(--outlined-button-disabled-text)'
         }
       };
       break;
@@ -126,7 +125,7 @@ const getButtonStyle = ({ buttonType = 'default', mode = 'dark', iconForMobile =
       buttonProps.variant = 'outlined';
       buttonProps.sx = {
         ...buttonProps.sx,
-        border: '2px solid var(--new-theme-color)',
+        border: '1px solid var(--new-theme-color)',
         color: 'var(--new-theme-color)',
         '&:hover': {
           backgroundColor: 'var(--new-theme-color)',

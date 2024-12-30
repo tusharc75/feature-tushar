@@ -17,7 +17,7 @@ const NewActionButton = <D,>({ items, itemsVisibleCount = 2, disabled, ...rest }
       {visibleItems.map((item) => {
         const { label, ...rest } = item;
         return (
-          <ThemeButton borderColor="theme" textColor="theme" key={item.label} iconForMobile={false} {...(rest as any)}>
+          <ThemeButton buttonType="themeBorder" key={item.label} iconForMobile={false} {...(rest as any)}>
             {label}
           </ThemeButton>
         );
