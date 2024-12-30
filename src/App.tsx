@@ -140,7 +140,6 @@ import Job from './pages/Job';
 import JobDetail from './pages/Job/JobDetail';
 import Leads from './pages/Leads';
 import LeadDetailsPage from './pages/Leads/LeadDetailsPage';
-import NewLead from './pages/Leads/NewLead';
 import MarketSegment from './pages/MarketSegment';
 import MarketSegmentDetail from './pages/MarketSegment/MarketSegmentDetail';
 import MaterialHandling from './pages/MaterialHandling';
@@ -349,7 +348,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
     return () => {
       clearInterval(notificationInterval);
     };
@@ -494,9 +493,6 @@ function App() {
               </PrivateRoute>
               <PrivateRoute exact path={`${routes.leadDetail.path}/:id`}>
                 <LeadDetailsPage />
-              </PrivateRoute>
-              <PrivateRoute exact path="/new-lead">
-                <NewLead />
               </PrivateRoute>
               <PrivateRoute exact path={routes.opportunity.path}>
                 <Opportunities />

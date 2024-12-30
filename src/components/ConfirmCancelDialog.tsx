@@ -1,12 +1,12 @@
 import CloseIcon from '@mui/icons-material/Close';
 import { Theme, Typography } from '@mui/material';
-import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
 import { makeStyles } from '@mui/styles';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomDialogTransition } from 'src/constants/helpers';
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -62,12 +62,21 @@ export default function ConfirmationCancelDialog({ onClose, onSave, open }: Conf
         <Typography>Do you want to save changes or leave?</Typography>
       </DialogContent>
       <DialogActions className="bg-[#ebebeb] dark:bg-[#1a1a26]">
-        <Button title="Leave Form" id="confirm-dialog-cancel-button" size="small" autoFocus onClick={onClose} color="primary">
+        <ThemeButton
+          buttonType='transparent'
+          onClick={onClose}
+          autoFocus
+          id="confirm-dialog-cancel-button"
+        >
           Leave
-        </Button>
-        <Button title="Save and Close" size="small" id="confirm-dialog-confirm-button" onClick={onSave} color="primary">
+        </ThemeButton>
+        <ThemeButton
+          buttonType='theme'
+          onClick={onSave}
+          id="confirm-dialog-confirm-button"
+        >
           Save
-        </Button>
+        </ThemeButton>
       </DialogActions>
     </Dialog>
   );
