@@ -20,7 +20,7 @@ export type Items<D> = {
   endIcon?: React.ReactNode;
   value?: D;
   visible?: boolean;
-} & Omit<MenuItemProps, 'children' | 'button'>;
+} & Omit<MenuItemProps, 'children'>;
 
 const ButtonMenu = <D,>({
   items,
@@ -79,7 +79,6 @@ const ButtonMenu = <D,>({
           return (
             <MenuItem
               key={index}
-              button={true}
               onClick={(e) => {
                 onClick?.(e);
                 onItemClick?.(e, item);

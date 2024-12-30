@@ -56,8 +56,7 @@ const getButtonStyle = ({
   const buttonProps: ButtonProps = {
     sx: {
       height: '32px',
-      fontSize: '14.7px',
-      lineHeight: '17px',
+      fontSize: '13px',
       gap: '5px',
       '& .MuiButton-icon': { margin: 0 },
       '& .MuiButton-endIcon': { marginRight: '-5px' },
