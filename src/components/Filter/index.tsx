@@ -242,7 +242,7 @@ const Filter = ({
         className={cn(
           ' [--px:20px] [--py:20px] md:[--px:37px] md:[--py:21px]',
           isMobile
-            ? '[--container-max-h:calc(100vh-160px)]  [--content-max-h:calc(100vh-237px)]'
+            ? '[--container-max-h:calc(100vh-212px)]  [--content-max-h:calc(100vh-280px)]'
             : '[--container-max-h:500px] [--content-max-h:433px]'
         )}
       >
@@ -258,8 +258,46 @@ const Filter = ({
             <Close />
           </IconButton>
         </div>
-        <CustomDialogContent className="relative !px-[--px] !py-[--py] pt-0 [--sidebar-width:285px]">
-          <div className={cn('grid overflow-hidden rounded-lg border', isMobile ? 'relative' : 'grid-cols-[var(--sidebar-width)1fr]')}>
+        <CustomDialogContent className="relative !px-[--px] !py-[--py] !pt-0 [--sidebar-width:285px]">
+          {isVisibleFilterSet && (
+            <div className="rounded-t-lg border-l border-r border-t px-[15px] py-2">
+              <Autocomplete
+                id={`filter-set`}
+                options={userFilters}
+                autoHighlight
+                renderOption={(props, option, state, ownerState) => {
+                  const { key, ...optionProps } = props;
+                  return (
+                    <Box component="li" key={key} {...optionProps}>
+                      <div className="flex w-full justify-between">
+                        <div>{option?.title}</div>
+                        <div>
+                          <HtmlTooltip title={'Delete'} placement="top" arrow enterTouchDelay={0}>
+                            <IconButton size="small" onClick={() => setIsFilterDeleteConfirm({ open: true, ids: [option._id] })}>
+                              <RiDeleteBin6Fill />
+                            </IconButton>
+                          </HtmlTooltip>
+                        </div>
+                      </div>
+                    </Box>
+                  );
+                }}
+                onChange={(_, newValue: any) => {
+                  handleSelectfilterSet(newValue || null);
+                }}
+                getOptionLabel={(option) => option?.title || ''}
+                value={selectedUserFilter}
+                renderInput={(params) => <TextField {...params} label="Select a Filter Set" margin="dense" size="small" variant="outlined" />}
+              />
+            </div>
+          )}
+          <div
+            className={cn(
+              'grid overflow-hidden  border',
+              isVisibleFilterSet ? 'rounded-b-lg' : 'rounded-lg',
+              isMobile ? 'relative' : 'grid-cols-[var(--sidebar-width)1fr]'
+            )}
+          >
             <div
               className={cn(
                 'transition-[width] duration-300 ',
@@ -274,38 +312,6 @@ const Filter = ({
                   isMobile && isSidebarOpen ? '[transform:translateX(0)]' : isMobile ? '[transform:translateX(calc(var(--sidebar-width)*-1))]' : ''
                 )}
               >
-                {isVisibleFilterSet && (
-                  <div className="mb-3">
-                    <Autocomplete
-                      id={`filter-set`}
-                      options={userFilters}
-                      autoHighlight
-                      renderOption={(props, option, state, ownerState) => {
-                        const { key, ...optionProps } = props;
-                        return (
-                          <Box component="li" key={key} {...optionProps}>
-                            <div className="flex w-full justify-between">
-                              <div>{option?.title}</div>
-                              <div>
-                                <HtmlTooltip title={'Delete'} placement="top" arrow enterTouchDelay={0}>
-                                  <IconButton size="small" onClick={() => setIsFilterDeleteConfirm({ open: true, ids: [option._id] })}>
-                                    <RiDeleteBin6Fill />
-                                  </IconButton>
-                                </HtmlTooltip>
-                              </div>
-                            </div>
-                          </Box>
-                        );
-                      }}
-                      onChange={(_, newValue: any) => {
-                        handleSelectfilterSet(newValue || null);
-                      }}
-                      getOptionLabel={(option) => option?.title || ''}
-                      value={selectedUserFilter}
-                      renderInput={(params) => <TextField {...params} label="Select a Filter Set" margin="dense" size="small" variant="outlined" />}
-                    />
-                  </div>
-                )}
                 <div className="mb-[15px] flex items-center gap-4">
                   <p className="text-[16px] font-medium leading-[22px] text-[--primary-text]">Filters</p>
                   <SearchBox value={searchVal} onChange={handleSearch} disabled={loading} />

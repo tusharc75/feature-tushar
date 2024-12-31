@@ -164,8 +164,8 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
           onOk={DeleteEntity}
         />
       ) : null}
-      <div>
-        <Box>
+      <>
+        <div className=" rounded-b border p-2">
           <>
             {isMobile || isTablet ? (
               <FormControl fullWidth margin="dense" size="small" variant="outlined">
@@ -206,11 +206,11 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
                   <CustomTab key={i} value={i} className="relative">
                     <span className={cn('block ', currentTabIndex === i && 'pr-[18px]')}>{c?.entity?.entityName}</span>
                     {permissions?.user?.isDelete &&
-                      currentTabIndex === i &&
-                      !Boolean(userId === user?._id && currentEntity?.entity?._id === selectedEntity) ? (
+                    currentTabIndex === i &&
+                    !Boolean(userId === user?._id && currentEntity?.entity?._id === selectedEntity) ? (
                       <HtmlTooltip className="absolute right-4" title={'Delete'}>
                         <IconButton aria-label="delete" size="small" className="ml-1" onClick={() => handleDeleteEntity()}>
-                          <Delete color='error' />
+                          <Delete color="error" />
                         </IconButton>
                       </HtmlTooltip>
                     ) : null}
@@ -219,7 +219,7 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
               </CustomTabs>
             )}
 
-            <Box style={{ padding: '0px', minHeight: '300px' }}>
+            <div className="min-h-[300px]">
               <div className="relative flex justify-between rounded-t bg-[var(--dark-secondary,var(--accordion-expanded-summary-bg,#EFFBF9))] px-7 py-4">
                 <h6 className="text-sm font-semibold leading-[1.05] ">Assigned Roles ({currentEntity?.role?.length || '0'})</h6>
                 {permissions?.user?.isUpdate && (
@@ -230,7 +230,7 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
                   </span>
                 )}
               </div>
-              <div className="grid grid-cols-12 border p-4">
+              <div className="grid grid-cols-12 border ">
                 <div className="col-span-12  pr-4 md:col-span-4">
                   <div className="h-[352px] overflow-y-auto">
                     {currentEntity.role && (
@@ -255,15 +255,16 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
                       field={unionRoleData ? unionRoleData.field : []}
                       resource={unionRoleData ? unionRoleData.resource : []}
                       isDisable={true}
-                      setField={() => { }}
-                      setResource={() => { }}
+                      setField={() => {}}
+                      setResource={() => {}}
+                      height={303}
                     />
                   </BoxWithBorder>
                 </div>
               </div>
-            </Box>
+            </div>
           </>
-        </Box>
+        </div>
         {roleRemoveConfirmBox.open && (
           <ConfirmationDialog
             open={roleRemoveConfirmBox.open}
@@ -277,7 +278,7 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
             okBtnLoading={isSubmitting}
           />
         )}
-      </div>
+      </>
     </>
   );
 }

@@ -7,6 +7,7 @@ export type TChannel = {
   members: string[];
   createdBy: CreatedBy;
   notifications?: number;
+  isOwner?: boolean;
 };
 
 export type CreatedBy = {

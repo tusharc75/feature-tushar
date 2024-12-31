@@ -130,16 +130,18 @@ const Sidebar = ({
                             : '[background-image:linear-gradient(270deg,_#f5f5f5_66%,_transparent_100%)] dark:[background-image:linear-gradient(270deg,_#212134_60%,_transparent_100%)]'
                         )}
                       >
-                        <IconButton
-                          edge="end"
-                          aria-label="delete"
-                          size="small"
-                          onClick={(e) => {
-                            setChannelMenuData({ selected: c, openConfirmDialog: true });
-                          }}
-                        >
-                          <Delete fontSize="small" color="error" />
-                        </IconButton>
+                        {c?.isOwner && (
+                          <IconButton
+                            edge="end"
+                            aria-label="delete"
+                            size="small"
+                            onClick={(e) => {
+                              setChannelMenuData({ selected: c, openConfirmDialog: true });
+                            }}
+                          >
+                            <Delete fontSize="small" color="error" />
+                          </IconButton>
+                        )}
                       </div>
                     </ListItem>
                   </>

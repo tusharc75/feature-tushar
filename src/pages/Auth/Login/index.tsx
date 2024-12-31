@@ -168,7 +168,7 @@ const Login = () => {
                           size="medium"
                           label="Email"
                           name="email"
-                          value={values['email']}
+                          value={values['email'] || null}
                           error={touched['email'] && Boolean(errors['email'])}
                           helperText={touched['email'] && errors['email']}
                           fullWidth
@@ -183,7 +183,7 @@ const Login = () => {
                           size="medium"
                           label="Password"
                           name="password"
-                          value={values['password']}
+                          value={values['password'] || null}
                           error={touched['password'] && Boolean(errors['password'])}
                           helperText={touched['password'] && errors['password']}
                           onChange={(e) => setFieldValue('password', e.target.value)}
@@ -224,10 +224,7 @@ const Login = () => {
                         {invalidAzureLogin ? (
                           <span>Not authorized loging out in {counter}</span>
                         ) : (
-                          <ThemeButton
-                            onClick={() => instance.logoutPopup()}
-                            buttonType='theme'
-                          >
+                          <ThemeButton onClick={() => instance.logoutPopup()} buttonType="theme">
                             Office 365 Log Out
                           </ThemeButton>
                         )}
