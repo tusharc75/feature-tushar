@@ -168,9 +168,9 @@ const SendMessage = ({
         return;
       }
     }
-    if (key === 'Enter' && !e.ctrlKey) {
+    if (key === 'Enter' && !e.ctrlKey && !e.metaKey) {
       e.preventDefault();
-      postMessage();
+      if (message && message !== initialMessage && !isLoading) postMessage();
     }
   };
 
