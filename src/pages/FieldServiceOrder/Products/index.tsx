@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Box, Button, IconButton, Menu, MenuItem } from '@mui/material';
+import { Box, IconButton, Menu, MenuItem } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
@@ -317,7 +317,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
     setDeleteData(obj);
   };
 
-  const handleAssignAssets = (data) => {};
+  const handleAssignAssets = (data) => { };
 
   return (
     <Fragment>

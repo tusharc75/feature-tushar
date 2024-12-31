@@ -1,6 +1,6 @@
 import { ControlPoint } from '@mui/icons-material';
 import EditIcon from '@mui/icons-material/Edit';
-import { Box, Button, Dialog, IconButton, Skeleton, Typography } from '@mui/material';
+import { Box, Dialog, IconButton, Skeleton, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -290,9 +290,9 @@ const EntityDetailsPage = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-          id: user._id,
-          name: `${user.firstName} ${user.lastName}`
-        }))
+        id: user._id,
+        name: `${user.firstName} ${user.lastName}`
+      }))
       : [];
 
     setUserList(rows);
