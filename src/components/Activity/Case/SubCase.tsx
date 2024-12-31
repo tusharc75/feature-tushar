@@ -69,7 +69,7 @@ export const SubCase = ({ setId, openAddSub, setOpenAddSub, fetchCaseDetail, dat
 
     axiosInstance()
       .delete(`/case/${id}`)
-      .then(() => {})
+      .then(() => { })
       .catch((err) => {
         setToastConfig(err);
       });
@@ -157,7 +157,7 @@ export const SubCase = ({ setId, openAddSub, setOpenAddSub, fetchCaseDetail, dat
             <ThemeButton buttonType="theme" disabled={!caseName || isSubmitting} isLoading={isSubmitting} onClick={handleSave}>
               Create
             </ThemeButton>
-            <ThemeButton buttonType="theme" className={classes.marginLeft} disableElevation onClick={() => setOpenAddSub(false)}>
+            <ThemeButton buttonType="transparent" className={classes.marginLeft} onClick={() => setOpenAddSub(false)}>
               Cancel
             </ThemeButton>
           </div>

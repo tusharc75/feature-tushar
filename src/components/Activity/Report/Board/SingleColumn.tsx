@@ -1,11 +1,10 @@
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { Button, IconButton, Typography } from '@mui/material';
+import { IconButton, Typography } from '@mui/material';
 import { Add } from '@mui/icons-material';
 import { useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ActivityModelHandler from '../../ActivityModelHandler';
 import { Column } from './type';
-
 import { useData } from '../../../../StateProvider/Provider';
 import SingleCard from './SingleCard';
 import { useDroppable } from '@dnd-kit/core';
@@ -62,9 +61,8 @@ const SingleColumn = ({ column, loading, type, setSelectedStatus, setOpenDialog,
           </div>
         )}
         <ul
-          className={`body min-h-[calc(100%-120px)] p-2 ${
-            active?.data.current.column === column.status ? 'bg-blue-200 dark:bg-gray-900' : ''
-          } transition-colors`}
+          className={`body min-h-[calc(100%-120px)] p-2 ${active?.data.current.column === column.status ? 'bg-blue-200 dark:bg-gray-900' : ''
+            } transition-colors`}
         >
           <SortableContext items={column.items.map((d) => d._id)} strategy={verticalListSortingStrategy}>
             {column.items.map((element, index) => (

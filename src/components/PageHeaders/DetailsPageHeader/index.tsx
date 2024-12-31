@@ -1,9 +1,8 @@
-import { Button, ButtonProps, Menu, useMediaQuery } from '@mui/material';
+import { ButtonProps, Menu, useMediaQuery } from '@mui/material';
 import { Add, ExpandMore } from '@mui/icons-material';
 import { ReactNode, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import PreviewDownload from 'src/components/PreviewDownload';
-// import { MdExpandCircleDown } from 'react-icons/md';
 import { FaCircleChevronDown } from 'react-icons/fa6';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import NewActionButton, { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHeader/NewActionButton';

@@ -1,4 +1,4 @@
-import { Button, ButtonProps, CircularProgress, Menu, useMediaQuery } from '@mui/material';
+import { ButtonProps, CircularProgress, Menu, useMediaQuery } from '@mui/material';
 import { AddOutlined, ExpandMore } from '@mui/icons-material';
 import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 import queryString from 'query-string';
@@ -189,9 +189,8 @@ const ListingPageHeader = ({
           {leftSideContents ? <HideWhenOffline>{leftSideContents}</HideWhenOffline> : null}
         </div>
         <div
-          className={`flex flex-grow ${shouldNotFlexWrap ? '' : 'flex-wrap'} items-center justify-end gap-[8px] ${cn(showSearchInMobile ? 'max-[600px]:pt-2' : '')} ${
-            !isLeftSidePresent && isMobile ? '-mt-2' : ''
-          }`}
+          className={`flex flex-grow ${shouldNotFlexWrap ? '' : 'flex-wrap'} items-center justify-end gap-[8px] ${cn(showSearchInMobile ? 'max-[600px]:pt-2' : '')} ${!isLeftSidePresent && isMobile ? '-mt-2' : ''
+            }`}
         >
           {Boolean(leftSideContentsOfSearchFilter) ? leftSideContentsOfSearchFilter : null}
           {onSearch ? (

@@ -1,13 +1,19 @@
-import { Box } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
+import { Box } from '@mui/material';
 import { camelCase, findIndex } from 'lodash';
 import queryString from 'query-string';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
+import { DownloadIcon } from 'src/assets/svg/svgIcons';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import ButtonWithPulse from 'src/components/ButtonWithPulse';
+import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Steps, { getIndex } from 'src/components/Steps';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { generateAddExistingProduct } from 'src/pages/RentalManagement/walkmeSteps';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { useData } from '../../StateProvider/Provider';
@@ -19,14 +25,11 @@ import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import {
   ACTIVITY_RESOURCE,
-  DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_STATUS,
-  DELIVERY_TICKET_TYPE,
   QUOTATION_STATUS,
   RENTAL_STATUS,
   RENTAL_STEPS,
   checkIsAllowedToEdit,
-  deliveryTicket,
   rentalManagement,
   rentalManagementSteps,
   serializedAsset,
@@ -46,12 +49,6 @@ import RentalManagementViews from './RoadMapViews';
 import SerializedAsset from './SerializedAsset';
 import Services from './Services';
 import { updateRentalProcessStatus } from './rentalOfflineHelper';
-import ButtonWithPulse from 'src/components/ButtonWithPulse';
-import { useGetWalkmeInstance } from 'src/components/CustomIntro';
-import { generateAddExistingProduct } from 'src/pages/RentalManagement/walkmeSteps';
-import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { DownloadIcon } from 'src/assets/svg/svgIcons';
 
 const RentalManagementDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -473,12 +470,12 @@ const RentalManagementDetailsPage = () => {
                       onClick={() => {
                         handleRentalReOpen();
                       }}
-                      buttonType='theme'
+                      buttonType="theme"
                       isLoading={reOpening}
                     >
                       Re-Open
                     </ThemeButton>
-                   )} 
+                  )}
                   {permissions?.rentalManagement?.isUpdate &&
                     !isOffline &&
                     ![RENTAL_STATUS.cancelled, RENTAL_STATUS.closed].includes(rentalManagementData?.status) && (

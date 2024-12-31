@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, Grid, Typography } from '@mui/material';
+import { Box, Dialog, Grid, Typography } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
 import { DragIndicator } from '@mui/icons-material';
@@ -9,7 +9,6 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { changeItemIndex, CustomDialogTransition } from 'src/constants/helpers';
-
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -204,9 +203,8 @@ const RenderListItem = ({ column, index, onChangeValue, type }) => {
     <li
       style={style}
       ref={setNodeRef}
-      className={`${
-        isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,#fff)]'
-      } list-none transition-colors`}
+      className={`${isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,#fff)]'
+        } list-none transition-colors`}
     >
       <Box bgcolor="var(--dark-primary, white)" border={1} p={1} borderColor="var(--common-border-color)">
         <Grid container spacing={1}>

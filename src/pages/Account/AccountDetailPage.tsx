@@ -1,11 +1,10 @@
-import { Box, Button, Card, CardContent, IconButton, List, ListItemIcon, ListItemText, Typography, useMediaQuery } from '@mui/material';
+import { Box, Card, CardContent, IconButton, List, ListItemIcon, ListItemText, Typography, useMediaQuery } from '@mui/material';
 import ListItem from '@mui/material/ListItem/ListItem';
 import Grid from '@mui/material/Grid2';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import { Skeleton } from '@mui/material';
 import { reverse as _reverse } from 'lodash';
-import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
 import { BsPerson } from 'react-icons/bs';
 import { FcApproval, FcDisapprove } from 'react-icons/fc';
@@ -991,7 +990,7 @@ export default function AccountDetailPage(props) {
           handleSubmit={onUpdateAccount}
           accountId={editAccountData._id ? editAccountData._id : accountData?._id}
           formValues={formValues}
-          handleAddressDataSource={() => {}}
+          handleAddressDataSource={() => { }}
         />
       ) : null}
 

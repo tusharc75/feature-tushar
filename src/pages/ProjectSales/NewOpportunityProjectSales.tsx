@@ -1,11 +1,10 @@
-import { Box, Button, Dialog, IconButton, InputAdornment } from '@mui/material';
+import { Box, Dialog, IconButton, InputAdornment } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Form, Formik } from 'formik';
 import PropTypes from 'prop-types';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
-
 import AddIcon from '@mui/icons-material/AddCircle';
 import InfoIcon from '@mui/icons-material/Info';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -221,7 +220,7 @@ export default function NewOpportunityProjectSales({ open, onSuccess, onClose, a
                               <Box marginY={2}>
                                 <Grid spacing={3} container>
                                   {form.sectionFields.map((field) => (
-                                    <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
+                                    <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                       {field.fieldName === 'probability' ? (
                                         <FormTypes
                                           // {...rest}
@@ -311,13 +310,14 @@ export default function NewOpportunityProjectSales({ open, onSuccess, onClose, a
                                           size="small"
                                         />
                                       ) : field.fieldName === formFieldNames.marketSegment ? (
-                                        <Grid key={field.fieldName} size={{xs:12, sm:12, md:12}}>
+                                        <Grid key={field.fieldName} size={{ xs: 12, sm: 12, md: 12 }}>
                                           <Grid container spacing={1}>
                                             <Grid
                                               size={{
-                                              xs:permissions.marketSegment.isCreate ? 10 : 11,
-                                              sm:permissions.marketSegment.isCreate ? 10 : 11,
-                                              md:permissions.marketSegment.isCreate ? 10 : 11}}
+                                                xs: permissions.marketSegment.isCreate ? 10 : 11,
+                                                sm: permissions.marketSegment.isCreate ? 10 : 11,
+                                                md: permissions.marketSegment.isCreate ? 10 : 11
+                                              }}
                                             >
                                               <FormTypes
                                                 fields={opportunityData.fields}
@@ -351,7 +351,7 @@ export default function NewOpportunityProjectSales({ open, onSuccess, onClose, a
                                               // permissions.productCategory
                                               //     .isCreate
                                               permissions.marketSegment.isCreate && (
-                                                <Grid size={{xs:1, sm:1, md:1}}>
+                                                <Grid size={{ xs: 1, sm: 1, md: 1 }}>
                                                   <HtmlTooltip title="Add Market Segment" className="mt-1">
                                                     <IconButton
                                                       onClick={() => {
@@ -366,7 +366,7 @@ export default function NewOpportunityProjectSales({ open, onSuccess, onClose, a
                                               )
                                             }
                                             {field?.tooltipMessage ? (
-                                              <Grid size={{xs:1, sm:1, md:1}}>
+                                              <Grid size={{ xs: 1, sm: 1, md: 1 }}>
                                                 <HtmlTooltip title={field?.tooltipMessage ?? ''}>
                                                   <InfoIcon color="disabled" />
                                                 </HtmlTooltip>
@@ -375,13 +375,14 @@ export default function NewOpportunityProjectSales({ open, onSuccess, onClose, a
                                           </Grid>
                                         </Grid>
                                       ) : field.fieldName === formFieldNames.subMarketSegment ? (
-                                        <Grid key={field.fieldName} size={{xs:12, sm:12, md:12}}>
+                                        <Grid key={field.fieldName} size={{ xs: 12, sm: 12, md: 12 }}>
                                           <Grid container spacing={1}>
                                             <Grid
                                               size={{
-                                              xs:permissions.marketSegment.isCreate ? 10 : 11,
-                                              sm:permissions.marketSegment.isCreate ? 10 : 11,
-                                              md:permissions.marketSegment.isCreate ? 10 : 11}}
+                                                xs: permissions.marketSegment.isCreate ? 10 : 11,
+                                                sm: permissions.marketSegment.isCreate ? 10 : 11,
+                                                md: permissions.marketSegment.isCreate ? 10 : 11
+                                              }}
                                             >
                                               <FormTypes
                                                 fields={opportunityData.fields}
@@ -411,7 +412,7 @@ export default function NewOpportunityProjectSales({ open, onSuccess, onClose, a
                                               />
                                             </Grid>
                                             {permissions.marketSegment.isCreate && (
-                                              <Grid size={{xs:1, sm:1, md:1}}>
+                                              <Grid size={{ xs: 1, sm: 1, md: 1 }}>
                                                 <HtmlTooltip title="Add Sub Market Segment" className="mt-1">
                                                   <IconButton
                                                     onClick={() => {
@@ -425,7 +426,7 @@ export default function NewOpportunityProjectSales({ open, onSuccess, onClose, a
                                               </Grid>
                                             )}
                                             {field?.tooltipMessage ? (
-                                              <Grid size={{xs:1, sm:1, md:1}}>
+                                              <Grid size={{ xs: 1, sm: 1, md: 1 }}>
                                                 <HtmlTooltip title={field?.tooltipMessage ?? ''}>
                                                   <InfoIcon color="disabled" />
                                                 </HtmlTooltip>
@@ -497,7 +498,7 @@ export default function NewOpportunityProjectSales({ open, onSuccess, onClose, a
                   </ThemeButton>
                   <ThemeButton
                     isLoading={loading}
-buttonType="theme"
+                    buttonType="theme"
                     onClick={(e) => {
                       e.preventDefault();
                       const err = Object.keys(errors);
