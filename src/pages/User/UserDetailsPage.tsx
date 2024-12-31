@@ -531,7 +531,7 @@ const UserDetailsPage = () => {
                             </span>
                           )}
                         </div>
-                        <div className="pt-3">
+                        <>
                           {loading ? (
                             <Box display="flex">
                               {[1, 2].map((i) => (
@@ -568,7 +568,7 @@ const UserDetailsPage = () => {
                               <Typography>No Entities </Typography>
                             </Box>
                           )}
-                        </div>
+                        </>
                       </Grid>
                     </Grid>
                   </TabPanel>
