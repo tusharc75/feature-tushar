@@ -1,10 +1,9 @@
 import { Skeleton } from '@mui/material';
-import { Box, Button, Paper, Typography } from '@mui/material';
+import { Box, Paper, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
 import axios from 'axios';
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { FaFileSignature } from 'react-icons/fa';
 import { useHistory, useParams } from 'react-router-dom';
 import { SVG } from '../../assets';
@@ -14,6 +13,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { backendApi } from '../../config';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ViewSignsDialog from './ViewSignsDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const useStyles = makeStyles(() => ({
   header: {
@@ -179,13 +179,13 @@ const CustomerSign = () => {
   return (
     <>
       <Grid container className={classes.header}>
-        <Grid size={{xs:12, md:1, sm:2}} >
+        <Grid size={{ xs: 12, md: 1, sm: 2 }} >
           <img className={classes.logo} src={SVG('LogoNew')} alt="equip logo" title="eQuipt Logo" />
         </Grid>
       </Grid>
       <Fragment>
         <Grid container spacing={1} className="detail-container">
-          <Grid size={{xs:12, sm:12, md:12, lg:12}}  spacing={2}>
+          <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }} spacing={2}>
             <Paper>
               {!deliveryTicketData ? (
                 <div>
@@ -226,27 +226,15 @@ const CustomerSign = () => {
 
             <Box display="flex" marginTop={2} justifyContent="flex-end" p="4px">
               {deliveryTicketData?.signatures?.length === 4 && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  color="primary"
-                  size="medium"
+                <ThemeButton
+                  iconForMobile={<FaFileSignature size={18} />}
+                  mobileTooltip='Customer Signature'
                   disabled={loading}
-                  style={isMobile && !isTablet ? { color: 'var(--warning-darken)' } : {}}
                   onClick={() => setOpenSignatureDialog(true)}
                 >
-                  {isMobile && !isTablet ? <FaFileSignature size={18} /> : 'Customer Signature'}
-                </Button>
+                  {'Customer Signature'}
+                </ThemeButton>
               )}
-              {/* {deliveryTicketData?.signatures?.some(d => d.type === "customer") && <Button
-                                variant={isMobile && !isTablet ? "text" : "contained"}
-                                color="primary"
-                                size="medium"
-                                onClick={() => setOpenSigns(true)}
-                                style={isMobile && !isTablet ? { color: "var(--info-darken)" } : {}}
-                            >
-                                {isMobile && !isTablet ? <FaSignature size={20} /> : "View Signatures"}
-                            </Button>
-                            } */}
             </Box>
           </Grid>
         </Grid>

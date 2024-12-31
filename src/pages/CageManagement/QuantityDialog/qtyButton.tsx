@@ -97,26 +97,11 @@ const QtyButton = ({ cart, fetchCart, product, warehouse, onSucess }) => {
     <Fragment>
       {cartProduct ? (
         <Box>
-          {/* <IconButton
-                    color="secondary"
-                    size="small"
-                    style={{ border: "1px solid" }}
-                    disabled={cartProduct?.qty >= product?.availableInventory}
-                    onClick={() => { handleUpdateCart("add") }}>
-                    <AddIcon fontSize="small" />
-                </IconButton > */}
           <IconButton disabled size="small">
             <Box pl={1} pr={1}>
               {`${cartProduct?.qty}`}
             </Box>
           </IconButton>
-          {/* <IconButton
-                    style={{ border: "1px solid" }}
-                    color="secondary"
-                    size="small"
-                    onClick={() => { handleUpdateCart("subtract") }}>
-                    <RemoveIcon fontSize="small" />
-                </IconButton> */}
           <IconButton
             className="ml-3"
             style={{ border: '1px solid', color: 'red' }}

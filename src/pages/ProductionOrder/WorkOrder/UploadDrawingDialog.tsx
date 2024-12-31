@@ -1,6 +1,5 @@
 import { useState, useContext } from 'react';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -8,6 +7,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { CustomDialogTransition, productionOrder } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { Dialog } from '@mui/material';
 
 const UploadDrawingDialog = ({ productionOrderData, handleClose }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -39,37 +39,36 @@ const UploadDrawingDialog = ({ productionOrderData, handleClose }) => {
     }
   };
 
-  return (
-    <Dialog open={true} onClose={handleClose} maxWidth="sm" TransitionComponent={CustomDialogTransition} fullWidth>
-      <CustomDialogHeader showRequiredLabel={false} title="Upload Drawings" onClose={handleClose} />
-      <CustomDialogContent>
-        <Box mt={2} mb={1}>
-          <input
-            id="zip-upload"
-            name="zip-upload"
-            type="file"
-            accept=".zip,application/zip,application/x-zip-compressed,application/pdf,.pdf,image/jpeg,image/png,image/gif,image/bmp"
-            multiple
-            onChange={handleUpload}
-            style={{ display: 'none' }}
-          />
-          <label htmlFor="zip-upload">
-            <ThemeButton
-              disabled={isUploading}
-              isLoading={isUploading}
-              buttonType='theme'
-            >
-              {isUploading ? 'Uploading...' : 'Select File *'}
-            </ThemeButton>
-          </label>
-        </Box>
-      </CustomDialogContent>
-      <CustomDialogFooter>
-        <Button type="button" variant="outlined" color="primary" size="small" onClick={handleClose}>
-          Cancel
-        </Button>
-      </CustomDialogFooter>
-    </Dialog>
+  return (<Dialog open={true} onClose={handleClose} maxWidth="sm" TransitionComponent={CustomDialogTransition} fullWidth>
+    <CustomDialogHeader showRequiredLabel={false} title="Upload Drawings" onClose={handleClose} />
+    <CustomDialogContent>
+      <Box mt={2} mb={1}>
+        <input
+          id="zip-upload"
+          name="zip-upload"
+          type="file"
+          accept=".zip,application/zip,application/x-zip-compressed,application/pdf,.pdf,image/jpeg,image/png,image/gif,image/bmp"
+          multiple
+          onChange={handleUpload}
+          style={{ display: 'none' }}
+        />
+        <label htmlFor="zip-upload">
+          <ThemeButton
+            disabled={isUploading}
+            isLoading={isUploading}
+            buttonType='theme'
+          >
+            {isUploading ? 'Uploading...' : 'Select File *'}
+          </ThemeButton>
+        </label>
+      </Box>
+    </CustomDialogContent>
+    <CustomDialogFooter>
+      <ThemeButton buttonType='transparent' onClick={handleClose}>
+        Cancel
+      </ThemeButton>
+    </CustomDialogFooter>
+  </Dialog>
   );
 };
 

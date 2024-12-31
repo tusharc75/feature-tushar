@@ -195,13 +195,13 @@ export default function Doa() {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-          id: user._id,
-          isChecked: false,
-          name: `${user.firstName} ${user.lastName}`,
-          email: user.email,
-          createdAt: displayDate(user.createdAt),
-          status: user.blocked ? user.blocked : false
-        }))
+        id: user._id,
+        isChecked: false,
+        name: `${user.firstName} ${user.lastName}`,
+        email: user.email,
+        createdAt: displayDate(user.createdAt),
+        status: user.blocked ? user.blocked : false
+      }))
       : [];
 
     setDataRows(rows);

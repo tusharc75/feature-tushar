@@ -1,4 +1,4 @@
-import { Box, Button, TextField } from '@mui/material';
+import { Box, TextField } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -144,7 +144,7 @@ const CycleCountDetermination = () => {
   const RightSideContents = () => {
     return (
       <>
-        <ThemeButton 
+        <ThemeButton
           onClick={() => {
             setOpen(true);
           }}

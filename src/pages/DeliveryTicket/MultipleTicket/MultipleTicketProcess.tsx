@@ -1,4 +1,4 @@
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -20,6 +20,7 @@ import {
 } from '../../../constants/helpers';
 import { findAll, findOne, objectStore } from '../../../constants/indexdbhelper';
 import routes from '.././../../components/Helpers/Routes';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const MultipleTicketProcess = ({ referenceData, ticketType, referenceType }) => {
   const renderedFrom = `${camelCase(sidebarResource?.deliveryTicket)}_grid-2`;
@@ -138,36 +139,30 @@ const MultipleTicketProcess = ({ referenceData, ticketType, referenceType }) => 
       <Box display="flex" justifyContent="flex-end" pt={1}>
         <Box display="flex" alignItems="center">
           <HtmlTooltip title="Sign-off - Dispatch">
-            <Button
-              variant="outlined"
-              color="primary"
-              size="small"
+            <ThemeButton
               onClick={() => {
                 setOpenSignatureDialog({ label: 'Sign-off - Dispatch', open: true });
               }}
               disabled={selectedRecords.length === 0 || selectedRecords.some((f) => f.status !== DELIVERY_TICKET_STATUS.new)}
             >
               Sign-off - Dispatch
-            </Button>
+            </ThemeButton>
           </HtmlTooltip>
           <Box mx={1} />
           <HtmlTooltip title="Sign-off - Delivery">
-            <Button
-              variant="outlined"
-              color="primary"
-              size="small"
+            <ThemeButton
               onClick={() => {
                 setOpenSignatureDialog({ label: 'Sign-off - Delivery', open: true });
               }}
               disabled={selectedRecords.length === 0 || selectedRecords.some((f) => f.status !== DELIVERY_TICKET_STATUS.inTransit)}
             >
               Sign-off - Delivery
-            </Button>
+            </ThemeButton>
           </HtmlTooltip>
           <Box mx={1} />
         </Box>
       </Box>
-      <Grid size={{xs:12, md:12, sm:12}} className="mt-3">
+      <Grid size={{ xs: 12, md: 12, sm: 12 }} className="mt-3">
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

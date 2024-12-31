@@ -1,8 +1,9 @@
-import { Box, Button, Checkbox, FormControlLabel, IconButton, Menu, MenuItem, Typography } from '@mui/material';
+import { Box, Checkbox, FormControlLabel, IconButton, Menu, MenuItem, Typography } from '@mui/material';
 import { MoreHoriz, Settings } from '@mui/icons-material';
 import { useState } from 'react';
 import { OPERATOR } from 'src/components/FormBuilder/helper';
 import ValidationDialog from 'src/components/FormBuilder/Properties/Validation/ValidationDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const Validation = ({ values, setFieldValue, fields, fieldsToExclude }) => {
   const [anchorElSetting, setAnchorElSetting] = useState(null);
@@ -143,18 +144,14 @@ const Validation = ({ values, setFieldValue, fields, fieldsToExclude }) => {
               </Box>
             </Box>
           ))}
-
         <Box mt={2}>
-          <Button
-            variant="outlined"
-            size="small"
-            color="primary"
+          <ThemeButton
             onClick={() => {
               setOpen({ open: true, data: null });
             }}
           >
             Add Validation
-          </Button>
+          </ThemeButton>
         </Box>
       </Box>
 

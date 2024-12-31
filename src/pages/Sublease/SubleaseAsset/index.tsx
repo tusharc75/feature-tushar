@@ -1,4 +1,3 @@
-import { Button } from '@mui/material';
 import Box from '@mui/material/Box/Box';
 import { map, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -213,12 +212,12 @@ const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, a
   const previewDownloadProps =
     columns && pdfColumns
       ? {
-          fileName: `${resources?.sublease?.titleSingular}-${subleaseData?.subleaseName}`,
-          resource: sidebarResource.sublease,
-          referenceId: subleaseData?._id,
-          columns: [...pdfColumns, ...columns?.filter((e) => ['serialNumber', 'supplierSerialNumber']?.includes(e.field))],
-          defaultColumns: ['index', 'type', 'detail', 'description', 'qty']
-        }
+        fileName: `${resources?.sublease?.titleSingular}-${subleaseData?.subleaseName}`,
+        resource: sidebarResource.sublease,
+        referenceId: subleaseData?._id,
+        columns: [...pdfColumns, ...columns?.filter((e) => ['serialNumber', 'supplierSerialNumber']?.includes(e.field))],
+        defaultColumns: ['index', 'type', 'detail', 'description', 'qty']
+      }
       : null;
 
   const rightSideContents = () => {
@@ -239,7 +238,7 @@ const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, a
           />
         )}
         {allowedToEdit && (
-          <ThemeButton 
+          <ThemeButton
             id="send-to-supplier-button"
             buttonType='theme'
             disabled={checkUniqWarehouse() && (allowedToEdit || isProcessor) ? false : true}

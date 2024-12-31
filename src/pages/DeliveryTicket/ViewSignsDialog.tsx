@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Dialog, Button, Box, Typography } from '@mui/material';
+import { Dialog, Box, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { startCase } from 'lodash';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition, displayDateTime } from '../../constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ViewSignsDialog = ({ close, signatures }) => {
   const [signs, setSigns] = useState([]);
@@ -35,7 +36,7 @@ const ViewSignsDialog = ({ close, signatures }) => {
       <CustomDialogContent>
         <Grid container spacing={2}>
           {signs.map((sign) => (
-            <Grid size={{ xs:12, sm:6}}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <Box textAlign="center">
                 <Typography variant="body1">
                   "{sign.status === 'Start Delivery' ? 'Sign-off - Dispatched' : 'Sign-off - Delivered'}"&nbsp;
@@ -62,9 +63,9 @@ const ViewSignsDialog = ({ close, signatures }) => {
         </Grid>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button size="small" variant="outlined" onClick={close} color="primary">
+        <ThemeButton onClick={close} buttonType='transparent'>
           Close
-        </Button>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

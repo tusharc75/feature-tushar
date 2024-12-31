@@ -1,7 +1,6 @@
 import {
   Avatar,
   Box,
-  Button,
   CircularProgress,
   Divider,
   IconButton,
@@ -40,6 +39,7 @@ import styles from '../profilePage.module.scss';
 import AddProxyDialog from './AddProxyDialog';
 import ManageUpdateEmailPasswordDialog from './ManageUpdateEmailAndPassword';
 import SetUpMfaDialog from './SetUpMfaDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const useStyles = makeStyles((theme: Theme) => ({
   profileEdit: {
@@ -377,35 +377,34 @@ export default function ManageProfile(props) {
                 ))}
             </div>
             <Divider />
-
-            <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setPasswordUpdate(true)}>
+            <ThemeButton fullWidth onClick={() => setPasswordUpdate(true)}>
               Change Password
-            </Button>
+            </ThemeButton>
             <Divider />
-            <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setShowAddProxyDialog(true)}>
+            <ThemeButton fullWidth onClick={() => setShowAddProxyDialog(true)}>
               Add DOA Proxy
-            </Button>
+            </ThemeButton>
             <Divider />
             {userData?.isMFASetup ? (
-              <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setRemoveMFAConfirmBox(true)}>
+              <ThemeButton fullWidth onClick={() => setRemoveMFAConfirmBox(true)}>
                 Remove MFA
-              </Button>
+              </ThemeButton>
             ) : (
-              <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setSetUpMfaDialog(true)}>
+              <ThemeButton fullWidth onClick={() => setSetUpMfaDialog(true)}>
                 Setup MFA
-              </Button>
+              </ThemeButton>
             )}
             {permissions?.payrollPolicy && (
               <>
                 <Divider />
                 {userData?.faceId || userData?.faceData ? (
-                  <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setRemoveFaceConfirmBox(true)}>
+                  <ThemeButton fullWidth onClick={() => setRemoveFaceConfirmBox(true)}>
                     Remove Face
-                  </Button>
+                  </ThemeButton>
                 ) : (
-                  <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setAddFaceDialog(true)}>
+                  <ThemeButton fullWidth onClick={() => setAddFaceDialog(true)}>
                     Add Face
-                  </Button>
+                  </ThemeButton>
                 )}
               </>
             )}

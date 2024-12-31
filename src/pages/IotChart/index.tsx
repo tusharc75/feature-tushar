@@ -1,4 +1,4 @@
-import { Box, Button, Chip, Typography } from '@mui/material';
+import { Box, Chip, Typography } from '@mui/material';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import { useContext, useEffect, useState } from 'react';
 import { MdChevronLeft } from 'react-icons/md';
@@ -17,6 +17,7 @@ import cardStyle from './index.module.scss';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import { uniqBy } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 function IotChart() {
   const toastConfig = useContext(CustomToastContext);
@@ -79,11 +80,7 @@ function IotChart() {
 
   const LeftSideContent = () => {
     return showLocation || showAsset ? (
-      <Button
-        size="small"
-        variant="outlined"
-        color="primary"
-        disableElevation
+      <ThemeButton
         onClick={() => {
           setShowAsset(null);
           if (!showAsset) {
@@ -94,7 +91,7 @@ function IotChart() {
         startIcon={<MdChevronLeft />}
       >
         Go Back
-      </Button>
+      </ThemeButton>
     ) : null;
   };
 

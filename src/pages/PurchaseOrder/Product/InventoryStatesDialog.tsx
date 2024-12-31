@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import { Box, Dialog, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaEye } from 'react-icons/fa';
@@ -93,11 +93,10 @@ const InventoryStatesDialog = ({ onClose, product, warehouse, data, purchaseOrde
                         <TableCell>{item?.managers?.map((e) => e.optionLabel)?.toString()}</TableCell>
                         <TableCell>
                           {irtTicketData?.find((d) => d.warehouse?.optionValue === item?.warehouse?.optionValue) ? (
-                            <ThemeButton 
+                            <ThemeButton
                               onClick={() => {
                                 history.push(
-                                  `${routes.irtTicketDetail.path}/${
-                                    irtTicketData.find((d) => d.warehouse?.optionValue === item?.warehouse?.optionValue)?._id
+                                  `${routes.irtTicketDetail.path}/${irtTicketData.find((d) => d.warehouse?.optionValue === item?.warehouse?.optionValue)?._id
                                   }`
                                 );
                               }}
@@ -107,7 +106,7 @@ const InventoryStatesDialog = ({ onClose, product, warehouse, data, purchaseOrde
                               View
                             </ThemeButton>
                           ) : (
-                            <ThemeButton 
+                            <ThemeButton
                               onClick={() => {
                                 setIrtTicketDialog({ open: true, data: item });
                               }}
