@@ -6,7 +6,6 @@ import { Link } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { BsArrowLeft } from 'react-icons/bs';
-
 import styles from './index.module.scss';
 import { ForgetPasswordImage, Logo } from 'src/assets/authenticationAssets';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
@@ -76,16 +75,16 @@ const ForgetPassword = () => {
                         />
                       </div>
                     </div>
-
                     <ThemeButton
                       disabled={isSubmitting}
                       onClick={submitForm}
                       isLoading={isSubmitting}
                       buttonType='theme'
+                      fullWidth
+                      sx={{ height: 40 }}
                     >
                       Submit
                     </ThemeButton>
-
                     <Box className={styles.formBottomTextleft}>
                       <MuiLink component={Link} to="/login">
                         <BsArrowLeft />
