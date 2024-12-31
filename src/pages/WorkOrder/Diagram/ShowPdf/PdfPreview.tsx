@@ -3,7 +3,7 @@ import { fabric } from 'fabric';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { asyncForEach, convertBlobToBase64 } from 'src/constants/helpers';
-import { Box, Button, FormControl, Typography } from '@mui/material';
+import { Box, FormControl, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 
@@ -414,65 +414,70 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
     <Box>
       <div className="my-2 flex min-h-[40px] flex-wrap items-center justify-between gap-2">
         <div className={'flex flex-wrap gap-2'}>
-          <Button disabled={loading || isDrawingMode || isHighlighterMode} variant="outlined" color="primary" size="small" onClick={handleAddText}>
-            Add Text
-          </Button>
-          <Button disabled={loading || isDrawingMode || isHighlighterMode} variant="outlined" color="primary" size="small" onClick={handleAddLine}>
-            Add Line
-          </Button>
-          <Button
+          <ThemeButton
             disabled={loading || isDrawingMode || isHighlighterMode}
-            variant="outlined"
-            color="primary"
-            size="small"
+            onClick={handleAddText}
+          >
+            Add Text
+          </ThemeButton>
+          <ThemeButton
+            disabled={loading || isDrawingMode || isHighlighterMode}
+            onClick={handleAddLine}
+          >
+            Add Line
+          </ThemeButton>
+          <ThemeButton
+            disabled={loading || isDrawingMode || isHighlighterMode}
             onClick={handleAddRectangle}
           >
             Add Rectangle
-          </Button>
-          <Button disabled={loading || isDrawingMode || isHighlighterMode} variant="outlined" color="primary" size="small" onClick={handleAddCircle}>
+          </ThemeButton>
+          <ThemeButton
+            disabled={loading || isDrawingMode || isHighlighterMode}
+            onClick={handleAddCircle}
+          >
             Add Circle
-          </Button>
-          <Button disabled={loading || isDrawingMode} variant="outlined" color="primary" size="small" onClick={toggleHighlighterMode}>
+          </ThemeButton>
+          <ThemeButton
+            disabled={loading || isDrawingMode}
+            onClick={toggleHighlighterMode}
+          >
             {isHighlighterMode ? 'Exit highlighter Mode' : 'Enter highlighter Mode'}
-          </Button>
-          <Button disabled={loading || isHighlighterMode} variant="outlined" color="primary" size="small" onClick={toggleDrawingMode}>
+          </ThemeButton>
+          <ThemeButton
+            disabled={loading || isDrawingMode}
+            onClick={toggleDrawingMode}
+          >
             {isDrawingMode ? 'Exit Drawing Mode' : 'Enter Drawing Mode'}
-          </Button>
+          </ThemeButton>
           {(isDrawingMode || isHighlighterMode) && (
-            <Button disabled={loading} variant="outlined" color="primary" size="small" onClick={handleUndo}>
+            <ThemeButton
+              disabled={loading}
+              onClick={handleUndo}
+            >
               Undo
-            </Button>
+            </ThemeButton>
           )}
           <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*" onChange={handleImageUpload} />
-          <Button
+          <ThemeButton
             disabled={loading || isDrawingMode || isHighlighterMode}
-            variant="outlined"
-            color="primary"
-            size="small"
             onClick={() => {
               fileInputRef.current.click();
-            }}
-          >
+            }}            >
             Upload Watermark
-          </Button>
-          <Button
+          </ThemeButton>
+          <ThemeButton
             disabled={loading || isDrawingMode || currentPageIndex === 0 || isHighlighterMode}
-            variant="outlined"
-            color="primary"
-            size="small"
             onClick={handlePreviousPage}
           >
             Previous Page
-          </Button>
-          <Button
+          </ThemeButton>
+          <ThemeButton
             disabled={loading || isDrawingMode || currentPageIndex === pageImages?.length - 1 || isHighlighterMode}
-            variant="outlined"
-            color="primary"
-            size="small"
             onClick={handleNextPage}
           >
             Next Page
-          </Button>
+          </ThemeButton>
         </div>
         {selectedObject && (
           <Box className="flex items-center gap-2">
@@ -492,9 +497,13 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
           >
             Save
           </ThemeButton>
-          <Button disabled={loading} variant="contained" color="primary" size="small" onClick={handleDownload}>
+          <ThemeButton
+            disabled={loading}
+            buttonType="theme"
+            onClick={handleDownload}
+          >
             Download
-          </Button>
+          </ThemeButton>
         </div>
       </div>
       <Grid container spacing={2}>
