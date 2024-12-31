@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState, Fragment } from 'react';
-import { Dialog, Button, Box, TextField, CircularProgress } from '@mui/material';
+import { Dialog, Box, TextField, CircularProgress } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
@@ -7,6 +7,7 @@ import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomDialogTransition, packages } from '../../constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const AssingProductsDialog = (props) => {
   const { packageIds, onClose, onSuccess } = props;
@@ -71,12 +72,12 @@ const AssingProductsDialog = (props) => {
                 slotProps={{
                   input: {
                     ...params.InputProps,
-                  endAdornment: (
-                    <Fragment>
-                      {isLoading ? <CircularProgress color="inherit" size={20} /> : null}
-                      {params.InputProps.endAdornment}
-                    </Fragment>
-                  )
+                    endAdornment: (
+                      <Fragment>
+                        {isLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                        {params.InputProps.endAdornment}
+                      </Fragment>
+                    )
                   }
                 }}
                 variant="outlined"
@@ -101,12 +102,20 @@ const AssingProductsDialog = (props) => {
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button variant="outlined" disabled={isSubmitting} color="primary" onClick={onClose}>
+        <ThemeButton
+          onClick={onClose}
+          buttonType='transparent'
+        >
           Cancel
-        </Button>
-        <Button onClick={submitForm} variant="contained" disabled={isSubmitting || !Boolean(product) || !Boolean(qty)} color="primary">
+        </ThemeButton>
+        <ThemeButton
+          onClick={submitForm}
+          buttonType='theme'
+          disabled={isSubmitting || !Boolean(product) || !Boolean(qty)}
+          isLoading={isSubmitting}
+        >
           Save
-        </Button>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

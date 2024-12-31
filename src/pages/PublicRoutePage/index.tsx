@@ -13,6 +13,7 @@ import IrtTicket from './IrtTicket';
 import QuotationCustomerAccept from './QuotationCustomer/QuotationCustomerAccept';
 import QuotationSupplierPrice from './QuotationSupplierPrice';
 import QuoteSupplierPrice from './QuoteSupplierPrice';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const useStyles = makeStyles((theme: Theme) => ({
   header: {
@@ -136,12 +137,12 @@ const PublicRoutePage = () => {
           <Box style={{ padding: '10px', display: 'flex', justifyContent: 'center' }}>
             <Box style={{ marginTop: '50px', width: '400px' }} boxShadow={3}>
               <Grid spacing={1} style={{ padding: '10px', display: 'flex', justifyContent: 'center' }} container>
-                <Grid size={{xs:12, sm:12, md:12}}>
+                <Grid size={{ xs: 12, sm: 12, md: 12 }}>
                   <h1 style={{ padding: '10px', display: 'flex', justifyContent: 'center', color: '#047d1c' }} title={'Authentication Required'}>
                     Authentication Required
                   </h1>
                 </Grid>
-                <Grid size={{xs:10, sm:10, md:10}}>
+                <Grid size={{ xs: 10, sm: 10, md: 10 }}>
                   <TextField
                     id="outlined-full-width"
                     margin="normal"
@@ -158,10 +159,13 @@ const PublicRoutePage = () => {
                     size="small"
                   />
                 </Grid>
-                <Grid size={{xs:10, sm:10, md:10}}>
-                  <Button style={{ marginBottom: '20px' }} variant="contained" color="primary" size="medium" fullWidth onClick={fetchResourceData}>
+                <Grid size={{ xs: 10, sm: 10, md: 10 }}>
+                  <ThemeButton
+                    onClick={fetchResourceData}
+                    buttonType='theme'
+                  >
                     Submit
-                  </Button>
+                  </ThemeButton>
                 </Grid>
               </Grid>
             </Box>

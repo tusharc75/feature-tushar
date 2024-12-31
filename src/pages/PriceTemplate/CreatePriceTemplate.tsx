@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment, useRef } from 'react';
-import { Box, Button, Menu, MenuItem, IconButton, useMediaQuery, Theme } from '@mui/material';
+import { Box, Menu, MenuItem, IconButton, useMediaQuery, Theme } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
 import { useParams, useHistory } from 'react-router-dom';
@@ -402,7 +402,7 @@ const PriceTemplate = () => {
                 <Form>
                   <Box py={1} pb={'16px'}>
                     <Grid container spacing={1}>
-                      <Grid size={{xs:12, sm:4}}>
+                      <Grid size={{ xs: 12, sm: 4 }}>
                         <TextField
                           disabled={!hasPermissionToUpdate}
                           variant="outlined"
@@ -419,7 +419,7 @@ const PriceTemplate = () => {
                           onChange={(e) => setFieldValue('name', e.target.value.trimStart())}
                         />
                       </Grid>
-                      <Grid size={{xs:12, sm:4}}>
+                      <Grid size={{ xs: 12, sm: 4 }}>
                         <Autocomplete
                           disabled={!hasPermissionToUpdate}
                           options={productTemplate}
@@ -453,26 +453,24 @@ const PriceTemplate = () => {
                           )}
                         />
                       </Grid>
-                      <Grid size={{xs:12, sm:4}} container justifyContent="flex-end">
+                      <Grid size={{ xs: 12, sm: 4 }} container justifyContent="flex-end">
                         <div className="button flex items-center">
                           <HistoryButton onClick={() => setShowHistory(true)} />
                           <Box>
                             {((id === '0' && priceTemplatePermissions.isCreate) || (id !== '0' && priceTemplatePermissions.isUpdate)) && (
-                            <ThemeButton
-                              onClick={submitForm}
-                              disabled={isUpdating || !hasPermissionToUpdate}
-                              isLoading={isUpdating}
-                              buttonType='theme'
-                            >
-                              Save
-                            </ThemeButton>
+                              <ThemeButton
+                                onClick={submitForm}
+                                disabled={isUpdating || !hasPermissionToUpdate}
+                                isLoading={isUpdating}
+                                buttonType='theme'
+                              >
+                                Save
+                              </ThemeButton>
                             )}
                           </Box>
                           <Box ml={1}>
-                            <Button
-                              color="primary"
-                              size="small"
-                              variant="contained"
+                            <ThemeButton
+                              buttonType='theme'
                               onClick={() => {
                                 if (
                                   hasPermissionToUpdate &&
@@ -486,16 +484,15 @@ const PriceTemplate = () => {
                                 } else {
                                   history.push(routes.priceTemplate.path);
                                 }
-                              }}
-                            >
+                              }}>
                               Close
-                            </Button>
+                            </ThemeButton>
                           </Box>
                         </div>
                       </Grid>
                     </Grid>
                     <Grid container spacing={1}>
-                      <Grid size={{xs:12, sm:4}}>
+                      <Grid size={{ xs: 12, sm: 4 }}>
                         {
                           <Autocomplete
                             disabled={!hasPermissionToUpdate}
@@ -531,7 +528,7 @@ const PriceTemplate = () => {
                           />
                         }
                       </Grid>
-                      <Grid size={{xs:12, sm:4}}>
+                      <Grid size={{ xs: 12, sm: 4 }}>
                         {
                           <Autocomplete
                             disabled={!hasPermissionToUpdate}
@@ -571,7 +568,7 @@ const PriceTemplate = () => {
                           />
                         }
                       </Grid>
-                      <Grid size={{xs:12, sm:4}}>
+                      <Grid size={{ xs: 12, sm: 4 }}>
                         {
                           <Autocomplete
                             disabled={!hasPermissionToUpdate}
