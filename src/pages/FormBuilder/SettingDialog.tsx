@@ -1,4 +1,4 @@
-import { Box, Button, Checkbox, Dialog, FormControlLabel, TextField } from '@mui/material';
+import { Box, Checkbox, Dialog, FormControlLabel, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Field, FieldArray, Form, Formik } from 'formik';
 import { isEmpty, isEqual } from 'lodash';
@@ -12,6 +12,7 @@ import { CustomDialogTransition } from '../../constants/helpers';
 import Autocomplete from '@mui/material/Autocomplete';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const SettingDialog = ({ entities, resource, handleClose }) => {
   const [initialValues, setInitialValues] = useState({
@@ -159,7 +160,7 @@ const SettingDialog = ({ entities, resource, handleClose }) => {
                           selectedEntities?.map((entity, index) => (
                             <Box pt={2}>
                               <Grid container spacing={1}>
-                                <Grid size={{xs:4}}>
+                                <Grid size={{ xs: 4 }}>
                                   <TextField
                                     disabled
                                     variant="outlined"
@@ -169,7 +170,7 @@ const SettingDialog = ({ entities, resource, handleClose }) => {
                                     fullWidth
                                   />
                                 </Grid>
-                                <Grid size={{xs:4}}>
+                                <Grid size={{ xs: 4 }}>
                                   <Field
                                     as={TextField}
                                     variant="outlined"
@@ -183,7 +184,7 @@ const SettingDialog = ({ entities, resource, handleClose }) => {
                                     }}
                                   />
                                 </Grid>
-                                <Grid size={{xs:4}}>
+                                <Grid size={{ xs: 4 }}>
                                   <Field
                                     as={TextField}
                                     value={values['entityResources'][entity._id]?.homePageLabel || ''}
@@ -208,26 +209,22 @@ const SettingDialog = ({ entities, resource, handleClose }) => {
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button
-                size="small"
+              <ThemeButton
+                buttonType='transparent'
                 onClick={() => {
                   if (isEqual(values, initialValues)) handleClose();
                   setShowConfirmDialog(true);
                 }}
-                color="primary"
               >
                 Cancel
-              </Button>
-              <Button
-                size="small"
-                type="submit"
-                color="primary"
-                variant="contained"
+              </ThemeButton>
+              <ThemeButton
+                buttonType='theme'
                 disabled={(values.entityWiseResourceName && !selectedEntities?.length) || !isEmpty(errors)}
                 onClick={submitForm}
               >
                 Save
-              </Button>
+              </ThemeButton>
             </CustomDialogFooter>
             {showConfirmDialog ? (
               <ConfirmCancelDialog

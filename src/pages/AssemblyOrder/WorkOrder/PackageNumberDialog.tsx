@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, TextField } from '@mui/material';
+import { Box, Dialog, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import Autocomplete from '@mui/material/Autocomplete';
 import { FieldArray, Form, Formik } from 'formik';
@@ -11,6 +11,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderIds = null }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -127,7 +128,7 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderId
                         {values?.managedPackages?.map((data, index) => (
                           <Box mb={2} border={1} p={1} borderColor="var(--common-border-color)">
                             <Grid container spacing={2}>
-                              <Grid size={{ xs:12, sm:6, md:6, lg:6}}>
+                              <Grid size={{ xs: 12, sm: 6, md: 6, lg: 6 }}>
                                 <TextField
                                   fullWidth
                                   label={managedPackagedLabel || 'Managed Package Name'}
@@ -159,7 +160,7 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderId
                                   }
                                 />
                               </Grid>
-                              <Grid size={{ xs:12, sm:6, md:6, lg:6}}>
+                              <Grid size={{ xs: 12, sm: 6, md: 6, lg: 6 }}>
                                 <Autocomplete
                                   id="package"
                                   disabled
@@ -213,20 +214,18 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderId
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button size="small" color="primary" onClick={onClose}>
-                  Cancel
-                </Button>
-                <Button
-                  // disabled={submitting}
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  type="submit"
+                <ThemeButton
+                  buttonType='transparent'
                   onClick={submitForm}
-                // endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                >
+                  Cancel
+                </ThemeButton>
+                <ThemeButton
+                  buttonType='theme'
+                  onClick={submitForm}
                 >
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
             </>
           )}

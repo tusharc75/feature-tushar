@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, Typography } from '@mui/material';
+import { Box, Dialog, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -8,6 +8,7 @@ import CopyToClipboardButton from 'src/components/CopyToClipboardButton';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import OtpInput from 'src/components/OtpInput';
 import { CustomDialogTransition } from 'src/constants/helpers';
@@ -87,7 +88,7 @@ function SetUpMfaDialog({ onClose }) {
             <Box mt={3} />
             <Box m={2}>
               <Grid container spacing={2}>
-                <Grid size={{xs:12}}>
+                <Grid size={{ xs: 12 }}>
                   <div className="mx-auto max-w-[400px] text-center">
                     <Typography variant="body2" className="mb-2">
                       Enter Code
@@ -106,21 +107,18 @@ function SetUpMfaDialog({ onClose }) {
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button size="small" onClick={onClose} variant="outlined">
+        <ThemeButton onClick={onClose} buttonType='transparent'>
           Cancel
-        </Button>
-        <Button
-          disableElevation
-          variant="contained"
-          size="small"
-          color="primary"
+        </ThemeButton>
+        <ThemeButton
+          buttonType='theme'
           disabled={token.length < 6}
           onClick={() => {
             validate(data.secret, token);
           }}
         >
           Submit
-        </Button>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

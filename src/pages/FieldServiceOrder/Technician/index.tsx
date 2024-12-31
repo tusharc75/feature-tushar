@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, MenuItem } from '@mui/material';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -17,6 +17,7 @@ import routes from '../../../components/Helpers/Routes';
 import { CHILD_RESOURCE, MATERIAL_TYPE, SERVICE_ORDER_STATUS, fieldServiceOrder, warehouse } from '../../../constants/helpers';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const Technician = ({
   serviceOrderData,
@@ -273,18 +274,15 @@ const Technician = ({
   const rightSideContents = () => {
     return (
       <>
-        <Button
-          variant="contained"
-          color="primary"
-          type="button"
-          size="small"
+        <ThemeButton
+          buttonType="theme"
           disabled={selectedRecords?.length === 1 ? false : true}
           onClick={() => {
             setAddEmployeeMasterDialog({ open: true, data: selectedRecords[0] });
           }}
         >
           {`Assign Technician`}
-        </Button>
+        </ThemeButton>
       </>
     );
   };
