@@ -103,7 +103,7 @@ const DropDown = ({
         </div>
         <div className="flex items-center justify-between">
           <InNin filterTerm={filterTerm} setFilterTerm={setFilterTerm} fieldName={fieldData?.fieldName} />
-          {fieldData?.lookup && fieldData?.lookupResource && (
+          {fieldData?.lookup && fieldData?.lookupResource && !fieldData?.customOptions?.length && (
             <SearchBox
               onChange={(e) => {
                 setSearchVal(e?.target?.value);
@@ -140,7 +140,11 @@ const DropDown = ({
                               } else {
                                 filter.term = filter.term?.filter((t) => t?.optionValue != o?.optionValue);
                               }
-                              setFilterByIds([...filterByIds?.filter((d) => d?.field != fieldData?.fieldName), filter]);
+                              if (filter.term?.length) {
+                                setFilterByIds([...filterByIds?.filter((d) => d?.field != fieldData?.fieldName), filter]);
+                              } else {
+                                setFilterByIds([...filterByIds?.filter((d) => d?.field != fieldData?.fieldName)]);
+                              }
                             } else {
                               setFilterByIds((pre) => [...pre, { field: fieldData?.fieldName, term: [o] }]);
                             }
@@ -148,10 +152,11 @@ const DropDown = ({
                             if (filter) {
                               if (e?.target?.checked) {
                                 filter.term = o;
+                                setFilterByIds([...filterByIds?.filter((d) => d?.field != fieldData?.fieldName), filter]);
                               } else {
                                 filter.term = filter.term = {};
+                                setFilterByIds([...filterByIds?.filter((d) => d?.field != fieldData?.fieldName)]);
                               }
-                              setFilterByIds([...filterByIds?.filter((d) => d?.field != fieldData?.fieldName), filter]);
                             } else {
                               setFilterByIds((pre) => [...pre, { field: fieldData?.fieldName, term: o }]);
                             }
@@ -197,10 +202,11 @@ const DropDown = ({
                             if (filter) {
                               if (e?.target?.checked) {
                                 filter.term = o?.optionValue;
+                                setDeepFilters([...deepFilters?.filter((d) => d?.field != fieldData?.fieldName), filter]);
                               } else {
                                 filter.term = filter.term = '';
+                                setDeepFilters([...deepFilters?.filter((d) => d?.field != fieldData?.fieldName)]);
                               }
-                              setDeepFilters([...deepFilters?.filter((d) => d?.field != fieldData?.fieldName), filter]);
                             } else {
                               setDeepFilters((pre) => [...pre, { field: fieldData?.fieldName, term: o?.optionValue }]);
                             }
@@ -211,7 +217,11 @@ const DropDown = ({
                               } else {
                                 filter.term = filter.term?.filter((t) => t != o?.optionValue);
                               }
-                              setDeepFilters([...deepFilters?.filter((d) => d?.field != fieldData?.fieldName), filter]);
+                              if (filter.term?.length) {
+                                setDeepFilters([...deepFilters?.filter((d) => d?.field != fieldData?.fieldName), filter]);
+                              } else {
+                                setDeepFilters([...deepFilters?.filter((d) => d?.field != fieldData?.fieldName)]);
+                              }
                             } else {
                               setDeepFilters((pre) => [...pre, { field: fieldData?.fieldName, term: [o?.optionValue] }]);
                             }

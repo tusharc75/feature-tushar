@@ -277,12 +277,34 @@ const MaterialHandling = () => {
     {
       fieldData: {
         _id: '630dc2429ec41869052396b6',
+        fieldName: 'fieldTicket',
+        fieldLabel: resources?.fieldTicket?.titlePlural,
+        lookup: true,
+        lookupResource: sidebarResource.fieldTicket,
+        resource: sidebarResource.materialHandling,
+        type: 'dropDown',
+        order: 5,
+        required: false,
+        sectionName: 'Material Handeling Filter',
+        isTooltip: false,
+        editAble: false,
+        brand: user?.user?.brand,
+        roleType: 0,
+        sectionProperties: ''
+      },
+      isRead: true,
+      isCreate: true,
+      isUpdate: true
+    },
+    {
+      fieldData: {
+        _id: '630dc2429ec41869052396b7',
         fieldName: 'createDate',
-        fieldLabel: 'Create Date',
+        fieldLabel: 'Requested Date',
         lookup: false,
         resource: sidebarResource.materialHandling,
         type: 'date',
-        order: 5,
+        order: 6,
         required: false,
         sectionName: 'Material Handeling Filter',
         isTooltip: false,
