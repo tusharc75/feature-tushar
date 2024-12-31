@@ -80,8 +80,8 @@ const useSearch = () => {
     }
     let entityData,
       allData = [];
-    if (user?.entity && user.entity.length) {
-      entityData = user.entity.find((curEntity) => curEntity._id === selectedEntity);
+    if (user?.entity && user?.entity.length) {
+      entityData = user?.entity.find((curEntity) => curEntity._id === selectedEntity);
     }
     if (entityData?.resource) {
       allData = entityData.resource;
@@ -100,7 +100,7 @@ const useSearch = () => {
       })
       .sort((a, b) => a.sectionName.localeCompare(b.sectionName));
     setItems(list);
-  }, [selectedEntity, setItems, user.entity, pathName]);
+  }, [selectedEntity, setItems, user?.entity, pathName]);
 
   useEffect(() => {
     getItems();

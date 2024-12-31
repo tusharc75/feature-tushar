@@ -1,14 +1,14 @@
-import { Box, Dialog, IconButton, Typography } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 import { ControlPoint } from '@mui/icons-material';
 import EditIcon from '@mui/icons-material/Edit';
-import { Skeleton } from '@mui/material';
+import { Box, Button, Dialog, IconButton, Skeleton, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaEye } from 'react-icons/fa';
 import { MdDelete } from 'react-icons/md';
 import { useHistory, useParams } from 'react-router-dom';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
+import { CustomDialogTransition, DOA_RESOURCE } from 'src/constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import { SET_SELECTED_ENTITY, SET_USER, USER_LOADING } from '../../StateProvider/actionTypes';
@@ -23,10 +23,9 @@ import routes from '../../components/Helpers/Routes';
 import ResourceTransferDialog from '../../components/ResourceTransferDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import DoaDialog from '../DoaSetup/ManageDoa/ManageDoaDialog';
+import DoaSetup from '../DoaSetupNew';
 import AssignedUsers from './AssignedUsers';
 import ManageEntity from './ManageEntity';
-import DoaSetup from '../DoaSetupNew';
-import { CustomDialogTransition, DOA_RESOURCE } from 'src/constants/helpers';
 
 const EntityDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -291,9 +290,9 @@ const EntityDetailsPage = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-        id: user._id,
-        name: `${user.firstName} ${user.lastName}`
-      }))
+          id: user._id,
+          name: `${user.firstName} ${user.lastName}`
+        }))
       : [];
 
     setUserList(rows);
@@ -337,16 +336,16 @@ const EntityDetailsPage = () => {
               )}
             </Box>
             <Box mt={2} className="single-form-v1 ">
-              <Box className="form-head-v1">
-                <Typography className="form-label-style-v1" component={'h3'}>
-                  {'DOA Details '}
-                </Typography>
+              <div className="relative flex justify-between rounded-t bg-[var(--dark-secondary,var(--accordion-expanded-summary-bg,#EFFBF9))] px-7 py-4">
+                <h6 className="text-sm font-semibold leading-[1.05] ">DOA Details</h6>
                 {permissions.entity?.isUpdate && (
-                  <ThemeButton buttonType='theme' onClick={() => setDoaDialogOpen(true)}>
-                    {doa.length > 0 ? 'Edit DOA' : 'Add DOA'}
-                  </ThemeButton>
+                  <span className="absolute right-5 top-[50%] [transform:translateY(-50%)]">
+                    <ThemeButton buttonType="theme" onClick={() => setDoaDialogOpen(true)}>
+                      {doa.length > 0 ? 'Edit DOA' : 'Add DOA'}
+                    </ThemeButton>
+                  </span>
                 )}
-              </Box>
+              </div>
               <Box className="formdata-v1">
                 <Grid container style={{ padding: '8px' }} spacing={1}>
                   <Grid size={{ xs: 12, sm: 12 }}>

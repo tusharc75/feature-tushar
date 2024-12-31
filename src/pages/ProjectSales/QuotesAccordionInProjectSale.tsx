@@ -1,12 +1,10 @@
-import { Box, Button, Card, CardContent, IconButton, Menu, MenuItem, Typography } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 import { MoreVert } from '@mui/icons-material';
 import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import TrendingUpOutlinedIcon from '@mui/icons-material/TrendingUpOutlined';
+import { Box, Button, Card, CardContent, IconButton, Menu, MenuItem, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import React, { useContext, useEffect, useState } from 'react';
 import { FaArrowAltCircleDown } from 'react-icons/fa';
 import { IoCalendarOutline } from 'react-icons/io5';
@@ -14,6 +12,7 @@ import { useHistory } from 'react-router-dom';
 import DisplayData from 'src/components/CardDisplayData';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { displayDate } from 'src/constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
@@ -22,7 +21,6 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import { formatAmountWithCurrency } from '../../constants/helpers';
 import ManageQuoteDialog from '../../pages/QuoteBuilderCombined/ManageQuote/ManageQuoteDialog';
-import { displayDate } from 'src/constants/helpers';
 import styles from './ProjectSales.module.scss';
 
 export default function QuotesAccordionInProjectSale({
@@ -177,25 +175,23 @@ export default function QuotesAccordionInProjectSale({
       </Menu>
       <Accordion expanded={expandQuote} onChange={() => setExpandQuote(!expandQuote)}>
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header pos_rel">
-          <Grid container>
-            <Grid size={{xs:8}} alignItems="center">
-              <Box component="div" display="flex" alignItems="center" flexGrow={1}>
-                <IconButton size="small" onClick={() => setExpandQuote(!expandQuote)}>
-                  {expandQuote === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                </IconButton>
-                <Box padding="5px">
-                  <Typography variant="subtitle2">Quotes ({quotes?.length || 0})</Typography>
-                </Box>
-              </Box>
-            </Grid>
-            <Grid size={{xs:4}} container justifyContent="flex-end" alignItems="center">
-              {(permissions?.isUpdate && isTeamMember) || isManager ? (
-                <IconButton aria-haspopup="true" color="primary" size="small" onClick={handleClick}>
-                  <MoreVert />
-                </IconButton>
-              ) : null}
-            </Grid>
-          </Grid>
+          <div className="flex items-center justify-between">
+            <Typography variant="subtitle2">Quotes ({quotes?.length || 0})</Typography>
+            {(permissions?.isUpdate && isTeamMember) || isManager ? (
+              <IconButton
+                aria-haspopup="true"
+                color="primary"
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  handleClick(e);
+                }}
+              >
+                <MoreVert />
+              </IconButton>
+            ) : null}
+          </div>
         </AccordionSummary>
         <AccordionDetails>
           <>
@@ -212,9 +208,9 @@ export default function QuotesAccordionInProjectSale({
                       >
                         <Card className="detailCard  card-v1" variant="outlined">
                           <CardContent className="card-link">
-                            <Grid size={{xs:12}}>
+                            <Grid size={{ xs: 12 }}>
                               <Grid container className="detailCardHeader">
-                                <Grid size={{xs:6}}>
+                                <Grid size={{ xs: 6 }}>
                                   {!isQuotePrivate(obj) ? (
                                     quoteNameWithRedirect(obj)
                                   ) : obj?.privateAccess === true ? (
@@ -232,7 +228,7 @@ export default function QuotesAccordionInProjectSale({
                                     quoteNameWithRedirect(obj)
                                   )}
                                 </Grid>
-                                <Grid size={{xs:6}}>
+                                <Grid size={{ xs: 6 }}>
                                   <Box display="flex" alignItems="center" justifyContent="flex-end">
                                     {obj?.estimatedAmount ? (
                                       <Typography
@@ -257,7 +253,7 @@ export default function QuotesAccordionInProjectSale({
                               </Grid>
 
                               <Grid container>
-                                <Grid size={{xs:12, sm:6, md:6}}>
+                                <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                                   {obj.expiryDate ? (
                                     <DisplayData
                                       key={i}
@@ -269,14 +265,14 @@ export default function QuotesAccordionInProjectSale({
                                     ''
                                   )}
                                 </Grid>
-                                <Grid size={{xs:12, sm:6, md:6}} className={styles.opportunity_closed_date}>
+                                <Grid size={{ xs: 12, sm: 6, md: 6 }} className={styles.opportunity_closed_date}>
                                   {obj.incoTerms ? (
                                     <DisplayData key={i} label="Inco Terms" value={obj.incoTerms} icon={<BusinessOutlinedIcon />} />
                                   ) : (
                                     ''
                                   )}
                                 </Grid>
-                                <Grid size={{xs:12, sm:6, md:6}}>
+                                <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                                   {obj.probability ? (
                                     <DisplayData key={i} label="Probability" value={`${obj.probability} %`} icon={<TrendingUpOutlinedIcon />} />
                                   ) : (
