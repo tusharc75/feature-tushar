@@ -2573,7 +2573,7 @@ const FormTypes = (props) => {
                   <ThemeButton
                     disabled={isFileUploading || !canEdit}
                     buttonType="theme"
-                    startIcon={isFileUploading && <CircularProgress size={15} />}
+                    isLoading={isFileUploading}
                   >
                     {isFileUploading ? 'Uploading File(s)' : required ? 'Upload File(s) *' : 'Upload File(s)'}
                   </ThemeButton>

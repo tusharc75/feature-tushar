@@ -1,4 +1,4 @@
-import { CircularProgress, Dialog, IconButton, ListItemIcon, ListItemText, TextField } from '@mui/material';
+import { Dialog, IconButton, ListItemIcon, ListItemText, TextField } from '@mui/material';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { DragIndicator, Info } from '@mui/icons-material';
 import SwapVertIcon from '@mui/icons-material/SwapVert';
@@ -156,7 +156,7 @@ export default function ArrangeView({ columns, setColumns }) {
               Cancel
             </ThemeButton>
             <ThemeButton disabled={isSubmitting} buttonType="theme" onClick={onSave}>
-              {isSubmitting ? <CircularProgress size={18} /> : 'Save'}
+              Save
             </ThemeButton>
           </CustomDialogFooter>
         </Dialog>

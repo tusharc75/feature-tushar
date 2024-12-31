@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react';
-import { Checkbox, CircularProgress, Dialog, List, ListItem, ListItemIcon, ListItemText, Typography } from '@mui/material';
+import { Checkbox, Dialog, List, ListItem, ListItemIcon, ListItemText, Typography } from '@mui/material';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
@@ -79,11 +79,11 @@ const TransferEntityDialog = ({ TransferEntityDialogOpen, onSuccess, handleClose
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
-        <ThemeButton disabled={isAssigning} onClick={handleCloseDialog} buttonType="transparent">
+        <ThemeButton onClick={handleCloseDialog} buttonType="transparent">
           Cancel
         </ThemeButton>
-        <ThemeButton disabled={!selectedEntities.length || isAssigning} onClick={handleTransferEntity} buttonType="theme">
-          {isAssigning ? <CircularProgress size={22} /> : 'Save'}
+        <ThemeButton disabled={!selectedEntities.length || isAssigning} onClick={handleTransferEntity} buttonType="theme" isLoading={isAssigning}>
+          Save
         </ThemeButton>
       </CustomDialogFooter>
     </Dialog>

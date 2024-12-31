@@ -154,7 +154,7 @@ export default function Actions({ onClose, onSuccess, resource, resourceData }) 
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <ThemeButton buttonType="transparent" disabled={submitting} onClick={onClose}>
+        <ThemeButton buttonType="transparent" onClick={onClose}>
           Cancel
         </ThemeButton>
         <ThemeButton
@@ -166,7 +166,7 @@ export default function Actions({ onClose, onSuccess, resource, resourceData }) 
               handleSave();
             }
           }}
-          endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+          isLoading={submitting}
         >
           Save
         </ThemeButton>

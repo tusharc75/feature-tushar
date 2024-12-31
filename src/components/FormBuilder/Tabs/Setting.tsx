@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Checkbox, CircularProgress, Dialog, FormControlLabel, TextField } from '@mui/material';
+import { Box, Checkbox, Dialog, FormControlLabel, TextField } from '@mui/material';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from 'src/constants/helpers';
@@ -146,14 +146,14 @@ const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <ThemeButton buttonType="transparent" disabled={submitting} onClick={onClose}>
+              <ThemeButton buttonType="transparent" onClick={onClose}>
                 Cancel
               </ThemeButton>
               <ThemeButton
                 disabled={submitting}
                 buttonType="theme"
                 onClick={submitForm}
-                endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                isLoading={submitting}
               >
                 Save
               </ThemeButton>

@@ -1,4 +1,4 @@
-import { Box, CircularProgress, Dialog, TextField } from '@mui/material';
+import { Box, Dialog, TextField } from '@mui/material';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Form, Formik } from 'formik';
@@ -172,7 +172,6 @@ const ManageTabs = ({ onClose, data, onSuccess, resource, resourceId, workflowId
             <CustomDialogFooter>
               <ThemeButton
                 buttonType="transparent"
-                disabled={isSubmitting}
                 onClick={() => {
                   if (isEqual(initialValues, values)) onClose();
                   else setShowConfirmDialog(true);
@@ -184,9 +183,8 @@ const ManageTabs = ({ onClose, data, onSuccess, resource, resourceId, workflowId
                 disabled={isSubmitting}
                 buttonType="theme"
                 onClick={submitForm}
-                endIcon={isSubmitting && <CircularProgress color="inherit" size={18} />}
+                isLoading={isSubmitting}
               >
-                {' '}
                 Save
               </ThemeButton>
             </CustomDialogFooter>

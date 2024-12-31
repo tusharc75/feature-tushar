@@ -1,5 +1,4 @@
-import { CircularProgress, Theme, Typography } from '@mui/material';
-import Button from '@mui/material/Button';
+import { Theme, Typography } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -7,6 +6,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import { makeStyles } from '@mui/styles';
 import React from 'react';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomDialogTransition } from 'src/constants/helpers';
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -66,13 +66,22 @@ export default function ConfirmationDialogRaw({
       </DialogTitle>
       <DialogContent dividers>{message ? <Typography>{message}</Typography> : null}</DialogContent>
       <DialogActions className="bg-[#ebebeb] dark:bg-[#1a1a26]">
-        <Button id={'confirmation-dialog-cancel-button'} size="small" autoFocus onClick={onClose} color="primary">
+        <ThemeButton
+          id={'confirmation-dialog-cancel-button'}
+          buttonType="transparent"
+          onClick={onClose}
+        >
           {!cancelText ? 'Cancel' : cancelText}
-        </Button>
-        <Button id={'confirmation-dialog-confirm-button'} size="small" onClick={onOk} disabled={okBtnLoading} color="primary">
-          {okBtnLoading ? <CircularProgress style={{ marginRight: '8px' }} size={20} color="inherit" /> : null}
+        </ThemeButton>
+        <ThemeButton
+          id={'confirmation-dialog-confirm-button'}
+          disabled={okBtnLoading}
+          buttonType="theme"
+          isLoading={okBtnLoading}
+          onClick={onOk}
+        >
           {!forwardText ? 'Confirm' : forwardText}
-        </Button>
+        </ThemeButton>
       </DialogActions>
     </Dialog>
   );
