@@ -257,6 +257,7 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
                       isDisable={true}
                       setField={() => {}}
                       setResource={() => {}}
+                      height={303}
                     />
                   </BoxWithBorder>
                 </div>
