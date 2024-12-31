@@ -1,4 +1,4 @@
-import { Box, Button, IconButton } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -17,6 +17,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { deleteDisable } from 'src/constants/messageHelpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ProgressiveBilling = ({ rentalId, allowCreateInvoice }) => {
   const renderedFrom = camelCase(sidebarResource.invoice);
@@ -215,16 +216,14 @@ const ProgressiveBilling = ({ rentalId, allowCreateInvoice }) => {
                 <HtmlTooltip
                   title={rentalManagementData?.allowToCreateBill ? '' : 'Invoice can be created only once item delivered or service started'}
                 >
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
+                  <ThemeButton
+                    buttonType="theme"
                     onClick={() => setCreateBillDialog({ open: true })}
                     aria-controls="action-menu"
                     disabled={!rentalManagementData?.allowToCreateBill}
                   >
                     Create Billing
-                  </Button>
+                  </ThemeButton>
                 </HtmlTooltip>
               </Box>
             </Box>

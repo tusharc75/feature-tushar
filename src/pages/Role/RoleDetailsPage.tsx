@@ -1,4 +1,4 @@
-import { Box, Button, Checkbox, FormControlLabel, IconButton, TextField, Typography } from '@mui/material';
+import { Box, Checkbox, FormControlLabel, IconButton, TextField, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { ControlPoint } from '@mui/icons-material';
 import { Autocomplete, Skeleton } from '@mui/material';
@@ -540,9 +540,9 @@ const RoleDetailsPage = () => {
                     isImport={permissions?.role.isUpdate && isEdit && !isEditDeleteDisable}
                   />
                   {permissions?.role.isUpdate && !isEdit && (
-                    <Button variant="contained" color="primary" size="medium" onClick={() => setIsEdit(true)}>
+                    <ThemeButton buttonType="theme" onClick={() => setIsEdit(true)}>
                       Edit
-                    </Button>
+                    </ThemeButton>
                   )}
                   {permissions?.role.isUpdate && isEdit && (
                     <ThemeButton
@@ -767,10 +767,9 @@ const RoleDetailsPage = () => {
                           {roleUsers.length > showRecordsBeforeViewAll && (
                             <>
                               <Box marginY={2} />
-                              <Button
-                                variant="outlined"
+                              <ThemeButton
+                                buttonType="transparent" 
                                 className="accordion-outlined-button"
-                                startIcon={<FaEye />}
                                 onClick={() =>
                                   history.push(`/user`, {
                                     id: roleData._id,
@@ -784,7 +783,7 @@ const RoleDetailsPage = () => {
                                 }
                               >
                                 View All
-                              </Button>
+                              </ThemeButton>
                             </>
                           )}
                         </>
