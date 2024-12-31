@@ -1,10 +1,10 @@
 import { useAccount, useMsal } from '@azure/msal-react';
 import { CircularProgress, FormControlLabel, Switch } from '@mui/material';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Grid2';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { makeStyles } from '@mui/styles';
@@ -277,7 +277,7 @@ export const CreateEmail = ({
             toastConfig.setToastConfig(err);
           });
       }
-    } catch (e) { }
+    } catch (e) {}
   };
 
   const handleSendEmail = async (values) => {
@@ -493,7 +493,7 @@ export const CreateEmail = ({
                     ) : (
                       <Grid container spacing={3}>
                         {showESign && (
-                          <Grid item className="pull-right p-0" xs={12}>
+                          <Grid className="pull-right p-0" size={{ xs: 12 }}>
                             <FormControlLabel
                               disabled={!isESign}
                               key={1}
@@ -502,7 +502,7 @@ export const CreateEmail = ({
                             />
                           </Grid>
                         )}
-                        <Grid item xs={12}>
+                        <Grid size={{ xs: 12 }}>
                           <TextField
                             autoComplete="off"
                             id={'send-email-dialog-subject-input'}
@@ -588,11 +588,7 @@ export const CreateEmail = ({
                             )}
                             value={values['cc']}
                             onBlur={(e: any) => {
-                              if (
-                                e.target.value &&
-                                e.target.value.trim() != '' &&
-                                /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(e.target.value)
-                              ) {
+                              if (e.target.value && e.target.value.trim() != '' && /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(e.target.value)) {
                                 setFieldValue('cc', [...values['cc'], e.target.value]);
                               }
                             }}
@@ -654,9 +650,8 @@ export const CreateEmail = ({
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  color="primary"
-                  size="small"
+                <ThemeButton
+                  buttonType="transparent"
                   disabled={sending}
                   onClick={() => {
                     if (isEqual(initialValues, values)) handleClose();
@@ -665,13 +660,10 @@ export const CreateEmail = ({
                   id={'send-email-dialog-cancel-button'}
                 >
                   Cancel
-                </Button>
+                </ThemeButton>
                 {!emailId && (
-                  <Button
-                    type="button"
-                    size="small"
-                    color="primary"
-                    variant="contained"
+                  <ThemeButton
+                    buttonType="theme"
                     disabled={sending || uploadingImageOrFileProgress > 0 || generatingFile}
                     onClick={(e) => {
                       e.preventDefault();
@@ -687,7 +679,7 @@ export const CreateEmail = ({
                     ) : (
                       'send'
                     )}
-                  </Button>
+                  </ThemeButton>
                 )}
               </CustomDialogFooter>
               {showConfirmDialog ? (

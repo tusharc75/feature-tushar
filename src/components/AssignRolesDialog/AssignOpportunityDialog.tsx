@@ -1,17 +1,16 @@
 import {
-  Button,
   Checkbox,
   CircularProgress,
   Dialog,
   FormControl,
   FormControlLabel,
-  Grid,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
   Typography
 } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
@@ -170,18 +169,12 @@ const AssignOpportunityDialog = ({ opportunityDialogOpen, onSuccess, handleClose
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button disabled={isAssigning} onClick={handleCloseDialog} color="primary" size="small">
+        <ThemeButton disabled={isAssigning} onClick={handleCloseDialog} buttonType="transparent">
           Cancel
-        </Button>
-        <Button
-          disabled={!selectedOpportunities.length || isAssigning}
-          onClick={handleAssignOpportunities}
-          color="primary"
-          size="small"
-          variant="contained"
-        >
+        </ThemeButton>
+        <ThemeButton disabled={!selectedOpportunities.length || isAssigning} onClick={handleAssignOpportunities} buttonType="theme">
           {isAssigning ? <CircularProgress size={22} /> : 'Save'}
-        </Button>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

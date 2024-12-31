@@ -1,6 +1,7 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { Box, TextField, Theme } from '@mui/material';
-import { Button, CircularProgress, Dialog } from '@mui/material';
+import { CircularProgress, Dialog } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
@@ -62,18 +63,15 @@ export default function AssetScrapRepairDialog({ statusToUpdate, setStatusToUpda
       </CustomDialogContent>
 
       <CustomDialogFooter>
-        <Button
-          size="small"
-          variant="outlined"
-          color="primary"
+        <ThemeButton
+          buttonType="transparent"
           onClick={() => {
             onClose();
           }}
         >
           Cancel
-        </Button>
-        <Button
-          size="small"
+        </ThemeButton>
+        <ThemeButton
           onClick={() => {
             setStatusToUpdate((prevState) => ({ ...prevState, isUpdating: true }));
             axiosInstance()
@@ -100,12 +98,11 @@ export default function AssetScrapRepairDialog({ statusToUpdate, setStatusToUpda
               });
           }}
           disabled={statusToUpdate.isUpdating}
-          variant="contained"
-          color="primary"
+          buttonType="theme"
         >
           {statusToUpdate.isUpdating ? <CircularProgress style={{ marginRight: '8px' }} size={20} color="inherit" /> : null}
           Change Status
-        </Button>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );
