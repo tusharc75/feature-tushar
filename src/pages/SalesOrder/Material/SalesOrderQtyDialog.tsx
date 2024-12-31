@@ -1,5 +1,6 @@
 import { FC, useEffect, useState, Fragment, useRef } from 'react';
-import { Button, Dialog, Grid, Box } from '@material-ui/core';
+import { Dialog, Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -9,7 +10,6 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomButton from '../../../components/Helpers/CustomButton';
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
@@ -18,6 +18,7 @@ import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import moment from 'moment';
 import { bulkUpdate, calculateRowsField } from 'src/components/RentalManagment/helper';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -157,7 +158,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
     } else {
       return 'Bulk Edit';
     }
-  }
+  };
 
   const handleSubmit = async (values) => {
     if (isBulkedit) {
@@ -315,7 +316,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
                                     size="small"
                                   />
                                 ) : rateChangeFields.includes(field.fieldName) && !isBulkedit ? (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
                                     <Box display="flex">
                                       <Box flexGrow={1}>
                                         <FormTypes
@@ -331,12 +332,20 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
                                           setFieldValue={(name, value) => {
                                             setFieldValue(name, value);
                                           }}
-                                          options={field.fieldName === 'pricingCondition' ? priceConditionList :
-                                            field.fieldName === 'pricingMethod' ? priceMethodList : field.option}
-
+                                          options={
+                                            field.fieldName === 'pricingCondition'
+                                              ? priceConditionList
+                                              : field.fieldName === 'pricingMethod'
+                                                ? priceMethodList
+                                                : field.option
+                                          }
                                           onChange={(e, val) => {
                                             const value = val && val.optionValue ? val.optionValue : '';
-                                            const { tempPriceCondition, tempPricingMethod } = updateRateChangeState({ ...values, [field.fieldName]: value }, priceConditionListConst, priceMethodListConst)
+                                            const { tempPriceCondition, tempPricingMethod } = updateRateChangeState(
+                                              { ...values, [field.fieldName]: value },
+                                              priceConditionListConst,
+                                              priceMethodListConst
+                                            );
                                             if (values['pricingCondition']) {
                                               if (!tempPriceCondition?.find((e) => e.optionValue === values['pricingCondition'])) {
                                                 setFieldValue('pricingCondition', '');
@@ -348,13 +357,26 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
                                                 setFieldValue('pricingMethod', '');
                                               }
                                             }
-                                            let priceValue
+                                            let priceValue;
                                             if (field.fieldName === 'pricingCondition') {
-                                              priceValue = priceConditionListConst?.find((d) => d.conditionId === value && d.pricingMethod === values['pricingMethod'] && d.unit === values['unit']);
+                                              priceValue = priceConditionListConst?.find(
+                                                (d) =>
+                                                  d.conditionId === value && d.pricingMethod === values['pricingMethod'] && d.unit === values['unit']
+                                              );
                                             } else if (field.fieldName === 'pricingMethod') {
-                                              priceValue = priceConditionListConst?.find((d) => d.conditionId === values['pricingCondition'] && d.pricingMethod === value && d.unit === values['unit']);
+                                              priceValue = priceConditionListConst?.find(
+                                                (d) =>
+                                                  d.conditionId === values['pricingCondition'] &&
+                                                  d.pricingMethod === value &&
+                                                  d.unit === values['unit']
+                                              );
                                             } else {
-                                              priceValue = priceConditionListConst?.find((d) => d.conditionId === values['pricingCondition'] && d.pricingMethod === values['pricingMethod'] && d.unit === value);
+                                              priceValue = priceConditionListConst?.find(
+                                                (d) =>
+                                                  d.conditionId === values['pricingCondition'] &&
+                                                  d.pricingMethod === values['pricingMethod'] &&
+                                                  d.unit === value
+                                              );
                                             }
                                             let priceFieldName = 'price_' + salesOrderData?.currency?.toLowerCase();
                                             const result = autoCalculateSpecificFields(
@@ -378,7 +400,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
                                     </Box>
                                   </Grid>
                                 ) : (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
                                     <Box display="flex">
                                       <Box flexGrow={1}>
                                         <FormTypes
@@ -413,9 +435,8 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType="transparent"
                   onClick={() => {
                     if (!isEqual(ref.current.values, initialData.values)) {
                       setShowConfirmDialog(true);
@@ -425,14 +446,12 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
                   }}
                 >
                   {'Close'}
-                </Button>
+                </ThemeButton>
                 {isBulkedit === false && showSaveAndNext && (
-                  <CustomButton
-                    loading={loadingEdit}
-                    disabled={isEqual(ref?.current?.values, initialData.values) || loadingEdit}
-                    variant="contained"
-                    color="primary"
-                    type="submit"
+                  <ThemeButton
+                    isLoading={Boolean(loadingEdit)}
+                    disabled={Boolean(isEqual(ref?.current?.values, initialData.values))|| Boolean(loadingEdit)}
+                    buttonType="theme"
                     onClick={() => {
                       setSaveAndNext(true);
                       submitForm();
@@ -440,14 +459,12 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
                   >
                     {' '}
                     Save & Next
-                  </CustomButton>
+                  </ThemeButton>
                 )}
-                <CustomButton
-                  loading={loadingEdit}
-                  disabled={isEqual(ref?.current?.values, initialData.values) || loadingEdit}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+                <ThemeButton
+                  isLoading={Boolean(loadingEdit)}
+                  disabled={Boolean(isEqual(ref?.current?.values, initialData.values)) || Boolean(loadingEdit)}
+                  buttonType="theme"
                   onClick={() => {
                     setSaveAndNext(false);
                     submitForm();
@@ -455,7 +472,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
                 >
                   {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmationDialog && (
                 <ConfirmationDialog

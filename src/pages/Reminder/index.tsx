@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Box, Grid, Typography } from '@material-ui/core';
-import moment from 'moment';
+import { Box, Typography } from '@mui/material';
 import { useLocation, useHistory } from 'react-router-dom';
 
 import axiosInstance from '../../axios/axiosInstance';
@@ -8,8 +7,9 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { ListRelatedTo } from '../../components/Activity/Helpers/ListRelatedTo';
 import ActivityModelHandler from '../../components/Activity/ActivityModelHandler';
 import routes from '../../components/Helpers/Routes';
-import { DateRange } from '@material-ui/icons';
+import { DateRange } from '@mui/icons-material';
 import { useData } from 'src/StateProvider/Provider';
+import dayjs from 'dayjs';
 
 const Reminder = () => {
   const history = useHistory();
@@ -31,15 +31,15 @@ const Reminder = () => {
   searchData = searchData ? searchData[1].split('&') : null;
   searchData = searchData
     ? searchData.map((q) => {
-      let obj: any = {};
-      if (q.includes('type')) {
-        obj['type'] = q.split('=')[1];
-      }
-      if (q.includes('id')) {
-        obj['id'] = q.split('=')[1];
-      }
-      return obj;
-    })
+        let obj: any = {};
+        if (q.includes('type')) {
+          obj['type'] = q.split('=')[1];
+        }
+        if (q.includes('id')) {
+          obj['id'] = q.split('=')[1];
+        }
+        return obj;
+      })
     : null;
   searchData = searchData ? Object.assign({}, { ...searchData[0], ...searchData[1] }) : null;
 
@@ -110,7 +110,7 @@ const Reminder = () => {
         style={{ fontSize: 12 }}
       >
         <DateRange className="text-[#000] dark:text-white" style={{ fontSize: 12 }} />
-        {type ? moment(data).format('MMM, DD HH:MM') : moment(data).format('MMM, DD YYYY')}
+        {type ? dayjs(data).tz().format('MMM, DD HH:MM') : dayjs(data).tz().format('MMM, DD YYYY')}
       </Typography>
     </>
   );

@@ -1,22 +1,18 @@
-import { Box, Button, CircularProgress, Dialog, Menu, MenuItem, TextField, Typography } from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
-import ThumbDownIcon from '@material-ui/icons/ThumbDown';
-import ThumbUpIcon from '@material-ui/icons/ThumbUp';
-import { Skeleton } from '@material-ui/lab';
+import { Box, CircularProgress, Dialog, Menu, MenuItem, TextField, Typography } from '@mui/material';
+import { ExpandMore } from '@mui/icons-material';
+import ThumbDownIcon from '@mui/icons-material/ThumbDown';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import { Skeleton } from '@mui/material';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import ReactDOM from 'react-dom';
 import { BiLayerPlus } from 'react-icons/bi';
 import { GiReceiveMoney } from 'react-icons/gi';
 import { HiPencil } from 'react-icons/hi';
-import { IoArrowDownCircleSharp } from 'react-icons/io5';
-import { MdDelete } from 'react-icons/md';
 import { VscIssueReopened, VscVersions } from 'react-icons/vsc';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import { useTableReducer } from 'src/components/CustomReactTable';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -36,7 +32,7 @@ import {
   quoteBuilder,
   sidebarResource,
   termsAndCondition,
-  yyyyMMDD
+  displayCardDate
 } from '../../../constants/helpers';
 import contactClass from '../../Contact/contact.module.scss';
 import DOAReasonDialog from '../../DOA/DOAReasonDialog';
@@ -48,6 +44,8 @@ import Step from 'src/pages/DynamicForm/Step';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { MdDelete } from 'react-icons/md';
 
 const DOASteps = [
   {
@@ -201,7 +199,7 @@ export default function QuoteDetail() {
     let mainPoint = {};
     if (quoteData) {
       mainPoint['Account Name'] = quoteData?.accountName?.optionLabel || '';
-      mainPoint['Expiry Date'] = yyyyMMDD(quoteData?.closeDate);
+      mainPoint['Expiry Date'] = displayCardDate(quoteData?.closeDate);
       mainPoint['Estimated Amount'] = quoteData?.estimatedAmount
         ? formatAmountWithCurrency(quoteData?.currency, quoteData?.estimatedAmount).fullFormatAmount
         : '';
@@ -585,51 +583,33 @@ export default function QuoteDetail() {
             {quoteData ? (
               <>
                 {processStatus !== 'New' && (
-                  <HtmlTooltip title="Quote Summary">
-                    <Button
-                      onClick={() => {
-                        setShowTotalSalesDialog(true);
-                      }}
-                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                      className="btn-outline-v1"
-                      size="small"
-                      startIcon={<GiReceiveMoney />}
-                      color="primary"
-                    >
-                      {isMobile && !isTablet ? '' : 'Quote Summary'}
-                    </Button>
-                  </HtmlTooltip>
-                )}
-                <HtmlTooltip title={`Version : ${currentVersion}`}>
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                    color="primary"
-                    size="small"
-                    className={`btn-outline-v1`}
+                  <ThemeButton
                     onClick={() => {
-                      setShowAllVersionStatus(true);
+                      setShowTotalSalesDialog(true);
                     }}
-                    style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                    startIcon={isMobile && !isTablet ? null : <VscVersions />}
+                    startIcon={<GiReceiveMoney />}
+                    mobileTooltip="Quote Summary"
+                    iconForMobile={<GiReceiveMoney />}
                   >
-                    {isMobile && !isTablet ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
-                  </Button>
-                </HtmlTooltip>
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                  color="default"
-                  size="small"
-                  className={`${isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'} new-dropdown-v1`}
-                  endIcon={isMobile && !isTablet ? null : <ExpandMore />}
-                  onClick={openActions}
-                  aria-controls="action-menu"
+                    Quote Summary
+                  </ThemeButton>
+                )}
+                <ThemeButton
+                  iconForMobile={<VscVersions size={20} />}
+                  onClick={() => {
+                    setShowAllVersionStatus(true);
+                  }}
+                  startIcon={<VscVersions />}
+                  mobileTooltip={`Version : ${currentVersion}`}
                 >
-                  {isMobile && !isTablet ? <IoArrowDownCircleSharp size={20} /> : 'Actions '}
-                </Button>
+                  {`Version : ${currentVersion}`}
+                </ThemeButton>
+                <ThemeButton iconForMobile={<ExpandMore />} onClick={openActions} endIcon={<ExpandMore />} mobileTooltip={`Actions`}>
+                  Actions
+                </ThemeButton>
                 <Menu
                   anchorEl={anchorEl}
                   keepMounted
-                  getContentAnchorEl={null}
                   anchorOrigin={{
                     vertical: 'bottom',
                     horizontal: 'left'
@@ -715,35 +695,27 @@ export default function QuoteDetail() {
                 </Menu>
                 {DOAApproved && versionStatus === 'Sent for DOA' && (
                   <>
-                    <HtmlTooltip title={`Accept`}>
-                      <Button
-                        onClick={() => {
-                          QuoteStatusChange('Accepted', '', '');
-                        }}
-                        variant="outlined"
-                        size="small"
-                        className="btn-outline-v1 mx-1"
-                        startIcon={<ThumbUpIcon />}
-                        color="primary"
-                      >
-                        {isMobile && !isTablet ? '' : `Accept`}
-                      </Button>
-                    </HtmlTooltip>
-                    <HtmlTooltip title="Reject">
-                      <Button
-                        onClick={() => {
-                          setQuoteStatusChangeData('Rejected');
-                          setShowQuoteStatusChangeDialog(true);
-                        }}
-                        className="mx-1"
-                        startIcon={<ThumbDownIcon />}
-                        variant="contained"
-                        size="small"
-                        color="primary"
-                      >
-                        {isMobile && !isTablet ? '' : 'Reject'}
-                      </Button>
-                    </HtmlTooltip>
+                    <ThemeButton
+                      iconForMobile={<ThumbUpIcon />}
+                      onClick={() => {
+                        QuoteStatusChange('Accepted', '', '');
+                      }}
+                      startIcon={<ThumbUpIcon />}
+                      mobileTooltip={`Accept`}
+                    >
+                      Accept
+                    </ThemeButton>
+                    <ThemeButton
+                      iconForMobile={<ThumbDownIcon />}
+                      onClick={() => {
+                        setQuoteStatusChangeData('Rejected');
+                        setShowQuoteStatusChangeDialog(true);
+                      }}
+                      startIcon={<ThumbDownIcon />}
+                      mobileTooltip={`Reject`}
+                    >
+                      Reject
+                    </ThemeButton>
                   </>
                 )}
               </>
@@ -898,12 +870,12 @@ export default function QuoteDetail() {
             />
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button size="small" onClick={() => setReopenReasonDialog(false)} color="primary">
+            <ThemeButton buttonType="transparent" onClick={() => setReopenReasonDialog(false)} >
               Close
-            </Button>
-            <Button size="small" variant="contained" disabled={reopenReason === ''} onClick={handleReOpenQuote} color="primary">
+            </ThemeButton>
+            <ThemeButton buttonType="theme" disabled={reopenReason === ''} onClick={handleReOpenQuote} >
               Save
-            </Button>
+            </ThemeButton>
           </CustomDialogFooter>
         </Dialog>
       )}

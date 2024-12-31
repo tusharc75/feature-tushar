@@ -1,5 +1,6 @@
 import { useState, useEffect, Fragment } from 'react';
-import { Box, Grid, IconButton } from '@material-ui/core';
+import { Box, IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
@@ -303,7 +304,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
   return (
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1}>
-        <Box display="flex" alignItems="center" gridGap={'8px'}>
+        <Box display="flex" alignItems="center" gap={'8px'}>
           <PreviewDownload
             fileName={`${resources?.productionOrder?.titleSingular}-${productionOrderData?.productionOrderNumber}`}
             resource={sidebarResource.productionOrder}
@@ -317,7 +318,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
         </Box>
       </Box>
       <Grid container spacing={2}>
-        <Grid item xs={12} md={12} sm={12}>
+        <Grid size={{xs:12, md:12, sm:12}}>
           {columns ? (
             <Box zIndex={5} width={'100%'}>
               <CustomReactTable

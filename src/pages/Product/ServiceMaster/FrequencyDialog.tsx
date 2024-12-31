@@ -1,11 +1,11 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Button, Dialog } from '@material-ui/core';
+import { Box, Dialog } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomDialogTransition, getObjKeysWithValues, serviceMaster } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -97,18 +97,12 @@ const FrequencyDialog = ({ onClose, onSuccess, serviceData, productId }) => {
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                  <Button type="button" variant="outlined" color="primary" size="small" onClick={onClose}>
+                  <ThemeButton buttonType="transparent" onClick={onClose}>
                     Cancel
-                  </Button>
-                  <CustomButton
-                    disabled={isEqual(initialData?.values, values)}
-                    loading={loading}
-                    variant="contained"
-                    color="primary"
-                    onClick={submitForm}
-                  >
+                  </ThemeButton>
+                  <ThemeButton disabled={isEqual(initialData?.values, values)} isLoading={loading} buttonType="theme" onClick={submitForm}>
                     Save
-                  </CustomButton>
+                  </ThemeButton>
                 </CustomDialogFooter>
               </>
             )}

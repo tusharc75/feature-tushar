@@ -1,4 +1,4 @@
-import { Box, Button, IconButton } from '@material-ui/core';
+import { Box, IconButton } from '@mui/material';
 import { startCase } from 'lodash';
 import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -8,6 +8,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -104,12 +105,11 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
               aria-label="Details"
               onClick={() => {
                 window.open(
-                  `${
-                    row.original.type === MATERIAL_TYPE.product
-                      ? routes.productDetail.path
-                      : row.original.type === MATERIAL_TYPE.package
-                        ? routes.packagesDetail.path
-                        : routes.serializedAssetDetail.path
+                  `${row.original.type === MATERIAL_TYPE.product
+                    ? routes.productDetail.path
+                    : row.original.type === MATERIAL_TYPE.package
+                      ? routes.packagesDetail.path
+                      : routes.serializedAssetDetail.path
                   }/${row.original.materialId}`
                 );
               }}
@@ -201,12 +201,12 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
   const previewDownloadProps =
     columns && pdfColumns
       ? {
-          fileName: `${resources?.sublease?.titleSingular}-${subleaseData?.subleaseName}`,
-          resource: sidebarResource.sublease,
-          referenceId: subleaseData?._id,
-          columns: [...columns?.filter((c) => c?.accessor != 'action'), ...pdfColumns],
-          defaultColumns: ['index', 'type', 'detail', 'description', 'qty']
-        }
+        fileName: `${resources?.sublease?.titleSingular}-${subleaseData?.subleaseName}`,
+        resource: sidebarResource.sublease,
+        referenceId: subleaseData?._id,
+        columns: [...columns?.filter((c) => c?.accessor != 'action'), ...pdfColumns],
+        defaultColumns: ['index', 'type', 'detail', 'description', 'qty']
+      }
       : null;
 
   const rightSideContents = () => {
@@ -231,24 +231,22 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
               selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
                 ? selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.map((d) => d?._id)
                 : treeToFlatArray(dataRows, 'subRows')
-                    .filter((f) => f.type === MATERIAL_TYPE.serializedAsset)
-                    ?.map((d) => d?._id)
+                  .filter((f) => f.type === MATERIAL_TYPE.serializedAsset)
+                  ?.map((d) => d?._id)
             }
           />
         )}
         {allowedToEdit && (
-          <Button
-            variant={'contained'}
-            color="primary"
-            size="small"
+          <ThemeButton
             disabled={selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && e?.qty - e?.assetQty > 0).length ? false : true}
             id="receive-product"
             onClick={() => {
               setReceiveDialog(true);
             }}
+            buttonType='theme'
           >
             Receive
-          </Button>
+          </ThemeButton>
         )}
       </>
     );

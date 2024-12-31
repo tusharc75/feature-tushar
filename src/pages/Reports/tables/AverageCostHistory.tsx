@@ -1,8 +1,7 @@
-import Box from '@material-ui/core/Box/Box';
-import Dialog from '@material-ui/core/Dialog';
-import Grid from '@material-ui/core/Grid/Grid';
+import Box from '@mui/material/Box/Box';
+import Dialog from '@mui/material/Dialog';
+import Grid from '@mui/material/Grid2';
 import { capitalize } from 'lodash';
-import moment from 'moment';
 import { useEffect } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -10,7 +9,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { CustomDialogTransition, dateTimeFormat, gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
+import { CustomDialogTransition, displayDateTime, gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
 import { ReferenceRenderer } from 'src/pages/ProductInventory/History';
 import { CreditDebitRenderer } from 'src/pages/Reports/tables/StandardReportTable/helperComponents';
 import { useData } from 'src/StateProvider/Provider';
@@ -69,8 +68,8 @@ const AverageCostHistory = ({ handleClose, product, productName, deepFilters, fi
       disableSortBy: false,
       Cell: ({ row }) =>
         row?.original?.date ? (
-          <h5 className="text-truncate" title={`${moment(row?.original?.date)?.format(dateTimeFormat)}`}>
-            {moment(row?.original?.date)?.format(dateTimeFormat)}
+          <h5 className="text-truncate" title={`${displayDateTime(row?.original?.date)}`}>
+            {displayDateTime(row?.original?.date)}
           </h5>
         ) : (
           <NoDataCell />
@@ -155,8 +154,8 @@ const AverageCostHistory = ({ handleClose, product, productName, deepFilters, fi
       disableSortBy: false,
       Cell: ({ row }) =>
         row?.original?.transactionDate ? (
-          <h5 className="text-truncate" title={`${moment(row?.original?.transactionDate)?.format(dateTimeFormat)}`}>
-            {moment(row?.original?.transactionDate)?.format(dateTimeFormat)}
+          <h5 className="text-truncate" title={`${displayDateTime(row?.original?.transactionDate)}`}>
+            {displayDateTime(row?.original?.transactionDate)}
           </h5>
         ) : (
           <NoDataCell />
@@ -169,7 +168,7 @@ const AverageCostHistory = ({ handleClose, product, productName, deepFilters, fi
       <Dialog fullScreen TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true} fullWidth>
         <CustomDialogHeader title={`History - ${productName}`} onClose={handleClose} showRequiredLabel={false}></CustomDialogHeader>
         <CustomDialogContent isFooterPresent={false}>
-          <Grid item xs={12} md={12} sm={12} className="mt-3">
+          <Grid size={{xs:12, md:12, sm:12}} className="mt-3">
             {columns ? (
               <CustomReactTable
                 height={'calc(100vh - 200px)'}

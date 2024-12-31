@@ -1,11 +1,12 @@
-import { Button, Dialog, Grid, TextField } from '@material-ui/core';
+import { Dialog, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Formik } from 'formik';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { rentalManagement } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
@@ -36,7 +37,7 @@ const AssetQtyDialog = ({ warehouse, product, handleClose, handleSuccess }) => {
     if (values?.qty == 0) {
       errors['qty'] = 'Please add quantity';
     }
-    return errors
+    return errors;
   };
 
   return (
@@ -66,9 +67,10 @@ const AssetQtyDialog = ({ warehouse, product, handleClose, handleSuccess }) => {
             <Fragment>
               <CustomDialogContent>
                 <Grid container spacing={2}>
-                  <Grid xs={12} md={12} sm={12} item>
+                  <Grid size={{ xs: 12, md: 12, sm: 12 }}>
                     <TextField
                       margin="dense"
+                      size="small"
                       type="number"
                       label="Quantity"
                       name="quantity"
@@ -86,18 +88,17 @@ const AssetQtyDialog = ({ warehouse, product, handleClose, handleSuccess }) => {
                 </Grid>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType="transparent"
                   onClick={() => {
                     handleClose();
                   }}
                 >
                   Cancel
-                </Button>
-                <CustomButton loading={loading} disabled={loading} variant="contained" type="button" onClick={submitForm} color="primary">
+                </ThemeButton>
+                <ThemeButton isLoading={loading} disabled={loading} buttonType="theme" onClick={submitForm}>
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
             </Fragment>
           )}

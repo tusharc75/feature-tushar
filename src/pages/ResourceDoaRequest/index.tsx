@@ -1,4 +1,4 @@
-import { Box, IconButton } from '@material-ui/core';
+import { Box, IconButton } from '@mui/material';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -12,7 +12,7 @@ import routes from 'src/components/Helpers/Routes';
 import { DOA_STATUS, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
 import { Link } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { CancelOutlined, CheckCircleOutlined } from '@material-ui/icons';
+import { CancelOutlined, CheckCircleOutlined } from '@mui/icons-material';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { useData } from 'src/StateProvider/Provider';
 import axios, { CancelTokenSource } from 'axios';

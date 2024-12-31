@@ -1,11 +1,11 @@
-import { CircularProgress, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { CircularProgress, TextField } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { debounce } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import DashboardModal from 'src/components/DashboardModal';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
@@ -74,9 +74,8 @@ const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
         fullScreenOption: true
       }}
       footer={
-        <CustomButton
-          variant="contained"
-          color="primary"
+        <ThemeButton
+          buttonType="theme"
           disabled={selectedUsers.length === 0}
           onClick={(e) => {
             e.preventDefault();
@@ -85,7 +84,7 @@ const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
           }}
         >
           Add
-        </CustomButton>
+        </ThemeButton>
       }
     >
       <Autocomplete
@@ -104,7 +103,7 @@ const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
         autoHighlight
         value={selectedUsers?.map((userId) => options.find((option) => option.optionValue === userId) || { optionLabel: '', optionValue: userId })}
         getOptionLabel={(option) => option.optionLabel || ''}
-        getOptionSelected={(option, val) => option.optionValue === val.optionValue}
+        isOptionEqualToValue={(option, val) => option.optionValue === val.optionValue}
         onChange={(event, newValue) => {
           setSelectedUsers(newValue.map((user) => user.optionValue));
         }}
@@ -115,14 +114,16 @@ const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
             name={'members'}
             autoFocus
             required={true}
-            InputProps={{
-              ...params.InputProps,
-              endAdornment: (
-                <>
-                  {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                  {params.InputProps.endAdornment}
-                </>
-              )
+            slotProps={{
+              input: {
+                ...params.InputProps,
+                endAdornment: (
+                  <>
+                    {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                    {params.InputProps.endAdornment}
+                  </>
+                )
+              }
             }}
             margin="none"
             size={'small'}

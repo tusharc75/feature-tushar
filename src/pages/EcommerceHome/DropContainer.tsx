@@ -1,8 +1,9 @@
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Grid, IconButton } from '@material-ui/core';
-import { Delete, DragIndicator, Edit } from '@material-ui/icons';
+import { IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { Delete, DragIndicator, Edit } from '@mui/icons-material';
 import React, { useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ConfigureItemDialog from './ConfigureItemDialog';
@@ -43,7 +44,7 @@ const DropContainer = ({ formData, setFormData, handleRemove }: DropContainerPro
         })}
       </SortableContext>
       {isOver && (
-        <Grid item xs={12} className="bg-[var(--dark-secondary, white)]">
+        <Grid size={{xs:12}} className="bg-[var(--dark-secondary, white)]">
           <div className="p-10  text-center text-4xl font-bold text-gray-400 [border:4px_dashed_var(--common-border-color)] dark:text-gray-600">
             Drop here
           </div>
@@ -73,7 +74,7 @@ export const SingleSection = ({ itemData, index, handleRemove, setFormData }) =>
   };
   return (
     <>
-      <Grid item component={'li'} xs={itemData.column} ref={setNodeRef} style={style} className=" list-none">
+      <Grid  component={'li'} size={{ xs: itemData.column }} ref={setNodeRef} style={style} className=" list-none">
         <div
           className={`flex items-center justify-between gap-2 ${
             isDragging ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,white)] '

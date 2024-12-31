@@ -1,13 +1,13 @@
-import DateFnsUtils from '@date-io/date-fns';
-import { Box, Button, CircularProgress, Dialog, Grid, TextField } from '@material-ui/core';
-import { KeyboardDateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { Box, Dialog } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Form, Formik } from 'formik';
-import moment from 'moment';
 import { useEffect, useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { CustomDialogTransition, dateFormatForInputControl, displayDate, normalizeDate } from 'src/constants/helpers';
+import { CustomDialogTransition, displayDate, normalizeDate } from 'src/constants/helpers';
+import CustomDatePicker from 'src/components/CustomDatePicker';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export default function StartStopDate({ onClose, type, loading, handleSubmit, data = null, minStartDate = null, maxEndDate = null }) {
   const [initialValues, setInitialValues] = useState({ startDate: new Date(), endDate: new Date() });
@@ -20,10 +20,8 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
       });
     } else {
       if (minStartDate) {
-        let date = moment(new Date(minStartDate));
-        const currentTime = moment();
-        date = date.set('hour', currentTime.hour()).set('minute', currentTime.minute());
-        setInitialValues({ startDate: date.toDate(), endDate: date.toDate() });
+        let date = new Date(minStartDate);
+        setInitialValues({ startDate: date, endDate: date });
       }
     }
   }, [data, type]);
@@ -70,72 +68,60 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
           <Form>
             <CustomDialogHeader title={`Set ${type === 'start' ? 'Start' : type === 'stop' ? 'End' : 'Start/End'} Date`} onClose={onClose} />
             <CustomDialogContent>
-              <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                <Box p={2}>
-                  <Grid container spacing={2}>
-                    {type !== 'stop' && (
-                      <Grid item xs={12} sm={12}>
-                        <KeyboardDateTimePicker
-                          inputVariant="outlined"
-                          variant="inline"
-                          fullWidth
-                          size="small"
-                          margin="none"
-                          autoOk
-                          format={dateFormatForInputControl + ' HH:mm'}
-                          {...(minStartDate ? { minDate: minStartDate } : {})}
-                          label={`Start Date`}
-                          views={['year', 'month', 'date']}
-                          value={values.startDate}
-                          onChange={(date) => {
-                            setFieldValue('startDate', date);
-                          }}
-                          error={touched['startDate'] && Boolean(errors['startDate'])}
-                          helperText={touched['startDate'] && errors['startDate']}
-                        />
-                      </Grid>
-                    )}
-                    {(type === 'startStop' || type === 'stop') && (
-                      <Grid item xs={12} sm={12}>
-                        <KeyboardDateTimePicker
-                          inputVariant="outlined"
-                          variant="inline"
-                          fullWidth
-                          size="small"
-                          margin="none"
-                          autoOk
-                          format={dateFormatForInputControl + ' HH:mm'}
-                          minDate={values.startDate}
-                          label={`'End' Date`}
-                          views={['year', 'month', 'date']}
-                          value={values.endDate}
-                          onChange={(date) => {
-                            setFieldValue('endDate', date);
-                          }}
-                          {...(maxEndDate ? { maxDate: maxEndDate } : {})}
-                          error={touched['endDate'] && Boolean(errors['endDate'])}
-                          helperText={touched['endDate'] && errors['endDate']}
-                        />
-                      </Grid>
-                    )}
-                  </Grid>
-                </Box>
-              </MuiPickersUtilsProvider>
+              <Box p={2}>
+                <Grid container spacing={2}>
+                  {type !== 'stop' && (
+                    <Grid size={{xs:12, sm:12}}>
+                      <CustomDatePicker
+                        fullWidth
+                        size="small"
+                        margin="none"
+                        {...(minStartDate ? { minDate: minStartDate } : {})}
+                        label={`Start Date`}
+                        value={values.startDate}
+                        onChange={(date) => {
+                          setFieldValue('startDate', date);
+                        }}
+                        error={touched['startDate'] && Boolean(errors['startDate'])}
+                        helperText={touched['startDate'] && errors['startDate']}
+                      />
+                    </Grid>
+                  )}
+                  {(type === 'startStop' || type === 'stop') && (
+                    <Grid size={{xs:12, sm:12}}>
+                      <CustomDatePicker
+                        fullWidth
+                        size="small"
+                        margin="none"
+                        minDate={values.startDate}
+                        label={`End Date`}
+                        value={values.endDate}
+                        onChange={(date) => {
+                          setFieldValue('endDate', date);
+                        }}
+                        {...(maxEndDate ? { maxDate: maxEndDate } : {})}
+                        error={touched['endDate'] && Boolean(errors['endDate'])}
+                        helperText={touched['endDate'] && errors['endDate']}
+                      />
+                    </Grid>
+                  )}
+                </Grid>
+              </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button disabled={loading} size="small" variant="outlined" color="primary" onClick={onClose}>
-                Close
-              </Button>
-              <Button
-                disabled={loading}
-                startIcon={loading && <CircularProgress size={18} color="inherit" />}
-                size="small"
-                variant="contained"
-                color="primary"
-                type="submit"
-              >
-                Save
-              </Button>
+              <ThemeButton
+                  onClick={onClose}
+                  buttonType='transparent'
+                >
+                  Close
+                </ThemeButton>
+                <ThemeButton
+                  disabled={loading}
+                  isLoading={loading}
+                  buttonType='theme'
+                >
+                  Save
+                </ThemeButton>
             </CustomDialogFooter>
           </Form>
         )}

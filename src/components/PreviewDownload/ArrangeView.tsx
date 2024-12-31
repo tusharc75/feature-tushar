@@ -1,6 +1,7 @@
-import { Box, Button, CircularProgress, Dialog, IconButton, ListItemIcon, ListItemText, TextField } from '@material-ui/core';
-import { DragIndicator, Info } from '@material-ui/icons';
-import SwapVertIcon from '@material-ui/icons/SwapVert';
+import { Dialog, IconButton, ListItemIcon, ListItemText, TextField } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { DragIndicator, Info } from '@mui/icons-material';
+import SwapVertIcon from '@mui/icons-material/SwapVert';
 import update from 'immutability-helper';
 import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -151,12 +152,12 @@ export default function ArrangeView({ columns, setColumns }) {
             </DndContext>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button disabled={isSubmitting} color="primary" variant="outlined" size="small" onClick={onClose}>
+            <ThemeButton disabled={isSubmitting} buttonType="transparent" onClick={onClose}>
               Cancel
-            </Button>
-            <Button disabled={isSubmitting} color="primary" variant="contained" size="small" onClick={onSave}>
-              {isSubmitting ? <CircularProgress size={18} /> : 'Save'}
-            </Button>
+            </ThemeButton>
+            <ThemeButton disabled={isSubmitting} buttonType="theme" onClick={onSave}>
+              Save
+            </ThemeButton>
           </CustomDialogFooter>
         </Dialog>
       )}
@@ -216,8 +217,10 @@ const RenderListItem = ({ index, id, fieldLabel, width, setWidth, customLabel, s
             onChange={(e) => {
               setWidth(e?.target?.value);
             }}
-            InputProps={{
-              endAdornment: '%'
+            slotProps={{
+              input: {
+                endAdornment: '%'
+              }
             }}
             placeholder="Width"
           />

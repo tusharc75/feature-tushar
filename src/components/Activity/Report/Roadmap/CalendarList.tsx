@@ -1,13 +1,13 @@
-import { Box } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import { TreeItem, TreeView } from '@material-ui/lab';
+import { Box, Theme } from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import { SimpleTreeView, TreeItem } from '@mui/x-tree-view';
 import moment from 'moment';
 import { useCallback, useMemo, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { cn, displayDate } from '../../../../constants/helpers';
 import ActivityModelHandler from '../../ActivityModelHandler';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   label: {
     paddingLeft: 0
   },
@@ -70,11 +70,11 @@ export default function CalendarList(props) {
         return (
           <TreeItem
             key={index}
-            nodeId={data._id.toString()}
+            itemId={data._id.toString()}
+            id={data._id.toString()}
             label={label}
             children={children}
             classes={{
-              group: classes.group,
               iconContainer: classes.iconContainer,
               label: classes.label
             }}
@@ -89,11 +89,11 @@ export default function CalendarList(props) {
 
   return (
     <>
-      <TreeView expanded={expanded} selected={selected} onNodeSelect={handleSelect}>
+      <SimpleTreeView expandedItems={expanded} selectedItems={selected} onSelectedItemsChange={handleSelect}>
         {TreeNodes.map((node) => {
           return node;
         })}
-      </TreeView>
+      </SimpleTreeView>
       {activityData && (
         <ActivityModelHandler
           fetchBoard={fetchRoadmap}

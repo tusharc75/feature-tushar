@@ -1,5 +1,5 @@
-import { Box, Chip, Dialog, IconButton, MenuItem, Typography } from '@material-ui/core';
-import { Delete as DeleteIcon } from '@material-ui/icons';
+import { Box, Chip, Dialog, IconButton, MenuItem, Typography } from '@mui/material';
+import { Delete as DeleteIcon } from '@mui/icons-material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase, uniqBy } from 'lodash';
 import { FC, useContext, useEffect, useState } from 'react';
@@ -304,8 +304,16 @@ const User: FC = () => {
             ...finalObject,
             status: u.blocked ? u.blocked : false,
             isBrandAdmin: u.userType === userType.brandAdmin,
-            assignedEntity: allAssignedEntities?.filter((e) => e)?.map((e) => { return { optionLabel: e?.entityName, optionValue: e?._id } }),
-            regionalWideRole: allRegionalWideRoles?.filter((e) => e)?.map((e) => { return { optionLabel: e?.name, optionValue: e?._id } }),
+            assignedEntity: allAssignedEntities
+              ?.filter((e) => e)
+              ?.map((e) => {
+                return { optionLabel: e?.entityName, optionValue: e?._id };
+              }),
+            regionalWideRole: allRegionalWideRoles
+              ?.filter((e) => e)
+              ?.map((e) => {
+                return { optionLabel: e?.name, optionValue: e?._id };
+              })
           };
           return res;
         });
@@ -533,7 +541,7 @@ const User: FC = () => {
             if (selectedRecords) {
               setDeleteUser(selectedRecords[0]);
             } else {
-              setDeleteUser(null)
+              setDeleteUser(null);
             }
             setShowDeleteDialog(true);
           }}

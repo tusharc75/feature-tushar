@@ -1,6 +1,6 @@
-import { Button, ButtonProps, CircularProgress, Menu, useMediaQuery } from '@material-ui/core';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { ButtonProps, CircularProgress, Menu, useMediaQuery } from '@mui/material';
+import { AddOutlined, ExpandMore } from '@mui/icons-material';
+import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 import queryString from 'query-string';
 import React, { ReactNode, useEffect, useMemo, useState } from 'react';
 import { FaCircleChevronDown } from 'react-icons/fa6';
@@ -11,13 +11,14 @@ import SearchBox from '../Helpers/SearchBox';
 import HideWhenOffline from '../HideWhenOffline';
 import { cn } from 'src/constants/helpers';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 type ButtonPropsWithExtraData = {
   tooltip?: string;
   loading?: boolean;
   iconsEnabled?: boolean;
   text?: string;
-  textAddShow?: boolean
+  textAddShow?: boolean;
 } & ButtonProps;
 
 type ListingPageHeaderProps = {
@@ -216,61 +217,48 @@ const ListingPageHeader = ({
               <div className="flex min-w-fit flex-wrap items-center gap-[8px]">
                 {isAddButtonVisible ? (
                   <HtmlTooltip title={addButtonTooltip ?? ''} placement="top" arrow enterTouchDelay={0}>
-                    <Button
-                      variant={'contained'}
-                      color="primary"
-                      size="small"
+                    <ThemeButton
+                      buttonType="theme"
                       id={showSearchInMobile ? 'dialog-add-button' : 'add-button'}
-                      disabled={addButtonLoading || addButtonDisabled}
+                      disabled={addButtonDisabled}
                       {...restOfAddButtonProps}
                       onClick={(e) => {
                         addButtonOnclick && addButtonOnclick(e);
                       }}
-                      className={`no-shadow ${addButtonLoading ? '' : ''} min-h-[32px] max-[600px]:[padding:4px_!important]`}
+                      isLoading={addButtonLoading}
                       startIcon={isMobile ? null : addButtonIconsEnabled ? <AddOutlined /> : null}
+                      iconForMobile={<AddOutlined />}
                     >
                       {renderButtonText({
                         text: textAddShow ? 'Add' : `Create`,
-                        loading: addButtonLoading,
-                        iconText: addButtonText,
-                        mobileIcon: <AddOutlined />
+                        loading: false,
+                        iconText: addButtonText
                       })}
-                    </Button>
+                    </ThemeButton>
                   </HtmlTooltip>
                 ) : null}
+
                 <HideWhenOffline>
                   {isActionButtonVisible ? (
                     <>
-                      <HtmlTooltip title={actionButtonTooltip ?? ''} placement="top" arrow enterTouchDelay={0}>
-                        <span>
-                          <Button
-                            variant={'outlined'}
-                            color="default"
-                            size="small"
-                            id={showSearchInMobile ? 'dialog-action-button' : 'action-button'}
-                            className={`new-dropdown-v1 [height:32px_!important] max-[600px]:[border:0px_!important] max-[600px]:[max-width:36px_!important]`}
-                            disabled={actionButtonLoading || actionButtonDisabled}
-                            {...restOfActionButtonProps}
-                            onClick={openActions}
-                            aria-controls="action-menu"
-                            endIcon={isMobile ? null : actionButtonIconsEnabled ? <ExpandMore /> : null}
-                          >
-                            {renderButtonText({
-                              text: 'Actions',
-                              loading: actionButtonLoading,
-                              mobileIcon: (
-                                <span className="h-[16px] w-[20px]">
-                                  <FaCircleChevronDown size={16} />
-                                </span>
-                              )
-                            })}
-                          </Button>
-                        </span>
-                      </HtmlTooltip>
+                      <ThemeButton
+                        tooltip={actionButtonTooltip ?? ''}
+                        size="small"
+                        id={showSearchInMobile ? 'dialog-action-button' : 'action-button'}
+                        disabled={actionButtonDisabled}
+                        {...restOfActionButtonProps}
+                        onClick={openActions}
+                        aria-controls="action-menu"
+                        buttonType="yellow"
+                        endIcon={isMobile ? null : actionButtonIconsEnabled ? <ExpandMore /> : null}
+                        iconForMobile={<FaCircleChevronDown size={16} />}
+                        isLoading={actionButtonLoading}
+                      >
+                        Actions
+                      </ThemeButton>
                       <Menu
                         anchorEl={anchorEl}
                         keepMounted
-                        getContentAnchorEl={null}
                         anchorOrigin={{
                           vertical: 'bottom',
                           horizontal: 'left'

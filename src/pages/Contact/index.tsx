@@ -1,7 +1,7 @@
-import { Box, Chip, Dialog, MenuItem } from '@material-ui/core';
-import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { Box, Chip, Dialog, MenuItem } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/Delete';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { AiOutlineDeploymentUnit } from 'react-icons/ai';
@@ -45,7 +45,9 @@ export default function Contact(props) {
     state: { user, selectedEntity, permissions, resources },
     dispatch: entityDispatch
   }: any = useData();
-  const { contact: { contactApi, contactResource, contactPermission, contactRoute } } = props;
+  const {
+    contact: { contactApi, contactResource, contactPermission, contactRoute }
+  } = props;
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource[contactResource]));
   const [contactId, setContactId] = useState('');
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -235,7 +237,7 @@ export default function Contact(props) {
               aria-label="Clone"
               disabled={contactPermissions?.isDelete && row?.original?.canDelete ? false : true}
               onClick={() => {
-                setDeleteRecord(row?.original)
+                setDeleteRecord(row?.original);
                 setShowDeleteConfirmBox(true);
               }}
             >
@@ -364,23 +366,26 @@ export default function Contact(props) {
       ids = selectedRecords?.map((d) => d._id);
     }
     dispatch({ type: 'loading', loading: true });
-    axiosInstance().put(`/${contactApi}/remove`, {
-      ids
-    }).then(({ data }) => {
-      setIsSubmitting(false);
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
-      });
-      dispatch({ type: 'selection', selectedRecords: [] });
-      setDeleteRecord(null);
-      setShowDeleteConfirmBox(false);
-      getContacts();
-    })
+    axiosInstance()
+      .put(`/${contactApi}/remove`, {
+        ids
+      })
+      .then(({ data }) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        dispatch({ type: 'selection', selectedRecords: [] });
+        setDeleteRecord(null);
+        setShowDeleteConfirmBox(false);
+        getContacts();
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-      }).finally(() => {
+      })
+      .finally(() => {
         dispatch({ type: 'loading', loading: false });
         setIsSubmitting(false);
       });
@@ -488,12 +493,14 @@ export default function Contact(props) {
           {showDeleteConfirmBox ? (
             <ConfirmationDialog
               open={showDeleteConfirmBox}
-              message={`Are you sure you want to delete ${deleteRecord ?
-                `${resources?.[contactResource]?.titleSingular?.toLowerCase()} : ${deleteRecord?.concatedName}` :
-                `selected ${resources?.[contactResource]?.titlePlural?.toLowerCase()}`} ?`}
+              message={`Are you sure you want to delete ${
+                deleteRecord
+                  ? `${resources?.[contactResource]?.titleSingular?.toLowerCase()} : ${deleteRecord?.concatedName}`
+                  : `selected ${resources?.[contactResource]?.titlePlural?.toLowerCase()}`
+              } ?`}
               onClose={() => {
-                setShowDeleteConfirmBox(false)
-                setDeleteRecord(null)
+                setShowDeleteConfirmBox(false);
+                setDeleteRecord(null);
               }}
               okBtnLoading={isSubmitting}
               onOk={handleDeleteContact}
@@ -508,7 +515,7 @@ export default function Contact(props) {
               onClose={() => {
                 setShowCreateContactDialog({ open: false, isClone: false, idToClone: null });
               }}
-              onSuccess={() => { }}
+              onSuccess={() => {}}
               isRedirectToDetailPage={true}
             />
           )}
@@ -607,12 +614,12 @@ const ActionMenuItems = ({
     <>
       {contactPermissions?.isDelete && (
         <MenuItem
-          disabled={selectedRecords?.every((e => e?.canDelete)) ? false : true}
+          disabled={selectedRecords?.every((e) => e?.canDelete) ? false : true}
           onClick={() => {
             if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
             } else {
-              setDeleteRecord(null)
+              setDeleteRecord(null);
             }
             setShowDeleteConfirmBox(true);
           }}

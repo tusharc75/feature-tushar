@@ -1,6 +1,5 @@
-import { Box, Button, Checkbox, FormControlLabel, IconButton, TableBody, TableCell, TableHead, TableRow, TextField } from '@material-ui/core';
-import MaUTable from '@material-ui/core/Table';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, IconButton, TableBody, TableCell, TableHead, TableRow, TextField, Autocomplete } from '@mui/material';
+import MaUTable from '@mui/material/Table';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import axios, { CancelTokenSource } from 'axios';
 
@@ -13,6 +12,7 @@ import routes from 'src/components/Helpers/Routes';
 import { ASSET_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { SchedularComponentProps } from 'src/pages/ScheduleAndDispatch/Scheduler/types';
 import AssetQtyDialog from './AssetQtyDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const AddSerializedAssets = ({ schedularState }: SchedularComponentProps) => {
   const {
@@ -36,7 +36,6 @@ const AddSerializedAssets = ({ schedularState }: SchedularComponentProps) => {
   const { page, limit, filters, sorting, selectedRecords } = state;
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
-  const [isAutoSelectAsset, setIsAutoSelectAsset] = useState(false);
   const [isVirtualizedTableView, setIsVirtualizedTableView] = useState(false);
   const [openAssetQtyDialog, setOpenAssetQtyDialog] = useState(false);
 
@@ -63,7 +62,6 @@ const AddSerializedAssets = ({ schedularState }: SchedularComponentProps) => {
       setSelectedAssets([]);
       dispatch({ type: 'selection', selectedRecords: [] });
       setIsVirtualizedTableView(false);
-      setIsAutoSelectAsset(false);
     }
   }, [selectedProduct, selectedWarehouse, loading]);
 
@@ -142,7 +140,7 @@ const AddSerializedAssets = ({ schedularState }: SchedularComponentProps) => {
               options={warehouseOptions}
               getOptionLabel={(option: any) => option.optionLabel}
               disableClearable
-              getOptionSelected={(option: any, val) => option.optionValue === val}
+              isOptionEqualToValue={(option: any, val) => option.optionValue === val}
               value={warehouseOptions?.find((data) => data.optionValue === selectedWarehouse) ?? ''}
               onChange={(e, val) => {
                 if (val !== null) {
@@ -168,7 +166,7 @@ const AddSerializedAssets = ({ schedularState }: SchedularComponentProps) => {
               className="md:max-w-[250px]"
               options={productOptions}
               getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-              getOptionSelected={(option: any, val) => option.optionValue === val}
+              isOptionEqualToValue={(option: any, val) => option.optionValue === val}
               value={productOptions?.find((data) => data.optionValue === selectedProduct) ?? ''}
               onChange={(e, val) => {
                 setSelectedProduct(val && val.optionValue ? val.optionValue : '');
@@ -178,27 +176,25 @@ const AddSerializedAssets = ({ schedularState }: SchedularComponentProps) => {
               )}
             />
           )}
-          {selectedProduct && selectedWarehouse && (
-            <FormControlLabel
-              control={
-                <Checkbox
-                  color="primary"
-                  checked={isAutoSelectAsset}
-                  name={`Auto Select Asset`}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setOpenAssetQtyDialog(true);
-                    } else {
-                      setIsVirtualizedTableView(false);
-                      setSelectedAssets([]);
-                    }
-                    setIsAutoSelectAsset(e.target.checked);
-                  }}
-                />
-              }
-              label={`Auto Select Asset`}
-            />
-          )}
+          <div className="flex items-center gap-3">
+            {selectedProduct && selectedWarehouse && !isVirtualizedTableView && (
+              <ThemeButton disabled={false} buttonType="theme" onClick={() => setOpenAssetQtyDialog(true)}>
+                Auto Select Asset
+              </ThemeButton>
+            )}
+            {isVirtualizedTableView && (
+              <ThemeButton
+                disabled={false}
+                buttonType="theme"
+                onClick={() => {
+                  setIsVirtualizedTableView(false);
+                  setSelectedAssets([]);
+                }}
+              >
+                Reset
+              </ThemeButton>
+            )}
+          </div>
         </div>
       </div>
       {isVirtualizedTableView ? (
@@ -220,15 +216,13 @@ const AddSerializedAssets = ({ schedularState }: SchedularComponentProps) => {
       )}
 
       <div className="flex justify-end">
-        <Button
+        <ThemeButton
           disabled={!selectedAssets?.length && !selectedRecords?.length}
-          variant="contained"
-          size="small"
-          color="primary"
+            buttonType="theme"
           onClick={() => handleAdd()}
         >
           Save & Next
-        </Button>
+        </ThemeButton>
       </div>
 
       {openAssetQtyDialog && (
@@ -236,7 +230,6 @@ const AddSerializedAssets = ({ schedularState }: SchedularComponentProps) => {
           warehouse={selectedWarehouse}
           product={selectedProduct}
           handleClose={() => {
-            setIsAutoSelectAsset(false);
             setOpenAssetQtyDialog(false);
           }}
           handleSuccess={(data) => {
@@ -283,7 +276,8 @@ const RenderVirtualizedAssetTable = ({ selectedAssets }) => {
         display: 'block',
         overflow: 'auto',
         height: 'calc(100vh - 393px)',
-        marginTop: '10px'
+        marginTop: '10px',
+        marginBottom: '10px'
       }}
       ref={scrollContainerRef}
       className="custom-react-table editable-table-v1 w-full border"
@@ -299,7 +293,7 @@ const RenderVirtualizedAssetTable = ({ selectedAssets }) => {
         >
           <TableRow className="h-[40px] bg-gray-100">
             <TableCell key="no" className="flex items-center border-b border-gray-300 text-left font-bold" style={{ width: '50%' }}>
-              S no.
+              Index
             </TableCell>
             <TableCell key="asset" className="flex items-center border-b border-gray-300 text-left font-bold" style={{ width: '50%' }}>
               Asset

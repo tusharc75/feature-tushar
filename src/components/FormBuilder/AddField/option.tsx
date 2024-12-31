@@ -2,22 +2,22 @@ import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, MouseSensor, Tou
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import Box from '@material-ui/core/Box';
-import Checkbox from '@material-ui/core/Checkbox';
-import FormControl from '@material-ui/core/FormControl';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Grid from '@material-ui/core/Grid';
-import IconButton from '@material-ui/core/IconButton';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import Select from '@material-ui/core/Select';
-import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
-import { DragIndicator } from '@material-ui/icons';
-import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
-import SortIcon from '@material-ui/icons/Sort';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import Box from '@mui/material/Box';
+import Checkbox from '@mui/material/Checkbox';
+import FormControl from '@mui/material/FormControl';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Grid from '@mui/material/Grid';
+import IconButton from '@mui/material/IconButton';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import { DragIndicator } from '@mui/icons-material';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import SortIcon from '@mui/icons-material/Sort';
+import Autocomplete from '@mui/material/Autocomplete';
 import update from 'immutability-helper';
 import { orderBy } from 'lodash';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -280,7 +280,7 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
                 id="tags-filled"
                 options={fields && fields.filter((_f) => _f._id !== _id && _f.type === 'dropDown')}
                 getOptionLabel={(option: any) => (option ? option.fieldLabel : '')}
-                getOptionSelected={(option: any, val) => option.fieldName === val}
+                isOptionEqualToValue={(option: any, val) => option.fieldName === val}
                 value={
                   fields && fields.filter((data) => data.fieldName === values['dropdowDependentOn']).length
                     ? fields && fields.filter((data) => data.fieldName === values['dropdowDependentOn'])[0]
@@ -291,7 +291,7 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
                   GetLookupOption(val && val.fieldName ? val.fieldName : '');
                 }}
                 renderInput={(params) => (
-                  <TextField {...params} margin="dense" variant="outlined" label="Dropdow Dependent On" placeholder="Dropdow Dependent On" />
+                  <TextField {...params} margin="dense" size="small" variant="outlined" label="Dropdow Dependent On" placeholder="Dropdow Dependent On" />
                 )}
               />
             </Grid>
@@ -375,7 +375,7 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
             id="tags-filled"
             options={values['option'] && values['option']}
             getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-            getOptionSelected={(option: any, val) => option.optionValue === val}
+            isOptionEqualToValue={(option: any, val) => option.optionValue === val}
             value={
               values['option'] && values['option'].filter((data) => data.optionValue === values['defaultDropdownOption']).length
                 ? values['option'] && values['option'].filter((data) => data.optionValue === values['defaultDropdownOption'])[0]
@@ -384,14 +384,14 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
             onChange={(e, val) => {
               setFieldValue('defaultDropdownOption', val && val.optionValue ? val.optionValue : '');
             }}
-            renderInput={(params) => <TextField {...params} margin="dense" variant="outlined" label="Default Option" placeholder="Default Option" />}
+            renderInput={(params) => <TextField {...params} margin="dense" size="small" variant="outlined" label="Default Option" placeholder="Default Option" />}
           />
         </Box>
       )}
       {values['isConverter'] ||
         (values['type'] === 'converter' && (
           <Grid item xs={12} sm={4} md={4}>
-            <FormControl fullWidth margin="dense" variant="outlined">
+            <FormControl fullWidth margin="dense" variant="outlined" size="small">
               <InputLabel id="dropdownOnConverter">Dropdown applied on converter</InputLabel>
               <Select
                 labelId="dropdownOnConverter"
@@ -503,6 +503,7 @@ const Card = (props) => {
               id="standard-basic"
               variant="outlined"
               margin="dense"
+              size="small"
               fullWidth
               style={{ margin: 0 }}
               value={data.optionLabel}
@@ -522,23 +523,23 @@ const Card = (props) => {
                 {values['dropdowDependentOn'] && fields.filter((_f) => _f.fieldName === values['dropdowDependentOn']).length
                   ? fields.filter((_f) => _f.fieldName === values['dropdowDependentOn'])[0].lookup
                     ? lookupOption &&
-                      lookupOption.map((_option) => {
+                    lookupOption.map((_option) => {
+                      return (
+                        <MenuItem key={_option.optionLabel} value={_option.optionValue}>
+                          {_option.optionLabel}
+                        </MenuItem>
+                      );
+                    })
+                    : fields.filter((_f) => _f.fieldName === values['dropdowDependentOn'])[0].option &&
+                    fields
+                      .filter((_f) => _f.fieldName === values['dropdowDependentOn'])[0]
+                      .option.map((_option) => {
                         return (
-                          <MenuItem key={_option.optionLabel} value={_option.optionValue}>
+                          <MenuItem key={_option.optionLabel} value={_option.optionLabel}>
                             {_option.optionLabel}
                           </MenuItem>
                         );
                       })
-                    : fields.filter((_f) => _f.fieldName === values['dropdowDependentOn'])[0].option &&
-                      fields
-                        .filter((_f) => _f.fieldName === values['dropdowDependentOn'])[0]
-                        .option.map((_option) => {
-                          return (
-                            <MenuItem key={_option.optionLabel} value={_option.optionLabel}>
-                              {_option.optionLabel}
-                            </MenuItem>
-                          );
-                        })
                   : null}
               </Select>
               {/* <TextField

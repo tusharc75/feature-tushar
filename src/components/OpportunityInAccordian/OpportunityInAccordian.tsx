@@ -1,11 +1,9 @@
-import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@material-ui/core';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 
-import { MoreVert } from '@material-ui/icons';
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import { MoreVert } from '@mui/icons-material';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { BiCustomize } from 'react-icons/bi';
 import { IoCalendarOutline } from 'react-icons/io5';
 import { Link, useHistory } from 'react-router-dom';
@@ -13,9 +11,8 @@ import DisplayData from 'src/components/CardDisplayData';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import { useData } from '../../StateProvider/Provider';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
-import { customerAccount, customerContact, formatAmountWithCurrency } from '../../constants/helpers';
+import { customerAccount, customerContact, displayDate, formatAmountWithCurrency } from '../../constants/helpers';
 import ManageOpportunityDialog from '../../pages/Opportunities/ManageOpportunityDialog';
-import { displayDate } from '../../services/util';
 import AssignOpportunityDialog from '../AssignRolesDialog/AssignOpportunityDialog';
 import HtmlTooltip from '../CustomTooltipTitle';
 import routes from './../../components/Helpers/Routes';
@@ -92,88 +89,77 @@ export default function OpportunityInAccordian({
     <>
       <Accordion expanded={expandOpportunity} className={`omsAccordian  `} onChange={() => setExpandOpportunity(!expandOpportunity)}>
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
-          <Grid container>
-            <Grid item xs={8} alignItems="center">
-              <Box display="flex">
-                <Box>
-                  <IconButton size="small">{expandOpportunity === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
-                </Box>
-                <Box padding="5px">
-                  <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }}>
-                    Opportunity ({opportunities?.length || 0})
-                  </Typography>
-                </Box>
-              </Box>
-            </Grid>
-            <Grid item xs={4} container justify="flex-end" alignItems="center">
-              <Typography variant="subtitle2">
-                {allowedToEdit && (
+          <div className="flex items-center justify-between">
+            <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }}>
+              Opportunity ({opportunities?.length || 0})
+            </Typography>
+
+            {allowedToEdit && (
+              <>
+                {contactResource === customerContact.contactResource ? (
                   <>
-                    {contactResource === customerContact.contactResource ? (
-                      <>
-                        <IconButton
-                          aria-haspopup="true"
-                          color="primary"
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleOpenMenu(e);
-                          }}
-                        >
-                          <MoreVert />
-                        </IconButton>
-                        <Menu id="menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
-                          <MenuItem
-                            disabled={!opportunityPermissions.isCreate}
-                            onClick={() => {
-                              setShowCreateOpportunityDialog(true);
-                              handleCloseMenu();
-                            }}
-                          >
-                            Create New
-                          </MenuItem>
-                          <MenuItem
-                            disabled={!opportunityPermissions.isUpdate}
-                            onClick={() => {
-                              setShowAddOpportunityDialog(true);
-                              handleCloseMenu();
-                            }}
-                          >
-                            Add Exisiting
-                          </MenuItem>
-                        </Menu>
-                      </>
-                    ) : (
-                      <>
-                        <IconButton
-                          aria-haspopup="true"
-                          color="primary"
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleOpenMenu(e);
-                          }}
-                        >
-                          <MoreVert />
-                        </IconButton>
-                        <Menu id="menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
-                          <MenuItem
-                            disabled={!opportunityPermissions.isCreate}
-                            onClick={() => {
-                              setShowCreateOpportunityDialog(true);
-                              handleCloseMenu();
-                            }}
-                          >
-                            Create New
-                          </MenuItem>
-                        </Menu>
-                      </>
-                    )}
+                    <IconButton
+                      aria-haspopup="true"
+                      color="primary"
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        handleOpenMenu(e);
+                      }}
+                    >
+                      <MoreVert />
+                    </IconButton>
+                    <Menu id="menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
+                      <MenuItem
+                        disabled={!opportunityPermissions.isCreate}
+                        onClick={() => {
+                          setShowCreateOpportunityDialog(true);
+                          handleCloseMenu();
+                        }}
+                      >
+                        Create New
+                      </MenuItem>
+                      <MenuItem
+                        disabled={!opportunityPermissions.isUpdate}
+                        onClick={() => {
+                          setShowAddOpportunityDialog(true);
+                          handleCloseMenu();
+                        }}
+                      >
+                        Add Exisiting
+                      </MenuItem>
+                    </Menu>
+                  </>
+                ) : (
+                  <>
+                    <IconButton
+                      aria-haspopup="true"
+                      color="primary"
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenMenu(e);
+                      }}
+                    >
+                      <MoreVert />
+                    </IconButton>
+                    <Menu id="menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
+                      <MenuItem
+                        disabled={!opportunityPermissions.isCreate}
+                        onClick={() => {
+                          setShowCreateOpportunityDialog(true);
+                          handleCloseMenu();
+                        }}
+                      >
+                        Create New
+                      </MenuItem>
+                    </Menu>
                   </>
                 )}
-              </Typography>
-            </Grid>
-          </Grid>
+              </>
+            )}
+          </div>
         </AccordionSummary>
         <AccordionDetails>
           <Box>
@@ -202,7 +188,7 @@ export default function OpportunityInAccordian({
                                   </Link>
                                 )
                               ) : (
-                                <span className="d-flex gap-2 align-items-center">
+                                <span className="d-flex align-items-center gap-2">
                                   <Typography className="detailName">{obj.opportunityName}</Typography>{' '}
                                   <HtmlTooltip title={`${obj.opportunityName} belongs to different entity`}>
                                     <InfoOutlinedIcon fontSize="small" />

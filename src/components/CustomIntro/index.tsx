@@ -1,5 +1,5 @@
-import { Dialog, IconButton, Popper, TextField, useMediaQuery } from '@material-ui/core';
-import { Close } from '@material-ui/icons';
+import { Dialog, IconButton, Popper, TextField, useMediaQuery } from '@mui/material';
+import { Close } from '@mui/icons-material';
 import { KeyboardEvent, ReactNode, useRef, useState } from 'react';
 import { cn, CustomDialogTransition } from 'src/constants/helpers';
 
@@ -231,7 +231,6 @@ const CustomIntro = () => {
               <div className="footer flex justify-between gap-2 ">
                 {!isFirstStep ? (
                   <ThemeButton
-                    color="secondary"
                     disabled={isWaiting || currentStepData.isPreviousButtonDisabled}
                     iconForMobile={false}
                     onClick={() => handleSteps.current?.previous()}
@@ -244,8 +243,7 @@ const CustomIntro = () => {
                 )}
                 {!isLastStep || isWaiting || currentStepData.waitForStepInsertion ? (
                   <ThemeButton
-                    borderColor="none"
-                    color="primary"
+                    buttonType="theme"
                     iconForMobile={false}
                     onClick={() => {
                       handleNext();
@@ -257,8 +255,7 @@ const CustomIntro = () => {
                   </ThemeButton>
                 ) : (
                   <ThemeButton
-                    borderColor="none"
-                    color="primary"
+                    buttonType="theme"
                     iconForMobile={false}
                     disabled={isWaiting}
                     onClick={() => {

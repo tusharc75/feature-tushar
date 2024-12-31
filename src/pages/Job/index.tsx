@@ -1,8 +1,8 @@
-import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import AppsIcon from '@material-ui/icons/Apps';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import ViewListIcon from '@material-ui/icons/ViewList';
+import { Box, Button, IconButton, MenuItem } from '@mui/material';
+import AppsIcon from '@mui/icons-material/Apps';
+import DeleteIcon from '@mui/icons-material/Delete';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
+import ViewListIcon from '@mui/icons-material/ViewList';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -16,14 +16,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import MessageDialog from '../../components/Helpers/MessageDialog';
-import {
-  checkIsAllowedToDelete,
-  getDefaultMyRecordType,
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  sidebarResource
-} from '../../constants/helpers';
+import { checkIsAllowedToDelete, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import CardView from './CardView';
@@ -124,19 +117,21 @@ const Job = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
-        {permissions?.job?.isDelete && <HtmlTooltip title="Delete">
-          <IconButton
-            size="small"
-            aria-label="Delete"
-            disabled={row?.original?.canDelete ? false : true}
-            onClick={() => {
-              setDeleteRecord(row.data);
-              setShowDeleteConfirmBox(true);
-            }}
-          >
-            <DeleteIcon color={row?.original?.canDelete ? 'error' : 'disabled'} />
-          </IconButton>
-        </HtmlTooltip>}
+        {permissions?.job?.isDelete && (
+          <HtmlTooltip title="Delete">
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              disabled={row?.original?.canDelete ? false : true}
+              onClick={() => {
+                setDeleteRecord(row.data);
+                setShowDeleteConfirmBox(true);
+              }}
+            >
+              <DeleteIcon color={row?.original?.canDelete ? 'error' : 'disabled'} />
+            </IconButton>
+          </HtmlTooltip>
+        )}
       </>
     )
   };
@@ -289,7 +284,7 @@ const Job = () => {
           if (selectedRecords.length === 1) {
             setDeleteRecord(selectedRecords[0]);
           } else {
-            setDeleteRecord(null)
+            setDeleteRecord(null);
           }
           setShowDeleteConfirmBox(true);
         }}

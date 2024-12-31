@@ -1,12 +1,14 @@
-import { Box, Button, Dialog, Grid, IconButton, Typography } from '@material-ui/core';
-import { ControlPoint, Edit } from '@material-ui/icons';
-import { Skeleton } from '@material-ui/lab';
+import { ControlPoint } from '@mui/icons-material';
+import EditIcon from '@mui/icons-material/Edit';
+import { Box, Dialog, IconButton, Skeleton, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaEye } from 'react-icons/fa';
 import { MdDelete } from 'react-icons/md';
 import { useHistory, useParams } from 'react-router-dom';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
+import { CustomDialogTransition, DOA_RESOURCE } from 'src/constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import { SET_SELECTED_ENTITY, SET_USER, USER_LOADING } from '../../StateProvider/actionTypes';
@@ -21,10 +23,9 @@ import routes from '../../components/Helpers/Routes';
 import ResourceTransferDialog from '../../components/ResourceTransferDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import DoaDialog from '../DoaSetup/ManageDoa/ManageDoaDialog';
+import DoaSetup from '../DoaSetupNew';
 import AssignedUsers from './AssignedUsers';
 import ManageEntity from './ManageEntity';
-import DoaSetup from '../DoaSetupNew';
-import { CustomDialogTransition, DOA_RESOURCE } from 'src/constants/helpers';
 
 const EntityDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -308,14 +309,9 @@ const EntityDetailsPage = () => {
             {entityData ? (
               <>
                 {permissions?.entity?.isUpdate && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    className={'btn-outline-v1'}
-                    size="small"
-                    onClick={handleOpenUpdateDialog}
-                  >
-                    {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                  </Button>
+                  <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                    {'Edit'}
+                  </ThemeButton>
                 )}
                 {permissions?.entity?.isDelete && (
                   <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowDeleteEntityDialog(true)} />
@@ -329,30 +325,30 @@ const EntityDetailsPage = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <Grid container spacing={3}>
-          <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
+          <Grid size={{ xs: 12, sm: 12, md: 8, lg: 8 }} spacing={2}>
             <Box>
               {loading || !entityFields.length ? (
                 <Grid container spacing={2} style={{ padding: '8px' }}>
-                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
                 </Grid>
               ) : (
                 <DetailsPage data={entityData} fields={fieldsToShowInDetailPage} />
               )}
             </Box>
             <Box mt={2} className="single-form-v1 ">
-              <Box className="form-head-v1">
-                <Typography className="form-label-style-v1" component={'h3'}>
-                  {'DOA Details '}
-                </Typography>
+              <div className="relative flex justify-between rounded-t bg-[var(--dark-secondary,var(--accordion-expanded-summary-bg,#EFFBF9))] px-7 py-4">
+                <h6 className="text-sm font-semibold leading-[1.05] ">DOA Details</h6>
                 {permissions.entity?.isUpdate && (
-                  <Button variant="contained" className="float-right-button-v1" color="primary" size="small" onClick={() => setDoaDialogOpen(true)}>
-                    {doa.length > 0 ? 'Edit DOA' : 'Add DOA'}
-                  </Button>
+                  <span className="absolute right-5 top-[50%] [transform:translateY(-50%)]">
+                    <ThemeButton buttonType="theme" onClick={() => setDoaDialogOpen(true)}>
+                      {doa.length > 0 ? 'Edit DOA' : 'Add DOA'}
+                    </ThemeButton>
+                  </span>
                 )}
-              </Box>
+              </div>
               <Box className="formdata-v1">
                 <Grid container style={{ padding: '8px' }} spacing={1}>
-                  <Grid item xs={12} sm={12}>
+                  <Grid size={{ xs: 12, sm: 12 }}>
                     <BoxWithBorder
                       style={{
                         padding: '0px'
@@ -376,12 +372,12 @@ const EntityDetailsPage = () => {
               </Box>
             ))}
           </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
+          <Grid size={{ xs: 12, sm: 12, md: 4, lg: 4 }} spacing={2}>
             <Box style={{ overflow: 'hidden' }} className="single-form-v1">
               <Box className="form-head-v1">
                 <Typography component={'h3'}>Assigned Users ({users.length || 0})</Typography>
                 {permissions.entity.isUpdate && (
-                  <IconButton className="float-right-button-v1" title="Assign users" color="primary" size="small" onClick={userDialogOpen}>
+                  <IconButton title="Assign users" color="primary" size="small" onClick={userDialogOpen}>
                     <ControlPoint />
                   </IconButton>
                 )}
@@ -409,11 +405,10 @@ const EntityDetailsPage = () => {
                 ) : users.length ? (
                   <>
                     <AssignedUsers permissions={permissions} user={users.slice(0, showUsers)} unassignEntity={handleUnassignUser} type="entity" />
-
                     {users.length > showRecordsBeforeViewAll && (
                       <>
                         <Box marginY={2} />
-                        <Button
+                        <ThemeButton
                           onClick={() =>
                             history.push(`/user`, {
                               id: entityData._id,
@@ -422,12 +417,11 @@ const EntityDetailsPage = () => {
                               text: 'Entity'
                             })
                           }
-                          variant="outlined"
-                          className="accordion-outlined-button"
+                          fullWidth
                           startIcon={<FaEye />}
                         >
                           View All &#8599;
-                        </Button>
+                        </ThemeButton>
                       </>
                     )}
                   </>

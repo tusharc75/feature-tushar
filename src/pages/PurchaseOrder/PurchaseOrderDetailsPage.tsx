@@ -1,5 +1,6 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import { Edit } from '@material-ui/icons';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import EditIcon from '@mui/icons-material/Edit';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
@@ -36,6 +37,7 @@ import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { generateAddManualEntry } from 'src/pages/PurchaseOrder/walkmeSteps';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const PurchaseOrderDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -205,14 +207,7 @@ const PurchaseOrderDetailsPage = () => {
               !purchaseOrderData?.deleted &&
               [PURCHASE_ORDER_STATUS.received].includes(purchaseOrderData?.status) && (
                 <Fragment>
-                  <ButtonWithPulse
-                    color="default"
-                    variant={'outlined'}
-                    className={'btn-outline-v1'}
-                    onClick={() => updateStatus(PURCHASE_ORDER_STATUS.closed)}
-                  >
-                    Close
-                  </ButtonWithPulse>
+                  <ButtonWithPulse onClick={() => updateStatus(PURCHASE_ORDER_STATUS.closed)}>Close</ButtonWithPulse>
                 </Fragment>
               )}
             {purchaseOrderData?.deleted ? null : ![PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status) ? (
@@ -224,14 +219,14 @@ const PurchaseOrderDetailsPage = () => {
                 }
               >
                 <span>
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    className={'btn-outline-v1'}
+                  <ThemeButton
+                    iconForMobile={<EditIcon />}
                     onClick={handleOpenUpdateDialog}
                     disabled={permissions?.purchaseOrder?.isUpdate && allowedToEdit ? false : true}
+                    mobileTooltip={'Edit'}
                   >
-                    {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                  </Button>
+                    {'Edit'}
+                  </ThemeButton>
                 </span>
               </HtmlTooltip>
             ) : (
@@ -243,14 +238,9 @@ const PurchaseOrderDetailsPage = () => {
                 }
               >
                 <span>
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    className={'btn-outline-v1'}
-                    onClick={() => updateStatus(PURCHASE_ORDER_STATUS.received)}
-                    disabled={permissions?.purchaseOrder?.isUpdate && allowedToEdit ? false : true}
-                  >
-                    {isMobile && !isTablet ? <Edit /> : 'Re-Open'}
-                  </Button>
+                  <ThemeButton iconForMobile={<EditIcon />} onClick={() => updateStatus(PURCHASE_ORDER_STATUS.received)} mobileTooltip={'Re-Open'}>
+                    {'Re-Open'}
+                  </ThemeButton>
                 </span>
               </HtmlTooltip>
             )}
@@ -274,7 +264,7 @@ const PurchaseOrderDetailsPage = () => {
           <Box>
             {loadingPurchaseOrder || !purchaseOrderFields.length ? (
               <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </Grid>
             ) : (
               <DetailsPage data={purchaseOrderData} fields={purchaseOrderFields} />
@@ -283,13 +273,13 @@ const PurchaseOrderDetailsPage = () => {
         </TabPanel>
         <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
           <TabPanel value={tabValue} index={1}>
-            <Grid item xs={12} sm={12} md={12} lg={12}>
+            <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
               {!purchaseOrderData || !purchaseOrderFields.length ? (
                 <Grid container spacing={2} style={{ padding: '8px' }}>
-                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
                 </Grid>
               ) : (
-                <Grid item xs={12} sm={12} md={12} lg={12}>
+                <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
                   <Steps
                     isNextStep={false}
                     nextStep={nextStep}

@@ -3,13 +3,8 @@ import { CustomDialogTransition } from '../../../constants/helpers';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import { isMobile, isTablet } from 'react-device-detect';
-import routes from 'src/components/Helpers/Routes';
 import {
   Dialog,
-  Box,
-  Button,
-  Link,
-  TextField,
   Table,
   TableHead,
   Paper,
@@ -17,8 +12,7 @@ import {
   TableBody,
   TableCell,
   TableRow,
-  Typography
-} from '@material-ui/core';
+} from '@mui/material';
 
 const ShowNonSerializeAssets = ({ data, onClose, title }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);

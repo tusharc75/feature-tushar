@@ -1,51 +1,31 @@
-import React from "react";
-import PropTypes from "prop-types";
-import Snackbar from "@material-ui/core/Snackbar";
-import MuiAlert from "@material-ui/lab/Alert";
-import { makeStyles } from "@material-ui/core/styles";
+import Alert, { AlertProps } from '@mui/material/Alert';
+import Box from '@mui/material/Box';
+import Snackbar from '@mui/material/Snackbar';
 
-function Alert(props) {
-  return <MuiAlert elevation={6} variant="filled" {...props} />;
-}
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    width: "100%",
-    "& > * + *": {
-      marginTop: theme.spacing(2),
-    },
-  },
-}));
-
-const CustomToast = (props) => {
-  const { open, close, message, type, hideDuration = 6000, anchorOrigin = null } = props;
-  const classes = useStyles();
-
-  return <>
-    {
-      open && <div className={classes.root}>
-        <Snackbar open={open} autoHideDuration={hideDuration} onClose={close}
-          anchorOrigin={anchorOrigin ? anchorOrigin :
-            {
-              vertical: 'top',
-              horizontal: 'center',
-            }}
-        >
-          <Alert onClose={close} severity={type}>
-            {message}
-          </Alert>
-        </Snackbar>
-      </div>
-    }
-  </>
+export type CustomToastProps = {
+  open: boolean;
+  message: string;
+  type: AlertProps['severity'] | 'notFoundError';
+};
+type ExtraAttributes = {
+  hideDuration?: number;
+  close: () => void;
 };
 
-CustomToast.propTypes = {
-  open: PropTypes.bool.isRequired,
-  close: PropTypes.func.isRequired,
-  message: PropTypes.any.isRequired,
-  type: PropTypes.string.isRequired,
-  anchorOrigin: PropTypes.object
+const CustomToast = ({ open, close, message, type, hideDuration = 6000 }: CustomToastProps & ExtraAttributes) => {
+  return (
+    <>
+      {open && (
+        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+          <Snackbar open={open} autoHideDuration={hideDuration} onClose={close} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+            <Alert onClose={close} severity={type as AlertProps['severity']} variant="filled" sx={{ width: '100%', color: 'white' }}>
+              {message}
+            </Alert>
+          </Snackbar>
+        </Box>
+      )}
+    </>
+  );
 };
 
 export default CustomToast;

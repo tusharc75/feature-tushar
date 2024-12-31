@@ -1,10 +1,10 @@
 import { Fragment } from 'react';
-import { ListItem, ListItemText, ListItemAvatar, Avatar, Box, Chip, Typography } from '@material-ui/core';
-import { Group } from '@material-ui/icons';
-import moment from 'moment';
+import { ListItem, ListItemText, ListItemAvatar, Avatar, Box, Chip, Typography } from '@mui/material';
+import { Group } from '@mui/icons-material';
 
 import axiosInstance from '../../axios/axiosInstance';
 import HtmlTooltip from '../CustomTooltipTitle';
+import dayjs from 'dayjs';
 
 const ChatList = (props) => {
   const { chat, setSelectedChat, userId } = props;
@@ -17,7 +17,7 @@ const ChatList = (props) => {
     }
   };
 
-  const formatTime = (time) => moment(time).fromNow(true);
+  const formatTime = (time) => dayjs.utc(time).tz().fromNow(true);
 
   return (
     <Fragment>
@@ -33,15 +33,7 @@ const ChatList = (props) => {
               </p>
               <Box ml={1} />
               {chat?.users.length > 2 && (
-                <HtmlTooltip
-                  title={
-                    <Fragment>
-                      {chat?.users.map((u) => (
-                        <Typography>{`${u?.firstName} ${u?.lastName}`}</Typography>
-                      ))}
-                    </Fragment>
-                  }
-                >
+                <HtmlTooltip title={<Fragment>{chat?.users.map((u) => <Typography>{`${u?.firstName} ${u?.lastName}`}</Typography>)}</Fragment>}>
                   <Chip variant="outlined" color="secondary" label="Group" size="small" icon={<Group />} />
                 </HtmlTooltip>
               )}

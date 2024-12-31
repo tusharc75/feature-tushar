@@ -1,7 +1,9 @@
-import { Box, makeStyles } from '@material-ui/core';
+import { Box, Theme } from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import dayjs from 'dayjs';
 import moment from 'moment';
 import { useCallback, useContext, useEffect, useState } from 'react';
-import { momentLocalizer, View } from 'react-big-calendar';
+import { View, dayjsLocalizer } from 'react-big-calendar';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomCalendar from 'src/components/CustomCalendar';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -9,15 +11,13 @@ import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 
-const localizer = momentLocalizer(moment);
-
 type Props = {};
 
 const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   topbar: {
     backgroundColor: 'var(--dark-secondary, #fff)',
     padding: '10px 10px',
@@ -82,6 +82,8 @@ const CalendarView = (props: Props) => {
     },
     [setView]
   );
+
+  const localizer = dayjsLocalizer(dayjs);
 
   return (
     <>

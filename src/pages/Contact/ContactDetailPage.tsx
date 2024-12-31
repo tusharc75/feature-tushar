@@ -1,8 +1,9 @@
-import { Box, Button, Dialog, Grid, List, ListItemText, Paper, Typography } from '@material-ui/core';
-import ListItem from '@material-ui/core/ListItem/ListItem';
-import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-import { Edit } from '@material-ui/icons';
-import { Skeleton } from '@material-ui/lab';
+import { Box, Dialog, List, ListItemText, Paper, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import ListItem from '@mui/material/ListItem/ListItem';
+import ListItemAvatar from '@mui/material/ListItemAvatar';
+import EditIcon from '@mui/icons-material/Edit';
+import { Skeleton } from '@mui/material';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AiOutlineMail } from 'react-icons/ai';
@@ -16,7 +17,7 @@ import { AccountHierarchyIcon } from 'src/assets/svg/svgIcons';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
@@ -183,7 +184,7 @@ const ContactDetailsPage = (props) => {
           { id: data?.accountName?.optionValue, type: accountResource }
         ]);
         setCustomizedRoutes([contactBreadcrumb, { title: [data.firstName, data.lastName].filter((d) => d).join(' ') }]);
-        setContactName([data.firstName, data.lastName].filter((d) => d).join(' '))
+        setContactName([data.firstName, data.lastName].filter((d) => d).join(' '));
         let orgChartData = [];
         let excludeContacts = [];
         if (data.parentHierarchy && data.parentHierarchy.length > 0) {
@@ -540,42 +541,19 @@ const ContactDetailsPage = (props) => {
               contactResource === customerContact.contactResource &&
               contactPermissions?.isUpdate &&
               allowedToEdit && (
-                <HtmlTooltip title="E-Commerce Access" arrow placement="top">
-                  <Button
-                    size="small"
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    disabled={contactData.relatedUser?.eCommerceAccess}
-                    onClick={handleEcommerceAccess}
-                    className={'btn-outline-v1'}
-                  >
-                    {isMobile && !isTablet ? <HiShoppingCart /> : 'E-Commerce Access'}
-                  </Button>
-                </HtmlTooltip>
+                <ThemeButton iconForMobile={<HiShoppingCart />} onClick={handleEcommerceAccess} mobileTooltip={'E-Commerce Access'}>
+                  {'E-Commerce Access'}
+                </ThemeButton>
               )}
             {contactPermissions?.isUpdate && allowedToEdit && (
-              <HtmlTooltip title="Give Portal Access" arrow placement="top">
-                <Button
-                  size="small"
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  disabled={contactData?.isUserExist}
-                  onClick={handlePortalAccess}
-                  className={'btn-outline-v1'}
-                >
-                  {isMobile && !isTablet ? <RiLayoutFill /> : 'Give Portal Access'}
-                </Button>
-              </HtmlTooltip>
+              <ThemeButton iconForMobile={<RiLayoutFill />} onClick={handlePortalAccess} mobileTooltip={'Give Portal Access'}>
+                {'Give Portal Access'}
+              </ThemeButton>
             )}
             {contactPermissions?.isUpdate && allowedToEdit && (
-              <HtmlTooltip title="Edit" arrow placement="top">
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  size="small"
-                  onClick={handleOpneUpdateDialog}
-                  className={'btn-outline-v1'}
-                >
-                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                </Button>
-              </HtmlTooltip>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpneUpdateDialog} mobileTooltip={'Edit'}>
+                {'Edit'}
+              </ThemeButton>
             )}
             {contactPermissions?.isDelete && allowedToDelete && (
               <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowDeleteConfirmBox(true)} />
@@ -599,7 +577,7 @@ const ContactDetailsPage = (props) => {
           {loading ? (
             <Grid container spacing={2}>
               {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
-                <Grid item sm={6} md={6}>
+                <Grid size={{ sm: 6, md: 6 }}>
                   <Skeleton variant="text" width="100px" height="16px" />
                   <Box marginY={1} />
                   <Skeleton width="100%" height="50px" />
@@ -703,7 +681,7 @@ const ContactDetailsPage = (props) => {
           )}
         </div>
 
-        <Grid item xs={12}>
+        <Grid size={{ xs: 12 }}>
           <QuickLinks quickLinks={quickLinks} />
         </Grid>
 
@@ -717,7 +695,7 @@ const ContactDetailsPage = (props) => {
               </div>
               <Box className={`formdata-v1 `}>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} md={6} lg={4}>
+                  <Grid size={{ xs: 12, md: 6, lg: 4 }}>
                     <Paper className="detailListing card-v1">
                       <List>
                         <ListItem>

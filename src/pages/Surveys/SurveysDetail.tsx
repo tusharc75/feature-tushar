@@ -1,13 +1,13 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import { Edit } from '@material-ui/icons';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import EditIcon from '@mui/icons-material/Edit';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -63,7 +63,9 @@ const SurveysDetail = () => {
       } = await axiosInstance().get(`/surveys/${id}`);
 
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.surveys, data));
-      setAllowedToDelete(permissions?.surveys?.isDelete && checkIsAllowedToDelete(user, sidebarResource.surveys, data.owner.optionValue) && data?.canDelete);
+      setAllowedToDelete(
+        permissions?.surveys?.isDelete && checkIsAllowedToDelete(user, sidebarResource.surveys, data.owner.optionValue) && data?.canDelete
+      );
       setSurveyData(data);
       setCustomizedRoutes([{ ...routes.surveys, title: resources?.surveys?.titlePlural }, { title: data?.surveyName }]);
       setLoading(false);
@@ -113,46 +115,33 @@ const SurveysDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {permissions?.surveys?.isUpdate && allowedToEdit && (
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                className={'btn-outline-v1'}
+              <ThemeButton
                 onClick={(e) => {
                   setStepFieldsDialog(true);
                 }}
-                size="small"
+                mobileTooltip={'Edit'}
               >
-                Fields
-              </Button>
+                {'Fields'}
+              </ThemeButton>
             )}
             {permissions?.surveys?.isUpdate && allowedToEdit && (
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                className={'btn-outline-v1'}
-                onClick={handleOpenUpdateDialog}
-                size="small"
-              >
-                {isMobile && !isTablet ? <Edit /> : 'Edit'}
-              </Button>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                {'Edit'}
+              </ThemeButton>
             )}
-            {allowedToDelete && (
-              <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-            )}
+            {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
           </Box>
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs className="new-tab-container-v1" value={tabValue} onChange={handleMainTabChange} textColor="primary">
-          <CustomTab value={0}>
-            Header
-          </CustomTab>
-          <CustomTab value={1}>
-            Details
-          </CustomTab>
+          <CustomTab value={0}>Header</CustomTab>
+          <CustomTab value={1}>Details</CustomTab>
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
             <Grid container spacing={2} style={{ padding: '8px' }}>
-              <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Grid>
           ) : (
             <DetailsPage data={SurveyData} fields={fields} />

@@ -1,15 +1,15 @@
-import { Box, IconButton, InputBase, Typography } from '@material-ui/core';
-import { Skeleton } from '@material-ui/lab';
+import { Box, IconButton, InputBase, Typography } from '@mui/material';
+import { Skeleton } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import io, { Socket } from 'socket.io-client';
 import { SendIcon } from 'src/assets/svg/svgIcons';
-import moment from 'moment';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import { backendApi } from 'src/config';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { ChatBoxIcon } from 'src/assets/svg/CollaborateSidebar';
+import dayjs from 'dayjs';
 
 const Chatter = (props: any) => {
   const { relatedTo } = props;
@@ -134,7 +134,7 @@ const Chatter = (props: any) => {
                       <p className="chat-user">{data.userName}</p>
                       <div className="message"> {data.message}</div>
                       <Box textAlign="right" className="chatTimer">
-                        <Typography variant="caption">{moment(data.date).fromNow()}</Typography>
+                        <Typography variant="caption">{dayjs(data.date).fromNow()}</Typography>
                       </Box>
                     </div>
                   </div>
@@ -144,7 +144,7 @@ const Chatter = (props: any) => {
                       <p className="chat-user">{data.userName}</p>
                       <div className="message"> {data.message} </div>
                       <Box textAlign="right" className="chatTimer">
-                        <Typography variant="caption">{moment(data.date).fromNow()}</Typography>
+                        <Typography variant="caption">{dayjs(data.date).fromNow()}</Typography>
                       </Box>
                     </div>
                   </div>

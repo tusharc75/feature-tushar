@@ -1,4 +1,5 @@
-import { Button, Grid, IconButton } from '@material-ui/core';
+import { IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
@@ -7,13 +8,14 @@ import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../.
 import routes from './../../../components/Helpers/Routes';
 import { camelCase } from 'lodash';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { ExpandMore } from '@material-ui/icons';
-import { Menu, MenuItem, Box } from '@material-ui/core';
+import { ExpandMore } from '@mui/icons-material';
+import { Menu, MenuItem, Box } from '@mui/material';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 let renderedFrom = `${camelCase(sidebarResource.user)}_warehouse_master`;
 
@@ -188,36 +190,32 @@ const Users = ({ warehouse }) => {
     <Fragment>
       <Box p={1} pb={2}>
         <Grid container>
-          <Grid item xs={3} md={3} sm={3}>
-            <Button
-              size="small"
-              variant="contained"
-              color="primary"
+          <Grid size={{ xs: 3, md: 3, sm: 3 }}>
+            <ThemeButton
               onClick={() => {
                 setOpenDialog(true);
               }}
+              mobileTooltip="Assign Users"
+              iconForMobile={false}
             >
               Assign Users
-            </Button>
+            </ThemeButton>
           </Grid>
-          <Grid item xs={9} md={9} sm={9}>
+          <Grid size={{ xs: 9, md: 9, sm: 9 }}>
             <Box display={'flex'} justifyContent={'flex-end'} alignItems="center">
-              <Button
-                variant="outlined"
-                color="default"
-                size="small"
+              <ThemeButton
                 onClick={openActions}
-                aria-controls="action-menu"
-                disabled={selectedRecords.length === 0}
                 endIcon={<ExpandMore />}
-                className="new-dropdown-v1"
+                mobileTooltip="Actions"
+                buttonType="yellow"
+                disabled={selectedRecords.length === 0}
+                iconForMobile={<ExpandMore />}
               >
                 Actions
-              </Button>
+              </ThemeButton>
               <Menu
                 anchorEl={anchorEl}
                 keepMounted
-                getContentAnchorEl={null}
                 anchorOrigin={{
                   vertical: 'bottom',
                   horizontal: 'left'

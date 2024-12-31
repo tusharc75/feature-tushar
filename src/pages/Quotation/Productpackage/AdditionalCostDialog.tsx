@@ -1,5 +1,5 @@
 import { FC, useEffect, useState, Fragment, useRef, useContext } from 'react';
-import { Button, Dialog, Box } from '@material-ui/core';
+import { Dialog, Box } from '@mui/material';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -9,7 +9,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomButton from '../../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { isEqual } from 'lodash';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import InputField from 'src/components/Helpers/InputField';
@@ -29,7 +29,16 @@ interface AdditionalCostDialogProps {
   quotationData: object | any;
 }
 
-const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency, handleAddCost, handleUpdateCost, costData, showSaveAndNext, loadingEdit, quotationData }) => {
+const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({
+  onClose,
+  currency,
+  handleAddCost,
+  handleUpdateCost,
+  costData,
+  showSaveAndNext,
+  loadingEdit,
+  quotationData
+}) => {
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -38,15 +47,18 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
   const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
-    fetchFields()
+    fetchFields();
   }, [costData]);
 
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
     var poFields = await fetch_child_resource_fields_perm(CHILD_RESOURCE.quotationCost, currency, true);
     poFields = poFields?.filter((f) => f?.isRead);
-    if ((quotationData?.taxCode || (quotationData?.billingAddress &&
-      (quotationData?.billingAddress?.zipCode || quotationData?.billingAddress?.state || quotationData?.billingAddress?.county)))) {
+    if (
+      quotationData?.taxCode ||
+      (quotationData?.billingAddress &&
+        (quotationData?.billingAddress?.zipCode || quotationData?.billingAddress?.state || quotationData?.billingAddress?.county))
+    ) {
       const taxCodeOptions = await fetchTaxRate(quotationData?.billingAddress, quotationData?.taxCode?.optionValue || null);
       poFields?.forEach((e: any) => {
         if (e?.fieldName === 'taxCode') {
@@ -65,7 +77,7 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
         values: getObjKeys('', poFields)
       });
     }
-  }
+  };
 
   const fetchTaxRate = async (billingAddress: any, taxCode = null) => {
     const zipCode = billingAddress?.zipCode;
@@ -80,7 +92,6 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
       toastConfig.setToastConfig(e);
     }
   };
-
 
   const handleSubmit = (values) => {
     if (!costData) {
@@ -139,11 +150,7 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
                       if (name === 'taxCode') {
                         const taxCode = initialData?.fields?.find((e) => e?.fieldName === 'taxCode')?.option.find((d) => d.optionValue === value);
                         setFieldValue('taxPercentage', taxCode?.taxRate || 0);
-                        const result = autoCalculateSpecificFields(
-                          { ['taxPercentage']: taxCode?.taxRate || 0 },
-                          values,
-                          initialData.fields
-                        );
+                        const result = autoCalculateSpecificFields({ ['taxPercentage']: taxCode?.taxRate || 0 }, values, initialData.fields);
                         if (Object.keys(result).length >= 1) {
                           for (var x in result) {
                             setFieldValue(x, result[x]);
@@ -159,9 +166,8 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType="transparent"
                   onClick={() => {
                     if (!isEqual(ref.current.values, initialData.values)) {
                       setShowConfirmDialog(true);
@@ -171,14 +177,12 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
                   }}
                 >
                   {'Close'}
-                </Button>
+                </ThemeButton>
                 {showSaveAndNext && (
-                  <CustomButton
+                  <ThemeButton
                     loading={loadingEdit}
                     disabled={isEqual(ref?.current?.values, initialData.values) || loadingEdit}
-                    variant="contained"
-                    color="primary"
-                    type="submit"
+                    buttonType="theme"
                     onClick={() => {
                       setSaveAndNext(true);
                       submitForm();
@@ -186,14 +190,12 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
                   >
                     {' '}
                     Save & Next
-                  </CustomButton>
+                  </ThemeButton>
                 )}
-                <CustomButton
+                <ThemeButton
                   loading={loadingEdit}
                   disabled={isEqual(ref?.current?.values, initialData.values)}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+                  buttonType="theme"
                   onClick={() => {
                     setSaveAndNext(false);
                     submitForm();
@@ -201,7 +203,7 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
                 >
                   {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog

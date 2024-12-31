@@ -1,11 +1,11 @@
-import { MenuItem } from '@material-ui/core';
-import Box from '@material-ui/core/Box';
-import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import { MenuItem } from '@mui/material';
+import Box from '@mui/material/Box';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { camelCase, map, sortBy, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import CustomEditableGrid, { useTableReducer as useEditableTableReducer } from 'src/components/CustomEditableGridNew';
@@ -624,10 +624,8 @@ const ProductBuilder = (props) => {
           )}
 
           {isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice && (
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
+            <ThemeButton
+              buttonType="theme"
               onClick={() => {
                 let tempSupplierAccountId = [];
                 selectedRecords?.forEach((element) => {
@@ -658,7 +656,7 @@ const ProductBuilder = (props) => {
               aria-controls="action-menu"
             >
               Ask Supplier to Quote
-            </Button>
+            </ThemeButton>
           )}
         </>
       );
@@ -829,7 +827,6 @@ const ProductBuilder = (props) => {
       {showConfirmDialog ? (
         <ConfirmCancelDialog
           open={showConfirmDialog}
-          close={() => setShowConfirmDialog(false)}
           onSave={() => {
             setShowConfirmDialog(false);
             // e.preventDefault();

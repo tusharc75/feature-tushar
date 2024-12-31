@@ -1,12 +1,12 @@
-import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Box, IconButton, Menu, MenuItem } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { deleteDisable, editDisable } from 'src/constants/messageHelpers';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
 import { camelCase, isArray, kebabCase } from 'lodash';
@@ -14,6 +14,7 @@ import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialog from '../../../../components/Helpers/ConfirmationDialog';
 import ManageDynamicForm from '../../ManageDynamicForm';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, referenceData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -58,51 +59,51 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
         ...(step?.readOnly
           ? []
           : [
-              {
-                accessor: 'action',
-                Header: 'Actions',
-                minWidth: 100,
-                width: 110,
-                sticky: 'right',
-                disableFilters: true,
-                disableSortBy: true,
-                canDrag: false,
-                Cell: ({ row }) => (
-                  <>
-                    <HtmlTooltip title={allowedToEdit ? 'Edit' : editDisable}>
-                      <span>
-                        <IconButton
-                          size="small"
-                          aria-label="Edit"
-                          disabled={allowedToEdit ? false : true}
-                          onClick={() => {
-                            setOpen({ open: true, id: row?.original?._id });
-                          }}
-                        >
-                          <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
-                        </IconButton>
-                      </span>
-                    </HtmlTooltip>
+            {
+              accessor: 'action',
+              Header: 'Actions',
+              minWidth: 100,
+              width: 110,
+              sticky: 'right',
+              disableFilters: true,
+              disableSortBy: true,
+              canDrag: false,
+              Cell: ({ row }) => (
+                <>
+                  <HtmlTooltip title={allowedToEdit ? 'Edit' : editDisable}>
+                    <span>
+                      <IconButton
+                        size="small"
+                        aria-label="Edit"
+                        disabled={allowedToEdit ? false : true}
+                        onClick={() => {
+                          setOpen({ open: true, id: row?.original?._id });
+                        }}
+                      >
+                        <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+                      </IconButton>
+                    </span>
+                  </HtmlTooltip>
 
-                    <HtmlTooltip title={allowedToDelete ? 'Delete' : deleteDisable}>
-                      <span>
-                        <IconButton
-                          size="small"
-                          aria-label="Delete"
-                          disabled={allowedToDelete ? false : true}
-                          onClick={() => {
-                            setDeleteRecord(row?.original);
-                            setShowDeleteConfirmBox(true);
-                          }}
-                        >
-                          <DeleteIcon fontSize="small" color={allowedToDelete ? 'error' : 'disabled'} />
-                        </IconButton>
-                      </span>
-                    </HtmlTooltip>
-                  </>
-                )
-              }
-            ])
+                  <HtmlTooltip title={allowedToDelete ? 'Delete' : deleteDisable}>
+                    <span>
+                      <IconButton
+                        size="small"
+                        aria-label="Delete"
+                        disabled={allowedToDelete ? false : true}
+                        onClick={() => {
+                          setDeleteRecord(row?.original);
+                          setShowDeleteConfirmBox(true);
+                        }}
+                      >
+                        <DeleteIcon fontSize="small" color={allowedToDelete ? 'error' : 'disabled'} />
+                      </IconButton>
+                    </span>
+                  </HtmlTooltip>
+                </>
+              )
+            }
+          ])
       ]);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -218,16 +219,14 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
           actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
           hasXpadding
           leftSideContents={
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
+            <ThemeButton
               onClick={() => {
                 setOpen({ open: true, id: null });
               }}
+              buttonType='theme'
             >
               Add
-            </Button>
+            </ThemeButton>
           }
         />
       )}

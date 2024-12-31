@@ -1,23 +1,8 @@
-import {
-  Dialog,
-  Button,
-  CircularProgress,
-  List,
-  ListItem,
-  ListItemText,
-  FormControl,
-  FormControlLabel,
-  FormLabel,
-  Radio,
-  RadioGroup,
-  Grid,
-  Box,
-  Typography,
-  TextField
-} from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
-import { map, uniq } from 'lodash';
-import { useContext, useState, useEffect } from 'react';
+import { Dialog, Box, Typography, TextField } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Grid from '@mui/material/Grid2';
+import Autocomplete from '@mui/material/Autocomplete';
+import { useState, useEffect } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -40,14 +25,16 @@ const CalculatePriceDialog = ({ handleSucess, onClose, referenceData, material }
   const fetchCalculatePrice = () => {
     const data: any = {};
     data.conditionType = [PRICING_SETUP_TYPE.rent];
-    data.material = material.filter((d) => (d.listPrice === null || d.listPrice === undefined || d.listPrice === 0)).map((ele) => ({
-      materialId: ele?.materialId,
-      materialType: ele?.type,
-      qty: ele?.qty,
-      pricingMethod: ele?.pricingMethod?.split(',')[0],
-      unit: ele?.unit,
-      currency: referenceData?.currency
-    }));
+    data.material = material
+      .filter((d) => d.listPrice === null || d.listPrice === undefined || d.listPrice === 0)
+      .map((ele) => ({
+        materialId: ele?.materialId,
+        materialType: ele?.type,
+        qty: ele?.qty,
+        pricingMethod: ele?.pricingMethod?.split(',')[0],
+        unit: ele?.unit,
+        currency: referenceData?.currency
+      }));
     data.supplier = [];
     data.customer = [referenceData?.customerAccount?.optionValue];
     data.warehouse = [referenceData?.warehouse?.optionValue];
@@ -103,10 +90,10 @@ const CalculatePriceDialog = ({ handleSucess, onClose, referenceData, material }
                   <Box p={1}>
                     <Box border={0.7} p={1} borderColor="var(--common-border-color)">
                       <Grid spacing={3} container>
-                        <Grid item xs={12} sm={6} md={6}>
+                        <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                           <Typography variant="subtitle2">{` ${obj.productData?.detail}`}</Typography>
                         </Grid>
-                        <Grid item xs={12} sm={6} md={6}>
+                        <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                           <Autocomplete
                             size="small"
                             fullWidth
@@ -114,7 +101,7 @@ const CalculatePriceDialog = ({ handleSucess, onClose, referenceData, material }
                             autoHighlight
                             value={value[obj.productData?.materialId]}
                             getOptionLabel={(option) => option.conditionName || ''}
-                            getOptionSelected={(option, val) => (option ? option.conditionId === val.conditionId : false)}
+                            isOptionEqualToValue={(option, val) => (option ? option.conditionId === val.conditionId : false)}
                             onChange={(_, val) => {
                               setValue((prevState) => ({
                                 ...prevState,
@@ -132,16 +119,14 @@ const CalculatePriceDialog = ({ handleSucess, onClose, referenceData, material }
             )}
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button
+            <ThemeButton
               onClick={() => {
                 handleSucess([...submitData, ...pricingConditionData.filter((d) => value[d.materialId]?.conditionId === d?.conditionId)]);
               }}
-              color="primary"
-              size="small"
-              variant="contained"
+              buttonType="theme"
             >
               Apply
-            </Button>
+            </ThemeButton>
           </CustomDialogFooter>
         </Dialog>
       ) : null}

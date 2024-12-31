@@ -1,5 +1,6 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import EditIcon from '@material-ui/icons/Edit';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import EditIcon from '@mui/icons-material/Edit';
 import { camelCase, startCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
@@ -35,7 +36,7 @@ import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Step from '../DynamicForm/Step';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 
 const TransferAssetDetailPage = () => {
   const renderedFrom = camelCase(sidebarResource.transferAsset);
@@ -266,35 +267,32 @@ const TransferAssetDetailPage = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {permissions?.transferAsset?.isUpdate && allowedToEdit && isTransferEnded && (
-              <Button
-                variant="outlined"
-                color="inherit"
-                size="small"
-                className={'btn-outline-v1'}
+              <ThemeButton
                 onClick={(e) => {
                   setShowReopenCloseConfirmation({ open: true, type: 'reopen' });
                 }}
+                mobileTooltip="Re-Open"
+                iconForMobile={false}
               >
                 Re-Open
-              </Button>
+              </ThemeButton>
             )}
-            {permissions?.transferAsset?.isUpdate && allowedToEdit && !isTransferEnded && (transferAssetData?.transferType.includes('External') ? isAllAssetsReceived : isAllAssetsDelivered) && (
-              <ButtonWithPulse
-                variant={'outlined'}
-                color="default"
-                size="small"
-                onClick={() => {
-                  setShowReopenCloseConfirmation({ open: true, type: 'close' });
-                }}
-                className={'btn-outline-v1'}
-              >
-                Close
-              </ButtonWithPulse>
-            )}
+            {permissions?.transferAsset?.isUpdate &&
+              allowedToEdit &&
+              !isTransferEnded &&
+              (transferAssetData?.transferType.includes('External') ? isAllAssetsReceived : isAllAssetsDelivered) && (
+                <ButtonWithPulse
+                  onClick={() => {
+                    setShowReopenCloseConfirmation({ open: true, type: 'close' });
+                  }}
+                >
+                  Close
+                </ButtonWithPulse>
+              )}
             {permissions?.transferAsset?.isUpdate && allowedToEdit && !isTransferEnded && (
-              <Button variant={isMobile && !isTablet ? 'text' : 'contained'} onClick={handleOpenUpdateDialog} className={'btn-outline-v1'}>
-                {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
-              </Button>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                {'Edit'}
+              </ThemeButton>
             )}
             {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             <ActivityButton
@@ -316,7 +314,7 @@ const TransferAssetDetailPage = () => {
           <Box>
             {loading || !transferAssetData ? (
               <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </Grid>
             ) : (
               <DetailsPage data={transferAssetData} fields={transferAssetFields} />

@@ -1,14 +1,16 @@
-import React, { useContext, useState } from 'react';
-import { makeStyles, Box, TextField } from '@material-ui/core';
-import { Button, CircularProgress, Dialog } from '@material-ui/core';
+import React, { useContext } from 'react';
+import { Box, TextField, Theme } from '@mui/material';
+import { Dialog } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition, serializedAsset } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { makeStyles } from '@mui/styles';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     width: '100%',
     maxWidth: 360,
@@ -61,18 +63,15 @@ export default function AssetScrapRepairDialog({ statusToUpdate, setStatusToUpda
       </CustomDialogContent>
 
       <CustomDialogFooter>
-        <Button
-          size="small"
-          variant="outlined"
-          color="primary"
+        <ThemeButton
+          buttonType="transparent"
           onClick={() => {
             onClose();
           }}
         >
           Cancel
-        </Button>
-        <Button
-          size="small"
+        </ThemeButton>
+        <ThemeButton
           onClick={() => {
             setStatusToUpdate((prevState) => ({ ...prevState, isUpdating: true }));
             axiosInstance()
@@ -99,12 +98,11 @@ export default function AssetScrapRepairDialog({ statusToUpdate, setStatusToUpda
               });
           }}
           disabled={statusToUpdate.isUpdating}
-          variant="contained"
-          color="primary"
+          isLoading={statusToUpdate.isUpdating}
+          buttonType="theme"
         >
-          {statusToUpdate.isUpdating ? <CircularProgress style={{ marginRight: '8px' }} size={20} color="inherit" /> : null}
           Change Status
-        </Button>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

@@ -1,13 +1,12 @@
-import { Collapse } from '@material-ui/core';
-import Box from '@material-ui/core/Box';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import Grid from '@material-ui/core/Grid';
-import IconButton from '@material-ui/core/IconButton';
-import ControlPointIcon from '@material-ui/icons/ControlPoint';
-import ExpandLess from '@material-ui/icons/ExpandLess';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import HighlightOffIcon from '@material-ui/icons/HighlightOff';
+import { Collapse } from '@mui/material';
+import Box from '@mui/material/Box';
+import Dialog from '@mui/material/Dialog';
+import Grid from '@mui/material/Grid';
+import IconButton from '@mui/material/IconButton';
+import ControlPointIcon from '@mui/icons-material/ControlPoint';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import { Form, Formik } from 'formik';
 import { isEqual, map, orderBy, sortBy, uniq } from 'lodash';
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
@@ -25,7 +24,7 @@ import { autoCalculateSpecificFields } from '../../constants/formulaUtility';
 import { getObjKeys, yupSchema } from '../../constants/helpers';
 import HtmlTooltip from '../CustomTooltipTitle';
 import { AddField } from '../FormBuilder/AddField';
-import CustomButton from '../Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import FormTypes from '../Helpers/FormTypes';
 import { CustomDialogTransition } from './../../constants/helpers';
 
@@ -379,8 +378,8 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                                               ? true
                                               : false
                                             : ['productCategory', 'productTemplate', 'entity', 'priceTemplate'].includes(field.fieldName)
-                                            ? true
-                                            : false
+                                              ? true
+                                              : false
                                         }
                                       />
                                     ) : (
@@ -424,8 +423,8 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                                                     ? true
                                                     : false
                                                   : ['productCategory', 'productTemplate', 'entity', 'priceTemplate'].includes(field.fieldName)
-                                                  ? true
-                                                  : false
+                                                    ? true
+                                                    : false
                                               }
                                               imageOrFileUploadCompletePercentage={
                                                 ['imageUpload', 'fileUpload'].some((s) => s === field.type)
@@ -459,9 +458,8 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                 </Box>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType="transparent"
                   onClick={() => {
                     if (!isEqual(ref.current.values, initialData.values)) {
                       setShowConfirmDialog(true);
@@ -471,12 +469,10 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                   }}
                 >
                   Cancel
-                </Button>
-                <CustomButton
-                  loading={loading}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+                </ThemeButton>
+                <ThemeButton
+                  isLoading={loading}
+                  buttonType="theme"
                   onClick={(e) => {
                     e.preventDefault();
                     handleScroll(errors);
@@ -486,11 +482,10 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                 >
                   {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

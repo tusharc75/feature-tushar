@@ -1,18 +1,18 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import TextField from '@material-ui/core/TextField';
-import Checkbox from '@material-ui/core/Checkbox';
-import Box from '@material-ui/core/Box';
-import Grid from '@material-ui/core/Grid';
-import Select from '@material-ui/core/Select';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormControl from '@material-ui/core/FormControl';
-import ListItemText from '@material-ui/core/ListItemText';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import Chip from '@material-ui/core/Chip';
-import { makeStyles } from '@material-ui/core/styles';
-import FormHelperText from '@material-ui/core/FormHelperText';
+import TextField from '@mui/material/TextField';
+import Checkbox from '@mui/material/Checkbox';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+import Select from '@mui/material/Select';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import ListItemText from '@mui/material/ListItemText';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import Autocomplete from '@mui/material/Autocomplete';
+import Chip from '@mui/material/Chip';
+import { makeStyles } from '@mui/styles';
+import FormHelperText from '@mui/material/FormHelperText';
 
 const MenuProps = {
   PaperProps: {
@@ -151,6 +151,7 @@ export const Converter = ({ fields, values, setFieldValue, touched, errors }) =>
           <TextField
             {...params}
             margin="dense"
+            size="small"
             name="units"
             variant="outlined"
             label="Units"
@@ -182,6 +183,7 @@ export const Converter = ({ fields, values, setFieldValue, touched, errors }) =>
                           name={_unit}
                           variant="outlined"
                           margin="dense"
+                          size="small"
                           fullWidth
                           autoFocus
                           style={{ margin: 0 }}
@@ -213,6 +215,7 @@ export const Converter = ({ fields, values, setFieldValue, touched, errors }) =>
                             name={_unit + '_' + index}
                             variant="outlined"
                             margin="dense"
+                            size="small"
                             fullWidth
                             style={{ margin: 0 }}
                             value={values['unitoption'] && values['unitoption'][i] && values['unitoption'][i][_unit]}
@@ -230,7 +233,7 @@ export const Converter = ({ fields, values, setFieldValue, touched, errors }) =>
         <Box mt={1}>
           <Grid spacing={3} container>
             <Grid item xs={12} sm={4} md={4}>
-              <FormControl variant="outlined" fullWidth margin="dense" error={touched['displayUnits'] && Boolean(errors['displayUnits'])}>
+              <FormControl variant="outlined" fullWidth size="small" margin="dense" error={touched['displayUnits'] && Boolean(errors['displayUnits'])}>
                 <InputLabel htmlFor="displayUnits">Display Units</InputLabel>
                 <Select
                   inputProps={{
@@ -239,6 +242,7 @@ export const Converter = ({ fields, values, setFieldValue, touched, errors }) =>
                   }}
                   margin="dense"
                   label="Display Units"
+                  size="small"
                   multiple
                   name="displayUnits"
                   value={values['displayUnits'] ? values['displayUnits'] : []}
@@ -285,13 +289,14 @@ export const Converter = ({ fields, values, setFieldValue, touched, errors }) =>
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={4} md={4}>
-              <FormControl variant="outlined" fullWidth margin="dense" error={touched['formulaUnits'] && Boolean(errors['formulaUnits'])}>
+              <FormControl variant="outlined" fullWidth margin="dense" size="small" error={touched['formulaUnits'] && Boolean(errors['formulaUnits'])}>
                 <InputLabel htmlFor="formulaUnits">Formula Units</InputLabel>
                 <Select
                   inputProps={{
                     name: 'formulaUnits',
                     id: 'formulaUnits'
                   }}
+                  size="small"
                   error={touched['formulaUnits'] && Boolean(errors['formulaUnits'])}
                   margin="dense"
                   label="Formula Units"
@@ -342,11 +347,12 @@ export const Converter = ({ fields, values, setFieldValue, touched, errors }) =>
             </Grid>
             {values['isFormula'] && (
               <Grid item xs={12} sm={4} md={4}>
-                <FormControl fullWidth margin="dense" variant="outlined">
+                <FormControl fullWidth margin="dense" size="small" variant="outlined">
                   <InputLabel id="formulaOnConverter">Formula applied on converter</InputLabel>
                   <Select
                     labelId="formulaOnConverter"
                     id="formulaOnConverter"
+                    size="small"
                     value={values['formulaOnConverter']}
                     onChange={(e) => setFieldValue('formulaOnConverter', e.target.value)}
                     label="Formula applied on converter"

@@ -1,6 +1,6 @@
-import { Box, Button, Dialog, Grid, IconButton, TextField, Typography } from '@material-ui/core';
-import { AddCircleOutline, RemoveCircleOutline } from '@material-ui/icons';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, Dialog, Grid, IconButton, TextField, Typography } from '@mui/material';
+import { AddCircleOutline, RemoveCircleOutline } from '@mui/icons-material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { FieldArray, Form, Formik } from 'formik';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -10,7 +10,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomDialogTransition, MATERIAL_TYPE, leadTimeStatusDropdown } from 'src/constants/helpers';
 
 const ManageLeadTime = ({ onClose, onSuccess, referenceType, referenceId, referenceData, referenceLabel, loading = false }) => {
@@ -102,7 +102,13 @@ const ManageLeadTime = ({ onClose, onSuccess, referenceType, referenceId, refere
               showManimizeMaximize={true}
             />
             <CustomDialogContent>
-              <Box mt={2} mb={1} style={{ maxHeight: fullScreen ? 'calc(100vh - 150px)' : '350px', overflow: 'auto' }} border={1} borderColor="var(--common-border-color)">
+              <Box
+                mt={2}
+                mb={1}
+                style={{ maxHeight: fullScreen ? 'calc(100vh - 150px)' : '350px', overflow: 'auto' }}
+                border={1}
+                borderColor="var(--common-border-color)"
+              >
                 <Box p={1} bgcolor="var(--dark-secondary, grey.200)">
                   <Grid container>
                     <Grid item xs={6}>
@@ -143,80 +149,81 @@ const ManageLeadTime = ({ onClose, onSuccess, referenceType, referenceId, refere
                       <>
                         {values?.steps?.length
                           ? values?.steps?.map((step, index) => {
-                            return (
-                              <Box key={index} p={1} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
-                                <Grid container spacing={1}>
-                                  <Grid item xs={12} sm={12} md={6} lg={6}>
-                                    <Autocomplete
-                                      options={leadTimeStatusDropdown || []}
-                                      getOptionLabel={(option) => option}
-                                      value={step?.leadTimeStatus || ''}
-                                      onChange={(event: any, val) => {
-                                        arrayHelpers.replace(index, {
-                                          ...values?.steps[index],
-                                          ['leadTimeStatus']: val || ''
-                                        });
-                                      }}
-                                      renderInput={(params) => (
-                                        <TextField
-                                          {...params}
-                                          label="Lead Time Status"
-                                          variant="outlined"
-                                          name="leadTimeStatus"
-                                          size="small"
-                                          fullWidth
-                                          required
-                                          error={
-                                            touched?.steps &&
-                                            touched?.steps[index]?.leadTimeStatus &&
-                                            errors?.steps &&
-                                            Boolean(errors?.steps[index]?.leadTimeStatus)
-                                          }
-                                          helperText={
-                                            touched?.steps &&
-                                            touched?.steps[index]?.leadTimeStatus &&
-                                            errors?.steps &&
-                                            errors?.steps[index]?.leadTimeStatus
-                                          }
-                                        />
-                                      )}
-                                    />
-                                  </Grid>
-                                  <Grid item xs={10} sm={10} md={4} lg={4}>
-                                    <TextField
-                                      id="Days-Field"
-                                      variant="outlined"
-                                      margin="dense"
-                                      name="days"
-                                      label="Days"
-                                      type="number"
-                                      fullWidth
-                                      style={{ margin: 0 }}
-                                      value={step?.days || ''}
-                                      required
-                                      onChange={(e) => {
-                                        arrayHelpers.replace(index, {
-                                          ...values?.steps[index],
-                                          ['days']: parseInt(e.target.value) ?? 0
-                                        });
-                                      }}
-                                      error={touched?.steps && touched?.steps[index]?.days && errors?.steps && Boolean(errors?.steps[index]?.days)}
-                                      helperText={touched?.steps && touched?.steps[index]?.days && errors?.steps && errors?.steps[index]?.days}
-                                    />
-                                  </Grid>
-                                  <Grid item xs={2} sm={2} md={2} lg={2}>
-                                    <Grid container justifyContent="flex-end">
-                                      <HtmlTooltip title="Remove">
-                                        <IconButton size="small" aria-label="remove" onClick={() => arrayHelpers.remove(index)}>
-                                          <RemoveCircleOutline fontSize="small" color="primary" />
-                                        </IconButton>
-                                      </HtmlTooltip>
+                              return (
+                                <Box key={index} p={1} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
+                                  <Grid container spacing={1}>
+                                    <Grid item xs={12} sm={12} md={6} lg={6}>
+                                      <Autocomplete
+                                        options={leadTimeStatusDropdown || []}
+                                        getOptionLabel={(option) => option}
+                                        value={step?.leadTimeStatus || ''}
+                                        onChange={(event: any, val) => {
+                                          arrayHelpers.replace(index, {
+                                            ...values?.steps[index],
+                                            ['leadTimeStatus']: val || ''
+                                          });
+                                        }}
+                                        renderInput={(params) => (
+                                          <TextField
+                                            {...params}
+                                            label="Lead Time Status"
+                                            variant="outlined"
+                                            name="leadTimeStatus"
+                                            size="small"
+                                            fullWidth
+                                            required
+                                            error={
+                                              touched?.steps &&
+                                              touched?.steps[index]?.leadTimeStatus &&
+                                              errors?.steps &&
+                                              Boolean(errors?.steps[index]?.leadTimeStatus)
+                                            }
+                                            helperText={
+                                              touched?.steps &&
+                                              touched?.steps[index]?.leadTimeStatus &&
+                                              errors?.steps &&
+                                              errors?.steps[index]?.leadTimeStatus
+                                            }
+                                          />
+                                        )}
+                                      />
+                                    </Grid>
+                                    <Grid item xs={10} sm={10} md={4} lg={4}>
+                                      <TextField
+                                        id="Days-Field"
+                                        variant="outlined"
+                                        margin="dense"
+                                        size="small"
+                                        name="days"
+                                        label="Days"
+                                        type="number"
+                                        fullWidth
+                                        style={{ margin: 0 }}
+                                        value={step?.days || ''}
+                                        required
+                                        onChange={(e) => {
+                                          arrayHelpers.replace(index, {
+                                            ...values?.steps[index],
+                                            ['days']: parseInt(e.target.value) ?? 0
+                                          });
+                                        }}
+                                        error={touched?.steps && touched?.steps[index]?.days && errors?.steps && Boolean(errors?.steps[index]?.days)}
+                                        helperText={touched?.steps && touched?.steps[index]?.days && errors?.steps && errors?.steps[index]?.days}
+                                      />
+                                    </Grid>
+                                    <Grid item xs={2} sm={2} md={2} lg={2}>
+                                      <Grid container justifyContent="flex-end">
+                                        <HtmlTooltip title="Remove">
+                                          <IconButton size="small" aria-label="remove" onClick={() => arrayHelpers.remove(index)}>
+                                            <RemoveCircleOutline fontSize="small" color="primary" />
+                                          </IconButton>
+                                        </HtmlTooltip>
+                                      </Grid>
                                     </Grid>
                                   </Grid>
-                                </Grid>
-                              </Box>
-                            );
-                          })
+                                </Box>
+                              );
+                            })
                           : null}
                       </>
                     )}
@@ -225,18 +232,12 @@ const ManageLeadTime = ({ onClose, onSuccess, referenceType, referenceId, refere
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button disabled={isSubmitting || loading} type="button" variant="outlined" color="primary" size="small" onClick={onClose}>
+              <ThemeButton disabled={isSubmitting || loading} buttonType="transparent" onClick={onClose}>
                 Cancel
-              </Button>
-              <CustomButton
-                loading={isSubmitting || loading}
-                variant="contained"
-                color="primary"
-                disabled={isSubmitting || loading}
-                onClick={submitForm}
-              >
+              </ThemeButton>
+              <ThemeButton isLoading={isSubmitting || loading} buttonType="theme" disabled={isSubmitting || loading} onClick={submitForm}>
                 Save
-              </CustomButton>
+              </ThemeButton>
             </CustomDialogFooter>
           </>
         )}

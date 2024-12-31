@@ -1,18 +1,20 @@
-import { useState, useEffect, useContext } from 'react';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { Box, Divider, Theme } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import axios from 'axios';
-import { backendApi } from '../../config';
-import { Box, Button, Divider, makeStyles } from '@material-ui/core';
-import { MATERIAL_TYPE, downloadExcel, gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { startCase } from 'lodash';
-import DetailsPage from 'src/components/Shared/DetailsPage';
+import { useContext, useEffect, useState } from 'react';
 import { FaDiceOne } from 'react-icons/fa';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import DetailsPage from 'src/components/Shared/DetailsPage';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import { backendApi } from '../../config';
+import { MATERIAL_TYPE, downloadExcel, gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     padding: '10px',
     width: '100%',
@@ -24,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'flex-end',
-    ['@media (max-width: 960px)']: {
+    "['@media (max-width: 960px)']": {
       display: 'none'
     }
   },
@@ -452,15 +454,12 @@ const QuotationSupplierPrice = ({ openAuthData, openAuthId }) => {
       <Box display="flex" className="pb-2" justifyContent="flex-end">
         <Box mx={1} />
         {!isSubmited && (
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            // disabled={disabledSubmitButton}
+          <ThemeButton
+            buttonType='theme'
             onClick={handleSubmit}
           >
             Submit
-          </Button>
+          </ThemeButton>
         )}
         <Box mx={1} />
       </Box>

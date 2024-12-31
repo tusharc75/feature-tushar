@@ -1,10 +1,8 @@
-import { TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { TextField } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { useState } from 'react';
 
-const checkboxValuesOptions = [
-  { label: 'Yes', value: true },
-];
+const checkboxValuesOptions = [{ label: 'Yes', value: true }];
 
 const CheckboxDropdown = ({ value, setFieldValue, touched, errors }) => {
   const [stateValue, setStateValue] = useState(value ? checkboxValuesOptions[0] : value);
@@ -13,7 +11,7 @@ const CheckboxDropdown = ({ value, setFieldValue, touched, errors }) => {
       <Autocomplete
         id="tags-filled"
         options={checkboxValuesOptions}
-        getOptionLabel={(option: any) => option.label}
+        getOptionLabel={(option: any) => option.label || ''}
         value={stateValue}
         multiple={false}
         onChange={(e, val) => {
@@ -24,6 +22,7 @@ const CheckboxDropdown = ({ value, setFieldValue, touched, errors }) => {
           <TextField
             {...params}
             margin="dense"
+            size="small"
             variant="outlined"
             label="Default Value"
             placeholder="Default Value"

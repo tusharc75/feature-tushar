@@ -1,9 +1,8 @@
-import { Avatar, Box } from '@material-ui/core';
-import { Image } from '@material-ui/icons';
-import InfoIcon from '@material-ui/icons/Info';
+import { Avatar, Box } from '@mui/material';
+import { Image } from '@mui/icons-material';
+import InfoIcon from '@mui/icons-material/Info';
 import { isArray, isObject } from 'lodash';
 import camelCase from 'lodash/camelCase';
-import moment from 'moment';
 import { useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useGridMetaData } from 'src/components/CustomReactTable/ArrangeView/utils';
@@ -20,8 +19,8 @@ import SwitchCell from 'src/components/CustomReactTable/Cells/SwitchCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import {
-  dateFormat,
-  dateTimeFormat,
+  displayDate,
+  displayDateTime,
   formatAmountWithCurrency,
   formatTotalforTableFooter,
   getUniqueCurrencies,
@@ -31,6 +30,7 @@ import { useData } from 'src/StateProvider/Provider';
 import CopyToClipboard from '../../Helpers/CopyToClipboard';
 import DataListCell from '../Cells/DataListCell';
 import { headerName } from 'src/components/CustomReactTable/hooks/hookUtils';
+import RichTextEditorCell from 'src/components/CustomReactTable/Cells/RichTextEditorCell';
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -319,8 +319,8 @@ export function useColumns() {
             cell: ({ row }) => (
               <div>
                 {row?.original?.[field?.fieldName] ? (
-                  <h5 className="createBy" title={`${moment(row?.original?.[field?.fieldName]).format(dateFormat)}`}>
-                    {moment(row?.original?.[field?.fieldName])?.format(dateFormat)}
+                  <h5 className="createBy" title={`${displayDate(row?.original?.[field?.fieldName])}`}>
+                    {displayDate(row?.original?.[field?.fieldName])}
                   </h5>
                 ) : (
                   <NoDataCell />
@@ -335,8 +335,8 @@ export function useColumns() {
             cell: ({ row }) => (
               <div>
                 {row?.original?.[field?.fieldName] ? (
-                  <h5 className="createBy" title={`${moment(row?.original?.[field?.fieldName]).format(dateTimeFormat)}`}>
-                    {moment(row?.original?.[field?.fieldName])?.format(dateTimeFormat)}
+                  <h5 className="createBy" title={`${displayDateTime(row?.original?.[field?.fieldName])}`}>
+                    {displayDateTime(row?.original?.[field?.fieldName])}
                   </h5>
                 ) : (
                   <NoDataCell />
@@ -441,7 +441,19 @@ export function useColumns() {
               return <NumberCell rowData={row.original} field={field} />;
             }
           });
-        } else if (field.type === 'percent') {
+        } else if (field.type === 'richTextEditor') {
+          column.push({
+            ...commonFieldData,
+            disableFilters: true,
+            disableSortBy: true,
+            cell: ({ row }) => (
+              <div>
+                <RichTextEditorCell original={row?.original} field={field} />
+              </div>
+            )
+          });
+        }
+        else if (field.type === 'percent') {
           column.push({
             ...commonFieldData,
             editable: Boolean(field?.isColumnEditable),

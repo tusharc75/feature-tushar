@@ -1,5 +1,5 @@
-import { Avatar, IconButton, ListItem, TextField } from '@material-ui/core';
-import { Add, Remove, RemoveCircleOutline } from '@material-ui/icons';
+import { Avatar, IconButton, ListItem, TextField } from '@mui/material';
+import { Add, Remove, RemoveCircleOutline } from '@mui/icons-material';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';

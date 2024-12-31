@@ -1,4 +1,4 @@
-import { Box, Dialog, IconButton, Menu, Popover } from '@material-ui/core';
+import { Box, Dialog, IconButton, Menu, Popover } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -23,7 +23,7 @@ import { ListingPageHeader } from '../PageHeaders';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { findOne, objectStore } from 'src/constants/indexdbhelper';
 import { Link } from 'react-router-dom';
-import { Info } from '@material-ui/icons';
+import { Info } from '@mui/icons-material';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const AssignServiceDialog = ({

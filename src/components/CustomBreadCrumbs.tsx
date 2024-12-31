@@ -1,4 +1,4 @@
-import { Breadcrumbs } from '@material-ui/core';
+import { Breadcrumbs } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { HomeIconBreadcrumb } from 'src/assets/newSvgs';
 

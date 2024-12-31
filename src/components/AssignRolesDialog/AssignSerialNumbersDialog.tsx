@@ -1,28 +1,27 @@
-import { Box, Button, Dialog, TextField } from '@material-ui/core';
+import { Box, Dialog, TextField } from '@mui/material';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import { ListingPageHeader } from '../PageHeaders';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
-import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from '../CustomReactTable';
+import CustomReactTable, { gridFilterParser, useTableReducer } from '../CustomReactTable';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import NoDataCell from '../Helpers/NoDataCell';
-import routes from '../Helpers/Routes';
-import moment from 'moment';
 import {
   CustomDialogTransition,
-  dateFormat,
+  displayDate,
   gridLoadingTimeout,
   prepareDataForGrid,
   productInventory,
   transferInventory
 } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
-import { Autocomplete } from '@material-ui/lab';
+import Autocomplete from '@mui/material/Autocomplete';
 import ManageTransferInventory from 'src/pages/TransferInventory/ManageTransferInventory';
 import AddSerialNumber from 'src/pages/ProductInventory/SerialNumber/AddSerialNumber';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const AssignSerialNumbersDialog = ({
   selectedProducts = [],
@@ -100,9 +99,9 @@ const AssignSerialNumbersDialog = ({
       Cell: ({ row }) => (
         <>
           {row?.original?.createdBy ? (
-            <h5 className="createBy" title={`${row?.original?.createdBy} • ${moment(row?.original?.createdByDate).format(dateFormat)}`}>
+            <h5 className="createBy" title={`${row?.original?.createdBy} • ${displayDate(row?.original?.createdByDate)}`}>
               {row?.original?.createdBy}
-              <span className="createdAtTime badge-date">{moment(row?.original?.createdByDate)?.format(dateFormat)}</span>
+              <span className="createdAtTime badge-date">{displayDate(row?.original?.createdByDate)}</span>
             </h5>
           ) : (
             <NoDataCell />
@@ -132,7 +131,7 @@ const AssignSerialNumbersDialog = ({
           setSerialNumberCount(0);
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   useEffect(() => {
@@ -259,32 +258,31 @@ const AssignSerialNumbersDialog = ({
         <Box style={{ display: 'inline' }}>
           {products.length > 0
             ? products?.map((d) => (
-                <Box
-                  m={0.5}
-                  p={1}
-                  border={1}
-                  className={`cursor-pointer rounded-sm ${
-                    selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
+              <Box
+                m={0.5}
+                p={1}
+                border={1}
+                className={`cursor-pointer rounded-sm ${selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
                   }`}
-                  borderColor="var(--common-border-color)"
-                  onClick={() => {
-                    if (selectedProduct === d.id) {
-                      setSelectedProduct(null);
-                    } else {
-                      setSelectedProduct(d.id);
-                    }
-                  }}
-                  style={{ display: 'inline-block' }}
-                >
-                  {d?.qty < 0 ? (
-                    <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                  ) : d?.qty === 0 ? (
-                    <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                  ) : (
-                    <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                  )}
-                </Box>
-              ))
+                borderColor="var(--common-border-color)"
+                onClick={() => {
+                  if (selectedProduct === d.id) {
+                    setSelectedProduct(null);
+                  } else {
+                    setSelectedProduct(d.id);
+                  }
+                }}
+                style={{ display: 'inline-block' }}
+              >
+                {d?.qty < 0 ? (
+                  <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                ) : d?.qty === 0 ? (
+                  <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                ) : (
+                  <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                )}
+              </Box>
+            ))
             : null}
         </Box>
         {showWarehouseFilter && (
@@ -292,8 +290,8 @@ const AssignSerialNumbersDialog = ({
             <Autocomplete
               fullWidth
               options={warehouseOption}
-              getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-              getOptionSelected={(option: any, val) => option.optionValue === val}
+              getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+              isOptionEqualToValue={(option: any, val) => option.optionValue === val}
               value={
                 warehouseOption.filter((data) => data.optionValue === selectedWarehouse).length
                   ? warehouseOption.filter((data) => data.optionValue === selectedWarehouse)[0]
@@ -308,6 +306,7 @@ const AssignSerialNumbersDialog = ({
                 <TextField
                   {...params}
                   margin="dense"
+                  size="small"
                   name="plant"
                   placeholder={resources?.warehouse?.titleSingular}
                   label={resources?.warehouse?.titleSingular}
@@ -325,19 +324,17 @@ const AssignSerialNumbersDialog = ({
   const rightSideContents = () => {
     return selectedWarehouse != filterByPlant?.optionValue && referenceType === 'Rental Job' ? (
       <>
-        <Button
+        <ThemeButton
           style={{ minWidth: 'max-content' }}
-          size="small"
-          color="primary"
           onClick={() => {
             setShowTransferInventoryDialog(true);
           }}
-          variant={'contained'}
           disabled={selectedRecords?.length === 0 || products?.some((d) => d?.qty < 0)}
+          buttonType='theme'
         >
           {`Transfer to ${filterByPlant?.optionLabel}`}
           {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
-        </Button>
+        </ThemeButton>
       </>
     ) : null;
   };
@@ -348,22 +345,20 @@ const AssignSerialNumbersDialog = ({
         {!selectedProduct || !selectedWarehouse ? (
           <HtmlTooltip title={'Please Select Product'}>
             <span>
-              <Button variant={'outlined'} color="primary" size="small" disabled={true}>
+              <ThemeButton disabled={true}>
                 Add New Serial Numbers
-              </Button>
+              </ThemeButton >
             </span>
           </HtmlTooltip>
         ) : serialNumberCount ? (
-          <Button
-            variant={'contained'}
-            color="primary"
-            size="small"
+          <ThemeButton
             onClick={() => {
               setAddserialNumber(true);
             }}
+            buttonType='theme'
           >
             Add New Serial Numbers
-          </Button>
+          </ThemeButton>
         ) : null}
       </>
     );

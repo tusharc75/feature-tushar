@@ -1,3 +1,4 @@
+import CloseIcon from '@mui/icons-material/Close';
 import {
   Box,
   Checkbox,
@@ -11,13 +12,13 @@ import {
   TableHead,
   TableRow,
   TextField
-} from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
-import { Autocomplete } from '@material-ui/lab';
+} from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
+import dayjs from 'dayjs';
 import { camelCase, groupBy } from 'lodash';
 import moment from 'moment';
-import React, { forwardRef, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
-import { View, momentLocalizer } from 'react-big-calendar';
+import { forwardRef, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import { View, dayjsLocalizer } from 'react-big-calendar';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -25,16 +26,14 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import CustomCalendar from 'src/components/CustomCalendar';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { useAppTheme } from 'src/constants/AppConfig';
-import { cn, dateFormat, sidebarResource } from 'src/constants/helpers';
+import { cn, displayDate, sidebarResource } from 'src/constants/helpers';
 import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
 import './calendarView.scss';
-import CloseIcon from '@material-ui/icons/Close';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
-const localizer = momentLocalizer(moment);
 const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
@@ -405,7 +404,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             }
             if (d?.actualEndDate) {
               end = new Date(d?.actualEndDate);
-              end.setHours(23, 59, 59, 999);
+              end = dayjs.tz(end).endOf('day').toDate();
               endDraggable = false;
             }
             if (!d?.actualEndDate && moment(new Date()).isAfter(moment(d?.estimateEndDate))) {
@@ -708,14 +707,16 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             {...params}
             label={`Select ${filtered?.label}`}
             variant="outlined"
-            InputProps={{
-              ...params.InputProps,
-              endAdornment: (
-                <>
-                  {lookupLoading ? <CircularProgress color="inherit" size={20} /> : null}
-                  {params.InputProps.endAdornment}
-                </>
-              )
+            slotProps={{
+              input: {
+                ...params.InputProps,
+                endAdornment: (
+                  <>
+                    {lookupLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                    {params.InputProps.endAdornment}
+                  </>
+                )
+              }
             }}
           />
         )}
@@ -734,6 +735,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     }
     return data;
   };
+
+  const localizer = dayjsLocalizer(dayjs);
 
   return (
     <>
@@ -758,12 +761,23 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 disableCloseOnSelect
                 style={{ width: '300px' }}
                 getOptionLabel={(option) => option?.label}
-                renderOption={(option: any) => (
-                  <React.Fragment>
-                    <Checkbox checked={selectedFilters?.some((_s) => _s.key === option.key)} />
-                    {option?.label}
-                  </React.Fragment>
-                )}
+                renderOption={(props, option, state, ownerState) => {
+                  const { key, ...optionProps } = props;
+                  return (
+                    <Box
+                      component="li"
+                      key={key}
+                      {...optionProps}
+                      display={'flex'}
+                      alignItems={'center'}
+                      justifyContent={'space-between'}
+                      width={'100%'}
+                    >
+                      <Checkbox style={{ marginRight: 8 }} checked={selectedFilters?.some((_s) => _s.key === option.key)} />
+                      {ownerState.getOptionLabel(option)}
+                    </Box>
+                  );
+                }}
                 size="small"
                 renderInput={(params) => <TextField {...params} label="Filters" variant="outlined" />}
                 value={selectedFilters}
@@ -862,7 +876,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
           >
             <Box className="max-h-[600px] space-y-2  overflow-y-auto overflow-x-hidden p-2">
               <div className="flex items-center justify-between pb-1 pr-1 pt-1">
-                <h5 className="text-sm">{`${isOpen?.eventData?.title} - ${moment(isOpen?.eventData?.start).format(dateFormat)}`}</h5>
+                <h5 className="text-sm">{`${isOpen?.eventData?.title} - ${displayDate(isOpen?.eventData?.start)}`}</h5>
                 <HtmlTooltip title="Close">
                   <IconButton size="small" onClick={() => setOpen({ open: false, data: [], eventData: null })} className="close-icon-v1">
                     <CloseIcon fontSize="small" />
@@ -871,7 +885,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               </div>
               {isOpen.data?.map((d) => (
                 <Accordion key={d.key} defaultExpanded>
-                  <AccordionSummary expandIcon={<ExpandMore />}>
+                  <AccordionSummary>
                     <h6 className=" text-sm font-semibold">{d.heading}</h6>
                   </AccordionSummary>
                   <AccordionDetails>

@@ -1,4 +1,4 @@
-import { IconButton } from '@material-ui/core';
+import { IconButton } from '@mui/material';
 import { TbLayoutSidebarFilled } from 'react-icons/tb';
 import { cn } from 'src/constants/helpers';
 import { LayoutComponentProps } from 'src/pages/Reports/Layout/types';

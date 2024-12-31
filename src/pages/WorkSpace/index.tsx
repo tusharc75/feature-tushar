@@ -1,4 +1,4 @@
-import { useMediaQuery } from '@material-ui/core';
+import { useMediaQuery } from '@mui/material';
 import { useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
@@ -19,7 +19,12 @@ const Workspace = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const mobScreen = useMediaQuery('(max-width:768px)');
   const [socket, setSocket] = useState<Socket>(null);
-  const { state: { user: { user }, resources } } = useData();
+  const {
+    state: {
+      user: { user },
+      resources
+    }
+  } = useData();
 
   const token = localStorage.getItem('token');
 
@@ -55,12 +60,12 @@ const Workspace = () => {
             if (index !== -1) {
               const updatedChannel = {
                 ...updatedChannels[index],
-                notifications: (updatedChannels[index]?.notifications || 0) + 1,
+                notifications: (updatedChannels[index]?.notifications || 0) + 1
               };
               updatedChannels[index] = updatedChannel;
             }
             return updatedChannels;
-          })
+          });
         }
       });
     }
@@ -69,15 +74,9 @@ const Workspace = () => {
         channels.forEach((channel) => {
           socket.emit('leaveChannel', channel?._id);
         });
-        socket.off('fetchNewMessage');
-        socket.off('fetchMessages');
-        socket.off('addReaction');
-        socket.off('removeReaction');
-        socket.off('notification');
       }
     };
   }, [socket, channels]);
-
 
   useEffect(() => {
     if (!token) return;
@@ -90,7 +89,6 @@ const Workspace = () => {
     });
     setSocket(s);
   }, [token]);
-
 
   return (
     <>

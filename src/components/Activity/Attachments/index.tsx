@@ -1,19 +1,18 @@
-import { ListItemIcon, ListItemText } from '@material-ui/core';
-import Box from '@material-ui/core/Box';
-import Collapse from '@material-ui/core/Collapse';
-import Dialog from '@material-ui/core/Dialog';
-import IconButton from '@material-ui/core/IconButton';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
-import Typography from '@material-ui/core/Typography';
-import AddOutlinedIcon from '@material-ui/icons/AddOutlined';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import CreateNewFolderIcon from '@material-ui/icons/CreateNewFolder';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import FolderOpenIcon from '@material-ui/icons/FolderOpen';
-import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
-import SendIcon from '@material-ui/icons/Send';
-import moment from 'moment';
+import { ListItemIcon, ListItemText } from '@mui/material';
+import Box from '@mui/material/Box';
+import Collapse from '@mui/material/Collapse';
+import Dialog from '@mui/material/Dialog';
+import IconButton from '@mui/material/IconButton';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import Typography from '@mui/material/Typography';
+import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import FolderOpenIcon from '@mui/icons-material/FolderOpen';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import SendIcon from '@mui/icons-material/Send';
 import React, { Fragment, ReactNode, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AiOutlineDelete, AiOutlineFile } from 'react-icons/ai';
@@ -22,7 +21,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
 import axiosInstance from '../../../axios/axiosInstance';
-import { CustomDialogTransition, dateTimeFormat } from '../../../constants/helpers';
+import { CustomDialogTransition, displayDateTime } from '../../../constants/helpers';
 import ActivityLoader from '../../Helpers/ActivityLoader';
 import { CreateEmail } from '../Email/CreateEmail';
 import { ListRelatedTo } from '../Helpers/ListRelatedTo';
@@ -423,7 +422,6 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
       <Menu
         id="folder-edit-menu"
         anchorEl={folderAnchorEl?.anchor}
-        getContentAnchorEl={null}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         open={isFolderOptionsOpen}
@@ -514,7 +512,6 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
             <Menu
               id="simple-menu"
               anchorEl={anchorEl}
-              getContentAnchorEl={null}
               anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
               transformOrigin={{ vertical: 'top', horizontal: 'right' }}
               keepMounted
@@ -649,9 +646,9 @@ const RenderFolder: React.FC<TFolderPRops> = ({ iconButtons, node, childNodes })
         <div className="ml-[27px]">
           <p
             className="mt-2 line-clamp-1 text-[0.8rem] text-[var(--dark-secondary-text,#7b898e)] "
-            title={` Created: ${node?.createdBy?.user?.concatedName} ${moment(node?.createdBy?.date).format(dateTimeFormat)}`}
+            title={` Created: ${node?.createdBy?.user?.concatedName} ${displayDateTime(node?.createdBy?.date)}`}
           >
-            Created: {node?.createdBy?.user?.concatedName} {moment(node?.createdBy?.date).format(dateTimeFormat)}
+            Created: {node?.createdBy?.user?.concatedName} {displayDateTime(node?.createdBy?.date)}
           </p>
         </div>
       </div>
@@ -691,9 +688,9 @@ const RenderFiles: React.FC<TFilePRops> = ({ iconButtons, node, onFileClick, rel
         <div className="ml-[27px]">
           <p
             className="my-2 line-clamp-1 text-[0.8rem]  text-[var(--dark-secondary-text,#7b898e)]"
-            title={`Created: ${node?.createdBy?.user?.concatedName} ${moment(node?.createdBy?.date).format(dateTimeFormat)}`}
+            title={`Created: ${node?.createdBy?.user?.concatedName} ${displayDateTime(node?.createdBy?.date)}`}
           >
-            Created: {node?.createdBy?.user?.concatedName} {moment(node?.createdBy?.date).format(dateTimeFormat)}
+            Created: {node?.createdBy?.user?.concatedName} {displayDateTime(node?.createdBy?.date)}
           </p>
           <ListRelatedTo relatedTo={node.relatedTo} originRelatedTo={relatedTo} />
         </div>

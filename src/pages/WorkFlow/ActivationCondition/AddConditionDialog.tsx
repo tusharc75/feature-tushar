@@ -1,5 +1,5 @@
-import { Box, Button, CircularProgress, Dialog, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, Dialog, TextField } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { useContext, useEffect, useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -10,6 +10,7 @@ import { Form, Formik } from 'formik';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ConditionDialog = ({ onClose, data, fields, activationCondition, onSuccess, id }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -126,12 +127,12 @@ const ConditionDialog = ({ onClose, data, fields, activationCondition, onSuccess
                     options={
                       fields?.filter((f) => !activationCondition?.map((d) => d?.fieldName)?.includes(f.fieldName))?.length > 0
                         ? fields
-                            ?.filter((f) => !activationCondition?.map((d) => d?.fieldName)?.includes(f.fieldName))
-                            ?.map((_f) => ({ optionLabel: _f?.fieldLabel, optionValue: _f?.fieldName }))
+                          ?.filter((f) => !activationCondition?.map((d) => d?.fieldName)?.includes(f.fieldName))
+                          ?.map((_f) => ({ optionLabel: _f?.fieldLabel, optionValue: _f?.fieldName }))
                         : []
                     }
                     getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                    getOptionSelected={(option: any, val) => option.optionValue === val}
+                    isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                     value={
                       fields
                         ?.filter((f) => f?.fieldName === values?.fieldName)
@@ -145,6 +146,7 @@ const ConditionDialog = ({ onClose, data, fields, activationCondition, onSuccess
                       <TextField
                         {...params}
                         margin="dense"
+                        size="small"
                         variant="outlined"
                         label="Field Name"
                         placeholder="Select Field"
@@ -156,7 +158,9 @@ const ConditionDialog = ({ onClose, data, fields, activationCondition, onSuccess
                     )}
                   />
                   {values?.fieldName &&
-                    (selectedField?.type === 'dropDown' || selectedField?.type === 'multiSelect' || ['checkBox', 'switch'].includes(selectedField?.type) ? (
+                    (selectedField?.type === 'dropDown' ||
+                      selectedField?.type === 'multiSelect' ||
+                      ['checkBox', 'switch'].includes(selectedField?.type) ? (
                       <Autocomplete
                         id="fieldValue"
                         options={options}
@@ -183,6 +187,7 @@ const ConditionDialog = ({ onClose, data, fields, activationCondition, onSuccess
                           <TextField
                             {...params}
                             margin="dense"
+                            size="small"
                             variant="outlined"
                             label="Field Value"
                             name="fieldValue"
@@ -201,6 +206,7 @@ const ConditionDialog = ({ onClose, data, fields, activationCondition, onSuccess
                         rows={4}
                         fullWidth
                         margin="dense"
+                        size="small"
                         value={values?.value}
                         onChange={(e) => {
                           setFieldValue('fieldValue', e.target.value.trimStart());
@@ -213,20 +219,22 @@ const ConditionDialog = ({ onClose, data, fields, activationCondition, onSuccess
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button size="small" onClick={onClose} disabled={submitting} color="primary">
+
+
+              <ThemeButton
+                buttonType='transparent'
+                onClick={onClose}
+              >
                 Cancel
-              </Button>
-              <Button
-                size="small"
-                type="submit"
+              </ThemeButton>
+              <ThemeButton
+                buttonType='theme'
                 disabled={submitting}
-                color="primary"
-                variant="contained"
                 onClick={submitForm}
-                endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                isLoading={submitting}
               >
                 Save
-              </Button>
+              </ThemeButton>
             </CustomDialogFooter>
           </>
         )}

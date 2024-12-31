@@ -1,36 +1,29 @@
 import React, { useRef, useEffect, useState, useContext, Fragment } from 'react';
-import { Box, Button, Grid, Chip, IconButton, Tooltip, InputAdornment } from '@material-ui/core';
+import { Box, Chip, IconButton, InputAdornment } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Formik, Form } from 'formik';
 import axiosInstance from '../../axios/axiosInstance';
-import {
-  getObjKeys,
-  yupSchema,
-  getObjKeysWithValues,
-  pricingCondition,
-  setFieldsInAscendingOrder,
-  getUniqueCurrencies,
-  formFieldNames
-} from '../../constants/helpers';
+import { getObjKeys, yupSchema, pricingCondition, setFieldsInAscendingOrder, getUniqueCurrencies } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import FormTypes from '../../components/Helpers/FormTypes';
-import CustomButton from '../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { useData } from '../../StateProvider/Provider';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
-import MenuItem from '@material-ui/core/MenuItem';
-import Select from '@material-ui/core/Select';
-import FormControl from '@material-ui/core/FormControl';
-import InputLabel from '@material-ui/core/InputLabel';
-import TextField from '@material-ui/core/TextField';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import TextField from '@mui/material/TextField';
 import MultipleEntry from './AddConditions/MultipleEntry';
 import { useParams, useHistory } from 'react-router-dom';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import routes from '../../components/Helpers/Routes';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import Autocomplete from '@mui/material/Autocomplete';
 import { result, find, startCase, isEqual, camelCase } from 'lodash';
-import { Delete } from '@material-ui/icons';
-import Badge from '@material-ui/core/Badge';
-import { makeStyles } from '@material-ui/core/styles';
+import { Delete } from '@mui/icons-material';
+import Badge from '@mui/material/Badge';
+import { makeStyles } from '@mui/styles';
 import { FaDiceOne } from 'react-icons/fa';
 
 const useStyles = makeStyles(() => ({
@@ -267,7 +260,7 @@ function PricingConditionsDetailsPage() {
   return (
     <Fragment>
       <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
+        <Grid size={{ md: 4, sm: 11, xs: 10 }}>
           <CustomBreadCrumbs
             routes={[
               {
@@ -302,33 +295,26 @@ function PricingConditionsDetailsPage() {
             {({ submitForm, values, errors, touched, setFieldValue }) => (
               <Form>
                 <Grid container>
-                  <Grid item md={6} sm={6} xs={6}>
+                  <Grid size={{ md: 6, sm: 6, xs: 6 }}>
                     <h2 className="form-label-style" style={{ borderBottom: 'none', paddingLeft: '12px' }}>
                       * Required Fields
                     </h2>
                   </Grid>
-                  <Grid container justify="flex-end" item md={6} sm={6} xs={6}>
+                  <Grid container justifyContent="flex-end" size={{ md: 6, sm: 6, xs: 6 }}>
                     <Box ml={1}>
-                      <CustomButton
-                        loading={loading}
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        //disabled={loading || isEqual(ref?.current?.values, initialData?.values)}
+                      <ThemeButton
+                        isLoading={loading}
+                        buttonType="theme"
                         onClick={(e) => {
                           e.preventDefault();
                           submitForm();
                         }}
                       >
                         Save
-                      </CustomButton>
+                      </ThemeButton>
                     </Box>
                     <Box ml={1}>
-                      <Button
-                        type="button"
-                        variant="outlined"
-                        color="primary"
-                        size="small"
+                      <ThemeButton
                         onClick={() => {
                           if (!isEqual(ref.current.values, initialData.values)) {
                             setShowConfirmDialog(true);
@@ -338,7 +324,7 @@ function PricingConditionsDetailsPage() {
                         }}
                       >
                         Close
-                      </Button>
+                      </ThemeButton>
                     </Box>
                   </Grid>
                 </Grid>
@@ -355,7 +341,7 @@ function PricingConditionsDetailsPage() {
                             <Grid spacing={3} container>
                               {form.sectionFields.map((field, index2) =>
                                 field.fieldName === 'product' ? (
-                                  <Grid key={field.fieldName} item xs={12} sm={4} md={4}>
+                                  <Grid key={field.fieldName} size={{ xs: 12, sm: 4, md: 4 }}>
                                     <FormTypes
                                       {...field}
                                       multiple
@@ -377,7 +363,7 @@ function PricingConditionsDetailsPage() {
                                     />
                                   </Grid>
                                 ) : (
-                                  <Grid key={index2} item xs={12} sm={4} md={4}>
+                                  <Grid key={index2} size={{ xs: 12, sm: 4, md: 4 }}>
                                     <FormTypes
                                       // {...rest}
                                       values={values}
@@ -402,7 +388,7 @@ function PricingConditionsDetailsPage() {
                               )}
                               {index === formsData.length - 1 && (
                                 <Fragment>
-                                  <Grid item xs={12} sm={4} md={4} className="pt-1">
+                                  <Grid size={{ xs: 12, sm: 4, md: 4 }} className="pt-1">
                                     <Autocomplete
                                       multiple
                                       freeSolo
@@ -422,6 +408,7 @@ function PricingConditionsDetailsPage() {
                                         <TextField
                                           {...params}
                                           margin="dense"
+                                          size="small"
                                           name="units"
                                           variant="outlined"
                                           label="Units"
@@ -432,7 +419,7 @@ function PricingConditionsDetailsPage() {
                                       )}
                                     />
                                   </Grid>
-                                  <Grid item xs={12} sm={4} md={4} className="pt-1">
+                                  <Grid size={{ xs: 12, sm: 4, md: 4 }} className="pt-1">
                                     <Autocomplete
                                       multiple
                                       id="tags-filled"
@@ -452,6 +439,7 @@ function PricingConditionsDetailsPage() {
                                         <TextField
                                           {...params}
                                           margin="dense"
+                                          size="small"
                                           variant="outlined"
                                           name="currency"
                                           label="Currency"
@@ -483,12 +471,13 @@ function PricingConditionsDetailsPage() {
                                 (_currency, i) =>
                                   values['units'] &&
                                   values['units'].map((_unit, j) => (
-                                    <Grid item xs={12} sm={3} md={3}>
+                                    <Grid size={{ xs: 12, sm: 3, md: 3 }}>
                                       <TextField
                                         id="mrp"
                                         name="mrp"
                                         variant="outlined"
                                         margin="dense"
+                                        size="small"
                                         fullWidth
                                         label={'Rate ' + _unit + ' ' + _currency}
                                         type="number"
@@ -499,18 +488,20 @@ function PricingConditionsDetailsPage() {
                                             parseFloat(e.target.value)
                                           )
                                         }
-                                        InputProps={{
-                                          startAdornment: (
-                                            <InputAdornment position="start">
-                                              {result(
-                                                find(getUniqueCurrencies(), function (obj) {
-                                                  return obj.currencyCode === _currency;
-                                                }),
-                                                'symbolNative'
-                                              )}
-                                            </InputAdornment>
-                                          ),
-                                          inputProps: { min: 0, max: 9999999999 }
+                                        slotProps={{
+                                          input: {
+                                            startAdornment: (
+                                              <InputAdornment position="start">
+                                                {result(
+                                                  find(getUniqueCurrencies(), function (obj) {
+                                                    return obj.currencyCode === _currency;
+                                                  }),
+                                                  'symbolNative'
+                                                )}
+                                              </InputAdornment>
+                                            ),
+                                            inputProps: { min: 0, max: 9999999999 }
+                                          }
                                         }}
                                       />
                                     </Grid>
@@ -529,7 +520,7 @@ function PricingConditionsDetailsPage() {
                         </div>
                         <Box marginTop={1} marginBottom={1}>
                           <Grid spacing={3} container>
-                            <Grid item xs={12} sm={4} md={4}>
+                            <Grid size={{ xs: 12, sm: 4, md: 4 }}>
                               <Autocomplete
                                 multiple
                                 id="tags-filled"
@@ -549,6 +540,7 @@ function PricingConditionsDetailsPage() {
                                   <TextField
                                     {...params}
                                     margin="dense"
+                                    size="small"
                                     variant="outlined"
                                     name="pricingMethod"
                                     label="Pricing Method"
@@ -589,6 +581,7 @@ function PricingConditionsDetailsPage() {
                                                   }
                                                   variant="outlined"
                                                   margin="dense"
+                                                  size="small"
                                                   fullWidth
                                                   type="number"
                                                   style={{ margin: 0 }}
@@ -623,10 +616,7 @@ function PricingConditionsDetailsPage() {
                           <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Discount</h2>
                         </div>
                         <Box marginTop={2} marginBottom={1}>
-                          <Button
-                            variant="outlined"
-                            color="primary"
-                            size="small"
+                          <ThemeButton
                             onClick={() => {
                               setDiscount([
                                 ...discount,
@@ -641,15 +631,15 @@ function PricingConditionsDetailsPage() {
                             }}
                           >
                             Add Discount
-                          </Button>
+                          </ThemeButton>
                         </Box>
                         {discount.map((val, index) => (
                           <Box key={index} mb={2}>
                             <Badge badgeContent={index + 1} color="primary"></Badge>
                             <Box p={2} border={1} borderColor="var(--common-border-color)">
                               <Grid spacing={3} container>
-                                <Grid item xs={12} sm={2} md={2}>
-                                  <FormControl fullWidth margin="dense" variant="outlined">
+                                <Grid size={{ xs: 12, sm: 2, md: 2 }}>
+                                  <FormControl fullWidth margin="dense" variant="outlined" size="small">
                                     <InputLabel id="demo-simple-select-outlined-label">Discount Type</InputLabel>
                                     <Select
                                       labelId="demo-simple-select-outlined-label"
@@ -660,6 +650,7 @@ function PricingConditionsDetailsPage() {
                                       }}
                                       label="Type"
                                       name={'type_' + index}
+                                      size="small"
                                     >
                                       <MenuItem value="Flat">Flat</MenuItem>
                                       <MenuItem value="Percentage">Percentage</MenuItem>
@@ -670,12 +661,13 @@ function PricingConditionsDetailsPage() {
                                 </Grid>
                                 {(val.type === 'Flat' || val.type === 'Percentage') && (
                                   <Fragment>
-                                    <Grid item xs={12} sm={2} md={2}>
+                                    <Grid size={{ xs: 12, sm: 2, md: 2 }}>
                                       <TextField
                                         id="amount"
                                         name="amount"
                                         variant="outlined"
                                         margin="dense"
+                                        size="small"
                                         fullWidth
                                         label={'Discount ' + (val.type === 'Flat' ? ' Amount' : ' Percentage')}
                                         type="number"
@@ -683,12 +675,13 @@ function PricingConditionsDetailsPage() {
                                         onChange={(e) => handleChangeValue(index, 'amount', parseFloat(e.target.value))}
                                       />
                                     </Grid>
-                                    <Grid item xs={12} sm={2} md={2}>
+                                    <Grid size={{ xs: 12, sm: 2, md: 2 }}>
                                       <TextField
                                         id="minTransAmount"
                                         name="minTransAmount"
                                         variant="outlined"
                                         margin="dense"
+                                        size="small"
                                         fullWidth
                                         label="Minimum Trans. Amount"
                                         type="number"
@@ -696,12 +689,13 @@ function PricingConditionsDetailsPage() {
                                         onChange={(e) => handleChangeValue(index, 'minTransAmount', parseFloat(e.target.value))}
                                       />
                                     </Grid>
-                                    <Grid item xs={12} sm={2} md={2}>
+                                    <Grid size={{ xs: 12, sm: 2, md: 2 }}>
                                       <TextField
                                         id="maxDiscount"
                                         name="maxDiscount"
                                         variant="outlined"
                                         margin="dense"
+                                        size="small"
                                         fullWidth
                                         label="Maximum Discount"
                                         type="number"
@@ -713,11 +707,12 @@ function PricingConditionsDetailsPage() {
                                 )}
                                 <Grid
                                   container
-                                  justify="flex-end"
-                                  item
-                                  xs={12}
-                                  sm={val.type === 'Flat' || val.type === 'Percentage' ? 4 : 10}
-                                  md={val.type === 'Flat' || val.type === 'Percentage' ? 4 : 10}
+                                  justifyContent="flex-end"
+                                  size={{
+                                    xs: 12,
+                                    sm: val.type === 'Flat' || val.type === 'Percentage' ? 4 : 10,
+                                    md: val.type === 'Flat' || val.type === 'Percentage' ? 4 : 10
+                                  }}
                                 >
                                   <IconButton
                                     size="small"
@@ -734,7 +729,7 @@ function PricingConditionsDetailsPage() {
                               </Grid>
                               {(val.type === 'Group Flat' || val.type === 'Group Percentage') && (
                                 <Grid container>
-                                  <Grid item xs={12} sm={6} md={6}>
+                                  <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                                     <MultipleEntry
                                       discount={discount}
                                       index={index}
@@ -759,10 +754,7 @@ function PricingConditionsDetailsPage() {
                           <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Charge</h2>
                         </div>
                         <Box marginTop={2} marginBottom={1}>
-                          <Button
-                            variant="outlined"
-                            color="primary"
-                            size="small"
+                          <ThemeButton
                             onClick={() => {
                               setCharge([
                                 ...charge,
@@ -775,19 +767,20 @@ function PricingConditionsDetailsPage() {
                             }}
                           >
                             Add Charge
-                          </Button>
+                          </ThemeButton>
                         </Box>
                         {charge.map((val, index) => (
                           <Box key={index} mb={2}>
                             <Badge badgeContent={index + 1} color="primary"></Badge>
                             <Box p={2} border={1} borderColor="var(--common-border-color)">
                               <Grid spacing={3} container>
-                                <Grid item xs={12} sm={2} md={2}>
+                                <Grid size={{ xs: 12, sm: 2, md: 2 }}>
                                   <TextField
                                     id="label"
                                     name="label"
                                     variant="outlined"
                                     margin="dense"
+                                    size="small"
                                     fullWidth
                                     label={'Charge Name'}
                                     type="text"
@@ -795,12 +788,13 @@ function PricingConditionsDetailsPage() {
                                     onChange={(e) => handleChangeChargeValue(index, 'label', e.target.value)}
                                   />
                                 </Grid>
-                                <Grid item xs={12} sm={2} md={2}>
-                                  <FormControl fullWidth margin="dense" variant="outlined">
+                                <Grid size={{ xs: 12, sm: 2, md: 2 }}>
+                                  <FormControl fullWidth margin="dense" variant="outlined" size="small">
                                     <InputLabel id="demo-simple-select-outlined-label">Charge Type</InputLabel>
                                     <Select
                                       labelId="demo-simple-select-outlined-label"
                                       id="demo-simple-select-outlined"
+                                      size="small"
                                       value={val.type}
                                       onChange={(e) => {
                                         handleChangeChargeValue(index, 'type', e.target.value);
@@ -813,12 +807,13 @@ function PricingConditionsDetailsPage() {
                                     </Select>
                                   </FormControl>
                                 </Grid>
-                                <Grid item xs={12} sm={2} md={2}>
+                                <Grid size={{ xs: 12, sm: 2, md: 2 }}>
                                   <TextField
                                     id="amount"
                                     name="amount"
                                     variant="outlined"
                                     margin="dense"
+                                    size="small"
                                     fullWidth
                                     label={'Charge ' + (val.type === 'Flat' ? ' Amount' : ' Percentage')}
                                     type="number"
@@ -826,7 +821,7 @@ function PricingConditionsDetailsPage() {
                                     onChange={(e) => handleChangeChargeValue(index, 'amount', parseFloat(e.target.value))}
                                   />
                                 </Grid>
-                                <Grid container justify="flex-end" item xs={12} sm={6} md={6}>
+                                <Grid container justifyContent="flex-end" size={{ xs: 12, sm: 6, md: 6 }}>
                                   <IconButton
                                     size="small"
                                     aria-label="delete"
@@ -853,10 +848,7 @@ function PricingConditionsDetailsPage() {
                           <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Tax</h2>
                         </div>
                         <Box marginTop={2} marginBottom={1}>
-                          <Button
-                            variant="outlined"
-                            color="primary"
-                            size="small"
+                          <ThemeButton
                             onClick={() => {
                               setTax([
                                 ...tax,
@@ -869,19 +861,20 @@ function PricingConditionsDetailsPage() {
                             }}
                           >
                             Add Tax
-                          </Button>
+                          </ThemeButton>
                         </Box>
                         {tax.map((val, index) => (
                           <Box key={index} mb={2}>
                             <Badge badgeContent={index + 1} color="primary"></Badge>
                             <Box p={2} border={1} borderColor="var(--common-border-color)">
                               <Grid spacing={3} container>
-                                <Grid item xs={12} sm={2} md={2}>
+                                <Grid size={{ xs: 12, sm: 2, md: 2 }}>
                                   <TextField
                                     id="taxCode"
                                     name="taxCode"
                                     variant="outlined"
                                     margin="dense"
+                                    size="small"
                                     fullWidth
                                     label={'Tax Code'}
                                     type="text"
@@ -889,8 +882,8 @@ function PricingConditionsDetailsPage() {
                                     onChange={(e) => handleChangeTaxValue(index, 'taxCode', e.target.value)}
                                   />
                                 </Grid>
-                                <Grid item xs={12} sm={2} md={2}>
-                                  <FormControl fullWidth margin="dense" variant="outlined">
+                                <Grid size={{ xs: 12, sm: 2, md: 2 }}>
+                                  <FormControl fullWidth margin="dense" variant="outlined" size="small">
                                     <InputLabel id="demo-simple-select-outlined-label">Tax Type</InputLabel>
                                     <Select
                                       labelId="demo-simple-select-outlined-label"
@@ -901,18 +894,20 @@ function PricingConditionsDetailsPage() {
                                       }}
                                       label="Type"
                                       name={'type_' + index}
+                                      size="small"
                                     >
                                       <MenuItem value="Flat">Flat</MenuItem>
                                       <MenuItem value="Percentage">Percentage</MenuItem>
                                     </Select>
                                   </FormControl>
                                 </Grid>
-                                <Grid item xs={12} sm={2} md={2}>
+                                <Grid size={{ xs: 12, sm: 2, md: 2 }}>
                                   <TextField
                                     id="amount"
                                     name="amount"
                                     variant="outlined"
                                     margin="dense"
+                                    size="small"
                                     fullWidth
                                     label={'Tax ' + (val.type === 'Flat' ? ' Amount' : ' Percentage')}
                                     type="number"
@@ -920,7 +915,7 @@ function PricingConditionsDetailsPage() {
                                     onChange={(e) => handleChangeTaxValue(index, 'amount', parseFloat(e.target.value))}
                                   />
                                 </Grid>
-                                <Grid container justify="flex-end" item xs={12} sm={6} md={6}>
+                                <Grid container justifyContent="flex-end" size={{ xs: 12, sm: 6, md: 6 }}>
                                   <IconButton
                                     size="small"
                                     aria-label="delete"
@@ -943,7 +938,6 @@ function PricingConditionsDetailsPage() {
                 </Box>
                 {showConfirmDialog && (
                   <ConfirmCancelDialog
-                    close={() => setShowConfirmDialog(false)}
                     open={showConfirmDialog}
                     onSave={() => {
                       setShowConfirmDialog(false);

@@ -1,20 +1,19 @@
-import Box from '@material-ui/core/Box/Box';
+import Box from '@mui/material/Box/Box';
 import { useState, useEffect, useContext } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
-import Grid from '@material-ui/core/Grid/Grid';
+import Grid from '@mui/material/Grid2';
 import axiosInstance from 'src/axios/axiosInstance';
-import { MATERIAL_TYPE, dateFormat, rentalManagement, sidebarResource } from 'src/constants/helpers';
+import { displayDate, MATERIAL_TYPE, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { IconButton, MenuItem } from '@material-ui/core';
+import { IconButton, MenuItem } from '@mui/material';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import { camelCase, isEmpty } from 'lodash';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { FiExternalLink } from 'react-icons/fi';
-import VisibilityIcon from '@material-ui/icons/Visibility';
-import moment from 'moment';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import ServiceLogDialog from 'src/pages/RentalManagement/ReceivingTicket/ServiceLogDialog';
 import StartStopServiceDateDialog from 'src/pages/RentalManagement/ReceivingTicket/StartStopServiceDateDialog';
 import CustomMessageDialog from 'src/components/MessageDialog';
@@ -22,7 +21,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from '../../../StateProvider/Provider';
 import { rentalManagementActions, rentalManagementMessage } from 'src/constants/messageHelpers';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { Delete } from '@material-ui/icons';
+import { Delete } from '@mui/icons-material';
 
 const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetchRecords, stepFullScreen }) => {
   const renderedFrom = `${camelCase(sidebarResource.rentalManagement)}_services`;
@@ -117,8 +116,8 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
         Header: 'Actual Start Date',
         Cell: ({ row }) =>
           row?.original?.manualStartDate ? (
-            <h5 className="text-truncate" title={`${moment(row?.original?.manualStartDate).format(dateFormat)}`}>
-              {moment(row?.original?.manualStartDate)?.format(dateFormat)}
+            <h5 className="text-truncate" title={`${displayDate(row?.original?.manualStartDate)}`}>
+              {displayDate(row?.original?.manualStartDate)}
             </h5>
           ) : (
             <NoDataCell />
@@ -129,39 +128,13 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
         Header: 'Actual End Date',
         Cell: ({ row }) =>
           row?.original?.manualEndDate ? (
-            <h5 className="text-truncate" title={`${moment(row?.original?.manualEndDate).format(dateFormat)}`}>
-              {moment(row?.original?.manualEndDate)?.format(dateFormat)}
+            <h5 className="text-truncate" title={`${displayDate(row?.original?.manualEndDate)}`}>
+              {displayDate(row?.original?.manualEndDate)}
             </h5>
           ) : (
             <NoDataCell />
           )
       },
-      // {
-      //   accessor: 'startDate',
-      //   Header: 'System Start Date',
-      //   show: false,
-      //   Cell: ({ row }) =>
-      //     row?.original?.startDate ? (
-      //       <h5 className="text-truncate" title={`${moment(row?.original?.startDate).format(dateFormat)}`}>
-      //         {moment(row?.original?.startDate)?.format(dateFormat)}
-      //       </h5>
-      //     ) : (
-      //       <NoDataCell />
-      //     )
-      // },
-      // {
-      //   accessor: 'endDate',
-      //   Header: 'System End Date',
-      //   show: false,
-      //   Cell: ({ row }) =>
-      //     row?.original?.endDate ? (
-      //       <h5 className="text-truncate" title={`${moment(row?.original?.endDate).format(dateFormat)}`}>
-      //         {moment(row?.original?.endDate)?.format(dateFormat)}
-      //       </h5>
-      //     ) : (
-      //       <NoDataCell />
-      //     )
-      // },
       {
         accessor: 'action',
         Header: 'Actions',
@@ -233,8 +206,8 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
     setServiceConfirmationDialog({ ...serviceConfirmationDialog, loading: true });
     data = { ids: selectedRecords?.map((s) => s?.uniqueId) };
     data['type'] = type;
-    data['startDate'] = moment(values.startDate).format('MM/DD/YYYY');
-    data['endDate'] = moment(values.endDate).format('MM/DD/YYYY');
+    data['startDate'] = displayDate(values.startDate, 'MM/DD/YYYY');
+    data['endDate'] = displayDate(values.endDate, 'MM/DD/YYYY');
     axiosInstance()
       .put(`${rentalManagement.api}/${rentalManagementData?._id}/start-end-date`, data)
       .then((response) => {
@@ -295,7 +268,7 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
         hasXpadding
       />
       <Grid container>
-        <Grid item xs={12} md={12} sm={12}>
+        <Grid size={{xs:12, md:12, sm:12}}>
           {columns ? (
             <CustomReactTable
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}

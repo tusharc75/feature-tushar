@@ -1,8 +1,8 @@
-import { Box, Button, IconButton, Menu, MenuItem, MenuList, Popover } from '@material-ui/core';
-import Add from '@material-ui/icons/Add';
-import DateRangeIcon from '@material-ui/icons/DateRange';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
+import { Box, IconButton, MenuItem, MenuList, Popover } from '@mui/material';
+import Add from '@mui/icons-material/Add';
+import DateRangeIcon from '@mui/icons-material/DateRange';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { isArray, startCase, uniqBy } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -188,13 +188,14 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
                 size="small"
                 onClick={() => {
                   window.open(
-                    `${row.original.type === MATERIAL_TYPE.serializedAsset
-                      ? routes.serializedAssetDetail.path
-                      : row.original.type === MATERIAL_TYPE.product
-                        ? routes.productDetail.path
-                        : row.original.type === MATERIAL_TYPE.package
-                          ? routes.packagesDetail.path
-                          : routes.serviceMasterDetail.path
+                    `${
+                      row.original.type === MATERIAL_TYPE.serializedAsset
+                        ? routes.serializedAssetDetail.path
+                        : row.original.type === MATERIAL_TYPE.product
+                          ? routes.productDetail.path
+                          : row.original.type === MATERIAL_TYPE.package
+                            ? routes.packagesDetail.path
+                            : routes.serviceMasterDetail.path
                     }/${row.original.materialId}`
                   );
                 }}
@@ -306,16 +307,17 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     rows = [...rows, ...updatedAdditionalData];
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.serializedAsset
-        ? parent.serializedAssetDetail?.assetNumber
-        : parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.service
-            ? parent.serviceDetail?.serviceName
-            : parent.type === MATERIAL_TYPE.package
-              ? parent.packageDetail?.packageName
-              : parent.detail
-        }`;
+      parent.detail = `${
+        parent.type === MATERIAL_TYPE.serializedAsset
+          ? parent.serializedAssetDetail?.assetNumber
+          : parent.type === MATERIAL_TYPE.product
+            ? parent.productDetail?.productName
+            : parent.type === MATERIAL_TYPE.service
+              ? parent.serviceDetail?.serviceName
+              : parent.type === MATERIAL_TYPE.package
+                ? parent.packageDetail?.packageName
+                : parent.detail
+      }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -345,14 +347,15 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.serializedAsset
-        ? _subRow.serializedAssetDetail?.assetNumber
-        : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow.productDetail?.productName
-          : _subRow.type === MATERIAL_TYPE.service
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
-        }`;
+      _subRow.detail = `${
+        _subRow.type === MATERIAL_TYPE.serializedAsset
+          ? _subRow.serializedAssetDetail?.assetNumber
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow.productDetail?.productName
+            : _subRow.type === MATERIAL_TYPE.service
+              ? _subRow.serviceDetail?.serviceName
+              : _subRow.packageDetail?.packageName
+      }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
@@ -401,9 +404,10 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       element.type = addDialog.type;
       if (addDialog.type !== MATERIAL_TYPE.serializedAsset) {
         element.unit = d?.unit && d?.unitMain?.length ? d?.unitMain[0] : '';
-        if (quotationData?.estimateStartDate
-          && quotationData?.estimateEndDate
-          && allFields?.filter((e) => ['estimateStartDate', 'estimateEndDate', 'estimateJobDuration']?.includes(e?.fieldName))?.length === 3
+        if (
+          quotationData?.estimateStartDate &&
+          quotationData?.estimateEndDate &&
+          allFields?.filter((e) => ['estimateStartDate', 'estimateEndDate', 'estimateJobDuration']?.includes(e?.fieldName))?.length === 3
         ) {
           element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
           element.estimateStartDate = quotationData?.estimateStartDate;
@@ -821,8 +825,8 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           disabled={
             !Boolean(
               selectedRecords &&
-              selectedRecords.filter((e) => !e.hideSelection).length &&
-              !selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)
+                selectedRecords.filter((e) => !e.hideSelection).length &&
+                !selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)
             )
           }
           onClick={() => {

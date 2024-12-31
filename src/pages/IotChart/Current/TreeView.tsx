@@ -1,16 +1,17 @@
-import { useEffect, useState } from 'react';
-import { Box, Dialog, Grid, IconButton, Typography } from '@material-ui/core';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import HistoryIcon from '@material-ui/icons/History';
-import { withStyles } from '@material-ui/core/styles';
-import MuiAccordion from '@material-ui/core/Accordion';
-import MuiAccordionSummary from '@material-ui/core/AccordionSummary';
-import MuiAccordionDetails from '@material-ui/core/AccordionDetails';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import HistoryIcon from '@mui/icons-material/History';
+import { Box, Dialog, IconButton, Theme, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import MuiAccordion from '@mui/material/Accordion';
+import MuiAccordionDetails from '@mui/material/AccordionDetails';
+import MuiAccordionSummary from '@mui/material/AccordionSummary';
+import { withStyles } from '@mui/styles';
 import moment from 'moment';
-import { cn, CustomDialogTransition, dateTimeFormat24Hours } from 'src/constants/helpers';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import { useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import { cn, CustomDialogTransition, dateTimeFormat24Hours, displayDateTime } from 'src/constants/helpers';
 import Chart from '../Helper/Chart';
 import FilterModel from '../Helper/FilterModel';
 
@@ -52,7 +53,7 @@ const AccordionSummary = withStyles({
   expanded: {}
 })(MuiAccordionSummary);
 
-const AccordionDetails = withStyles((theme) => ({
+const AccordionDetails = withStyles((theme: Theme) => ({
   root: {
     display: 'block',
     padding: theme.spacing(2),
@@ -105,7 +106,7 @@ export default function TreeView({ expandedAccordition, setExpandedAccordition, 
               {expandedAccordition[category?._id] && currentData?.filter((d) => d?.category?.optionValue === category?._id)?.length ? (
                 <h6 className="line-clamp-1 text-right text-sm font-normal leading-[1.5] text-gray-500 dark:text-gray-300 max-sm:text-xs">
                   <span className="max-md:sr-only">Last Updated -</span>
-                  <span>{moment(currentData?.filter((d) => d?.category?.optionValue === category?._id)[0]?.time).format(dateTimeFormat24Hours)}</span>
+                  <span>{displayDateTime(currentData?.filter((d) => d?.category?.optionValue === category?._id)[0]?.time, dateTimeFormat24Hours)}</span>
                 </h6>
               ) : null}
             </div>

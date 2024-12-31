@@ -8,8 +8,9 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { MdZoomOutMap } from 'react-icons/md';
-import { ExpandLess, ExpandMore } from '@material-ui/icons';
-import { Box, Button, Paper, Typography } from '@material-ui/core';
+import { ExpandLess, ExpandMore } from '@mui/icons-material';
+import { Box, Paper, Typography } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const customNodeStyles = {
   repairJob: {
@@ -268,17 +269,14 @@ const RepairJobViews = (props) => {
     <ContentFullScreen fullScreen={fullScreenOpen} setFullScreen={setFullScreenOpen}>
       <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
         <Box>
-          <Button
-            variant={'outlined'}
-            color="default"
-            size="small"
+          <ThemeButton
             onClick={() => {
               setColorInfo(!colorInfo);
             }}
-            aria-controls="action-menu"
+            endIcon={colorInfo ? <ExpandLess /> : <ExpandMore />}
           >
-            {'Color Info'} {colorInfo ? <ExpandLess /> : <ExpandMore />}
-          </Button>
+            {'Color Info'}
+          </ThemeButton>
         </Box>
         {colorInfo && (
           <Box>

@@ -1,16 +1,16 @@
 import _ from 'lodash';
-import React, { useContext, useState, useEffect, Fragment } from 'react';
+import { useContext, useState, useEffect, Fragment } from 'react';
 import ReactFlow, { Controls, ControlButton, ReactFlowProvider } from 'react-flow-renderer';
 import axiosInstance from '../../../axios/axiosInstance';
 import { COLOUR_MASTER, transferAsset, deliveryTicket, DELIVERY_TICKET_STATUS, sidebarResource } from '../../../constants/helpers';
 import routes from '../../../components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { MdZoomOutMap } from 'react-icons/md';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import { Box, Button, Paper, Typography } from '@material-ui/core';
-import { ExpandMore, ExpandLess } from '@material-ui/icons';
+import { Box, Paper, Typography } from '@mui/material';
+import { ExpandMore, ExpandLess } from '@mui/icons-material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const customDeliveredNodeStyle = {
   closedTransferAsset: {
@@ -195,18 +195,15 @@ const TransferAssetViews = (props) => {
     <ContentFullScreen fullScreen={fullDialogueOpen} setFullScreen={setFullDialogueOpen}>
       <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
         <Box>
-          <Button
-            variant={'outlined'}
-            color="default"
-            size="small"
+          <ThemeButton
             onClick={() => {
               setColorInfo(!colorInfo);
             }}
-            aria-controls="action-menu"
+
             endIcon={colorInfo ? <ExpandLess /> : <ExpandMore />}
           >
             {'Color Info'}
-          </Button>
+          </ThemeButton>
         </Box>
         {colorInfo && (
           <Box>

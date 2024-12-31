@@ -1,5 +1,5 @@
-import { Box, Button, IconButton, Popover, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, IconButton, Popover, TextField } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { isEmpty } from 'lodash';
 import React, { useContext, useState } from 'react';
 import { AiFillEdit } from 'react-icons/ai';
@@ -8,9 +8,9 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import AsyncDropDown from 'src/components/Helpers/FormTypes/AsyncDropdown';
-import routes from 'src/components/Helpers/Routes';
 import SaveFilterDialog from './SaveFilterDialog';
 interface Props {
   filters: { key: string; title: string; multiple?: boolean; defaultValue?: number }[];
@@ -120,27 +120,30 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
             setSelectedKpiFilter(newValue || null);
           }}
           getOptionLabel={(option) => option?.title}
-          renderOption={(option) => (
-            <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'} width={'100%'}>
-              <span style={{ width: 'calc(100% - 71px)' }}>{option?.title}</span>
-              <Box>
-                <HtmlTooltip title={'Edit'} placement="top" arrow enterTouchDelay={0}>
-                  <IconButton size="small" style={{ marginRight: '20px' }}>
-                    <AiFillEdit />
-                  </IconButton>
-                </HtmlTooltip>
-                <HtmlTooltip title={'Delete'} placement="top" arrow enterTouchDelay={0}>
-                  <IconButton size="small" onClick={() => setIsFilterDeleteConfirm({ open: true, ids: [option._id] })}>
-                    <RiDeleteBin6Fill />
-                  </IconButton>
-                </HtmlTooltip>
+          renderOption={(props, option, state, ownerState) => {
+            const { key, ...optionProps } = props;
+            return (
+              <Box key={key} component="li" {...optionProps} display={'flex'} alignItems={'center'} justifyContent={'space-between'} width={'100%'}>
+                <span style={{ width: 'calc(100% - 25px)' }}>{ownerState.getOptionLabel(option)}</span>
+                <Box className="flex gap-1">
+                  <HtmlTooltip title={'Edit'} placement="top" arrow enterTouchDelay={0}>
+                    <IconButton size="small">
+                      <AiFillEdit />
+                    </IconButton>
+                  </HtmlTooltip>
+                  <HtmlTooltip title={'Delete'} placement="top" arrow enterTouchDelay={0}>
+                    <IconButton size="small" onClick={() => setIsFilterDeleteConfirm({ open: true, ids: [option._id] })}>
+                      <RiDeleteBin6Fill />
+                    </IconButton>
+                  </HtmlTooltip>
+                </Box>
               </Box>
-            </Box>
-          )}
+            );
+          }}
           id="controllable-states-demo"
           options={kpiFilters}
           renderInput={(params) => <TextField {...params} margin="none" size={'small'} fullWidth label="Select a Filter Set" variant="outlined" />}
-          getOptionSelected={(option, val) => option?.optionValue === val?.optionValue}
+          isOptionEqualToValue={(option, val) => option?.optionValue === val?.optionValue}
         />
         <div className="mt-2 [border-top:1px_dashed_var(--common-border-color)]" />
         <div className=" my-5 space-y-3">
@@ -170,7 +173,7 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
                   autoHighlight
                   value={values[filter?.key] ? values[filter?.key] : filter?.multiple ? [] : {}}
                   getOptionLabel={(option: any) => option?.optionLabel}
-                  getOptionSelected={(option, val) => option?.optionValue === val?.optionValue}
+                  isOptionEqualToValue={(option, val) => option?.optionValue === val?.optionValue}
                   onChange={(_, val) => {
                     handleChange(filter?.key, val);
                     setInputValues((prevValues) => ({ ...prevValues, [filter?.key]: val }));
@@ -206,17 +209,15 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
           ))}
         </div>
         <div className="mt-4 pt-2 text-right [border-top:1px_solid_var(--common-border-color)]">
-          <Button
+          <ThemeButton
+            buttonType="yellow"
             onClick={() => {
               setIsSaveFilter({ open: true, data: selectedKpiFilter });
             }}
             disabled={isEmpty(inputValues) && !selectedKpiFilter ? true : false}
-            size="small"
-            color="primary"
-            className="yellow-button"
           >
             {selectedKpiFilter ? 'Update Filter' : 'Save Filter'}
-          </Button>
+          </ThemeButton>
         </div>
       </Box>
       {isSaveFilter.open && (

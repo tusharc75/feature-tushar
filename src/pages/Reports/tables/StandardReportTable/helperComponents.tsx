@@ -1,5 +1,5 @@
-import { IconButton } from '@material-ui/core';
-import { Warning } from '@material-ui/icons';
+import { IconButton } from '@mui/material';
+import { Warning } from '@mui/icons-material';
 import { capitalize, isArray } from 'lodash';
 import { FiExternalLink } from 'react-icons/fi';
 import { Link } from 'react-router-dom';

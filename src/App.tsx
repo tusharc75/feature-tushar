@@ -1,4 +1,6 @@
-import { CssBaseline } from '@material-ui/core';
+import { CssBaseline } from '@mui/material';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { AnimatePresence } from 'framer-motion';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
@@ -138,7 +140,6 @@ import Job from './pages/Job';
 import JobDetail from './pages/Job/JobDetail';
 import Leads from './pages/Leads';
 import LeadDetailsPage from './pages/Leads/LeadDetailsPage';
-import NewLead from './pages/Leads/NewLead';
 import MarketSegment from './pages/MarketSegment';
 import MarketSegmentDetail from './pages/MarketSegment/MarketSegmentDetail';
 import MaterialHandling from './pages/MaterialHandling';
@@ -287,6 +288,7 @@ function App() {
   }, []);
 
   const toast = useContext(CustomToastContext);
+
   const notification = useContext(CustomNotificationCountContext);
   const chatNotification = useContext(CustomChatNotificationCountContext);
 
@@ -346,7 +348,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
     return () => {
       clearInterval(notificationInterval);
     };
@@ -441,819 +443,816 @@ function App() {
   };
 
   return (
-    <ColorModeProvider>
-      <CssBaseline />
-      <AnimatePresence initial={false} exitBeforeEnter>
-        <ErrorBoundaryComponent>
-          <Switch>
-            <Route exact path="/login/mfa" render={({ location }) => conditionalRedirect(LoginMFA, location)} />
-            <Route
-              // exact
-              path="/login"
-              render={({ location }) => conditionalRedirect(Login, location)}
-            />
-            <Route
-              // exact
-              path="/auth/login"
-              render={({ location }) => conditionalRedirect(Oauth, location)}
-            />
-            <Route
-              // exact
-              path="/office365/login"
-              render={({ location }) => conditionalRedirect(AzureLogin, location)}
-            />
-            <Route
-              // exact
-              path="/sso-login-error"
-              render={({ location }) => conditionalRedirect(AzureSSOError, location)}
-            />
-            <Route
-              // exact
-              path="/sso-login"
-              render={({ location }) => conditionalRedirect(AzureSSOLogin, location)}
-            />
-            <Route exact path="/create-password" render={({ location }) => conditionalRedirect(PasswordSetup, location)} />
-            <Route exact path="/forget-password" render={({ location }) => conditionalRedirect(ForgetPassword, location)} />
-            <Route exact path="/reset-password" render={({ location }) => conditionalRedirect(ResetPassword, location)} />
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <ColorModeProvider>
+        <CssBaseline />
+        <AnimatePresence initial={false} exitBeforeEnter>
+          <ErrorBoundaryComponent>
+            <Switch>
+              <Route exact path="/login/mfa" render={({ location }) => conditionalRedirect(LoginMFA, location)} />
+              <Route
+                // exact
+                path="/login"
+                render={({ location }) => conditionalRedirect(Login, location)}
+              />
+              <Route
+                // exact
+                path="/auth/login"
+                render={({ location }) => conditionalRedirect(Oauth, location)}
+              />
+              <Route
+                // exact
+                path="/office365/login"
+                render={({ location }) => conditionalRedirect(AzureLogin, location)}
+              />
+              <Route
+                // exact
+                path="/sso-login-error"
+                render={({ location }) => conditionalRedirect(AzureSSOError, location)}
+              />
+              <Route
+                // exact
+                path="/sso-login"
+                render={({ location }) => conditionalRedirect(AzureSSOLogin, location)}
+              />
+              <Route exact path="/create-password" render={({ location }) => conditionalRedirect(PasswordSetup, location)} />
+              <Route exact path="/forget-password" render={({ location }) => conditionalRedirect(ForgetPassword, location)} />
+              <Route exact path="/reset-password" render={({ location }) => conditionalRedirect(ResetPassword, location)} />
 
-            <PrivateRoute exact path="/">
-              <Home />
-            </PrivateRoute>
-            <PrivateRoute exact path="/logout">
-              <Logout />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.lead.path}>
-              <Leads />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.resourceLogs.path}>
-              <ResourceLogs />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.leadDetail.path}/:id`}>
-              <LeadDetailsPage />
-            </PrivateRoute>
-            <PrivateRoute exact path="/new-lead">
-              <NewLead />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.opportunity.path}>
-              <Opportunities />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.opportunityDetail.path}/:id`}>
-              <OpportunityDetailsPage />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.doa.path}>
-              <Doa />
-            </PrivateRoute>
-            <PrivateRoute exact path="/add-doa">
-              <Doa />
-            </PrivateRoute>
-            <PrivateRoute key="customer-account" exact path={routes.customerAccount.path}>
-              <Account account={customerAccount} />
-            </PrivateRoute>
-            <PrivateRoute key="customer-account-edit" exact path={`${routes.customerAccountDetail.path}/:id`}>
-              <AccountDetailPage
-                account={customerAccount}
-                contact={customerContact}
-                accountBreadcrumb={{ ...routes.customerAccount, title: resources?.customerAccount?.titlePlural }}
-              />
-            </PrivateRoute>
-            <PrivateRoute key="customer-contact" exact path={routes.customerContact.path}>
-              <Contact contact={customerContact} account={customerAccount} />
-            </PrivateRoute>
-            <PrivateRoute key="customer-contact-edit" exact path={`${routes.customerContactDetail.path}/:id`}>
-              <ContactDetailPage
-                account={customerAccount}
-                contact={customerContact}
-                contactBreadcrumb={{ ...routes.customerContact, title: resources?.customerContact?.titlePlural }}
-              />
-            </PrivateRoute>
-            <PrivateRoute key="supplier-account" exact path={routes.supplierAccount.path}>
-              <Account account={supplierAccount} />
-            </PrivateRoute>
-            <PrivateRoute key="supplier-account-edit" exact path={`${routes.supplierAccountDetail.path}/:id`}>
-              <AccountDetailPage
-                account={supplierAccount}
-                contact={supplierContact}
-                accountBreadcrumb={{ ...routes.supplierAccount, title: resources?.supplierAccount?.titlePlural }}
-              />
-            </PrivateRoute>
-            <PrivateRoute key="supplier-contact" exact path={routes.supplierContact.path}>
-              <Contact contact={supplierContact} account={supplierAccount} />
-            </PrivateRoute>
-            <PrivateRoute key="supplier-contact-edit" exact path={`${routes.supplierContactDetail.path}/:id`}>
-              <ContactDetailPage
-                account={supplierAccount}
-                contact={supplierContact}
-                contactBreadcrumb={{ ...routes.supplierContact, title: resources?.supplierContact?.titlePlural }}
-              />
-            </PrivateRoute>
-            <PrivateRoute key="project-sales" exact path={routes.projectSales.path}>
-              <ProjectSales />
-            </PrivateRoute>
-            <PrivateRoute key="project-sales-details" exact path={`${routes.projectSalesDetail.path}/:id`}>
-              <ProjectSalesDetails />
-            </PrivateRoute>
-            <PrivateRoute exact path="/user">
-              <User />
-            </PrivateRoute>
-            <PrivateRoute exact path="/user-manual*" userManual={true}>
-              <UserManual />
-            </PrivateRoute>
-            <PrivateRoute exact path="/profile">
-              <UserProfilePage profileBreadCrumbs={routes.profilePage} />
-            </PrivateRoute>
-            <PrivateRoute exact path="/brand-configuration">
-              <BrandConfiguration />
-            </PrivateRoute>
-            <PrivateRoute exact path="/user/detail/:id">
-              <UserDetailsPage />
-            </PrivateRoute>
-            <PrivateRoute exact path="/entity">
-              <Entity />
-            </PrivateRoute>
-            <PrivateRoute exact path="/entity/detail/:id">
-              <EntityDetailPage />
-            </PrivateRoute>
-            <PrivateRoute exact path="/role">
-              <Roles />
-            </PrivateRoute>
-            <PrivateRoute exact path="/role/detail/:id">
-              <RoleDetailsPage />
-            </PrivateRoute>
-            <PrivateRoute exact path="/activity">
-              <Activitydemo />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.productInventory.path}>
-              <InventoryProduct />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.activityEmail.path}>
-              <Email />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.note.path}>
-              <Note />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.attachment.path}>
-              <Attachments />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.calendar.path}>
-              <Calender />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.reminder.path}>
-              <Reminder />
-            </PrivateRoute>
-            <PrivateRoute path={routes.case.path}>
-              <Activity type="case" />
-            </PrivateRoute>
-            <PrivateRoute path={routes.task.path}>
-              <Activity type="task" />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.product.path}>
-              <Product />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.productDetail.path + '/:id'}>
-              <ProductDetailsPage />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.serializedAsset.path}>
-              <SerializedAsset />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.serializedAssetsCertification.path}>
-              <SerializedAssetsCertification />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.serializedAssetDetail.path + '/:id'}>
-              <SerializedAssetDetailsPage />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.rentalManagement.path}>
-              <RentalManagement />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.rentalManagementDetail.path + '/:id'}>
-              <RentalManagementDetailsPage />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.sublease.path}>
-              <Sublease />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.subleaseDetail.path + '/:id'}>
-              <SubleaseDetailsPage />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.productCategory.path}>
-              <ProductCategory />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.productCategoryDetail.path + '/:id'}>
-              <ProductCategoryDetailPage />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.productTemplate.path}>
-              <ProductTemplate />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.productTemplate.path + '/:id'}>
-              <CreateProductTemplate />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.quotePdfTemplate.path}>
-              <QuotePdfTemplate />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.quotePdfTemplateDetail.path}/:id`}>
-              <CreateNewQuotePdfTemplate />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.formBuilder.path}>
-              <FormBuilder />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.zone.path}>
-              <Zone />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.zoneDetail.path + '/:id'}>
-              <ZoneDetailPage />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.formBuilder.path}${routes.formBuilderResource.path}`}>
-              <CreateFormBuilder />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.termsAndConditions.path}>
-              <TermsAndConditions />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.termsAndConditionsDetail.path}/:id`}>
-              <TermsAndConditionDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.priceTemplate.path}>
-              <PriceTemplate />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.priceTemplate.path + '/:id'}>
-              <CreatePriceTemplate />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.productBuilder.path}>
-              <ProductBuilder />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.productBuilder.path + '/:id'}>
-              <CreateProductBuilder />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.currencyConverter.path}>
-              <CurrencyConverter />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.warehouse.path}>
-              <Warehouse />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.warehouseDetail.path + '/:id'}>
-              <WarehouseDetailsPage />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.quoteBuilderDetail.path}/:id`}>
-              <QuoteDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={'/dashboards'}>
-              <Dashboard />
-            </PrivateRoute>
-            <Route exact path={'/quote-approval/:id'}>
-              <QuoteApproval />
-            </Route>
-            <PrivateRoute exact path={routes.DOARequest.path}>
-              <DOARequest />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.DOARequest.path}/:id`}>
-              <DOAapproval />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.DOARequest.path}/quotation/:id`}>
-              <DOAApprovalQuotation />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.quoteBuilder.path}>
-              <QuoteBuilderCombined />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.productDetail.path}/:id/bom`}>
-              <BOMTable />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.budget.path}>
-              <Budget />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.budgetDetail.path}/:id`}>
-              <BudgetDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.pricingCondition.path}>
-              <PricingConditions />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.pricingCondition.path}/detail/:id`}>
-              <PricingConditionsDetails />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.marketSegment.path}>
-              <MarketSegment />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.marketSegment.path}/detail/:id`}>
-              <MarketSegmentDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.deliveryTicket.path}>
-              <DeliveryTicket />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.deliveryTicket.path}/detail/:id`}>
-              <DeliveryTicketDetailsPage />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.repairJob.path}>
-              <RepairJob />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.repairJobDetail.path}/:id`}>
-              <RepairJobDetails />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.salesOrder.path}>
-              <SalesOrder />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.salesOrderDetail.path}/:id`}>
-              <SalesOrderDetails />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.invoice.path}>
-              <Invoice />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.invoiceDetail.path}/:id`}>
-              <InvoiceDetails />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.packages.path}>
-              <PackageList />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.packagesDetail.path}/:id`}>
-              <PackageDetails />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.purchaseOrder.path}>
-              <PurchaseOrder />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.purchaseOrderDetail.path}/:id`}>
-              <PurchaseOrderDetailsPage />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.transferAsset.path}>
-              <TransferAsset />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.transferAssetDetail.path}/:id`}>
-              <TransferAssetDetailPage />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.transferInventory.path}>
-              <TransferInventory />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.transferInventoryDetail.path}/:id`}>
-              <TransferInventoryDetailPage />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.address.path}`}>
-              <Address />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.addressDetail.path}/:id`}>
-              <AddressDetailPage />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.reports.path}*`}>
-              <ReportsCenter />
-            </PrivateRoute>
-            <PrivateRoute exact path={`/custom-report`}>
-              <CustomReport />
-            </PrivateRoute>
-            <PrivateRoute exact path={`/schedule-report`}>
-              <ScheduleReport />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.resourceCalendar.path}`}>
-              <ResourceCalendar />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.resourceCalendar.path}/:resource`}>
-              <ResourceCalendarData />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.eCommercePolicy.path}`}>
-              <EcommercePolicy />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.wellMaster.path}`}>
-              <WellMaster />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.wellMasterDetail.path}/:id`}>
-              <WellMasterDetailsPage />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.bulkAssetCreation.path}`}>
-              <BulkAssetCreation />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.bulkAssetCreationDetail.path}/:id`}>
-              <BulkAssetCreationDetailsPage />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.repairType.path}`}>
-              <RepairType />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.repairTypeDetail.path}/:id`}>
-              <RepairTypeDetailsPage />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes?.pos?.path}`}>
-              <Pos />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes?.posProductDetail?.path}/:id/:warehouseId`}>
-              <PosProductDetails />
-            </PrivateRoute>
-            <PrivateRoute exact path={'/dashboard-master/:id'}>
-              <DashboardBuilder />
-            </PrivateRoute>
-            <PrivateRoute exact path={'/dashboard-master'}>
-              <DashboardsList />
-            </PrivateRoute>
-            <Route exact path={'/customer-sign/:id'}>
-              <CustomerSign />
-            </Route>
-            <PrivateRoute exact path={`${routes.cageManagement.path}`}>
-              <CageManagement />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.productAuction.path}`}>
-              <ProductAuction />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.productAuctionDetail.path}/:id`}>
-              <ProductAuctionDetailsPage />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.inventoryToAsset.path}>
-              <ConvertInventory />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.importExport.path}>
-              <ImportExport />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.inventoryCycle.path}>
-              <InventoryCycle />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.inventoryCycleDetail.path}/:id`}>
-              <InventoryCycleDetailPage />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.cycleCountDetermination.path}>
-              <CycleCountDetermination />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.cycleCountPhysicalInventory.path}>
-              <CycleCountPhysicalInventory />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.quotation.path}>
-              <Quotation />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.quotationDetail.path}/:id`}>
-              <QuotationDetails />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.serviceMaster.path}>
-              <ServiceMaster />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.serviceMasterDetail.path}/:id`}>
-              <ServiceMasterDetailsPage />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes?.repairOrder?.path}>
-              <RepairOrder />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes?.repairOrderDetail?.path}/:id`}>
-              <RepairOrderDetails />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes?.productionOrder?.path}>
-              <ProductionOrder />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes?.productionOrderDetail?.path}/:id`}>
-              <ProductionOrderDetails />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes?.fieldServiceOrder?.path}>
-              <FieldServiceOrder />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes?.fieldServiceOrderDetail?.path}/:id`}>
-              <FieldServiceOrderDetailsPage />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes?.workOrder?.path}>
-              <WorkOrder />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes?.workOrderDetail?.path}/:id`}>
-              <WorkOrderDetails />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.workOrderSupervisor.path}>
-              <WorkOrderSupervisor />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.workOrderTechnician.path}`}>
-              <WorkOrderTechnician />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.frequentlyAskedQuestion.path}`}>
-              <FrequentlyAskedQuestion />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.frequentlyAskedQuestionDetail.path}/:id`}>
-              <FrequencyAskedQuestionDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.blog.path}`}>
-              <Blog />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.blogDetail.path}/:id`}>
-              <BlogDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.eCommerceHome.path}>
-              <EcommerceHome />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.surveys.path}>
-              <Survey />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.surveysDetail.path}/:id`}>
-              <SurveysDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.contactUs.path}>
-              <ContactUs />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.contactUsDetail.path}/:id`}>
-              <ContactUsDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.supportTicket.path}>
-              <SupportTicket />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.supportTicketDetail.path}/:id`}>
-              <SupportTicketDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.demandOrder.path}>
-              <DemandOrder />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.demandOrderDetail.path}/:id`}>
-              <DemandOrderDetails />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.employeeMaster.path}>
-              <EmployeeMaster />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.employeeMasterDetail.path}/:id`}>
-              <EmployeeMasterDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.competencyType.path}`}>
-              <CompetencyType />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.competencyTypeDetail.path}/:id`}>
-              <CompetencyTypeDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.technicianScheduler.path}`}>
-              <TechnicianScheduler />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.irtTicket.path}`}>
-              <IrtTicket />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.irtTicketDetail.path}/:id`}>
-              <IrtTicketDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.purchaseRequisition.path}`}>
-              <PurchaseRequisition />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.purchaseRequisitionDetail.path}/:id`}>
-              <PurchaseRequisitionDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.planning.path}`}>
-              <Planning />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.planningDetail.path}/:id`}>
-              <PlanningDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.planningCalendar.path}`}>
-              <PlanningCalendar />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.fieldTicket.path}`}>
-              <FieldTicket />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.fieldTicketDetail.path}/:id`}>
-              <FieldTicketDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.fieldServiceTechnician.path}`}>
-              <FieldServiceTechnician />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.fleetDispatch.path}`}>
-              <FleetDispatch />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.truckMaster.path}`}>
-              <TruckMaster />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.truckMasterDetail.path}/:id`}>
-              <TruckMasterDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.job.path}`}>
-              <Job />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.jobDetail.path}/:id`}>
-              <JobDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.fleetReceiver.path}`}>
-              <FleetReceiver />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.storageLocation.path}`}>
-              <StorageLocation />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes?.storageLocationDetail?.path}/:id`}>
-              <StorageLocationDetailsPage />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.transactionLock.path}`}>
-              <TransactionLock />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.transactionLockDetail.path}/:id`}>
-              <TransactionLockDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.wellNumber.path}`}>
-              <WellNumber />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.wellNumberDetail.path}/:id`}>
-              <WellNumberDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.planningView.path}`}>
-              <PlanningView />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.taxMaster.path}`}>
-              <TaxMaster />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.taxMasterDetail.path}/:id`}>
-              <TaxMasterDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.competencies.path}`}>
-              <Competencies />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.competenciesDetail.path}/:id`}>
-              <CompetenciesDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.materialHandling.path}`}>
-              <MaterialHandling />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.padMaster.path}`}>
-              <PadMaster />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.padMasterDetail.path}/:id`}>
-              <PadMasterDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.driverMaster.path}`}>
-              <DriverMaster />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.driverMasterDetail.path}/:id`}>
-              <DriverMasterDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.trailerMaster.path}`}>
-              <TrailerMaster />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.trailerMasterDetail.path}/:id`}>
-              <TrailerMasterDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.iotDataPoints.path}`}>
-              <IotDataPoints />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.iotDataPointsDetail.path}/:id`}>
-              <IotDataPointsDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.iotChart.path}`}>
-              <IotChart />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.iotChartDetail.path}/:id`}>
-              <SerializedAssetDetailsPage />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.sendOutboundMessage.path}`}>
-              <SendOutboundMessage />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.deviceTemplates.path}`}>
-              <DeviceTemplates />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.deviceTemplatesDetail.path}/:id`}>
-              <DeviceTemplatesDetails />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.workStations.path}`}>
-              <WorkStations />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.workStationsDetail.path}/:id`}>
-              <WorkStationsDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.deviceTemplateAlert.path}`}>
-              <DeviceTemplatesAlert />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.deviceTemplateAlertDetail.path}`}>
-              <DeviceTemplateAlertDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.chartOfAccount.path}`}>
-              <ChartOfAccount />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.payrollPolicy.path}`}>
-              <PayrollPolicy />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.payrollPolicyDetail.path}/:id`}>
-              <PayrollPolicyDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.triggerNotificationMaster.path}`}>
-              <TriggerNotificationMaster />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.triggerNotificationMasterDetail.path}/:id`}>
-              <TriggerNotificationMasterDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.chartOfAccountDetail.path}/:id`}>
-              <ChartOfAccountDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.creditMemo.path}`}>
-              <CreditMemo />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.creditMemoDetail.path}/:id`}>
-              <CreditMemoDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.generateInvoice.path}`}>
-              <GenerateInvoice />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.subleaseInvoice.path}>
-              <GenerateInvoice resourceRendered="sublease" />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.dataList.path}>
-              <DataList />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.dataList.path}/:id`}>
-              <DataListDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.userDownloadRequest.path}>
-              <UserDownloadRequest />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes?.repairOrderInvoice?.path}>
-              <GenerateInvoice resourceRendered="repairOrder" />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.rentalManagementInvoice.path}>
-              <GenerateInvoice resourceRendered="rentalManagement" />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.fieldTicketInvoice.path}>
-              <GenerateInvoice resourceRendered="fieldTicket" />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.triggerNotificationHistory.path}`}>
-              <TriggerNotificationHistory />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.userAttendance.path}>
-              <UserAttendance />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.deals.path}>
-              <Deals />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.dealDetail.path}/:id`}>
-              <DealDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.serializedAssetStatusChangeRequest.path}`}>
-              <SerializedAssetStatusChangeRequest />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.units.path}>
-              <Units />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.unitDetail.path}/:id`}>
-              <UnitDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.workOrderPlanning.path}>
-              <WorkOrderPlanning />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.resourceDoaRequest.path}>
-              <ResourceDoaRequest />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.subcontractAssembly.path}>
-              <SubcontractAssembly />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.subcontractAssemblyDetail.path}/:id`}>
-              <SubcontractAssemblyDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.managedPackages.path}>
-              <ManagedPackages />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.managedPackagesDetail.path}/:id`}>
-              <ManagedPackagedDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.integration.path}`}>
-              <Integration />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.trainAiModel.path}`}>
-              <TrainAiModel />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.equiptAi.path}`}>
-              <EquiptAi />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.workSpace.path}`}>
-              <WorkSpace />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.workflow.path}`}>
-              <WorkFlow />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.workflow.path}/:id`}>
-              <CreateWorkFlow />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.workflowReport.path}`}>
-              <WorkFlowReport />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.workflowReportDetail.path}/:id`}>
-              <WorkFlowReportDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.assemblyOrder.path}`}>
-              <AssemblyOrder />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.assemblyOrderDetail.path}/:id`}>
-              <AssemblyOrderDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.packageInventory.path}`}>
-              <PackageInventory />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.scheduleAndDispatch.path}`}>
-              <ScheduleAndDispatch />
-            </PrivateRoute>
-            <Route exact path={'/public/:id'}>
-              <PublicRoutePage />
-            </Route>
-            <PrivateRoute exact path={`/:route`}>
-              <DynamicForm />
-            </PrivateRoute>
-            <PrivateRoute exact path={`/:route/detail/:id`}>
-              <DynamicFormDetail />
-            </PrivateRoute>
-            <Route path="*" component={NotFound} />
-          </Switch>
-          <ScreenOrientationOverlay displayOn="portrait" device="tablet" />
-          <ScreenOrientationOverlay displayOn="landscape" device="mobile" />
-          <CustomIntro />
-          <AgentChat />
-        </ErrorBoundaryComponent>
-      </AnimatePresence>
-      {/* <ForceUpdatePopup data={isUpdateModalOpen.data} onClose={handleCloseUpdateModal} /> */}
-      {isUpdateModalOpen.open && <ForceUpdatePopup data={isUpdateModalOpen.data} onClose={handleCloseUpdateModal} />}
-      {toast?.toastConfig?.open &&
-        (['notFoundError'].some((s) => s !== toast?.toastConfig?.type) ? (
-          <CustomToaster
-            type={toast.toastConfig.type}
-            message={toast.toastConfig.message}
-            anchorOrigin={toast.toastConfig?.anchorOrigin || null}
-            open={toast.toastConfig.open}
-            close={() => {
-              toast.setToastConfig({ open: false });
-            }}
-          />
-        ) : toast.toastConfig.type === 'notFoundError' ? (
-          <RecordDeletedDialog />
-        ) : (
-          ''
-        ))}
-    </ColorModeProvider>
+              <PrivateRoute exact path="/">
+                <Home />
+              </PrivateRoute>
+              <PrivateRoute exact path="/logout">
+                <Logout />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.lead.path}>
+                <Leads />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.resourceLogs.path}>
+                <ResourceLogs />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.leadDetail.path}/:id`}>
+                <LeadDetailsPage />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.opportunity.path}>
+                <Opportunities />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.opportunityDetail.path}/:id`}>
+                <OpportunityDetailsPage />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.doa.path}>
+                <Doa />
+              </PrivateRoute>
+              <PrivateRoute exact path="/add-doa">
+                <Doa />
+              </PrivateRoute>
+              <PrivateRoute key="customer-account" exact path={routes.customerAccount.path}>
+                <Account account={customerAccount} />
+              </PrivateRoute>
+              <PrivateRoute key="customer-account-edit" exact path={`${routes.customerAccountDetail.path}/:id`}>
+                <AccountDetailPage
+                  account={customerAccount}
+                  contact={customerContact}
+                  accountBreadcrumb={{ ...routes.customerAccount, title: resources?.customerAccount?.titlePlural }}
+                />
+              </PrivateRoute>
+              <PrivateRoute key="customer-contact" exact path={routes.customerContact.path}>
+                <Contact contact={customerContact} account={customerAccount} />
+              </PrivateRoute>
+              <PrivateRoute key="customer-contact-edit" exact path={`${routes.customerContactDetail.path}/:id`}>
+                <ContactDetailPage
+                  account={customerAccount}
+                  contact={customerContact}
+                  contactBreadcrumb={{ ...routes.customerContact, title: resources?.customerContact?.titlePlural }}
+                />
+              </PrivateRoute>
+              <PrivateRoute key="supplier-account" exact path={routes.supplierAccount.path}>
+                <Account account={supplierAccount} />
+              </PrivateRoute>
+              <PrivateRoute key="supplier-account-edit" exact path={`${routes.supplierAccountDetail.path}/:id`}>
+                <AccountDetailPage
+                  account={supplierAccount}
+                  contact={supplierContact}
+                  accountBreadcrumb={{ ...routes.supplierAccount, title: resources?.supplierAccount?.titlePlural }}
+                />
+              </PrivateRoute>
+              <PrivateRoute key="supplier-contact" exact path={routes.supplierContact.path}>
+                <Contact contact={supplierContact} account={supplierAccount} />
+              </PrivateRoute>
+              <PrivateRoute key="supplier-contact-edit" exact path={`${routes.supplierContactDetail.path}/:id`}>
+                <ContactDetailPage
+                  account={supplierAccount}
+                  contact={supplierContact}
+                  contactBreadcrumb={{ ...routes.supplierContact, title: resources?.supplierContact?.titlePlural }}
+                />
+              </PrivateRoute>
+              <PrivateRoute key="project-sales" exact path={routes.projectSales.path}>
+                <ProjectSales />
+              </PrivateRoute>
+              <PrivateRoute key="project-sales-details" exact path={`${routes.projectSalesDetail.path}/:id`}>
+                <ProjectSalesDetails />
+              </PrivateRoute>
+              <PrivateRoute exact path="/user">
+                <User />
+              </PrivateRoute>
+              <PrivateRoute exact path="/user-manual*" userManual={true}>
+                <UserManual />
+              </PrivateRoute>
+              <PrivateRoute exact path="/profile">
+                <UserProfilePage profileBreadCrumbs={routes.profilePage} />
+              </PrivateRoute>
+              <PrivateRoute exact path="/brand-configuration">
+                <BrandConfiguration />
+              </PrivateRoute>
+              <PrivateRoute exact path="/user/detail/:id">
+                <UserDetailsPage />
+              </PrivateRoute>
+              <PrivateRoute exact path="/entity">
+                <Entity />
+              </PrivateRoute>
+              <PrivateRoute exact path="/entity/detail/:id">
+                <EntityDetailPage />
+              </PrivateRoute>
+              <PrivateRoute exact path="/role">
+                <Roles />
+              </PrivateRoute>
+              <PrivateRoute exact path="/role/detail/:id">
+                <RoleDetailsPage />
+              </PrivateRoute>
+              <PrivateRoute exact path="/activity">
+                <Activitydemo />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.productInventory.path}>
+                <InventoryProduct />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.activityEmail.path}>
+                <Email />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.note.path}>
+                <Note />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.attachment.path}>
+                <Attachments />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.calendar.path}>
+                <Calender />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.reminder.path}>
+                <Reminder />
+              </PrivateRoute>
+              <PrivateRoute path={routes.case.path}>
+                <Activity type="case" />
+              </PrivateRoute>
+              <PrivateRoute path={routes.task.path}>
+                <Activity type="task" />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.product.path}>
+                <Product />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.productDetail.path + '/:id'}>
+                <ProductDetailsPage />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.serializedAsset.path}>
+                <SerializedAsset />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.serializedAssetsCertification.path}>
+                <SerializedAssetsCertification />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.serializedAssetDetail.path + '/:id'}>
+                <SerializedAssetDetailsPage />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.rentalManagement.path}>
+                <RentalManagement />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.rentalManagementDetail.path + '/:id'}>
+                <RentalManagementDetailsPage />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.sublease.path}>
+                <Sublease />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.subleaseDetail.path + '/:id'}>
+                <SubleaseDetailsPage />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.productCategory.path}>
+                <ProductCategory />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.productCategoryDetail.path + '/:id'}>
+                <ProductCategoryDetailPage />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.productTemplate.path}>
+                <ProductTemplate />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.productTemplate.path + '/:id'}>
+                <CreateProductTemplate />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.quotePdfTemplate.path}>
+                <QuotePdfTemplate />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.quotePdfTemplateDetail.path}/:id`}>
+                <CreateNewQuotePdfTemplate />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.formBuilder.path}>
+                <FormBuilder />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.zone.path}>
+                <Zone />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.zoneDetail.path + '/:id'}>
+                <ZoneDetailPage />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.formBuilder.path}${routes.formBuilderResource.path}`}>
+                <CreateFormBuilder />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.termsAndConditions.path}>
+                <TermsAndConditions />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.termsAndConditionsDetail.path}/:id`}>
+                <TermsAndConditionDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.priceTemplate.path}>
+                <PriceTemplate />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.priceTemplate.path + '/:id'}>
+                <CreatePriceTemplate />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.productBuilder.path}>
+                <ProductBuilder />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.productBuilder.path + '/:id'}>
+                <CreateProductBuilder />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.currencyConverter.path}>
+                <CurrencyConverter />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.warehouse.path}>
+                <Warehouse />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.warehouseDetail.path + '/:id'}>
+                <WarehouseDetailsPage />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.quoteBuilderDetail.path}/:id`}>
+                <QuoteDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={'/dashboards'}>
+                <Dashboard />
+              </PrivateRoute>
+              <Route exact path={'/quote-approval/:id'}>
+                <QuoteApproval />
+              </Route>
+              <PrivateRoute exact path={routes.DOARequest.path}>
+                <DOARequest />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.DOARequest.path}/:id`}>
+                <DOAapproval />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.DOARequest.path}/quotation/:id`}>
+                <DOAApprovalQuotation />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.quoteBuilder.path}>
+                <QuoteBuilderCombined />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.productDetail.path}/:id/bom`}>
+                <BOMTable />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.budget.path}>
+                <Budget />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.budgetDetail.path}/:id`}>
+                <BudgetDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.pricingCondition.path}>
+                <PricingConditions />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.pricingCondition.path}/detail/:id`}>
+                <PricingConditionsDetails />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.marketSegment.path}>
+                <MarketSegment />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.marketSegment.path}/detail/:id`}>
+                <MarketSegmentDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.deliveryTicket.path}>
+                <DeliveryTicket />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.deliveryTicket.path}/detail/:id`}>
+                <DeliveryTicketDetailsPage />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.repairJob.path}>
+                <RepairJob />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.repairJobDetail.path}/:id`}>
+                <RepairJobDetails />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.salesOrder.path}>
+                <SalesOrder />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.salesOrderDetail.path}/:id`}>
+                <SalesOrderDetails />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.invoice.path}>
+                <Invoice />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.invoiceDetail.path}/:id`}>
+                <InvoiceDetails />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.packages.path}>
+                <PackageList />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.packagesDetail.path}/:id`}>
+                <PackageDetails />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.purchaseOrder.path}>
+                <PurchaseOrder />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.purchaseOrderDetail.path}/:id`}>
+                <PurchaseOrderDetailsPage />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.transferAsset.path}>
+                <TransferAsset />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.transferAssetDetail.path}/:id`}>
+                <TransferAssetDetailPage />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.transferInventory.path}>
+                <TransferInventory />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.transferInventoryDetail.path}/:id`}>
+                <TransferInventoryDetailPage />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.address.path}`}>
+                <Address />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.addressDetail.path}/:id`}>
+                <AddressDetailPage />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.reports.path}*`}>
+                <ReportsCenter />
+              </PrivateRoute>
+              <PrivateRoute exact path={`/custom-report`}>
+                <CustomReport />
+              </PrivateRoute>
+              <PrivateRoute exact path={`/schedule-report`}>
+                <ScheduleReport />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.resourceCalendar.path}`}>
+                <ResourceCalendar />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.resourceCalendar.path}/:resource`}>
+                <ResourceCalendarData />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.eCommercePolicy.path}`}>
+                <EcommercePolicy />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.wellMaster.path}`}>
+                <WellMaster />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.wellMasterDetail.path}/:id`}>
+                <WellMasterDetailsPage />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.bulkAssetCreation.path}`}>
+                <BulkAssetCreation />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.bulkAssetCreationDetail.path}/:id`}>
+                <BulkAssetCreationDetailsPage />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.repairType.path}`}>
+                <RepairType />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.repairTypeDetail.path}/:id`}>
+                <RepairTypeDetailsPage />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes?.pos?.path}`}>
+                <Pos />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes?.posProductDetail?.path}/:id/:warehouseId`}>
+                <PosProductDetails />
+              </PrivateRoute>
+              <PrivateRoute exact path={'/dashboard-master/:id'}>
+                <DashboardBuilder />
+              </PrivateRoute>
+              <PrivateRoute exact path={'/dashboard-master'}>
+                <DashboardsList />
+              </PrivateRoute>
+              <Route exact path={'/customer-sign/:id'}>
+                <CustomerSign />
+              </Route>
+              <PrivateRoute exact path={`${routes.cageManagement.path}`}>
+                <CageManagement />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.productAuction.path}`}>
+                <ProductAuction />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.productAuctionDetail.path}/:id`}>
+                <ProductAuctionDetailsPage />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.inventoryToAsset.path}>
+                <ConvertInventory />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.importExport.path}>
+                <ImportExport />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.inventoryCycle.path}>
+                <InventoryCycle />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.inventoryCycleDetail.path}/:id`}>
+                <InventoryCycleDetailPage />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.cycleCountDetermination.path}>
+                <CycleCountDetermination />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.cycleCountPhysicalInventory.path}>
+                <CycleCountPhysicalInventory />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.quotation.path}>
+                <Quotation />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.quotationDetail.path}/:id`}>
+                <QuotationDetails />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.serviceMaster.path}>
+                <ServiceMaster />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.serviceMasterDetail.path}/:id`}>
+                <ServiceMasterDetailsPage />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes?.repairOrder?.path}>
+                <RepairOrder />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes?.repairOrderDetail?.path}/:id`}>
+                <RepairOrderDetails />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes?.productionOrder?.path}>
+                <ProductionOrder />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes?.productionOrderDetail?.path}/:id`}>
+                <ProductionOrderDetails />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes?.fieldServiceOrder?.path}>
+                <FieldServiceOrder />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes?.fieldServiceOrderDetail?.path}/:id`}>
+                <FieldServiceOrderDetailsPage />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes?.workOrder?.path}>
+                <WorkOrder />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes?.workOrderDetail?.path}/:id`}>
+                <WorkOrderDetails />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.workOrderSupervisor.path}>
+                <WorkOrderSupervisor />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.workOrderTechnician.path}`}>
+                <WorkOrderTechnician />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.frequentlyAskedQuestion.path}`}>
+                <FrequentlyAskedQuestion />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.frequentlyAskedQuestionDetail.path}/:id`}>
+                <FrequencyAskedQuestionDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.blog.path}`}>
+                <Blog />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.blogDetail.path}/:id`}>
+                <BlogDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.eCommerceHome.path}>
+                <EcommerceHome />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.surveys.path}>
+                <Survey />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.surveysDetail.path}/:id`}>
+                <SurveysDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.contactUs.path}>
+                <ContactUs />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.contactUsDetail.path}/:id`}>
+                <ContactUsDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.supportTicket.path}>
+                <SupportTicket />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.supportTicketDetail.path}/:id`}>
+                <SupportTicketDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.demandOrder.path}>
+                <DemandOrder />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.demandOrderDetail.path}/:id`}>
+                <DemandOrderDetails />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.employeeMaster.path}>
+                <EmployeeMaster />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.employeeMasterDetail.path}/:id`}>
+                <EmployeeMasterDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.competencyType.path}`}>
+                <CompetencyType />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.competencyTypeDetail.path}/:id`}>
+                <CompetencyTypeDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.technicianScheduler.path}`}>
+                <TechnicianScheduler />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.irtTicket.path}`}>
+                <IrtTicket />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.irtTicketDetail.path}/:id`}>
+                <IrtTicketDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.purchaseRequisition.path}`}>
+                <PurchaseRequisition />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.purchaseRequisitionDetail.path}/:id`}>
+                <PurchaseRequisitionDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.planning.path}`}>
+                <Planning />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.planningDetail.path}/:id`}>
+                <PlanningDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.planningCalendar.path}`}>
+                <PlanningCalendar />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.fieldTicket.path}`}>
+                <FieldTicket />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.fieldTicketDetail.path}/:id`}>
+                <FieldTicketDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.fieldServiceTechnician.path}`}>
+                <FieldServiceTechnician />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.fleetDispatch.path}`}>
+                <FleetDispatch />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.truckMaster.path}`}>
+                <TruckMaster />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.truckMasterDetail.path}/:id`}>
+                <TruckMasterDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.job.path}`}>
+                <Job />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.jobDetail.path}/:id`}>
+                <JobDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.fleetReceiver.path}`}>
+                <FleetReceiver />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.storageLocation.path}`}>
+                <StorageLocation />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes?.storageLocationDetail?.path}/:id`}>
+                <StorageLocationDetailsPage />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.transactionLock.path}`}>
+                <TransactionLock />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.transactionLockDetail.path}/:id`}>
+                <TransactionLockDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.wellNumber.path}`}>
+                <WellNumber />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.wellNumberDetail.path}/:id`}>
+                <WellNumberDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.planningView.path}`}>
+                <PlanningView />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.taxMaster.path}`}>
+                <TaxMaster />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.taxMasterDetail.path}/:id`}>
+                <TaxMasterDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.competencies.path}`}>
+                <Competencies />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.competenciesDetail.path}/:id`}>
+                <CompetenciesDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.materialHandling.path}`}>
+                <MaterialHandling />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.padMaster.path}`}>
+                <PadMaster />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.padMasterDetail.path}/:id`}>
+                <PadMasterDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.driverMaster.path}`}>
+                <DriverMaster />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.driverMasterDetail.path}/:id`}>
+                <DriverMasterDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.trailerMaster.path}`}>
+                <TrailerMaster />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.trailerMasterDetail.path}/:id`}>
+                <TrailerMasterDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.iotDataPoints.path}`}>
+                <IotDataPoints />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.iotDataPointsDetail.path}/:id`}>
+                <IotDataPointsDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.iotChart.path}`}>
+                <IotChart />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.iotChartDetail.path}/:id`}>
+                <SerializedAssetDetailsPage />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.sendOutboundMessage.path}`}>
+                <SendOutboundMessage />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.deviceTemplates.path}`}>
+                <DeviceTemplates />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.deviceTemplatesDetail.path}/:id`}>
+                <DeviceTemplatesDetails />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.workStations.path}`}>
+                <WorkStations />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.workStationsDetail.path}/:id`}>
+                <WorkStationsDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.deviceTemplateAlert.path}`}>
+                <DeviceTemplatesAlert />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.deviceTemplateAlertDetail.path}`}>
+                <DeviceTemplateAlertDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.chartOfAccount.path}`}>
+                <ChartOfAccount />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.payrollPolicy.path}`}>
+                <PayrollPolicy />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.payrollPolicyDetail.path}/:id`}>
+                <PayrollPolicyDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.triggerNotificationMaster.path}`}>
+                <TriggerNotificationMaster />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.triggerNotificationMasterDetail.path}/:id`}>
+                <TriggerNotificationMasterDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.chartOfAccountDetail.path}/:id`}>
+                <ChartOfAccountDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.creditMemo.path}`}>
+                <CreditMemo />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.creditMemoDetail.path}/:id`}>
+                <CreditMemoDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.generateInvoice.path}`}>
+                <GenerateInvoice />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.subleaseInvoice.path}>
+                <GenerateInvoice resourceRendered="sublease" />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.dataList.path}>
+                <DataList />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.dataList.path}/:id`}>
+                <DataListDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.userDownloadRequest.path}>
+                <UserDownloadRequest />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes?.repairOrderInvoice?.path}>
+                <GenerateInvoice resourceRendered="repairOrder" />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.rentalManagementInvoice.path}>
+                <GenerateInvoice resourceRendered="rentalManagement" />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.fieldTicketInvoice.path}>
+                <GenerateInvoice resourceRendered="fieldTicket" />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.triggerNotificationHistory.path}`}>
+                <TriggerNotificationHistory />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.userAttendance.path}>
+                <UserAttendance />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.deals.path}>
+                <Deals />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.dealDetail.path}/:id`}>
+                <DealDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.serializedAssetStatusChangeRequest.path}`}>
+                <SerializedAssetStatusChangeRequest />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.units.path}>
+                <Units />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.unitDetail.path}/:id`}>
+                <UnitDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.workOrderPlanning.path}>
+                <WorkOrderPlanning />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.resourceDoaRequest.path}>
+                <ResourceDoaRequest />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.subcontractAssembly.path}>
+                <SubcontractAssembly />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.subcontractAssemblyDetail.path}/:id`}>
+                <SubcontractAssemblyDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.managedPackages.path}>
+                <ManagedPackages />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.managedPackagesDetail.path}/:id`}>
+                <ManagedPackagedDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.integration.path}`}>
+                <Integration />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.trainAiModel.path}`}>
+                <TrainAiModel />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.equiptAi.path}`}>
+                <EquiptAi />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.workSpace.path}`}>
+                <WorkSpace />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.workflow.path}`}>
+                <WorkFlow />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.workflow.path}/:id`}>
+                <CreateWorkFlow />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.workflowReport.path}`}>
+                <WorkFlowReport />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.workflowReportDetail.path}/:id`}>
+                <WorkFlowReportDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.assemblyOrder.path}`}>
+                <AssemblyOrder />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.assemblyOrderDetail.path}/:id`}>
+                <AssemblyOrderDetail />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.packageInventory.path}`}>
+                <PackageInventory />
+              </PrivateRoute>
+              <PrivateRoute exact path={`${routes.scheduleAndDispatch.path}`}>
+                <ScheduleAndDispatch />
+              </PrivateRoute>
+              <Route exact path={'/public/:id'}>
+                <PublicRoutePage />
+              </Route>
+              <PrivateRoute exact path={`/:route`}>
+                <DynamicForm />
+              </PrivateRoute>
+              <PrivateRoute exact path={`/:route/detail/:id`}>
+                <DynamicFormDetail />
+              </PrivateRoute>
+              <Route path="*" component={NotFound} />
+            </Switch>
+            <ScreenOrientationOverlay displayOn="portrait" device="tablet" />
+            <ScreenOrientationOverlay displayOn="landscape" device="mobile" />
+            <CustomIntro />
+            <AgentChat />
+          </ErrorBoundaryComponent>
+        </AnimatePresence>
+        {isUpdateModalOpen.open && <ForceUpdatePopup data={isUpdateModalOpen.data} onClose={handleCloseUpdateModal} />}
+        {toast?.toastConfig?.open &&
+          (['notFoundError'].some((s) => s !== toast?.toastConfig?.type) ? (
+            <CustomToaster
+              type={toast.toastConfig.type}
+              message={toast.toastConfig.message}
+              open={toast.toastConfig.open}
+              close={() => {
+                toast.setToastConfig((prev) => ({ message: '', type: null, open: false }));
+              }}
+            />
+          ) : toast.toastConfig.type === 'notFoundError' ? (
+            <RecordDeletedDialog />
+          ) : (
+            ''
+          ))}
+      </ColorModeProvider>
+    </LocalizationProvider>
   );
 }
 

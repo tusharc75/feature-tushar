@@ -1,29 +1,20 @@
-import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@material-ui/core';
-import { MoreVert } from '@material-ui/icons';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import { MoreVert } from '@mui/icons-material';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
+import { IoCalendarOutline } from 'react-icons/io5';
 import { Link, useHistory } from 'react-router-dom';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
-import { useData } from '../../StateProvider/Provider';
-import routes from '../Helpers/Routes';
-import ManageQuotationDialog from 'src/pages/Quotation/ManageQuotationDialog';
 import { QUOTATION_TYPE, displayDate } from 'src/constants/helpers';
+import ManageQuotationDialog from 'src/pages/Quotation/ManageQuotationDialog';
+import { useData } from '../../StateProvider/Provider';
 import DisplayData from '../CardDisplayData';
-import { IoCalendarOutline } from 'react-icons/io5';
+import routes from '../Helpers/Routes';
 
-export default function QuotationInAccordion({
-  expanded = false,
-  recordsPerLine = 2,
-  quotations,
-  fetchData,
-  opportunityData,
-  allowedToEdit,
-}) {
+export default function QuotationInAccordion({ expanded = false, recordsPerLine = 2, quotations, fetchData, opportunityData, allowedToEdit }) {
   const history = useHistory();
   const {
-    state: { permissions, resources },
+    state: { permissions, resources }
   }: any = useData();
   let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
 
@@ -50,7 +41,6 @@ export default function QuotationInAccordion({
   const [anchorEl, setAnchorEl] = useState(null);
   const [resourceName, setResourceName] = useState('');
 
-
   useEffect(() => {
     let isExpanded = expandQuotation;
     if (quotations?.length === 0 && isExpanded) isExpanded = false;
@@ -74,51 +64,43 @@ export default function QuotationInAccordion({
     });
   };
 
-
   return (
     <>
       <Accordion expanded={expandQuotation} className="omsAccordian" onChange={() => setExpandQuotation(!expandQuotation)}>
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
-          <Grid container>
-            <Grid item xs={8} alignItems="center">
-              <Box component="div" display="flex" alignItems="center" flexGrow={1}>
-                <IconButton size="small">{expandQuotation === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
-                <Box padding="5px">
-                  <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }}>
-                    {resources?.quotation?.titleSingular} ({quotations?.length || 0})
-                  </Typography>
-                </Box>
-              </Box>
-            </Grid>
-            <Grid item xs={4} container justify="flex-end" alignItems="center">
-              {allowedToEdit && (
-                <>
-                  <IconButton
-                    aria-haspopup="true"
-                    color="primary"
-                    size="small"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleOpenMenu(e);
+          <div className="flex items-center justify-between">
+            <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }}>
+              {resources?.quotation?.titleSingular} ({quotations?.length || 0})
+            </Typography>
+
+            {allowedToEdit && (
+              <>
+                <IconButton
+                  aria-haspopup="true"
+                  color="primary"
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    handleOpenMenu(e);
+                  }}
+                >
+                  <MoreVert />
+                </IconButton>
+                <Menu id="menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
+                  <MenuItem
+                    disabled={!permissions?.quotation?.isCreate}
+                    onClick={() => {
+                      setShowCreateDialog(true);
+                      handleCloseMenu();
                     }}
                   >
-                    <MoreVert />
-                  </IconButton>
-                  <Menu id="menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
-                    <MenuItem
-                      disabled={!permissions?.quotation?.isCreate}
-                      onClick={() => {
-                        setShowCreateDialog(true);
-                        handleCloseMenu();
-                      }}
-                    >
-                      Create New
-                    </MenuItem>
-                  </Menu>
-                </>
-              )}
-            </Grid>
-          </Grid>
+                    Create New
+                  </MenuItem>
+                </Menu>
+              </>
+            )}
+          </div>
         </AccordionSummary>
         <AccordionDetails>
           <Box>
@@ -130,11 +112,7 @@ export default function QuotationInAccordion({
                       <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index}>
                         <Card className="detailCard  card-v1" variant="outlined">
                           <CardContent className="card-link">
-                            <Link
-                              className="link"
-                              to={`${routes.quotationDetail.path}/${obj._id}`}
-                              target="_blank"
-                              rel="noopener noreferrer">
+                            <Link className="link" to={`${routes.quotationDetail.path}/${obj._id}`} target="_blank" rel="noopener noreferrer">
                               <Typography className="detailName">{obj.quotationNumber}</Typography>
                             </Link>
                           </CardContent>
@@ -149,7 +127,7 @@ export default function QuotationInAccordion({
                                 />
                               )}
                             </Grid>
-                            <Grid item xs={12} sm={6} md={6} >
+                            <Grid item xs={12} sm={6} md={6}>
                               {obj.supplierSuggestedDeliveryDate && (
                                 <DisplayData
                                   key={index}
@@ -173,12 +151,7 @@ export default function QuotationInAccordion({
             )}
             {quotations && quotations?.length ? (
               <Box mt={2}>
-                <Button
-                  className="accordion-outlined-button"
-                  onClick={() => handleViewAll()}
-                  startIcon={<VisibilityIcon />}
-                  variant="outlined"
-                >
+                <Button className="accordion-outlined-button" onClick={() => handleViewAll()} startIcon={<VisibilityIcon />} variant="outlined">
                   <span>View All</span>
                 </Button>
               </Box>
@@ -199,7 +172,7 @@ export default function QuotationInAccordion({
           referenceData={{
             opportunity: opportunityData?._id,
             type: QUOTATION_TYPE.salesOrder,
-            customerAccount: opportunityData?.customerAccount?.optionValue,
+            customerAccount: opportunityData?.customerAccount?.optionValue
           }}
           isRedirectTodetailPage={false}
         />

@@ -1,11 +1,10 @@
-import { Box, TextField } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import Checkbox from '@material-ui/core/Checkbox';
-import Chip from '@material-ui/core/Chip';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Grid from '@material-ui/core/Grid';
-import { makeStyles } from '@material-ui/core/styles';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, TextField } from '@mui/material';
+import Checkbox from '@mui/material/Checkbox';
+import Chip from '@mui/material/Chip';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Grid from '@mui/material/Grid2';
+import { makeStyles } from '@mui/styles';
+import Autocomplete from '@mui/material/Autocomplete';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdUpdate } from 'react-icons/md';
@@ -14,7 +13,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
-import CustomButton from '../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { getUniqueCurrencies } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
@@ -188,16 +187,10 @@ const CurrencyConverter = () => {
         <ListingPageHeader
           rightSideContents={
             currencyConverterPermissions.isUpdate ? (
-              <Button
-                onClick={handleUpdate}
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                size="small"
-                color="primary"
-                style={isMobile && !isTablet ? { color: 'var(--info)' } : {}}
-              >
+              <ThemeButton onClick={handleUpdate} buttonType="yellow">
                 {' '}
                 {isMobile && !isTablet ? <MdUpdate size={20} /> : 'Update'}{' '}
-              </Button>
+              </ThemeButton>
             ) : null
           }
           isActionButtonVisible={false}
@@ -214,7 +207,7 @@ const CurrencyConverter = () => {
                 padding: '10px 10px'
               }}
             >
-              <Grid item xs={12} md={8} sm={8}>
+              <Grid size={{ xs: 12, sm: 8, md: 8 }}>
                 <Autocomplete
                   fullWidth
                   multiple
@@ -231,7 +224,7 @@ const CurrencyConverter = () => {
                   }
                   onChange={(e, value) => handleChange(convertLabeltoValue(value))}
                   renderInput={(params) => (
-                    <TextField {...params} margin="dense" variant="outlined" label="Currency in use" placeholder="Currency in use" />
+                    <TextField {...params} margin="dense" size="small" variant="outlined" label="Currency in use" placeholder="Currency in use" />
                   )}
                 // renderOption={(option) => {
                 //   const { currencyCode, symbolNative, currencyName } = getUniqueCurrencies().find(d => d.currencyCode === option);
@@ -239,7 +232,7 @@ const CurrencyConverter = () => {
                 // }}
                 />
               </Grid>
-              <Grid xs={12} md={4} sm={4} container justify="flex-end">
+              <Grid size={{ xs: 12, md: 4, sm: 4 }} container justifyContent="flex-end">
                 <FormControlLabel
                   control={<Checkbox name="required" checked={isApiUpdate} onChange={(e) => setIsApiUpdate(e.target.checked)} color="primary" />}
                   label="Auto Update Daily Through API"
@@ -251,11 +244,11 @@ const CurrencyConverter = () => {
             {option && option.length > 0 && (
               <Fragment>
                 <Grid container>
-                  <Grid xs={12} container justify="flex-end">
-                    <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" onClick={getcurrencyrates} size="small">
+                  <Grid size={{ xs: 12 }} container justifyContent="flex-end">
+                    <ThemeButton isLoading={loading} disabled={loading} buttonType="theme" onClick={getcurrencyrates}>
                       {' '}
                       Fetch Rates
-                    </CustomButton>
+                    </ThemeButton>
                   </Grid>
                 </Grid>
                 <Box mt={1} border={1} p={1} borderColor="var(--common-border-color)" style={{ overflowX: 'auto' }}>
@@ -280,6 +273,7 @@ const CurrencyConverter = () => {
                                 id="standard-basic"
                                 type="number"
                                 variant="outlined"
+                                size="small"
                                 margin="dense"
                                 fullWidth
                                 style={{ margin: 0 }}

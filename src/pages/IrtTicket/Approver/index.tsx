@@ -1,7 +1,7 @@
-import { Box, Button, Chip, Grid, IconButton, Typography } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
-import PersonIcon from '@material-ui/icons/Person';
-import moment from 'moment';
+import { Box, Chip, IconButton, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import DeleteIcon from '@mui/icons-material/Delete';
+import PersonIcon from '@mui/icons-material/Person';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -9,8 +9,9 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { useAppTheme } from 'src/constants/AppConfig';
-import { IRT_APPROVER_STATUS } from 'src/constants/helpers';
+import { displayDateTime, IRT_APPROVER_STATUS } from 'src/constants/helpers';
 import AssignUserDialog from './AssignUserDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const Approver = ({ irtTicketData }) => {
   const [approver, setAapprover] = useState(null);
@@ -50,7 +51,7 @@ const Approver = ({ irtTicketData }) => {
   return (
     <Box>
       <Grid container spacing={2}>
-        <Grid item xs={12} sm={5} md={4} lg={3}>
+        <Grid size={{ xs: 12, sm: 5, md: 4, lg: 3 }}>
           <Grid
             container
             spacing={2}
@@ -59,20 +60,17 @@ const Approver = ({ irtTicketData }) => {
             }}
           >
             <Box pl={1} pb={2}>
-              <Button
-                variant="outlined"
-                color="primary"
-                size="small"
+              <ThemeButton
                 onClick={() => {
                   setOpenDialog(true);
                 }}
               >
                 Add Approver
-              </Button>
+              </ThemeButton>
             </Box>
             {approver ? (
               approver?.map((item, index) => (
-                <Grid item xs={12} key={index}>
+                <Grid size={{ xs: 12 }} key={index}>
                   <Box
                     style={{
                       borderWidth: '1px',
@@ -83,14 +81,14 @@ const Approver = ({ irtTicketData }) => {
                             ? 'hsl(194, 100%, 94%)'
                             : 'hsla(194, 100%, 64%, .5)'
                           : item.status === IRT_APPROVER_STATUS.approved
-                          ? theme === 'light'
-                            ? 'hsl(96, 100%, 94%)'
-                            : 'hsla(96, 100%, 64%, .5)'
-                          : item.status === IRT_APPROVER_STATUS.declined
-                          ? theme === 'light'
-                            ? 'hsl(0, 100%, 96%)'
-                            : 'hsla(0, 100%, 66%, .5)'
-                          : 'white',
+                            ? theme === 'light'
+                              ? 'hsl(96, 100%, 94%)'
+                              : 'hsla(96, 100%, 64%, .5)'
+                            : item.status === IRT_APPROVER_STATUS.declined
+                              ? theme === 'light'
+                                ? 'hsl(0, 100%, 96%)'
+                                : 'hsla(0, 100%, 66%, .5)'
+                              : 'white',
                       borderColor: selected?._id === item?._id ? 'var(--dark-active-border-color, #329592)' : 'var(--common-border-color)',
                       cursor: 'pointer',
                       transition: '.3s'
@@ -101,19 +99,19 @@ const Approver = ({ irtTicketData }) => {
                     }}
                   >
                     <Grid container alignItems={'center'} spacing={1}>
-                      <Grid item>
+                      <Grid>
                         <PersonIcon />
                       </Grid>
-                      <Grid item>
+                      <Grid>
                         <Typography>{item?.user?.optionLabel}</Typography>
                       </Grid>
-                      <Grid item>
+                      <Grid>
                         <Chip color="primary" label={item?.type} />
                       </Grid>
-                      <Grid item>
+                      <Grid>
                         <Chip color="primary" label={item?.status} />
                       </Grid>
-                      <Grid item>
+                      <Grid>
                         {item?.status === 'Send' && (
                           <HtmlTooltip title="Delete">
                             <IconButton
@@ -139,7 +137,7 @@ const Approver = ({ irtTicketData }) => {
             )}
           </Grid>
         </Grid>
-        <Grid item xs={12} sm={7} md={8} lg={9}>
+        <Grid size={{ xs: 12, sm: 7, md: 8, lg: 9 }}>
           {selected && (
             <Box
               p={2}
@@ -164,7 +162,7 @@ const Approver = ({ irtTicketData }) => {
                     {item?.detail}
                   </Typography>
                   <Typography variant="body2" style={{ fontSize: '12px', marginBottom: '6px', color: 'var(--dark-secondary-text, gray)' }}>
-                    {moment(item?.date).format('MMM DD YYYY hh:mm A')}
+                    {displayDateTime(item?.date)}
                   </Typography>
                   {item?.reason && (
                     <Typography variant="body2" style={{ color: 'var(--dark-secondary-text, #3e3e3e)' }}>

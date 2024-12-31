@@ -1,4 +1,4 @@
-import { TextField } from '@material-ui/core';
+import { TextField } from '@mui/material';
 import React from 'react';
 import { getFilledArray, joinArrayStrings, KEYBOARD_KEY, mergeArrayStringFromIndex, split, updateIndex } from 'src/components/OtpInput/helper';
 import { useEvent } from 'src/components/OtpInput/hooks';

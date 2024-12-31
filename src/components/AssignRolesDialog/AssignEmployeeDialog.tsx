@@ -1,5 +1,5 @@
-import { Box, Dialog, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, Dialog, TextField } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -195,7 +195,7 @@ const AssignEmployeeDialog = ({ reference, onSuccess, handleClose, ids = [], def
           fullWidth
           className="max-w-[300px]"
           options={competencyOptions}
-          getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+          getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
           onChange={(e, val) => {
             setSelectedCompetency(val);
           }}
@@ -211,8 +211,8 @@ const AssignEmployeeDialog = ({ reference, onSuccess, handleClose, ids = [], def
           fullWidth
           className="max-w-[300px]"
           options={warehouseOptions}
-          getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-          getOptionSelected={(option: any, val) => option.optionValue === val}
+          getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+          isOptionEqualToValue={(option: any, val) => option.optionValue === val}
           value={
             warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
               ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
@@ -225,6 +225,7 @@ const AssignEmployeeDialog = ({ reference, onSuccess, handleClose, ids = [], def
             <TextField
               {...params}
               margin="dense"
+              size="small"
               name="plant"
               placeholder={resources?.warehouse?.titleSingular}
               label={resources?.warehouse?.titleSingular}

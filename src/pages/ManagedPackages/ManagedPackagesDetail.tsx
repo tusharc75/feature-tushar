@@ -1,4 +1,5 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -13,8 +14,8 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManagedPackages from './ManageManagedPackages';
 import { isMobile, isTablet } from 'react-device-detect';
-import { Edit } from '@material-ui/icons';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import EditIcon from '@mui/icons-material/Edit';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import Assign from './Assign';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import ManagedPackagesView from './View';
@@ -111,13 +112,9 @@ const ManagedPackagedDetail = () => {
           <Box className="control-buttons-v1">
             <>
               {permissions?.managedPackages?.isUpdate && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  className="btn-outline-v1"
-                  onClick={handleOpenUpdateDialog}
-                >
-                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                </Button>
+                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                  {'Edit'}
+                </ThemeButton>
               )}
               {permissions?.managedPackages?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               <ActivityButton
@@ -133,13 +130,13 @@ const ManagedPackagedDetail = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0} label={'Details'} />
           <CustomTab value={1} label={'Products'} />
-          {!(isMobile && !isTablet) && (<CustomTab value={2} label={'Views'} />)}
+          {!(isMobile && !isTablet) && <CustomTab value={2} label={'Views'} />}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
             {loading || !fields?.length ? (
               <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </Grid>
             ) : (
               <DetailsPage data={managedPackagesData} fields={fields} />
@@ -156,7 +153,7 @@ const ManagedPackagedDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.managedPackages?.titleSingular?.toLowerCase()} : ${managedPackagesData?.managedPackageName} ?`}             
+          message={`Are you sure you want to delete ${resources?.managedPackages?.titleSingular?.toLowerCase()} : ${managedPackagesData?.managedPackageName} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

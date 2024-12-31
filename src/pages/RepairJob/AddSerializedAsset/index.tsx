@@ -1,6 +1,6 @@
-import { IconButton, MenuItem } from '@material-ui/core';
-import Box from '@material-ui/core/Box/Box';
-import { Edit } from '@material-ui/icons';
+import { IconButton, MenuItem } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import { Edit } from '@mui/icons-material';
 import { Fragment, useContext, useEffect, useState, useRef } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -10,7 +10,7 @@ import CustomReactTable, { useColumns, useTableReducer } from 'src/components/Cu
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';

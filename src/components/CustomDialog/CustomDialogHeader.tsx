@@ -1,32 +1,8 @@
+import CloseIcon from '@mui/icons-material/Close';
+import { DialogTitle, IconButton } from '@mui/material';
 import React from 'react';
-import { IconButton, Typography, makeStyles, Box } from '@material-ui/core';
-import MuiDialogTitle from '@material-ui/core/DialogTitle';
-import CloseIcon from '@material-ui/icons/Close';
-import PropTypes from 'prop-types';
-import { FiMinimize2, FiMaximize2 } from 'react-icons/fi';
 import { isMobile, isTablet } from 'react-device-detect';
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    margin: 0,
-    padding: theme.spacing(1.5, 1.5, 1.5, 2),
-    display: 'flex'
-    // background: '#282845'
-
-    // borderBottom: `1px solid #daf5ff`
-  },
-  closeButton: {
-    position: 'absolute',
-    right: theme.spacing(1.5),
-    top: theme.spacing(1.5),
-    color: theme.palette.grey[500]
-  },
-  dialogTitle: {
-    fontSize: '1.2rem',
-    display: 'inline-flex',
-    alignItems: 'center'
-  }
-}));
+import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 
 type CustomDialogHeaderProps = {
   title: React.ReactNode;
@@ -45,12 +21,10 @@ function CustomDialogHeader({
   showManimizeMaximize = false,
   showRequiredLabel = true,
   isMinimized = true,
-  onMinimizeMaximize = () => { },
+  onMinimizeMaximize = () => {},
   style = {},
   additionalTitle = null
 }: CustomDialogHeaderProps) {
-  const classes = useStyles();
-
   const maxWidth = React.useMemo(() => {
     let tempWidth = 0;
     const onCloseButtonWidth = 30;
@@ -70,33 +44,32 @@ function CustomDialogHeader({
 
   return (
     <React.Fragment>
-      <MuiDialogTitle disableTypography className={`${classes.root}`}>
-        <Typography
-          variant="h6"
-          className={`${classes.dialogTitle} title-layout text-truncate`}
+      <DialogTitle component={'div'} className={`flex min-h-[54px] items-center justify-between bg-[#1c1c31] px-4 py-2 text-white dark:bg-[#1a1a26]`}>
+        <h2
+          className={` title-layout text-truncate text-xl font-semibold leading-[1.6]`}
           style={{ ...style, maxWidth: `calc(100% - ${maxWidth}px)` }}
         >
           {title}
           {additionalTitle && <span className="text-truncate">{additionalTitle}</span>}
-        </Typography>
-        <div className={`${classes.closeButton} close`}>
+        </h2>
+        <div className={` close`}>
           {showRequiredLabel && (
             <span className="form-label-style required-text mr-2" style={{ borderBottom: 'none' }}>
               * Required Fields
             </span>
           )}
           {showManimizeMaximize && !(isMobile || isTablet) && (
-            <IconButton aria-label="close" onClick={onMinimizeMaximize} size="small" className="close-button mr-2">
+            <IconButton aria-label="close" onClick={onMinimizeMaximize} size="small" className="close-button mr-2 text-white">
               {isMinimized ? <FiMaximize2 /> : <FiMinimize2 />}
             </IconButton>
           )}
           {onClose && (
-            <IconButton aria-label="close" onClick={onClose} size="small">
-              <CloseIcon className="close-button" />
+            <IconButton aria-label="close" onClick={onClose} size="small" className="text-white">
+              <CloseIcon className="close-button " />
             </IconButton>
           )}
         </div>
-      </MuiDialogTitle>
+      </DialogTitle>
     </React.Fragment>
   );
 }

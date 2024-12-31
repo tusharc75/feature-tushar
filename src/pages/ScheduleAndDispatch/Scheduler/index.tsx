@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { cn } from 'src/constants/helpers';
 import AddSerializedAssets from 'src/pages/ScheduleAndDispatch/Scheduler/AddSerializedAssets';
 import AddServices from 'src/pages/ScheduleAndDispatch/Scheduler/AddServices';
@@ -23,13 +23,15 @@ const Scheduler = () => {
     }
   }, [activeTab, isMobile]);
 
+  const filteredTabs = useMemo(()=> tabs?.filter((t)=>t.show),[tabs])
+
   return (
     <div className="grid min-h-[--min-h] max-w-full grid-cols-1 border [--h:calc(100vh-180px)] [--loader-h:calc(100vh-290px)] [--min-h:500px] md:h-[--h] md:grid-cols-[284px_1fr]">
       <div
         className={`sidebar max-md:hide-scrollbar isolate px-3 py-4 [--gap:18px] max-md:order-2 max-md:overflow-auto max-md:border-t md:h-[--h] md:min-h-[--min-h] md:border-r`}
       >
         <ul className=" flex gap-[--gap] max-md:w-min max-md:flex-row md:flex-col">
-          {tabs.map((t, index) => {
+          {filteredTabs.map((t, index) => {
             const isActive = index <= activeTabIndex;
             return (
               <li
@@ -52,7 +54,7 @@ const Scheduler = () => {
                   <span className="text-xs font-semibold leading-[14px] text-gray-600 dark:text-gray-400">Step {index + 1}</span>
                   <p className="text-sm font-semibold leading-[16px] text-[#2E2C2E] dark:text-gray-100">{t.label}</p>
                 </div>
-                {index !== tabs.length - 1 && (
+                {index !== filteredTabs.length - 1 && (
                   <>
                     <span className="vertical-line absolute left-[34px] top-[calc(100%+1px)] -z-10 h-[--gap] w-[1px] bg-[--common-border-color] max-md:hidden" />
                     <span className="horizontal-line absolute left-[calc(100%+1px)] top-[50%] -z-10 h-[1px] w-[--gap] bg-[--common-border-color] [transform:translateY(-50%)] md:hidden" />

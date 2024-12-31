@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import routes from '../../Helpers/Routes';
 import { startCase } from 'lodash';
 
@@ -15,7 +15,7 @@ export const ListRelatedTo = ({ relatedTo, originRelatedTo }) => {
                 <p
                   style={{ borderStyle: 'solid' }}
                   title={`${routes[_element?.type]?.title || startCase(_element?.type)} - ${_element.name}`}
-                  className="text-[#2A3042] dark:text-[var(--dark-secondary-text)] bg-[#F2F6FF] dark:bg-[var(--dark-secondary)] border border-[#B8CCFE] max-w-max rounded-3xl px-[12px] py-[4px] truncate font-semibold text-[12px] "
+                  className="max-w-max truncate rounded-3xl border border-[#B8CCFE] bg-[#F2F6FF] px-[12px] py-[4px] text-[12px] font-semibold text-[#2A3042] dark:bg-[var(--dark-secondary)] dark:text-[var(--dark-secondary-text)] "
                 >
                   {`${routes[_element?.type]?.title || startCase(_element?.type)} - ${_element.name}`}
                 </p>
@@ -31,7 +31,7 @@ export const ListRelatedTo = ({ relatedTo, originRelatedTo }) => {
             <p
               style={{ borderStyle: 'solid' }}
               title={`${routes[_element?.type]?.title || startCase(_element?.type)} - ${_element.name}`}
-              className="text-[#2A3042] dark:text-[var(--dark-secondary-text)] bg-[#F2F6FF] dark:bg-[var(--dark-secondary)] border border-[#B8CCFE] max-w-max rounded-3xl px-[12px] py-[4px] truncate font-semibold text-[12px] "
+              className="max-w-max truncate rounded-3xl border border-[#B8CCFE] bg-[#F2F6FF] px-[12px] py-[4px] text-[12px] font-semibold text-[#2A3042] dark:bg-[var(--dark-secondary)] dark:text-[var(--dark-secondary-text)] "
             >
               {`${routes[_element?.type]?.title || startCase(_element?.type)} - ${_element.name}`}
             </p>

@@ -1,6 +1,6 @@
 import React from 'react';
-import { Dialog, Box, Button, Grid, CircularProgress } from '@material-ui/core';
-
+import { Dialog, Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -8,6 +8,7 @@ import { CustomDialogTransition, getObjKeys } from '../../../constants/helpers';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const AddConfigurationDialog = (props) => {
   const { data, fields, close, id, fetchData } = props;
@@ -95,7 +96,7 @@ const AddConfigurationDialog = (props) => {
         <Box py={2}>
           <Grid container spacing={2}>
             {fields.map((field) => (
-              <Grid item xs={12} sm={6} key={field.fieldName}>
+              <Grid size={{xs:12, sm:6}} key={field.fieldName}>
                 <FormTypes
                   fieldData={field}
                   values={formData.values}
@@ -114,7 +115,7 @@ const AddConfigurationDialog = (props) => {
                 />
               </Grid>
             ))}
-            <Grid item xs={12}>
+            <Grid size={{xs:12}}>
               <FormTypes
                 values={formData}
                 errors={{}}
@@ -134,18 +135,20 @@ const AddConfigurationDialog = (props) => {
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button disabled={submitting} variant="outlined" color="primary" onClick={close}>
+        <ThemeButton
+          onClick={close}
+          buttonType='transparent'
+        >
           Close
-        </Button>
-        <Button
-          disabled={submitting}
-          variant="contained"
-          color="primary"
+        </ThemeButton>
+        <ThemeButton
           onClick={postImages}
-          endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+          disabled={submitting}
+          isLoading={submitting}
+          buttonType='theme'
         >
           Save
-        </Button>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

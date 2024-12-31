@@ -1,17 +1,16 @@
-import { Box, Button, Dialog, Grid, Typography } from '@material-ui/core';
-import moment from 'moment';
+import { Box, Dialog, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FcApproval, FcCancel } from 'react-icons/fc';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import CustomButton from '../../../components/Helpers/CustomButton';
-import { CustomDialogTransition, REPAIR_PROCESS_STATUS, dateTimeFormat, repairJob } from '../../../constants/helpers';
+import { CustomDialogTransition, displayDateTime, REPAIR_PROCESS_STATUS, repairJob } from '../../../constants/helpers';
 
 const RepairProcess = ({ onClose, onSuccess, assetId, assetNumber, repaired, repairJobData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -81,7 +80,7 @@ const RepairProcess = ({ onClose, onSuccess, assetId, assetNumber, repaired, rep
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
       open={true}
-      onClose={(e, reason) => {}}
+      onClose={(e, reason) => { }}
       fullWidth
     >
       <Fragment>
@@ -106,16 +105,16 @@ const RepairProcess = ({ onClose, onSuccess, assetId, assetNumber, repaired, rep
                 </Box>
                 <Box p={1} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
                   <Grid container>
-                    <Grid item xs={1} sm={1} md={1} lg={1}>
+                    <Grid size={{ xs: 1, sm: 1, md: 1, lg: 1 }}>
                       <Typography variant="body2">Sr.</Typography>
                     </Grid>
-                    <Grid item xs={5} sm={5} md={5} lg={5}>
+                    <Grid size={{ xs: 5, sm: 5, md: 5, lg: 5 }}>
                       <Typography variant="body2">Repair Step</Typography>
                     </Grid>
-                    <Grid item xs={3} sm={3} md={3} lg={3}>
+                    <Grid size={{ xs: 3, sm: 3, md: 3, lg: 3 }}>
                       <Typography variant="body2">Action</Typography>
                     </Grid>
-                    <Grid item xs={3} sm={3} md={3} lg={3}>
+                    <Grid size={{ xs: 3, sm: 3, md: 3, lg: 3 }}>
                       <Typography variant="body2">Duration</Typography>
                     </Grid>
                   </Grid>
@@ -123,43 +122,35 @@ const RepairProcess = ({ onClose, onSuccess, assetId, assetNumber, repaired, rep
                 {process?.steps?.map((step, index) => (
                   <Box key={index} p={2} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
                     <Grid container>
-                      <Grid item xs={1} sm={1} md={1} lg={1}>
+                      <Grid size={{ xs: 1, sm: 1, md: 1, lg: 1 }}>
                         <Typography variant="body2">{step.order}</Typography>
                       </Grid>
-                      <Grid item xs={5} sm={5} md={5} lg={5}>
+                      <Grid size={{ xs: 5, sm: 5, md: 5, lg: 5 }}>
                         <Typography variant="body2">{step.name}</Typography>
                       </Grid>
-                      <Grid item xs={3} sm={3} md={3} lg={3}>
+                      <Grid size={{ xs: 3, sm: 3, md: 3, lg: 3 }}>
                         {activeStep === index ? (
                           step.status === REPAIR_PROCESS_STATUS.start ? (
                             <Fragment>
-                              <Button
-                                variant="outlined"
-                                color="secondary"
-                                aria-controls="simple-menu"
-                                aria-haspopup="true"
-                                size="small"
+                              <ThemeButton
+                                buttonType='theme'
                                 className="mr-2"
                                 onClick={() => handleUpdate(step?._id, step?.name, REPAIR_PROCESS_STATUS.complete)}
                               >
                                 {REPAIR_PROCESS_STATUS.complete}
-                              </Button>
+                              </ThemeButton>
                               <DeleteButton
                                 text={REPAIR_PROCESS_STATUS.failed}
                                 onClick={() => handleUpdate(step?._id, step?.name, REPAIR_PROCESS_STATUS.failed)}
                               />
                             </Fragment>
                           ) : (
-                            <Button
-                              variant="outlined"
-                              color="primary"
-                              aria-controls="simple-menu"
-                              aria-haspopup="true"
-                              size="small"
+                            <ThemeButton
+                              buttonType='theme'
                               onClick={() => handleUpdate(step?._id, step?.name, REPAIR_PROCESS_STATUS.start)}
                             >
                               {REPAIR_PROCESS_STATUS.start}
-                            </Button>
+                            </ThemeButton>
                           )
                         ) : null}
                         {step.status === REPAIR_PROCESS_STATUS.complete && (
@@ -177,9 +168,9 @@ const RepairProcess = ({ onClose, onSuccess, assetId, assetNumber, repaired, rep
                           </HtmlTooltip>
                         )}
                       </Grid>
-                      <Grid item xs={3} sm={3} md={3} lg={3}>
-                        {step.startDate && <Typography variant="body2">Start Date - {moment(step.startDate).format(dateTimeFormat)}</Typography>}
-                        {step.endDate && <Typography variant="body2">End Date - {moment(step.endDate).format(dateTimeFormat)}</Typography>}
+                      <Grid size={{ xs: 3, sm: 3, md: 3, lg: 3 }}>
+                        {step.startDate && <Typography variant="body2">Start Date - {displayDateTime(step.startDate)}</Typography>}
+                        {step.endDate && <Typography variant="body2">End Date - {displayDateTime(step.endDate)}</Typography>}
                       </Grid>
                     </Grid>
                   </Box>
@@ -190,11 +181,9 @@ const RepairProcess = ({ onClose, onSuccess, assetId, assetNumber, repaired, rep
         </CustomDialogContent>
         <CustomDialogFooter>
           {allowComplete && !repaired && (
-            <CustomButton
-              loading={loading}
-              variant="contained"
-              color="primary"
-              type="submit"
+            <ThemeButton
+              isLoading={loading}
+              buttonType="theme"
               onClick={(e) => {
                 handleCompleteRepair();
               }}
@@ -202,7 +191,7 @@ const RepairProcess = ({ onClose, onSuccess, assetId, assetNumber, repaired, rep
             >
               {' '}
               Complete Repair
-            </CustomButton>
+            </ThemeButton>
           )}
         </CustomDialogFooter>
       </Fragment>

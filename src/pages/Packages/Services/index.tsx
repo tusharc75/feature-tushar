@@ -1,4 +1,4 @@
-import { Box, Button, MenuItem } from '@material-ui/core';
+import { Box, MenuItem } from '@mui/material';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { GrDrag } from 'react-icons/gr';
@@ -8,6 +8,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
@@ -202,10 +203,11 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
             ids={[]}
             additionalParams={`refrenceId=${packageId}`}
           />
-          <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
-            <GrDrag fontSize="small" color="primary" className="mr-1" />
+          <ThemeButton
+            startIcon={<GrDrag fontSize="small" />}
+            onClick={() => setArrangeView(true)}>
             Arrange
-          </Button>
+          </ThemeButton>
         </>
       )
     );

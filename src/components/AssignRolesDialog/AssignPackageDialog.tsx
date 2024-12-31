@@ -1,4 +1,4 @@
-import { Box, Dialog, Grid, IconButton } from '@material-ui/core';
+import { Box, Dialog, Grid, IconButton } from '@mui/material';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -14,7 +14,7 @@ import { ListingPageHeader } from '../PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 import { Link } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import Services from 'src/pages/Packages/Services';
 import Products from 'src/pages/Packages/Products';

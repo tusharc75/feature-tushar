@@ -1,5 +1,5 @@
-import { IconButton, InputAdornment, TextField, Typography } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { IconButton, InputAdornment, TextField, Typography } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { copyTextToClipboard, getUniqueCurrencies } from 'src/constants/helpers';
 import { handleAutoCalculation } from 'src/constants/formulaUtility';
 import { find, result } from 'lodash';
@@ -73,6 +73,7 @@ const FormTypes = (props) => {
     <TextField
       {...rest}
       margin="dense"
+      size="small"
       disabled={disabled}
       variant="outlined"
       type={'text'}
@@ -97,6 +98,7 @@ const FormTypes = (props) => {
       rows={1}
       value={values[name]}
       margin="dense"
+      size="small"
       error={Boolean(errors[`${values._id}_${name}`])}
       helperText={Boolean(errors[`${values._id}_${name}`]) && errors[`${values._id}_${name}`]}
       onChange={onChange ? onChange : (e) => handleChange(name, e.target.value)}
@@ -109,13 +111,13 @@ const FormTypes = (props) => {
       disabled={disabled}
       value={options.find((data) => data.optionValue === values[name]) ? options.find((data) => data.optionValue === values[name]) : ''}
       getOptionLabel={(option: any) => option?.optionLabel || ''}
-      getOptionSelected={(option: any, val) => (option ? option?.optionValue == val?.optionValue : false)}
+      isOptionEqualToValue={(option: any, val) => (option ? option?.optionValue == val?.optionValue : false)}
       onChange={
         onChange
           ? onChange
           : (e, val) => {
-              handleChange(name, val?.optionValue);
-            }
+            handleChange(name, val?.optionValue);
+          }
       }
       renderInput={(params) => (
         <TextField
@@ -124,6 +126,7 @@ const FormTypes = (props) => {
           error={Boolean(errors[`${values._id}_${name}`])}
           helperText={Boolean(errors[`${values._id}_${name}`]) && errors[`${values._id}_${name}`]}
           margin="dense"
+          size="small"
           variant="outlined"
         />
       )}
@@ -135,6 +138,7 @@ const FormTypes = (props) => {
       {...rest}
       variant="outlined"
       margin="dense"
+      size="small"
       name={name}
       required={required}
       disabled={disabled}
@@ -145,25 +149,25 @@ const FormTypes = (props) => {
         onChange
           ? onChange
           : (e) => {
-              if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
-                if (fieldData?.isConverter) {
-                  handleCurrencyChangeWithConverterChange(
-                    name,
-                    currency,
-                    unit,
-                    e.target.value === ''
-                      ? 0
-                      : e.target.value.slice(-1) === '.' || e?.target?.value?.slice(-2) === '.0'
-                        ? e.target.value.replace(/,/g, '')
-                        : parseFloat(e.target.value.replace(/,/g, ''))
-                  );
-                } else if (fieldData.displayCurrency.length > 1) {
-                  handleCurrencyChange(name, currency, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
-                } else {
-                  handleChange(name, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
-                }
+            if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
+              if (fieldData?.isConverter) {
+                handleCurrencyChangeWithConverterChange(
+                  name,
+                  currency,
+                  unit,
+                  e.target.value === ''
+                    ? 0
+                    : e.target.value.slice(-1) === '.' || e?.target?.value?.slice(-2) === '.0'
+                      ? e.target.value.replace(/,/g, '')
+                      : parseFloat(e.target.value.replace(/,/g, ''))
+                );
+              } else if (fieldData.displayCurrency.length > 1) {
+                handleCurrencyChange(name, currency, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
+              } else {
+                handleChange(name, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
               }
             }
+          }
       }
       autoComplete="off"
       onBlur={(e) => {
@@ -186,19 +190,21 @@ const FormTypes = (props) => {
           }
         }
       }}
-      InputProps={{
-        startAdornment: (
-          <InputAdornment position="start">
-            {result(
-              find(getUniqueCurrencies(), function (obj) {
-                return obj.currencyCode === currency;
-              }),
-              'symbolNative'
-            )}
-          </InputAdornment>
-        ),
-        inputProps: { min: 0 },
-        readOnly: fieldData && fieldData.isUneditable ? true : false
+      slotProps={{
+        input: {
+          startAdornment: (
+            <InputAdornment position="start">
+              {result(
+                find(getUniqueCurrencies(), function (obj) {
+                  return obj.currencyCode === currency;
+                }),
+                'symbolNative'
+              )}
+            </InputAdornment>
+          ),
+          inputProps: { min: 0 },
+          readOnly: fieldData && fieldData.isUneditable ? true : false
+        },
       }}
     />
   ) : fieldData?.type === 'converter' ? (
@@ -207,6 +213,7 @@ const FormTypes = (props) => {
       variant="outlined"
       type="number"
       margin="dense"
+      size="small"
       name={name}
       required={required}
       autoComplete="off"
@@ -219,9 +226,11 @@ const FormTypes = (props) => {
           ? onChange
           : (e) => handleConverterChange(name, unit, e.target.value === '' ? '' : parseFloat(e.target.value.replace(/[^0-9\.]/g, '')))
       }
-      InputProps={{
-        inputProps: { min: 0 },
+      slotProps={{
+        input: {
+          inputProps: { min: 0 },
         readOnly: fieldData && fieldData.isUneditable ? true : false
+        },
       }}
     />
   ) : fieldData?.type === 'decimal' ? (
@@ -229,6 +238,7 @@ const FormTypes = (props) => {
       {...rest}
       variant="outlined"
       margin="dense"
+      size="small"
       type="number"
       disabled={disabled}
       onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
@@ -241,12 +251,14 @@ const FormTypes = (props) => {
         onChange
           ? onChange
           : (e) => {
-              handleChange(name, e.target.value === '' ? '' : parseFloat(parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces || 0)));
-            }
+            handleChange(name, e.target.value === '' ? '' : parseFloat(parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces || 0)));
+          }
       }
-      InputProps={{
-        inputProps: { min: 0 },
+      slotProps={{
+        input: {
+          inputProps: { min: 0 },
         readOnly: fieldData && fieldData.isUneditable ? true : false
+        },
       }}
     />
   ) : fieldData?.type === 'percent' ? (
@@ -255,6 +267,7 @@ const FormTypes = (props) => {
       type="number"
       variant="outlined"
       margin="dense"
+      size="small"
       autoComplete="off"
       disabled={disabled}
       required={required}
@@ -263,22 +276,24 @@ const FormTypes = (props) => {
       onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
       error={Boolean(errors[`${values._id}_${name}`])}
       helperText={Boolean(errors[`${values._id}_${name}`]) && errors[`${values._id}_${name}`]}
-      InputProps={{
-        endAdornment: '%',
-        inputProps: { min: 0 },
-        readOnly: fieldData && fieldData.isUneditable ? true : false
+      slotProps={{
+        input: {
+          endAdornment: '%',
+          inputProps: { min: 0 },
+          readOnly: fieldData && fieldData.isUneditable ? true : false
+        },
       }}
       onChange={
         onChange
           ? onChange
           : (e) => {
-              handleChange(
-                name,
-                e.target.value === ''
-                  ? 0
-                  : parseFloat(parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces === undefined ? 2 : fieldData?.decimalPlaces))
-              );
-            }
+            handleChange(
+              name,
+              e.target.value === ''
+                ? 0
+                : parseFloat(parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces === undefined ? 2 : fieldData?.decimalPlaces))
+            );
+          }
       }
     />
   ) : fieldData?.type === 'vlookupDropdown' ? (
@@ -287,6 +302,7 @@ const FormTypes = (props) => {
       variant="outlined"
       type={'text'}
       margin="dense"
+      size="small"
       autoComplete="off"
       disabled={disabled}
       required={required}
@@ -302,6 +318,7 @@ const FormTypes = (props) => {
       disabled={disabled}
       variant="outlined"
       margin="dense"
+      size="small"
       type={fieldData?.returnType === 'decimal' ? 'number' : 'text'}
       name={name}
       autoComplete="off"
@@ -313,16 +330,18 @@ const FormTypes = (props) => {
         onChange
           ? onChange
           : (e) => {
-              if (fieldData?.returnType === 'decimal') {
-                handleChange(name, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
-              } else {
-                handleChange(name, e.target.value);
-              }
+            if (fieldData?.returnType === 'decimal') {
+              handleChange(name, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
+            } else {
+              handleChange(name, e.target.value);
             }
+          }
       }
-      InputProps={{
-        inputProps: { min: 0 },
-        readOnly: fieldData && fieldData.isUneditable ? true : false
+      slotProps={{
+        input: {
+          inputProps: { min: 0 },
+          readOnly: fieldData && fieldData.isUneditable ? true : false
+        },
       }}
     />
   ) : null;
@@ -337,7 +356,7 @@ const MultiSelect = ({ options, disabled, values, name, onChange, handleChange, 
     let value: { name: string; value: any[] } | string = serializedData;
     try {
       value = JSON.parse(serializedData) as { name: string; value: any[] };
-    } catch (error) {}
+    } catch (error) { }
 
     if (typeof value === 'string' || !value) {
       // Allow pasting of normal text.
@@ -376,13 +395,13 @@ const MultiSelect = ({ options, disabled, values, name, onChange, handleChange, 
         limitTags={1}
         value={value}
         getOptionLabel={(option: any) => option?.optionLabel || ''}
-        getOptionSelected={(option: any, val) => (option ? option?.optionValue === val?.optionValue : false)}
+        isOptionEqualToValue={(option: any, val) => (option ? option?.optionValue === val?.optionValue : false)}
         onChange={
           onChange
             ? onChange
             : (e, val) => {
-                handleChange(name, val ? val : []);
-              }
+              handleChange(name, val ? val : []);
+            }
         }
         renderInput={(params) => (
           <TextField
@@ -391,6 +410,7 @@ const MultiSelect = ({ options, disabled, values, name, onChange, handleChange, 
             error={Boolean(errors[`${values._id}_${name}`])}
             helperText={Boolean(errors[`${values._id}_${name}`]) && errors[`${values._id}_${name}`]}
             margin="dense"
+            size="small"
             variant="outlined"
             onPaste={(e) => {
               const data = handlePaste(e);

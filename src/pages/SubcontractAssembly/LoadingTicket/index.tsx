@@ -1,5 +1,5 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
-import { LocalShipping } from '@material-ui/icons';
+import { Box, IconButton, MenuItem } from '@mui/material';
+import { LocalShipping } from '@mui/icons-material';
 import { map, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

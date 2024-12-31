@@ -1,12 +1,11 @@
-import { Box, Button, Grid, IconButton } from '@material-ui/core';
-import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
-import EditIcon from '@material-ui/icons/Edit';
-import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
+import { Box, IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import AddBoxRoundedIcon from '@mui/icons-material/AddBoxRounded';
+import EditIcon from '@mui/icons-material/Edit';
+import RemoveCircleRoundedIcon from '@mui/icons-material/RemoveCircleRounded';
 import { camelCase } from 'lodash';
-import moment from 'moment';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { FaSignature } from 'react-icons/fa';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
@@ -33,8 +32,8 @@ import {
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
-  dateTimeFormat,
   deliveryTicket,
+  displayDateTime,
   getObjKeysWithValues,
   gridLoadingTimeout,
   prepareDataForGrid,
@@ -204,12 +203,12 @@ export default function DeliveryTicketDetail(props) {
         setDeliveryTicketData(data);
         const startDeliverySignatures = data?.signatures?.filter((f) => f.status === 'Start Delivery' && f.date);
         if (startDeliverySignatures && startDeliverySignatures.length > 0) {
-          setStartDeliveryDate(moment(startDeliverySignatures[startDeliverySignatures.length - 1].date).format(dateTimeFormat));
+          setStartDeliveryDate(displayDateTime(startDeliverySignatures[startDeliverySignatures.length - 1].date));
         }
         setSignOffDate(data?.actualDeliveryDate);
         const signOffSignatures = data?.signatures?.filter((f) => f.status === 'Sign-Off' && f.date);
         if (signOffSignatures && signOffSignatures.length > 0) {
-          setSignOffDate(moment(signOffSignatures[signOffSignatures.length - 1].date).format(dateTimeFormat));
+          setSignOffDate(displayDateTime(signOffSignatures[signOffSignatures.length - 1].date));
         }
         setCanEdit([...(data?.collaborator ?? []), data?.owner ?? {}, data?.processor ?? {}].some((obj) => obj.optionValue === user.user._id));
         setSignatures(data?.signatures || []);
@@ -483,8 +482,6 @@ export default function DeliveryTicketDetail(props) {
                   <ThemeButton
                     iconForMobile={deliveryTicketData?.ticketType === DELIVERY_TICKET_TYPE.loading ? <TbTruckDelivery /> : <RiFolderReceivedLine />}
                     mobileTooltip={deliveryTicketData?.ticketType === DELIVERY_TICKET_TYPE.loading ? 'Delivered to Customer' : 'Receive Item'}
-                    className="btn-outline-v1"
-                    size="small"
                     onClick={() => {
                       if (user?.user?.brandPolicy?.assetDeliveredStatus && deliveryTicketData?.ticketType === DELIVERY_TICKET_TYPE.loading) {
                         setOpenDateDialog({
@@ -499,37 +496,21 @@ export default function DeliveryTicketDetail(props) {
                         handelProcessTickets();
                       }
                     }}
-                    style={isMobile && !isTablet ? { color: 'var(--teal)' } : {}}
                   >
                     {deliveryTicketData?.ticketType === DELIVERY_TICKET_TYPE.loading ? 'Delivered to Customer' : 'Receive Item'}
                   </ThemeButton>
                 )}
-
               {permissions?.deliveryTicket?.isUpdate &&
                 canEdit &&
                 ![DELIVERY_TICKET_STATUS.delivered, DELIVERY_TICKET_STATUS.cancelled].includes(deliveryTicketData?.status) && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    className="btn-outline-v1"
-                    size="small"
-                    onClick={handleOpenUpdateDialog}
-                    style={isMobile && !isTablet ? { color: 'var(--teal)' } : {}}
-                  >
-                    {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
-                  </Button>
+                  <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                    {'Edit'}
+                  </ThemeButton>
                 )}
-
               {deliveryTicketData?.signatures?.length > 0 ? (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  className="btn-outline-v1"
-                  color="primary"
-                  size="small"
-                  onClick={() => setOpenSigns(true)}
-                  style={isMobile && !isTablet ? { color: 'var(--info-darken)' } : {}}
-                >
-                  {isMobile && !isTablet ? <FaSignature size={20} /> : 'View Signatures'}
-                </Button>
+                <ThemeButton iconForMobile={<FaSignature size={20} />} onClick={() => setOpenSigns(true)} mobileTooltip={'View Signatures'}>
+                  {'View Signatures'}
+                </ThemeButton>
               ) : null}
               <PreviewDownload
                 resource={sidebarResource.deliveryTicket}
@@ -599,14 +580,14 @@ export default function DeliveryTicketDetail(props) {
               />
             ) : (
               <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </Grid>
             )}
           </TabPanel>
           {permissions?.serializedAsset?.isRead && (
             <TabPanel value={tabValue} index={1}>
               <Grid container spacing={1} className="p-2">
-                <Grid item xs={12} className="d-flex mt-2 gap-2">
+                <Grid size={{ xs: 12 }} className="d-flex mt-2 gap-2">
                   {deliveryTicketData?.status === 'New' && (
                     <IconButton
                       onClick={() => {
@@ -637,7 +618,7 @@ export default function DeliveryTicketDetail(props) {
                   )}
                   <Box mx={1} />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                   {serializedAssetColumns ? (
                     <CustomReactTable
                       height={'calc(100vh - 150px)'}

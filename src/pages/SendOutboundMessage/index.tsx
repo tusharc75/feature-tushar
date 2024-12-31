@@ -1,8 +1,7 @@
-import { Box, Button, TextField } from '@material-ui/core';
-import { AddOutlined } from '@material-ui/icons';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, TextField } from '@mui/material';
+import { AddOutlined } from '@mui/icons-material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase } from 'lodash';
-import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -14,9 +13,10 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import { dateTimeFormat, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
+import { displayDateTime, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
 import ManageSendOutboundMessage from './manageSendOutboundMessage';
 import axios, { CancelTokenSource } from 'axios';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const renderedFrom = camelCase(sidebarResource.sendOutboundMessage);
 
@@ -65,7 +65,7 @@ const SendOutboundMessage = () => {
       Header: 'Date',
       disableFilters: true,
       Cell: ({ row }) =>
-        row?.original?.date ? <h5 className="text-truncate">{moment(row?.original?.date)?.format(dateTimeFormat)}</h5> : <NoDataCell />
+        row?.original?.date ? <h5 className="text-truncate">{displayDateTime(row?.original?.date)}</h5> : <NoDataCell />
     },
     {
       accessor: 'user',
@@ -182,7 +182,7 @@ const SendOutboundMessage = () => {
                 options={serializedAssetOptions}
                 style={{ minWidth: '350px' }}
                 getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                getOptionSelected={(option: any, val) => option.optionValue === val}
+                isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                 value={selectedSerializedAsset}
                 onChange={(e, val) => {
                   setSelectedSerializedAsset(val);
@@ -191,6 +191,7 @@ const SendOutboundMessage = () => {
                   <TextField
                     {...params}
                     margin="dense"
+                    size="small"
                     name={'serializedAsset'}
                     label={resources?.serializedAsset?.titleSingular}
                     variant="outlined"
@@ -201,18 +202,15 @@ const SendOutboundMessage = () => {
             <div className="align-items-center flex flex-wrap justify-end gap-[8px]">
               <SearchBox onChange={handleSearch} value={search} />
               <div className="flex flex-wrap items-center gap-[8px]">
-                <Button
-                  variant={'contained'}
-                  color="primary"
-                  size="small"
-                  className={`no-shadow`}
+                <ThemeButton
                   onClick={() => {
                     setManageSendOutBoundMessageDialog(true);
                   }}
                   startIcon={<AddOutlined />}
+                  buttonType='theme'
                 >
                   Send
-                </Button>
+                </ThemeButton>
               </div>
             </div>
           </div>

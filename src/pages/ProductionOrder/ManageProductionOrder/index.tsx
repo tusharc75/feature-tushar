@@ -1,10 +1,10 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
 import { Formik, Form } from 'formik';
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box } from '@mui/material';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import InputField from 'src/components/Helpers/InputField';
-import CustomButton from '../../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { useData } from '../../../StateProvider/Provider';
@@ -19,7 +19,7 @@ import {
   sidebarResource
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
@@ -222,11 +222,8 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  type="button"
-                  variant="outlined"
-                  color="primary"
-                  size="small"
+                <ThemeButton
+buttonType="transparent"
                   onClick={() => {
                     if (isEqual(initialData.values, values)) {
                       onClose();
@@ -236,11 +233,10 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
                   }}
                 >
                   Cancel
-                </Button>
-                <CustomButton
-                  loading={loading}
-                  variant="contained"
-                  color="primary"
+                </ThemeButton>
+                <ThemeButton
+                  isLoading={loading}
+buttonType="theme"
                   disabled={loading}
                   onClick={(e) => {
                     e.preventDefault();
@@ -249,7 +245,7 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
                   }}
                 >
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog

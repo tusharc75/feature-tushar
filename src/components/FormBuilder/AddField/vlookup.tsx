@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import IconButton from '@material-ui/core/IconButton';
-import Typography from '@material-ui/core/Typography';
-import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
-import Box from '@material-ui/core/Box';
-import Grid from '@material-ui/core/Grid';
-import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
+import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
+import TextField from '@mui/material/TextField';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import { read, utils, writeFile } from 'xlsx';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import Chip from '@material-ui/core/Chip';
-import MenuItem from '@material-ui/core/MenuItem';
-import Select from '@material-ui/core/Select';
+import Autocomplete from '@mui/material/Autocomplete';
+import Chip from '@mui/material/Chip';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
 import { FixedSizeList } from 'react-window';
-import FormControl from '@material-ui/core/FormControl';
-import InputLabel from '@material-ui/core/InputLabel';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
 import axiosInstance from '../../../axios/axiosInstance';
 
 export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors }) => {
@@ -175,6 +175,7 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
                 id="standard-basic"
                 variant="outlined"
                 margin="dense"
+                size="small"
                 fullWidth
                 style={{ margin: 0 }}
                 value={values['option'][props2.index] && values['option'][props2.index].optionLabel}
@@ -195,6 +196,7 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
                       fullWidth
                       variant="outlined"
                       margin="dense"
+                      size="small"
                       value={values['option'][props2.index] && values['option'][props2.index][_row] && values['option'][props2.index][_row]}
                       onChange={(event) => onChangeValue(props2.index, _row, event.target.value)}
                     >
@@ -217,6 +219,7 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
                       fullWidth
                       variant="outlined"
                       margin="dense"
+                      size="small"
                       value={values['option'][props2.index] && values['option'][props2.index][_row] && values['option'][props2.index][_row]}
                       onChange={(event) => onChangeValue(props2.index, _row, event.target.value)}
                     >
@@ -235,6 +238,7 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
                       id="standard-basic"
                       variant="outlined"
                       margin="dense"
+                      size="small"
                       fullWidth
                       style={{ margin: 0 }}
                       value={values['option'][props2.index] && values['option'][props2.index][_row] && values['option'][props2.index][_row]}
@@ -263,7 +267,7 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
               return _field.fieldLabel;
             })
         }
-        getOptionLabel={(option) => option}
+        getOptionLabel={(option) => option || ''}
         value={values['vlookupInputFields'] ? convertValueToLabel(values['vlookupInputFields']) : []}
         renderTags={(value: string[], getTagProps) =>
           value.map((option: string, index: number) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
@@ -278,6 +282,7 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
           <TextField
             {...params}
             margin="dense"
+            size="small"
             variant="outlined"
             label="Input Parameters"
             placeholder="Input Parameters"
@@ -294,7 +299,7 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
               <Typography variant="body2">Options</Typography>
             </Grid>
             <Grid item xs={12} sm={6} md={6} container justify="flex-end">
-              <label htmlFor="vlookupimportFromExcel" className={`cursor-pointer mr-3`}>
+              <label htmlFor="vlookupimportFromExcel" className={`mr-3 cursor-pointer`}>
                 Import from Excel
               </label>
               <input
@@ -347,7 +352,7 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
       {values['isConverter'] ||
         (values['type'] === 'converter' && (
           <Grid item xs={12} sm={4} md={4}>
-            <FormControl fullWidth margin="dense" variant="outlined">
+            <FormControl fullWidth margin="dense" size="small" variant="outlined">
               <InputLabel id="vlookupOnConverter">Vlookup applied on converter</InputLabel>
               <Select
                 labelId="vlookupOnConverter"

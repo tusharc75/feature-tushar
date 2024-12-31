@@ -1,6 +1,7 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useContext, useEffect, useState } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -13,6 +14,7 @@ import ActivityButton from 'src/components/Activity/ActivityButton';
 import { camelCase, sortBy } from 'lodash';
 import { WORK_FLOW_STATUS } from 'src/constants/helpers';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const WorkFlowReportDetail = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -102,20 +104,22 @@ const WorkFlowReportDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ ...routes.workflowReport, title: resources?.workFlowReport?.titlePlural }, { title: workFlowData?.workflowName }]} />
+          <CustomBreadCrumbs
+            routes={[{ ...routes.workflowReport, title: resources?.workFlowReport?.titlePlural }, { title: workFlowData?.workflowName }]}
+          />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {workFlowReportData?.status !== WORK_FLOW_STATUS.completed && (
-              <Button
-                variant={'contained'}
+              <ThemeButton
                 onClick={() => {
                   setShowCloseConfirmation(true);
                 }}
-                className={'btn-outline-v1'}
+                mobileTooltip="Close"
+                iconForMobile={false}
               >
-                {'Close'}
-              </Button>
+                Close
+              </ThemeButton>
             )}
             {resourceData?.collaborateTools && workFlowReportData && (
               <ActivityButton
@@ -133,7 +137,7 @@ const WorkFlowReportDetail = () => {
         </CustomTabs>
         {loading || !workFlowReportData || !workFlowData ? (
           <Grid container spacing={2} style={{ padding: '8px' }}>
-            <CommonSkeleton lenArray={[...Array(7).keys()]} />
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Grid>
         ) : (
           workFlowData &&

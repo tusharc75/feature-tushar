@@ -1,8 +1,8 @@
-import { Box, Button, Dialog, Grid, IconButton } from '@material-ui/core';
-import AddIcon from '@material-ui/icons/AddCircle';
+import { Box, Dialog, IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import AddIcon from '@mui/icons-material/AddCircle';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
-import moment from 'moment';
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
@@ -17,7 +17,7 @@ import CustomDialogContent from '../../components/CustomDialog/CustomDialogConte
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import CustomButton from '../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import FormTypes from '../../components/Helpers/FormTypes';
 import {
   DELIVERY_FROM_TO_TYPE,
@@ -40,8 +40,9 @@ import {
   setFieldsInAscendingOrder
 } from './../../constants/helpers';
 import { createDeliveryTicketOffline } from './deliveryTicketOfflineHelper';
-import { generateFormFieldSteps, generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
+import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 import routes from 'src/components/Helpers/Routes';
+import dayjs from 'dayjs';
 
 const ManageDeliveryTicket = ({
   onClose,
@@ -554,14 +555,14 @@ const ManageDeliveryTicket = ({
   function validate(values) {
     const errors = {};
     if (initialData?.fields?.find((e) => e?.fieldName === 'pickUpDate') && initialData?.fields?.find((e) => e?.fieldName === 'deliveryDate')) {
-      let pickUpDate = moment(values?.pickUpDate);
-      let deliveryDate = moment(values?.deliveryDate);
+      let pickUpDate = dayjs(values?.pickUpDate);
+      let deliveryDate = dayjs(values?.deliveryDate);
       if (deliveryDate.diff(pickUpDate, 'days') < 0) {
         errors['pickUpDate'] = 'Please enter valid pick-Up date';
       }
     }
     if (initialData?.fields?.find((e) => e?.fieldName === 'createDate') && assets?.length) {
-      if (!moment(values['createDate']).isSameOrAfter(moment(createDateMin))) {
+      if (!dayjs(values['createDate']).isSameOrAfter(dayjs(createDateMin))) {
         errors['createDate'] = `Please select valid date`;
       }
     }
@@ -660,11 +661,10 @@ const ManageDeliveryTicket = ({
                     onClose();
                   }
                 }}
-                title={`${
-                  deliveryTicketId
-                    ? `Update ${initialData.values?.ticketName ? `(${initialData.values?.ticketName})` : ''}`
-                    : `Create Transaction Ticket`
-                }`}
+                title={`${deliveryTicketId
+                  ? `Update ${initialData.values?.ticketName ? `(${initialData.values?.ticketName})` : ''}`
+                  : `Create Transaction Ticket`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -696,7 +696,7 @@ const ManageDeliveryTicket = ({
                                   'deliveryToType'
                                 ].includes(field.fieldName) ? null : ['returnReason'].includes(field.fieldName) &&
                                   values['ticketType'] !== DELIVERY_TICKET_TYPE.return ? null : (
-                                  <Grid key={index2} item xs={12} sm={6} md={6}>
+                                  <Grid key={index2} size={{ xs: 12, sm: 6, md: 6 }}>
                                     {field.fieldName === 'pickUpDate' ? (
                                       <FormTypes
                                         {...field}
@@ -764,7 +764,7 @@ const ManageDeliveryTicket = ({
                                         isTooltip={field?.isTooltip || false}
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
-                                        minDate={moment(values['pickUpDate'])}
+                                        minDate={new Date(values['pickUpDate'])}
                                       />
                                     ) : field.fieldName === 'owner' ? (
                                       <FormTypes
@@ -1035,12 +1035,9 @@ const ManageDeliveryTicket = ({
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  variant="outlined"
-                  color="primary"
+                <ThemeButton
+                  buttonType="transparent"
                   id={'manage-ticket-dialog-cancel-button'}
-                  size="small"
-                  disabled={isSubmitting || loading}
                   onClick={() => {
                     if (!isEqual(ref.current.values, initialData.values)) {
                       setShowConfirmDialog(true);
@@ -1050,13 +1047,11 @@ const ManageDeliveryTicket = ({
                   }}
                 >
                   Cancel
-                </Button>
-                <CustomButton
+                </ThemeButton>
+                <ThemeButton
                   disabled={isSubmitting || loading}
-                  loading={loading}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+                  isLoading={isSubmitting}
+                  buttonType="theme"
                   id={'manage-ticket-dialog-save-button'}
                   onClick={(e) => {
                     e.preventDefault();
@@ -1064,13 +1059,11 @@ const ManageDeliveryTicket = ({
                     submitForm();
                   }}
                 >
-                  {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

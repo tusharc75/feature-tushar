@@ -1,5 +1,5 @@
-import { CircularProgress, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { CircularProgress, TextField } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { debounce, uniqBy } from 'lodash';
 import { useCallback, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -99,14 +99,14 @@ const DataList = ({ columnDef, cellValue, setCellValue, cell, currentEditingCell
       disableCloseOnSelect={true}
       options={uniqBy([...columnDef?.option, ...defaultOptions], 'optionValue')}
       getOptionLabel={(option: any) => {
-        return option ? option?.optionLabel : '';
+        return option ? option?.optionLabel || '' : '';
       }}
       value={
         cellValue
           ? uniqBy([...columnDef?.option, ...defaultOptions], 'optionValue')?.filter((data: any) => cellValue?.includes(data.optionValue))
           : []
       }
-      getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+      isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
       onChange={(e, val: any) => {
         setCellValue(val ? val.map((val) => val?.optionValue) : []);
         setInputValues('');
@@ -115,14 +115,16 @@ const DataList = ({ columnDef, cellValue, setCellValue, cell, currentEditingCell
       renderInput={(params) => (
         <TextField
           {...params}
-          InputProps={{
-            ...params.InputProps,
-            endAdornment: (
-              <>
-                {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                {params.InputProps.endAdornment}
-              </>
-            )
+          slotProps={{
+            input: {
+              ...params.InputProps,
+              endAdornment: (
+                <>
+                  {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                  {params.InputProps.endAdornment}
+                </>
+              )
+            }
           }}
           autoFocus
           onBlur={onBlur}
@@ -159,8 +161,8 @@ const DataList = ({ columnDef, cellValue, setCellValue, cell, currentEditingCell
       options={uniqBy([...columnDef?.option, ...defaultOptions], 'optionValue')}
       fullWidth
       loading={loading}
-      getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-      getOptionSelected={(option: any, val) => option?.optionValue === val}
+      getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+      isOptionEqualToValue={(option: any, val) => option?.optionValue === val}
       value={uniqBy([...columnDef?.option, ...defaultOptions], 'optionValue').find((data: any) => data.optionValue === cellValue) || ''}
       onChange={(e, val) => {
         setCellValue(val?.optionValue || '');
@@ -173,14 +175,16 @@ const DataList = ({ columnDef, cellValue, setCellValue, cell, currentEditingCell
       renderInput={(params) => (
         <TextField
           {...params}
-          InputProps={{
-            ...params.InputProps,
-            endAdornment: (
-              <>
-                {loading ? <CircularProgress color="inherit" size={15} /> : null}
-                {params.InputProps.endAdornment}
-              </>
-            )
+          slotProps={{
+            input: {
+              ...params.InputProps,
+              endAdornment: (
+                <>
+                  {loading ? <CircularProgress color="inherit" size={15} /> : null}
+                  {params.InputProps.endAdornment}
+                </>
+              )
+            }
           }}
           autoFocus
           onBlur={onBlur}

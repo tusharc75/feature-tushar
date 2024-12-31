@@ -1,8 +1,9 @@
-import { Box, Button } from '@material-ui/core';
+import { Box } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { useEffect, useMemo, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
@@ -107,7 +108,6 @@ const AddTechnicians = ({ schedularState }: SchedularComponentProps) => {
     <>
       <h6 className="mb-[18px] text-xl font-semibold leading-6">{tabData?.label}</h6>
       {columns ? (
-        selectedServices?.length ? (
           <CustomReactTable
             height={'calc(100vh - 393px)'}
             columns={columns}
@@ -117,7 +117,6 @@ const AddTechnicians = ({ schedularState }: SchedularComponentProps) => {
             refreshGrid={fetchData}
             resource={sidebarResource.employeeMaster}
           />
-        ) : null
       ) : (
         <Box p={2} className="h-[--loader-h]">
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -125,12 +124,12 @@ const AddTechnicians = ({ schedularState }: SchedularComponentProps) => {
       )}
 
       <div className="flex justify-end gap-2">
-        <Button variant="outlined" color="secondary" size="small" onClick={() => setActiveTab('services')}>
+        <ThemeButton buttonType="transparent" onClick={() => setActiveTab('services')}>
           Back
-        </Button>
-        <Button disabled={false} variant="contained" size="small" color="primary" onClick={() => handleAdd()}>
+        </ThemeButton>
+        <ThemeButton disabled={false} buttonType="theme" onClick={() => handleAdd()}>
           Save & Next
-        </Button>
+        </ThemeButton>
       </div>
     </>
   );

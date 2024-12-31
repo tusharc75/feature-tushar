@@ -1,4 +1,4 @@
-import { Box, Button } from '@material-ui/core';
+import { Box } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import queryString from 'query-string';
@@ -13,10 +13,11 @@ import { gridLoadingTimeout } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ArrangeView from './ArrangeView';
-import { AddOutlined } from '@material-ui/icons';
+import { AddOutlined } from '@mui/icons-material';
 import { useData } from 'src/StateProvider/Provider';
 import { useHistory } from 'react-router-dom';
 import SectionMaster from './sectionMaster';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const renderedFrom = 'form-builder';
 
@@ -90,13 +91,13 @@ const FormBuilder = () => {
 
   useEffect(() => {
     fetchGetBrandResource();
-  }, [ search ]);
+  }, [search]);
 
   const closeHandler = () => {
     setArrangeViewOpen(false);
     fetchGetBrandResource();
   };
-  
+
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
   };
@@ -129,17 +130,15 @@ const FormBuilder = () => {
     return (
       <>
         {permissions.formBuilder?.isCreate && (
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
+          <ThemeButton
+            buttonType="theme"
             onClick={() => {
               history.push('/form-builder/0');
             }}
             startIcon={<AddOutlined />}
           >
             Add
-          </Button>
+          </ThemeButton>
         )}
       </>
     );
@@ -150,32 +149,31 @@ const FormBuilder = () => {
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ ...routes.formBuilder, title: resources?.formBuilder?.titlePlural }]} />
         <div className="flex items-center gap-1">
-          <Button
-            variant="outlined"
-            className={'btn-outline-v1'}
+          <ThemeButton
             onClick={() => {
               setArrangeViewOpen(true);
             }}
+            iconForMobile={false}
           >
             Change Resource Order
-          </Button>
-          <Button
-            variant="outlined"
-            className={'btn-outline-v1'}
+          </ThemeButton>
+          <ThemeButton
             onClick={() => {
               setOpenSectionMaster(true);
             }}
+            iconForMobile={false}
           >
             Sections
-          </Button>
+          </ThemeButton>
         </div>
       </div>
       <CustomContainer>
-        <ListingPageHeader 
-          rightSideContents={<RightSideContents />} 
+        <ListingPageHeader
+          rightSideContents={<RightSideContents />}
           searchValue={search}
           onSearch={handleSearch}
-          isActionButtonVisible={false} isAddButtonVisible={false} 
+          isActionButtonVisible={false}
+          isAddButtonVisible={false}
         />
         {arrangeViewOpen && <ArrangeView open={arrangeViewOpen} close={closeHandler} resourceData={resource} />}
         {openSectionMaster && <SectionMaster close={() => setOpenSectionMaster(false)} />}

@@ -1,9 +1,9 @@
-import { Box, Button } from '@material-ui/core';
+import { Box } from '@mui/material';
 import { Form, Formik } from 'formik';
-import { Fragment, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import CustomButton from 'src/components/Helpers/CustomButton';
 import InputField from 'src/components/Helpers/InputField';
 import { GenerateResourceLineNumber, getObjKeys, sidebarResource, yupSchema } from 'src/constants/helpers';
 import { SchedularComponentProps } from 'src/pages/ScheduleAndDispatch/Scheduler/types';
@@ -67,22 +67,18 @@ const ManageScheduleRental = ({ schedularState }: SchedularComponentProps) => {
                 </Form>
               </div>
               <div className="flex  justify-end gap-2">
-                <Button
+                <ThemeButton
                   disabled={false}
-                  type="button"
-                  variant="outlined"
-                  color="primary"
-                  size="small"
+                  buttonType="transparent"
                   onClick={() => {
-                    setActiveTab('technicians');
+                    schedularState?.tabs?.find((t) => t.key === 'technicians')?.show ? setActiveTab('technicians') : setActiveTab('services');
                   }}
                 >
                   Back
-                </Button>
-                <CustomButton
-                  loading={loading}
-                  variant="contained"
-                  color="primary"
+                </ThemeButton>
+                <ThemeButton
+                  isLoading={loading}
+                  buttonType="theme"
                   disabled={loading}
                   onClick={(e) => {
                     e.preventDefault();
@@ -90,7 +86,7 @@ const ManageScheduleRental = ({ schedularState }: SchedularComponentProps) => {
                   }}
                 >
                   Save
-                </CustomButton>
+                </ThemeButton>
               </div>
             </>
           )}

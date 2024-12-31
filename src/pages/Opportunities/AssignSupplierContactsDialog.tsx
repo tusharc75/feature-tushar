@@ -1,17 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import {
-  Button,
-  Checkbox,
-  CircularProgress,
-  Dialog,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Typography,
-  TextField,
-  Chip
-} from '@material-ui/core';
+import { Checkbox, Dialog, List, ListItem, ListItemIcon, ListItemText, Typography, TextField, Chip } from '@mui/material';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
@@ -19,8 +7,9 @@ import CustomDialogContent from '../../components/CustomDialog/CustomDialogConte
 import Loader from '../../components/Loader';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import { cloneDeep } from 'lodash';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import Autocomplete from '@mui/material/Autocomplete';
 import { CustomDialogTransition } from 'src/constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export default function AssignSupplierContactsDialog({
   opportunityId,
@@ -164,12 +153,19 @@ export default function AssignSupplierContactsDialog({
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button disabled={isAssigning} onClick={handleCloseDialog} color="primary" size="small">
+        <ThemeButton
+          onClick={handleCloseDialog}
+          buttonType='transparent'
+        >
           Cancel
-        </Button>
-        <Button onClick={handleAssignContacts} color="primary" variant="contained" size="small">
-          {isAssigning ? <CircularProgress size={22} /> : 'Save'}
-        </Button>
+        </ThemeButton>
+        <ThemeButton
+          onClick={handleAssignContacts}
+          isLoading={isAssigning}
+          buttonType='theme'
+        >
+          Save
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

@@ -1,7 +1,7 @@
-import { Dialog, FormControl, IconButton, MenuItem, Select, useMediaQuery } from '@material-ui/core';
-import { Close } from '@material-ui/icons';
+import { Autocomplete, Box, Dialog, FormControl, IconButton, MenuItem, Select, TextField, useMediaQuery } from '@mui/material';
+import { Close } from '@mui/icons-material';
 import { uniqBy } from 'lodash';
-import { useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { BsFillFunnelFill } from 'react-icons/bs';
 import { MdChevronRight } from 'react-icons/md';
 import { TbLayoutSidebarFilled } from 'react-icons/tb';
@@ -16,6 +16,13 @@ import { getErrors, getLabel, isCLearFilterButtonVisible, useClassForFewSeconds 
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { cn, CustomDialogTransition } from 'src/constants/helpers';
+import SaveFilterDialog from 'src/components/CustomReactTable/GridFilter/SaveFilterDialog';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { RiDeleteBin6Fill } from 'react-icons/ri';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import axiosInstance from 'src/axios/axiosInstance';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { createFilterSetData } from 'src/components/CustomReactTable';
 
 const Filter = ({
   onClose,
@@ -32,8 +39,14 @@ const Filter = ({
   reportConfig = null,
   filterTitle = '',
   loading = false,
-  onCloseWithErrors = null
+  onCloseWithErrors = null,
+  isVisibleFilterSet = false,
+  fetchUserFilters = () => {},
+  userFilters = [],
+  selectedFilter = null
 }) => {
+  const toastConfig = useContext(CustomToastContext);
+
   const [selectedField, setSelectedField] = useState(null);
   const [filteredOptions, setFilteredOptions] = useState([]);
   const [searchVal, setSearchVal] = useState('');
@@ -42,6 +55,9 @@ const Filter = ({
   const [errors, setErrors] = useState<{ [key: string]: boolean }>({});
   const [checkForErrors, setCheckForErrors] = useState(false);
   const { addClass, className } = useClassForFewSeconds('animate-shake', 200);
+  const [isSaveFilter, setIsSaveFilter] = useState({ open: false, data: null });
+  const [selectedUserFilter, setSelectedUserFilter] = useState(selectedFilter);
+  const [isFilterDeleteConfirm, setIsFilterDeleteConfirm] = useState({ open: false, ids: null });
 
   const uniqueValues = useMemo(() => {
     return uniqBy([...deepFilters, ...filterByIds], (d) => d.field);
@@ -78,7 +94,15 @@ const Filter = ({
 
   useEffect(() => {
     if (deepFilters?.length > 0) {
-      setSelectedField(columns?.filter((c) => c?.fieldData?.fieldName === deepFilters[0]?.field)[0]?.fieldData);
+      setSelectedField(
+        columns?.filter((c) => {
+          let fieldName = c?.fieldData?.fieldName;
+          if (c?.fieldData?.type === 'date') {
+            fieldName = `from_${fieldName}`;
+          }
+          return fieldName === deepFilters[0]?.field;
+        })[0]?.fieldData
+      );
     } else if (filterByIds?.length > 0) {
       setSelectedField(columns?.filter((c) => c?.fieldData?.fieldName === filterByIds[0]?.field)[0]?.fieldData);
     }
@@ -155,182 +179,293 @@ const Filter = ({
     }
   };
 
+  const handleSelectfilterSet = (val) => {
+    setSelectedUserFilter(val);
+    if (val) {
+      const { filterById, deepFilter } = createFilterSetData(val, columns);
+      setFilterByIds(filterById);
+      setDeepFilters(deepFilter);
+      setFilterTerm(val?.filterTerm || {});
+    } else {
+      setFilterByIds([]);
+      setDeepFilters([]);
+      setFilterTerm({});
+    }
+  };
+
+  const handleDeleteUserFilter = () => {
+    axiosInstance()
+      .put(`/user-resource-filter/remove`, { ids: isFilterDeleteConfirm.ids })
+      .then(({ data }) => {
+        fetchUserFilters();
+        setIsFilterDeleteConfirm({ open: false, ids: null });
+        handleSelectfilterSet(null);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const isDisable = () => {
+    if (deepFilters && deepFilters?.length && deepFilters?.filter((d) => d?.term?.length)?.length) return false;
+    if (filterByIds && filterByIds?.length && filterByIds?.filter((d) => d?.term?.length)?.length) return false;
+    return true;
+  };
+
   return (
-    <Dialog
-      open={true}
-      maxWidth="md"
-      fullWidth
-      TransitionComponent={CustomDialogTransition}
-      fullScreen={isMobile}
-      onClose={(e, reason) => {
-        if (reason !== 'backdropClick') {
-          handleClose();
-        }
-      }}
-      PaperProps={{
-        className: 'md:!rounded-[12px] !rounded-[0px]'
-      }}
-      className={cn(
-        ' [--px:20px] [--py:20px] md:[--px:37px] md:[--py:21px]',
-        isMobile ? '[--container-max-h:calc(100vh-160px)]  [--content-max-h:calc(100vh-237px)]' : '[--container-max-h:500px] [--content-max-h:433px]'
-      )}
-    >
-      <div className="flex items-center gap-3 px-[--px] py-[--py] ">
-        <BsFillFunnelFill size={40} className="flex-shrink-0 text-[--new-theme-color]" />
-        <div className="flex-grow">
-          <h6 className="mb-[5px] text-[20px] font-semibold leading-[22px]">Filters for {filterTitle}</h6>
-          <p className="text-[12px] font-normal leading-[14px] text-[#777575] dark:text-gray-400 max-sm:hidden">
-            See results in your view based on the filters you select here.
-          </p>
+    <>
+      <Dialog
+        open={true}
+        maxWidth="md"
+        fullWidth
+        TransitionComponent={CustomDialogTransition}
+        fullScreen={isMobile}
+        onClose={(e, reason) => {
+          if (reason !== 'backdropClick') {
+            handleClose();
+          }
+        }}
+        PaperProps={{
+          className: 'md:!rounded-[12px] !rounded-[0px]'
+        }}
+        className={cn(
+          ' [--px:20px] [--py:20px] md:[--px:37px] md:[--py:21px]',
+          isMobile
+            ? '[--container-max-h:calc(100vh-160px)]  [--content-max-h:calc(100vh-237px)]'
+            : '[--container-max-h:500px] [--content-max-h:433px]'
+        )}
+      >
+        <div className="flex items-center gap-3 px-[--px] py-[--py] ">
+          <BsFillFunnelFill size={40} className="flex-shrink-0 text-[--new-theme-color]" />
+          <div className="flex-grow">
+            <h6 className="mb-[5px] text-[20px] font-semibold leading-[22px]">Filters for {filterTitle}</h6>
+            <p className="text-[12px] font-normal leading-[14px] text-[#777575] dark:text-gray-400 max-sm:hidden">
+              See results in your view based on the filters you select here.
+            </p>
+          </div>
+          <IconButton onClick={handleClose} size="small">
+            <Close />
+          </IconButton>
         </div>
-        <IconButton onClick={handleClose} size="small">
-          <Close />
-        </IconButton>
-      </div>
-      <CustomDialogContent className="relative !px-[--px] !py-[--py] pt-0 [--sidebar-width:285px]">
-        <div className={cn('grid overflow-hidden rounded-lg border', isMobile ? 'relative' : 'grid-cols-[var(--sidebar-width)1fr]')}>
-          <div
-            className={cn(
-              'transition-[width] duration-300 ',
-              isMobile ? 'absolute bottom-0 left-0 top-0 z-[11] bg-[--dark-primary,white]' : '[border-right:1px_solid_var(--common-border-color)]',
-              isMobile && isSidebarOpen ? 'w-[--sidebar-width] [border-right:1px_solid_var(--common-border-color)]' : isMobile ? 'w-0' : ''
-            )}
-          >
+        <CustomDialogContent className="relative !px-[--px] !py-[--py] pt-0 [--sidebar-width:285px]">
+          <div className={cn('grid overflow-hidden rounded-lg border', isMobile ? 'relative' : 'grid-cols-[var(--sidebar-width)1fr]')}>
             <div
               className={cn(
-                'w-[--sidebar-width] px-[17px] py-[15px] transition-transform duration-300',
-                isMobile ? `shadow-md` : '[border-right:1px_solid_var(--common-border-color)]',
-                isMobile && isSidebarOpen ? '[transform:translateX(0)]' : isMobile ? '[transform:translateX(calc(var(--sidebar-width)*-1))]' : ''
+                'transition-[width] duration-300 ',
+                isMobile ? 'absolute bottom-0 left-0 top-0 z-[11] bg-[--dark-primary,white]' : '[border-right:1px_solid_var(--common-border-color)]',
+                isMobile && isSidebarOpen ? 'w-[--sidebar-width] [border-right:1px_solid_var(--common-border-color)]' : isMobile ? 'w-0' : ''
               )}
             >
-              <div className="mb-[15px] flex items-center gap-4">
-                <p className="text-[16px] font-medium leading-[22px] text-[--primary-text]">Filters</p>
-                <SearchBox value={searchVal} onChange={handleSearch} disabled={loading} />
-                {isMobile && <ToggleSidebar toggleSidebar={() => toggleSidebar()} />}
-              </div>
-              <ul className={cn(' space-y-2 overflow-y-auto overflow-x-hidden', isMobile ? 'h-[--content-max-h]' : 'max-h-[--content-max-h]')}>
-                {!loading
-                  ? filteredOptions?.map((o, i) => {
-                      return (
-                        <li
-                          key={i}
-                          className={cn(
-                            'flex cursor-pointer list-none items-center gap-[5px] rounded-lg px-[14px] py-2 text-[12px] font-medium leading-[14.5px] hover:bg-gray-100 data-[active=true]:bg-gray-100 dark:hover:bg-gray-800 data-[active=true]:dark:bg-gray-800',
-                            errors[o?.fieldName] ? ` ${className} border border-red-500` : 'border'
-                          )}
-                          data-active={selectedField?.fieldName === o?.fieldName}
-                          onClick={() => {
-                            setSelectedField((prev) => (prev?.fieldName === o?.fieldName ? null : o));
-                            setIsSidebarOpen(false);
-                          }}
-                        >
-                          <img src={listFilter} alt={''} />
-                          {o?.fieldLabel} {defaultColumns?.some?.((d) => d?.fieldName === o?.fieldName) && <span style={{ color: 'red' }}>*</span>}{' '}
-                          <span className="block min-w-[14px] rounded-[4px] bg-[--dark-secondary,#E3F3F2] px-[2px] text-center text-[10px] font-bold leading-[14px] text-[--new-theme-color]">
-                            {getLabel(o, uniqueValues)}
-                          </span>
-                          <MdChevronRight className="ml-auto text-[--new-theme-color]" />
+              <div
+                className={cn(
+                  'w-[--sidebar-width] px-[17px] py-[15px] transition-transform duration-300',
+                  isMobile ? `shadow-md` : '[border-right:1px_solid_var(--common-border-color)]',
+                  isMobile && isSidebarOpen ? '[transform:translateX(0)]' : isMobile ? '[transform:translateX(calc(var(--sidebar-width)*-1))]' : ''
+                )}
+              >
+                {isVisibleFilterSet && (
+                  <div className="mb-3">
+                    <Autocomplete
+                      id={`filter-set`}
+                      options={userFilters}
+                      autoHighlight
+                      renderOption={(props, option, state, ownerState) => {
+                        const { key, ...optionProps } = props;
+                        return (
+                          <Box component="li" key={key} {...optionProps}>
+                            <div className="flex w-full justify-between">
+                              <div>{option?.title}</div>
+                              <div>
+                                <HtmlTooltip title={'Delete'} placement="top" arrow enterTouchDelay={0}>
+                                  <IconButton size="small" onClick={() => setIsFilterDeleteConfirm({ open: true, ids: [option._id] })}>
+                                    <RiDeleteBin6Fill />
+                                  </IconButton>
+                                </HtmlTooltip>
+                              </div>
+                            </div>
+                          </Box>
+                        );
+                      }}
+                      onChange={(_, newValue: any) => {
+                        handleSelectfilterSet(newValue || null);
+                      }}
+                      getOptionLabel={(option) => option?.title || ''}
+                      value={selectedUserFilter}
+                      renderInput={(params) => <TextField {...params} label="Select a Filter Set" margin="dense" size="small" variant="outlined" />}
+                    />
+                  </div>
+                )}
+                <div className="mb-[15px] flex items-center gap-4">
+                  <p className="text-[16px] font-medium leading-[22px] text-[--primary-text]">Filters</p>
+                  <SearchBox value={searchVal} onChange={handleSearch} disabled={loading} />
+                  {isMobile && <ToggleSidebar toggleSidebar={() => toggleSidebar()} />}
+                </div>
+                <ul className={cn(' space-y-2 overflow-y-auto overflow-x-hidden', isMobile ? 'h-[--content-max-h]' : 'max-h-[--content-max-h]')}>
+                  {!loading
+                    ? filteredOptions?.map((o, i) => {
+                        return (
+                          <li
+                            key={i}
+                            className={cn(
+                              'flex cursor-pointer list-none items-center gap-[5px] rounded-lg px-[14px] py-2 text-[12px] font-medium leading-[14.5px] hover:bg-gray-100 data-[active=true]:bg-gray-100 dark:hover:bg-gray-800 data-[active=true]:dark:bg-gray-800',
+                              errors[o?.fieldName] ? ` ${className} border border-red-500` : 'border'
+                            )}
+                            data-active={selectedField?.fieldName === o?.fieldName}
+                            onClick={() => {
+                              setSelectedField((prev) => (prev?.fieldName === o?.fieldName ? null : o));
+                              setIsSidebarOpen(false);
+                            }}
+                          >
+                            <img src={listFilter} alt={''} />
+                            {o?.fieldLabel} {defaultColumns?.some?.((d) => d?.fieldName === o?.fieldName) && <span style={{ color: 'red' }}>*</span>}{' '}
+                            <span className="block min-w-[14px] rounded-[4px] bg-[--dark-secondary,#E3F3F2] px-[2px] text-center text-[10px] font-bold leading-[14px] text-[--new-theme-color]">
+                              {getLabel(o, uniqueValues)}
+                            </span>
+                            <MdChevronRight className="ml-auto text-[--new-theme-color]" />
+                          </li>
+                        );
+                      })
+                    : [...Array(9).keys()].map((l) => (
+                        <li className="list-none">
+                          <div className="h-[39px] w-full animate-pulse rounded-lg bg-gray-200" />
                         </li>
-                      );
-                    })
-                  : [...Array(9).keys()].map((l) => (
-                      <li className="list-none">
-                        <div className="h-[39px] w-full animate-pulse rounded-lg bg-gray-200" />
-                      </li>
-                    ))}
-              </ul>
+                      ))}
+                </ul>
+              </div>
+            </div>
+            <div
+              className={cn(
+                'relative h-[--container-max-h] flex-grow  px-[17px] py-[15px] pt-0 [--py:15px]',
+                isMobile && isSidebarOpen ? 'overflow-hidden' : 'overflow-y-auto'
+              )}
+            >
+              {selectedField && selectedField?.type === 'singleLine' ? (
+                <SingleLine
+                  key={selectedField._id || selectedField.fieldName}
+                  fieldData={selectedField}
+                  allFields={[]}
+                  deepFilters={deepFilters}
+                  setDeepFilters={setDeepFilters}
+                  filterTerm={filterTerm}
+                  setFilterTerm={setFilterTerm}
+                  sidebarIcon={isMobile && <ToggleSidebar toggleSidebar={() => toggleSidebar()} />}
+                />
+              ) : ['dropDown', 'multiSelect']?.includes(selectedField?.type) ? (
+                <DropDown
+                  key={selectedField._id || selectedField.fieldName}
+                  fieldData={selectedField}
+                  deepFilters={deepFilters}
+                  setDeepFilters={setDeepFilters}
+                  filterByIds={filterByIds}
+                  setFilterByIds={setFilterByIds}
+                  multiple={
+                    reportConfig?.defaultColumn ? (reportConfig?.notMultiSelectFields?.includes(selectedField?.fieldName) ? false : true) : true
+                  }
+                  filterTerm={filterTerm}
+                  setFilterTerm={setFilterTerm}
+                  sidebarIcon={isMobile && <ToggleSidebar toggleSidebar={() => toggleSidebar()} />}
+                />
+              ) : selectedField?.type === 'checkBox' ? (
+                <CheckBox
+                  key={selectedField._id || selectedField.fieldName}
+                  fieldData={selectedField}
+                  deepFilters={deepFilters}
+                  setDeepFilters={setDeepFilters}
+                  sidebarIcon={isMobile && <ToggleSidebar toggleSidebar={() => toggleSidebar()} />}
+                />
+              ) : selectedField?.type === 'date' ? (
+                <DateTime
+                  key={selectedField._id || selectedField.fieldName}
+                  fieldData={selectedField}
+                  deepFilters={deepFilters}
+                  setDeepFilters={setDeepFilters}
+                  resource={resource}
+                  sidebarIcon={isMobile && <ToggleSidebar toggleSidebar={() => toggleSidebar()} />}
+                />
+              ) : (
+                <div className="min-h-[75px] py-[15px]">
+                  {isMobile && <ToggleSidebar toggleSidebar={() => toggleSidebar()} />}
+                  <div className="absolute left-[23px] right-[23px] top-[50px] text-center">
+                    <img src={selectFilter} alt={''} />
+                    <h6 className="mb-[5px] text-[16px] font-semibold leading-[22px] text-[--primary-text]">Select Filter</h6>
+                    <p className="text-[12px] font-normal leading-[14.5px]">Choose a filter from the left panel to apply it.</p>
+                  </div>
+                </div>
+              )}
+              <div
+                onClick={() => setIsSidebarOpen(false)}
+                title={isMobile && isSidebarOpen ? 'Close Sidebar' : ''}
+                className={cn(
+                  'absolute inset-0 cursor-pointer bg-black/50 [backdrop-filter:blur(3px)] [transition:opacity_300ms,_backdrop-filter_300ms] ',
+                  isMobile && isSidebarOpen ? 'z-10 opacity-100' : '-z-10 opacity-0'
+                )}
+              />
             </div>
           </div>
-          <div
-            className={cn(
-              'relative h-[--container-max-h] flex-grow  px-[17px] py-[15px] pt-0 [--py:15px]',
-              isMobile && isSidebarOpen ? 'overflow-hidden' : 'overflow-y-auto'
+        </CustomDialogContent>
+        <div className="flex justify-between px-[--px] py-[--py] pt-0">
+          {isCLearFilterButtonVisible(defaultColumnsMap, uniqueValues) ? (
+            <ThemeButton iconForMobile={false} onClick={handleClearAllFilter}>
+              Clear Filters
+            </ThemeButton>
+          ) : (
+            <div />
+          )}
+          <div className="flex gap-2">
+            {isVisibleFilterSet && (
+              <ThemeButton
+                disabled={isDisable()}
+                iconForMobile={false}
+                buttonType="yellow"
+                onClick={() => setIsSaveFilter({ open: true, data: selectedUserFilter })}
+              >
+                {selectedUserFilter ? 'Update Filter' : 'Save Filter'}
+              </ThemeButton>
             )}
-          >
-            {selectedField && selectedField?.type === 'singleLine' ? (
-              <SingleLine
-                key={selectedField._id || selectedField.fieldName}
-                fieldData={selectedField}
-                allFields={[]}
-                deepFilters={deepFilters}
-                setDeepFilters={setDeepFilters}
-                filterTerm={filterTerm}
-                setFilterTerm={setFilterTerm}
-                sidebarIcon={isMobile && <ToggleSidebar toggleSidebar={() => toggleSidebar()} />}
-              />
-            ) : ['dropDown', 'multiSelect']?.includes(selectedField?.type) ? (
-              <DropDown
-                key={selectedField._id || selectedField.fieldName}
-                fieldData={selectedField}
-                deepFilters={deepFilters}
-                setDeepFilters={setDeepFilters}
-                filterByIds={filterByIds}
-                setFilterByIds={setFilterByIds}
-                multiple={
-                  reportConfig?.defaultColumn ? (reportConfig?.notMultiSelectFields?.includes(selectedField?.fieldName) ? false : true) : true
-                }
-                filterTerm={filterTerm}
-                setFilterTerm={setFilterTerm}
-                sidebarIcon={isMobile && <ToggleSidebar toggleSidebar={() => toggleSidebar()} />}
-              />
-            ) : selectedField?.type === 'checkBox' ? (
-              <CheckBox
-                key={selectedField._id || selectedField.fieldName}
-                fieldData={selectedField}
-                deepFilters={deepFilters}
-                setDeepFilters={setDeepFilters}
-                sidebarIcon={isMobile && <ToggleSidebar toggleSidebar={() => toggleSidebar()} />}
-              />
-            ) : selectedField?.type === 'date' ? (
-              <DateTime
-                key={selectedField._id || selectedField.fieldName}
-                fieldData={selectedField}
-                deepFilters={deepFilters}
-                setDeepFilters={setDeepFilters}
-                resource={resource}
-                sidebarIcon={isMobile && <ToggleSidebar toggleSidebar={() => toggleSidebar()} />}
-              />
-            ) : (
-              <div className="min-h-[75px] py-[15px]">
-                {isMobile && <ToggleSidebar toggleSidebar={() => toggleSidebar()} />}
-                <div className="absolute left-[23px] right-[23px] top-[50px] text-center">
-                  <img src={selectFilter} alt={''} />
-                  <h6 className="mb-[5px] text-[16px] font-semibold leading-[22px] text-[--primary-text]">Select Filter</h6>
-                  <p className="text-[12px] font-normal leading-[14.5px]">Choose a filter from the left panel to apply it.</p>
-                </div>
-              </div>
-            )}
-            <div
-              onClick={() => setIsSidebarOpen(false)}
-              title={isMobile && isSidebarOpen ? 'Close Sidebar' : ''}
-              className={cn(
-                'absolute inset-0 cursor-pointer bg-black/50 [backdrop-filter:blur(3px)] [transition:opacity_300ms,_backdrop-filter_300ms] ',
-                isMobile && isSidebarOpen ? 'z-10 opacity-100' : '-z-10 opacity-0'
-              )}
-            />
+            <ThemeButton
+              iconForMobile={false}
+              buttonType="theme"
+              onClick={() => {
+                handleApplyFilter();
+              }}
+            >
+              Apply Filters
+            </ThemeButton>
           </div>
         </div>
-      </CustomDialogContent>
-      <div className="flex justify-between px-[--px] py-[--py] pt-0">
-        {isCLearFilterButtonVisible(defaultColumnsMap, uniqueValues) ? (
-          <ThemeButton iconForMobile={false} onClick={handleClearAllFilter}>
-            Clear Filters
-          </ThemeButton>
-        ) : (
-          <div />
-        )}
-        <ThemeButton
-          iconForMobile={false}
-          borderColor="none"
-          color="primary"
-          onClick={() => {
-            handleApplyFilter();
+      </Dialog>
+      {isSaveFilter.open && (
+        <SaveFilterDialog
+          handleClose={() => {
+            setIsSaveFilter({ open: false, data: null });
           }}
-        >
-          Apply Filters
-        </ThemeButton>
-      </div>
-    </Dialog>
+          columns={columns}
+          resource={resource}
+          handleSucess={() => {
+            setIsSaveFilter({ open: false, data: null });
+            fetchUserFilters();
+            setSelectedUserFilter(null);
+          }}
+          filterData={isSaveFilter?.data}
+          deepFilters={deepFilters}
+          filterByIds={filterByIds}
+          filterTerm={filterTerm}
+        />
+      )}
+      {isFilterDeleteConfirm.open && (
+        <ConfirmationDialog
+          open={true}
+          message={`Are you sure you want to delete ?`}
+          onClose={() => setIsFilterDeleteConfirm({ open: false, ids: null })}
+          onOk={handleDeleteUserFilter}
+        />
+      )}
+    </>
   );
 };
 
@@ -339,15 +474,16 @@ export default Filter;
 export const InNin = ({ filterTerm, setFilterTerm, fieldName }) => {
   return (
     <div className="mr-2">
-      <FormControl fullWidth size="small" variant="outlined" margin="dense">
+      <FormControl fullWidth size="small" variant="outlined" margin="none">
         <Select
+          size="small"
           labelId={'filter-term'}
           id={'filter-term'}
           value={filterTerm[fieldName] || '$in'}
           onChange={(e) => {
             setFilterTerm((prev) => ({ ...prev, [fieldName]: e?.target?.value }));
           }}
-          className="[&_.MuiSelect-root]:p-[7px_32px_7px_10px]"
+          className="[&_.MuiSelect-select]:!p-[5px_32px_5px_10px]"
           margin="none"
         >
           <MenuItem value={'$in'}>Include</MenuItem>

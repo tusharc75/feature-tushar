@@ -1,11 +1,13 @@
 import { useContext, useEffect, useState } from 'react';
-import { Button, Checkbox, CircularProgress, Dialog, FormControlLabel, Grid, TextField } from '@material-ui/core';
+import { Checkbox, Dialog, FormControlLabel, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { CustomDialogTransition } from 'src/constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const GenerateAutoPassword = ({ ids = [], onClose }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -66,7 +68,7 @@ const GenerateAutoPassword = ({ ids = [], onClose }) => {
       <CustomDialogContent>
         <div className="mb-5 mt-5">
           <Grid container spacing={2}>
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <FormControlLabel
                 control={
                   <Checkbox
@@ -80,7 +82,7 @@ const GenerateAutoPassword = ({ ids = [], onClose }) => {
               />
             </Grid>
 
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <TextField
                 id="password"
                 fullWidth
@@ -103,13 +105,20 @@ const GenerateAutoPassword = ({ ids = [], onClose }) => {
       </CustomDialogContent>
 
       <CustomDialogFooter>
-        <Button onClick={onClose} color="primary">
+        <ThemeButton
+          buttonType='transparent'
+          onClick={onClose}
+        >
           Cancel
-        </Button>
-
-        <Button onClick={generatePassword} variant="contained" color="primary" disabled={isCreatingPassword || !isValid(password)}>
-          {isCreatingPassword ? <CircularProgress size={20} /> : 'Generate'}
-        </Button>
+        </ThemeButton>
+        <ThemeButton
+          buttonType='theme'
+          disabled={isCreatingPassword || !isValid(password)}
+          onClick={generatePassword}
+          isLoading={isCreatingPassword}
+        >
+          Save
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

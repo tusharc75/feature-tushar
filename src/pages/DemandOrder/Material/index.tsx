@@ -1,7 +1,8 @@
-import { Box, Grid, IconButton, MenuItem } from '@material-ui/core';
-import Add from '@material-ui/icons/Add';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
+import { Box, IconButton, MenuItem } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import Add from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { camelCase, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
@@ -441,8 +442,12 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit, resourc
       {deleteData && (
         <ConfirmationDialog
           open={true}
-          message={`Are you sure you want to delete ${deleteData ? `${resources?.demandOrder?.titleSingular?.toLowerCase()} :
-            ${deleteData?.demandOrderNumber || ''}` : `selected ${resources?.demandOrder?.titlePlural?.toLowerCase()}`} ?`}
+          message={`Are you sure you want to delete ${
+            deleteData
+              ? `${resources?.demandOrder?.titleSingular?.toLowerCase()} :
+            ${deleteData?.demandOrderNumber || ''}`
+              : `selected ${resources?.demandOrder?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => setDeleteData(null)}
           onOk={() => handleDelete(deleteData)}
           okBtnLoading={isDeleting}

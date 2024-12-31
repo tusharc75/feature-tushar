@@ -1,10 +1,8 @@
 import {
   Avatar,
   Box,
-  Button,
   CircularProgress,
   Divider,
-  Grid,
   IconButton,
   Table,
   TableBody,
@@ -12,11 +10,13 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Typography,
-  makeStyles
-} from '@material-ui/core';
-import { Image } from '@material-ui/icons';
-import DeleteIcon from '@material-ui/icons/Delete';
+  Theme,
+  Typography
+} from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { makeStyles } from '@mui/styles';
+import { Image } from '@mui/icons-material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { cloneDeep } from 'lodash';
 import { useContext, useState } from 'react';
 import { FaDiceOne, FaUserAltSlash, FaUserCheck } from 'react-icons/fa';
@@ -39,8 +39,9 @@ import styles from '../profilePage.module.scss';
 import AddProxyDialog from './AddProxyDialog';
 import ManageUpdateEmailPasswordDialog from './ManageUpdateEmailAndPassword';
 import SetUpMfaDialog from './SetUpMfaDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   profileEdit: {
     position: 'absolute',
     bottom: 0,
@@ -376,35 +377,34 @@ export default function ManageProfile(props) {
                 ))}
             </div>
             <Divider />
-
-            <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setPasswordUpdate(true)}>
+            <ThemeButton fullWidth onClick={() => setPasswordUpdate(true)}>
               Change Password
-            </Button>
+            </ThemeButton>
             <Divider />
-            <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setShowAddProxyDialog(true)}>
+            <ThemeButton fullWidth onClick={() => setShowAddProxyDialog(true)}>
               Add DOA Proxy
-            </Button>
+            </ThemeButton>
             <Divider />
             {userData?.isMFASetup ? (
-              <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setRemoveMFAConfirmBox(true)}>
+              <ThemeButton fullWidth onClick={() => setRemoveMFAConfirmBox(true)}>
                 Remove MFA
-              </Button>
+              </ThemeButton>
             ) : (
-              <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setSetUpMfaDialog(true)}>
+              <ThemeButton fullWidth onClick={() => setSetUpMfaDialog(true)}>
                 Setup MFA
-              </Button>
+              </ThemeButton>
             )}
             {permissions?.payrollPolicy && (
               <>
                 <Divider />
                 {userData?.faceId || userData?.faceData ? (
-                  <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setRemoveFaceConfirmBox(true)}>
+                  <ThemeButton fullWidth onClick={() => setRemoveFaceConfirmBox(true)}>
                     Remove Face
-                  </Button>
+                  </ThemeButton>
                 ) : (
-                  <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setAddFaceDialog(true)}>
+                  <ThemeButton fullWidth onClick={() => setAddFaceDialog(true)}>
                     Add Face
-                  </Button>
+                  </ThemeButton>
                 )}
               </>
             )}
@@ -424,7 +424,7 @@ export default function ManageProfile(props) {
               <Box mb={2}>
                 {loading || userLoading ? (
                   <Grid container spacing={2} style={{ padding: '8px' }}>
-                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
                   </Grid>
                 ) : !userFields.length ? (
                   <Typography>No Data Found</Typography>

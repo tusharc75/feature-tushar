@@ -1,5 +1,6 @@
 import { useRef, useState, useContext } from 'react';
-import { Button, Box, Dialog, Stepper, Step, StepLabel, Typography, Divider } from '@material-ui/core';
+import { Box, Dialog, Stepper, Step, StepLabel, Typography, Divider } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../constants/helpers';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
@@ -7,7 +8,7 @@ import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import SignaturePad from 'react-signature-canvas';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import TextField from '@material-ui/core/TextField';
+import TextField from '@mui/material/TextField';
 
 export default function SignatureDialog(props) {
   const { open, onClose, onSigned, forDelivery, steps, label, submitting } = props;
@@ -100,17 +101,15 @@ export default function SignatureDialog(props) {
         <div style={{ display: activeStep === 0 ? 'none' : 'block' }} className="bg-white">
           <SignaturePad ref={signCanvas2} canvasProps={{ minWidth: 500, width: 500, height: 400 }} />
         </div>
-        <Button
-          variant="outlined"
-          size="small"
-          color="primary"
+        <ThemeButton
+          buttonType="transparent"
           onClick={() => {
             activeStep === 0 ? clearSignCanvas1() : clearSignCanvas2();
           }}
           fullWidth
         >
           Clear
-        </Button>
+        </ThemeButton>
         {forDelivery && (
           <Box pt={2}>
             <TextField
@@ -118,6 +117,7 @@ export default function SignatureDialog(props) {
               label="Name"
               fullWidth
               margin="dense"
+              size="small"
               value={activeStep === 0 ? name1 : name2}
               onChange={(e) => {
                 activeStep === 0 ? setName1(e.target.value) : setName2(e.target.value);
@@ -128,45 +128,35 @@ export default function SignatureDialog(props) {
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button variant="outlined" size="small" disabled={submitting} onClick={onClose} color="primary">
+        <ThemeButton buttonType="transparent" disabled={submitting} onClick={onClose}>
           Close
-        </Button>
+        </ThemeButton>
         {forDelivery ? (
           <>
-            <Button
-              variant="contained"
-              size="small"
-              color="primary"
-              disabled={activeStep === 0 || submitting}
-              onClick={() => setActiveStep((prevStep) => prevStep - 1)}
-            >
+            <ThemeButton buttonType="theme" disabled={activeStep === 0 || submitting} onClick={() => setActiveStep((prevStep) => prevStep - 1)}>
               Back
-            </Button>
-            <Button
-              variant="contained"
-              size="small"
-              color="primary"
+            </ThemeButton>
+            <ThemeButton
+              buttonType="theme"
               disabled={submitting}
               onClick={() => {
                 handleClickNext(activeStep === 0 ? signCanvas1 : signCanvas2);
               }}
             >
               {steps.length > 1 && activeStep === 0 ? 'Next' : 'Submit'}
-            </Button>
+            </ThemeButton>
           </>
         ) : (
-          <Button
-            size="small"
+          <ThemeButton
             disabled={loading || signCanvas1.current?.isEmpty()}
             onClick={() => {
               setLoading(true);
               onSigned(signCanvas1.current?.getTrimmedCanvas().toDataURL('image/png'));
             }}
-            color="primary"
-            variant="contained"
+            buttonType="theme"
           >
             {loading ? 'Sending...' : 'Send'}
-          </Button>
+          </ThemeButton>
         )}
       </CustomDialogFooter>
     </Dialog>

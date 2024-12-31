@@ -1,11 +1,11 @@
-import { Chip, IconButton, useMediaQuery } from '@material-ui/core';
+import { Chip, IconButton, useMediaQuery } from '@mui/material';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import Chatbox, { Topics, useChatboxReducer } from 'src/components/AiChatbox';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Chat } from '@material-ui/icons';
+import { Chat } from '@mui/icons-material';
 import { isArray } from 'lodash';
 import { FiSidebar } from 'react-icons/fi';
 import { DownloadIcon } from 'src/assets/svg/svgIcons';
@@ -74,8 +74,8 @@ const EquiptAi = () => {
         const selectedTopics =
           isArray(data?.topics) && data?.topics?.length
             ? data?.topics?.map((e) => {
-              return { _id: e.optionValue, aiModelTopicName: e.optionLabel };
-            })
+                return { _id: e.optionValue, aiModelTopicName: e.optionLabel };
+              })
             : [];
         setState({ type: 'setSelectedTopics', payload: selectedTopics });
         setState({ type: 'setMessageFromHistory', payload: data });
@@ -193,8 +193,7 @@ const EquiptAi = () => {
                   <ThemeButton
                     mobileTooltip="New Chat"
                     iconForMobile={<Chat fontSize={'small'} />}
-                    color="primary"
-                    borderColor="none"
+                    buttonType="theme"
                     startIcon={<Chat fontSize={'small'} />}
                     size="small"
                     onClick={() => hadleNewChat()}

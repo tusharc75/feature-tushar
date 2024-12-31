@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box, Grid, IconButton, Typography } from '@material-ui/core';
+import { Box, Grid, IconButton, Typography } from '@mui/material';
 import { getObjKeys, gridSize, setFieldsInAscendingOrder } from 'src/constants/helpers';
 import FormTypes from '../../FormTypes';
 
@@ -46,7 +46,6 @@ const Counter = ({ label, values, name, setFieldValue, fieldData, touched, error
     setError(err);
     setTouch(tch);
   };
-
 
   return (
     <Box>
@@ -96,16 +95,19 @@ const Counter = ({ label, values, name, setFieldValue, fieldData, touched, error
                       formsData?.map((form, index1) => {
                         return form?.name ? (
                           <Grid key={index1} item xs={12} sm={12} md={12} lg={12} xl={12}>
-                            <Typography variant='body2'>{form.name}</Typography>
+                            <Typography variant="body2">{form.name}</Typography>
                             <Box marginY={2}>
                               <Grid container spacing={1}>
                                 {form?.sectionFields?.map((field, index2) => (
-                                  <Grid key={index2} item
+                                  <Grid
+                                    key={index2}
+                                    item
                                     xs={12}
                                     sm={field?.columnSize ? field?.columnSize : gridSize(field.type)}
                                     md={field?.columnSize ? field?.columnSize : gridSize(field.type)}
                                     lg={field?.columnSize ? field?.columnSize : gridSize(field.type)}
-                                    xl={field?.columnSize ? field?.columnSize : gridSize(field.type)}>
+                                    xl={field?.columnSize ? field?.columnSize : gridSize(field.type)}
+                                  >
                                     <FormTypes
                                       {...field}
                                       fieldData={field}

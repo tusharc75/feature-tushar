@@ -1,5 +1,6 @@
-import { Dialog, makeStyles } from '@material-ui/core';
+import { Dialog } from '@mui/material';
 import Carousel from 'react-material-ui-carousel';
+import { makeStyles } from '@mui/styles';
 
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';

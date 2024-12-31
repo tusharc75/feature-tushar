@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, CssBaseline, FormControl, MenuItem, Select } from '@material-ui/core';
+import { Box, CssBaseline, FormControl, MenuItem, Select } from '@mui/material';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useCallback, useContext, useEffect, useState } from 'react';
@@ -10,6 +10,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { SET_SELECTED_ENTITY, SET_USER } from 'src/StateProvider/actionTypes';
 import { SVG } from 'src/assets';
 import axiosInstance from 'src/axios/axiosInstance';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import OtpInput from 'src/components/OtpInput';
@@ -174,6 +175,7 @@ const LoginMFA = () => {
                   id="demo-simple-select"
                   value={selectedMethod}
                   onChange={(e) => setSelectedMethod(e.target.value)}
+                  size="small"
                 >
                   <MenuItem value={MFA_METHOD.emailOtp}>Email Code</MenuItem>
                   {tokenData?.isMFASetup && <MenuItem value={MFA_METHOD.totp}>Authenticator App</MenuItem>}
@@ -181,9 +183,9 @@ const LoginMFA = () => {
               </FormControl>
               {selectedMethod === MFA_METHOD.emailOtp && tokenData?.authenticationMethod === MFA_METHOD.totp ? (
                 <Box mt={2} mb={2}>
-                  <Button disableElevation variant="contained" color="primary" onClick={handleResendCode}>
+                  <ThemeButton onClick={handleResendCode} buttonType="theme">
                     Send Code
-                  </Button>
+                  </ThemeButton>
                 </Box>
               ) : (
                 <form
@@ -193,7 +195,8 @@ const LoginMFA = () => {
                   }}
                 >
                   <p className="info mx-auto mb-7 mt-7 max-w-[400px] text-[13px] font-normal leading-[1.5] text-gray-500">
-                    A verification code has been sent to your {selectedMethod === 'totp' ? 'device' : 'email'}. Please enter the code below to proceed.
+                    A verification code has been sent to your {selectedMethod === 'totp' ? 'device' : 'email'}. Please enter the code below to
+                    proceed.
                   </p>
                   <div className="mb-6 md:px-5">
                     <OtpInput
@@ -224,19 +227,17 @@ const LoginMFA = () => {
                       {timeLeft ? <span>{formatTime(timeLeft)}</span> : null}
                     </div>
                   )}
-                  <Button
-                    disableElevation
-                    variant="contained"
-                    color="primary"
+                  <ThemeButton
+                    buttonType="theme"
                     type="submit"
                     fullWidth
-                    style={{ paddingBlock: 10, borderRadius: 9 }}
+                    sx={{ paddingBlock: 10, height: 40 }}
                     disabled={otp.length < 6 || isSubmitting}
+                    isLoading={isSubmitting}
                     onClick={handleSubmit}
-                    startIcon={isSubmitting && <CircularProgress color="inherit" size={20} />}
                   >
                     Submit
-                  </Button>
+                  </ThemeButton>
                 </form>
               )}
             </div>

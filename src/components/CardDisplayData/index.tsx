@@ -1,4 +1,4 @@
-import { List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
+import { List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
 import CopyToClipboard from 'src/components/Helpers/CopyToClipboard';
 
 function DisplayData({ label, value, icon, highlightsHead = false, showCopyToText = false }) {
@@ -15,7 +15,7 @@ function DisplayData({ label, value, icon, highlightsHead = false, showCopyToTex
                 display: 'inline-block',
                 fontWeight: 600
               }}
-              className="line-clamp-1 max-w-full dark:bg-[rgb(70,70,108)] bg-[#EFFBF9] text-[#298B88] dark:text-white"
+              className="line-clamp-1 max-w-full bg-[#EFFBF9] text-[#298B88] dark:bg-[rgb(70,70,108)] dark:text-white"
             >
               {showCopyToText ? <CopyToClipboard textToCopy={value ? value : '-'} /> : value ? value : '-'}
             </span>

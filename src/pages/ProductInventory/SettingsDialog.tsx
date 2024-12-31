@@ -1,18 +1,19 @@
-import { Box, Button, Dialog, Grid, TextField } from '@material-ui/core';
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { Box, Dialog } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Form, Formik } from 'formik';
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import MomentUtils from '@date-io/moment';
 import moment from 'moment';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CustomDialogTransition, dateFormat, productInventory } from 'src/constants/helpers';
+import { CustomDialogTransition, productInventory } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import InfoIcon from '@material-ui/icons/Info';
+import InfoIcon from '@mui/icons-material/Info';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CustomDatePicker from 'src/components/CustomDatePicker';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 function SettingsDialog({ onClose, warehouse }) {
   const toastConfig = useContext(CustomToastContext);
@@ -89,34 +90,26 @@ function SettingsDialog({ onClose, warehouse }) {
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
                   <Grid container spacing={2}>
-                    <Grid item xs={12} sm={12} md={6}>
+                    <Grid size={{xs:12, sm:12, md:6}}>
                       <Fragment>
-                        <MuiPickersUtilsProvider utils={MomentUtils}>
-                          <KeyboardDatePicker
-                            autoOk
-                            variant="inline"
-                            inputVariant="outlined"
-                            label="Lock Date"
-                            fullWidth
-                            format={dateFormat}
-                            value={values['lockDate']}
-                            placeholder="Lock Date"
-                            margin="dense"
-                            required
-                            maxDate={new Date()}
-                            onChange={(value) => {
-                              setFieldValue('lockDate', value);
-                            }}
-                            InputLabelProps={{
-                              shrink: true
-                            }}
-                            error={errors['lockDate'] ? true : false}
-                            helperText={errors['lockDate']}
-                          />
-                        </MuiPickersUtilsProvider>
+                        <CustomDatePicker
+                          label="Lock Date"
+                          fullWidth
+                          value={values['lockDate']}
+                          placeholder="Lock Date"
+                          margin="dense"
+                          size="small"
+                          required
+                          maxDate={new Date()}
+                          onChange={(value) => {
+                            setFieldValue('lockDate', value);
+                          }}
+                          error={errors['lockDate'] ? true : false}
+                          helperText={errors['lockDate']}
+                        />
                       </Fragment>
                     </Grid>
-                    <Grid item xs={12} sm={12} md={6}>
+                    <Grid size={{xs:12, sm:12, md:6}}>
                       <Box mt={2}>
                         <HtmlTooltip title="The transactions recorded prior to this date cannot be modified or deleted.">
                           <InfoIcon />
@@ -127,12 +120,12 @@ function SettingsDialog({ onClose, warehouse }) {
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button color="primary" size="small" onClick={onClose}>
+                <ThemeButton buttonType="transparent" onClick={onClose}>
                   Cancel
-                </Button>
-                <Button variant="contained" color="primary" size="small" onClick={submitForm}>
+                </ThemeButton>
+                <ThemeButton buttonType="theme" onClick={submitForm}>
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
             </>
           )}

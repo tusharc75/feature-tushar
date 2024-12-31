@@ -1,8 +1,9 @@
-import { Dialog, Button, Box, TextField, Typography } from '@material-ui/core';
+import { Dialog, Box, TextField, Typography } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { CustomDialogTransition } from 'src/constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const CompleteDialog = ({ handleClose, serviceName, updateStatus, comment, setComment }) => {
   return (
@@ -13,7 +14,7 @@ const CompleteDialog = ({ handleClose, serviceName, updateStatus, comment, setCo
       maxWidth="sm"
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {
-          handleClose()
+          handleClose();
         }
       }}
     >
@@ -43,12 +44,18 @@ const CompleteDialog = ({ handleClose, serviceName, updateStatus, comment, setCo
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button variant="outlined" size="small" onClick={handleClose} color='primary'>
+        <ThemeButton
+          onClick={handleClose}
+          buttonType='transparent'
+        >
           Cancel
-        </Button>
-        <Button variant="contained" size="small" onClick={updateStatus} color="primary">
+        </ThemeButton>
+        <ThemeButton
+          onClick={updateStatus}
+          buttonType='theme'
+        >
           Complete
-        </Button>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

@@ -1,9 +1,10 @@
 import React, { Fragment } from 'react';
-import { Checkbox, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select } from '@material-ui/core';
+import { Checkbox, FormControl, FormControlLabel, InputLabel, MenuItem, Select } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import moment from 'moment';
 import FormTypes from 'src/components/Helpers/FormTypes';
-import { KeyboardDatePicker } from '@material-ui/pickers';
-import { dateFormat } from 'src/constants/helpers';
+import CustomDatePicker from 'src/components/CustomDatePicker';
+import dayjs from 'dayjs';
 
 const Filters = ({
   selectedResources,
@@ -19,7 +20,6 @@ const Filters = ({
   setStatusPeriodDate,
   setStatusTimeFrame
 }) => {
-
   const [isStatusPeriod, setIsStatusPeriod] = React.useState(false);
   const [errors, setErrors] = React.useState({});
 
@@ -50,12 +50,12 @@ const Filters = ({
         isStatus
           ? setStatusPeriodDate((prevState) => ({
             ...prevState,
-            [`from_statusPeriod`]: new Date(moment().subtract('1', 'month').calendar()),
+            [`from_statusPeriod`]: new Date(dayjs().subtract(1, 'month').toDate()),
             [`to_statusPeriod`]: new Date()
           }))
           : setBetweenDate((prevState) => ({
             ...prevState,
-            [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'month').calendar()),
+            [`from_${field.fieldName}`]: new Date(dayjs().subtract(1, 'month').toDate()),
             [`to_${field.fieldName}`]: new Date()
           }));
 
@@ -65,12 +65,12 @@ const Filters = ({
         isStatus
           ? setStatusPeriodDate((prevState) => ({
             ...prevState,
-            [`from_statusPeriod`]: new Date(moment().subtract('3', 'months').calendar()),
+            [`from_statusPeriod`]: new Date(dayjs().subtract(3, 'month').toDate()),
             [`to_statusPeriod`]: new Date()
           }))
           : setBetweenDate((prevState) => ({
             ...prevState,
-            [`from_${field.fieldName}`]: new Date(moment().subtract('3', 'months').calendar()),
+            [`from_${field.fieldName}`]: new Date(dayjs().subtract(3, 'month').toDate()),
             [`to_${field.fieldName}`]: new Date()
           }));
         break;
@@ -80,12 +80,12 @@ const Filters = ({
         isStatus
           ? setStatusPeriodDate((prevState) => ({
             ...prevState,
-            [`from_statusPeriod`]: new Date(moment().subtract('6', 'months').calendar()),
+            [`from_statusPeriod`]: new Date(dayjs().subtract(6, 'month').toDate()),
             [`to_statusPeriod`]: new Date()
           }))
           : setBetweenDate((prevState) => ({
             ...prevState,
-            [`from_${field.fieldName}`]: new Date(moment().subtract('6', 'months').calendar()),
+            [`from_${field.fieldName}`]: new Date(dayjs().subtract(6, 'month').toDate()),
             [`to_${field.fieldName}`]: new Date()
           }));
         break;
@@ -95,12 +95,12 @@ const Filters = ({
         isStatus
           ? setStatusPeriodDate((prevState) => ({
             ...prevState,
-            [`from_statusPeriod`]: new Date(moment().subtract('1', 'year').calendar()),
+            [`from_statusPeriod`]: new Date(dayjs().subtract(1, 'year').toDate()),
             [`to_statusPeriod`]: new Date()
           }))
           : setBetweenDate((prevState) => ({
             ...prevState,
-            [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'year').calendar()),
+            [`from_${field.fieldName}`]: new Date(dayjs().subtract(1, 'year').toDate()),
             [`to_${field.fieldName}`]: new Date()
           }));
         break;
@@ -141,114 +141,100 @@ const Filters = ({
       {selectedResources.length > 0 &&
         selectedResources.map((field: any) => (
           <React.Fragment key={field._id}>
-            {field.fieldName === 'all' ?
-              null :
-              ['dropDown', 'multiSelect']?.includes(field.type) ?
-                <Grid item xs={12} sm={6} md={6}>
-                  <FormTypes
-                    values={formValues}
-                    errors={{}}
-                    touched={{}}
-                    label={field.fieldLabel}
-                    name={field.fieldName}
-                    type={field.type === 'dropDown' ? 'multiSelect' : field.type}
-                    options={field.option}
-                    setFieldValue={(name, value) => {
-                      handleSelectFilter(field.type === 'dropDown' ? 'multiSelect' : field.type, name, value)
-                    }}
-                    required={false}
+            {field.fieldName === 'all' ? null : ['dropDown', 'multiSelect']?.includes(field.type) ? (
+              <Grid size={{xs:12, sm:6, md:6}}>
+                <FormTypes
+                  values={formValues}
+                  errors={{}}
+                  touched={{}}
+                  label={field.fieldLabel}
+                  name={field.fieldName}
+                  type={field.type === 'dropDown' ? 'multiSelect' : field.type}
+                  options={field.option}
+                  setFieldValue={(name, value) => {
+                    handleSelectFilter(field.type === 'dropDown' ? 'multiSelect' : field.type, name, value);
+                  }}
+                  required={false}
+                  fullWidth
+                  size="small"
+                />
+              </Grid>
+            ) : field.type === 'date' ? (
+              <Fragment>
+                <Grid size={{xs:12, sm:6}}>
+                  <FormControl fullWidth size="small" variant="outlined">
+                    <InputLabel id={field.fieldName}>Select Duration</InputLabel>
+                    <Select
+                      labelId={field.fieldName}
+                      id={`time-${field.fieldName}`}
+                      value={statusTimeFrame}
+                      onChange={(e) => {
+                        handleDuration(e.target.value, field);
+                        setStatusTimeFrame(e.target.value);
+                      }}
+                      label="Select Duration"
+                      size="small"
+                    >
+                      <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
+                      <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
+                      <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
+                      <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
+                      <MenuItem value={'custom'}>Custom</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid size={{xs:12, sm:6}}>
+                  <CustomDatePicker
+                    disabled={statusTimeFrame !== 'custom'}
                     fullWidth
                     size="small"
+                    name={`from_${field.fieldName}`}
+                    label={`From ${field.fieldLabel}`}
+                    value={betweenDate && betweenDate[`from_${field.fieldName}`] ? betweenDate[`from_${field.fieldName}`] : null}
+                    onChange={(date: any) => {
+                      setBetweenDate((prevState) => ({ ...prevState, [`from_${field.fieldName}`]: date }));
+                    }}
                   />
-                </Grid> : field.type === 'date' ? (
-                  <Fragment>
-                    <Grid item xs={12} sm={6}>
-                      <FormControl fullWidth size="small" variant="outlined">
-                        <InputLabel id={field.fieldName}>Select Duration</InputLabel>
-                        <Select
-                          labelId={field.fieldName}
-                          id={`time-${field.fieldName}`}
-                          value={statusTimeFrame}
-                          onChange={(e) => {
-                            handleDuration(e.target.value, field);
-                            setStatusTimeFrame(e.target.value);
-                          }}
-                          label="Select Duration"
-                        >
-                          <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
-                          <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
-                          <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
-                          <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
-                          <MenuItem value={'custom'}>Custom</MenuItem>
-                        </Select>
-                      </FormControl>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <KeyboardDatePicker
-                        autoOk
-                        disabled={statusTimeFrame !== 'custom'}
-                        fullWidth
-                        size="small"
-                        variant="inline"
-                        inputVariant="outlined"
-                        name={`from_${field.fieldName}`}
-                        label={`From ${field.fieldLabel}`}
-                        value={betweenDate && betweenDate[`from_${field.fieldName}`] ? betweenDate[`from_${field.fieldName}`] : null}
-                        onChange={(date: any) => {
-                          setBetweenDate((prevState) => ({ ...prevState, [`from_${field.fieldName}`]: date }));
-                        }}
-                        format={dateFormat}
-                        InputLabelProps={{
-                          shrink: true
-                        }}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <KeyboardDatePicker
-                        autoOk
-                        fullWidth
-                        disabled={statusTimeFrame !== 'custom'}
-                        size="small"
-                        variant="inline"
-                        inputVariant="outlined"
-                        name={`to_${field.fieldName}`}
-                        label={`To ${field.fieldLabel}`}
-                        value={betweenDate && betweenDate[`to_${field.fieldName}`] ? betweenDate[`to_${field.fieldName}`] : null}
-                        onChange={(date: any) => {
-                          setBetweenDate((prevState) => ({ ...prevState, [`to_${field.fieldName}`]: date }));
-                        }}
-                        format={dateFormat}
-                        InputLabelProps={{
-                          shrink: true
-                        }}
-                        minDate={betweenDate && betweenDate[`from_${field.fieldName}`] ? betweenDate[`from_${field.fieldName}`] : new Date()}
-                      />
-                    </Grid>
-                  </Fragment>
-                ) :
-                  <Grid item xs={12} sm={6}>
-                    <FormTypes
-                      values={formValues}
-                      errors={{}}
-                      touched={{}}
-                      label={field.fieldLabel}
-                      name={field.fieldName}
-                      type={field.type}
-                      options={field.option}
-                      setFieldValue={(name, value) => {
-                        handleSelectFilter(field.type, name, value)
-                      }}
-                      required={false}
-                      fullWidth
-                      size="small"
-                    />
-                  </Grid>
-            }
+                </Grid>
+                <Grid size={{xs:12, sm:6}}>
+                  <CustomDatePicker
+                    fullWidth
+                    disabled={statusTimeFrame !== 'custom'}
+                    size="small"
+                    name={`to_${field.fieldName}`}
+                    label={`To ${field.fieldLabel}`}
+                    value={betweenDate && betweenDate[`to_${field.fieldName}`] ? betweenDate[`to_${field.fieldName}`] : null}
+                    onChange={(date: any) => {
+                      setBetweenDate((prevState) => ({ ...prevState, [`to_${field.fieldName}`]: date }));
+                    }}
+                    minDate={betweenDate && betweenDate[`from_${field.fieldName}`] ? betweenDate[`from_${field.fieldName}`] : new Date()}
+                  />
+                </Grid>
+              </Fragment>
+            ) : (
+              <Grid size={{xs:12, sm:6}}>
+                <FormTypes
+                  values={formValues}
+                  errors={{}}
+                  touched={{}}
+                  label={field.fieldLabel}
+                  name={field.fieldName}
+                  type={field.type}
+                  options={field.option}
+                  setFieldValue={(name, value) => {
+                    handleSelectFilter(field.type, name, value);
+                  }}
+                  required={false}
+                  fullWidth
+                  size="small"
+                />
+              </Grid>
+            )}
           </React.Fragment>
         ))}
       {isStatusPeriod && (
         <Fragment>
-          <Grid item xs={12}>
+          <Grid size={{xs:12}}>
             <FormControlLabel
               control={<Checkbox checked={statusPeriod} onChange={(e) => setStatusPeriod((state: boolean) => !state)} name="statusPeriod" />}
               label="Status Period"
@@ -256,7 +242,7 @@ const Filters = ({
           </Grid>
           {statusPeriod && (
             <Fragment>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{xs:12, sm:6}}>
                 <FormControl fullWidth size="small" variant="outlined">
                   <InputLabel id="statusPeriod">Select Duration</InputLabel>
                   <Select
@@ -277,29 +263,21 @@ const Filters = ({
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <KeyboardDatePicker
-                  autoOk
+              <Grid size={{xs:12, sm:6}}>
+                <CustomDatePicker
                   fullWidth
                   disabled={statusTimeFrame !== 'custom'}
                   size="small"
-                  variant="inline"
-                  inputVariant="outlined"
                   name={`from_statusPeriod`}
                   label={`From Status Period`}
                   value={statusPeriodDate && statusPeriodDate[`from_statusPeriod`] ? statusPeriodDate[`from_statusPeriod`] : null}
                   onChange={(date: any) => {
                     setStatusPeriodDate((prevState) => ({ ...prevState, [`from_statusPeriod`]: date }));
                   }}
-                  format={dateFormat}
-                  InputLabelProps={{
-                    shrink: true
-                  }}
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <KeyboardDatePicker
-                  autoOk
+              <Grid size={{xs:12, sm:6}}>
+                <CustomDatePicker
                   fullWidth
                   size="small"
                   variant="inline"
@@ -310,10 +288,6 @@ const Filters = ({
                   value={statusPeriodDate && statusPeriodDate[`to_statusPeriod`] ? statusPeriodDate[`to_statusPeriod`] : null}
                   onChange={(date: any) => {
                     setStatusPeriodDate((prevState) => ({ ...prevState, [`to_statusPeriod`]: date }));
-                  }}
-                  format={dateFormat}
-                  InputLabelProps={{
-                    shrink: true
                   }}
                 />
               </Grid>

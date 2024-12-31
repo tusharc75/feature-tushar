@@ -1,4 +1,5 @@
-import { Box, Button, CircularProgress, Dialog, Divider, Grid, TextField } from '@material-ui/core';
+import { Box, Dialog, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import React, { useContext, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
@@ -6,7 +7,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -79,17 +80,17 @@ const DispatchDialog = ({ handleClose, handleSucess, fleet, job }) => {
         </div>
         <Box marginY={2}>
           <Grid spacing={2} container>
-            <Grid item xs={12} sm={6} md={6}>
-              <TextField variant="outlined" type="text" label="Job Number" fullWidth margin="dense" value={job?.jobNumber} />
+            <Grid size={{xs:12, sm:6, md:6}}>
+              <TextField variant="outlined" type="text" label="Job Number" fullWidth margin="dense" size="small" value={job?.jobNumber} />
             </Grid>
-            <Grid item xs={12} sm={6} md={6}>
-              <TextField variant="outlined" type="text" label="PRS" fullWidth margin="dense" value={job?.asset?.assetNumber} />
+            <Grid size={{xs:12, sm:6, md:6}}>
+              <TextField variant="outlined" type="text" label="PRS" fullWidth margin="dense" size="small" value={job?.asset?.assetNumber} />
             </Grid>
-            <Grid item xs={12} sm={6} md={6}>
-              <TextField variant="outlined" type="text" label="Fleet Number" fullWidth margin="dense" value={fleet?.fleetNumber} />
+            <Grid size={{xs:12, sm:6, md:6}}>
+              <TextField variant="outlined" type="text" label="Fleet Number" fullWidth margin="dense" size="small" value={fleet?.fleetNumber} />
             </Grid>
-            <Grid item xs={12} sm={6} md={6}>
-              <TextField variant="outlined" type="text" label="Location" fullWidth margin="dense" value={job?.shippingAddress?.optionLabel} />
+            <Grid size={{xs:12, sm:6, md:6}}>
+              <TextField variant="outlined" type="text" label="Location" fullWidth margin="dense" size="small" value={job?.shippingAddress?.optionLabel} />
             </Grid>
           </Grid>
         </Box>
@@ -99,7 +100,7 @@ const DispatchDialog = ({ handleClose, handleSucess, fleet, job }) => {
         </div>
         <Box marginY={2}>
           <Grid spacing={2} container>
-            <Grid item xs={12} sm={6} md={6}>
+            <Grid size={{xs:12, sm:6, md:6}}>
               <FormTypes
                 fieldData={null}
                 values={dispatchData}
@@ -123,7 +124,7 @@ const DispatchDialog = ({ handleClose, handleSucess, fleet, job }) => {
                 imageOrFileUploadCompletePercentage={null}
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={6}>
+            <Grid size={{xs:12, sm:6, md:6}}>
               <FormTypes
                 fieldData={null}
                 values={dispatchData}
@@ -147,7 +148,7 @@ const DispatchDialog = ({ handleClose, handleSucess, fleet, job }) => {
                 imageOrFileUploadCompletePercentage={null}
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={6}>
+            <Grid size={{xs:12, sm:6, md:6}}>
               <TextField
                 variant="outlined"
                 type="text"
@@ -156,6 +157,7 @@ const DispatchDialog = ({ handleClose, handleSucess, fleet, job }) => {
                 fullWidth
                 rows={3}
                 margin="dense"
+                size="small"
                 value={comment}
                 onChange={(e: any) => setComment(e.target.value)}
               />
@@ -164,29 +166,24 @@ const DispatchDialog = ({ handleClose, handleSucess, fleet, job }) => {
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button
-          type="button"
-          variant="outlined"
-          color="primary"
-          size="small"
+        <ThemeButton
           onClick={() => {
             handleClose();
           }}
+          buttonType='transparent'
         >
           Cancel
-        </Button>
-        <CustomButton
-          loading={false}
-          variant="contained"
-          color="primary"
-          startIcon={submitting && <CircularProgress size={20} color="inherit" />}
+        </ThemeButton>
+        <ThemeButton
           disabled={submitting}
           onClick={(e) => {
             handleDispatch();
           }}
+          isLoading={submitting}
+          buttonType='theme'
         >
           Dispatch
-        </CustomButton>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

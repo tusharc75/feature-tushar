@@ -1,12 +1,12 @@
-import { Box, Chip, MenuItem, TextField } from '@material-ui/core';
-import Checkbox from '@material-ui/core/Checkbox';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import WarningIcon from '@material-ui/icons/Warning';
+import { Box, Chip, MenuItem, TextField } from '@mui/material';
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/Delete';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
+import WarningIcon from '@mui/icons-material/Warning';
 import queryString from 'query-string';
-import { Autocomplete } from '@material-ui/lab';
+import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase, isArray } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
@@ -87,7 +87,7 @@ const SerializedAsset = () => {
         filterVal['status'] = { filter: [assetStatus] };
       }
       if (product) {
-        const productFilter = JSON.parse(product)
+        const productFilter = JSON.parse(product);
         if (isArray(productFilter)) {
           filterVal['product'] = {
             operator: 'OR',
@@ -98,7 +98,7 @@ const SerializedAsset = () => {
         }
       }
       if (warehouse) {
-        const warehouseFilter = JSON.parse(warehouse)
+        const warehouseFilter = JSON.parse(warehouse);
         if (isArray(warehouseFilter)) {
           filterVal['warehouse'] = {
             operator: 'OR',
@@ -109,7 +109,7 @@ const SerializedAsset = () => {
         }
       }
       if (currentLocation) {
-        const currentLocationFilter = JSON.parse(currentLocation)
+        const currentLocationFilter = JSON.parse(currentLocation);
         if (isArray(currentLocationFilter)) {
           filterVal['currentLocation'] = {
             operator: 'OR',
@@ -482,7 +482,7 @@ const SerializedAsset = () => {
             if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
             } else {
-              setDeleteRecord(null)
+              setDeleteRecord(null);
             }
             setShowDeleteConfirmBox(true);
           }}
@@ -632,7 +632,6 @@ const SerializedAsset = () => {
     );
   };
 
-
   const handleCertificationSupplier = async (data) => {
     const ids = selectedRecords?.map((item) => item?._id);
     const certificationSupplier = data?.map((item) => item?._id);
@@ -703,9 +702,7 @@ const SerializedAsset = () => {
           onSearch={handleSearch}
           isActionButtonVisible={true}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
-          actionMenuItems={
-            <ActionMenuItems />
-          }
+          actionMenuItems={<ActionMenuItems />}
           addButtonProps={{ disabled: !permissions?.serializedAsset?.isCreate }}
           addButtonOnclick={() => {
             setShowManageProductInventoryDialog({ open: true, isClone: false, idToClone: null });
@@ -747,8 +744,11 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.serializedAsset?.titleSingular?.toLowerCase()} :
-            ${deleteRecord?._id ? deleteRecord?.assetNumber : ''}` : `selected ${resources?.serializedAsset?.titlePlural?.toLowerCase()}`} ?`}
+          message={`Are you sure you want to delete ${deleteRecord
+            ? `${resources?.serializedAsset?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?._id ? deleteRecord?.assetNumber : ''}`
+            : `selected ${resources?.serializedAsset?.titlePlural?.toLowerCase()}`
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -812,7 +812,7 @@ const LeftSideContent = ({
             className={`w-full lg:w-[230px]`}
             options={productCategoryList}
             getOptionLabel={(option: any) => (option ? option.name : '')}
-            getOptionSelected={(option: any, val) => option._id === val}
+            isOptionEqualToValue={(option: any, val) => option._id === val}
             value={
               productCategoryList.filter((data) => data._id === productCategory).length
                 ? productCategoryList.filter((data) => data._id === productCategory)[0]
@@ -832,7 +832,7 @@ const LeftSideContent = ({
             options={productFilterList}
             size="small"
             getOptionLabel={(option: any) => (option ? option.productName : '')}
-            getOptionSelected={(option: any, val) => option._id === val}
+            isOptionEqualToValue={(option: any, val) => option._id === val}
             value={
               productFilterList.filter((data) => data._id === productFilter).length
                 ? productFilterList.filter((data) => data._id === productFilter)[0]
@@ -841,16 +841,14 @@ const LeftSideContent = ({
             onChange={(e, val) => {
               setProductFilter(val && val._id ? val._id : '');
             }}
-            renderInput={(params) => (
-              <TextField size="small" {...params} margin="none" name="product" label="Product" variant="outlined" fullWidth />
-            )}
+            renderInput={(params) => <TextField size="small" {...params} margin="none" name="product" label="Product" variant="outlined" fullWidth />}
           />
         )}
         <Autocomplete
           className={`w-full lg:w-[230px]`}
           options={warehouseOptions}
           getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-          getOptionSelected={(option: any, val) => option.optionValue === val}
+          isOptionEqualToValue={(option: any, val) => option.optionValue === val}
           value={
             warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
               ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
@@ -860,15 +858,7 @@ const LeftSideContent = ({
             setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
           }}
           renderInput={(params) => (
-            <TextField
-              {...params}
-              margin="none"
-              size="small"
-              name="plant"
-              label={resources?.warehouse?.titleSingular}
-              variant="outlined"
-              fullWidth
-            />
+            <TextField {...params} margin="none" size="small" name="plant" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
           )}
         />
         {permissions?.sublease && (
@@ -905,4 +895,3 @@ const LeftSideContent = ({
     </>
   );
 };
-

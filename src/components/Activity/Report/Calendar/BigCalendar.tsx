@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import Box from '@material-ui/core/Box';
-import { Typography } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import Box from '@mui/material/Box';
+import { Theme, Typography } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import { useHistory } from 'react-router-dom';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import IconButton from '@material-ui/core/IconButton';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import IconButton from '@mui/material/IconButton';
 import moment from 'moment';
-import { grey } from '@material-ui/core/colors';
-import { dateFormat } from '../../../../constants/helpers';
+import { displayDate } from 'src/constants/helpers';
+
 let dayname = moment.weekdaysShort();
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   fontBold: {
     fontWeight: 500,
     color: theme.palette.primary.main
@@ -185,7 +185,7 @@ export default function BigCalendar({ type, activity }) {
                       {activity
                         .filter(
                           (data) =>
-                            moment(data.dueDate).format(dateFormat) ===
+                            displayDate(data.dueDate) ===
                             year + '-' + _day.month.toString().padStart(2, '0') + '-' + _day.day.toString().padStart(2, '0')
                         )
                         .map(

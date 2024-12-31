@@ -1,6 +1,7 @@
-import { Chip, ChipProps, CircularProgress, Grid, TextField, Typography } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import { Box, Chip, ChipProps, CircularProgress, TextField, Theme, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { makeStyles } from '@mui/styles';
+import Autocomplete from '@mui/material/Autocomplete';
 import axios from 'axios';
 import { camelCase, startCase } from 'lodash';
 import React, { useEffect } from 'react';
@@ -9,7 +10,7 @@ import { useData } from '../StateProvider/Provider';
 import ActivityModelHandler from './Activity/ActivityModelHandler';
 import { get_activity_resource, get_dynamic_resource } from './Activity/Helpers/utils';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   chipStyle: {
     textAlign: 'center',
     height: 'unset !important',
@@ -178,43 +179,40 @@ export const SearchFilter = ({
             size="small"
             variant="outlined"
             placeholder="Search or Filter"
-            InputProps={{
-              ...params.InputProps,
-              endAdornment: (
-                <React.Fragment>
-                  {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                  {params.InputProps.endAdornment}
-                </React.Fragment>
-              )
+            slotProps={{
+              input: {
+                ...params.InputProps,
+                endAdornment: (
+                  <React.Fragment>
+                    {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                    {params.InputProps.endAdornment}
+                  </React.Fragment>
+                )
+              }
             }}
           />
         )}
         value={value}
-        renderOption={(option) => {
-          const index = options.findIndex((o) => o.type === option.type);
+        renderOption={(props, option, state, ownerState) => {
+          const { key, ...optionProps } = props;
           const { size, className, ...rest } = chip;
           return (
-            <Grid container alignItems="center" spacing={3}>
-              <Grid item>
-                <Chip
-                  size={size || 'medium'}
-                  {...rest}
-                  className={`${classes.chipStyle} ${className}`}
-                  label={
-                    option.isAll
-                      ? option.type === 'my'
-                        ? activityName
-                          ? 'My' + ' ' + startCase(activityName)
-                          : 'My activities'
-                        : option.name + ' ' + option.label
-                      : option.label
-                  }
-                />
-              </Grid>
-              <Grid item xs>
-                {!option.isAll && <Typography variant="body2">{option.name}</Typography>}
-              </Grid>
-            </Grid>
+            <Box component="li" {...optionProps} display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+              <Chip
+                size={size || 'small'}
+                {...rest}
+                className={`${classes.chipStyle} ${className}`}
+                label={
+                  option.isAll
+                    ? option.type === 'my'
+                      ? activityName
+                        ? `My ${startCase(activityName)}`
+                        : 'My activities'
+                      : `${option.name} ${option.label}`
+                    : option.label
+                }
+              />
+            </Box>
           );
         }}
       />

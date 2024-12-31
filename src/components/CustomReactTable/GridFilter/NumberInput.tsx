@@ -1,5 +1,5 @@
-import { Chip, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Chip, TextField } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 
 const NumberInput = ({ errors, touched, value, fieldLabel, onChange, fieldName, required = false }) => {
   return (

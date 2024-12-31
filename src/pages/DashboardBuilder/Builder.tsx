@@ -1,12 +1,13 @@
-import { Box, Button, Checkbox, FormControl, FormControlLabel, FormGroup, FormLabel, Grid, Radio, RadioGroup, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
-import { makeStyles } from '@material-ui/styles';
+import { Box, Checkbox, FormControl, FormControlLabel, FormGroup, FormLabel, Radio, RadioGroup, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import Autocomplete from '@mui/material/Autocomplete';
+import { makeStyles } from '@mui/styles';
 import { camelCase, startCase } from 'lodash';
 import React from 'react';
-
 import axiosInstance from 'src/axios/axiosInstance';
 import { generateId } from 'src/constants/helpers';
 import { CHART_TYPES, GRAPH_TYPES, IFormDataType, KPIListType, defaultFormConfigs, statuses } from './builderHelpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const useClasses = makeStyles(() => ({
   column: {
@@ -48,7 +49,7 @@ const Builder = (props: Props) => {
       .then(({ data: { data } }) => {
         setKpiLists(data);
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   React.useEffect(fetchKpis, []);
@@ -116,7 +117,7 @@ const Builder = (props: Props) => {
               }));
             }}
             getOptionLabel={(option) => option.name}
-            getOptionSelected={(option, value) => option.kpi === value.kpi}
+            isOptionEqualToValue={(option, value) => option.kpi === value.kpi}
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -150,7 +151,7 @@ const Builder = (props: Props) => {
             value={formValues.graphType}
             onChange={(_, val) => handleChange('graphType', val)}
             getOptionLabel={(option) => option}
-            getOptionSelected={(option, value) => option === value}
+            isOptionEqualToValue={(option, value) => option === value}
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -171,7 +172,7 @@ const Builder = (props: Props) => {
             value={formValues.chartType}
             onChange={(_, val) => handleChange('chartType', val)}
             getOptionLabel={(option) => option}
-            getOptionSelected={(option, value) => option === value}
+            isOptionEqualToValue={(option, value) => option === value}
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -192,7 +193,7 @@ const Builder = (props: Props) => {
               value={formValues.axis}
               onChange={(_, val) => handleChange('axis', val)}
               getOptionLabel={(option) => option}
-              getOptionSelected={(option, value) => option === value}
+              isOptionEqualToValue={(option, value) => option === value}
               renderInput={(params) => <TextField {...params} required label="Flow Axis" variant="outlined" />}
             />
           </Box>
@@ -248,7 +249,7 @@ const Builder = (props: Props) => {
               value={formValues.filters}
               onChange={(_, val) => handleChange('filters', val)}
               getOptionLabel={(option) => option.title}
-              getOptionSelected={(option, value) => option.title === value.title}
+              isOptionEqualToValue={(option, value) => option.title === value.title}
               renderInput={(params) => (
                 <TextField
                   {...params}
@@ -286,7 +287,7 @@ const Builder = (props: Props) => {
         </Box>
         <Box mt={2}>
           <Grid container>
-            <Grid item>
+            <Grid >
               <FormGroup row>
                 <FormControlLabel
                   control={
@@ -304,7 +305,7 @@ const Builder = (props: Props) => {
                 />
               </FormGroup>
             </Grid>
-            <Grid item>
+            <Grid >
               <FormGroup row>
                 <FormControlLabel
                   control={
@@ -326,9 +327,9 @@ const Builder = (props: Props) => {
         </Box>
       </div>
       <Box mt={2}>
-        <Button disableRipple fullWidth color="primary" onClick={addFormConfigs} variant="contained">
+        <ThemeButton fullWidth onClick={addFormConfigs} buttonType='theme'>
           {Boolean(selectedData) ? 'Apply Changes' : 'Add Chart'}
-        </Button>
+        </ThemeButton>
       </Box>
     </Box>
   );

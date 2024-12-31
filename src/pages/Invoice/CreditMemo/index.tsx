@@ -1,16 +1,16 @@
-import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { camelCase, set, startCase } from 'lodash';
+import { Box, IconButton, Menu, MenuItem } from '@mui/material';
+import { camelCase, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { CHILD_RESOURCE, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { Add } from '@material-ui/icons';
+import { Add } from '@mui/icons-material';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import ManageCreditMemo from 'src/pages/CreditMemo/ManageCreditMemo';
@@ -21,10 +21,9 @@ import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { isMobile, isTablet } from 'react-device-detect';
 import MaterialDialog from './MaterialDialog';
 import { FiExternalLink } from 'react-icons/fi';
-
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 function CreditMemo({ invoiceData, allowedToEdit }) {
-
   const renderedFrom = `${camelCase(sidebarResource.invoice)}_credit_memo`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -106,7 +105,7 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
-  }
+  };
 
   const fetchFields = async () => {
     try {
@@ -289,26 +288,28 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
     <Fragment>
       <Box pb={2} justifyContent={'space-between'} className="flex gap-2">
         {allowedToEdit && permissions?.creditMemo?.isCreate && (
-          <Button variant={'outlined'} color="primary" size="small" startIcon={<Add />} onClick={() => setCreditMemoDialog({ open: true, id: null })}>
+          <ThemeButton
+            startIcon={<Add />}
+            iconForMobile={<Add />}
+            mobileTooltip="Create"
+            onClick={() => setCreditMemoDialog({ open: true, id: null })}
+          >
             Create
-          </Button>
+          </ThemeButton>
         )}
-        <div className="flex gap-2 items-center">
+        <div className="flex items-center gap-2">
           {invoiceColumns && dataRows?.length > 0 && <PreviewDownload {...previewDownloadProps} />}
           {allowedToEdit && (
-            <Button
-              variant={'outlined'}
-              color="primary"
-              aria-controls="simple-menu"
-              aria-haspopup="true"
+            <ThemeButton
               disabled={selectedRecords.length === 0}
-              size="small"
               onClick={handleClick}
               endIcon={<ArrowDropDownIcon />}
-              className="new-dropdown-v1"
+              mobileTooltip="Actions"
+              buttonType="yellow"
+              iconForMobile={<ArrowDropDownIcon />}
             >
               {'Actions'}
-            </Button>
+            </ThemeButton>
           )}
         </div>
         <Menu
@@ -316,7 +317,6 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
           keepMounted
           open={Boolean(anchorActionEl)}
           onClose={handleClose}
-          getContentAnchorEl={null}
           anchorOrigin={{
             vertical: 'bottom',
             horizontal: 'right'

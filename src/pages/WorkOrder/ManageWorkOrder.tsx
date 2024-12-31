@@ -1,5 +1,6 @@
-import { useState, useEffect, useContext, useRef, Fragment } from 'react';
-import { Box, Dialog, Button, Grid, Tooltip, IconButton } from '@material-ui/core';
+import { useState, useEffect, useContext, Fragment } from 'react';
+import { Box, Dialog, } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Formik, Form } from 'formik';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
@@ -13,7 +14,7 @@ import {
   serializedAsset,
   GenerateResourceLineNumber,
   WORK_ORDER_STATUS,
-  WORK_ORDER_TYPE,
+  WORK_ORDER_TYPE
 } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema, workOrder, sidebarResource } from '../../constants/helpers';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
@@ -22,10 +23,10 @@ import { FaDiceOne } from 'react-icons/fa';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
-import CustomButton from '../../components/Helpers/CustomButton';
 import routes from 'src/components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
 import { ASSET_STATUS } from '../../constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const disabledFieldArray = ['type', 'product', 'warehouse', 'serializedAsset', 'status'];
 
@@ -54,7 +55,9 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
       const response = await axiosInstance().get(`/field?resource=${sidebarResource['workOrder']}`);
       data = response?.data?.data;
 
-      data = data?.filter((e) => !['productionOrder', 'repairOrder', 'repairJob', 'assemblyOrder', 'serviceProcessStatus'].includes(e?.fieldData?.fieldName));
+      data = data?.filter(
+        (e) => !['productionOrder', 'repairOrder', 'repairJob', 'assemblyOrder', 'serviceProcessStatus'].includes(e?.fieldData?.fieldName)
+      );
 
       let serializedAssetFieldIndex = data.findIndex((obj) => obj?.fieldData.fieldName === 'serializedAsset');
       if (serializedAssetFieldIndex > -1) {
@@ -69,12 +72,14 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
                 ASSET_STATUS.underReview,
                 ASSET_STATUS.needRepair,
                 ASSET_STATUS.needRecert,
-                ASSET_STATUS.customerPossession,
+                ASSET_STATUS.customerPossession
               ]
             }
           }
-        ]
-        const { data: { data: lookupResource } } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=${serializedAsset.resource}&deepFilter=${JSON.stringify(deepFilter)}`);
+        ];
+        const {
+          data: { data: lookupResource }
+        } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=${serializedAsset.resource}&deepFilter=${JSON.stringify(deepFilter)}`);
         if (lookupResource['Serialized Asset']) {
           data[serializedAssetFieldIndex].fieldData.option = lookupResource['Serialized Asset'];
           setAssetOptionData(lookupResource['Serialized Asset']);
@@ -140,7 +145,8 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
     } else {
       setSubmitting(true);
       let updatedValues = { ...values };
-      axiosInstance().post(`${workOrder.api}`, updatedValues)
+      axiosInstance()
+        .post(`${workOrder.api}`, updatedValues)
         .then(({ data }) => {
           setLoading(false);
           setSubmitting(false);
@@ -161,7 +167,6 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
         });
     }
   };
-
 
   const handleScroll = (errors) => {
     const err = Object.keys(errors);
@@ -196,11 +201,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
       }}
     >
       {initialData?.fields?.length ? (
-        <Formik
-          initialValues={initialData.values}
-          validationSchema={yupSchema(initialData.fields)}
-          onSubmit={handleSubmit}
-        >
+        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
@@ -227,74 +228,77 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
                 <Form autoComplete="off" autoCorrect="off" noValidate>
                   {formsData &&
                     formsData?.map((form, i) => {
-                      return form.name && (
-                        <div key={i}>
-                          <div className="detail-box-content">
-                            <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                            <h2 className="form-label-style form-label-quotes">{form.name}</h2>
-                          </div>
-                          <Box marginY={2}>
-                            <Grid spacing={3} container>
-                              {form.sectionFields.map((field, index2) => (
-                                <Grid key={index2} item xs={12} sm={6} md={6}>
-                                  {field.fieldName === 'warehouse' ? (
-                                    <FormTypes
-                                      {...field}
-                                      fieldData={field}
-                                      disabled={(workOrderId && (disabledFieldArray.includes(field.fieldName)) || field.disableOnEdit)}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value);
-                                        let data = assetOptionsData.filter((i) => {
-                                          if (values?.product) {
-                                            return values?.product === i.product && i.warehouse === value
-                                          }
-                                          return i.warehouse === value;
-                                        });
-                                        setAssetOptions(data);
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                      imageOrFileUploadCompletePercentage={null}
-                                    />
-                                  ) : field.fieldName === 'serializedAsset' ? (
-                                    <FormTypes
-                                      {...field}
-                                      fieldData={field}
-                                      disabled={(workOrderId && (disabledFieldArray.includes(field.fieldName)) || field.disableOnEdit
-                                        || values['type'] === WORK_ORDER_TYPE.productionOrder)}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={assetOptions}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value);
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                      imageOrFileUploadCompletePercentage={null}
-                                    />
-                                  ) :
-                                    field.fieldName === 'product' ? (
+                      return (
+                        form.name && (
+                          <div key={i}>
+                            <div className="detail-box-content">
+                              <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                              <h2 className="form-label-style form-label-quotes">{form.name}</h2>
+                            </div>
+                            <Box marginY={2}>
+                              <Grid spacing={3} container>
+                                {form.sectionFields.map((field, index2) => (
+                                  <Grid key={index2} size={{ xs: 12, sm: 6, md: 6 }}>
+                                    {field.fieldName === 'warehouse' ? (
                                       <FormTypes
                                         {...field}
                                         fieldData={field}
-                                        disabled={(workOrderId && (disabledFieldArray.includes(field.fieldName)) || field.disableOnEdit)}
+                                        disabled={(workOrderId && disabledFieldArray.includes(field.fieldName)) || field.disableOnEdit}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        setFieldValue={(name, value) => {
+                                          setFieldValue(name, value);
+                                          let data = assetOptionsData.filter((i) => {
+                                            if (values?.product) {
+                                              return values?.product === i.product && i.warehouse === value;
+                                            }
+                                            return i.warehouse === value;
+                                          });
+                                          setAssetOptions(data);
+                                        }}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
+                                        size="small"
+                                        imageOrFileUploadCompletePercentage={null}
+                                      />
+                                    ) : field.fieldName === 'serializedAsset' ? (
+                                      <FormTypes
+                                        {...field}
+                                        fieldData={field}
+                                        disabled={
+                                          (workOrderId && disabledFieldArray.includes(field.fieldName)) ||
+                                          field.disableOnEdit ||
+                                          values['type'] === WORK_ORDER_TYPE.productionOrder
+                                        }
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={assetOptions}
+                                        setFieldValue={(name, value) => {
+                                          setFieldValue(name, value);
+                                        }}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
+                                        size="small"
+                                        imageOrFileUploadCompletePercentage={null}
+                                      />
+                                    ) : field.fieldName === 'product' ? (
+                                      <FormTypes
+                                        {...field}
+                                        fieldData={field}
+                                        disabled={(workOrderId && disabledFieldArray.includes(field.fieldName)) || field.disableOnEdit}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -306,7 +310,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
                                           setFieldValue(name, value);
                                           let data = assetOptionsData.filter((i) => {
                                             if (values?.warehouse) {
-                                              return values?.warehouse === i.warehouse && i.product === value
+                                              return values?.warehouse === i.warehouse && i.product === value;
                                             }
                                             return i.product === value;
                                           });
@@ -319,45 +323,43 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
                                         size="small"
                                         imageOrFileUploadCompletePercentage={null}
                                       />
-                                    ) :
-                                      (
-                                        <FormTypes
-                                          {...field}
-                                          fieldData={field}
-                                          fields={initialData.fields}
-                                          disabled={(workOrderId && (disabledFieldArray.includes(field.fieldName)) || field.disableOnEdit)}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={field.option}
-                                          setFieldValue={(name, value) => {
-                                            setFieldValue(name, value);
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                          imageOrFileUploadCompletePercentage={null}
-                                        />
-                                      )}
-                                </Grid>
-                              ))}
-                            </Grid>
-                          </Box>
-                        </div>
-                      )
+                                    ) : (
+                                      <FormTypes
+                                        {...field}
+                                        fieldData={field}
+                                        fields={initialData.fields}
+                                        disabled={(workOrderId && disabledFieldArray.includes(field.fieldName)) || field.disableOnEdit}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        setFieldValue={(name, value) => {
+                                          setFieldValue(name, value);
+                                        }}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
+                                        size="small"
+                                        imageOrFileUploadCompletePercentage={null}
+                                      />
+                                    )}
+                                  </Grid>
+                                ))}
+                              </Grid>
+                            </Box>
+                          </div>
+                        )
+                      );
                     })}
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  size="small"
+                <ThemeButton
+                  buttonType="transparent"
                   disabled={isSubmitting || loading}
                   onClick={() => {
                     if (!isEqual(values, initialData.values)) {
@@ -368,13 +370,11 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
                   }}
                 >
                   Cancel
-                </Button>
-                <CustomButton
+                </ThemeButton>
+                <ThemeButton
                   disabled={isSubmitting || loading}
-                  loading={loading}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+                  isLoading={loading}
+                  buttonType="theme"
                   onClick={(e) => {
                     e.preventDefault();
                     handleScroll(errors);
@@ -383,11 +383,10 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
                 >
                   {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

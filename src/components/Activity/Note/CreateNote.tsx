@@ -1,13 +1,11 @@
-import MomentUtils from '@date-io/moment';
-import { CircularProgress, IconButton, Paper } from '@material-ui/core';
-import Box from '@material-ui/core/Box';
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
-import DeleteIcon from '@material-ui/icons/Delete';
-import GetAppIcon from '@material-ui/icons/GetApp';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { IconButton, Paper } from '@mui/material';
+import Box from '@mui/material/Box';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Grid from '@mui/material/Grid2';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import DeleteIcon from '@mui/icons-material/Delete';
+import GetAppIcon from '@mui/icons-material/GetApp';
 import axios, { CancelTokenSource } from 'axios';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
@@ -219,7 +217,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
           {otherAttachments.map((attachment, i) => {
             return (
               <>
-                <Grid item key={i} sm={3} xs={3} md={3} xl={3}>
+                <Grid key={i} size={{ sm: 3, xs: 3, md: 3, xl: 3 }}>
                   <Paper className={emailStyles.fileContainer}>
                     <img src={getFileIconSrc(attachment)} className={emailStyles.file} alt="attchment" />
                     <Typography noWrap variant="body2">
@@ -261,12 +259,12 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
         <CommonSkeleton lenArray={[...Array(4).keys()]} />
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button variant="outlined" color="primary" size="small" disabled>
+        <ThemeButton buttonType="transparent" disabled>
           Cancel
-        </Button>
-        <Button variant="contained" color="primary" size="small" disabled>
+        </ThemeButton>
+        <ThemeButton buttonType="theme" disabled>
           Save
-        </Button>
+        </ThemeButton>
       </CustomDialogFooter>
     </>
   ) : (
@@ -285,93 +283,89 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
           ></CustomDialogHeader>
           <CustomDialogContent>
             <Form autoComplete="off" autoCorrect="off" noValidate>
-              <MuiPickersUtilsProvider utils={MomentUtils}>
-                <Box padding={1}>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12}>
-                      <TextField
-                        variant="outlined"
-                        type="text"
-                        label="Note Title"
-                        required={true}
-                        name="name"
-                        fullWidth
-                        margin="dense"
-                        value={values['name']}
-                        error={touched['name'] && Boolean(errors['name'])}
-                        helperText={touched['name'] && errors['name']}
-                        onChange={(e) => {
-                          setFieldValue('name', e.target.value.trimStart());
+              <Box padding={1}>
+                <Grid container spacing={3}>
+                  <Grid size={{ xs: 12 }}>
+                    <TextField
+                      variant="outlined"
+                      type="text"
+                      label="Note Title"
+                      required={true}
+                      name="name"
+                      fullWidth
+                      margin="dense"
+                      size="small"
+                      value={values['name']}
+                      error={touched['name'] && Boolean(errors['name'])}
+                      helperText={touched['name'] && errors['name']}
+                      onChange={(e) => {
+                        setFieldValue('name', e.target.value.trimStart());
+                      }}
+                    />
+                    {renderFileThumbnails}
+                    <ImageAttachments
+                      imageAttachments={fileImageAttachments}
+                      onImageClick={(attachment) => {
+                        setImageSource(attachment);
+                        setOpen(true);
+                      }}
+                      onDelete={handleDeleteFileImageAttachment}
+                      emailId={noteId}
+                      isRenderedFrom={true}
+                    />
+                    <ImageAttachments
+                      imageAttachments={imageAttachments}
+                      onImageClick={(attachment) => {
+                        setImageSource(attachment);
+                        setOpen(true);
+                      }}
+                      onDelete={handleDeleteImageAttachment}
+                      emailId={noteId}
+                      isRenderedFrom={true}
+                    />
+                    <Box>
+                      <TinyMce
+                        onChange={(value) => {
+                          setFieldValue('description', value);
                         }}
-                      />
-                      {renderFileThumbnails}
-                      <ImageAttachments
-                        imageAttachments={fileImageAttachments}
-                        onImageClick={(attachment) => {
-                          setImageSource(attachment);
-                          setOpen(true);
+                        initialValue={initialValues?.description}
+                        imageOrFileUploadCompletePercentage={(completePercentage) => {
+                          setUploadingImageOrFileProgress(completePercentage);
                         }}
-                        onDelete={handleDeleteFileImageAttachment}
-                        emailId={noteId}
-                        isRenderedFrom={true}
+                        // doNotShowUploadFile={true : false}
+                        onUploadFile={onUploadFile}
+                        onUploadImage={handleUploadImage}
+                        usePublicUrlforFileUpload={true}
                       />
-                      <ImageAttachments
-                        imageAttachments={imageAttachments}
-                        onImageClick={(attachment) => {
-                          setImageSource(attachment);
-                          setOpen(true);
-                        }}
-                        onDelete={handleDeleteImageAttachment}
-                        emailId={noteId}
-                        isRenderedFrom={true}
-                      />
-                      <Box>
-                        <TinyMce
-                          onChange={(value) => {
-                            setFieldValue('description', value);
-                          }}
-                          initialValue={initialValues?.description}
-                          imageOrFileUploadCompletePercentage={(completePercentage) => {
-                            setUploadingImageOrFileProgress(completePercentage);
-                          }}
-                          // doNotShowUploadFile={true : false}
-                          onUploadFile={onUploadFile}
-                          onUploadImage={handleUploadImage}
-                          usePublicUrlforFileUpload={true}
-                        />
-                      </Box>
+                    </Box>
 
-                      {noteId && (
-                        <Fragment>
-                          {initialValues.relatedTo && initialValues.relatedTo.length ? (
-                            <Box mt={2}>
-                              <RelatedToDispay relatedTo={initialValues.relatedTo} />
-                            </Box>
-                          ) : null}
-                          {initialValues.createdBy && initialValues.createdBy.date && (
-                            <Box mt={1} color="text.secondary">
-                              <Typography variant="body2">Created {displayDate(initialValues.createdBy.date)}</Typography>
-                            </Box>
-                          )}
-                          {initialValues.updatedBy && initialValues.updatedBy.date && (
-                            <Box mt={1} color="text.secondary">
-                              <Typography variant="body2">Updated {displayDate(initialValues.updatedBy.date)}</Typography>
-                            </Box>
-                          )}
-                        </Fragment>
-                      )}
-                    </Grid>
+                    {noteId && (
+                      <Fragment>
+                        {initialValues.relatedTo && initialValues.relatedTo.length ? (
+                          <Box mt={2}>
+                            <RelatedToDispay relatedTo={initialValues.relatedTo} />
+                          </Box>
+                        ) : null}
+                        {initialValues.createdBy && initialValues.createdBy.date && (
+                          <Box mt={1} color="text.secondary">
+                            <Typography variant="body2">Created {displayDate(initialValues.createdBy.date)}</Typography>
+                          </Box>
+                        )}
+                        {initialValues.updatedBy && initialValues.updatedBy.date && (
+                          <Box mt={1} color="text.secondary">
+                            <Typography variant="body2">Updated {displayDate(initialValues.updatedBy.date)}</Typography>
+                          </Box>
+                        )}
+                      </Fragment>
+                    )}
                   </Grid>
-                </Box>
-              </MuiPickersUtilsProvider>
+                </Grid>
+              </Box>
             </Form>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button
-              size="small"
-              variant="outlined"
-              type="button"
-              color="primary"
+            <ThemeButton
+              buttonType="transparent"
               disabled={uploading}
               onClick={() => {
                 if (isEqual(initialValues, values)) handleClose();
@@ -379,13 +373,9 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
               }}
             >
               Cancel
-            </Button>
-            <Button
-              size="small"
-              type="button"
-              color="primary"
-              variant="contained"
-              endIcon={uploading && <CircularProgress size={20} />}
+            </ThemeButton>
+            <ThemeButton
+              buttonType="theme"
               onClick={() => {
                 if (Object.keys(errors).length) {
                   Object.keys(errors).map((k) => {
@@ -394,13 +384,13 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
                 } else submitForm();
               }}
               disabled={uploadingImageOrFileProgress > 0 || uploading}
+              isLoading={uploading}
             >
               Save
-            </Button>
+            </ThemeButton>
           </CustomDialogFooter>
           {showConfirmDialog ? (
             <ConfirmCancelDialog
-              close={() => setShowConfirmDialog(false)}
               open={showConfirmDialog}
               onSave={() => {
                 setShowConfirmDialog(false);

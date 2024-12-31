@@ -1,15 +1,14 @@
-import { Box, Button, Grid, Menu, MenuItem } from '@material-ui/core';
-import { Edit } from '@material-ui/icons';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import { Box, Menu, MenuItem } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import EditIcon from '@mui/icons-material/Edit';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomTabs, { TabPanel, CustomTab } from 'src/components/CustomTabs';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import { sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -19,6 +18,8 @@ import History from './History';
 import ManageTrailerMaster from './ManageTrailerMaster';
 import Step from '../DynamicForm/Step';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { ExpandMore } from '@mui/icons-material';
+import { RiExchange2Line } from 'react-icons/ri';
 
 const TrailerMasterDetail = () => {
   const { id } = useParams();
@@ -162,23 +163,21 @@ const TrailerMasterDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ ...routes.trailerMaster, title: resources?.trailerMaster?.titlePlural }, { title: trailerMasterData?.trailerName }]} />
+          <CustomBreadCrumbs
+            routes={[{ ...routes.trailerMaster, title: resources?.trailerMaster?.titlePlural }, { title: trailerMasterData?.trailerName }]}
+          />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {permissions?.trailerMaster?.isUpdate && (
-              <Button
-                variant={'outlined'}
-                color="primary"
-                aria-controls="simple-menu"
-                aria-haspopup="true"
-                className="btn-outline-v1"
-                size="small"
+              <ThemeButton
                 onClick={handleClick}
-                endIcon={<ArrowDropDownIcon />}
+                endIcon={<ExpandMore />}
+                mobileTooltip="Change Status"
+                iconForMobile={<RiExchange2Line size={24} style={{ color: 'var(--primary-text)' }} />}
               >
                 {'Change Status'}
-              </Button>
+              </ThemeButton>
             )}
             <Menu
               id="simple-menu"
@@ -186,7 +185,6 @@ const TrailerMasterDetail = () => {
               keepMounted
               open={Boolean(anchorEl)}
               onClose={handleClose}
-              getContentAnchorEl={null}
               anchorOrigin={{
                 vertical: 'bottom',
                 horizontal: 'right'
@@ -213,9 +211,9 @@ const TrailerMasterDetail = () => {
                 })}
             </Menu>
             {permissions?.trailerMaster?.isUpdate && (
-              <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
-                {isMobile && !isTablet ? <Edit /> : 'Edit'}
-              </Button>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                {'Edit'}
+              </ThemeButton>
             )}
             {permissions?.trailerMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
           </Box>
@@ -223,18 +221,14 @@ const TrailerMasterDetail = () => {
       </Box>
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0}>
-            Details
-          </CustomTab>
-          <CustomTab value={1}>
-            History
-          </CustomTab>
+          <CustomTab value={0}>Details</CustomTab>
+          <CustomTab value={1}>History</CustomTab>
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
             <Grid container spacing={2} style={{ padding: '8px' }}>
-              <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Grid>
           ) : (
             <DetailsPage data={trailerMasterData} fields={fields} />

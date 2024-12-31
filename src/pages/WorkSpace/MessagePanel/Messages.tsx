@@ -1,8 +1,7 @@
-import { Avatar, IconButton, Menu, MenuItem, Popper, Tooltip } from '@material-ui/core';
-import { MoreVert, Delete, GetApp } from '@material-ui/icons';
+import { Avatar, IconButton, Menu, MenuItem, Popper, Tooltip } from '@mui/material';
+import { MoreVert, Delete, GetApp } from '@mui/icons-material';
 import EmojiPicker from 'emoji-picker-react';
 import { groupBy, uniqBy } from 'lodash';
-import moment from 'moment';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { BsEmojiGrin, BsReply } from 'react-icons/bs';
 import { Socket } from 'socket.io-client';
@@ -13,7 +12,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { useAppTheme } from 'src/constants/AppConfig';
-import { cn, dateFormat, getFileIconSrc } from 'src/constants/helpers';
+import { cn, dateFormat, displayDate, displayDateTime, getFileIconSrc } from 'src/constants/helpers';
 import { ChannelData, Message } from 'src/pages/WorkSpace/types';
 import { formatDateWithTodayYestarday } from 'src/pages/WorkSpace/utils';
 import SendMessage from './SendMessage';
@@ -29,13 +28,13 @@ type MessagesProps = {
 };
 
 export const groupByDate = (messages: Message[]) => {
-  return groupBy(messages, (message) => moment(message.date).format(dateFormat));
+  return groupBy(messages, (message) => displayDate(message.date));
 };
 
 const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, channelData }: MessagesProps) => {
   const [messages, setMessages] = useState<{ [key: string]: Message[] }>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [lastMessageId, setLastMessageId] = useState(null);
+  const [lastMessageSeen, setLastMessageSeen] = useState(null);
   const toastConfig = useContext(CustomToastContext);
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, _id: null });
   const [anchorEl, setAnchorEl] = useState(null);
@@ -43,35 +42,44 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, ch
   const [editingMessage, setEditingMessage] = useState(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const fetchMessages = async (after: string = null) => {
+  const fetchMessages = async (messageId: string = null, updateMessage: Boolean = false) => {
     try {
       let api = `/work-space/channel/message/${channelId}`;
-      if (after) {
-        api += `?after=${after}`;
+      if (updateMessage && messageId) {
+        api += `/${messageId}`;
+      } else if (messageId) {
+        api += `?after=${messageId}`;
       } else {
         setIsLoading(true);
       }
+
       const { data } = await axiosInstance().get(api);
 
       setMessages((prevMessages) => {
         let newMessages = data?.data || [];
-        if (after) {
-          return groupByDate([...Object.values(prevMessages).flat().slice(0, -1), ...newMessages]);
+        if (updateMessage) {
+          const updatedMessages: Message[] = Object?.values(prevMessages)?.flat();
+          const index: number = updatedMessages?.findIndex((message) => message._id === messageId);
+          updatedMessages[index] = data?.data;
+          return groupByDate(updatedMessages);
+        } else if (!updateMessage && messageId) {
+          return groupByDate([...Object?.values(prevMessages)?.flat()?.slice(0, -1), ...newMessages]);
         } else {
           return groupByDate(newMessages);
         }
       });
+
       setTimeout(() => {
         containerRef.current?.scrollTo(0, containerRef.current?.scrollHeight || 0);
       }, 100);
       setThreadDialogOpen((prevDialog) => {
-        if (prevDialog.open && (prevDialog.message?._id === after || !after)) {
+        if (prevDialog.open && (prevDialog.message?._id === messageId || !messageId)) {
           const updatedMessage = data?.data?.find((message) => message._id === prevDialog.message?._id);
           return { open: true, message: updatedMessage || prevDialog.message };
         }
         return prevDialog;
       });
-      if (data?.data?.length > 0) setLastMessageId(data.data[data.data.length - 1]?._id);
+      if (data?.data?.length > 0) setLastMessageSeen(data?.data[data.data.length - 1]?._id);
     } catch (error) {
       toastConfig.setToastConfig(error);
     } finally {
@@ -81,15 +89,11 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, ch
 
   useEffect(() => {
     if (socket) {
-      socket.on('fetchNewMessage', (messageId) => {
-        if (messageId) {
-          fetchMessages(messageId);
-        } else {
-          fetchMessages(lastMessageId);
-        }
+      socket.on('fetchUpdatedMessage', (messageId) => {
+        fetchMessages(messageId, true);
       });
-      socket.on('fetchMessages', () => {
-        fetchMessages();
+      socket.on('fetchMessages', (messageId) => {
+        fetchMessages(messageId);
       });
       socket.on('addReaction', ({ messageId, emoji, user }) => {
         setMessages((prevMessages) => {
@@ -121,7 +125,15 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, ch
         });
       });
     }
-  }, [socket, lastMessageId]);
+    return () => {
+      if (socket) {
+        socket.off('fetchUpdatedMessage');
+        socket.off('fetchMessages');
+        socket.off('addReaction');
+        socket.off('removeReaction');
+      }
+    };
+  }, [socket, channelId]);
 
   useEffect(() => {
     fetchMessages();
@@ -196,7 +208,7 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, ch
           </div>
         )}
       </div>
-      <SendMessage channelId={channelId} socket={socket} channelData={channelData} disabled={isLoading} />
+      <SendMessage channelId={channelId} socket={socket} channelData={channelData} disabled={isLoading} messageId={lastMessageSeen} />
       <MoreMenuAndDeleteConfirmDialog
         anchorEl={anchorEl}
         handleMenuClose={handleMenuClose}
@@ -244,7 +256,7 @@ export const DisplaySingleMessage = ({
   handleEditComplete,
   setThreadDialogOpen,
   handleMenuClick,
-  messageTimeFormatter = (date) => moment(date).format('hh:mm A'),
+  messageTimeFormatter = (date) => displayDateTime(date, 'hh:mm A'),
   channelData
 }: DisplaySingleMessageProps) => {
   const [theme] = useAppTheme();
@@ -621,7 +633,6 @@ export const MoreMenuAndDeleteConfirmDialog = ({
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
-        getContentAnchorEl={null}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'left'

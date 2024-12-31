@@ -1,5 +1,5 @@
-import { Box, MenuItem, TextField } from '@material-ui/core';
-import IconButton from '@material-ui/core/IconButton';
+import { Box, MenuItem, TextField } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import CustomContainer from 'src/components/CustomContainer';
@@ -14,9 +14,9 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
 import { ASSET_APPROVAL_STATUS, gridLoadingTimeout, prepareDataForGrid, serializedAsset, sidebarResource } from '../../../constants/helpers';
-import CancelIcon from '@material-ui/icons/Cancel';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import { Autocomplete } from '@material-ui/lab';
+import CancelIcon from '@mui/icons-material/Cancel';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import Autocomplete from '@mui/material/Autocomplete';
 
 const renderedFrom = camelCase(sidebarResource.serializedAssetStatusChangeRequest);
 
@@ -190,7 +190,9 @@ const SerializedAssetStatusChangeRequest = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ ...routes.serializedAssetStatusChangeRequest, title: resources?.serializedAssetStatusChangeRequest?.titlePlural }]} />
+        <CustomBreadCrumbs
+          routes={[{ ...routes.serializedAssetStatusChangeRequest, title: resources?.serializedAssetStatusChangeRequest?.titlePlural }]}
+        />
       </div>
       <CustomContainer>
         <ListingPageHeader
@@ -232,7 +234,7 @@ const SerializedAssetStatusChangeRequest = () => {
               className={`w-full lg:w-[230px]`}
               options={statusOptions}
               getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-              getOptionSelected={(option: any, val) => option.optionValue === val}
+              isOptionEqualToValue={(option: any, val) => option.optionValue === val}
               value={
                 statusOptions?.filter((data) => data.optionValue === selectedStatus)?.length
                   ? statusOptions.filter((data) => data.optionValue === selectedStatus)[0]

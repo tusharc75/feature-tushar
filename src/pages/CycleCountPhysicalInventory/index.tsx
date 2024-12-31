@@ -1,5 +1,5 @@
-import { Box, Grid, IconButton } from '@material-ui/core';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import { Box, IconButton } from '@mui/material';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { camelCase } from 'lodash';
 import { Fragment, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';

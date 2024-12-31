@@ -1,15 +1,14 @@
-import { Box, Button, Dialog, Grid, Typography } from '@material-ui/core';
-import IconButton from '@material-ui/core/IconButton';
-import TextField from '@material-ui/core/TextField';
-import { DragIndicator } from '@material-ui/icons';
+import { Box, Dialog, Grid, Typography } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
+import TextField from '@mui/material/TextField';
+import { DragIndicator } from '@mui/icons-material';
 import React, { useEffect } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { changeItemIndex, CustomDialogTransition } from 'src/constants/helpers';
-
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -164,13 +163,12 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading, isLast =
         </DndContext>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button variant="outlined" size="small" color="primary" onClick={handleClose}>
+        <ThemeButton buttonType="transparent" onClick={handleClose}>
           Cancel
-        </Button>
-        <CustomButton
-          loading={loading}
-          variant="contained"
-          color="primary"
+        </ThemeButton>
+        <ThemeButton
+          isLoading={loading}
+          buttonType="theme"
           type="submit"
           onClick={(e) => {
             e.preventDefault();
@@ -179,7 +177,7 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading, isLast =
           disabled={loading || !valid}
         >
           {buttonText}
-        </CustomButton>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );
@@ -205,9 +203,8 @@ const RenderListItem = ({ column, index, onChangeValue, type }) => {
     <li
       style={style}
       ref={setNodeRef}
-      className={`${
-        isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,#fff)]'
-      } list-none transition-colors`}
+      className={`${isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,#fff)]'
+        } list-none transition-colors`}
     >
       <Box bgcolor="var(--dark-primary, white)" border={1} p={1} borderColor="var(--common-border-color)">
         <Grid container spacing={1}>
@@ -231,6 +228,7 @@ const RenderListItem = ({ column, index, onChangeValue, type }) => {
               name="Order"
               variant="outlined"
               margin="dense"
+              size="small"
               type="number"
               fullWidth
               style={{ margin: 0 }}

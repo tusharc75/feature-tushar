@@ -1,11 +1,10 @@
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { Button, IconButton, Typography } from '@material-ui/core';
-import { Add } from '@material-ui/icons';
+import { IconButton, Typography } from '@mui/material';
+import { Add } from '@mui/icons-material';
 import { useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ActivityModelHandler from '../../ActivityModelHandler';
 import { Column } from './type';
-
 import { useData } from '../../../../StateProvider/Provider';
 import SingleCard from './SingleCard';
 import { useDroppable } from '@dnd-kit/core';
@@ -38,18 +37,17 @@ const SingleColumn = ({ column, loading, type, setSelectedStatus, setOpenDialog,
 
   return (
     <>
-      <div className={`bg-[var(--dark-secondary,#f1f5ff)] rounded-[8px] group`} key={column.status} ref={setNodeRef}>
+      <div className={`group rounded-[8px] bg-[var(--dark-secondary,#f1f5ff)]`} key={column.status} ref={setNodeRef}>
         {!loading && (
-          <div className="bg-[var(--dark-secondary,#f1f5ff)] sticky top-0 z-10 rounded-[8px] px-[13px] py-[14px]">
+          <div className="sticky top-0 z-10 rounded-[8px] bg-[var(--dark-secondary,#f1f5ff)] px-[13px] py-[14px]">
             <Typography variant="subtitle2" style={{ width: '50%', fontSize: '0.95rem', fontWeight: 700 }} className=" capitalize">
               {column.status}
               {' (' + column.items.length + ')'}
             </Typography>
             {permissions && permissions[type?.toLowerCase()]?.isCreate ? (
-              <HtmlTooltip title={`Create ${type}`}>
+              <HtmlTooltip title={`Create ${type}`} style={{ float: 'right', marginTop: '-25px' }}>
                 <IconButton
                   size="small"
-                  style={{ float: 'right', marginTop: '-25px' }}
                   onClick={() => {
                     setSelectedStatus(column.status);
                     setOpenDialog(true);
@@ -63,9 +61,8 @@ const SingleColumn = ({ column, loading, type, setSelectedStatus, setOpenDialog,
           </div>
         )}
         <ul
-          className={`body min-h-[calc(100%-120px)] p-2 ${
-            active?.data.current.column === column.status ? 'bg-blue-200 dark:bg-gray-900' : ''
-          } transition-colors`}
+          className={`body min-h-[calc(100%-120px)] p-2 ${active?.data.current.column === column.status ? 'bg-blue-200 dark:bg-gray-900' : ''
+            } transition-colors`}
         >
           <SortableContext items={column.items.map((d) => d._id)} strategy={verticalListSortingStrategy}>
             {column.items.map((element, index) => (
@@ -83,7 +80,7 @@ const SingleColumn = ({ column, loading, type, setSelectedStatus, setOpenDialog,
           </SortableContext>
         </ul>
         {permissions && permissions[type?.toLowerCase()]?.isCreate && !loading ? (
-          <div className=" group-hover:opacity-100 opacity-0 sticky bottom-0">
+          <div className=" sticky bottom-0 opacity-0 group-hover:opacity-100">
             <ThemeButton
               iconForMobile={false}
               fullWidth

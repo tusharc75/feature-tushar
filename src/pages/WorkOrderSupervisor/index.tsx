@@ -1,10 +1,8 @@
-import DateFnsUtils from '@date-io/date-fns';
-import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { MoreVert } from '@material-ui/icons';
-import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
-import RefreshIcon from '@material-ui/icons/Refresh';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { IconButton, Menu, MenuItem } from '@mui/material';
+import { MoreVert } from '@mui/icons-material';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 import moment from 'moment';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { FaRegCalendar } from 'react-icons/fa';
@@ -86,7 +84,9 @@ const WorkOrderSupervisor = () => {
 
   const [selectedServiceData, setSelectedServiceData] = useState(null);
   const [openWorkOrderScheduler, setOpenWorkOrderScheduler] = useState(false);
-  const [viewType, setViewType] = useState<ViewType>('card-view');
+  const [viewType, setViewType] = useState<ViewType>(() => {
+    return (localStorage.getItem(`${renderedFrom}_view`) as ViewType) || 'card-view';
+  });
   const [consumablesDialog, setConsumablesDialog] = useState(false);
 
   const [globalFilters, setGlobalFilters] = useState<DateRange>({
@@ -108,7 +108,7 @@ const WorkOrderSupervisor = () => {
         fieldName: 'user',
         fieldLabel: resources?.employeeMaster?.titlePlural,
         lookup: true,
-        lookupResource: sidebarResource.employeeMaster,
+        lookupResource: sidebarResource.user,
         resource: sidebarResource.workOrderSupervisor,
         type: 'dropDown',
         order: 0,
@@ -127,7 +127,7 @@ const WorkOrderSupervisor = () => {
     {
       fieldData: {
         _id: '630dc2429ec41869052395b2',
-        fieldName: 'serviceMaster',
+        fieldName: 'service',
         fieldLabel: resources?.serviceMaster?.titlePlural,
         lookup: true,
         lookupResource: sidebarResource.serviceMaster,
@@ -262,12 +262,13 @@ const WorkOrderSupervisor = () => {
       visibleColumns: [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.completed],
       limit: LIMIT
     });
+    localStorage.setItem(`${renderedFrom}_view`, viewType);
 
     return () =>
       dispatch({
         type: 'reset'
       });
-  }, []);
+  }, [viewType]);
 
   const openAssignHandler = (value: any, data: any) => {
     setSelectedServiceData(data);
@@ -429,12 +430,12 @@ const WorkOrderSupervisor = () => {
         },
         ...(['table-view', 'card-view']?.includes(viewType)
           ? [
-            {
-              disabled: selectedRecords?.length === 0,
-              label: 'Add Products/Consumables',
-              onClick: () => setConsumablesDialog(true)
-            }
-          ]
+              {
+                disabled: selectedRecords?.length === 0,
+                label: 'Add Products/Consumables',
+                onClick: () => setConsumablesDialog(true)
+              }
+            ]
           : [])
       ]
     };
@@ -498,345 +499,341 @@ const WorkOrderSupervisor = () => {
   };
 
   return (
-    <MuiPickersUtilsProvider utils={DateFnsUtils}>
-      <section className="main-container-v1">
-        <div className="headerbox-v1">
-          <CustomBreadCrumbs routes={[{ ...routes.workOrderSupervisor, title: resources?.workOrderSupervisor?.titlePlural }]} />
-          <div className="flex items-center gap-2">
-            {permissions?.workOrder?.isCreate && (
-              <Button
-                variant="outlined"
-                className={'btn-outline-v1'}
-                onClick={() => {
-                  setOpenWorkOrderScheduler(true);
-                }}
-              >
-                Scheduler
-              </Button>
-            )}
-            {permissions?.workOrder?.isCreate && (
-              <Button
-                variant="outlined"
-                className={'btn-outline-v1'}
-                onClick={() => {
-                  window.open(`${routes?.workOrder?.path}`);
-                }}
-              >
-                {`${resources?.workOrder?.titlePlural}`}
-              </Button>
-            )}
-            <ButtonMenu
-              showChevron={true}
-              items={moreButtonMenuItems}
-              horizontal="right"
-              slot={
-                ((props) => (
-                  <HtmlTooltip title={'More'}>
-                    <IconButton aria-haspopup="true" color="primary" size="small" title="More" {...props}>
-                      <MoreVert />
-                    </IconButton>
-                  </HtmlTooltip>
-                )) as any
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[{ ...routes.workOrderSupervisor, title: resources?.workOrderSupervisor?.titlePlural }]} />
+        <div className="flex items-center gap-2">
+          {permissions?.workOrder?.isCreate && (
+            <ThemeButton
+              iconForMobile={false}
+              onClick={() => {
+                setOpenWorkOrderScheduler(true);
+              }}
+              mobileTooltip={`Scheduler`}
+            >
+              Scheduler
+            </ThemeButton>
+          )}
+          {permissions?.workOrder?.isCreate && (
+            <ThemeButton
+              iconForMobile={false}
+              onClick={() => {
+                window.open(`${routes?.workOrder?.path}`);
+              }}
+              mobileTooltip={`${resources?.workOrder?.titlePlural}`}
+            >
+              {`${resources?.workOrder?.titlePlural}`}
+            </ThemeButton>
+          )}
+          <ButtonMenu
+            showChevron={true}
+            items={moreButtonMenuItems}
+            horizontal="right"
+            slot={
+              ((props) => (
+                <HtmlTooltip title={'More'}>
+                  <IconButton aria-haspopup="true" color="primary" size="small" title="More" {...props}>
+                    <MoreVert />
+                  </IconButton>
+                </HtmlTooltip>
+              )) as any
+            }
+          />
+        </div>
+      </div>
+      <div className="main-container">
+        <div className="header-panel pb-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex gap-2">
+              {['card-view', 'table-view'].includes(viewType) ? (
+                <>
+                  <DateRangePicker horizontal="left" date={globalFilters} setDate={setGlobalFilters} />
+                  {viewType === 'table-view' && (
+                    <ButtonMenu
+                      showChevron={true}
+                      items={statusMenuItems}
+                      onItemClick={(e, item) => {
+                        setTableViewStatus(item.value as TableViewStatus);
+                      }}
+                    >
+                      <span className="flex items-center gap-2">
+                        {workOrderIconMap[tableViewStatus]}
+                        Status: {tableViewStatus}
+                      </span>
+                    </ButtonMenu>
+                  )}
+                </>
+              ) : (
+                <div className="flex">
+                  <ToggleButtonGroup size="small" exclusive value={resourceType} onChange={(e, newVal) => {}}>
+                    <ToggleButton value={'workOrder'} onClick={() => setResourceType('workOrder')}>
+                      {resources?.workOrder?.titleSingular}
+                    </ToggleButton>
+                    <ToggleButton value={'repairOrder'} onClick={() => setResourceType('repairOrder')}>
+                      {resources?.repairOrder?.titleSingular}
+                    </ToggleButton>
+                  </ToggleButtonGroup>
+                </div>
+              )}
+            </div>
+
+            <div className="ml-auto flex items-center gap-2">
+              <IconButtonTabs
+                onItemClick={resetSelectedRecords}
+                items={
+                  [
+                    {
+                      value: 'card-view',
+                      icon: <MdViewWeek />,
+                      tooltip: 'Card View'
+                    },
+                    {
+                      value: 'table-view',
+                      icon: <TfiLayoutListThumbAlt />,
+                      tooltip: 'Table View'
+                    },
+                    {
+                      value: 'calendar-view',
+                      icon: <FaRegCalendar />,
+                      tooltip: 'Calendar View'
+                    }
+                  ] as const
+                }
+                setValue={setViewType}
+                value={viewType}
+              />
+              <HtmlTooltip title={'Refresh'}>
+                <IconButton style={{ width: 32, height: 32 }} size="small" onClick={onClickRefreshIcon}>
+                  <RefreshIcon fontSize="small" />
+                </IconButton>
+              </HtmlTooltip>
+            </div>
+          </div>
+        </div>
+        {viewType !== 'table-view' && (
+          <div className="min-h-[32px]">
+            <DetailsPageHeader
+              isAddButtonVisible={false}
+              isActionButtonVisible={false}
+              isNewActionButtonVisible={selectedRecords.length > 0}
+              newActionButtonProps={newActionButtonProps}
+              actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
+              leftSideContents={
+                <div className="flex items-center gap-2">
+                  <ThemeButton
+                    mobileTooltip="Apply Filters"
+                    startIcon={<BiFilterAlt className="-ml-1 mr-1 mt-[1px]" />}
+                    iconForMobile={<BiFilterAlt />}
+                    onClick={() => {
+                      setShowFilter(true);
+                    }}
+                  >
+                    Show Filters
+                  </ThemeButton>
+                  <DisplayFilterChip
+                    filterTerm={filterTerm}
+                    resourceColumns={FIELD_TO_FILTER}
+                    deepFilters={[]}
+                    filterByIds={filterByIds}
+                    fetchResourceData={(deepFilter, filterById) => {
+                      handleApplyFilter(filterById);
+                    }}
+                    setDeepFilters={null}
+                    setFilterByIds={setFilterByIds}
+                  />
+                </div>
+              }
+              hasXpadding={false}
+              hasYpadding={false}
+              className="pt-4"
+            />
+          </div>
+        )}
+        {viewType === 'card-view' && (
+          <div className="pt-2">
+            <CardColTimeline
+              getColColors={(colName) => workOrderColormap[colName]}
+              fetchSingleColumn={fetchSingleColumn}
+              state={state}
+              dispatch={dispatch}
+              passFailStatus={true}
+              passFailAccessor="serviceStatus"
+              cardOnClick={(e, data) => {
+                setOpen({ open: true, id: data.workOrder });
+              }}
+            />
+          </div>
+        )}
+        {viewType === 'calendar-view' && (
+          <div className="pt-2">
+            <WorkOrderCalendar getFilterQuery={getQueryString} filterQuery={filterQuery} reference={resourceType} ref={ref} setOpen={setOpen} />
+          </div>
+        )}
+        {viewType === 'table-view' && (
+          <div className="pt-4">
+            <WorkOrderList
+              renderedFrom={renderedFrom}
+              state={tableState}
+              dispatch={tableDispatch}
+              filterQuery={filterQuery}
+              ref={workOrderListRef}
+              status={tableViewStatus}
+              consumablesDialog={consumablesDialog}
+              setConsumablesDialog={setConsumablesDialog}
+              tableHead={
+                <DetailsPageHeader
+                  isAddButtonVisible={false}
+                  isActionButtonVisible={false}
+                  isNewActionButtonVisible={selectedRecords.length > 0}
+                  newActionButtonProps={newActionButtonProps}
+                  actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
+                  leftSideContents={
+                    <div className="flex items-center gap-2">
+                      <ThemeButton
+                        mobileTooltip="Apply Filters"
+                        startIcon={<BiFilterAlt className="-ml-1 mr-1 mt-[1px]" />}
+                        iconForMobile={<BiFilterAlt />}
+                        onClick={() => {
+                          setShowFilter(true);
+                        }}
+                      >
+                        Show Filters
+                      </ThemeButton>
+                      <DisplayFilterChip
+                        filterTerm={filterTerm}
+                        resourceColumns={FIELD_TO_FILTER}
+                        deepFilters={[]}
+                        filterByIds={filterByIds}
+                        fetchResourceData={(deepFilter, filterById) => {
+                          handleApplyFilter(filterById);
+                        }}
+                        setDeepFilters={null}
+                        setFilterByIds={setFilterByIds}
+                      />
+                    </div>
+                  }
+                  hasXpadding={false}
+                  hasYpadding={false}
+                />
               }
             />
           </div>
-        </div>
-        <div className="main-container">
-          <div className="header-panel pb-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="flex gap-2">
-                {['card-view', 'table-view'].includes(viewType) ? (
-                  <>
-                    <DateRangePicker horizontal="left" date={globalFilters} setDate={setGlobalFilters} />
-                    {viewType === 'table-view' && (
-                      <ButtonMenu
-                        showChevron={true}
-                        items={statusMenuItems}
-                        onItemClick={(e, item) => {
-                          setTableViewStatus(item.value as TableViewStatus);
-                        }}
-                      >
-                        <span className="flex items-center gap-2">
-                          {workOrderIconMap[tableViewStatus]}
-                          Status: {tableViewStatus}
-                        </span>
-                      </ButtonMenu>
-                    )}
-                  </>
-                ) : (
-                  <div className="flex">
-                    <ToggleButtonGroup size="small" exclusive value={resourceType} onChange={(e, newVal) => { }}>
-                      <ToggleButton value={'workOrder'} onClick={() => setResourceType('workOrder')}>
-                        {resources?.workOrder?.titleSingular}
-                      </ToggleButton>
-                      <ToggleButton value={'repairOrder'} onClick={() => setResourceType('repairOrder')}>
-                        {resources?.repairOrder?.titleSingular}
-                      </ToggleButton>
-                    </ToggleButtonGroup>
-                  </div>
-                )}
-              </div>
-
-              <div className="ml-auto flex items-center gap-2">
-                <IconButtonTabs
-                  onItemClick={resetSelectedRecords}
-                  items={
-                    [
-                      {
-                        value: 'card-view',
-                        icon: <MdViewWeek />,
-                        tooltip: 'Card View'
-                      },
-                      {
-                        value: 'table-view',
-                        icon: <TfiLayoutListThumbAlt />,
-                        tooltip: 'Table View'
-                      },
-                      {
-                        value: 'calendar-view',
-                        icon: <FaRegCalendar />,
-                        tooltip: 'Calendar View'
-                      }
-                    ] as const
-                  }
-                  setValue={setViewType}
-                  value={viewType}
-                />
-                <HtmlTooltip title={'Refresh'}>
-                  <IconButton style={{ width: 32, height: 32 }} size="small" onClick={onClickRefreshIcon}>
-                    <RefreshIcon fontSize="small" />
-                  </IconButton>
-                </HtmlTooltip>
-              </div>
-            </div>
-          </div>
-          {viewType !== 'table-view' && (
-            <div className="min-h-[32px]">
-              <DetailsPageHeader
-                isAddButtonVisible={false}
-                isActionButtonVisible={false}
-                isNewActionButtonVisible={selectedRecords.length > 0}
-                newActionButtonProps={newActionButtonProps}
-                actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
-                leftSideContents={
-                  <div className="flex items-center gap-2">
-                    <ThemeButton
-                      tooltip="Apply Filters"
-                      startIcon={<BiFilterAlt className="-ml-1 mr-1 mt-[1px]" />}
-                      iconForMobile={<BiFilterAlt />}
-                      onClick={() => {
-                        setShowFilter(true);
-                      }}
-                      variant="outlined"
-                    >
-                      Show Filters
-                    </ThemeButton>
-                    <DisplayFilterChip
-                      filterTerm={filterTerm}
-                      resourceColumns={FIELD_TO_FILTER}
-                      deepFilters={[]}
-                      filterByIds={filterByIds}
-                      fetchResourceData={(deepFilter, filterById) => {
-                        handleApplyFilter(filterById);
-                      }}
-                      setDeepFilters={null}
-                      setFilterByIds={setFilterByIds}
-                    />
-                  </div>
-                }
-                hasXpadding={false}
-                hasYpadding={false}
-                className="pt-4"
-              />
-            </div>
-          )}
-          {viewType === 'card-view' && (
-            <div className="pt-2">
-              <CardColTimeline
-                getColColors={(colName) => workOrderColormap[colName]}
-                fetchSingleColumn={fetchSingleColumn}
-                state={state}
-                dispatch={dispatch}
-                passFailStatus={true}
-                passFailAccessor="serviceStatus"
-                cardOnClick={(e, data) => {
-                  setOpen({ open: true, id: data.workOrder });
-                }}
-              />
-            </div>
-          )}
-          {viewType === 'calendar-view' && (
-            <div className="pt-2">
-              <WorkOrderCalendar getFilterQuery={getQueryString} filterQuery={filterQuery} reference={resourceType} ref={ref} setOpen={setOpen} />
-            </div>
-          )}
-          {viewType === 'table-view' && (
-            <div className="pt-4">
-              <WorkOrderList
-                renderedFrom={renderedFrom}
-                state={tableState}
-                dispatch={tableDispatch}
-                filterQuery={filterQuery}
-                ref={workOrderListRef}
-                status={tableViewStatus}
-                consumablesDialog={consumablesDialog}
-                setConsumablesDialog={setConsumablesDialog}
-                tableHead={
-                  <DetailsPageHeader
-                    isAddButtonVisible={false}
-                    isActionButtonVisible={false}
-                    isNewActionButtonVisible={selectedRecords.length > 0}
-                    newActionButtonProps={newActionButtonProps}
-                    actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
-                    leftSideContents={
-                      <div className="flex items-center gap-2">
-                        <ThemeButton
-                          tooltip="Apply Filters"
-                          startIcon={<BiFilterAlt className="-ml-1 mr-1 mt-[1px]" />}
-                          iconForMobile={<BiFilterAlt />}
-                          onClick={() => {
-                            setShowFilter(true);
-                          }}
-                          variant="outlined"
-                        >
-                          Show Filters
-                        </ThemeButton>
-                        <DisplayFilterChip
-                          filterTerm={filterTerm}
-                          resourceColumns={FIELD_TO_FILTER}
-                          deepFilters={[]}
-                          filterByIds={filterByIds}
-                          fetchResourceData={(deepFilter, filterById) => {
-                            handleApplyFilter(filterById);
-                          }}
-                          setDeepFilters={null}
-                          setFilterByIds={setFilterByIds}
-                        />
-                      </div>
-                    }
-                    hasXpadding={false}
-                    hasYpadding={false}
-                  />
-                }
-              />
-            </div>
-          )}
-        </div>
-        {assignTechnicianDialog.open && (
-          <AssignUserDialog
-            warehouse={assignTechnicianDialog.multiple ? selectedRecords[0]?.warehouse?.optionValue : selectedServiceData?.warehouse}
-            workOrderData={
-              assignTechnicianDialog.multiple
-                ? selectedRecords?.map((r) => ({
+        )}
+      </div>
+      {assignTechnicianDialog.open && (
+        <AssignUserDialog
+          warehouse={assignTechnicianDialog.multiple ? selectedRecords[0]?.warehouse?.optionValue : selectedServiceData?.warehouse}
+          workOrderData={
+            assignTechnicianDialog.multiple
+              ? selectedRecords?.map((r) => ({
                   uniqueId: r?.uniqueId,
                   workOrderId: r?.workOrder
                 }))
-                : [
+              : [
+                  {
+                    uniqueId: selectedServiceData?.uniqueId,
+                    workOrderId: selectedServiceData?.workOrder
+                  }
+                ]
+          }
+          assignedUsers={
+            assignTechnicianDialog.multiple
+              ? selectedRecords?.length === 1
+                ? selectedRecords[0]?.assignedUsers
+                : []
+              : selectedServiceData?.assignedUsers
+          }
+          reference={'service'}
+          handleClose={() => {
+            setAssignTechnicianDialog({ open: false, multiple: false });
+          }}
+          handleSucess={() => {
+            setAssignTechnicianDialog({ open: false, multiple: false });
+            dispatch({ type: 'refreshData' });
+          }}
+          competencies={assignTechnicianDialog.multiple ? selectedRecords[0]?.competencies : selectedServiceData?.competencies}
+        />
+      )}
+      {workStationAssignDialog.open && (
+        <AssignWorkStationDialog
+          warehouse={workStationAssignDialog.open ? selectedRecords[0]?.warehouse?.optionValue : selectedServiceData?.warehouse}
+          workOrderData={
+            workStationAssignDialog.multiple
+              ? selectedRecords?.map((r) => ({
+                  uniqueId: r?.uniqueId,
+                  workOrderId: r?.workOrder
+                }))
+              : [
                   {
                     uniqueId: selectedServiceData?.uniqueId,
                     workOrderId: selectedServiceData?._id
                   }
                 ]
-            }
-            assignedUsers={
-              assignTechnicianDialog.multiple
-                ? selectedRecords?.length === 1
-                  ? selectedRecords[0]?.assignedUsers
-                  : []
-                : selectedServiceData?.assignedUsers
-            }
-            reference={'service'}
-            handleClose={() => {
-              setAssignTechnicianDialog({ open: false, multiple: false });
-            }}
-            handleSucess={() => {
-              setAssignTechnicianDialog({ open: false, multiple: false });
-              dispatch({ type: 'refreshData' });
-            }}
-            competencies={assignTechnicianDialog.multiple ? selectedRecords[0]?.competencies : selectedServiceData?.competencies}
-          />
-        )}
-        {workStationAssignDialog.open && (
-          <AssignWorkStationDialog
-            warehouse={workStationAssignDialog.open ? selectedRecords[0]?.warehouse?.optionValue : selectedServiceData?.warehouse}
-            workOrderData={
-              workStationAssignDialog.multiple
-                ? selectedRecords?.map((r) => ({
-                  uniqueId: r?.uniqueId,
-                  workOrderId: r?.workOrder
-                }))
-                : [
-                  {
-                    uniqueId: selectedServiceData?.uniqueId,
-                    workOrderId: selectedServiceData?._id
-                  }
-                ]
-            }
-            workStations={workStationAssignDialog.multiple ? selectedRecords[0]?.assignedWorkStations : selectedServiceData?.assignedWorkStations}
-            handleClose={() => {
-              setWorkStationAssignDialog({ open: false, multiple: false });
-            }}
-            handleSucess={() => {
-              setWorkStationAssignDialog({ open: false, multiple: false });
-              dispatch({ type: 'refreshData' });
-            }}
-          />
-        )}
+          }
+          workStations={workStationAssignDialog.multiple ? selectedRecords[0]?.assignedWorkStations : selectedServiceData?.assignedWorkStations}
+          handleClose={() => {
+            setWorkStationAssignDialog({ open: false, multiple: false });
+          }}
+          handleSucess={() => {
+            setWorkStationAssignDialog({ open: false, multiple: false });
+            dispatch({ type: 'refreshData' });
+          }}
+        />
+      )}
 
-        {openWorkOrderScheduler && (
-          <WorkOrderSchedulerDialog
-            onClose={() => setOpenWorkOrderScheduler(false)}
-            onSuccess={() => {
-              onClickRefreshIcon();
-              setOpenWorkOrderScheduler(false);
-            }}
-          />
-        )}
-        {isOpen.open && (
-          <WorkOrderDetailDialog
-            workOrderId={isOpen?.id}
-            handleClose={() => {
-              setOpen({ open: false, id: null });
-            }}
-          />
-        )}
-        {consumablesDialog && (
-          <AssignProductDialog
-            handleCloseDialog={() => setConsumablesDialog(false)}
-            ids={[]}
-            onSuccess={(rows) => {
-              if (viewType === 'card-view') {
-                handleAddConsumables(rows, selectedRecords);
-              } else {
-                workOrderListRef.current?.handleAddConsumables(rows, selectedRecords);
-              }
-            }}
-            serialized={false}
-            isSubmitting={workOrderListRef.current?.submitting}
-            extraDeepFilter={[{ field: 'expenseItem', term: 'No' }]}
-          />
-        )}
-        {showFilter && (
-          <Filter
-            onClose={() => {
-              setShowFilter(false);
-              dispatch({ type: 'setFilterQuery', filterQuery: '' });
-            }}
-            loading={false}
-            filterTitle={resources?.workOrderSupervisor?.titleSingular}
-            resource={sidebarResource.workOrderSupervisor}
-            columns={FIELD_TO_FILTER}
-            onApplyFilter={handleApplyFilter}
-            deepFilters={[]}
-            setDeepFilters={null}
-            filterByIds={filterByIds}
-            setFilterByIds={setFilterByIds}
-            filterTerm={filterTerm}
-            setFilterTerm={setFilterTerm}
-          />
-        )}
-      </section>
-    </MuiPickersUtilsProvider>
+      {openWorkOrderScheduler && (
+        <WorkOrderSchedulerDialog
+          onClose={() => setOpenWorkOrderScheduler(false)}
+          onSuccess={() => {
+            onClickRefreshIcon();
+            setOpenWorkOrderScheduler(false);
+          }}
+        />
+      )}
+      {isOpen.open && (
+        <WorkOrderDetailDialog
+          workOrderId={isOpen?.id}
+          handleClose={() => {
+            setOpen({ open: false, id: null });
+          }}
+        />
+      )}
+      {consumablesDialog && (
+        <AssignProductDialog
+          handleCloseDialog={() => setConsumablesDialog(false)}
+          ids={[]}
+          onSuccess={(rows) => {
+            if (viewType === 'card-view') {
+              handleAddConsumables(rows, selectedRecords);
+            } else {
+              workOrderListRef.current?.handleAddConsumables(rows, selectedRecords);
+            }
+          }}
+          serialized={false}
+          isSubmitting={workOrderListRef.current?.submitting}
+          extraDeepFilter={[{ field: 'expenseItem', term: 'No' }]}
+        />
+      )}
+      {showFilter && (
+        <Filter
+          onClose={() => {
+            setShowFilter(false);
+            dispatch({ type: 'setFilterQuery', filterQuery: '' });
+          }}
+          loading={false}
+          filterTitle={resources?.workOrderSupervisor?.titleSingular}
+          resource={sidebarResource.workOrderSupervisor}
+          columns={FIELD_TO_FILTER}
+          onApplyFilter={handleApplyFilter}
+          deepFilters={[]}
+          setDeepFilters={null}
+          filterByIds={filterByIds}
+          setFilterByIds={setFilterByIds}
+          filterTerm={filterTerm}
+          setFilterTerm={setFilterTerm}
+        />
+      )}
+    </section>
   );
 };
 

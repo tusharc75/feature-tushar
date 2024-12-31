@@ -1,6 +1,6 @@
-import { Box, IconButton } from '@material-ui/core';
-import { Map } from '@material-ui/icons';
-import RefreshIcon from '@material-ui/icons/Refresh';
+import { Box, IconButton } from '@mui/material';
+import { Map } from '@mui/icons-material';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import update from 'immutability-helper';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';

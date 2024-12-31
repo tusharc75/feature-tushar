@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Menu, MenuItem, Button, CircularProgress } from '@material-ui/core';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import { Menu, MenuItem } from '@mui/material';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const SendMailMenu = ({ exportData, isProcessing }) => {
-
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -20,27 +20,20 @@ const SendMailMenu = ({ exportData, isProcessing }) => {
     <>
       <HtmlTooltip title={'Send Mail'} placement="top" arrow enterTouchDelay={0}>
         <span>
-          <Button
-            onClick={(e) => handleClick(e)}
-            endIcon={<ArrowDropDownIcon />}
-            variant={'outlined'}
-            color="primary"
-            aria-controls="simple-menu"
-            aria-haspopup="true"
-            className="min-h-[32px]"
-            size="small"
+          <ThemeButton
             disabled={isProcessing === 'sendMail'}
-            startIcon={isProcessing === 'sendMail' && <CircularProgress color="inherit" size={18} />}
+            buttonType='theme'
+            isLoading={isProcessing}
+            onClick={(e) => handleClick(e)}
           >
             Send Mail
-          </Button>
+          </ThemeButton>
         </span>
       </HtmlTooltip>
       <Menu
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
-        getContentAnchorEl={null}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'right'
@@ -49,7 +42,6 @@ const SendMailMenu = ({ exportData, isProcessing }) => {
           vertical: 'top',
           horizontal: 'right'
         }}
-        
       >
         <MenuItem
           onClick={() => {

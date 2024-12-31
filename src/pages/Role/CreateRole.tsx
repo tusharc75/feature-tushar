@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Dialog, Button, CircularProgress, Grid, Box, TextField, Paper, useTheme } from '@material-ui/core';
+import { Dialog, Box, TextField, Paper } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useHistory } from 'react-router-dom';
-import { Autocomplete, Skeleton } from '@material-ui/lab';
+import { Autocomplete, Skeleton } from '@mui/material';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
@@ -13,6 +14,7 @@ import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from '../../StateProvider/Provider';
 import ImportExportRole from 'src/pages/Role/ImportExportRole';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selectedEntity, isClone = false, roleId = null }) => {
   const {
@@ -214,19 +216,19 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
             <Skeleton width="100%" height="70px" />
             <Grid container spacing={2}>
               {[1, 2, 3, 4, 5, 6, 7].map((i) => (
-                <Grid key={i} item xs={12} sm={6} md={6}>
+                <Grid key={i} size={{ xs: 12, sm: 6, md: 6 }}>
                   <Skeleton width="100%" height="60px" />
                 </Grid>
               ))}
             </Grid>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button variant="outlined" size="small" color="primary" disabled={loading}>
+            <ThemeButton buttonType="theme" disabled={loading}>
               Cancel
-            </Button>
-            <Button variant="contained" size="small" color="primary" disabled={loading}>
+            </ThemeButton>
+            <ThemeButton buttonType="theme" disabled={loading}>
               Submit
-            </Button>
+            </ThemeButton>
           </CustomDialogFooter>
         </>
       ) : (
@@ -259,7 +261,14 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
                   autoHighlight
                   disableClearable
                   fullWidth
-                  renderOption={(option) => option || ''}
+                  renderOption={(props, option, state, ownerState) => {
+                    const { key, ...optionProps } = props;
+                    return (
+                      <Box component="li" key={key} {...optionProps}>
+                        {ownerState.getOptionLabel(option)}
+                      </Box>
+                    );
+                  }}
                   onChange={(event: any, newValue: any) => {
                     setValues({ ...values, tier: newValue });
                   }}
@@ -269,7 +278,7 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
                 />
               </Box>
               <Box className="mb-3 flex justify-end">
-              <ImportExportRole
+                <ImportExportRole
                   resource={resource}
                   field={field}
                   childrenResource={childrenResource}
@@ -278,7 +287,7 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
                   setChildrenResource={setChildrenResource}
                   isExport={false}
                   isImport={true}
-                  />
+                />
               </Box>
               <Paper>
                 {loading ? (
@@ -325,31 +334,26 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
             </Box>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button
-              variant="outlined"
-              color="primary"
-              size="small"
-              disabled={isSubmitting}
+            <ThemeButton
+              buttonType='transparent'
               onClick={() => {
                 if ((Boolean(!values.name) && Boolean(!values.description)) || Boolean(!values.tier)) close();
                 else setShowConfirmDialog(true);
               }}
             >
               Cancel
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={handleSubmit}
+            </ThemeButton>
+            <ThemeButton
+              buttonType='theme'
               disabled={isSubmitting || Boolean(!values.name) || Boolean(!values.description) || Boolean(!values.tier)}
+              onClick={handleSubmit}
+              isLoading={isSubmitting}
             >
-              {isSubmitting ? <CircularProgress size={22} /> : 'Submit'}
-            </Button>
+              Save
+            </ThemeButton>
           </CustomDialogFooter>
           {showConfirmDialog ? (
             <ConfirmCancelDialog
-              close={() => setShowConfirmDialog(false)}
               open={showConfirmDialog}
               onSave={() => {
                 setShowConfirmDialog(false);

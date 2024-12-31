@@ -1,5 +1,6 @@
-import { Box, Button, Dialog, Grid, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, Dialog, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import Autocomplete from '@mui/material/Autocomplete';
 import { FieldArray, Form, Formik } from 'formik';
 import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -10,6 +11,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderIds = null }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -42,7 +44,7 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderId
           }))
         });
       })
-      .catch((error) => {});
+      .catch((error) => { });
   }, [assemblyOrderId]);
 
   const fetchFieldLabel = async () => {
@@ -57,7 +59,7 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderId
       ]
     });
     const managedPackageField = data?.find((d) => d.resource === sidebarResource.managedPackages)?.fieldNames || [];
-    setManagedPackagedLabel(managedPackageField[0]?.fieldLabel)
+    setManagedPackagedLabel(managedPackageField[0]?.fieldLabel);
   };
 
   const validate = (values) => {
@@ -87,7 +89,7 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderId
       .then((res) => {
         onSuccess();
       })
-      .catch((error) => {});
+      .catch((error) => { });
   };
 
   return (
@@ -126,7 +128,7 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderId
                         {values?.managedPackages?.map((data, index) => (
                           <Box mb={2} border={1} p={1} borderColor="var(--common-border-color)">
                             <Grid container spacing={2}>
-                              <Grid item md={6} lg={6} sm={6} xs={12}>
+                              <Grid size={{ xs: 12, sm: 6, md: 6, lg: 6 }}>
                                 <TextField
                                   fullWidth
                                   label={managedPackagedLabel || 'Managed Package Name'}
@@ -158,13 +160,13 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderId
                                   }
                                 />
                               </Grid>
-                              <Grid item md={6} lg={6} sm={6} xs={12}>
+                              <Grid size={{ xs: 12, sm: 6, md: 6, lg: 6 }}>
                                 <Autocomplete
                                   id="package"
                                   disabled
                                   options={packageOptions}
                                   getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                                  getOptionSelected={(option: any, val) => option?.optionValue === val}
+                                  isOptionEqualToValue={(option: any, val) => option?.optionValue === val}
                                   value={
                                     packageOptions && packageOptions.filter((f) => f?.optionValue === data?.package).length
                                       ? packageOptions.filter((f) => f?.optionValue === data?.package)[0]
@@ -180,6 +182,7 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderId
                                     <TextField
                                       {...params}
                                       margin="dense"
+                                      size="small"
                                       variant="outlined"
                                       label="Package"
                                       placeholder="Package"
@@ -211,20 +214,18 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderId
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button size="small" color="primary" onClick={onClose}>
-                  Cancel
-                </Button>
-                <Button
-                  // disabled={submitting}
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  type="submit"
+                <ThemeButton
+                  buttonType='transparent'
                   onClick={submitForm}
-                  // endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                >
+                  Cancel
+                </ThemeButton>
+                <ThemeButton
+                  buttonType='theme'
+                  onClick={submitForm}
                 >
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
             </>
           )}

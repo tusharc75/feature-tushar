@@ -1,24 +1,23 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
-import IconButton from '@material-ui/core/IconButton';
-import AddIcon from '@material-ui/icons/AddCircle';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import Dialog from '@mui/material/Dialog';
+import IconButton from '@mui/material/IconButton';
+import AddIcon from '@mui/icons-material/AddCircle';
 import { Form, Formik } from 'formik';
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { object } from 'yup';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
-import CustomButton from '../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { downloadExcel } from '../../constants/helpers';
 import CreateProductCategory from '../../pages/ProductCategory/CreateProductCategory';
 import HtmlTooltip from '../CustomTooltipTitle';
 import FormTypes from '../Helpers/FormTypes';
 import { CustomDialogTransition } from './../../constants/helpers';
-
 
 const SelectionDialog = (props) => {
   const {
@@ -144,13 +143,13 @@ const SelectionDialog = (props) => {
       axiosInstance()
         .get(
           `${api}/template?productCategory=` +
-          values.productCategory +
-          '&productTemplate=' +
-          values.productTemplate +
-          '&priceTemplate=' +
-          values.priceTemplate +
-          '&refrenceId=' +
-          refrenceId,
+            values.productCategory +
+            '&productTemplate=' +
+            values.productTemplate +
+            '&priceTemplate=' +
+            values.priceTemplate +
+            '&refrenceId=' +
+            refrenceId,
           { responseType: 'arraybuffer' }
         )
         .then((response) => {
@@ -197,14 +196,7 @@ const SelectionDialog = (props) => {
       open={true}
       fullWidth
     >
-      <Formik
-        innerRef={ref}
-        enableReinitialize={true}
-        initialValues={initialData}
-        validateOnMount
-        validate={validate}
-        onSubmit={handleSubmit}
-      >
+      <Formik innerRef={ref} enableReinitialize={true} initialValues={initialData} validateOnMount validate={validate} onSubmit={handleSubmit}>
         {({ values, errors, touched, setFieldValue, submitForm }) => (
           <Fragment>
             <CustomDialogHeader title="Select Category & Template" onClose={handleClose}></CustomDialogHeader>
@@ -213,10 +205,10 @@ const SelectionDialog = (props) => {
                 <Box p={1}>
                   <Grid container spacing={1}>
                     <Grid
-                      item
-                      xs={permissions.productCategory.isCreate ? 11 : 12}
-                      sm={permissions.productCategory.isCreate ? 11 : 12}
-                      md={permissions.productCategory.isCreate ? 11 : 12}
+                      size={{
+                      xs:permissions.productCategory.isCreate ? 11 : 12,
+                      sm:permissions.productCategory.isCreate ? 11 : 12,
+                      md:permissions.productCategory.isCreate ? 11 : 12}}
                     >
                       <FormTypes
                         errors={errors}
@@ -240,7 +232,7 @@ const SelectionDialog = (props) => {
                       />
                     </Grid>
                     {permissions.productCategory.isCreate && (
-                      <Grid item xs={1} sm={1} md={1}>
+                      <Grid size={{xs:1, sm:1, md:1}}>
                         <HtmlTooltip title="Add Product Category" className="mt-1">
                           <IconButton
                             onClick={() => {
@@ -309,9 +301,9 @@ const SelectionDialog = (props) => {
                             setSelectedFile(e);
                           }}
                         />
-                        <Button className={`btn-choose`} variant="outlined" component="span">
+                        <ThemeButton className={`btn-choose`} component="span">
                           Choose Files
-                        </Button>
+                        </ThemeButton>
                         {fileError && <p className="MuiFormHelperText-root Mui-error MuiFormHelperText-contained">{fileError}</p>}
                         <span style={{ marginLeft: '5px' }}>
                           {selectedFile && selectedFile.target.files.length > 0 ? selectedFile.target.files[0].name : null}
@@ -323,13 +315,13 @@ const SelectionDialog = (props) => {
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button size="small" color="primary" onClick={handleClose}>
+              <ThemeButton buttonType="transparent" onClick={handleClose}>
                 Cancel
-              </Button>
-              <CustomButton loading={loading} variant="contained" color="primary" type="submit" onClick={submitForm}>
+              </ThemeButton>
+              <ThemeButton isLoading={loading} buttonType="theme" onClick={submitForm}>
                 {' '}
                 {isUpload ? 'Upload' : 'Download'}{' '}
-              </CustomButton>
+              </ThemeButton>
             </CustomDialogFooter>
           </Fragment>
         )}

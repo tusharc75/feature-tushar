@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import {
   Dialog,
-  Button,
   TextField,
   TableBody,
   TableCell,
@@ -15,9 +14,9 @@ import {
   useMediaQuery,
   Menu,
   MenuItem
-} from '@material-ui/core';
+} from '@mui/material';
 import { ACTIVITY_RESOURCE, CustomDialogTransition, downloadExcel } from 'src/constants/helpers';
-import { Autocomplete } from '@material-ui/lab';
+import Autocomplete from '@mui/material/Autocomplete';
 import { AiOutlineImport } from 'react-icons/ai';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -25,13 +24,11 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import CustomButton from 'src/components/Helpers/CustomButton';
 import _, { isEmpty, uniqBy } from 'lodash';
 import { read, utils, write, writeFile } from 'xlsx';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { AddField } from 'src/components/FormBuilder/AddField';
 import { AddColumnDialog } from 'src/components/productBuilder/CustomImport/AddColumnDialog';
-import { Add, Delete } from '@material-ui/icons';
+import { Add, Delete } from '@mui/icons-material';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import RowNumberDialog from 'src/components/productBuilder/CustomImport/RowNumberDialog';
 import ImportedDataDialog from 'src/components/productBuilder/CustomImport/ImpoetedDataDialog';
@@ -39,6 +36,7 @@ import ViewDialog from 'src/components/productBuilder/CustomImport/ViewDialog';
 import { handleFileImport } from 'src/components/productBuilder/CustomImport/helper';
 import ShowMissedOrExtraColumn from 'src/components/productBuilder/CustomImport/ShowMissedOrExtraColumn';
 import { AddAllColumnDialog } from 'src/components/productBuilder/CustomImport/AddAllColumnDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'USD' }) => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -349,7 +347,6 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
   const handleSave = (file) => {
     setLoading(true);
     toastConfig.setToastConfig({
-      hideDuration: null,
       open: true,
       type: 'info',
       message: `Uploading builder, Please wait...`
@@ -414,7 +411,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                   style={{ minWidth: '250px', flexGrow: 1 }}
                   options={productCategory}
                   getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                  getOptionSelected={(option: any, val) => option.optionValue === val}
+                  isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                   value={
                     productCategory?.filter((p) => p?.optionValue === values['productCategory'])?.length > 0
                       ? productCategory?.filter((p) => p?.optionValue === values['productCategory'])[0]
@@ -424,7 +421,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                     setValues({ productCategory: val && val.optionValue ? val.optionValue : '', productTemplate: '', priceTemplate: '' });
                   }}
                   renderInput={(params) => (
-                    <TextField {...params} margin="dense" variant="outlined" label="Product Category" placeholder="Product Category" />
+                    <TextField {...params} margin="dense" size="small" variant="outlined" label="Product Category" placeholder="Product Category" />
                   )}
                 />
                 <Autocomplete
@@ -432,7 +429,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                   style={{ minWidth: '250px', flexGrow: 1 }}
                   options={productTemplate}
                   getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                  getOptionSelected={(option: any, val) => option.optionValue === val}
+                  isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                   value={
                     productTemplate?.filter((p) => p?.optionValue === values['productTemplate'])?.length > 0
                       ? productTemplate?.filter((p) => p?.optionValue === values['productTemplate'])[0]
@@ -446,7 +443,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                     }
                   }}
                   renderInput={(params) => (
-                    <TextField {...params} margin="dense" variant="outlined" label="Product Template" placeholder="Product Template" />
+                    <TextField {...params} margin="dense" size="small" variant="outlined" label="Product Template" placeholder="Product Template" />
                   )}
                 />
                 <Autocomplete
@@ -454,7 +451,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                   style={{ minWidth: '250px', flexGrow: 1 }}
                   options={priceTemplate}
                   getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                  getOptionSelected={(option: any, val) => option.optionValue === val}
+                  isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                   value={
                     priceTemplate?.filter((p) => p?.optionValue === values['priceTemplate'])?.length > 0
                       ? priceTemplate?.filter((p) => p?.optionValue === values['priceTemplate'])[0]
@@ -464,7 +461,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                     setValues({ ...values, priceTemplate: val && val.optionValue ? val.optionValue : '' });
                   }}
                   renderInput={(params) => (
-                    <TextField {...params} margin="dense" variant="outlined" label="Price Template" placeholder="Price Template" />
+                    <TextField {...params} margin="dense" size="small" variant="outlined" label="Price Template" placeholder="Price Template" />
                   )}
                 />
                 <input
@@ -479,22 +476,16 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                   disabled={!(values?.productTemplate && values?.priceTemplate)}
                 />
                 <label htmlFor={`customImportFile`}>
-                  <HtmlTooltip title={'Import File'}>
-                    <span>
-                      <Button
-                        variant={isMobile ? 'text' : 'outlined'}
-                        color="primary"
-                        size="small"
-                        className={`${isMobile ? 'btn-outline-v1  with-border max-[600px]:[max-width:36px_!important]' : ''}`}
-                        component="span"
-                        // disabled={_.some(_.values(values), (v) => v === '')}
-                        disabled={!(values?.productTemplate && values?.priceTemplate)}
-                        startIcon={isMobile ? null : <AiOutlineImport />}
-                      >
-                        {isMobile ? <AiOutlineImport /> : 'Import File'}
-                      </Button>
-                    </span>
-                  </HtmlTooltip>
+                  <ThemeButton
+                    tooltip={'Import File'}
+                    component="span"
+                    // disabled={_.some(_.values(values), (v) => v === '')}
+                    disabled={!(values?.productTemplate && values?.priceTemplate)}
+                    startIcon={isMobile ? null : <AiOutlineImport />}
+                    iconForMobile={<AiOutlineImport />}
+                  >
+                    Import File
+                  </ThemeButton>
                 </label>
               </div>
               <div className="ml-auto flex flex-wrap items-center gap-2">
@@ -502,29 +493,22 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                   <Box mr={2}>
                     <ShowMissedOrExtraColumn view={selectedView} file={files} />
                   </Box>
-                  <HtmlTooltip title={'Add Column'}>
-                    <span>
-                      <Button
-                        id={'custom-import-dialog-add-menu-button'}
-                        variant={isMobile ? 'text' : 'outlined'}
-                        color="primary"
-                        size="small"
-                        disabled={isUploading || templateImportHeader?.length === 0 || customImportHeader?.length === 0}
-                        className={`${isMobile ? 'btn-outline-v1  with-border max-[600px]:[max-width:36px_!important]' : ''}`}
-                        startIcon={isMobile ? null : <Add />}
-                        onClick={(e) => {
-                          setAddAnchorEl(e.currentTarget);
-                        }}
-                        aria-controls="add-menu"
-                      >
-                        {isMobile ? <Add /> : 'Add Column'}
-                      </Button>
-                    </span>
-                  </HtmlTooltip>
+                  <ThemeButton
+                    id={'custom-import-dialog-add-menu-button'}
+                    disabled={isUploading || templateImportHeader?.length === 0 || customImportHeader?.length === 0}
+                    startIcon={isMobile ? null : <Add />}
+                    iconForMobile={<Add />}
+                    tooltip="Add Column"
+                    onClick={(e) => {
+                      setAddAnchorEl(e.currentTarget);
+                    }}
+                    aria-controls="add-menu"
+                  >
+                    Add Column
+                  </ThemeButton>
                   <Menu
                     anchorEl={addAnchorEl}
                     keepMounted
-                    getContentAnchorEl={null}
                     anchorOrigin={{
                       vertical: 'bottom',
                       horizontal: 'left'
@@ -535,7 +519,6 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                     TransitionProps={{ unmountOnExit: true, timeout: walkmeInstance ? 0 : 200 }}
                   >
                     <MenuItem
-                      button
                       onClick={(e) => {
                         setAddAnchorEl(null);
                         setAddSystemColumn(true);
@@ -544,7 +527,6 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                       Add System Column
                     </MenuItem>
                     <MenuItem
-                      button
                       onClick={(e) => {
                         setAddAnchorEl(null);
                         setAddImportedColumn({ open: true, type: 'single' });
@@ -553,7 +535,6 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                       Add From Imported Excel Column
                     </MenuItem>
                     <MenuItem
-                      button
                       onClick={(e) => {
                         setAddAnchorEl(null);
                         setAddImportedColumn({ open: true, type: 'all' });
@@ -563,19 +544,16 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                     </MenuItem>
                   </Menu>
                 </>
-                <Button
+                <ThemeButton
                   id={'custom-import-dialog-add-view-menu-button'}
-                  variant={'outlined'}
-                  color="primary"
-                  size="small"
                   disabled={isUploading || templateImportHeader?.length === 0 || customImportHeader?.length === 0}
                   onClick={(e) => {
                     setShowViewDialog(true);
                   }}
-                  aria-controls="add-view-menu"
+                  isLoading={isUploading}
                 >
                   Save Excel Mapping
-                </Button>
+                </ThemeButton>
               </div>
             </div>
             {isUploading ? (
@@ -642,15 +620,15 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                                   {...params}
                                   label=""
                                   variant="outlined"
-                                  // error={
-                                  //   _key?.value === field?.fieldLabel?.toUpperCase() &&
-                                  //   !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader)
-                                  // }
-                                  // helperText={
-                                  //   _key?.value === field?.fieldLabel?.toUpperCase() &&
-                                  //   !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader) &&
-                                  //   'Required field'
-                                  // }
+                                // error={
+                                //   _key?.value === field?.fieldLabel?.toUpperCase() &&
+                                //   !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader)
+                                // }
+                                // helperText={
+                                //   _key?.value === field?.fieldLabel?.toUpperCase() &&
+                                //   !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader) &&
+                                //   'Required field'
+                                // }
                                 />
                               )}
                             />
@@ -664,13 +642,12 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
             ) : null}
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button color="primary" size="small" onClick={handleClose}>
+            <ThemeButton buttonType="transparent" onClick={handleClose}>
               Cancel
-            </Button>
-            <CustomButton
+            </ThemeButton>
+            <ThemeButton
               onClick={handleCustomImport}
-              variant="contained"
-              color="primary"
+              buttonType="theme"
               disabled={
                 loading ||
                 // !values?.productCategory ||
@@ -679,10 +656,10 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                 templateImportHeader?.length === 0 ||
                 customImportHeader?.length === 0
               }
-              loading={loading}
+              isLoading={loading}
             >
               Submit
-            </CustomButton>
+            </ThemeButton>
           </CustomDialogFooter>
           {addSystemColumn && (
             <AddField

@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Button, CircularProgress, Dialog, Grid, TextField } from '@material-ui/core';
+import { Box, Dialog, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Form, Formik } from 'formik';
 import { camelCase, isEqual } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -10,8 +11,9 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Autocomplete, ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { Autocomplete, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import routes from 'src/components/Helpers/Routes';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const NotifSendType = [
   {
@@ -105,7 +107,7 @@ const AddNotificationDialog = ({ data, type, onSuccess, onClose, id }) => {
         }
       }}
     >
-      <Formik initialValues={initialValues} onSubmit={handleSubmit} validate={() => {}}>
+      <Formik initialValues={initialValues} onSubmit={handleSubmit} validate={() => { }}>
         {({ values, errors, setFieldValue, touched, submitForm }) => (
           <>
             <CustomDialogHeader
@@ -153,7 +155,7 @@ const AddNotificationDialog = ({ data, type, onSuccess, onClose, id }) => {
                         disableCloseOnSelect={true}
                         options={roleOptions ?? []}
                         getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                        getOptionSelected={(option: any, val) => option.optionValue === val}
+                        isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                         value={
                           roleOptions && roleOptions?.filter((data) => values['ids'].includes(data.optionValue))?.length
                             ? roleOptions?.filter((data) => values['ids'].includes(data.optionValue))
@@ -167,6 +169,7 @@ const AddNotificationDialog = ({ data, type, onSuccess, onClose, id }) => {
                           <TextField
                             {...params}
                             margin="dense"
+                            size="small"
                             variant="outlined"
                             label="Roles"
                             placeholder="Roles"
@@ -187,7 +190,7 @@ const AddNotificationDialog = ({ data, type, onSuccess, onClose, id }) => {
                         options={userOptions ?? []}
                         disableCloseOnSelect={true}
                         getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                        getOptionSelected={(option: any, val) => option.optionValue === val}
+                        isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                         value={
                           userOptions && userOptions?.filter((data) => values['ids'].includes(data.optionValue))?.length
                             ? userOptions?.filter((data) => values['ids'].includes(data.optionValue))
@@ -201,6 +204,7 @@ const AddNotificationDialog = ({ data, type, onSuccess, onClose, id }) => {
                           <TextField
                             {...params}
                             margin="dense"
+                            size="small"
                             variant="outlined"
                             label="Users"
                             placeholder="Users"
@@ -217,34 +221,29 @@ const AddNotificationDialog = ({ data, type, onSuccess, onClose, id }) => {
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button
-                size="small"
-                color="primary"
-                disabled={submitting}
+
+
+              <ThemeButton
+                buttonType='transparent'
                 onClick={() => {
                   if (isEqual(initialValues, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
               >
                 Cancel
-              </Button>
-              <Button
+              </ThemeButton>
+              <ThemeButton
+                buttonType='theme'
                 disabled={submitting}
-                variant="contained"
-                color="primary"
-                size="small"
-                type="submit"
                 onClick={submitForm}
-                endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                isLoading={submitting}
               >
-                {' '}
                 Save
-              </Button>
+              </ThemeButton>
             </CustomDialogFooter>
 
             {showConfirmDialog ? (
               <ConfirmationCancelDialog
-                close={() => setShowConfirmDialog(false)}
                 open={showConfirmDialog}
                 onSave={() => {
                   setShowConfirmDialog(false);

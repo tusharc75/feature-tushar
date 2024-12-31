@@ -1,5 +1,5 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
+import { Box, IconButton, MenuItem } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { camelCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -15,7 +15,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import ManageDataList from './ManageDataList';
-import { Edit } from '@material-ui/icons';
+import { Edit } from '@mui/icons-material';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 
 const DataListItems = ({ dataListId }) => {
@@ -25,12 +25,12 @@ const DataListItems = ({ dataListId }) => {
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const {
-    state: { user, permissions,resources }
+    state: { user, permissions, resources }
   }: any = useData();
   const [columns, setColumns] = useState(null);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isEdit: false, idToEdit: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [ deleteRecord, setDeleteRecord] = useState(null);
+  const [deleteRecord, setDeleteRecord] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();
@@ -87,8 +87,8 @@ const DataListItems = ({ dataListId }) => {
               aria-label="Delete"
               disabled={row?.original?.canDelete ? false : true}
               onClick={() => {
-                 setDeleteRecord(row.original);
-                 setShowDeleteConfirmBox(true);
+                setDeleteRecord(row.original);
+                setShowDeleteConfirmBox(true);
               }}
             >
               <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
@@ -240,8 +240,12 @@ const DataListItems = ({ dataListId }) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.dataLists?.titleSingular?.toLowerCase()} :
-            ${deleteRecord?.title || ''}` : `selected ${resources?.dataLists?.titlePlural?.toLowerCase()}`} ?`}
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.dataLists?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.title || ''}`
+              : `selected ${resources?.dataLists?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

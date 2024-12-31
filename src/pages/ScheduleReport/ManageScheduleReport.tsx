@@ -1,6 +1,7 @@
 import { useEffect, useState, useContext, useRef } from 'react';
-import { Dialog, Grid, Box, Button, TextField, Typography, CircularProgress } from '@material-ui/core';
-import { Autocomplete, ToggleButtonGroup, ToggleButton } from '@material-ui/lab';
+import { Dialog, Box, TextField, Typography, CircularProgress } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { Autocomplete, ToggleButtonGroup, ToggleButton } from '@mui/material';
 import { Form, Formik, FormikProps } from 'formik';
 import { REPORT_LIST, SCHEDULE_FREQUENCY, FREQUENCY_WEEKS, CustomDialogTransition } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -15,6 +16,7 @@ import Loader from 'src/components/Loader';
 import { useData } from '../../StateProvider/Provider';
 import { camelCase, isEmpty, kebabCase } from 'lodash';
 import React from 'react';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 type ValueTypes = {
   scheduleName: string;
@@ -475,7 +477,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                   </div>
                   <Box my={2}>
                     <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
                         <TextField
                           value={values.scheduleName}
                           required
@@ -489,13 +491,13 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                           helperText={touched['scheduleName'] && errors['scheduleName']}
                         />
                       </Grid>
-                      <Grid item xs={12} sm={6}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
                         <Autocomplete
                           options={resourceOption}
                           fullWidth
                           size="small"
                           getOptionLabel={(option) => option.title}
-                          getOptionSelected={(option, value) => option.value === value.value}
+                          isOptionEqualToValue={(option, value) => option.value === value.value}
                           value={values.resource}
                           onChange={(_, newVal) => {
                             const result = { resource: newVal, filters: [], column: [] };
@@ -527,14 +529,14 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                   </div>
                   <Box my={2}>
                     <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
                         <Autocomplete
                           options={filterOptions}
                           fullWidth
                           multiple
                           size="small"
                           value={values.filters}
-                          getOptionSelected={(option, val) => option.fieldName === val.fieldName}
+                          isOptionEqualToValue={(option, val) => option.fieldName === val.fieldName}
                           getOptionLabel={(option) => option.fieldLabel}
                           onChange={(_, newVal) => {
                             setFieldValue('filters', newVal);
@@ -547,14 +549,16 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                               label="Filters"
                               name="filters"
                               variant="outlined"
-                              InputProps={{
-                                ...params.InputProps,
-                                endAdornment: (
-                                  <React.Fragment>
-                                    {loadingColumns ? <CircularProgress size={18} color="inherit" /> : null}
-                                    {params.InputProps.endAdornment}
-                                  </React.Fragment>
-                                )
+                              slotProps={{
+                                input: {
+                                  ...params.InputProps,
+                                  endAdornment: (
+                                    <React.Fragment>
+                                      {loadingColumns ? <CircularProgress size={18} color="inherit" /> : null}
+                                      {params.InputProps.endAdornment}
+                                    </React.Fragment>
+                                  )
+                                }
                               }}
                             />
                           )}
@@ -574,13 +578,13 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                         setStatusPeriodDate={setStatusPeriodDate}
                         setStatusTimeFrame={setStatusTimeFrame}
                       />
-                      <Grid item xs={12} sm={6}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
                         <Autocomplete
                           options={resourceColumns.map((item) => item.fieldData)}
                           fullWidth
                           multiple
                           size="small"
-                          getOptionSelected={(option, val) => option.fieldName === val.fieldName}
+                          isOptionEqualToValue={(option, val) => option.fieldName === val.fieldName}
                           getOptionLabel={(option) => option.fieldLabel}
                           value={values.column}
                           onChange={(_, newVal) => setFieldValue('column', newVal)}
@@ -592,14 +596,16 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                               label="Columns"
                               name="columns"
                               variant="outlined"
-                              InputProps={{
-                                ...params.InputProps,
-                                endAdornment: (
-                                  <React.Fragment>
-                                    {loadingColumns ? <CircularProgress size={18} color="inherit" /> : null}
-                                    {params.InputProps.endAdornment}
-                                  </React.Fragment>
-                                )
+                              slotProps={{
+                                input: {
+                                  ...params.InputProps,
+                                  endAdornment: (
+                                    <React.Fragment>
+                                      {loadingColumns ? <CircularProgress size={18} color="inherit" /> : null}
+                                      {params.InputProps.endAdornment}
+                                    </React.Fragment>
+                                  )
+                                }
                               }}
                             />
                           )}
@@ -613,13 +619,13 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                   </div>
                   <Box my={2}>
                     <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
                         <Autocomplete
                           options={sharepointOptions ? ['Email', 'Sharepoint Upload'] : ['Email']}
                           fullWidth
                           size="small"
                           getOptionLabel={(option) => option}
-                          getOptionSelected={(option, value) => option === value}
+                          isOptionEqualToValue={(option, value) => option === value}
                           value={values.reportAction}
                           onChange={(_, newVal) => setFieldValue('reportAction', newVal)}
                           renderInput={(params) => (
@@ -635,13 +641,13 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                           )}
                         />
                       </Grid>
-                      <Grid item xs={12} sm={6}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
                         <Autocomplete
                           options={['xslx', 'csv']}
                           fullWidth
                           size="small"
                           getOptionLabel={(option) => option}
-                          getOptionSelected={(option, value) => option === value}
+                          isOptionEqualToValue={(option, value) => option === value}
                           value={values.fileType}
                           onChange={(_, newVal) => setFieldValue('fileType', newVal)}
                           renderInput={(params) => (
@@ -662,14 +668,14 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                   <Box my={2}>
                     <Grid container spacing={2}>
                       {values?.reportAction === 'Email' && (
-                        <Grid item xs={12} sm={6}>
+                        <Grid size={{ xs: 12, sm: 6 }}>
                           <Autocomplete
                             options={usersList}
                             fullWidth
                             multiple
                             size="small"
                             getOptionLabel={(option) => option.name}
-                            getOptionSelected={(option, value) => option.userId === value.userId}
+                            isOptionEqualToValue={(option, value) => option.userId === value.userId}
                             value={values.subscribeUsers}
                             onChange={(_, newVal) => setFieldValue('subscribeUsers', newVal)}
                             renderInput={(params) => (
@@ -687,13 +693,13 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                         </Grid>
                       )}
                       {values?.reportAction === 'Sharepoint Upload' && sharepointOptions && (
-                        <Grid item xs={12} sm={6}>
+                        <Grid size={{ xs: 12, sm: 6 }}>
                           <Autocomplete
                             options={sharepointOptions}
                             fullWidth
                             size="small"
                             getOptionLabel={(option) => option.optionLabel}
-                            getOptionSelected={(option, value) => option.optionValue == value}
+                            isOptionEqualToValue={(option, value) => option.optionValue == value}
                             value={sharepointOptions?.find((ops) => ops?.optionValue === values?.sharepointSite) || {}}
                             onChange={(_, newVal) => setFieldValue('sharepointSite', newVal?.optionValue || '')}
                             renderInput={(params) => (
@@ -714,7 +720,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                   </Box>
                   <Box my={2}>
                     <Grid container spacing={2}>
-                      <Grid item xs={12}>
+                      <Grid size={{ xs: 12 }}>
                         <Box>
                           <Typography color="textPrimary">Schedule Frequency</Typography>
                           <Box mt={1} />
@@ -792,12 +798,12 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                           )}
                         </Box>
                       </Grid>
-                      <Grid item xs={12} sm={6}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
                         <Autocomplete
                           options={getTimeOption()}
                           fullWidth
                           size="small"
-                          getOptionSelected={(option, val) => option === val}
+                          isOptionEqualToValue={(option, val) => option === val}
                           getOptionLabel={(option) => option ?? ''}
                           value={values.time}
                           onChange={(_, newVal) => {
@@ -820,19 +826,21 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                   </Box>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                  <Button disabled={isSubmitting} color="primary" size="small" onClick={handleClose}>
+
+                  <ThemeButton
+                    buttonType='transparent'
+                    onClick={handleClose}
+                  >
                     Cancel
-                  </Button>
-                  <Button
-                    startIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
+                  </ThemeButton>
+                  <ThemeButton
+                    buttonType='theme'
                     disabled={isSubmitting}
-                    variant="contained"
-                    color="primary"
-                    size="small"
                     onClick={submitForm}
+                    isLoading={isSubmitting}
                   >
                     {id ? 'Update' : 'Save'}
-                  </Button>
+                  </ThemeButton>
                 </CustomDialogFooter>
               </Form>
             </>

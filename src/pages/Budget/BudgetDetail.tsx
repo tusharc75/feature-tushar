@@ -1,7 +1,7 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import { Edit } from '@material-ui/icons';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import EditIcon from '@mui/icons-material/Edit';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -10,7 +10,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { ACTIVITY_RESOURCE, sidebarResource } from '../../constants/helpers';
@@ -70,7 +70,7 @@ const BudgetDetail = () => {
         .put(`${routes?.budget?.path}/remove`, { ids: [id] })
         .then(({ data }) => {
           setShowDeleteConfirmBox(false);
-          
+
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -104,14 +104,9 @@ const BudgetDetail = () => {
           <Box className="control-buttons-v1">
             <>
               {permissions?.budget?.isUpdate && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  size="small"
-                  onClick={handleOpenUpdateDialog}
-                  className={'btn-outline-v1'}
-                >
-                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                </Button>
+                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                  {'Edit'}
+                </ThemeButton>
               )}
               {permissions?.budget?.isDelete && <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />}
               <ActivityButton referenceId={budgetData?._id} resource={ACTIVITY_RESOURCE.budget} resourceLabel={budgetData?.name} />
@@ -122,7 +117,7 @@ const BudgetDetail = () => {
       <Box className={`detail-container-v1`}>
         {loading || !fields?.length ? (
           <Grid container spacing={2} style={{ padding: '8px' }}>
-            <CommonSkeleton lenArray={[...Array(7).keys()]} />
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Grid>
         ) : (
           <DetailsPage data={budgetData} fields={fields} />

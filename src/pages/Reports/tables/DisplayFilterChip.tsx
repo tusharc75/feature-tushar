@@ -1,5 +1,5 @@
-import { IconButton } from '@material-ui/core';
-import { Close } from '@material-ui/icons';
+import { IconButton } from '@mui/material';
+import { Close } from '@mui/icons-material';
 import { camelCase, isEmpty, uniqBy } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';

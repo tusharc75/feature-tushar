@@ -1,10 +1,11 @@
 import React from 'react';
 import Chart from 'react-chartjs-2';
-import { Paper, Box, Grid, useTheme, useMediaQuery, Typography, Button, Badge, IconButton } from '@material-ui/core';
-import { ImportExport, TableChart, Timeline, Maximize } from '@material-ui/icons';
+import { Paper, Box, useTheme, useMediaQuery, Typography, Badge, IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { ImportExport, TableChart, Timeline } from '@mui/icons-material';
 import { BsFilter, BsFillPinFill } from 'react-icons/bs';
 import { FiMaximize2 } from 'react-icons/fi';
-import { Skeleton } from '@material-ui/lab';
+import { Skeleton } from '@mui/material';
 import { TbPinnedOff } from 'react-icons/tb';
 import FiltersDropdown from './FiltersDropdown';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -14,17 +15,18 @@ import { GlobalFiltersType } from './GlobalFilter';
 import Loader from 'src/components/Loader';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import { camelCase, isEmpty, startCase } from 'lodash';
+import { camelCase, isEmpty, isObject, startCase } from 'lodash';
 import MapView from './MapView';
 import { IFormDataType } from '../DashboardBuilder/builderHelpers';
 import getStaticData from './getStaticData';
 import StaticCards from './StaticCards';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useAppTheme } from 'src/constants/AppConfig';
-import RefreshIcon from '@material-ui/icons/Refresh';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { formatAmountWithCurrency } from 'src/constants/helpers';
 import { FunnelChart } from 'react-funnel-pipeline';
 import 'react-funnel-pipeline/dist/index.css';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export interface ChartDataType extends IFormDataType {
   _id: any;
@@ -237,12 +239,12 @@ const ChartTypes = ({
   };
 
   return (
-    <Grid item xs={12} md={fullScreen ? 12 : chart.column}>
+    <Grid size={{ xs: 12, md: 12 }} >
       {chart.graphType === 'Custom' ? (
         <Grid container spacing={1}>
           {loading ? (
             [...Array(4).keys()].map((_, index) => (
-              <Grid item xs={12} sm={6} md={3} key={index + 1}>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index + 1}>
                 <Box p={2} component={Paper} height={'100%'} display="flex" flexDirection="column" justifyContent="space-between">
                   <Skeleton variant="text" width={150} height={30} />
                   <Skeleton variant="text" width={100} height={20} />
@@ -263,49 +265,42 @@ const ChartTypes = ({
           sx={{ border: '1px solid var(--common-border-color)', boxShadow: '0px 20.3165px 40.6331px rgba(0, 0, 0, 0.03)' }}
         >
           <Box style={{ padding: '15px 10px' }}>
-            <div className="flex justify-between items-center">
+            <div className="flex items-center justify-between">
               <div>
                 {chart.hasFilters && (
                   <Badge color="secondary" variant="dot" invisible={invisible}>
-                    <Button
+                    <ThemeButton
                       disabled={loading}
                       onClick={handleOpenFilter}
-                      size="small"
-                      disableElevation
-                      color="primary"
                       startIcon={<BsFilter fontSize={14} />}
                     >
                       Filters
-                    </Button>
+                    </ThemeButton>
                   </Badge>
                 )}
               </div>
               <div className="flex items-center">
                 {chart.hasExport && (
-                  <Button
+                  <ThemeButton
                     disabled={loading}
                     style={{ marginRight: chart.hasTableView ? 10 : 0 }}
                     onClick={handleOpenExport}
-                    color="primary"
-                    size="small"
                     startIcon={<ImportExport />}
                   >
                     Export to
-                  </Button>
+                  </ThemeButton>
                 )}
                 {chart.hasTableView && chartData?.tableData && (
-                  <Button
+                  <ThemeButton
                     disabled={loading}
-                    color="primary"
                     style={{ marginRight: 10 }}
                     onClick={() => {
                       setTableView(!tableView);
                     }}
-                    size="small"
                     startIcon={!tableView ? <TableChart /> : <Timeline />}
                   >
                     {!tableView ? 'Table' : 'Chart'} View
-                  </Button>
+                  </ThemeButton>
                 )}
                 {selectedDashboardId ? (
                   !chart?.pin ? (
@@ -408,32 +403,39 @@ const ChartTypes = ({
                     }}
                     options={{
                       plugins: {
-                        ...((chart?.currency || chart?.percentage || chart?.chartType === 'Bar') &&
-                        {
+                        ...((chart?.currency || chart?.percentage || chart?.chartType === 'Bar') && {
                           tooltip: {
                             mode: 'index',
                             callbacks: {
                               label: function (context) {
-                                let label = (chart?.chartType === 'Bar' && chart?.stack) ? context.dataset.label : context.label || context.dataset.label || '';
+                                let label =
+                                  chart?.chartType === 'Bar' && chart?.stack ? context.dataset.label : context.label || context.dataset.label || '';
                                 if (label) {
                                   label += ': ';
                                 }
                                 if (chart?.percentage) {
-                                  label += `${context.parsed}%`;
+                                  if (isObject(context?.parsed)) {
+                                    label += `${context?.formattedValue}%`;
+                                  } else {
+                                    label += `${context.parsed}%`;
+                                  }
                                 } else {
                                   let parseValue = context?.parsed?.y;
                                   if (chart?.kpi?.horizontalBar) {
                                     parseValue = context?.parsed?.x;
                                   }
                                   if (parseValue !== null) {
-                                    label += chart?.currency ? formatAmountWithCurrency((globalFilters.currency || currency), Number(parseValue) ? parseValue : '00').fullFormatAmountWithoutSpace : parseValue;
+                                    label += chart?.currency
+                                      ? formatAmountWithCurrency(globalFilters.currency || currency, Number(parseValue) ? parseValue : '00')
+                                        .fullFormatAmountWithoutSpace
+                                      : parseValue;
                                   }
                                 }
                                 return label;
                               }
                             }
                           }
-                        }),
+                        })
                       },
                       maintainAspectRatio: false,
                       indexAxis: chart?.kpi?.horizontalBar ? 'y' : 'x',
@@ -449,11 +451,12 @@ const ChartTypes = ({
                           },
                           ticks: {
                             callback: function (value) {
-                              return chart?.currency ?
-                                formatAmountWithCurrency((globalFilters.currency || currency), Number(value) ? value : '00').fullFormatAmountWithoutSpace
+                              return chart?.currency
+                                ? formatAmountWithCurrency(globalFilters.currency || currency, Number(value) ? value : '00')
+                                  .fullFormatAmountWithoutSpace
                                 : value;
                             }
-                          },
+                          }
                         },
                         ...(chartData.datasets.some((d) => d?.yAxisID === 'y1') && {
                           y1: {

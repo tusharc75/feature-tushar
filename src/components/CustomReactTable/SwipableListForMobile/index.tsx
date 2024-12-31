@@ -1,5 +1,5 @@
-import { CircularProgress } from '@material-ui/core';
-import { Error } from '@material-ui/icons';
+import { CircularProgress } from '@mui/material';
+import { Error } from '@mui/icons-material';
 import React, { FC, useMemo } from 'react';
 import VirtualSwipableList from 'src/components/CustomReactTable/SwipableListForMobile/VirtualSwipableList';
 import RenderFooter from './RenderFooter';

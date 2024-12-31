@@ -1,17 +1,16 @@
-import { Box, Button, Grid, Menu, MenuItem } from '@material-ui/core';
-import { Edit, ExpandMore } from '@material-ui/icons';
-import { Skeleton } from '@material-ui/lab';
+import { Box, Menu, MenuItem } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { ExpandMore } from '@mui/icons-material';
+import EditIcon from '@mui/icons-material/Edit';
+import { Skeleton } from '@mui/material';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
-import { IoMdDownload } from 'react-icons/io';
 import { VscVersions } from 'react-icons/vsc';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import Steps, { getIndex } from 'src/components/Steps';
 import Versions from 'src/components/Versions';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -40,7 +39,8 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Step from '../DynamicForm/Step';
-import { RiExchangeBoxFill } from 'react-icons/ri';
+import { RiExchange2Line } from 'react-icons/ri';
+import { DownloadIcon } from 'src/assets/svg/svgIcons';
 
 const InvoiceDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -239,65 +239,43 @@ const InvoiceDetails = () => {
           <Box className="control-buttons-v1">
             {invoiceData ? (
               <>
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                  className="btn-outline-v1"
-                  type="button"
-                  size="small"
-                  disabled={isDownloading ? true : false}
-                  startIcon={isMobile ? '' : <IoMdDownload />}
+                <ThemeButton
                   onClick={(e) => {
                     handleDownload();
                   }}
+                  startIcon={<DownloadIcon />}
+                  disabled={isDownloading ? true : false}
+                  mobileTooltip={isDownloading ? 'Please wait...' : 'Download'}
+                  iconForMobile={<DownloadIcon />}
                 >
-                  {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloading ? 'Please wait...' : 'Download'}
-                </Button>
+                  {isDownloading ? 'Please wait...' : 'Download'}
+                </ThemeButton>
                 {invoiceData?.versions?.length && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                    color="primary"
-                    size="small"
-                    className={'btn-outline-v1'}
+                  <ThemeButton
                     onClick={() => {
                       setVersionDialog(true);
                     }}
-                    style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                    startIcon={isMobile && !isTablet ? null : <VscVersions />}
+                    startIcon={<VscVersions />}
+                    mobileTooltip={'Versions'}
+                    iconForMobile={<VscVersions size={20} style={{ color: 'var(--primary-text)' }} />}
                   >
-                    {isMobile && !isTablet ? <VscVersions size={20} /> : 'Versions'}
-                  </Button>
+                    Versions
+                  </ThemeButton>
                 )}
-                {permissions?.invoice?.isUpdate && allowedToEdit && statusOptions?.length > 0 && (
-                  <Button
-                    variant={'outlined'}
-                    color="default"
-                    size="small"
+                {permissions?.invoice?.isUpdate && allowedToEdit && statusOptions?.length > 0 && invoiceData?.status !== INVOICE_STATUS.closed && (
+                  <ThemeButton
                     onClick={openActions}
-                    className="btn-outline-v1"
-                    disabled={updateLoading}
-                    aria-controls="action-menu"
                     endIcon={<ExpandMore />}
+                    mobileTooltip="Change Status"
+                    disabled={updateLoading}
+                    iconForMobile={<RiExchange2Line size={24} style={{ color: 'var(--primary-text)' }} />}
                   >
-                    {isMobile && !isTablet ? <RiExchangeBoxFill size={24} style={{ color: 'var(--primary-text)' }} /> : 'Change Status'}
-                  </Button>
+                    {'Change Status'}
+                  </ThemeButton>
                 )}
-                {permissions?.invoice?.isUpdate &&
-                  allowedToEdit &&
-                  ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status) && (
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      className={'btn-outline-v1'}
-                      size="small"
-                      onClick={handleOpenUpdateDialog}
-                    >
-                      {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                    </Button>
-                  )}
-                {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
                 <Menu
                   anchorEl={anchorEl}
                   keepMounted
-                  getContentAnchorEl={null}
                   anchorOrigin={{
                     vertical: 'bottom',
                     horizontal: 'left'
@@ -324,34 +302,25 @@ const InvoiceDetails = () => {
                       );
                     })}
                 </Menu>
-                {/* {permissions?.invoice?.isUpdate &&
-                  allowedToEdit &&
-                  [INVOICE_STATUS.readyToInvoice, INVOICE_STATUS.invoiced].includes(invoiceData?.status) && (
-                    <ButtonWithPulse
-                      variant={'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={() => {
-                        setShowClosedConfirmBox(true);
-                      }}
-                      className={'btn-outline-v1'}
-                    >
-                      Close
-                    </ButtonWithPulse>
-                  )} */}
                 {permissions?.invoice?.isUpdate && allowedToEdit && invoiceData?.status === INVOICE_STATUS.closed && (
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    size="small"
-                    className={'btn-outline-v1'}
+                  <ThemeButton
                     onClick={() => {
                       setShowReOpenConfirmBox(true);
                     }}
+                    mobileTooltip="Re-Open"
+                    iconForMobile={false}
                   >
-                    Re-Open
-                  </Button>
+                    {'Re-Open'}
+                  </ThemeButton>
                 )}
+                {permissions?.invoice?.isUpdate &&
+                  allowedToEdit &&
+                  ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status) && (
+                    <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                      {'Edit'}
+                    </ThemeButton>
+                  )}
+                {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
@@ -372,7 +341,7 @@ const InvoiceDetails = () => {
           <Box>
             {loading || !invoiceFields.length ? (
               <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </Grid>
             ) : (
               <>
@@ -383,9 +352,9 @@ const InvoiceDetails = () => {
         </TabPanel>
         <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
           <TabPanel value={tabValue} index={1}>
-            <Grid item xs={12} sm={12} md={12} lg={12}>
+            <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
               {invoiceData ? (
-                <Grid item xs={12} sm={12} md={12} lg={12}>
+                <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
                   <Steps
                     isNextStep={false}
                     nextStep={nextStep}
@@ -420,7 +389,7 @@ const InvoiceDetails = () => {
                 </Grid>
               ) : (
                 <Grid container spacing={2} style={{ padding: '8px' }}>
-                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
                 </Grid>
               )}
             </Grid>

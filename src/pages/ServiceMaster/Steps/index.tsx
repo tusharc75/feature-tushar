@@ -1,27 +1,24 @@
-import { useState, useEffect, useContext } from 'react';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import { Box, Grid, IconButton, Menu, MenuItem, Button, useMediaQuery } from '@material-ui/core';
-import axiosInstance from 'src/axios/axiosInstance';
-import StepDialog from './StepDialog';
-import { serviceMaster, sidebarResource } from 'src/constants/helpers';
+import DeleteIcon from '@mui/icons-material/Delete';
+import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
+import EditIcon from '@mui/icons-material/Edit';
+import { Box, IconButton, MenuItem, useMediaQuery } from '@mui/material';
 import { camelCase } from 'lodash';
-import routes from 'src/components/Helpers/Routes';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { useData } from '../../../StateProvider/Provider';
-import { gridLoadingTimeout } from 'src/constants/helpers';
-import DeleteIcon from '@material-ui/icons/Delete';
+import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import EditIcon from '@material-ui/icons/Edit';
-import FieldDialog from './FieldDialog';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { Build, ExpandMore, LowPriority } from '@material-ui/icons';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
-import DragIndicatorIcon from '@material-ui/icons/DragIndicator';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { gridLoadingTimeout, serviceMaster, sidebarResource } from 'src/constants/helpers';
+import { useData } from '../../../StateProvider/Provider';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import NoDataCell from '../../../components/Helpers/NoDataCell';
+import FieldDialog from './FieldDialog';
+import StepDialog from './StepDialog';
 
 const renderedFrom = `${camelCase(sidebarResource?.serviceMaster)}_steps`;
 
@@ -280,7 +277,7 @@ const Steps = ({ serviceId }) => {
     return (
       <>
         {dataRows?.length ? (
-          <ThemeButton iconForMobile={<LowPriority />} onClick={() => setArrangeView(true)} tooltip="Arrange" borderColor="default">
+          <ThemeButton iconForMobile={<LowPriority />} onClick={() => setArrangeView(true)} mobileTooltip="Arrange" borderColor="default">
             <DragIndicatorIcon fontSize="small" className="mr-1 text-[var(--primary)] dark:text-white" /> Arrange
           </ThemeButton>
         ) : null}

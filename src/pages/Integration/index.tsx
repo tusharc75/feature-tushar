@@ -1,19 +1,17 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, IconButton, Typography } from '@material-ui/core';
+import { Box, IconButton, Typography } from '@mui/material';
 import { HiArrowRight } from 'react-icons/hi';
 import { getColors } from '../Home/helpers';
 import styles from './index.module.scss';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { FaSlack } from 'react-icons/fa';
 import axiosInstance from 'src/axios/axiosInstance';
 import { backendApi } from 'src/config';
 import { useData } from 'src/StateProvider/Provider';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import IntegrationCardShell from 'src/pages/Integration/IntegrationCardShell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { Delete, CheckBox } from '@material-ui/icons';
+import { Delete, CheckBox } from '@mui/icons-material';
 import slackLogo from 'src/assets/slack-logo.png';
 
 const Integration = () => {

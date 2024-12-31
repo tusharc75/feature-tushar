@@ -1,32 +1,10 @@
-import React, { useState, useContext, useMemo, useEffect } from 'react';
-import {
-  Dialog,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Box,
-  Checkbox,
-  Button,
-  TextField,
-  CircularProgress,
-  Grid,
-  Chip,
-  Typography
-} from '@material-ui/core';
-import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import React, { useState, useMemo, useEffect } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { GiReceiveMoney } from 'react-icons/gi';
-import { AiIcon, LightIcon } from 'src/assets/svg/svgIcons';
-
-import { currencyCodeToSymbol, CustomDialogTransition, formatAmountWithCurrency, quotation, QUOTATION_STATUS } from 'src/constants/helpers';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { LightIcon } from 'src/assets/svg/svgIcons';
+import { currencyCodeToSymbol, formatAmountWithCurrency, quotation } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
-import DashboardModal, { ModalHead } from 'src/components/DashboardModal';
-import { Background } from 'react-flow-renderer';
-import routes from 'src/components/Helpers/Routes';
+import DashboardModal from 'src/components/DashboardModal';
 import { useData } from 'src/StateProvider/Provider';
 
 interface CssObj {
@@ -83,7 +61,7 @@ const QuotationSummeryDialog = ({ quotationData, versionId, onClose }) => {
   const [redCard, setRedCard] = useState(false);
 
   const {
-    state: {resources }
+    state: { resources }
   }: any = useData();
 
   useEffect(() => {
@@ -102,7 +80,7 @@ const QuotationSummeryDialog = ({ quotationData, versionId, onClose }) => {
     additionalData = additionalCostResponce?.data?.data || [];
     inventory = data?.inventory ? data?.inventory : [];
     let rows = data.material.filter((e) => e.parentId === null);
-     rows = [...rows,...additionalData]
+    rows = [...rows, ...additionalData];
     const totalFinalPrice = rows
       .filter(
         (f) =>
@@ -114,7 +92,7 @@ const QuotationSummeryDialog = ({ quotationData, versionId, onClose }) => {
     const totalSupplierPrice = rows
       .filter(
         (f) =>
-        !f?.parentId &&
+          !f?.parentId &&
           f?.hasOwnProperty('supplierPrice_' + quotationData?.currency?.toLowerCase()) &&
           !isNaN(f['supplierPrice_' + quotationData?.currency?.toLowerCase()])
       )
@@ -196,15 +174,6 @@ const QuotationSummeryDialog = ({ quotationData, versionId, onClose }) => {
             </div>
           )}
         </div>
-        {/* <div style={styles.aiCard}>
-          <div style={styles.cardHead}>
-            <AiIcon />
-            <Typography style={{ fontWeight: 600, marginTop: 5 }}>AI Suggestions:</Typography>
-          </div>
-          <Box mt={1} style={styles.chipContainer}>
-            <RenderChip lebel="As per previous orders, margin can be increased by 2-5%" />
-          </Box>
-        </div> */}
       </DashboardModal>
     </>
   );

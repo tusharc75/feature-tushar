@@ -1,8 +1,9 @@
-import { Badge, Box, Button, Grid, IconButton, TextField } from '@material-ui/core';
-import ButtonGroup from '@material-ui/core/ButtonGroup';
-import CropFreeIcon from '@material-ui/icons/CropFree';
-import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
-import { Autocomplete } from '@material-ui/lab';
+import { Badge, Box, Button, IconButton, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import ButtonGroup from '@mui/material/ButtonGroup';
+import CropFreeIcon from '@mui/icons-material/CropFree';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -170,21 +171,21 @@ const Pos = () => {
   return (
     <Fragment>
       <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
+        <Grid size={{md:4, sm:11, xs:10}}>
           <CustomBreadCrumbs routes={[{ ...routes.pos, title: resources?.pos?.titlePlural }]} />
         </Grid>
-        <Grid item md={8} sm={11} xs={10}></Grid>
+        <Grid size={{md:8, sm:11, xs:10}}></Grid>
       </Grid>
       <CustomContainer>
         <div className="header-panel">
           <Grid container>
-            <Grid item xs={12} sm={12} md={6} className={isMobile ? styles2.mobile_panel : 'd-flex align-items-center gap-1'}>
+            <Grid size={{xs:12, sm:12, md:6}} className={isMobile ? styles2.mobile_panel : 'd-flex align-items-center gap-1'}>
               <Autocomplete
                 style={{ width: '250px' }}
                 options={plantOptions}
                 getOptionLabel={(option: any) => option.warehouseName}
                 disableClearable
-                getOptionSelected={(option: any, val) => option.warehouseId === val}
+                isOptionEqualToValue={(option: any, val) => option.warehouseId === val}
                 value={
                   plantOptions.filter((data) => data.warehouseId === plantId).length
                     ? plantOptions.filter((data) => data.warehouseId === plantId)[0]
@@ -200,6 +201,7 @@ const Pos = () => {
                     <TextField
                       {...params}
                       margin="dense"
+                      size="small"
                       name="plant"
                       placeholder={resources?.warehouse?.titleSingular}
                       variant="standard"
@@ -207,7 +209,7 @@ const Pos = () => {
                       className={isMobile ? 'serchBox' : ''}
                     />
                   ) : (
-                    <TextField {...params} margin="dense" name="plant" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
+                    <TextField {...params} margin="dense" name="plant" size="small" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
                   )
                 }
               />
@@ -215,7 +217,7 @@ const Pos = () => {
                 style={{ width: '250px' }}
                 options={productCategoryList}
                 getOptionLabel={(option: any) => (option ? option.name : '')}
-                getOptionSelected={(option: any, val) => option._id === val}
+                isOptionEqualToValue={(option: any, val) => option._id === val}
                 value={
                   productCategoryList.find((data) => data._id === productCategory)
                     ? productCategoryList.find((data) => data._id === productCategory)
@@ -229,6 +231,7 @@ const Pos = () => {
                     <TextField
                       {...params}
                       margin="dense"
+                      size="small"
                       name="productCategory"
                       placeholder="Product Category"
                       variant="standard"
@@ -236,12 +239,12 @@ const Pos = () => {
                       className={isMobile ? 'serchBox' : ''}
                     />
                   ) : (
-                    <TextField {...params} margin="dense" name="productCategory" label="Product Category" variant="outlined" fullWidth />
+                    <TextField {...params} margin="dense" size="small" name="productCategory" label="Product Category" variant="outlined" fullWidth />
                   )
                 }
               />
             </Grid>
-            <Grid md={6} sm={12} xs={12} container className={styles2.filter_side}>
+            <Grid size={{md:6, sm:12, xs:12}} container className={styles2.filter_side}>
               <Box className={isMobile ? styles2.mobile_filter_side_header : styles2.filter_side_header} component="div">
                 <SearchBox
                   onChange={(e) => {

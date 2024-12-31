@@ -1,7 +1,6 @@
-import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { Box, IconButton, MenuItem } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -14,7 +13,6 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
-import SearchBox from 'src/components/Helpers/SearchBox';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageFrequentlyAskedQuestion from './ManageFrequentlyAskedQuestion';
@@ -35,7 +33,6 @@ const FrequentlyAskedQuestion = () => {
   const { generateColumns } = useColumns();
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [columns, setColumns] = useState(null);
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [freqentlyAskedQuestionId, setFrequentlyAskedQuestionId] = useState(null);
@@ -201,11 +198,11 @@ const FrequentlyAskedQuestion = () => {
         <MenuItem
           disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
           onClick={() => {
-            if (selectedRecords.length === 1){
+            if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-              }else{
-                setDeleteRecord(null)
-              }            
+            } else {
+              setDeleteRecord(null);
+            }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -272,7 +269,7 @@ const FrequentlyAskedQuestion = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.frequentlyAskedQuestion?.titleSingular?.toLowerCase()} : ${deleteRecord?.label}` : `selected ${resources?.frequentlyAskedQuestion?.titlePlural?.toLowerCase()}`} ?`}              
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.frequentlyAskedQuestion?.titleSingular?.toLowerCase()} : ${deleteRecord?.label}` : `selected ${resources?.frequentlyAskedQuestion?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

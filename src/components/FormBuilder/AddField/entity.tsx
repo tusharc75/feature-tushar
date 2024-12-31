@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import TextField from '@material-ui/core/TextField';
-import Box from '@material-ui/core/Box';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import { Checkbox, FormControlLabel } from '@material-ui/core';
+import TextField from '@mui/material/TextField';
+import Box from '@mui/material/Box';
+import Autocomplete from '@mui/material/Autocomplete';
+import { Checkbox, FormControlLabel } from '@mui/material';
 import { useData } from 'src/StateProvider/Provider';
 
 export const Entity = ({ values, setFieldValue, touched, errors }) => {
@@ -42,7 +42,7 @@ export const Entity = ({ values, setFieldValue, touched, errors }) => {
             options={entityOptions}
             disabled={!values['isFieldEntityWise']}
             getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-            getOptionSelected={(option: any, val) => option?.optionValue === val?.optionValue}
+            isOptionEqualToValue={(option: any, val) => option?.optionValue === val?.optionValue}
             value={
               values['fieldEntity']?.length > 0
                 ? entityOptions.filter((option) => values['fieldEntity'].includes(option.optionValue))?.map((option) => option)
@@ -58,6 +58,7 @@ export const Entity = ({ values, setFieldValue, touched, errors }) => {
               <TextField
                 {...params}
                 margin="dense"
+                size="small"
                 variant="outlined"
                 label="Entites"
                 error={touched && errors && touched['fieldEntity'] && Boolean(errors['fieldEntity'])}

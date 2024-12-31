@@ -1,24 +1,24 @@
 import React, { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
-import { CssBaseline, Button, Box, TextField, CircularProgress, Link as MuiLink } from '@material-ui/core';
+import { CssBaseline, Box, TextField, Link as MuiLink } from '@mui/material';
 import { Formik, Form } from 'formik';
 import axiosInstance from './../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import InputAdornment from '@material-ui/core/InputAdornment';
-import IconButton from '@material-ui/core/IconButton';
-import Visibility from '@material-ui/icons/Visibility';
-import VisibilityOff from '@material-ui/icons/VisibilityOff';
+import InputAdornment from '@mui/material/InputAdornment';
+import IconButton from '@mui/material/IconButton';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { Logo } from 'src/assets/authenticationAssets';
 import AuthSlider from './AuthSlider';
 
 import styles from './index.module.scss';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 export const userManual = {
   description: 'View our user manual in just a click.',
   link: 'https://docs.equip-t.com/auth/login'
 };
 
 const Oauth = () => {
-
   const toastConfig = useContext(CustomToastContext);
   const [isSubmitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -29,7 +29,8 @@ const Oauth = () => {
       email: values.email,
       password: values.password
     };
-    axiosInstance().post('/user/auth', data)
+    axiosInstance()
+      .post('/user/auth', data)
       .then(async ({ data: response }) => {
         setSubmitting(false);
         const { data } = response;
@@ -101,14 +102,16 @@ const Oauth = () => {
                           helperText={touched['password'] && errors['password']}
                           onChange={(e) => setFieldValue('password', e.target.value)}
                           fullWidth
-                          InputProps={{
-                            endAdornment: (
-                              <InputAdornment position="end">
-                                <IconButton className="p-0" onClick={() => setShowPassword(!showPassword)}>
-                                  {showPassword ? <Visibility /> : <VisibilityOff />}
-                                </IconButton>
-                              </InputAdornment>
-                            )
+                          slotProps={{
+                            input: {
+                              endAdornment: (
+                                <InputAdornment position="end">
+                                  <IconButton className="p-0" onClick={() => setShowPassword(!showPassword)}>
+                                    {showPassword ? <Visibility /> : <VisibilityOff />}
+                                  </IconButton>
+                                </InputAdornment>
+                              )
+                            },
                           }}
                         />
                       </div>
@@ -120,18 +123,14 @@ const Oauth = () => {
                     </Box>
 
                     <Box>
-                      <Button
-                        disabled={isSubmitting}
-                        fullWidth
-                        variant="contained"
-                        color="primary"
-                        type="submit"
-                        className={styles.submitButton}
+                      <ThemeButton
                         onClick={submitForm}
-                        startIcon={isSubmitting && <CircularProgress color="inherit" size={20} />}
+                        disabled={isSubmitting}
+                        isLoading={isSubmitting}
+                        buttonType='theme'
                       >
                         Sign In
-                      </Button>
+                      </ThemeButton>
                     </Box>
                   </Form>
                 )}

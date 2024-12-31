@@ -1,5 +1,5 @@
-import { Box, IconButton, MenuItem, Typography } from '@material-ui/core';
-import { CheckCircle, Delete } from '@material-ui/icons';
+import { Box, IconButton, MenuItem, Typography } from '@mui/material';
+import { CheckCircle, Delete } from '@mui/icons-material';
 import { flatMap, map, orderBy, startCase, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
@@ -15,7 +15,7 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { CHILD_RESOURCE, MATERIAL_SUB_TYPE, MATERIAL_TYPE, WORK_ORDER_STATUS, workOrder, WORKORDER_SERVICE_STATUS } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import SyncIcon from '@material-ui/icons/Sync';
+import SyncIcon from '@mui/icons-material/Sync';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { AutoCompleteIcon } from 'src/assets/svg/svgIcons';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
@@ -728,12 +728,12 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
             if (autoCompleteData && autoCompleteData.length > 0) {
               autoCompleteData.forEach((d) => {
                 if (d?.canAutoCompleteWorkOrder && d?.workOrderId) {
-                  if(d?.type===MATERIAL_TYPE.package) isPackage = true;
+                  if (d?.type === MATERIAL_TYPE.package) isPackage = true;
                   if (!ids?.includes(d?.workOrderId)) ids.push(d?.workOrderId);
                 }
               });
             }
-            
+
             isPackage ? setOpenManagedPackageDialog({ open: true, ids: ids }) : handleAutoComplete(ids);
           }}
         />
@@ -742,15 +742,15 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
       {openManagedPackageDialog.open && (
         <PackageNumberDialog
           onClose={() => {
-            setOpenManagedPackageDialog({open: false, ids: []});
+            setOpenManagedPackageDialog({ open: false, ids: [] });
             setCompleteConfirmBox(false);
           }}
           assemblyOrderId={assemblyOrderData._id}
           workOrderIds={openManagedPackageDialog.ids}
           onSuccess={() => {
             setCompleteConfirmBox(false);
-            handleAutoComplete(openManagedPackageDialog.ids)
-            setOpenManagedPackageDialog({open: false, ids: []});
+            handleAutoComplete(openManagedPackageDialog.ids);
+            setOpenManagedPackageDialog({ open: false, ids: [] });
           }}
         />
       )}

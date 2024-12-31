@@ -4,7 +4,6 @@ import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import {
   Checkbox,
-  CircularProgress,
   Dialog,
   FormControl,
   FormControlLabel,
@@ -16,8 +15,8 @@ import {
   Switch,
   TextField,
   useMediaQuery
-} from '@material-ui/core';
-import { DragHandle, Info } from '@material-ui/icons';
+} from '@mui/material';
+import { DragHandle, Info } from '@mui/icons-material';
 import { Formik, FormikErrors } from 'formik';
 import update from 'immutability-helper';
 import { startCase } from 'lodash';
@@ -416,11 +415,11 @@ const ArrangeViewDialog = ({
               type="submit"
               onClick={submitForm}
               iconForMobile={false}
-              borderColor="none"
-              color="primary"
+              buttonType="theme"
+              isLoading={loading}
               disabled={loading ? true : resized ? false : !dirty}
             >
-              Save <CircularProgress size={20} color="inherit" className={`${loading ? '' : 'sr-only'} ml-2`} />
+              Save
             </ThemeButton>
           </CustomDialogFooter>
         </Dialog>
@@ -463,14 +462,12 @@ const RenderListItem = ({ column, handleToggle, checked, index, values, setField
     <li
       ref={setNodeRef}
       style={style}
-      className={`${
-        isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))] ' : 'bg-[var(--dark-secondary,#fff)]'
-      } list-none transition-colors`}
+      className={`${isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))] ' : 'bg-[var(--dark-secondary,#fff)]'
+        } list-none transition-colors`}
     >
       <div
-        className={`flex items-center p-[8px_17px_8px_0] [border-bottom:1px_solid_var(--common-border-color)] ${
-          index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
-        } `}
+        className={`flex items-center p-[8px_17px_8px_0] [border-bottom:1px_solid_var(--common-border-color)] ${index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
+          } `}
       >
         <HtmlTooltip title={isFilteredColumn ? 'Clear search filter to arrange' : ''}>
           <ListItemIcon

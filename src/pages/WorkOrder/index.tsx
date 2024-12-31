@@ -1,5 +1,5 @@
-import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
+import { Box, IconButton, Menu, MenuItem } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
@@ -28,12 +28,10 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageWorkOrder from './ManageWorkOrder';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios, { CancelTokenSource } from 'axios';
 
 const WorkOrder = () => {
-
-
   let renderedFrom = camelCase(sidebarResource?.workOrder);
 
   const toastConfig = useContext(CustomToastContext);
@@ -272,7 +270,7 @@ const WorkOrder = () => {
           if (selectedRecords.length === 1) {
             setDeleteRecord(selectedRecords[0]);
           } else {
-            setDeleteRecord(null)
+            setDeleteRecord(null);
           }
           setIsConformDialogVisible(true);
         }}
@@ -340,8 +338,11 @@ const WorkOrder = () => {
         {isConfirmDialogVisible && (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.workOrder?.titleSingular?.toLowerCase()} :
-              ${deleteRecord?.workOrderNumber || ''}` : `selected ${resources?.workOrder?.titlePlural?.toLowerCase()}`} ?`}
+            message={`Are you sure you want to delete ${deleteRecord
+                ? `${resources?.workOrder?.titleSingular?.toLowerCase()} :
+              ${deleteRecord?.workOrderNumber || ''}`
+                : `selected ${resources?.workOrder?.titlePlural?.toLowerCase()}`
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

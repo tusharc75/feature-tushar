@@ -1,5 +1,5 @@
-import { Button, Collapse, IconButton, List, ListItem, ListItemText, Menu, MenuItem } from '@material-ui/core';
-import { Add, ArrowDropDown, ArrowDropUp, Delete, MoreHoriz } from '@material-ui/icons';
+import { Add, ArrowDropDown, ArrowDropUp, Delete } from '@mui/icons-material';
+import { Collapse, IconButton, List, ListItem, ListItemText } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { VscLayoutSidebarLeft } from 'react-icons/vsc';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -62,8 +62,7 @@ const Sidebar = ({
       >
         <div className="flex items-center justify-between gap-2">
           <ThemeButton
-            borderColor="none"
-            color="primary"
+            buttonType="theme"
             onClick={() => setCreateChannelDialog(true)}
             iconForMobile={<Add />}
             mobileTooltip="New Channel"
@@ -79,16 +78,15 @@ const Sidebar = ({
         </div>
         <SearchBox value={searchValue} onChange={handleFilter} />
         <div>
-          <Button
-            size={'small'}
-            className="group"
+          <ThemeButton
+            buttonType='transparent'
             onClick={() => {
               setIsExpanded((prev) => !prev);
             }}
             endIcon={isExpanded ? <ArrowDropDown fontSize="large" /> : <ArrowDropUp fontSize="large" />}
           >
-            <span className="text-[15px]">Channels</span>
-          </Button>
+            Channels
+          </ThemeButton>
           {filteredChannels ? (
             <Collapse in={isExpanded}>
               <List dense>

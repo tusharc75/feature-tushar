@@ -1,5 +1,5 @@
-import { Box, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, TextField } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 
 const DashboardResources = ({ dashboardList, dashboardName, setDashboardName, isEdit }) => {
   return (
@@ -13,7 +13,7 @@ const DashboardResources = ({ dashboardList, dashboardName, setDashboardName, is
           getOptionLabel={(option: any) => option.name}
           value={dashboardName}
           onChange={(_event, newValue) => setDashboardName(newValue)}
-          renderInput={(params) => <TextField {...params} variant="outlined" label="Select Dashboard" placeholder="Dashboard" margin="dense" />}
+          renderInput={(params) => <TextField {...params} variant="outlined" label="Select Dashboard" placeholder="Dashboard" margin="dense" size="small" />}
           disabled={!isEdit}
         />
       </Box>

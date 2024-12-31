@@ -1,29 +1,28 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { Box, Button, Dialog, IconButton, MenuItem, TextField } from '@material-ui/core';
+import { Box, Dialog, IconButton, MenuItem, TextField } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomButton from 'src/components/Helpers/CustomButton';
-import { CustomDialogTransition, dateFormat, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { CustomDialogTransition, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { FieldArray, Form, Formik } from 'formik';
 import { camelCase, isEqual } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
-import { Autocomplete } from '@material-ui/lab';
-import AddIcon from '@material-ui/icons/Add';
-import CloseIcon from '@material-ui/icons/Close';
-import DeleteIcon from '@material-ui/icons/Delete';
+import Autocomplete from '@mui/material/Autocomplete';
+import AddIcon from '@mui/icons-material/Add';
+import CloseIcon from '@mui/icons-material/Close';
+import DeleteIcon from '@mui/icons-material/Delete';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { useData } from 'src/StateProvider/Provider';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import MomentUtils from '@date-io/moment';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const OPERATOR = [
   {
@@ -152,7 +151,7 @@ const ManageServiceConditional = ({ onClose, onSuccess, productId, id }) => {
     const fields = await axiosInstance().get(`/field?resource=${sidebarResource.serializedAsset}`);
     const fieldsData = fields.data?.data;
     const assetFields = fieldsData
-      .filter((field) => ['number', 'decimal'].includes(field.fieldData.type) || field.fieldData.fieldName === "recertDate")
+      .filter((field) => ['number', 'decimal'].includes(field.fieldData.type) || field.fieldData.fieldName === 'recertDate')
       ?.map((ele) => {
         return {
           optionValue: ele.fieldData.fieldName,
@@ -257,7 +256,6 @@ const ManageServiceConditional = ({ onClose, onSuccess, productId, id }) => {
 
   return (
     <Fragment>
-      <MuiPickersUtilsProvider utils={MomentUtils}>
       <Dialog
         fullWidth
         maxWidth="md"
@@ -369,43 +367,37 @@ const ManageServiceConditional = ({ onClose, onSuccess, productId, id }) => {
                                           />
                                         </Box>
                                         <Box>
-                                      {cnd.field==="recertDate" ? 
-                                         <KeyboardDatePicker
-                                         autoOk
-                                         fullWidth
-                                         size="small"
-                                         variant="inline"
-                                         inputVariant="outlined"
-                                         value={ values?.condition[i]?.value ? new Date(values?.condition[i]?.value) : null}
-                                         name="value"
-                                         label="Value"
-                                         onChange={(date: any) => {
-                                          setFieldValue(`condition.${i}.value`, date);
-                                         }}
-                                         error={touched?.condition && Boolean(errors[`condition.${i}.value`])}
-                                         helperText={touched?.condition && errors[`condition.${i}.value`]}
-                                         format={dateFormat}
-                                         InputLabelProps={{
-                                           shrink: true
-                                         }}
-                                         margin="dense"
-                                       />
-                                         : <TextField
-                                            margin="none"
-                                            size="small"
-                                            type="number"
-                                            label="Value"
-                                            name="value"
-                                            variant="outlined"
-                                            fullWidth
-                                            value={values?.condition[i]?.value}
-                                            error={touched?.condition && Boolean(errors[`condition.${i}.value`])}
-                                            helperText={touched?.condition && errors[`condition.${i}.value`]}
-                                            onChange={(e) => {
-                                              setFieldValue(`condition.${i}.value`, parseFloat(e.target.value));
-                                            }}
-                                          />
-                                          }
+                                          {cnd.field === 'recertDate' ? (
+                                            <CustomDatePicker
+                                              fullWidth
+                                              size="small"
+                                              value={values?.condition[i]?.value ? new Date(values?.condition[i]?.value) : null}
+                                              name="value"
+                                              label="Value"
+                                              onChange={(date: any) => {
+                                                setFieldValue(`condition.${i}.value`, date);
+                                              }}
+                                              error={touched?.condition && Boolean(errors[`condition.${i}.value`])}
+                                              helperText={touched?.condition && errors[`condition.${i}.value`]}
+                                              margin="dense"
+                                            />
+                                          ) : (
+                                            <TextField
+                                              margin="none"
+                                              size="small"
+                                              type="number"
+                                              label="Value"
+                                              name="value"
+                                              variant="outlined"
+                                              fullWidth
+                                              value={values?.condition[i]?.value}
+                                              error={touched?.condition && Boolean(errors[`condition.${i}.value`])}
+                                              helperText={touched?.condition && errors[`condition.${i}.value`]}
+                                              onChange={(e) => {
+                                                setFieldValue(`condition.${i}.value`, parseFloat(e.target.value));
+                                              }}
+                                            />
+                                          )}
                                         </Box>
                                         <Box className=" ml-auto max-w-fit" display="flex" justifyContent="space-between" alignItems="center">
                                           <HtmlTooltip title="Remove">
@@ -451,22 +443,21 @@ const ManageServiceConditional = ({ onClose, onSuccess, productId, id }) => {
                     </div>
                   </CustomDialogContent>
                   <CustomDialogFooter>
-                    <Button type="button" variant="outlined" color="primary" size="small" onClick={onClose}>
+                    <ThemeButton buttonType="transparent" onClick={onClose}>
                       Cancel
-                    </Button>
-                    <CustomButton
+                    </ThemeButton>
+                    <ThemeButton
                       disabled={
                         values?.condition?.length === 0 ||
                         dataRows?.length === 0 ||
                         isEqual(initialData, { ...values, services: dataRows?.map((e) => e._id) })
                       }
-                      loading={loading}
-                      variant="contained"
-                      color="primary"
+                      isLoading={loading}
+                      buttonType="theme"
                       onClick={submitForm}
                     >
                       Save
-                    </CustomButton>
+                    </ThemeButton>
                   </CustomDialogFooter>
                 </>
               )}
@@ -504,10 +495,8 @@ const ManageServiceConditional = ({ onClose, onSuccess, productId, id }) => {
           onOk={handleDelete}
         />
       )}
-      </MuiPickersUtilsProvider>
     </Fragment>
   );
 };
 
 export default ManageServiceConditional;
-

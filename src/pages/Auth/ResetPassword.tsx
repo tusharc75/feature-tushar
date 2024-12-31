@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { CssBaseline, Button, Box, Link as MuiLink, CircularProgress, TextField, Typography } from '@material-ui/core';
+import { CssBaseline, Box, Link as MuiLink, TextField, Typography } from '@mui/material';
 import { Formik, Form } from 'formik';
 import queryString from 'query-string';
 import { Redirect, Link } from 'react-router-dom';
@@ -11,6 +11,7 @@ import { useData } from '../../StateProvider/Provider';
 import { BsArrowLeft } from 'react-icons/bs';
 import styles from './index.module.scss';
 import { CreatePasswordImage, Logo } from 'src/assets/authenticationAssets';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ResetPassword = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -177,18 +178,14 @@ const ResetPassword = () => {
                       </div>
                     </div>
 
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      type="submit"
-                      className={styles.submitButton}
-                      fullWidth
+                    <ThemeButton
                       disabled={isSubmitting || !isTokenValid || !tokenChecking}
                       onClick={submitForm}
-                      startIcon={isSubmitting && <CircularProgress size={20} color="inherit" />}
+                      isLoading={isSubmitting}
+                      buttonType='theme'
                     >
                       Submit
-                    </Button>
+                    </ThemeButton>
                   </Form>
                 )}
               </Formik>

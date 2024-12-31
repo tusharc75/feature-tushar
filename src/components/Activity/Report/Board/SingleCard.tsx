@@ -1,7 +1,7 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Box, IconButton, Menu, MenuItem, Typography } from '@material-ui/core';
-import { DateRange, MoreHoriz } from '@material-ui/icons';
+import { Box, IconButton, Menu, MenuItem, Typography } from '@mui/material';
+import { DateRange, MoreHoriz } from '@mui/icons-material';
 import React from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { ListRelatedTo } from '../../Helpers/ListRelatedTo';

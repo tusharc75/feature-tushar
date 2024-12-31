@@ -1,9 +1,9 @@
-import { Box, MenuItem } from '@material-ui/core';
-import IconButton from '@material-ui/core/IconButton';
-import TextField from '@material-ui/core/TextField';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, MenuItem } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
+import TextField from '@mui/material/TextField';
+import DeleteIcon from '@mui/icons-material/Delete';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
+import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { RiBillLine } from 'react-icons/ri';
@@ -296,11 +296,11 @@ const Product = () => {
         <MenuItem
           disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
           onClick={() => {
-            if (selectedRecords.length === 1){
+            if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-              }else{
-                setDeleteRecord(null)
-              }
+            } else {
+              setDeleteRecord(null);
+            }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -431,7 +431,7 @@ const Product = () => {
                 isProductType,
                 productTypeList,
                 productType,
-                setProductType,
+                setProductType
               }}
             />
           }
@@ -492,7 +492,7 @@ const Product = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.product?.titleSingular?.toLowerCase()} : ${deleteRecord?.productName || ''}` : `selected ${resources?.product?.titlePlural?.toLowerCase()}`} ?`}              
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.product?.titleSingular?.toLowerCase()} : ${deleteRecord?.productName || ''}` : `selected ${resources?.product?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -518,7 +518,7 @@ const LeftSideContent = ({
   isProductType,
   productTypeList,
   productType,
-  setProductType,
+  setProductType
 }) => {
   return (
     <>
@@ -529,7 +529,7 @@ const LeftSideContent = ({
             options={productCategoryList}
             getOptionLabel={(option: any) => (option ? option.name : '')}
             size="small"
-            getOptionSelected={(option: any, val) => option._id === val}
+            isOptionEqualToValue={(option: any, val) => option._id === val}
             value={
               productCategoryList.filter((data) => data._id === productCategory).length
                 ? productCategoryList.filter((data) => data._id === productCategory)[0]
@@ -549,7 +549,7 @@ const LeftSideContent = ({
           className="flex-grow sm:max-w-[250px] md:min-w-[250px] md:flex-grow-0"
           options={productTemplateList}
           getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-          getOptionSelected={(option: any, val) => option.optionValue === val}
+          isOptionEqualToValue={(option: any, val) => option.optionValue === val}
           value={
             productTemplateList.filter((data) => data.optionValue === productTemplate).length
               ? productTemplateList.filter((data) => data.optionValue === productTemplate)[0]
@@ -568,7 +568,7 @@ const LeftSideContent = ({
           className="flex-grow sm:max-w-[250px] md:min-w-[250px] md:flex-grow-0"
           options={productTypeList}
           getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-          getOptionSelected={(option: any, val) => option.optionValue === val}
+          isOptionEqualToValue={(option: any, val) => option.optionValue === val}
           value={
             productTypeList.filter((data) => data.optionValue === productType).length
               ? productTypeList.filter((data) => data.optionValue === productType)[0]

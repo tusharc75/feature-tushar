@@ -1,12 +1,11 @@
-import { Button, CircularProgress, Dialog, IconButton, Menu, MenuItem, TextField, useMediaQuery } from '@material-ui/core';
-import Box from '@material-ui/core/Box/Box';
-import { makeStyles } from '@material-ui/core/styles';
-import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import Edit from '@material-ui/icons/Edit';
-import HelpIcon from '@material-ui/icons/HelpOutline';
-import InfoIcon from '@material-ui/icons/Info';
-import LocalShippingIcon from '@material-ui/icons/LocalShipping';
+import { Dialog, IconButton, Menu, MenuItem, TextField, Theme, useMediaQuery } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import { makeStyles } from '@mui/styles';
+import AddBoxRoundedIcon from '@mui/icons-material/AddBoxRounded';
+import Edit from '@mui/icons-material/Edit';
+import HelpIcon from '@mui/icons-material/HelpOutline';
+import InfoIcon from '@mui/icons-material/Info';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import { groupBy, isArray, isEmpty, isEqual, isObject, map, uniq, uniqueId } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { IoRemoveCircleOutline } from 'react-icons/io5';
@@ -59,15 +58,17 @@ import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomInt
 import { generateDeliveredToCustomer, generateLoadingStepCreateTicketSteps, nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
 import ChangePreviousAssetDataDialog from 'src/pages/RentalManagement/LoadingTicket/ChangePreviousAssetDataDialog';
 import GpsLocationCell from 'src/components/CustomReactTable/Cells/GpsLocationCell';
-import WarningIcon from '@material-ui/icons/Warning';
+import WarningIcon from '@mui/icons-material/Warning';
 import FreeStyleMultiSelect from 'src/components/CustomReactTable/Cells/FreeStyleMultiSelect';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { ExpandMore } from '@mui/icons-material';
 
 const stepGlobalDataAdded = {
   createTicket: false,
   deliverToCustomer: false
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     width: '100%',
     maxWidth: 360,
@@ -1251,11 +1252,7 @@ const LoadingTicket = ({
           <PreviewDownloadMultiple referenceIds={uniqueLoadingTicket} />
         </span>
         {allowedToEdit && !rentalPolicyData?.hideAssetChangeStatus && (
-          <Button
-            variant={'outlined'}
-            color="primary"
-            aria-controls="simple-menu"
-            aria-haspopup="true"
+          <ThemeButton
             disabled={
               !allowUpdateStatus ||
               selectedRecords.length === 0 ||
@@ -1275,12 +1272,11 @@ const LoadingTicket = ({
                 ].includes(f.status)
               )
             }
-            size="small"
             onClick={handleClick}
-            endIcon={<ArrowDropDownIcon />}
+            endIcon={<ExpandMore />}
           >
             Change Status
-          </Button>
+          </ThemeButton>
         )}
         {(allowedToEdit || isProcessor) && (
           <>
@@ -1288,32 +1284,30 @@ const LoadingTicket = ({
               selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
               selectedRecords?.length ? (
               <HtmlTooltip title="Remove Assets From Loading Ticket(s)">
-                <Button
+                <ThemeButton
                   onClick={() => {
                     setShowRemoveTicketDialog(true);
                   }}
-                  variant={isMobile ? 'text' : 'outlined'}
-                  color="primary"
-                  size="small"
-                  style={isMobile ? { color: 'var(--danger-light)' } : {}}
+                  iconForMobile={<IoRemoveCircleOutline size={22} />}
+                  mobileTooltip='Remove Loading Ticket'
                   disabled={selectedRecords.length === 0 || currentStep === 4 || selectedRecords.some((f) => !f.hasOwnProperty('loadingTicketId'))}
                 >
-                  {isMobile ? <IoRemoveCircleOutline size={22} /> : 'Remove Loading Ticket'}
-                </Button>
+                  Remove Loading Ticket
+                </ThemeButton>
               </HtmlTooltip>
             ) : null}
             {showProcessDeliveryTicket && !isOffline && (
               <HtmlTooltip title="Process Multiple Loading Ticket(s)">
-                <Button
+                <ThemeButton
                   onClick={() => {
                     setOpenDeliveryTicketDialog(true);
                   }}
-                  variant={isMobile ? 'text' : 'contained'}
-                  color="primary"
-                  size="small"
+                  buttonType='theme'
+                  iconForMobile={<AddBoxRoundedIcon />}
+                  mobileTooltip='Process Loading Ticket'
                 >
-                  {isMobile ? <AddBoxRoundedIcon /> : 'Process Loading Ticket'}
-                </Button>
+                  Process Loading Ticket
+                </ThemeButton>
               </HtmlTooltip>
             )}
           </>
@@ -1409,7 +1403,6 @@ const LoadingTicket = ({
         keepMounted
         open={Boolean(anchorEl)}
         onClose={handleClose}
-        getContentAnchorEl={null}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'right'
@@ -1530,11 +1523,14 @@ const LoadingTicket = ({
             </Box>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button size="small" variant="outlined" color="primary" onClick={() => setStatusToUpdate((prevState) => ({ ...prevState, open: false }))}>
+            <ThemeButton
+              onClick={() => setStatusToUpdate((prevState) => ({ ...prevState, open: false }))}
+              buttonType='transparent'
+            >
               Cancel
-            </Button>
-            <Button
-              size="small"
+            </ThemeButton>
+            <ThemeButton
+              disabled={statusToUpdate.isUpdating}
               onClick={() => {
                 setStatusToUpdate((prevState) => ({ ...prevState, isUpdating: true }));
                 axiosInstance()
@@ -1560,13 +1556,11 @@ const LoadingTicket = ({
                     toastConfig.setToastConfig(error);
                   });
               }}
-              disabled={statusToUpdate.isUpdating}
-              variant="contained"
-              color="primary"
+              buttonType='theme'
+              isLoading={statusToUpdate.isUpdating}
             >
-              {statusToUpdate.isUpdating ? <CircularProgress style={{ marginRight: '8px' }} size={20} color="inherit" /> : null}
               Change Status
-            </Button>
+            </ThemeButton>
           </CustomDialogFooter>
         </Dialog>
       )}

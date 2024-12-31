@@ -1,9 +1,8 @@
-import { Dialog } from '@material-ui/core';
-import moment from 'moment';
+import { Dialog } from '@mui/material';
 import { useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { CustomDialogTransition, dateTimeFormat } from 'src/constants/helpers';
+import { CustomDialogTransition, displayDateTime } from 'src/constants/helpers';
 import ChangesDialogContent from 'src/pages/ResourceLogs/ChangesDialogContent';
 
 const ChangesDialog = ({ open, onClose, data }) => {
@@ -25,14 +24,11 @@ const ChangesDialog = ({ open, onClose, data }) => {
         }}
         showManimizeMaximize={true}
         showRequiredLabel={false}
-        title={`Changes - ${data?.referenceId?.optionLabel || ''} - ${data?.updatedBy?.optionLabel || ''} - ${moment(data?.date)?.format(dateTimeFormat)}`}
+        title={`Changes - ${data?.referenceId?.optionLabel || ''} - ${data?.updatedBy?.optionLabel || ''} - ${displayDateTime(data?.date)}`}
         onClose={onClose}
       />
       <CustomDialogContent isFooterPresent={false}>
-        <ChangesDialogContent
-          changes={data?.changes || []}
-          operations={data?.operations || []}
-          updatedBy={data?.updatedBy?.optionValue} />
+        <ChangesDialogContent changes={data?.changes || []} operations={data?.operations || []} updatedBy={data?.updatedBy?.optionValue} />
       </CustomDialogContent>
     </Dialog>
   );

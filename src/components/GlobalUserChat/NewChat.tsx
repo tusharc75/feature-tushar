@@ -1,10 +1,11 @@
-import { useState, Fragment, useContext } from 'react';
-import { Avatar, TextField, Box, Button } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { useState, useContext } from 'react';
+import { Avatar, TextField, Box } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Autocomplete from '@mui/material/Autocomplete';
 
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { Image } from '@material-ui/icons';
+import { Image } from '@mui/icons-material';
 
 const NewChat = (props) => {
   const { setNewChat, setSelectedChat, users, userId, setChatOpen } = props;
@@ -56,15 +57,18 @@ const NewChat = (props) => {
           multiple
           size="small"
           getOptionLabel={(option) => option.name}
-          renderOption={(option) => (
-            <Fragment>
-              <Avatar src={option.avatar}>
-                <Image style={{ fontSize: 24 }} />
-              </Avatar>
-              <Box component="span" mr={2} />
-              {option.name}
-            </Fragment>
-          )}
+          renderOption={(props, option, state, ownerState) => {
+            const { key, ...optionProps } = props;
+            return (
+              <Box key={key} component="li" {...optionProps}>
+                <Avatar src={option.avatar}>
+                  <Image style={{ fontSize: 24 }} />
+                </Avatar>
+                <Box component="span" mr={2} />
+                {ownerState.getOptionLabel(option)}
+              </Box>
+            );
+          }}
           value={newUsers}
           onChange={(_, newVal) => setNewUsers(newVal)}
           renderInput={(params) => (
@@ -91,15 +95,9 @@ const NewChat = (props) => {
           helperText={newUsers.length > 1 && groupName && 'Name must be at least 4 characters'}
         />
         <Box mt={4}>
-          <Button
-            disabled={!newUsers.length || (newUsers.length > 1 && !groupName)}
-            fullWidth
-            color="primary"
-            variant="contained"
-            onClick={createRoom}
-          >
+          <ThemeButton disabled={!newUsers.length || (newUsers.length > 1 && !groupName)} fullWidth buttonType="theme" onClick={createRoom}>
             Start Chatting
-          </Button>
+          </ThemeButton>
         </Box>
       </div>
     </div>

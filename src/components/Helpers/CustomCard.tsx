@@ -1,14 +1,7 @@
-import React, { useState } from "react";
-import PropTypes from "prop-types";
-import {
-  IconButton,
-  Card,
-  CardHeader,
-  Avatar,
-  Menu,
-  MenuItem,
-} from "@material-ui/core";
-import { MoreVert } from "@material-ui/icons";
+import React, { useState } from 'react';
+import PropTypes from 'prop-types';
+import { IconButton, Card, CardHeader, Avatar, Menu, MenuItem } from '@mui/material';
+import { MoreVert } from '@mui/icons-material';
 
 const CustomCard = (props) => {
   const { heading, subHeading, data, edit, remove } = props;
@@ -16,7 +9,7 @@ const CustomCard = (props) => {
 
   const getNameIntials = (name) => {
     var matches = name.match(/\b(\w)/g);
-    var acronym = matches.join("");
+    var acronym = matches.join('');
 
     return acronym;
   };
@@ -47,20 +40,14 @@ const CustomCard = (props) => {
             <IconButton aria-label="edit" onClick={handleClick}>
               <MoreVert />
             </IconButton>
-            <Menu
-              id="menu"
-              anchorEl={anchorEl}
-              keepMounted
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
-            >
+            <Menu id="menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
               <MenuItem onClick={handleEdit}>Edit</MenuItem>
               <MenuItem onClick={handleDelete}>Delete</MenuItem>
             </Menu>
           </>
         }
         title={heading}
-        subheader={subHeading ? subHeading : ""}
+        subheader={subHeading ? subHeading : ''}
       />
     </Card>
   );
@@ -71,7 +58,7 @@ CustomCard.propTypes = {
   subHeading: PropTypes.string,
   data: PropTypes.object.isRequired,
   edit: PropTypes.func.isRequired,
-  remove: PropTypes.func.isRequired,
+  remove: PropTypes.func.isRequired
 };
 
 export default CustomCard;

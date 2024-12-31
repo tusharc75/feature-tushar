@@ -1,13 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Box, Button, Card, CardContent, Grid, List, ListItemIcon, Typography } from '@material-ui/core';
+import { Box, Button, Card, CardContent, List, ListItemIcon, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import accountClass from './account.module.scss';
 import { useHistory } from 'react-router-dom';
 import { BsPerson } from 'react-icons/bs';
 import { BiFace } from 'react-icons/bi';
-import ListItem from '@material-ui/core/ListItem/ListItem';
-import { ListItemText } from '@material-ui/core';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import ListItem from '@mui/material/ListItem/ListItem';
+import { ListItemText } from '@mui/material';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 function DisplayData({ key, label, value, icon, highlightsHead = false }) {
   return (
@@ -53,7 +54,7 @@ function RelatedContacts({ contacts, accountId, accountName, contactApi, contact
           <Grid container spacing={1}>
             {contacts.map((obj, index) => {
               return (
-                <Grid item xs={12} sm={12} md={6} lg={4} className="omsAccordian" key={obj?._id ?? `contact${index}`}>
+                <Grid size={{ xs:12, sm:6, md:6, lg:4}} className="omsAccordian" key={obj?._id ?? `contact${index}`}>
                   <Card key={obj?._id ?? `contact${index}`} className="detailCard card-v1" variant="outlined">
                     <CardContent className="card-link">
                       <Link className={`${accountClass.account_name_link} f_size`} to={`/${contactApi}/detail/${obj._id}`}>
@@ -61,10 +62,10 @@ function RelatedContacts({ contacts, accountId, accountName, contactApi, contact
                       </Link>
 
                       <Grid container>
-                        <Grid item xs={12} sm={6} md={6}>
+                        <Grid size={{ xs:12, sm:6, md:6}}>
                           {<DisplayData key={index} label="Account" value={accountName || '-'} icon={<BsPerson size={15} />} />}
                         </Grid>
-                        <Grid item xs={12} sm={6} md={6}>
+                        <Grid size={{ xs:12, sm:6, md:6}}>
                           {<DisplayData key={index} label="Title" value={obj.title || '-'} icon={<BiFace size={15} />} />}
                         </Grid>
                       </Grid>

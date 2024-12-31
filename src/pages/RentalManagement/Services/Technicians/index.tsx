@@ -1,29 +1,30 @@
-import Box from '@material-ui/core/Box/Box';
+import Box from '@mui/material/Box/Box';
 import { useState, useEffect, useContext } from 'react';
 import CommonSkeleton from '../../../../components/Helpers/CommonSkeleton';
 import routes from '../../../../components/Helpers/Routes';
-import Grid from '@material-ui/core/Grid/Grid';
+import Grid from '@mui/material/Grid2';
 import axiosInstance from 'src/axios/axiosInstance';
 import { prepareDataForGrid, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { IconButton, Menu, MenuItem } from '@mui/material';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { useData } from 'src/StateProvider/Provider';
 import { BiChevronDown } from 'react-icons/bi';
 import ConfirmationDialog from '../../../../components/Helpers/ConfirmationDialog';
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
 import { displayDate } from 'src/constants/helpers';
-import { Add } from '@material-ui/icons';
-import EditIcon from '@material-ui/icons/Edit';
+import { Add } from '@mui/icons-material';
+import EditIcon from '@mui/icons-material/Edit';
 import { CustomOfflineContext } from '../../../../StateProvider/OfflineContext/OfflineContext';
 import RentalTechnicianQtyDialog from './RentalTechnicianQtyDialog';
 import { camelCase } from 'lodash';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { calculatePrice, fetch_rental_technician_fields } from 'src/components/RentalManagment/helper';
 import { FiExternalLink } from 'react-icons/fi';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, services }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -363,30 +364,30 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
       <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
         {allowedToEdit && (
           <Box display="flex" justifyContent="space-between" mb={2}>
-            <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
-              <Button variant="outlined" color="primary" size="small" startIcon={<Add />} onClick={() => setTechnicianDialog(true)}>
+            <Box display="flex" gap={'8px'} flexWrap={'wrap'}>
+              <ThemeButton
+                startIcon={<Add />}
+                onClick={() => setTechnicianDialog(true)}>
                 Add
-              </Button>
+              </ThemeButton>
             </Box>
             <Box display="flex" ml={1}>
-              <Button
-                variant="outlined"
-                color="primary"
-                size="small"
+              <ThemeButton
+                mobileTooltip="Actions"
+                buttonType="yellow"
+                iconForMobile={<BiChevronDown />}
                 id="demo-positioned-button"
                 onClick={handleClick}
                 disabled={!Boolean(selectedRecords?.length)}
                 endIcon={<BiChevronDown />}
-                className="new-dropdown-v1"
               >
                 Actions
-              </Button>
+              </ThemeButton>
               <Menu
                 anchorEl={anchorEl}
                 keepMounted
                 open={open}
                 onClose={handleClose}
-                getContentAnchorEl={null}
                 anchorOrigin={{
                   vertical: 'bottom',
                   horizontal: 'right'
@@ -418,7 +419,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
           </Box>
         )}
         <Grid container spacing={2}>
-          <Grid item xs={12} md={12} sm={12}>
+          <Grid size={{ xs: 12, md: 12, sm: 12 }}>
             {columns && dataRows ? (
               <CustomReactTable
                 height={'300px'}

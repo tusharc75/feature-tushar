@@ -1,6 +1,7 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import EditIcon from '@material-ui/icons/Edit';
-import { Skeleton } from '@material-ui/lab';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import EditIcon from '@mui/icons-material/Edit';
+import { Skeleton } from '@mui/material';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
@@ -15,7 +16,7 @@ import ContentFullScreen from 'src/components/ContentFullScreen';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import routes from 'src/components/Helpers/Routes';
@@ -312,42 +313,31 @@ const RepairOrderDetails = () => {
                   repairOrderData?.material
                     ?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)
                     ?.every((e) => e.status === ASSET_STATUS.inRepair) && (
-                    <Button
-                      size="small"
+                    <ThemeButton
                       onClick={() => {
                         setShowTransferAssetDialog(true);
                       }}
-                      variant={'contained'}
-                      className={'btn-outline-v1'}
+                      mobileTooltip={`Create ${resources?.transferAsset?.titleSingular}`}
+                      iconForMobile={false}
                     >
                       {`Create ${resources?.transferAsset?.titleSingular}`}
-                    </Button>
+                    </ThemeButton>
                   )}
                 {permissions?.repairOrder?.isUpdate && [REPAIR_ORDER_STATUS.completed].includes(repairOrderData?.status) && (
                   <HtmlTooltip title={allowedToEdit ? '' : `Owner or Collaborator can reopen ${resources?.repairOrder?.titleSingular}`}>
-                    <span>
-                      <Button
-                        variant={'contained'}
-                        className={'btn-outline-v1'}
-                        onClick={() =>
-                          updateOrderStatus(repairOrderData?.invoice?.optionValue ? REPAIR_ORDER_STATUS.invoiced : REPAIR_ORDER_STATUS.readyToInvoice)
-                        }
-                        disabled={permissions?.repairOrder?.isUpdate && allowedToEdit ? false : true}
-                      >
-                        {'Re-Open'}
-                      </Button>
-                    </span>
+                    <ThemeButton
+                      onClick={() =>
+                        updateOrderStatus(repairOrderData?.invoice?.optionValue ? REPAIR_ORDER_STATUS.invoiced : REPAIR_ORDER_STATUS.readyToInvoice)
+                      }
+                      disabled={permissions?.repairOrder?.isUpdate && allowedToEdit ? false : true}
+                      iconForMobile={false}
+                    >
+                      {'Re-Open'}
+                    </ThemeButton>
                   </HtmlTooltip>
                 )}
                 {permissions?.repairOrder?.isUpdate && allowedToEdit && repairOrderData?.canComplete && stepNames[currentStep] === 'Slip' && (
-                  <ButtonWithPulse
-                    variant={'outlined'}
-                    color="default"
-                    size="small"
-                    onClick={() => updateOrderStatus(REPAIR_ORDER_STATUS.completed)}
-                    className={'btn-outline-v1'}
-                    id={'header-button-complete'}
-                  >
+                  <ButtonWithPulse onClick={() => updateOrderStatus(REPAIR_ORDER_STATUS.completed)} id={'header-button-complete'}>
                     Complete
                   </ButtonWithPulse>
                 )}
@@ -357,17 +347,15 @@ const RepairOrderDetails = () => {
                   [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                     quotationVersionData?.status
                   ) && (
-                    <Button
+                    <ThemeButton
                       className="buttonStyleBigScreen"
-                      variant="contained"
-                      color="primary"
-                      size="small"
+                      buttonType="theme"
                       onClick={() => {
                         createNewVersionQuote();
                       }}
                     >
                       Create New Version
-                    </Button>
+                    </ThemeButton>
                   )}
                 {permissions?.repairOrder?.isUpdate &&
                   allowedToEdit &&
@@ -377,13 +365,9 @@ const RepairOrderDetails = () => {
                       quotationVersionData?.status
                     ) && ['Add Assets', 'Work Order'].includes(stepNames[currentStep])
                   ) && (
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      onClick={() => setOpenUpdateDialog(true)}
-                      className={'btn-outline-v1'}
-                    >
-                      {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
-                    </Button>
+                    <ThemeButton iconForMobile={<EditIcon />} onClick={() => setOpenUpdateDialog(true)} mobileTooltip={'Edit'}>
+                      {'Edit'}
+                    </ThemeButton>
                   )}
                 {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>
@@ -412,7 +396,7 @@ const RepairOrderDetails = () => {
               <DetailsPage data={repairOrderData} fields={repairOrderFields} />
             ) : (
               <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </Grid>
             )}
           </Box>
@@ -431,13 +415,13 @@ const RepairOrderDetails = () => {
               setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
               handlePrev={
                 stepNames[currentStep] === 'Quotation' &&
-                allowedToEdit &&
-                [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                  quotationVersionData?.status
-                )
+                  allowedToEdit &&
+                  [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                    quotationVersionData?.status
+                  )
                   ? () => {
-                      setShowQuotationConfirmBox(true);
-                    }
+                    setShowQuotationConfirmBox(true);
+                  }
                   : null
               }
               updateStatus={(step: number) => {
@@ -475,8 +459,8 @@ const RepairOrderDetails = () => {
                   currentStep === 3
                     ? allowedToEdit
                     : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                          quotationVersionData?.status
-                        )
+                      quotationVersionData?.status
+                    )
                       ? false
                       : allowedToEdit
                 }

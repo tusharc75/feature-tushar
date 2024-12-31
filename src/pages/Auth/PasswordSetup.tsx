@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, CssBaseline, Link as MuiLink, TextField, Typography } from '@material-ui/core';
+import { Box, CssBaseline, Link as MuiLink, TextField, Typography } from '@mui/material';
 import { Form, Formik } from 'formik';
 import queryString from 'query-string';
 import React, { useContext, useState } from 'react';
@@ -10,6 +10,7 @@ import demoImg from '../../assets/clip-hardworking-man.png';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { BsArrowLeft } from 'react-icons/bs';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const PasswordSetup = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -133,18 +134,14 @@ const PasswordSetup = () => {
                         />
                       </div>
                     </div>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      type="submit"
-                      fullWidth
-                      className={styles.submitButton}
-                      disabled={isSubmitting}
+                    <ThemeButton
                       onClick={submitForm}
-                      startIcon={isSubmitting && <CircularProgress size={20} color="inherit" />}
+                      disabled={isSubmitting}
+                      isLoading={isSubmitting}
+                      buttonType='theme'
                     >
                       Submit
-                    </Button>
+                    </ThemeButton>
                   </Form>
                 )}
               </Formik>

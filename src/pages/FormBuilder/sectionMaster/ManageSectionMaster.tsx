@@ -1,4 +1,5 @@
-import { Box, Button, CircularProgress, Dialog, Grid, TextField } from '@material-ui/core';
+import { Box, Dialog, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useState } from 'react';
@@ -13,6 +14,7 @@ import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import IconAutoComplete from './IconAutoComplete';
 import { defaultIcons } from 'src/assets/IconGenerator';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ManageSectionMaster = ({ onClose, onSuccess, sectionData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -30,7 +32,7 @@ const ManageSectionMaster = ({ onClose, onSuccess, sectionData }) => {
     if (sectionData && sectionData?._id) {
       values._id = sectionData?._id;
     }
-    values.oldSectionName = sectionData?.sectionName
+    values.oldSectionName = sectionData?.sectionName;
     axiosInstance()
       .put(`section-master`, values)
       .then(({ data }) => {
@@ -89,9 +91,10 @@ const ManageSectionMaster = ({ onClose, onSuccess, sectionData }) => {
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
                   <Grid container spacing={2}>
-                    <Grid item xs={12} sm={12}>
+                    <Grid size={{xs:12, sm:12}}>
                       <TextField
                         margin="dense"
+                        size="small"
                         type="text"
                         label="Section Name"
                         name="sectionName"
@@ -105,9 +108,10 @@ const ManageSectionMaster = ({ onClose, onSuccess, sectionData }) => {
                         helperText={touched['sectionName'] && errors['sectionName']}
                       />
                     </Grid>
-                    <Grid item xs={12} sm={12}>
+                    <Grid size={{xs:12, sm:12}}>
                       <TextField
                         margin="dense"
+                        size="small"
                         type="text"
                         label="Description"
                         name="description"
@@ -120,7 +124,7 @@ const ManageSectionMaster = ({ onClose, onSuccess, sectionData }) => {
                         value={values['description']}
                       />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid size={{xs:12}}>
                       <IconAutoComplete
                         onChange={(e, val) => {
                           setFieldValue('iconName', val);
@@ -132,33 +136,26 @@ const ManageSectionMaster = ({ onClose, onSuccess, sectionData }) => {
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
-                  disabled={submitting}
+                <ThemeButton
                   onClick={() => {
                     if (isEqual(initialData, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
+                  buttonType='transparent'
                 >
                   Cancel
-                </Button>
-                <Button
-                  disabled={submitting}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
-                  size="small"
+                </ThemeButton>
+                <ThemeButton
                   onClick={submitForm}
-                  endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                  disabled={submitting}
+                  isLoading={submitting}
+                  buttonType='theme'
                 >
-                  {' '}
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

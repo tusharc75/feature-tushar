@@ -1,7 +1,7 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
-import AutorenewIcon from '@material-ui/icons/Autorenew';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { Box, IconButton, MenuItem } from '@mui/material';
+import AutorenewIcon from '@mui/icons-material/Autorenew';
+import DeleteIcon from '@mui/icons-material/Delete';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -29,7 +29,6 @@ import ManagePurchaseRequisition from './ManagePurchaseRequisition';
 import axios, { CancelTokenSource } from 'axios';
 
 const PurchaseRequisition = () => {
-
   const {
     state: { user, permissions, selectedEntity, resources }
   }: any = useData();
@@ -268,11 +267,11 @@ const PurchaseRequisition = () => {
         <MenuItem
           disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
           onClick={() => {
-            if (selectedRecords.length === 1){
+            if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-              }else{
-                setDeleteRecord(null)
-              }
+            } else {
+              setDeleteRecord(null);
+            }
             setShowDeleteConfirmBox(true);
           }}
         >

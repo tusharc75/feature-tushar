@@ -1,4 +1,4 @@
-import { Box, IconButton, TextField } from '@material-ui/core';
+import { Box, IconButton } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -6,13 +6,12 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import routes from 'src/components/Helpers/Routes';
-import { gridLoadingTimeout, dateTimeFormat, prepareDataForGrid } from 'src/constants/helpers';
-import PreviewIcon from '@material-ui/icons/Visibility';
-import GetAppIcon from '@material-ui/icons/GetApp';
+import { gridLoadingTimeout, prepareDataForGrid, displayDateTime } from 'src/constants/helpers';
+import PreviewIcon from '@mui/icons-material/Visibility';
+import GetAppIcon from '@mui/icons-material/GetApp';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import moment from 'moment';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { camelCase } from 'lodash';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -76,7 +75,7 @@ const UserDownloadRequest = () => {
         disableFilters: true,
         disableSortBy: true,
         width: 120,
-        Cell: ({ row }) => <p className="text-truncate">{moment(row?.original?.createdByDate)?.format(dateTimeFormat)}</p>
+        Cell: ({ row }) => <p className="text-truncate">{displayDateTime(row?.original?.createdByDate)}</p>
       },
       ActionsRenderer
     ];

@@ -1,8 +1,8 @@
-import { Box, IconButton, MenuItem, MenuList, Popover } from '@material-ui/core';
-import { default as Add } from '@material-ui/icons/Add';
-import DateRangeIcon from '@material-ui/icons/DateRange';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
+import { Box, IconButton, MenuItem, MenuList, Popover } from '@mui/material';
+import { default as Add } from '@mui/icons-material/Add';
+import DateRangeIcon from '@mui/icons-material/DateRange';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { camelCase, isArray, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -115,7 +115,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
         Cell: ({ row, table }) => (
           <div className="flex items-center gap-2">
             {row.original?.detail ? (
-              allowedToEdit ?
+              allowedToEdit ? (
                 <p
                   onClick={() => {
                     handleOpen(row, table.getRowModel().rows);
@@ -124,7 +124,10 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
                   title={row.original?.detail}
                 >
                   {row.original?.detail}
-                </p> : <p className=" text-truncate">{row.original?.detail}</p>
+                </p>
+              ) : (
+                <p className=" text-truncate">{row.original?.detail}</p>
+              )
             ) : (
               <NoDataCell />
             )}
@@ -263,14 +266,15 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
     rows = [...rows, ...additionalCost];
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.product
-        ? parent.productDetail?.productName
-        : parent.type === MATERIAL_TYPE.service
-          ? parent.serviceDetail?.serviceName
-          : parent.type === MATERIAL_TYPE.package
-            ? parent.packageDetail?.packageName
-            : parent.detail || ''
-        }`;
+      parent.detail = `${
+        parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.service
+            ? parent.serviceDetail?.serviceName
+            : parent.type === MATERIAL_TYPE.package
+              ? parent.packageDetail?.packageName
+              : parent.detail || ''
+      }`;
       parent.description =
         parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription || ''
@@ -299,12 +303,13 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.product
-        ? _subRow.productDetail?.productName
-        : _subRow.type === MATERIAL_TYPE.service
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-        }`;
+      _subRow.detail = `${
+        _subRow.type === MATERIAL_TYPE.product
+          ? _subRow.productDetail?.productName
+          : _subRow.type === MATERIAL_TYPE.service
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+      }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription
@@ -698,7 +703,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
         }}
         addButtonProps={{
           disabled: !allowedToEdit,
-          tooltip: salesOrderData?.quotation ? `Converted from Quotation you can not perform this action` : !allowedToEdit ? ownerAndColaborator : ``,
+          tooltip: salesOrderData?.quotation ? `Converted from Quotation you can not perform this action` : !allowedToEdit ? ownerAndColaborator : ``
         }}
         leftSideContents
         rightSideContents

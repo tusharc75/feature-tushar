@@ -1,17 +1,16 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import { Skeleton } from '@material-ui/lab';
-import { camelCase } from 'lodash';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { Skeleton } from '@mui/material';
 import React, { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { Edit } from '@material-ui/icons';
-import { isMobile, isTablet } from 'react-device-detect';
+import EditIcon from '@mui/icons-material/Edit';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import DetailsPage from 'src/components/Shared/DetailsPage';
 import { ACTIVITY_RESOURCE, MATERIAL_TYPE, packages } from 'src/constants/helpers';
@@ -112,14 +111,9 @@ const PackageDetails = () => {
             {packageData ? (
               <>
                 {permissions?.packages?.isUpdate && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    className={'btn-outline-v1'}
-                    size="small"
-                    onClick={handleOpenUpdateDialog}
-                  >
-                    {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                  </Button>
+                  <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                    {'Edit'}
+                  </ThemeButton>
                 )}
                 {permissions?.packages?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>
@@ -138,12 +132,12 @@ const PackageDetails = () => {
           <CustomTab value={3}>Sub Packages</CustomTab>
         </CustomTabs>
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={12} md={12}>
+          <Grid size={{ xs: 12, sm: 12, md: 12 }}>
             <TabPanel value={tabValue} index={0}>
               <DetailsPage data={packageData} fields={packageFields} />
               <Box mb={2} mt={2}>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6} md={6}>
+                  <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                     <LeadTime referenceType={MATERIAL_TYPE.package} referenceId={id} referenceLabel={packageData?.packageName} />
                   </Grid>
                 </Grid>
@@ -164,7 +158,7 @@ const PackageDetails = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.packages?.titleSingular?.toLowerCase()} : ${headingLabel || ''} ?`}           
+          message={`Are you sure you want to delete ${resources?.packages?.titleSingular?.toLowerCase()} : ${headingLabel || ''} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

@@ -1,5 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Button, CircularProgress, Dialog, FormControlLabel, Checkbox, TextField, IconButton, Typography, Grid } from '@material-ui/core';
+import { Box, Dialog, FormControlLabel, Checkbox, TextField, IconButton, Typography } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Grid from '@mui/material/Grid2';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -10,8 +12,8 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { resourcePolicy } from './helper';
-import { Autocomplete } from '@material-ui/lab';
-import { AddCircleOutline, RemoveCircleOutline } from '@material-ui/icons';
+import Autocomplete from '@mui/material/Autocomplete';
+import { AddCircleOutline, RemoveCircleOutline } from '@mui/icons-material';
 import { isArray } from 'lodash';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
@@ -166,20 +168,17 @@ const PolicyDialog = ({ resourceData, resource, onClose, onSuccess }) => {
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button size="small" color="primary" onClick={onClose}>
+                <ThemeButton buttonType="transparent" onClick={onClose}>
                   Cancel
-                </Button>
-                <Button
+                </ThemeButton>
+                <ThemeButton
                   disabled={isSubmitting}
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  type="submit"
+                  buttonType="theme"
                   onClick={submitForm}
-                  endIcon={isSubmitting && <CircularProgress color="inherit" size={18} />}
+                  isLoading={isSubmitting}
                 >
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
             </>
           )}
@@ -225,7 +224,7 @@ const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource
       <>
         {!loading ? (
           <Grid container spacing={2}>
-            <Grid item lg={6} md={6} sm={6} xs={12}>
+            <Grid size={{lg:6, md:6, sm:6, xs:12}}>
               <DropDownField
                 options={options}
                 error={null}
@@ -259,13 +258,13 @@ const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource
     }
     return (
       <Grid container spacing={2}>
-        <Grid item lg={6} md={6} sm={6} xs={12}>
+        <Grid size={{lg:6, md:6, sm:6, xs:12}}>
           <Autocomplete
             fullWidth
             size="small"
             options={options}
-            getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-            getOptionSelected={(option: any, val) => {
+            getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+            isOptionEqualToValue={(option: any, val) => {
               return option?.optionValue === val?.optionValue;
             }}
             value={options?.find((e) => e.optionValue === data?.data) || {}}
@@ -295,8 +294,8 @@ const DropDownField = ({ onChange, value, options, multiple = false, error, touc
       multiple={multiple}
       disableCloseOnSelect={multiple}
       options={options}
-      getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-      getOptionSelected={(option: any, val) => {
+      getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+      isOptionEqualToValue={(option: any, val) => {
         return option?.optionValue === val?.optionValue;
       }}
       value={value}
@@ -417,7 +416,10 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                       <Box display="flex" alignItems="center">
                         <Typography color="textSecondary">{field.fieldLabel}</Typography>
                         <Box ml={2} display="flex" alignContent="center">
-                          <input type="color" name={field.fieldName} value={value[field.fieldName]}
+                          <input
+                            type="color"
+                            name={field.fieldName}
+                            value={value[field.fieldName]}
                             onChange={(e) => {
                               const updatedVal = e.target.value;
                               setFieldValue(`data.${idx}.data.${index}.${field.fieldName}`, updatedVal);
@@ -425,7 +427,8 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                               updatedData[index][field.fieldName] = updatedVal;
                               setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
                               onChange(null, updatedData);
-                            }} />
+                            }}
+                          />
                         </Box>
                       </Box>
                     </>
@@ -447,41 +450,41 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                         onChange(null, updatedData);
                       }}
                     />
-                ): (
-                      <DropDownField
-                        key={field.fieldName}
-                        options={
-                          field?.lookupResource
-                            ? field.option
+                  ) : (
+                    <DropDownField
+                      key={field.fieldName}
+                      options={
+                        field?.lookupResource
+                          ? field.option
+                          : field?.fieldName === 'status'
+                            ? getStatusOptions(initialData?.fieldsData)
+                            : fieldOptions
+                      }
+                      error={errors[`data.${idx}.data.${index}.${field.fieldName}`]}
+                      touched={touched?.data && touched.data[idx].data[index][field.fieldName]}
+                      onChange={(e, val) => {
+                        const updatedVal = isArray(val) ? val?.map((ele) => ele.optionValue) : val?.optionValue;
+                        setFieldValue(`data.${idx}.data.${index}.${field.fieldName}`, updatedVal);
+                        let updatedData = [...initialData?.fieldsData];
+                        updatedData[index][field.fieldName] = updatedVal;
+                        setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
+                        onChange(null, updatedData);
+                      }}
+                      value={
+                        field?.type === 'multiSelect'
+                          ? field?.lookupResource
+                            ? field?.option?.filter((opt) => value[`${field.fieldName}`]?.some((val) => val === opt.optionValue))
                             : field?.fieldName === 'status'
-                              ? getStatusOptions(initialData?.fieldsData)
-                              : fieldOptions
-                        }
-                        error={errors[`data.${idx}.data.${index}.${field.fieldName}`]}
-                        touched={touched?.data && touched.data[idx].data[index][field.fieldName]}
-                        onChange={(e, val) => {
-                          const updatedVal = isArray(val) ? val?.map((ele) => ele.optionValue) : val?.optionValue;
-                          setFieldValue(`data.${idx}.data.${index}.${field.fieldName}`, updatedVal);
-                          let updatedData = [...initialData?.fieldsData];
-                          updatedData[index][field.fieldName] = updatedVal;
-                          setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
-                          onChange(null, updatedData);
-                        }}
-                        value={
-                          field?.type === 'multiSelect'
-                            ? field?.lookupResource
-                              ? field?.option?.filter((opt) => value[`${field.fieldName}`]?.some((val) => val === opt.optionValue))
-                              : field?.fieldName === 'status' ?
-                                statusOptions?.filter((ele) => value[`${field.fieldName}`].includes(ele?.optionValue))
-                                : fieldOptions.filter((opt) => value[`${field.fieldName}`]?.some((val) => val === opt.optionValue))
-                            : statusOptions?.filter((ele) => ele?.optionValue === value[`${field.fieldName}`])[0]
-                        }
-                        multiple={field?.type === 'multiSelect'}
-                        fieldLabel={field?.fieldLabel}
-                        fieldName={field?.fieldLabel}
-                        required={field?.required}
-                      />
-                    )
+                              ? statusOptions?.filter((ele) => value[`${field.fieldName}`].includes(ele?.optionValue))
+                              : fieldOptions.filter((opt) => value[`${field.fieldName}`]?.some((val) => val === opt.optionValue))
+                          : statusOptions?.filter((ele) => ele?.optionValue === value[`${field.fieldName}`])[0]
+                      }
+                      multiple={field?.type === 'multiSelect'}
+                      fieldLabel={field?.fieldLabel}
+                      fieldName={field?.fieldLabel}
+                      required={field?.required}
+                    />
+                  )
                 )}
               </div>
               <HtmlTooltip title="Remove">

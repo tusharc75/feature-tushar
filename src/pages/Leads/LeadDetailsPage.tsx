@@ -1,17 +1,14 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import { Edit } from '@material-ui/icons';
-import { Skeleton } from '@material-ui/lab';
-import queryString from 'query-string';
+import { Box } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaSyncAlt } from 'react-icons/fa';
 import { MdDelete } from 'react-icons/md';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
-import { SVG } from '../../assets';
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -134,7 +131,10 @@ const LeadDetailsPage = () => {
         setAllowedToEdit(permissions?.lead?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.lead, data));
         setAllowedToDelete(permissions?.lead?.isDelete && checkIsAllowedToDelete(user, sidebarResource.lead, data.owner.optionValue));
         setLeadData(data);
-        setCustomizedRoutes([{ ...routes.lead, title: resources?.lead?.titlePlural }, { title: [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' ') || data?.company }]);
+        setCustomizedRoutes([
+          { ...routes.lead, title: resources?.lead?.titlePlural },
+          { title: [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' ') || data?.company }
+        ]);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -336,11 +336,7 @@ const LeadDetailsPage = () => {
           <Box className="control-buttons-v1">
             {!isLeadAlreadyConvertedToOpportunity && hasPermissionToConvertToOpportunity && (
               <>
-                <Button
-                  variant={'contained'}
-                  color="primary"
-                  size="small"
-                  className={'no-shadow'}
+                <ThemeButton
                   onClick={() => {
                     const leadName = [leadData.firstName, leadData.middleName, leadData.lastName].filter((d) => d).join(' ');
                     setConvertLeadToOpportunityConfirmationDialog({
@@ -350,20 +346,18 @@ const LeadDetailsPage = () => {
                       message: `Are you sure you want to convert ${leadName} to opportunity?`
                     });
                   }}
+                  buttonType='theme'
+                  iconForMobile={<FaSyncAlt size={15} />}
+                  mobileTooltip={'Convert Lead To Opportunity'}
                 >
-                  {isMobile && !isTablet ? <FaSyncAlt size={15} /> : 'Convert Lead To Opportunity'}
-                </Button>
+                  {'Convert Lead To Opportunity'}
+                </ThemeButton>
               </>
             )}
             {leadsPermissions.isUpdate && allowedToEdit && (
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                size="small"
-                onClick={handleOpneUpdateDialog}
-                className={'btn-outline-v1'}
-              >
-                {isMobile && !isTablet ? <Edit /> : 'Edit'}
-              </Button>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpneUpdateDialog} mobileTooltip={'Edit'}>
+                {'Edit'}
+              </ThemeButton>
             )}
             {leadsPermissions.isDelete && allowedToDelete && !leadData?.staticData?.convertedToOpportunity && (
               <DeleteButton
@@ -475,7 +469,7 @@ const LeadDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.lead?.titleSingular?.toLowerCase()} : ${leadData?.concatedName} ?`}            
+          message={`Are you sure you want to delete ${resources?.lead?.titleSingular?.toLowerCase()} : ${leadData?.concatedName} ?`}
           onClose={() => setShowConfirmBox(false)}
           onOk={handleDeleteLead}
           okBtnLoading={isDeleting}

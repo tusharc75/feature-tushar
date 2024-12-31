@@ -1,12 +1,12 @@
-import Box from '@material-ui/core/Box/Box';
+import Box from '@mui/material/Box/Box';
 import { useState, useEffect, useContext } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import Grid from '@material-ui/core/Grid/Grid';
+import Grid from '@mui/material/Grid2';
 import axiosInstance from 'src/axios/axiosInstance';
-import { dateTimeFormat, gridLoadingTimeout, prepareDataForGrid, productInventory, sidebarResource } from 'src/constants/helpers';
+import { displayDateTime, gridLoadingTimeout, prepareDataForGrid, productInventory, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
@@ -16,7 +16,6 @@ import { useData } from 'src/StateProvider/Provider';
 import { Link } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
 import { useAppTheme } from 'src/constants/AppConfig';
-import moment from 'moment';
 
 const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueId }) => {
   const renderedFrom = `${camelCase(sidebarResource?.productInventory)}_history`;
@@ -48,7 +47,7 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
         disableFilters: true,
         disableSortBy: true,
         Cell: ({ row }) => {
-          return row.original?.date ? <p className="text-truncate">{moment(row?.original?.date)?.format(dateTimeFormat)}</p> : <NoDataCell />;
+          return row.original?.date ? <p className="text-truncate">{displayDateTime(row?.original?.date)}</p> : <NoDataCell />;
         }
       },
       {
@@ -213,7 +212,7 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
         disableSortBy: true,
         Cell: ({ row }) => {
           return row.original?.transactionDate ? (
-            <p className="text-truncate">{moment(row?.original?.transactionDate)?.format(dateTimeFormat)}</p>
+            <p className="text-truncate">{displayDateTime(row?.original?.transactionDate)}</p>
           ) : (
             <NoDataCell />
           );
@@ -250,7 +249,7 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
       <Dialog fullScreen TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true} fullWidth>
         <CustomDialogHeader title={`History - ${productName}`} onClose={handleClose} showRequiredLabel={false}></CustomDialogHeader>
         <CustomDialogContent isFooterPresent={false}>
-          <Grid item xs={12} md={12} sm={12} className="mt-3">
+          <Grid size={{xs:12, md:12, sm:12}} className="mt-3">
             {columns ? (
               <CustomReactTable
                 height={'calc(100vh - 150px)'}

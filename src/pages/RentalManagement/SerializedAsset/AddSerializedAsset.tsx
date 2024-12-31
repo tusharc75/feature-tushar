@@ -1,12 +1,9 @@
-import { Box, CircularProgress } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog/Dialog';
-import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/TextField';
-import { Autocomplete } from '@material-ui/lab';
+import { Box } from '@mui/material';
+import Dialog from '@mui/material/Dialog/Dialog';
+import TextField from '@mui/material/TextField';
+import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase, isString, map, uniq } from 'lodash';
 import { Fragment, useCallback, useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { Link } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
@@ -42,7 +39,7 @@ import ManageTransferAsset from '../../TransferAssets/ManageTransferAsset';
 import axios, { CancelTokenSource } from 'axios';
 import AssetDetailsChangeDialog from '../ReceivingTicket/AssetDetailsChangeDialog';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { Add } from '@material-ui/icons';
+import { Add } from '@mui/icons-material';
 
 const AddSerializedAsset = ({
   isAdding,
@@ -486,30 +483,29 @@ const AddSerializedAsset = ({
               <div className="flex flex-grow flex-wrap items-center gap-2">
                 {serializedProducts.length > 0
                   ? serializedProducts.map((d, i) => (
-                      <Box
-                        border={1}
-                        className={`cursor-pointer p-2 text-[13px] ${
-                          selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
+                    <Box
+                      border={1}
+                      className={`cursor-pointer p-2 text-[13px] ${selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
                         }`}
-                        borderColor="var(--common-border-color)"
-                        id={`serialized-products-${i}`}
-                        onClick={() => {
-                          if (selectedProduct === d.id) {
-                            setSelectedProduct(null);
-                          } else {
-                            setSelectedProduct(d.id);
-                          }
-                        }}
-                      >
-                        {d?.qty < 0 ? (
-                          <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                        ) : d?.qty === 0 ? (
-                          <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                        ) : (
-                          <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                        )}
-                      </Box>
-                    ))
+                      borderColor="var(--common-border-color)"
+                      id={`serialized-products-${i}`}
+                      onClick={() => {
+                        if (selectedProduct === d.id) {
+                          setSelectedProduct(null);
+                        } else {
+                          setSelectedProduct(d.id);
+                        }
+                      }}
+                    >
+                      {d?.qty < 0 ? (
+                        <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                      ) : d?.qty === 0 ? (
+                        <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                      ) : (
+                        <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                      )}
+                    </Box>
+                  ))
                   : null}
                 {serializedProducts.length > 0 && serializedProducts.some((s) => s.qty < 0) ? (
                   <div className="text-error font-weight-bold">You have selected more assets than required</div>
@@ -524,7 +520,7 @@ const AddSerializedAsset = ({
                     fullWidth
                     options={warehouseOption}
                     getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                    getOptionSelected={(option: any, val) => option.optionValue === val}
+                    isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                     value={
                       warehouseOption.filter((data) => data.optionValue === selectedWarehouse).length
                         ? warehouseOption.filter((data) => data.optionValue === selectedWarehouse)[0]
@@ -537,6 +533,7 @@ const AddSerializedAsset = ({
                       <TextField
                         {...params}
                         margin="dense"
+                        size="small"
                         name="plant"
                         placeholder={resources?.warehouse?.titleSingular}
                         label={resources?.warehouse?.titleSingular}
@@ -553,10 +550,8 @@ const AddSerializedAsset = ({
                 {(Number(tabValue) === 0 || Number(tabValue) === 1) && (
                   <Fragment>
                     {permissions?.transferAsset?.isCreate && selectedRecords?.length !== 0 && !checkUniqWarehouse() && (
-                      <Button
-                        style={{ minWidth: 'max-content' }}
-                        size="small"
-                        color="primary"
+                      <ThemeButton
+                        buttonType='theme'
                         onClick={() => {
                           if (checkAssetPolicy(ASSET_STATUS.reserved)) {
                             const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.reserved);
@@ -570,19 +565,16 @@ const AddSerializedAsset = ({
                             setShowTransferAssetDialog({ open: true, data: null });
                           }
                         }}
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
                         disabled={isAdding || serializedProducts.some((d) => d?.qty < 0)}
-                        className={`${isMobile && !isTablet ? 'mobile_button' : ''}  `}
-                        endIcon={isAdding && <CircularProgress size={20} />}
+                        isLoading={isAdding}
                       >
                         {`Transfer to ${filterByPlant?.optionLabel}`}
                         {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
-                      </Button>
+                      </ThemeButton>
                     )}
-
                     <ThemeButton
                       iconForMobile={<Add />}
-                      borderColor="none"
+                      buttonType="theme"
                       tooltip={
                         selectedRecords?.length !== 0 && !checkUniqWarehouse()
                           ? 'Direct transfer to customer location'
@@ -592,14 +584,10 @@ const AddSerializedAsset = ({
                               ? 'Replace'
                               : 'Add'
                       }
-                      color="primary"
-                      size="small"
                       id={'add-to-job-button'}
-                      style={{ minWidth: 'max-content' }}
                       onClick={handleAddButtonClick}
                       disabled={selectedRecords?.length === 0 || isAdding || serializedProducts.some((d) => d?.qty < 0)}
-                      className={`${isMobile && !isTablet ? 'mobile_button' : ''}  `}
-                      endIcon={isAdding && <CircularProgress size={20} />}
+                      isLoading={isAdding}
                     >
                       {referenceType === 'Rental Job' ? 'Add to Job' : replaceAssets ? 'Replace' : 'Add'}
                       {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
@@ -609,21 +597,17 @@ const AddSerializedAsset = ({
                 {Number(tabValue) === 2 && (
                   <Box ml={2}>
                     <HtmlTooltip title={'Add to Job'}>
-                      <Button
-                        color="primary"
-                        size="small"
-                        style={{ minWidth: 'max-content' }}
+                      <ThemeButton
+                        disabled={isSubmitting || checkUniqRentalJob() || serializedProducts.some((d) => d?.qty < 0)}
                         onClick={() => {
                           setInuseAssetConfirmBox(true);
                         }}
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        disabled={isSubmitting || checkUniqRentalJob() || serializedProducts.some((d) => d?.qty < 0)}
-                        className={`${isMobile && !isTablet ? 'mobile_button' : ''}  `}
-                        endIcon={isSubmitting && <CircularProgress size={20} />}
+                        buttonType='theme'
+                        isLoading={isSubmitting}
                       >
                         {`Add to Job`}
                         {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
-                      </Button>
+                      </ThemeButton>
                     </HtmlTooltip>
                   </Box>
                 )}
@@ -744,7 +728,7 @@ const AddSerializedAsset = ({
         <AssetDetailsChangeDialog
           ids={openAssetDataDialog._ids}
           statusPolicy={openAssetDataDialog.statusPolicy}
-          setAssetsData={() => {}}
+          setAssetsData={() => { }}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: '' })}
           onSuccess={(data) => {
             if (Number(tabValue) === 2) {

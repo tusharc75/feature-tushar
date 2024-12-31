@@ -1,7 +1,8 @@
-import { Box, Button } from '@material-ui/core';
+import { Box } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Loader from 'src/components/Loader';
 
 const ShowPdf = ({ data }) => {
@@ -52,9 +53,12 @@ const ShowPdf = ({ data }) => {
         <>
           {mimeType !== 'application/pdf' && (
             <Box mb={2}>
-              <Button onClick={handleDownload} variant="contained" color="primary">
+              <ThemeButton
+                buttonType='theme'
+                onClick={handleDownload}
+              >
                 Download
-              </Button>
+              </ThemeButton>
             </Box>
           )}
           <iframe title={data?.name} src={url} width="100%" height="100%" frameBorder="0" scrolling="auto" contextMenu="none"></iframe>

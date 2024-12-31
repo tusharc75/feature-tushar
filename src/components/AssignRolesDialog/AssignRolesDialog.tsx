@@ -1,15 +1,5 @@
-import {
-  Button,
-  Checkbox,
-  CircularProgress,
-  FormControl,
-  FormControlLabel,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Typography
-} from '@material-ui/core';
+import { Checkbox, FormControl, FormControlLabel, List, ListItem, ListItemIcon, ListItemText, Typography } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
@@ -174,13 +164,13 @@ const AssignRolesDialog = ({ rolesDialogOpen, onSuccess, handleCloseDialog, user
       </CustomDialogContent>
       <CustomDialogFooter>
         {!isRenderedFromUserSetUp && (
-          <Button disabled={isAssigning} onClick={handleCloseDialog} color="primary" size="small">
+          <ThemeButton onClick={handleCloseDialog} buttonType="transparent">
             Cancel
-          </Button>
+          </ThemeButton>
         )}
-        <Button disabled={!selectedRoles.length || isAssigning} onClick={handleAssignRoles} color="primary" size="small" variant="contained">
-          {isAssigning ? <CircularProgress size={22} /> : isRenderedFromUserSetUp ? 'Save & Finish' : 'Save'}
-        </Button>
+        <ThemeButton disabled={!selectedRoles.length || isAssigning} onClick={handleAssignRoles} buttonType="theme" isLoading={isAssigning}>
+          {isRenderedFromUserSetUp ? 'Save & Finish' : 'Save'}
+        </ThemeButton>
       </CustomDialogFooter>
 
       {/* // </Dialog> */}

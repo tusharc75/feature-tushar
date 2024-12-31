@@ -1,4 +1,5 @@
-import { Box, Button, Dialog } from '@material-ui/core';
+import { Box, Dialog } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import React, { useState } from 'react';
@@ -141,19 +142,18 @@ export const SectionProperties = ({ handleClose, section, setSections, sections 
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button
-                size="small"
+              <ThemeButton
+                buttonType="transparent"
                 onClick={() => {
                   if (isEqual(values, initialValues)) handleClose();
                   setShowConfirmDialog(true);
                 }}
-                color="primary"
               >
                 Cancel
-              </Button>
-              <Button size="small" type="submit" color="primary" variant="contained" onClick={submitForm}>
+              </ThemeButton>
+              <ThemeButton buttonType="theme" onClick={submitForm}>
                 Save
-              </Button>
+              </ThemeButton>
             </CustomDialogFooter>
             {showConfirmDialog ? (
               <ConfirmCancelDialog

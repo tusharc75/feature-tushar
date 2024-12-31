@@ -1,10 +1,10 @@
-import { Box, Dialog, IconButton } from '@material-ui/core';
+import { Box, Dialog, IconButton } from '@mui/material';
 import { useContext, useState } from 'react';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomDialogTransition, formatAmountWithCurrency, gridLoadingTimeout } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useEffect } from 'react';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';

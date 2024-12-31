@@ -1,5 +1,6 @@
-import React, { FC } from 'react';
-import { Button, ButtonProps } from '@material-ui/core';
+import { FC } from 'react';
+import { ButtonProps } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 interface ButtonWithPulseProps extends ButtonProps {
   pulseEffect?: boolean;
@@ -9,14 +10,14 @@ const ButtonWithPulse: FC<ButtonWithPulseProps> = ({ children, disabled, pulseEf
   return (
     <div className="relative isolate">
       {!disabled && pulseEffect && (
-        <span className="animate-ripple bg-white dark-bg-[var(--dark-primary)] rounded-[3px]">
+        <span className="animate-ripple dark-bg-[var(--dark-primary)] rounded-[3px] bg-white">
           <span></span>
           <span></span>
         </span>
       )}
-      <Button {...others} disabled={disabled}>
+      <ThemeButton {...others} disabled={disabled}>
         {children}
-      </Button>
+      </ThemeButton>
     </div>
   );
 };

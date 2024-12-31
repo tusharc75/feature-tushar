@@ -1,9 +1,9 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import { Edit } from '@material-ui/icons';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import EditIcon from '@mui/icons-material/Edit';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
-import { Fragment, useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
+import { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -41,7 +41,7 @@ import {
   generateLoadingStepReceive,
   nextButtonStep
 } from 'src/pages/TransferInventory/walkmeSteps';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 
 const TransferInventoryDetailPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -243,28 +243,14 @@ const TransferInventoryDetailPage = () => {
             {allowedToEdit &&
               ![TRANSFER_INVENTORY_STATUS.delivered].includes(transferInventoryData?.status) &&
               transferInventoryData?.canComplete && (
-                <Fragment>
-                  <ButtonWithPulse
-                    variant={'outlined'}
-                    color="default"
-                    size="small"
-                    id={`transfer-inventory-complete-button`}
-                    onClick={() => updateStatus(TRANSFER_INVENTORY_STATUS.delivered)}
-                    className={'btn-outline-v1'}
-                  >
-                    Complete
-                  </ButtonWithPulse>
-                </Fragment>
+                <ButtonWithPulse id={`transfer-inventory-complete-button`} onClick={() => updateStatus(TRANSFER_INVENTORY_STATUS.delivered)}>
+                  Complete
+                </ButtonWithPulse>
               )}
             {allowedToEdit && transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered && (
-              <Button
-                className={'btn-outline-v1'}
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                size="small"
-                onClick={handleOpenUpdateDialog}
-              >
-                {isMobile && !isTablet ? <Edit /> : 'Edit'}
-              </Button>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                {'Edit'}
+              </ThemeButton>
             )}
             {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             <ActivityButton
@@ -285,7 +271,7 @@ const TransferInventoryDetailPage = () => {
           <Box>
             {loading || !transferInventoryData ? (
               <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </Grid>
             ) : (
               <DetailsPage data={transferInventoryData} fields={transferInventoryFields} />

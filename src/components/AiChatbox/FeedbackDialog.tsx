@@ -1,8 +1,8 @@
-import { Button, TextField } from '@material-ui/core';
+import { TextField } from '@mui/material';
 import React, { useContext, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import DashboardModal from 'src/components/DashboardModal';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
@@ -58,19 +58,12 @@ const FeedbackDialog = ({ handleClose, chatData, chatId }: FeedbackDialogProps) 
       }}
       footer={
         <>
-          <Button variant="outlined" color="primary" size="small" onClick={handleClose}>
+          <ThemeButton buttonType="transparent" onClick={handleClose}>
             Cancel
-          </Button>
-          <CustomButton
-            disabled={comment === '' || loading}
-            loading={loading}
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={handleSubmit}
-          >
+          </ThemeButton>
+          <ThemeButton disabled={comment === '' || loading} isLoading={loading} buttonType="theme" onClick={handleSubmit}>
             Save
-          </CustomButton>
+          </ThemeButton>
         </>
       }
     >

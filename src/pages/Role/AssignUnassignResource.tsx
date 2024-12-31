@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Button, Checkbox, CircularProgress, Dialog, TextField, FormControlLabel, Box } from '@material-ui/core';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import { Checkbox, Dialog, TextField, FormControlLabel, Box } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import Loader from '../../components/Loader';
@@ -8,6 +8,7 @@ import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter
 import axiosInstance from '../../axios/axiosInstance';
 import { useData } from '../../StateProvider/Provider';
 import { CustomDialogTransition } from 'src/constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const AssignUnassignResourceDialog = ({
   showUpdateResourceDialog,
@@ -129,7 +130,7 @@ const AssignUnassignResourceDialog = ({
               // style={{ width: '400px' }}
               multiple={true}
               options={resource?.map((_resource) => _resource.name)}
-              renderInput={(params) => <TextField {...params} variant="outlined" label="Resource" margin="dense" required={true} />}
+              renderInput={(params) => <TextField {...params} variant="outlined" label="Resource" margin="dense" size="small" required={true} />}
               getOptionLabel={(option) => option}
               onChange={(e, val) => {
                 setSelectedResource(val);
@@ -199,12 +200,20 @@ const AssignUnassignResourceDialog = ({
         ) : null}
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button disabled={isSubmitting} onClick={handleClose} color="primary" size="small">
+        <ThemeButton
+          buttonType='transparent'
+          onClick={handleClose}
+        >
           Cancel
-        </Button>
-        <Button disabled={!selectedResource.length || isSubmitting} onClick={handleUpdate} color="primary" size="small" variant="contained">
-          {isSubmitting ? <CircularProgress size={22} /> : 'Save'}
-        </Button>
+        </ThemeButton>
+        <ThemeButton
+          buttonType='theme'
+          disabled={!selectedResource.length || isSubmitting}
+          onClick={handleUpdate}
+          isLoading={isSubmitting}
+        >
+          Save
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

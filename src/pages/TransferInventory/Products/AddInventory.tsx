@@ -1,4 +1,4 @@
-import { Box, Dialog, Typography } from '@material-ui/core';
+import { Box, Dialog, Typography } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -11,7 +11,6 @@ import { ListingPageHeader } from 'src/components/PageHeaders';
 import {
   CustomDialogTransition,
   gridLoadingTimeout,
-  isObjectEmpty,
   prepareDataForGrid,
   productInventory,
   sidebarResource

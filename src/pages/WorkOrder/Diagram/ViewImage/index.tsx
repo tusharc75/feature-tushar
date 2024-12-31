@@ -3,10 +3,8 @@ import { fabric } from 'fabric';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { b64toBlob } from 'src/constants/helpers';
-import { Box, Button, FormControl, Typography } from '@material-ui/core';
-import CustomButton from 'src/components/Helpers/CustomButton';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { Box, FormControl, Typography } from '@mui/material';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 
 fabric.IText.prototype.initHiddenTextarea = (function (initHiddenTextarea) {
   return function () {
@@ -400,49 +398,59 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
 
   return (
     <Box>
-      <div className="flex flex-wrap items-center justify-between gap-2 min-h-[40px] my-2">
-        <div className={'flex gap-2 flex-wrap'}>
-          <Button disabled={loading || isDrawingMode || isHighlighterMode} variant="outlined" color="primary" size="small" onClick={handleAddText}>
-            Add Text
-          </Button>
-          <Button disabled={loading || isDrawingMode || isHighlighterMode} variant="outlined" color="primary" size="small" onClick={handleAddLine}>
-            Add Line
-          </Button>
-          <Button
+      <div className="my-2 flex min-h-[40px] flex-wrap items-center justify-between gap-2">
+        <div className={'flex flex-wrap gap-2'}>
+          <ThemeButton
             disabled={loading || isDrawingMode || isHighlighterMode}
-            variant="outlined"
-            color="primary"
-            size="small"
+            onClick={handleAddText}
+          >
+            Add Text
+          </ThemeButton>
+          <ThemeButton
+            disabled={loading || isDrawingMode || isHighlighterMode}
+            onClick={handleAddLine}
+          >
+            Add Line
+          </ThemeButton>
+          <ThemeButton
+            disabled={loading || isDrawingMode || isHighlighterMode}
             onClick={handleAddRectangle}
           >
             Add Rectangle
-          </Button>
-          <Button disabled={loading || isDrawingMode || isHighlighterMode} variant="outlined" color="primary" size="small" onClick={handleAddCircle}>
+          </ThemeButton>
+          <ThemeButton
+            disabled={loading || isDrawingMode || isHighlighterMode}
+            onClick={handleAddCircle}
+          >
             Add Circle
-          </Button>
-          <Button disabled={loading || isDrawingMode} variant="outlined" color="primary" size="small" onClick={toggleHighlighterMode}>
+          </ThemeButton>
+          <ThemeButton
+            disabled={loading || isDrawingMode}
+            onClick={toggleHighlighterMode}
+          >
             {isHighlighterMode ? 'Exit highlighter Mode' : 'Enter highlighter Mode'}
-          </Button>
-          <Button disabled={loading || isHighlighterMode} variant="outlined" color="primary" size="small" onClick={toggleDrawingMode}>
+          </ThemeButton>
+          <ThemeButton
+            disabled={loading || isHighlighterMode}
+            onClick={toggleDrawingMode}
+          >
             {isDrawingMode ? 'Exit Drawing Mode' : 'Enter Drawing Mode'}
-          </Button>
+          </ThemeButton>
           {(isDrawingMode || isHighlighterMode) && (
-            <Button disabled={loading} variant="outlined" color="primary" size="small" onClick={handleUndo}>
-              Undo
-            </Button>
+            <ThemeButton
+              disabled={loading}
+              onClick={handleUndo}
+            > Undo</ThemeButton>
           )}
           <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*" onChange={handleImageUpload} />
-          <Button
+          <ThemeButton
             disabled={loading || isDrawingMode || isHighlighterMode}
-            variant="outlined"
-            color="primary"
-            size="small"
             onClick={() => {
               fileInputRef.current.click();
             }}
           >
             Upload Watermark
-          </Button>
+          </ThemeButton>
         </div>
         {selectedObject && (
           <Box className="flex items-center gap-2">
@@ -452,22 +460,24 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
             <DeleteButton mode="light" text="Remove" size="small" onClick={handleRemove} />
           </Box>
         )}
-        <div className="flex flex-wrap gap-2 items-center">
-          <CustomButton
+        <div className="flex flex-wrap items-center gap-2">
+          <ThemeButton
             disabled={isSubmitting || loading}
-            loading={isSubmitting}
-            variant="contained"
-            color="primary"
-            type="submit"
+            isLoading={isSubmitting}
+            buttonType="theme"
             onClick={(e) => {
               handleSave();
             }}
           >
             Save
-          </CustomButton>
-          <Button disabled={loading} variant="contained" color="primary" size="small" onClick={handleDownload}>
+          </ThemeButton>
+          <ThemeButton
+            disabled={loading}
+            onClick={handleDownload}
+            buttonType="theme"
+          >
             Download
-          </Button>
+          </ThemeButton>
         </div>
       </div>
       <Box height={'calc(100vh - 140px)'} width={'calc(100vw - 20px)'} style={{ overflow: 'auto' }}>

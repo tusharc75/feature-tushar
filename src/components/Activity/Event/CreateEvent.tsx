@@ -1,13 +1,12 @@
 import { useAccount, useMsal } from '@azure/msal-react';
-import MomentUtils from '@date-io/moment';
-import { Box, Button, CircularProgress, Grid, TextField, Typography, useMediaQuery } from '@material-ui/core';
-import { ArrowRightAlt } from '@material-ui/icons';
-import { Autocomplete } from '@material-ui/lab';
-import { KeyboardDatePicker, KeyboardTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { Box, TextField, Typography, useMediaQuery } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { ArrowRightAlt } from '@mui/icons-material';
+import Autocomplete from '@mui/material/Autocomplete';
 import axios, { CancelTokenSource } from 'axios';
 import { Form, Formik } from 'formik';
 import { isEmpty } from 'lodash';
-import moment from 'moment';
 import PropTypes from 'prop-types';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { object, string } from 'yup';
@@ -17,12 +16,15 @@ import axiosInstance from '../../../axios/axiosInstance';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import { dateFormat, sidebarResource } from '../../../constants/helpers';
+import { displayDateTime, sidebarResource } from '../../../constants/helpers';
 import getAzureAcessToken from '../../Azure/getAzureAccessToken';
 import Loader from '../../Loader';
 import { RelatedToDispay } from '../Helpers/RelatedToDispay';
 import { UserDropdown } from '../Helpers/userDropdown';
 import { get_activity_resource } from '../Helpers/utils';
+import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
+import CustomDatePicker from 'src/components/CustomDatePicker';
+import dayjs from 'dayjs';
 
 const CreateNewEvent = async (inputData) => {
   const { data } = await axiosInstance().post('/event', inputData);
@@ -76,7 +78,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
         .then(({ data: { data } }) => {
           setInitialValues(data);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     } else {
       setInitialValues({
         name: '',
@@ -209,7 +211,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
       errors['endDate'] = 'End date should be greater then start date';
       return errors;
     }
-    if (moment(startDate)?.format('MM-DD-YYYY') === moment(endDate)?.format('MM-DD-YYYY')) {
+    if (dayjs(startDate)?.format('MM-DD-YYYY') === dayjs(endDate)?.format('MM-DD-YYYY')) {
       if (new Date(values?.startTime)?.getTime() > new Date(values?.endTime).getTime()) {
         errors['endTime'] = 'End time should be greater then start time';
       }
@@ -238,247 +240,218 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
             <>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  <MuiPickersUtilsProvider utils={MomentUtils}>
-                    <Box padding={1}>
-                      <TextField
-                        variant="outlined"
-                        type="text"
-                        label="Event Name"
-                        required={true}
-                        name="name"
-                        fullWidth
-                        margin="dense"
-                        value={values['name']}
-                        error={touched['name'] && Boolean(errors['name'])}
-                        helperText={touched['name'] && errors['name']}
-                        onChange={(e) => setFieldValue('name', e.target.value.trimStart())}
+                  <Box padding={1}>
+                    <TextField
+                      variant="outlined"
+                      type="text"
+                      label="Event Name"
+                      required={true}
+                      name="name"
+                      fullWidth
+                      margin="dense"
+                      size="small"
+                      value={values['name']}
+                      error={touched['name'] && Boolean(errors['name'])}
+                      helperText={touched['name'] && errors['name']}
+                      onChange={(e) => setFieldValue('name', e.target.value.trimStart())}
+                    />
+                    <Box pt={1}>
+                      <UserDropdown
+                        name="participant"
+                        label="Participant"
+                        errors={errors}
+                        touched={touched}
+                        required={false}
+                        setFieldValue={setFieldValue}
+                        multiple={true}
+                        value={values['participant']}
+                        email={email ? email.map((e) => ({ userId: e, name: e })) : []}
                       />
-                      <Box pt={1}>
-                        <UserDropdown
-                          name="participant"
-                          label="Participant"
-                          errors={errors}
-                          touched={touched}
-                          required={false}
-                          setFieldValue={setFieldValue}
-                          multiple={true}
-                          value={values['participant']}
-                          email={email ? email.map((e) => ({ userId: e, name: e })) : []}
+                    </Box>
+                    {!eventId && !relatedTo && (
+                      <Box mt={2}>
+                        <Autocomplete
+                          options={resourceOptions}
+                          getOptionLabel={(option) => option.optionLabel || ''}
+                          value={resource}
+                          fullWidth
+                          onChange={(event, newValue) => {
+                            setResource(newValue);
+                          }}
+                          size="small"
+                          renderInput={(params) => <TextField {...params} label="Resource" variant="outlined" />}
                         />
-                      </Box>
-                      {!eventId && !relatedTo && (
-                        <Box mt={2}>
+                        <Box mt={2} />
+                        {resource && resourceData && (
                           <Autocomplete
-                            options={resourceOptions}
-                            getOptionLabel={(option) => option.optionLabel}
-                            value={resource}
+                            disabled={loadingResources}
+                            options={resourceData}
+                            getOptionLabel={(option: any) => option.optionLabel || ''}
+                            isOptionEqualToValue={(option: any, value: any) => option.optionLabel === value.optionLabel}
                             fullWidth
+                            value={selectedResourceData}
                             onChange={(event, newValue) => {
-                              setResource(newValue);
+                              setSelectedResourceData(newValue);
                             }}
                             size="small"
-                            renderInput={(params) => <TextField {...params} label="Resource" variant="outlined" />}
+                            renderInput={(params) => (
+                              <TextField {...params} label={`Select ${resource.optionValue}`} variant="outlined" required={Boolean(resource)} />
+                            )}
                           />
-                          <Box mt={2} />
-                          {resource && resourceData && (
-                            <Autocomplete
-                              disabled={loadingResources}
-                              options={resourceData}
-                              getOptionLabel={(option: any) => option.optionLabel}
-                              getOptionSelected={(option: any, value: any) => option.optionLabel === value.optionLabel}
-                              fullWidth
-                              value={selectedResourceData}
-                              onChange={(event, newValue) => {
-                                setSelectedResourceData(newValue);
-                              }}
-                              size="small"
-                              renderInput={(params) => (
-                                <TextField {...params} label={`Select ${resource.optionValue}`} variant="outlined" required={Boolean(resource)} />
-                              )}
-                            />
-                          )}
+                        )}
+                      </Box>
+                    )}
+                    <Box pt={1} display="flex" flexDirection={isMobile ? 'column' : 'row'}>
+                      <Grid container spacing={2}>
+                        <Grid size={{ xs: 7 }}>
+                          <CustomDatePicker
+                            size="small"
+                            disablePast={true}
+                            value={values.startDate}
+                            name="startDate"
+                            label="Start Date"
+                            onChange={(date: any) => {
+                              setFieldValue('startDate', date ? date : null);
+                              setFieldValue('startTime', date ? getTime(date._d) : null);
+                            }}
+                            error={Boolean(touched['startDate']) && Boolean(errors['startDate'])}
+                            helperText={Boolean(touched['startDate']) && errors['startDate']}
+                            margin="dense"
+                          />
+                        </Grid>
+
+                        <Grid size={{ xs: 5 }}>
+                          <CustomDateTimePicker
+                            size="small"
+                            label="Start Time"
+                            name="startTime"
+                            placeholder="08:00"
+                            inputFormat="HH:mm"
+                            value={values.startTime}
+                            onChange={(date: any) => {
+                              setFieldValue('startTime', date || null);
+                              if (date && new Date(date._d).getHours() < 23) {
+                                setFieldValue('endTime', new Date(new Date(date._d).getTime() + 30 * 60000));
+                              }
+                            }}
+                            error={Boolean(touched['startTime']) && Boolean(errors['startTime'])}
+                            helperText={Boolean(touched['startTime']) && errors['startTime']}
+                            margin="dense"
+                          />
+                        </Grid>
+                      </Grid>
+
+                      {!isMobile && (
+                        <Box mt={2} px={1}>
+                          <ArrowRightAlt color="disabled" />
                         </Box>
                       )}
-                      <Box pt={1} display="flex" flexDirection={isMobile ? 'column' : 'row'}>
-                        <Grid container spacing={2}>
-                          <Grid item xs={7}>
-                            <KeyboardDatePicker
-                              autoOk
-                              size="small"
-                              disablePast
-                              variant="inline"
-                              inputVariant="outlined"
-                              value={values.startDate}
-                              name="startDate"
-                              label="Start Date"
-                              onChange={(date: any) => {
-                                setFieldValue('startDate', date ? date : null);
-                                setFieldValue('startTime', date ? getTime(date._d) : null);
-                              }}
-                              format={dateFormat}
-                              error={Boolean(touched['startDate']) && Boolean(errors['startDate'])}
-                              helperText={Boolean(touched['startDate']) && errors['startDate']}
-                              InputLabelProps={{
-                                shrink: true
-                              }}
-                              margin="dense"
-                            />
-                          </Grid>
 
-                          <Grid item xs={5}>
-                            <KeyboardTimePicker
-                              autoOk
-                              ampm={false}
-                              size="small"
-                              variant="inline"
-                              inputVariant="outlined"
-                              label="Start Time"
-                              name="startTime"
-                              placeholder="08:00"
-                              mask="__:__"
-                              value={values.startTime}
-                              invalidDateMessage="Invalid time format"
-                              onChange={(date: any) => {
-                                setFieldValue('startTime', date || null);
-                                if (date && new Date(date._d).getHours() < 23) {
-                                  setFieldValue('endTime', new Date(new Date(date._d).getTime() + 30 * 60000));
-                                }
-                              }}
-                              error={Boolean(touched['startTime']) && Boolean(errors['startTime'])}
-                              helperText={Boolean(touched['startTime']) && errors['startTime']}
-                              InputLabelProps={{
-                                shrink: true
-                              }}
-                              margin="dense"
-                            />
-                          </Grid>
+                      <Grid container spacing={2}>
+                        <Grid size={{ xs: 7 }}>
+                          <CustomDatePicker
+                            size="small"
+                            disablePast={true}
+                            minDateTime={values.startDate}
+                            value={values.endDate}
+                            name="endDate"
+                            label="End Date"
+                            onChange={(date: any) => {
+                              setFieldValue('endDate', date);
+                              setFieldValue('endTime', new Date(getTime(date ? date._d : new Date()).getTime() + 30 * 60000));
+                            }}
+                            error={Boolean(touched['endDate']) && Boolean(errors['endDate'])}
+                            helperText={Boolean(touched['endDate']) && errors['endDate']}
+                            margin="dense"
+                          />
                         </Grid>
-
-                        {!isMobile && (
-                          <Box mt={2} px={1}>
-                            <ArrowRightAlt color="disabled" />
+                        <Grid size={{ xs: 5 }}>
+                          <CustomDateTimePicker
+                            size="small"
+                            label="End Time"
+                            name="endTime"
+                            placeholder="08:00"
+                            inputFormat="HH:mm"
+                            value={values.endTime}
+                            onChange={(date: any) => {
+                              const nDate = new Date(values.startTime).toISOString().split('T')[0];
+                              let nTime = '';
+                              if (date) {
+                                if ((date._d + '').includes('Invalid Date')) {
+                                  setFieldValue('endTime', `${date._i}`);
+                                } else {
+                                  nTime = new Date(date._d).toISOString().split('T')[1];
+                                  setFieldValue('endTime', new Date(`${nDate}T${nTime}`));
+                                }
+                              }
+                            }}
+                            error={Boolean(touched['endTime']) && Boolean(errors['endTime'])}
+                            helperText={Boolean(touched['endTime']) && errors['endTime']}
+                            margin="dense"
+                          />
+                        </Grid>
+                      </Grid>
+                    </Box>
+                    <TextField
+                      fullWidth
+                      margin="dense"
+                      size="small"
+                      type="text"
+                      label="Location"
+                      value={values['location']}
+                      name="location"
+                      variant="outlined"
+                      onChange={(e) => setFieldValue('location', e.target.value.trimStart())}
+                    />
+                    <TextField
+                      fullWidth
+                      margin="dense"
+                      type="text"
+                      size="small"
+                      multiline
+                      rows={3}
+                      label="Description"
+                      value={values['description']}
+                      name="description"
+                      variant="outlined"
+                      onChange={(e) => setFieldValue('description', e.target.value.trimStart())}
+                    />
+                    {eventId && (
+                      <Fragment>
+                        {initialValues.createdBy && initialValues.createdBy.date && (
+                          <Box mt={1} color="text.secondary">
+                            <Typography variant="body2">Created {displayDateTime(initialValues.createdBy.date, 'MMM DD YYYY hh:mm A')}</Typography>
                           </Box>
                         )}
-
-                        <Grid container spacing={2}>
-                          <Grid item xs={7}>
-                            <KeyboardDatePicker
-                              autoOk
-                              size="small"
-                              disablePast
-                              variant="inline"
-                              inputVariant="outlined"
-                              minDate={values.startDate}
-                              value={values.endDate}
-                              name="endDate"
-                              label="End Date"
-                              onChange={(date: any) => {
-                                setFieldValue('endDate', date);
-                                setFieldValue('endTime', new Date(getTime(date ? date._d : new Date()).getTime() + 30 * 60000));
-                              }}
-                              format={dateFormat}
-                              error={Boolean(touched['endDate']) && Boolean(errors['endDate'])}
-                              helperText={Boolean(touched['endDate']) && errors['endDate']}
-                              InputLabelProps={{
-                                shrink: true
-                              }}
-                              margin="dense"
-                            />
-                          </Grid>
-                          <Grid item xs={5}>
-                            <KeyboardTimePicker
-                              autoOk
-                              ampm={false}
-                              size="small"
-                              variant="inline"
-                              inputVariant="outlined"
-                              label="End Time"
-                              name="endTime"
-                              placeholder="08:00"
-                              mask="__:__"
-                              value={values.endTime}
-                              onChange={(date: any) => {
-                                const nDate = new Date(values.startTime).toISOString().split('T')[0];
-                                let nTime = '';
-                                if (date) {
-                                  if ((date._d + '').includes('Invalid Date')) {
-                                    setFieldValue('endTime', `${date._i}`);
-                                  } else {
-                                    nTime = new Date(date._d).toISOString().split('T')[1];
-                                    setFieldValue('endTime', new Date(`${nDate}T${nTime}`));
-                                  }
-                                }
-                              }}
-                              error={Boolean(touched['endTime']) && Boolean(errors['endTime'])}
-                              helperText={Boolean(touched['endTime']) && errors['endTime']}
-                              InputLabelProps={{
-                                shrink: true
-                              }}
-                              margin="dense"
-                            />
-                          </Grid>
-                        </Grid>
-                      </Box>
-                      <TextField
-                        fullWidth
-                        margin="dense"
-                        type="text"
-                        label="Location"
-                        value={values['location']}
-                        name="location"
-                        variant="outlined"
-                        onChange={(e) => setFieldValue('location', e.target.value.trimStart())}
-                      />
-                      <TextField
-                        fullWidth
-                        margin="dense"
-                        type="text"
-                        multiline
-                        rows={3}
-                        label="Description"
-                        value={values['description']}
-                        name="description"
-                        variant="outlined"
-                        onChange={(e) => setFieldValue('description', e.target.value.trimStart())}
-                      />
-                      {eventId && (
-                        <Fragment>
-                          {initialValues.createdBy && initialValues.createdBy.date && (
-                            <Box mt={1} color="text.secondary">
-                              <Typography variant="body2">Created {moment(initialValues.createdBy.date).format('MMM DD YYYY hh:mm A')}</Typography>
-                            </Box>
-                          )}
-                          {initialValues.updatedBy && initialValues.updatedBy.date && (
-                            <Box mt={1} color="text.secondary">
-                              <Typography variant="body2">Updated {moment(initialValues.updatedBy.date).format('MMM DD YYYY hh:mm A')}</Typography>
-                            </Box>
-                          )}
-                        </Fragment>
-                      )}
-
-                      {eventId && initialValues?.relatedTo && initialValues.relatedTo.length ? (
-                        <Fragment>
-                          <Box mt={2}>
-                            <RelatedToDispay relatedTo={initialValues.relatedTo} />
+                        {initialValues.updatedBy && initialValues.updatedBy.date && (
+                          <Box mt={1} color="text.secondary">
+                            <Typography variant="body2">Updated {displayDateTime(initialValues.updatedBy.date, 'MMM DD YYYY hh:mm A')}</Typography>
                           </Box>
-                        </Fragment>
-                      ) : null}
-                    </Box>
-                  </MuiPickersUtilsProvider>
+                        )}
+                      </Fragment>
+                    )}
+
+                    {eventId && initialValues?.relatedTo && initialValues.relatedTo.length ? (
+                      <Fragment>
+                        <Box mt={2}>
+                          <RelatedToDispay relatedTo={initialValues.relatedTo} />
+                        </Box>
+                      </Fragment>
+                    ) : null}
+                  </Box>
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button disabled={isSubmitting} color="primary" size="small" onClick={handleClose}>
+                <ThemeButton buttonType="transparent" onClick={handleClose}>
                   Cancel
-                </Button>
-                <Button disabled={isSubmitting} type="button" color="primary" variant="contained" size="small" onClick={submitForm}>
-                  {isSubmitting ? <CircularProgress size={22} /> : 'Save'}
-                </Button>
+                </ThemeButton>
+                <ThemeButton disabled={isSubmitting} isLoading={isSubmitting} buttonType="theme" onClick={submitForm}>
+                  Save
+                </ThemeButton>
                 {eventId && (
-                  <Button
+                  <ThemeButton
                     disabled={isSubmitting}
-                    variant="outlined"
-                    size="small"
+                    buttonType="theme"
                     style={{ color: 'red', borderColor: 'red' }}
                     onClick={() =>
                       axiosInstance()
@@ -497,7 +470,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                     }
                   >
                     Delete
-                  </Button>
+                  </ThemeButton>
                 )}
               </CustomDialogFooter>
             </>

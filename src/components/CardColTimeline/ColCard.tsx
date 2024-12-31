@@ -1,11 +1,10 @@
-import { Box, Typography } from '@material-ui/core';
-import moment from 'moment';
+import { Box, Typography } from '@mui/material';
 import React, { useRef } from 'react';
 import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
 import { FaCheckCircle } from 'react-icons/fa';
 import { FiExternalLink } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
-import { WORKORDER_SERVICE_STEP_STATUS, dateFormat, dateTimeFormat } from 'src/constants/helpers';
+import { WORKORDER_SERVICE_STEP_STATUS, cn, displayDate } from 'src/constants/helpers';
 import { datarowInterface } from '.';
 import HtmlTooltip from '../CustomTooltipTitle';
 import TimerComponent, { getFieldsWithOtherDetails } from './TimerComponent';
@@ -19,9 +18,21 @@ type IColCard = {
   passFailAccessor?: string;
   rowDef: datarowInterface[];
   selectedRecords?: any[];
+  background?: string;
+  color?: string;
 };
 
-const ColCard: React.FC<IColCard> = ({ data, cardOnClick, cardOnSelect, rowDef, passFailStatus, passFailAccessor, selectedRecords }) => {
+const ColCard: React.FC<IColCard> = ({
+  data,
+  cardOnClick,
+  cardOnSelect,
+  rowDef,
+  passFailStatus,
+  passFailAccessor,
+  selectedRecords,
+  background = '',
+  color = ''
+}) => {
   const tooltip = rowDef.find((item) => item.type === 'tooltip');
   const isSelected = selectedRecords?.map((r) => r?._id)?.includes(data['_id']);
   let paddingRight = 0;
@@ -50,7 +61,7 @@ const ColCard: React.FC<IColCard> = ({ data, cardOnClick, cardOnSelect, rowDef, 
   };
 
   return (
-    <Box className={styles.singleCard} style={{ backgroundColor: isSelected ? '#d5d2f7' : '' }}>
+    <Box className={cn(styles.singleCard, isSelected ? (background && color ? `${background} ${color}` : 'bg-[#d5d2f7] dark:bg-neutral-800') : '')}>
       {isSelected && (
         <Box className={`${styles.checkBox}`}>
           <FaCheckCircle size={18} color="green" />
@@ -144,7 +155,7 @@ const ColCard: React.FC<IColCard> = ({ data, cardOnClick, cardOnSelect, rowDef, 
             return (
               <Typography key={index} className={styles.cardDetails}>
                 <span>{item.title}: </span>
-                {data[item.accessor] ? moment(data[item.accessor]).format(dateFormat) : '--'}
+                {data[item.accessor] ? displayDate(data[item.accessor]) : '--'}
               </Typography>
             );
           }
@@ -153,7 +164,7 @@ const ColCard: React.FC<IColCard> = ({ data, cardOnClick, cardOnSelect, rowDef, 
             return (
               <Typography key={index} className={styles.cardDetails}>
                 <span>{item.title}: </span>
-                {data[item.accessor] ? moment(data[item.accessor]).format(dateTimeFormat) : '--'}
+                {data[item.accessor] ? displayDate(data[item.accessor]) : '--'}
               </Typography>
             );
           }

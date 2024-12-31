@@ -1,14 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
-import Box from '@material-ui/core/Box';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
+import Box from '@mui/material/Box';
 import { Formik, Form } from 'formik';
 import { object, string } from 'yup';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomButton from '../../../components/Helpers/CustomButton';
-import TextField from '@material-ui/core/TextField';
-import { Dialog } from '@material-ui/core';
+import TextField from '@mui/material/TextField';
+import { Dialog } from '@mui/material';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -20,9 +17,9 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { ATTACHMENT_TYPE, CustomDialogTransition, workOrder } from 'src/constants/helpers';
 import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
-import { sortBy } from 'lodash';
-import { Autocomplete } from '@material-ui/lab';
+import Autocomplete from '@mui/material/Autocomplete';
 import DocumentScanner from 'src/components/Activity/Helpers/DocumentScanner';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const AttachmentSchema = object().shape({
   name: string().required('please add attachment name'),
@@ -198,7 +195,7 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
                           options={Object.values(ATTACHMENT_TYPE)}
                           renderInput={(params) => <TextField {...params} size="small" variant="outlined" label="Attachment Type" margin="none" />}
                           getOptionLabel={(option) => option}
-                          getOptionSelected={(option: any, value: any) => option === value}
+                          isOptionEqualToValue={(option: any, value: any) => option === value}
                           onChange={(e, val) => {
                             setFieldValue('attachmentType', val);
                           }}
@@ -227,42 +224,38 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
                             }}
                           />
                         </div>
-                        <CustomButton variant="contained" color="primary" disabled={!canEdit} onClick={() => setDocumentScanDialog(true)}>
+                        <ThemeButton buttonType="theme" disabled={!canEdit} onClick={() => setDocumentScanDialog(true)}>
                           Scan Document
-                        </CustomButton>
+                        </ThemeButton>
                       </div>
                       <AttachmentThumbnail attachments={otherAttachments} handleDeleteAttachment={handleDeleteAttachment} canEdit={canEdit} />
                     </Box>
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                  <Button
-                    color="primary"
-                    size="small"
+                  <ThemeButton
+                    buttonType="transparent"
                     onClick={() => {
                       handleClose();
                     }}
                   >
                     Cancel
-                  </Button>
+                  </ThemeButton>
                   {canEdit && (
-                    <CustomButton
-                      type="button"
-                      color="primary"
+                    <ThemeButton
+                      isLoading={loading}
+                      buttonType="theme"
                       disabled={
                         loading || isEdit ? uploadingImageOrFileProgress > 0 : uploadingImageOrFileProgress > 0 || otherAttachments.length === 0
                       }
-                      loading={loading}
-                      variant="contained"
                       onClick={submitForm}
                     >
                       Save
-                    </CustomButton>
+                    </ThemeButton>
                   )}
                 </CustomDialogFooter>
                 {showConfirmDialog ? (
                   <ConfirmCancelDialog
-                    close={() => setShowConfirmDialog(false)}
                     open={showConfirmDialog}
                     onSave={() => {
                       setShowConfirmDialog(false);

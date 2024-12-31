@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import styles from './steps.module.scss';
 import MobileSteps from './MobileSteps';
 import { isMobile, isTablet } from 'react-device-detect';
-import { Button, IconButton, Box, Typography } from '@material-ui/core';
+import { Button, IconButton, Box, Typography } from '@mui/material';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
 import { AiOutlineLeft, AiOutlineRight } from 'react-icons/ai';
 import { FiMaximize2 } from 'react-icons/fi';
@@ -82,7 +82,7 @@ const Steps = ({
         document.body.classList.remove('has-mobile-step');
       };
     } else {
-      return () => { };
+      return () => {};
     }
   }, [isMobile && !isTablet]);
 
@@ -111,10 +111,11 @@ const Steps = ({
       {isMobile && !isTablet ? (
         <MobileSteps
           id={steps[currentStep]?.title ? steps[currentStep]?.title : ''}
-          stepName={`${activeStep + 1 > steps.length || isStepEnded
-            ? 'Completed'
-            : `${activeStep + 1}/${steps.length} ${steps[currentStep]?.title ? steps[currentStep]?.title : ''}`
-            }`}
+          stepName={`${
+            activeStep + 1 > steps.length || isStepEnded
+              ? 'Completed'
+              : `${activeStep + 1}/${steps.length} ${steps[currentStep]?.title ? steps[currentStep]?.title : ''}`
+          }`}
           nextButton={
             <Button
               size="small"
@@ -215,12 +216,10 @@ const Steps = ({
                     </Box>
                     <Typography className={styles.label}>{step.title}</Typography>
                     {!isStepEnded && setStepFullScreen && currentStep === i && (
-                      <HtmlTooltip title={`${stepFullScreen ? `Exit full` : `Full`} screen`}>
-                        <Box className={styles.fullScrceen}>
-                          <IconButton aria-label="Full Screen" onClick={setStepFullScreen} size="small">
-                            <FiMaximize2 />
-                          </IconButton>
-                        </Box>
+                      <HtmlTooltip title={`${stepFullScreen ? `Exit full` : `Full`} screen`} className={styles.fullScrceen}>
+                        <IconButton aria-label="Full Screen" onClick={setStepFullScreen} size="small">
+                          <FiMaximize2 />
+                        </IconButton>
                       </HtmlTooltip>
                     )}
                   </div>

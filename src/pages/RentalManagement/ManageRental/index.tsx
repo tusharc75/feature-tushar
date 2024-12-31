@@ -1,5 +1,6 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import Dialog from '@mui/material/Dialog';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import moment from 'moment';
@@ -13,7 +14,6 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import CustomButton from '../../../components/Helpers/CustomButton';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import routes from '../../../components/Helpers/Routes';
 import {
@@ -28,6 +28,7 @@ import {
 } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ManageRentalManagementDialog = ({
   isClone,
@@ -275,7 +276,7 @@ const ManageRentalManagementDialog = ({
                             <Box marginY={2}>
                               <Grid spacing={3} container>
                                 {form.sectionFields.map((field) => (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                     {field.fieldName === 'estimateStartDate' ? (
                                       <FormTypes
                                         {...field}
@@ -394,8 +395,8 @@ const ManageRentalManagementDialog = ({
                                         imageOrFileUploadCompletePercentage={
                                           ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                             ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(completePercentage);
-                                              }
+                                              setUploadingImageOrFileProgress(completePercentage);
+                                            }
                                             : null
                                         }
                                         fields={rentalData.fields}
@@ -412,11 +413,8 @@ const ManageRentalManagementDialog = ({
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  type="button"
-                  variant="outlined"
-                  color="primary"
-                  size="small"
+                <ThemeButton
+                  buttonType="transparent"
                   onClick={() => {
                     if (isEqual(rentalData.initialValues, values)) {
                       onClose();
@@ -426,12 +424,11 @@ const ManageRentalManagementDialog = ({
                   }}
                 >
                   Cancel
-                </Button>
-                <CustomButton
-                  loading={loading}
+                </ThemeButton>
+                <ThemeButton
                   id="dialog-save-button"
-                  variant="contained"
-                  color="primary"
+                  buttonType="theme"
+                  isLoading={loading}
                   disabled={uploadingImageOrFileProgress > 0 || loading || (!isClone && isEqual(rentalData.initialValues, values))}
                   onClick={(e) => {
                     e.preventDefault();
@@ -440,7 +437,7 @@ const ManageRentalManagementDialog = ({
                   }}
                 >
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog && (
                 <ConfirmCancelDialog
@@ -450,7 +447,6 @@ const ManageRentalManagementDialog = ({
                     handleScroll(errors);
                     submitForm();
                   }}
-                  close={() => setShowConfirmDialog(false)}
                   onClose={() => {
                     setShowConfirmDialog(false);
                     onClose();

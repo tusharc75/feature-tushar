@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dialog, Button, Box, CircularProgress, Grid } from '@material-ui/core';
+import { Dialog, Box } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -11,6 +11,7 @@ import { uniq, map } from 'lodash';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import { checkFormulaLoop } from 'src/constants/formulaUtility';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const FieldDialog = ({ handleClose, handleSucess, serviceIds, stepIds = null, reference = '', fields = null, notEditable = false }) => {
   const {
@@ -154,7 +155,7 @@ const FieldDialog = ({ handleClose, handleSucess, serviceIds, stepIds = null, re
         {!notEditable && (
           <Box display="flex" justifyContent="flex-end">
             <Box>
-              <label htmlFor="importField" className="cursor-pointer mr-3">
+              <label htmlFor="importField" className="mr-3 cursor-pointer">
                 Import Fields
                 <input
                   onClick={(e: any) => (e.target.value = null)}
@@ -169,7 +170,7 @@ const FieldDialog = ({ handleClose, handleSucess, serviceIds, stepIds = null, re
                   type="file"
                 />
               </label>
-              <label className="cursor-pointer mr-3" onClick={handleExportFields}>
+              <label className="mr-3 cursor-pointer" onClick={handleExportFields}>
                 Export Fields
               </label>
               <a id="downloadAnchorElem" style={{ display: 'none' }}></a>
@@ -189,20 +190,21 @@ const FieldDialog = ({ handleClose, handleSucess, serviceIds, stepIds = null, re
         />
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button disabled={isSubmitting} variant="outlined" size="small" color="primary" onClick={handleClose}>
-          Close
-        </Button>
+
+        <ThemeButton
+          buttonType='transparent'
+          onClick={handleClose}>
+          Cancel
+        </ThemeButton>
         {reference === 'workOrder' && notEditable ? null : (
-          <Button
-            variant="contained"
-            size="small"
-            color="primary"
+          <ThemeButton
+            buttonType='theme'
             disabled={isSubmitting}
             onClick={handleSave}
-            endIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
+            isLoading={isSubmitting}
           >
             Save
-          </Button>
+          </ThemeButton>
         )}
       </CustomDialogFooter>
     </Dialog>

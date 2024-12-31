@@ -1,5 +1,5 @@
-import { ChangeEvent, FC, FormEvent, useContext, useEffect, useState, Fragment, useRef } from 'react';
-import { Button, Dialog, Grid, Box } from '@material-ui/core';
+import { FC, useContext, useEffect, useState, Fragment, useRef } from 'react';
+import { Dialog, Box } from '@mui/material';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -9,12 +9,12 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomButton from '../../../components/Helpers/CustomButton';
 import { isEqual } from 'lodash';
 import { fetch_rental_cost_fields } from '../../../components/RentalManagment/helper';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import moment from 'moment';
 import InputField from 'src/components/Helpers/InputField';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 interface AdditionalCostDialogProps {
   onClose: VoidFunction | any;
@@ -26,7 +26,15 @@ interface AdditionalCostDialogProps {
   showSaveAndNext?: Boolean;
 }
 
-const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency, handleAddCost, handleUpdateCost, costData, loadingEdit, showSaveAndNext }) => {
+const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({
+  onClose,
+  currency,
+  handleAddCost,
+  handleUpdateCost,
+  costData,
+  loadingEdit,
+  showSaveAndNext
+}) => {
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -76,7 +84,6 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
     return errors;
   }
 
-
   return (
     <Dialog
       maxWidth="md"
@@ -91,7 +98,7 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
           innerRef={ref}
           enableReinitialize={true}
           initialValues={initialData.values}
-          validationSchema={yupSchema(initialData.fields?.filter(f => f?.isRead))}
+          validationSchema={yupSchema(initialData.fields?.filter((f) => f?.isRead))}
           validateOnMount
           validate={validate}
           onSubmit={handleSubmit}
@@ -127,9 +134,8 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType="transparent"
                   onClick={() => {
                     if (!isEqual(ref.current.values, initialData.values)) {
                       setShowConfirmDialog(true);
@@ -139,14 +145,12 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
                   }}
                 >
                   {'Close'}
-                </Button>
+                </ThemeButton>
                 {showSaveAndNext && (
-                  <CustomButton
-                    loading={loadingEdit}
-                    disabled={isEqual(ref?.current?.values, initialData.values) || loadingEdit}
-                    variant="contained"
-                    color="primary"
-                    type="submit"
+                  <ThemeButton
+                    isLoading={Boolean(loadingEdit)}
+                    disabled={Boolean(isEqual(ref?.current?.values, initialData.values)) || Boolean(loadingEdit)}
+                    buttonType="theme"
                     onClick={() => {
                       setSaveAndNext(true);
                       submitForm();
@@ -154,14 +158,12 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
                   >
                     {' '}
                     Save & Next
-                  </CustomButton>
+                  </ThemeButton>
                 )}
-                <CustomButton
-                  loading={loadingEdit}
-                  disabled={isEqual(ref?.current?.values, initialData.values)}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+                <ThemeButton
+                  isLoading={Boolean(loadingEdit)}
+                  disabled={Boolean(isEqual(ref?.current?.values, initialData.values))}
+                  buttonType="theme"
                   onClick={() => {
                     setSaveAndNext(false);
                     submitForm();
@@ -169,11 +171,10 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
                 >
                   {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

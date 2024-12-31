@@ -1,4 +1,5 @@
-import { Box, Grid } from '@material-ui/core';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useContext, useEffect, useState } from 'react';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
@@ -9,8 +10,7 @@ import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/compone
 import { camelCase } from 'lodash';
 import { Link } from 'react-router-dom';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { dateFormat, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../../constants/helpers';
-import moment from 'moment';
+import { displayDate, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../../constants/helpers';
 
 const renderedFrom = `${camelCase(sidebarResource.workStations)}_activeService`;
 
@@ -147,7 +147,7 @@ const CurrentStatus = ({ id }) => {
         Header: 'Create Date',
         disableFilters: true,
         disableSortBy: true,
-        Cell: ({ row }) => (row?.original?.createDate ? <div> {moment(row?.original?.createDate).format(dateFormat)} </div> : <NoDataCell />)
+        Cell: ({ row }) => (row?.original?.createDate ? <div> {displayDate(row?.original?.createDate)} </div> : <NoDataCell />)
       },
       {
         accessor: 'estimateCompleteDate',
@@ -155,7 +155,7 @@ const CurrentStatus = ({ id }) => {
         disableFilters: true,
         disableSortBy: true,
         Cell: ({ row }) =>
-          row?.original?.estimateCompleteDate ? <div> {moment(row?.original?.estimateCompleteDate).format(dateFormat)} </div> : <NoDataCell />
+          row?.original?.estimateCompleteDate ? <div> {displayDate(row?.original?.estimateCompleteDate)} </div> : <NoDataCell />
       },
       {
         accessor: 'status',
@@ -184,7 +184,7 @@ const CurrentStatus = ({ id }) => {
         />
       ) : (
         <Grid container spacing={2} style={{ padding: '8px' }}>
-          <CommonSkeleton lenArray={[...Array(7).keys()]} />
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Grid>
       )}
     </Box>

@@ -1,18 +1,15 @@
-import { Button, CircularProgress, Dialog, IconButton, Menu, MenuItem, TextField } from '@material-ui/core';
-import Box from '@material-ui/core/Box/Box';
-import Grid from '@material-ui/core/Grid/Grid';
-import { makeStyles } from '@material-ui/core/styles';
-import { ExpandMore } from '@material-ui/icons';
-import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import Edit from '@material-ui/icons/Edit';
-import HelpIcon from '@material-ui/icons/HelpOutline';
-import InfoIcon from '@material-ui/icons/Info';
-import LocalShippingIcon from '@material-ui/icons/LocalShipping';
+import { Dialog, IconButton, Menu, MenuItem, TextField, Theme } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Grid from '@mui/material/Grid2';
+import { makeStyles } from '@mui/styles';
+import { ExpandMore } from '@mui/icons-material';
+import AddBoxRoundedIcon from '@mui/icons-material/AddBoxRounded';
+import Edit from '@mui/icons-material/Edit';
+import HelpIcon from '@mui/icons-material/HelpOutline';
+import InfoIcon from '@mui/icons-material/Info';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import { groupBy, isArray, isEmpty, isObject, map, startCase, uniq, uniqBy } from 'lodash';
-import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { MdHandyman, MdHomeRepairService } from 'react-icons/md';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import CustomMessageDialog from 'src/components/MessageDialog';
@@ -45,8 +42,8 @@ import {
   RENTAL_INTERNAL_ASSET_STATUS,
   RENTAL_STEPS,
   REPAIR_JOB_STATUS,
-  dateFormat,
   deliveryTicket,
+  displayDate,
   findSimilarRecords,
   gridLoadingTimeout,
   serializedAsset as productInventoryHelperObject,
@@ -78,10 +75,11 @@ import { useGetWalkmeInstance, useSetWalkmeData, WalkmeData } from 'src/componen
 import { generateCreateReceivingTicket, generateReceiveItem, nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
 import ChangePreviousAssetDataDialog from 'src/pages/RentalManagement/LoadingTicket/ChangePreviousAssetDataDialog';
 import GpsLocationCell from 'src/components/CustomReactTable/Cells/GpsLocationCell';
-import WarningIcon from '@material-ui/icons/Warning';
+import WarningIcon from '@mui/icons-material/Warning';
 import FreeStyleMultiSelect from 'src/components/CustomReactTable/Cells/FreeStyleMultiSelect';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     width: '100%',
     maxWidth: 360,
@@ -1399,8 +1397,8 @@ const ReceivingTicket = ({
         Header: 'Actual Start Date',
         Cell: ({ row }) =>
           row?.original?.manualStartDate ? (
-            <h5 className="text-truncate" title={`${moment(row?.original?.manualStartDate).format(dateFormat)}`}>
-              {moment(row?.original?.manualStartDate)?.format(dateFormat)}
+            <h5 className="text-truncate" title={`${displayDate(row?.original?.manualStartDate)}`}>
+              {displayDate(row?.original?.manualStartDate)}
             </h5>
           ) : (
             <NoDataCell />
@@ -1411,8 +1409,8 @@ const ReceivingTicket = ({
         Header: 'Actual End Date',
         Cell: ({ row }) =>
           row?.original?.manualEndDate ? (
-            <h5 className="text-truncate" title={`${moment(row?.original?.manualEndDate).format(dateFormat)}`}>
-              {moment(row?.original?.manualEndDate)?.format(dateFormat)}
+            <h5 className="text-truncate" title={`${displayDate(row?.original?.manualEndDate)}`}>
+              {displayDate(row?.original?.manualEndDate)}
             </h5>
           ) : (
             <NoDataCell />
@@ -1424,8 +1422,8 @@ const ReceivingTicket = ({
         show: false,
         Cell: ({ row }) =>
           row?.original?.startDate ? (
-            <h5 className="text-truncate" title={`${moment(row?.original?.startDate).format(dateFormat)}`}>
-              {moment(row?.original?.startDate)?.format(dateFormat)}
+            <h5 className="text-truncate" title={`${displayDate(row?.original?.startDate)}`}>
+              {displayDate(row?.original?.startDate)}
             </h5>
           ) : (
             <NoDataCell />
@@ -1437,8 +1435,8 @@ const ReceivingTicket = ({
         show: false,
         Cell: ({ row }) =>
           row?.original?.endDate ? (
-            <h5 className="text-truncate" title={`${moment(row?.original?.endDate).format(dateFormat)}`}>
-              {moment(row?.original?.endDate)?.format(dateFormat)}
+            <h5 className="text-truncate" title={`${displayDate(row?.original?.endDate)}`}>
+              {displayDate(row?.original?.endDate)}
             </h5>
           ) : (
             <NoDataCell />
@@ -1566,7 +1564,7 @@ const ReceivingTicket = ({
     if (rentalManagementData?.processor?.optionValue) {
       data['processor'] = rentalManagementData?.processor?.optionValue;
     }
-    const receivingStatus = user?.user?.brandPolicy?.rentalReceivingAvailableStatus ? ASSET_STATUS.available : ASSET_STATUS.underReview
+    const receivingStatus = user?.user?.brandPolicy?.rentalReceivingAvailableStatus ? ASSET_STATUS.available : ASSET_STATUS.underReview;
     const statusPolicy = checkAssetPolicy(receivingStatus);
     if (statusPolicy && selectedRecords?.filter((e) => e.type === 'Asset')?.length) {
       setOpenAssetDetailDialog({
@@ -1900,10 +1898,10 @@ const ReceivingTicket = ({
       asset: asset
     };
     if (values.manualStartDate) {
-      data.startDate = moment(values.manualStartDate).format('MM/DD/YYYY');
+      data.startDate = displayDate(values.manualStartDate);
     }
     if (values.manualEndDate) {
-      data.endDate = moment(values.manualEndDate).format('MM/DD/YYYY');
+      data.endDate = displayDate(values.manualEndDate);
     }
     axiosInstance()
       .put(`${rentalManagement.api}/${rentalManagementData?._id}/start-end-date`, data)
@@ -2059,11 +2057,7 @@ const ReceivingTicket = ({
           <PreviewDownloadMultiple referenceIds={uniqueReceivingTicket} />
         </span>
         {allowedToEdit && !rentalPolicyData?.hideAssetChangeStatus && (
-          <Button
-            variant={'outlined'}
-            color="primary"
-            aria-controls="simple-menu"
-            aria-haspopup="true"
+          <ThemeButton
             disabled={
               selectedRecords?.length === 0 ||
               isOffline ||
@@ -2082,39 +2076,33 @@ const ReceivingTicket = ({
                 ].includes(f.status)
               )
             }
-            size="small"
             onClick={handleClick}
-            endIcon={<ArrowDropDownIcon />}
+            endIcon={<ExpandMore />}
           >
             {'Change Status'}
-          </Button>
+          </ThemeButton>
         )}
         {(repairJobCount > 0 || repairOrderCount > 0) && (
-          <Button
+          <ThemeButton
             onClick={openLinkActions}
-            variant="outlined"
-            color="default"
-            size="small"
-            aria-controls="action-menu"
-            className="normal-case"
             endIcon={<ExpandMore fontSize="inherit" />}
           >
             Order(s)
-          </Button>
+          </ThemeButton>
         )}
         {showProcessDeliveryTicket && !isOffline && (
           <>
             <HtmlTooltip title="Process Multiple Receiving/Return Ticket(s)">
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                color="primary"
-                size="small"
+              <ThemeButton
+                iconForMobile={<AddBoxRoundedIcon />}
+                mobileTooltip='Process Ticket'
+                buttonType='theme'
                 onClick={() => {
                   setOpenDeliveryTicketDialog(true);
                 }}
               >
-                {isMobile && !isTablet ? <AddBoxRoundedIcon /> : 'Process Ticket'}
-              </Button>
+                {'Process Ticket'}
+              </ThemeButton>
             </HtmlTooltip>
           </>
         )}
@@ -2213,7 +2201,7 @@ const ReceivingTicket = ({
           rightSideContents={rightSideContents()}
           hasXpadding
         />
-        <Grid item xs={12} md={12} sm={12}>
+        <Grid size={{ xs: 12, md: 12, sm: 12 }}>
           {columns ? (
             <CustomReactTable
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
@@ -2245,7 +2233,6 @@ const ReceivingTicket = ({
       <Menu
         anchorEl={anchorLinkActionEl}
         keepMounted
-        getContentAnchorEl={null}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'left'
@@ -2279,7 +2266,6 @@ const ReceivingTicket = ({
         keepMounted
         open={Boolean(anchorEl)}
         onClose={handleClose}
-        getContentAnchorEl={null}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'right'
@@ -2426,7 +2412,7 @@ const ReceivingTicket = ({
           products={selectedRecords.filter((d: any) => d?.type === 'Product')}
           onSuccess={(data) => {
             setShowQtyDialog({ data: data, open: false });
-            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingAvailableStatus ? ASSET_STATUS.available : ASSET_STATUS.underReview
+            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingAvailableStatus ? ASSET_STATUS.available : ASSET_STATUS.underReview;
             const statusPolicy = checkAssetPolicy(receivingStatus);
             if (statusPolicy && selectedRecords?.filter((e) => e.type === 'Asset')?.length) {
               setOpenAssetDetailDialog((ps: any) => ({ ...ps, open: true }));
@@ -2524,13 +2510,19 @@ const ReceivingTicket = ({
             </Box>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button size="small" variant="outlined" color="primary" onClick={() => setStatusToUpdate((prevState) => ({ ...prevState, open: false }))}>
+            <ThemeButton
+              onClick={() => setStatusToUpdate((prevState) => ({ ...prevState, open: false }))}
+              buttonType='transparent'
+            >
               Cancel
-            </Button>
-            <Button size="small" onClick={handleChangeStatus} disabled={statusToUpdate.isUpdating} variant="contained" color="primary">
-              {statusToUpdate.isUpdating ? <CircularProgress style={{ marginRight: '8px' }} size={20} color="inherit" /> : null}
+            </ThemeButton>
+            <ThemeButton
+              disabled={statusToUpdate.isUpdating}
+              buttonType='theme'
+              isLoading={statusToUpdate.isUpdating}
+            >
               Change Status
-            </Button>
+            </ThemeButton>
           </CustomDialogFooter>
         </Dialog>
       )}

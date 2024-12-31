@@ -1,7 +1,7 @@
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Divider, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { MoreHoriz } from '@material-ui/icons';
+import { Divider, IconButton, Menu, MenuItem } from '@mui/material';
+import { MoreHoriz } from '@mui/icons-material';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';

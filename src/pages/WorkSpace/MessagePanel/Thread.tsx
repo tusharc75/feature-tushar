@@ -1,5 +1,5 @@
-import { IconButton } from '@material-ui/core';
-import { Close } from '@material-ui/icons';
+import { IconButton } from '@mui/material';
+import { Close } from '@mui/icons-material';
 import { useEffect, useState } from 'react';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { cn } from 'src/constants/helpers';
@@ -107,7 +107,7 @@ const Thread = ({ message, onClose, socket, channelId, deleteMessage, open, chan
           )}
         </div>
         <div className="footer">
-          <SendMessage channelId={channelId} socket={socket} messageId={message?._id} editorId={'from-thread'} channelData={channelData} />
+          <SendMessage channelId={channelId} socket={socket} parentMessageId={message?._id} editorId={'from-thread'} channelData={channelData} />
         </div>
 
         <MoreMenuAndDeleteConfirmDialog

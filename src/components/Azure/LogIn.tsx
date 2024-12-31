@@ -1,11 +1,12 @@
 import React from 'react';
-import { Box, Button } from '@material-ui/core';
+import { Box } from '@mui/material';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { AuthenticatedTemplate, UnauthenticatedTemplate } from '@azure/msal-react';
 import { OfficeLogo } from 'src/assets/authenticationAssets';
 import axios from 'axios';
 import SSOLoginButton from 'src/pages/Auth/Buttons/SSOLoginButton';
 import { backendApi } from 'src/config';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const LogIn = () => {
   const { instance, accounts } = useMsal();
@@ -13,20 +14,29 @@ const LogIn = () => {
   const azureLogin = async () => {
     try {
       await instance.loginPopup();
-    } catch (e) {}
+    } catch (e) { }
   };
   return (
     <>
       <AuthenticatedTemplate>
         <p>{account?.name}</p>
-        <Button fullWidth startIcon={<OfficeLogo color="#FF5722" />} variant="outlined" className="azure-login" onClick={() => instance.logout()}>
+        <ThemeButton
+          sx={{ height: 40 }}
+          fullWidth
+          startIcon={<OfficeLogo color="#FF5722" />}
+          onClick={() => instance.logout()}>
           Log Out
-        </Button>
+        </ThemeButton>
       </AuthenticatedTemplate>
       <UnauthenticatedTemplate>
-        <Button startIcon={<OfficeLogo color="#FF5722" />} fullWidth className="azure-login" variant="outlined" onClick={azureLogin}>
+        <ThemeButton
+          startIcon={<OfficeLogo color="#FF5722" />}
+          fullWidth
+          onClick={azureLogin}
+          sx={{ height: 40 }}
+        >
           Office 365 Login
-        </Button>
+        </ThemeButton>
         <Box mt={2} />
         <SSOLoginButton />
       </UnauthenticatedTemplate>

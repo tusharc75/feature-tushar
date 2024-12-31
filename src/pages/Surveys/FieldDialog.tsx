@@ -1,16 +1,15 @@
-import { Box, Button, CircularProgress, Dialog } from '@material-ui/core'
-import { camelCase, map, uniq } from 'lodash'
-import React from 'react'
-import axiosInstance from 'src/axios/axiosInstance'
-import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent'
-import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter'
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader'
-import { FormBuilder } from 'src/components/FormBuilder'
-import { checkFormulaLoop } from 'src/constants/formulaUtility'
-import { CustomDialogTransition, fieldLabelToFieldName } from 'src/constants/helpers'
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext'
-
-
+import { Box, Dialog } from '@mui/material';
+import { map, uniq } from 'lodash';
+import React from 'react';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import { FormBuilder } from 'src/components/FormBuilder';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { checkFormulaLoop } from 'src/constants/formulaUtility';
+import { CustomDialogTransition, fieldLabelToFieldName } from 'src/constants/helpers';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const FieldDialog = ({ handleClose, handleSuccess, surveyId, notEditable = false }) => {
   const toastConfig = React.useContext(CustomToastContext);
@@ -35,9 +34,8 @@ const FieldDialog = ({ handleClose, handleSuccess, surveyId, notEditable = false
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
-      })
-  }, [])
-
+      });
+  }, []);
 
   const handleExportFields = () => {
     var dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(section));
@@ -99,8 +97,7 @@ const FieldDialog = ({ handleClose, handleSuccess, surveyId, notEditable = false
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
-  }
-
+  };
 
   return (
     <Dialog open aria-labelledby="customized-dialog-title" onClose={handleClose} TransitionComponent={CustomDialogTransition} fullWidth fullScreen>
@@ -109,7 +106,7 @@ const FieldDialog = ({ handleClose, handleSuccess, surveyId, notEditable = false
         {!notEditable && (
           <Box display="flex" justifyContent="flex-end">
             <Box>
-              <label htmlFor="importField" className="cursor-pointer mr-3">
+              <label htmlFor="importField" className="mr-3 cursor-pointer">
                 Import Fields
                 <input
                   onClick={(e: any) => (e.target.value = null)}
@@ -124,7 +121,7 @@ const FieldDialog = ({ handleClose, handleSuccess, surveyId, notEditable = false
                   type="file"
                 />
               </label>
-              <label className="cursor-pointer mr-3" onClick={handleExportFields}>
+              <label className="mr-3 cursor-pointer" onClick={handleExportFields}>
                 Export Fields
               </label>
               <a id="downloadAnchorElem" style={{ display: 'none' }}></a>
@@ -143,23 +140,26 @@ const FieldDialog = ({ handleClose, handleSuccess, surveyId, notEditable = false
         />
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button disabled={isSubmitting} variant="outlined" size="small" color="primary" onClick={handleClose}>
-          Close
-        </Button>
-        {notEditable ? null :
-          <Button
-            variant="contained"
-            size="small"
-            color="primary"
+
+        <ThemeButton
+          buttonType='transparent'
+          onClick={handleClose}
+        >
+          Cancel
+        </ThemeButton>
+        {notEditable ? null : (
+          <ThemeButton
+            buttonType='theme'
             disabled={isSubmitting}
             onClick={handleSave}
-            endIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
+            isLoading={isSubmitting}
           >
             Save
-          </Button>}
+          </ThemeButton>
+        )}
       </CustomDialogFooter>
     </Dialog>
-  )
-}
+  );
+};
 
-export default FieldDialog
+export default FieldDialog;

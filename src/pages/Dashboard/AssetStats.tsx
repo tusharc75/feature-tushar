@@ -1,6 +1,7 @@
 import React from 'react';
-import { Grid, Box, Typography, Paper, TextField, Card, CardContent, CircularProgress } from '@material-ui/core';
-import { Autocomplete, Skeleton } from '@material-ui/lab';
+import { Box, Typography, Paper, TextField, Card, CardContent, CircularProgress } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { Autocomplete, Skeleton } from '@mui/material';
 import axiosInstance from 'src/axios/axiosInstance';
 import VirtualizedList from 'src/components/VirtualizedList';
 import moment from 'moment';
@@ -70,23 +71,33 @@ const AssetStats = () => {
           onChange={(_, val) => setSelectedAssets(val)}
           fullWidth
           size="small"
-          getOptionSelected={(option, val) => option.optionValue === val.optionValue}
+          isOptionEqualToValue={(option, val) => option.optionValue === val.optionValue}
           getOptionLabel={(option) => option.optionLabel}
-          renderOption={(option) => <Typography noWrap>{option.optionLabel}</Typography>}
+          renderOption={(props, option, state, ownerState) => {
+            const { key, ...optionProps } = props;
+            return (
+              <Box key={key} component="li" {...optionProps}>
+                <Typography noWrap>{ownerState.getOptionLabel(option)}</Typography>
+              </Box>
+            );
+          }}
           onInputChange={(_, val) => setSearchVal(val)}
           renderInput={(params) => (
             <TextField
               {...params}
               variant="outlined"
               label="Search Assets"
-              InputProps={{
-                ...params.InputProps,
-                endAdornment: (
-                  <React.Fragment>
-                    {loadingAssets ? <CircularProgress color="inherit" size={20} /> : null}
-                    {params.InputProps.endAdornment}
-                  </React.Fragment>
-                )
+              size="small"
+              slotProps={{
+                input: {
+                  ...params.InputProps,
+                  endAdornment: (
+                    <React.Fragment>
+                      {loadingAssets ? <CircularProgress color="inherit" size={20} /> : null}
+                      {params.InputProps.endAdornment}
+                    </React.Fragment>
+                  )
+                }
               }}
             />
           )}
@@ -100,7 +111,7 @@ const AssetStats = () => {
       <Grid container spacing={2} alignItems={'stretch'}>
         {loadingStats &&
           ['1', '2', '3', '4'].map((d) => (
-            <Grid key={d} item xs={12} sm={4} md={3}>
+            <Grid key={d} size={{ xs: 12, sm: 4, md: 3 }}>
               <Card>
                 <CardContent>
                   <Skeleton variant="text" height={30} width={200} animation="wave" />
@@ -112,7 +123,7 @@ const AssetStats = () => {
 
         {assetStats && selectedAssets.length > 0 && !loadingStats && (
           <>
-            <Grid item xs={12} sm={4} md={4}>
+            <Grid size={{ xs: 12, sm: 4, md: 4 }}>
               <Card>
                 <CardContent>
                   <Typography color="textSecondary" gutterBottom>
@@ -126,7 +137,7 @@ const AssetStats = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={12} sm={4} md={4}>
+            <Grid size={{ xs: 12, sm: 4, md: 4 }}>
               <Card>
                 <CardContent>
                   <Typography color="textSecondary" gutterBottom>
@@ -140,7 +151,7 @@ const AssetStats = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={12} sm={4} md={4}>
+            <Grid size={{ xs: 12, sm: 4, md: 4 }}>
               <Card>
                 <CardContent>
                   <Typography color="textSecondary" gutterBottom>
@@ -149,9 +160,11 @@ const AssetStats = () => {
                   <Box display="flex" alignItems="flex-end">
                     <Box ml={1}>
                       <Typography variant="h5" component="h2">
-                        {assetStats?.totalUtilization ? `${round(moment.duration(assetStats?.totalUtilization).asHours())}:${Math.floor(moment.duration(assetStats?.totalUtilization).asMinutes() % 60)}` : 0}
+                        {assetStats?.totalUtilization
+                          ? `${round(moment.duration(assetStats?.totalUtilization).asHours())}:${Math.floor(moment.duration(assetStats?.totalUtilization).asMinutes() % 60)}`
+                          : 0}
                       </Typography>
-                    </Box >
+                    </Box>
                     <Box ml={1}>
                       <Typography variant="body1">Hours</Typography>
                     </Box>
@@ -159,7 +172,7 @@ const AssetStats = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={12} sm={4} md={4}>
+            <Grid size={{ xs: 12, sm: 4, md: 4 }}>
               <Card>
                 <CardContent>
                   <Typography color="textSecondary" gutterBottom>
@@ -173,7 +186,7 @@ const AssetStats = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={12} sm={4} md={4}>
+            <Grid size={{ xs: 12, sm: 4, md: 4 }}>
               <Card>
                 <CardContent>
                   <Typography color="textSecondary" gutterBottom>
@@ -187,7 +200,7 @@ const AssetStats = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={12} sm={4} md={4}>
+            <Grid size={{ xs: 12, sm: 4, md: 4 }}>
               <Card>
                 <CardContent>
                   <Typography color="textSecondary" gutterBottom>
@@ -196,9 +209,11 @@ const AssetStats = () => {
                   <Box display="flex" alignItems="flex-end">
                     <Box ml={1}>
                       <Typography variant="h5" component="h2">
-                        {assetStats?.totalInUseTimeAfterLastRepair ? `${round(moment.duration(assetStats?.totalInUseTimeAfterLastRepair).asHours())}:${Math.floor(moment.duration(assetStats?.totalInUseTimeAfterLastRepair).asMinutes() % 60)}` : 0}
+                        {assetStats?.totalInUseTimeAfterLastRepair
+                          ? `${round(moment.duration(assetStats?.totalInUseTimeAfterLastRepair).asHours())}:${Math.floor(moment.duration(assetStats?.totalInUseTimeAfterLastRepair).asMinutes() % 60)}`
+                          : 0}
                       </Typography>
-                    </Box >
+                    </Box>
                     <Box ml={1}>
                       <Typography variant="body1">Hours</Typography>
                     </Box>

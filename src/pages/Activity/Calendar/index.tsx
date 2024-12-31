@@ -1,5 +1,5 @@
-import { Box, Button, ClickAwayListener, Dialog, Grow, MenuItem, MenuList, Paper, Popper } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { Box, ClickAwayListener, Dialog, Grow, MenuItem, MenuList, Paper, Popper, Theme } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import axios, { CancelTokenSource } from 'axios';
 import { lowerCase, startCase } from 'lodash';
 import queryString from 'query-string';
@@ -21,8 +21,9 @@ import routes from '../../../components/Helpers/Routes';
 import { SearchFilter } from '../../../components/SearchFilter';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import MyCalendar from './MyCalendar';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   topbar: {
     backgroundColor: 'var(--dark-primary,#fff)'
   },
@@ -39,7 +40,8 @@ const BigCalendar = () => {
   const classes = useStyles();
   const {
     state: {
-      user: { user }, resources
+      user: { user },
+      resources
     }
   } = useData();
   const history = useHistory();
@@ -69,7 +71,7 @@ const BigCalendar = () => {
         .then(({ data: { data } }) => {
           setFilter([{ _id: referenceId, type: referenceType, name: data.name }]);
         })
-        .catch((err) => { });
+        .catch((err) => {});
     } else {
       setFilter([]);
     }
@@ -94,7 +96,7 @@ const BigCalendar = () => {
           }));
           setActivities({ activities: newData, loading: false });
         })
-        .catch(() => { });
+        .catch(() => {});
     },
     [type, filter]
   );
@@ -143,9 +145,9 @@ const BigCalendar = () => {
             <div className="flex flex-wrap gap-2">
               <div className="flex flex-wrap gap-2">
                 <div className="flex flex-wrap items-center gap-3">
-                  <Button aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick} size="small" color="primary" variant="contained">
+                  <ThemeButton aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick} buttonType="theme">
                     Create Activity
-                  </Button>
+                  </ThemeButton>
                   <div className="flex flex-wrap gap-2">
                     {['Event', 'Task', 'Case'].map((item) => (
                       <>

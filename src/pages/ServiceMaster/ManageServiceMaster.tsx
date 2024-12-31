@@ -1,31 +1,37 @@
 import { useState, useEffect, Fragment, useContext, useRef } from 'react';
-import Button from '@material-ui/core/Button';
 import { Formik, Form } from 'formik';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomButton from '../../components/Helpers/CustomButton';
 import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, serviceMaster } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
 import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const ManageServiceMaster = ({ isClone = false, serviceMasterId = null, onClose, onSuccess, isRedirectToDetailPage = true, referenceData = null }) => {
+const ManageServiceMaster = ({
+  isClone = false,
+  serviceMasterId = null,
+  onClose,
+  onSuccess,
+  isRedirectToDetailPage = true,
+  referenceData = null
+}) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   const ref = useRef(null);
   const walkmeInstance = useGetWalkmeInstance();
@@ -174,7 +180,7 @@ const ManageServiceMaster = ({ isClone = false, serviceMasterId = null, onClose,
           {({ values, errors, touched, submitForm, setFieldValue }) => (
             <Fragment>
               <CustomDialogHeader
-                title={serviceMasterId ? (isClone ? 'Clone' : `Update ${serviceMasterManage?.serviceName}`) : 'Create ' + routes.serviceMaster.title}
+                title={serviceMasterId ? (isClone ? 'Clone' : `Update ${serviceMasterManage?.serviceName}`) : 'Create ' + resources?.serviceMaster?.titleSingular}
                 onClose={() => {
                   if (!isEqual(ref.current.values, initialData.values)) {
                     setShowConfirmDialog(true);
@@ -190,7 +196,7 @@ const ManageServiceMaster = ({ isClone = false, serviceMasterId = null, onClose,
               ></CustomDialogHeader>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                <InputField
+                  <InputField
                     errors={errors}
                     values={values}
                     setFieldValue={setFieldValue}
@@ -202,9 +208,8 @@ const ManageServiceMaster = ({ isClone = false, serviceMasterId = null, onClose,
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType="transparent"
                   onClick={() => {
                     if (!isEqual(ref.current.values, initialData.values)) {
                       setShowConfirmDialog(true);
@@ -214,13 +219,11 @@ const ManageServiceMaster = ({ isClone = false, serviceMasterId = null, onClose,
                   }}
                 >
                   Cancel
-                </Button>
-                <CustomButton
+                </ThemeButton>
+                <ThemeButton
                   id={'dialog-save-button'}
-                  loading={loading}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+                  isLoading={loading}
+                  buttonType="theme"
                   onClick={(e) => {
                     e.preventDefault();
                     handleScroll(errors);
@@ -230,11 +233,10 @@ const ManageServiceMaster = ({ isClone = false, serviceMasterId = null, onClose,
                 >
                   {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

@@ -1,17 +1,16 @@
-import { TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { TextField } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import routes from 'src/components/Helpers/Routes';
-import { LOG_RESOURCE, } from 'src/constants/helpers';
+import { LOG_RESOURCE } from 'src/constants/helpers';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ResourceLogsGrid from './ResourceLogsGrid';
 
 const ResourceLogs = () => {
-
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions, resources }
@@ -44,7 +43,7 @@ const ResourceLogs = () => {
     const data: any = [];
     for (var key in LOG_RESOURCE) {
       if (permissions[key]?.isRead === true) {
-        data.push({ optionLabel: routes[key].title, optionValue: LOG_RESOURCE[key], key: key });
+        data.push({ optionLabel: resources?.[key]?.titleSingular, optionValue: LOG_RESOURCE[key], key: key });
       }
     }
     setResourceOptions(data);
@@ -68,9 +67,11 @@ const ResourceLogs = () => {
 
   useEffect(() => {
     if (selectedResource) {
-      axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=User`).then(({ data: { data } }) => {
-        setUserOptions(data["User"])
-      })
+      axiosInstance()
+        .get(`/sa-formbuilder/lookup?lookupResource=User`)
+        .then(({ data: { data } }) => {
+          setUserOptions(data['User']);
+        })
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
@@ -84,7 +85,7 @@ const ResourceLogs = () => {
       </div>
       <CustomContainer>
         <div className="header-panel">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[8px]">
+          <div className="grid grid-cols-1 gap-[8px] sm:grid-cols-2 lg:grid-cols-4">
             <Autocomplete
               fullWidth
               options={resourceOptions}
@@ -103,7 +104,7 @@ const ResourceLogs = () => {
                   options={option}
                   fullWidth
                   getOptionLabel={(option: any) => option.optionLabel}
-                  getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                  isOptionEqualToValue={(option: any, value: any) => option.optionValue === value.optionValue}
                   value={selectedOption}
                   onChange={(event, newValue) => {
                     setSelectedOption(newValue);
@@ -115,7 +116,7 @@ const ResourceLogs = () => {
                   options={actionOptions}
                   fullWidth
                   getOptionLabel={(option: any) => option.optionLabel}
-                  getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                  isOptionEqualToValue={(option: any, value: any) => option.optionValue === value.optionValue}
                   value={selectedAction}
                   onChange={(event, newValue) => {
                     setSelectedAction(newValue);
@@ -127,7 +128,7 @@ const ResourceLogs = () => {
                   options={userOptions}
                   fullWidth
                   getOptionLabel={(option: any) => option.optionLabel}
-                  getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                  isOptionEqualToValue={(option: any, value: any) => option.optionValue === value.optionValue}
                   value={selectedUser}
                   onChange={(event, newValue) => {
                     setSelectedUser(newValue);
@@ -139,7 +140,12 @@ const ResourceLogs = () => {
             )}
           </div>
         </div>
-        <ResourceLogsGrid selectedResource={selectedResource} selectedOption={selectedOption?.optionValue} selectedAction={selectedAction?.optionValue} selectedUser={selectedUser?.optionValue} />
+        <ResourceLogsGrid
+          selectedResource={selectedResource}
+          selectedOption={selectedOption?.optionValue}
+          selectedAction={selectedAction?.optionValue}
+          selectedUser={selectedUser?.optionValue}
+        />
       </CustomContainer>
     </section>
   );

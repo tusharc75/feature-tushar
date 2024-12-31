@@ -1,11 +1,10 @@
-import { Box } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import TextField from '@material-ui/core/TextField';
-import { Autocomplete } from '@material-ui/lab';
+import { Box } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Dialog from '@mui/material/Dialog';
+import TextField from '@mui/material/TextField';
+import Autocomplete from '@mui/material/Autocomplete';
 import { sortBy } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -77,21 +76,21 @@ const AddExistingProduct = (props) => {
     }
   }, [page, limit, filters, sorting, search, productColoums, productCategory, productTemplate, showFilteredRecordsOnly]);
 
-  useEffect(()=>{
-   if(selectedRecords?.length){
-    const newlySelected = selectedRecords?.filter(data => !orderedSelectedRecords?.some(item => item._id === data._id)) || [];
-    const deselected = orderedSelectedRecords?.filter(item => !selectedRecords?.some(data => data._id === item._id));
+  useEffect(() => {
+    if (selectedRecords?.length) {
+      const newlySelected = selectedRecords?.filter((data) => !orderedSelectedRecords?.some((item) => item._id === data._id)) || [];
+      const deselected = orderedSelectedRecords?.filter((item) => !selectedRecords?.some((data) => data._id === item._id));
 
-    let updatedOrder = [];
-    if(orderedSelectedRecords?.length){
-      updatedOrder = [...orderedSelectedRecords?.filter(item => !deselected?.some(d => d._id === item._id))]
+      let updatedOrder = [];
+      if (orderedSelectedRecords?.length) {
+        updatedOrder = [...orderedSelectedRecords?.filter((item) => !deselected?.some((d) => d._id === item._id))];
+      }
+
+      updatedOrder = [...updatedOrder, ...newlySelected];
+
+      setOrderedSelectedRecords(updatedOrder);
     }
-  
-    updatedOrder = [...updatedOrder, ...newlySelected];
-
-    setOrderedSelectedRecords(updatedOrder);
-   }
-  },[selectedRecords])
+  }, [selectedRecords]);
 
   useEffect(() => {
     axiosInstance()
@@ -253,7 +252,7 @@ const AddExistingProduct = (props) => {
                 style={{ width: '250px' }}
                 options={productCategoryList}
                 getOptionLabel={(option: any) => (option ? option.name : '')}
-                getOptionSelected={(option: any, val) => option._id === val}
+                isOptionEqualToValue={(option: any, val) => option._id === val}
                 disabled={referenceData && referenceData?.productCategory ? true : false}
                 value={
                   productCategoryList.filter((data) => data._id === productCategory).length
@@ -272,7 +271,7 @@ const AddExistingProduct = (props) => {
                   style={{ width: '250px' }}
                   options={productTemplateList}
                   getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                  getOptionSelected={(option: any, val) => option.optionValue === val}
+                  isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                   disabled={referenceData && referenceData?.productTemplate ? true : false}
                   value={
                     productTemplateList.filter((data) => data.optionValue === productTemplate).length
@@ -283,17 +282,17 @@ const AddExistingProduct = (props) => {
                     setProductTemplate(val && val.optionValue ? val.optionValue : '');
                   }}
                   renderInput={(params) => (
-                    <TextField {...params} margin="dense" name="productTemplate" label="Product Template" variant="outlined" fullWidth />
+                    <TextField {...params} margin="dense" size="small" name="productTemplate" label="Product Template" variant="outlined" fullWidth />
                   )}
                 />
               )}
             </div>
             <div className="ml-auto flex flex-wrap items-start justify-end gap-2 ">
               <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
-              <Button size="small" color="primary" onClick={handleAdd} variant="contained" disabled={selectedRecords.length > 0 ? false : true}>
+              <ThemeButton buttonType='theme' onClick={handleAdd} disabled={selectedRecords.length > 0 ? false : true}>
                 {selectedRecords.length ? '(' + selectedRecords.length + ')  ' : ''}
                 Add
-              </Button>
+              </ThemeButton>
             </div>
           </div>
         </Box>

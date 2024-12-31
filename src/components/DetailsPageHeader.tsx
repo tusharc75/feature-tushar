@@ -1,6 +1,6 @@
-import { Box, Typography } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import { Skeleton } from '@material-ui/lab';
+import { Box, Theme, Typography } from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import { Skeleton } from '@mui/material';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 import CopyToClipboard from '../components/Helpers/CopyToClipboard';
 import routes from './Helpers/Routes';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     marginTop: 0
   },
@@ -128,7 +128,7 @@ const DetailsPageHeader = (props) => {
             })
           ) : null}
         </Box>
-        <div id="detailHeaderPageActions" className={'flex items-center justify-flex-end gap-2'}>
+        <div id="detailHeaderPageActions" className={'justify-flex-end flex items-center gap-2'}>
           {children}
         </div>
       </div>

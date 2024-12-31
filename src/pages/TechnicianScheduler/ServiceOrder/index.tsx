@@ -1,15 +1,14 @@
-import { Box, IconButton, TextField } from '@material-ui/core';
-import moment from 'moment';
+import { Box, IconButton, TextField } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { dateFormat, rentalManagement, sidebarResource } from 'src/constants/helpers';
+import { displayDate, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AssignTechnicianDialog from '../Roadmap/AssignTechnicianDialog';
-import { Autocomplete } from '@material-ui/lab';
+import Autocomplete from '@mui/material/Autocomplete';
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import { FiExternalLink } from 'react-icons/fi';
@@ -31,7 +30,7 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
       key: 'rentalManagement',
       resource: sidebarResource.rentalManagement,
       title: resources?.rentalManagement?.titleSingular
-    },
+    }
   ];
 
   const toastConfig = useContext(CustomToastContext);
@@ -112,40 +111,19 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
       },
       ...(selectedType === 'fieldTicket'
-        ? [{
-          accessor: 'fieldTicketNumber',
-          Header: 'Field Ticket',
-          width: 200,
-          Cell: ({ row }) =>
-            row.original['fieldTicketNumber'] ? (
-              <div className="flex items-center gap-1">
-                <p title={row.original.fieldTicketNumber}>{row.original.fieldTicketNumber}</p>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes.fieldTicketDetail.path}/${row.original.resourceId}`);
-                  }}
-                >
-                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                </IconButton>
-              </div>
-            ) : (
-              <NoDataCell />
-            )
-        }]
-        : selectedType === 'rentalManagement'
-          ? [{
-            accessor: 'rentalJobName',
-            Header: 'Rental Job',
+        ? [
+          {
+            accessor: 'fieldTicketNumber',
+            Header: 'Field Ticket',
             width: 200,
             Cell: ({ row }) =>
-              row.original['rentalJobName'] ? (
+              row.original['fieldTicketNumber'] ? (
                 <div className="flex items-center gap-1">
-                  <p title={row.original.rentalJobName}>{row.original.rentalJobName}</p>
+                  <p title={row.original.fieldTicketNumber}>{row.original.fieldTicketNumber}</p>
                   <IconButton
                     size="small"
                     onClick={() => {
-                      window.open(`${routes.rentalManagementDetail.path}/${row.original.resourceId}`);
+                      window.open(`${routes.fieldTicketDetail.path}/${row.original.resourceId}`);
                     }}
                   >
                     <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
@@ -155,6 +133,30 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
                 <NoDataCell />
               )
           }
+        ]
+        : selectedType === 'rentalManagement'
+          ? [
+            {
+              accessor: 'rentalJobName',
+              Header: 'Rental Job',
+              width: 200,
+              Cell: ({ row }) =>
+                row.original['rentalJobName'] ? (
+                  <div className="flex items-center gap-1">
+                    <p title={row.original.rentalJobName}>{row.original.rentalJobName}</p>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.rentalManagementDetail.path}/${row.original.resourceId}`);
+                      }}
+                    >
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                    </IconButton>
+                  </div>
+                ) : (
+                  <NoDataCell />
+                )
+            }
           ]
           : []),
       {
@@ -217,7 +219,7 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
         width: 200,
         Cell: ({ row }) =>
           row.original['estimateStartDate'] ? (
-            <p className="text-truncate">{moment(row.original.estimateStartDate).format(dateFormat)}</p>
+            <p className="text-truncate">{displayDate(row.original.estimateStartDate)}</p>
           ) : (
             <NoDataCell />
           )
@@ -228,7 +230,7 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
         width: 200,
         Cell: ({ row }) =>
           row.original['estimateEndDate'] ? (
-            <p className="text-truncate">{moment(row.original.estimateEndDate).format(dateFormat)}</p>
+            <p className="text-truncate">{displayDate(row.original.estimateEndDate)}</p>
           ) : (
             <NoDataCell />
           )
@@ -264,7 +266,7 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
           autoHighlight
           value={serviceTypes?.find((e) => e.key === selectedType) || null}
           getOptionLabel={(option: any) => option?.title || ''}
-          getOptionSelected={(option, val) => (option ? option?.title === val?.title : false)}
+          isOptionEqualToValue={(option, val) => (option ? option?.title === val?.title : false)}
           onChange={(_, val) => {
             setSelectedType(val.key);
             fetchData(val.resource);

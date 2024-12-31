@@ -1,7 +1,7 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import { Edit } from '@material-ui/icons';
-import { Skeleton } from '@material-ui/lab';
-import { camelCase } from 'lodash';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import EditIcon from '@mui/icons-material/Edit';
+import { Skeleton } from '@mui/material';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -187,22 +187,16 @@ const SalesOrderDetails = () => {
                 {permissions?.salesOrder?.isUpdate &&
                   [SALES_ORDER_STATUS.readyToInvoice, SALES_ORDER_STATUS.invoiced].includes(salesOrderData?.status) && (
                     <ButtonWithPulse
-                      variant={'outlined'}
-                      color="default"
-                      size="small"
                       onClick={() => {
                         setShowClosedConfirmBox(true);
                       }}
-                      className={'btn-outline-v1'}
                     >
                       Close
                     </ButtonWithPulse>
                   )}
                 {permissions?.salesOrder?.isUpdate && [SALES_ORDER_STATUS.closed].includes(salesOrderData?.status) && (
                   <ThemeButton
-                    variant="contained"
                     iconForMobile={false}
-                    size="small"
                     onClick={() => {
                       if (salesOrderData?.invoice) {
                         updateJobStatus(SALES_ORDER_STATUS.invoiced);
@@ -215,16 +209,10 @@ const SalesOrderDetails = () => {
                   </ThemeButton>
                 )}
                 {permissions?.salesOrder?.isUpdate && allowedToEdit && ![SALES_ORDER_STATUS.closed].includes(salesOrderData?.status) && (
-                  <Button
-                    className={'btn-outline-v1'}
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    size="small"
-                    onClick={handleOpenUpdateDialog}
-                  >
-                    {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                  </Button>
+                  <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                    {'Edit'}
+                  </ThemeButton>
                 )}
-
                 {permissions?.salesOrder?.isDelete && salesOrderData?.canDelete && (
                   <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                 )}
@@ -247,7 +235,7 @@ const SalesOrderDetails = () => {
           <Box>
             {loading || !salesOrderFields.length ? (
               <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </Grid>
             ) : (
               <>

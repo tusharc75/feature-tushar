@@ -1,6 +1,7 @@
-import { Box, Button, Container, FormControl, FormControlLabel, Grid, Paper, Radio, TextField, Typography } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
-import RadioGroup from '@material-ui/core/RadioGroup';
+import { Box, Container, FormControl, FormControlLabel, Paper, Radio, TextField, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import Autocomplete from '@mui/material/Autocomplete';
+import RadioGroup from '@mui/material/RadioGroup';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
@@ -8,6 +9,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import DetailsPage from '../../../components/Shared/DetailsPage';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { IRT_APPROVER_STATUS } from 'src/constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const resaonList = [
   'Inventory physically not here to release.  Action:  Complete paperwork and cycle count to correct inventory accuracy. ',
@@ -106,7 +108,7 @@ const IrtTicket = ({ openAuthId, openAuthData }) => {
               <DetailsPage data={irtTicketData} fields={fields} />
               <Box pt={2}>
                 <Grid container spacing={2}>
-                  <Grid item xs={6}>
+                  <Grid size={{ xs: 6 }}>
                     <Paper>
                       <Box p={3}>
                         <Typography variant="h6" color="primary">
@@ -128,7 +130,7 @@ const IrtTicket = ({ openAuthId, openAuthData }) => {
                         </Box>
                         {status === IRT_APPROVER_STATUS.declined && (
                           <Box mt={2}>
-                            <FormControl variant="outlined" fullWidth margin="dense">
+                            <FormControl variant="outlined" fullWidth margin="dense" size="small">
                               <Autocomplete
                                 id="tags-filled"
                                 options={resaonList}
@@ -141,6 +143,7 @@ const IrtTicket = ({ openAuthId, openAuthData }) => {
                                   <TextField
                                     {...params}
                                     margin="dense"
+                                    size="small"
                                     variant="outlined"
                                     label="Decline Reason"
                                     placeholder="Decline Reason"
@@ -160,26 +163,26 @@ const IrtTicket = ({ openAuthId, openAuthData }) => {
                             fullWidth
                             rows={2}
                             margin="dense"
+                            size="small"
                             value={comment}
                             onChange={(e: any) => setComment(e.target.value)}
                           />
                         </Box>
                         <Box pt={2}>
-                          <Button
-                            variant="contained"
-                            color="primary"
+                          <ThemeButton
+                            buttonType="theme"
                             disabled={isSubmited}
                             onClick={() => {
                               submitResponce();
                             }}
                           >
                             Submit
-                          </Button>
+                          </ThemeButton>
                         </Box>
                       </Box>
                     </Paper>
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid size={{ xs: 6 }}>
                     <Paper>
                       <Box p={3}>
                         <Typography variant="h6" color="primary">
@@ -196,23 +199,22 @@ const IrtTicket = ({ openAuthId, openAuthData }) => {
                               setSelectedUsers(val);
                             }}
                             getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                            getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                            isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
                             renderInput={(props) => (
                               <TextField {...props} placeholder={''} variant="outlined" name="userList" label={'Select Users'} />
                             )}
                           />
                         </Box>
                         <Box my={3}>
-                          <Button
-                            variant="contained"
-                            color="primary"
+                          <ThemeButton
+                            buttonType="theme"
                             disabled={!isSubmited && selectedUsers?.length === 0}
                             onClick={() => {
                               handleForwardApproval();
                             }}
                           >
                             Forward Approval
-                          </Button>
+                          </ThemeButton>
                         </Box>
                       </Box>
                     </Paper>

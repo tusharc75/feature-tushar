@@ -19,7 +19,7 @@ const BrandNotFound = () => {
           You've requested a page using an invalid hostname. Please double check the web address or try the address of our main site:
         </p>
         <a className="link block" href={mainSiteUrl}>
-          <ThemeButton iconForMobile={false} color="primary" borderColor="none" fullWidth style={{ paddingBlock: '10px', fontSize: '14px' }}>
+          <ThemeButton iconForMobile={false} buttonType="theme" fullWidth style={{ paddingBlock: '10px', fontSize: '14px' }}>
             Our main site
           </ThemeButton>
         </a>

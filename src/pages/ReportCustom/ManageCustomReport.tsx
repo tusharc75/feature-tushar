@@ -1,6 +1,7 @@
 import { useEffect, useState, useContext, useRef } from 'react';
-import { Dialog, Grid, Box, Button, TextField, CircularProgress } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Dialog, Box, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import Autocomplete from '@mui/material/Autocomplete';
 import { Form, Formik, FormikProps } from 'formik';
 import { CustomDialogTransition, REPORT_LIST } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -14,6 +15,7 @@ import { FaDiceOne } from 'react-icons/fa';
 import Loader from 'src/components/Loader';
 import { useData } from '../../StateProvider/Provider';
 import { isEmpty, kebabCase } from 'lodash';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 type ValueTypes = {
   customReportName: string;
@@ -351,7 +353,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
                   </div>
                   <Box my={2}>
                     <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
                         <TextField
                           value={values.customReportName}
                           required
@@ -365,13 +367,13 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
                           helperText={touched['customReportName'] && errors['customReportName']}
                         />
                       </Grid>
-                      <Grid item xs={12} sm={6}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
                         <Autocomplete
                           options={resourceOption}
                           fullWidth
                           size="small"
                           getOptionLabel={(option) => option?.title || ''}
-                          getOptionSelected={(option, value) => option?.value === value?.value}
+                          isOptionEqualToValue={(option, value) => option?.value === value?.value}
                           value={values.resource}
                           onChange={(_, newVal) => {
                             const result = { resource: newVal, filters: [], column: [] };
@@ -403,14 +405,14 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
                   </div>
                   <Box my={2}>
                     <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
                         <Autocomplete
                           options={filterOptions}
                           fullWidth
                           multiple
                           size="small"
                           value={values.filters}
-                          getOptionSelected={(option, val) => option.fieldName === val.fieldName}
+                          isOptionEqualToValue={(option, val) => option.fieldName === val.fieldName}
                           getOptionLabel={(option) => option.fieldLabel}
                           onChange={(_, newVal) => {
                             setFieldValue('filters', newVal);
@@ -441,13 +443,13 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
                         setStatusPeriodDate={setStatusPeriodDate}
                         setStatusTimeFrame={setStatusTimeFrame}
                       />
-                      <Grid item xs={12} sm={6}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
                         <Autocomplete
                           options={resourceColumns.map((item) => item.fieldData)}
                           fullWidth
                           multiple
                           size="small"
-                          getOptionSelected={(option, val) => option.fieldName === val.fieldName}
+                          isOptionEqualToValue={(option, val) => option.fieldName === val.fieldName}
                           getOptionLabel={(option) => option.fieldLabel}
                           value={values.column}
                           onChange={(_, newVal) => setFieldValue('column', newVal)}
@@ -467,19 +469,20 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
                   </Box>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                  <Button disabled={isSubmitting} color="primary" size="small" onClick={handleClose}>
+                  <ThemeButton
+                    buttonType='transparent'
+                    onClick={handleClose}
+                  >
                     Cancel
-                  </Button>
-                  <Button
-                    startIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
+                  </ThemeButton>
+                  <ThemeButton
+                    buttonType='theme'
                     disabled={isSubmitting}
-                    variant="contained"
-                    color="primary"
-                    size="small"
                     onClick={submitForm}
+                    isLoading={isSubmitting}
                   >
                     {id ? 'Update' : 'Save'}
-                  </Button>
+                  </ThemeButton>
                 </CustomDialogFooter>
               </Form>
             </>

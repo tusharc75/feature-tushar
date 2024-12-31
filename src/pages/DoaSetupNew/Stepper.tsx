@@ -1,11 +1,12 @@
-import { Box, Grid, Paper, Step, StepConnector, StepLabel, Stepper, makeStyles, withStyles } from '@material-ui/core';
-import { Check } from '@material-ui/icons';
+import { Check } from '@mui/icons-material';
+import { Box, Grid2, Paper, Step, StepConnector, StepLabel, Stepper, Theme } from '@mui/material';
+import { makeStyles, withStyles } from '@mui/styles';
 import clsx from 'clsx';
-import { DoaApproveType, getUniqueCurrencies } from 'src/constants/helpers';
 import { Link } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
+import { DoaApproveType, getUniqueCurrencies } from 'src/constants/helpers';
 
-const QontoConnector = withStyles((theme) => ({
+const QontoConnector = withStyles((theme: Theme) => ({
   alternativeLabel: {
     top: 10,
     left: 'calc(-90% - 16px)',
@@ -19,7 +20,7 @@ const QontoConnector = withStyles((theme) => ({
   }
 }))(StepConnector);
 
-const useQontoStepIconStyles = makeStyles((theme) => ({
+const useQontoStepIconStyles = makeStyles((theme: Theme) => ({
   root: {
     color: '#09445A',
     display: 'flex',
@@ -29,14 +30,13 @@ const useQontoStepIconStyles = makeStyles((theme) => ({
     color: '#aaa'
   },
   circle: {
-    width: 22,
-    height: 22,
+    width: 32,
+    height: 32,
     borderRadius: '50%',
     display: 'grid',
     placeItems: 'center',
     zIndex: 1,
     border: '2px solid #163340',
-    padding: '5px 23px 23px 5px',
     marginTop: '-6px',
     background: '#f6f6f6'
   },
@@ -66,8 +66,8 @@ const DoaStepper = ({ data }) => {
   return (
     <Paper elevation={0}>
       <Box m={2} p={2}>
-        <Grid container justifyContent="center" alignItems="center">
-          <Grid item xs={12} md={12} lg={7}>
+        <Grid2 container sx={{ justifyContent: 'center', alignItems: 'center' }}>
+          <Grid2 size={{ xs: 12, md: 12, lg: 7 }}>
             <Stepper activeStep={-1} connector={<QontoConnector />} alternativeLabel>
               {data?.approveType === DoaApproveType.user
                 ? data?.users?.map((user, i) => {
@@ -131,8 +131,8 @@ const DoaStepper = ({ data }) => {
                     );
                   })}
             </Stepper>
-          </Grid>
-        </Grid>
+          </Grid2>
+        </Grid2>
       </Box>
     </Paper>
   );

@@ -1,13 +1,11 @@
 import { useState, useEffect, useContext, useReducer } from 'react';
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import axiosInstance from '../../../axios/axiosInstance';
-import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { dateFormat, prepareDataForGrid, serializedAsset, sidebarResource } from '../../../constants/helpers';
+import { displayDate, prepareDataForGrid, serializedAsset, sidebarResource } from '../../../constants/helpers';
 import { camelCase } from 'lodash';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import moment from 'moment';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 
 const renderedFrom = `${camelCase(sidebarResource?.serializedAsset)}_depreciationHistory`;
@@ -56,7 +54,7 @@ const DepreciationHistory = ({ id }) => {
         disableFilters: true,
         disableSortBy: false,
         disabled: true,
-        Cell: ({ row }) => (row.original?.date ? <div>{moment(row.original?.date)?.format(dateFormat)}</div> : <NoDataCell />)
+        Cell: ({ row }) => (row.original?.date ? <div>{displayDate(row.original?.date)}</div> : <NoDataCell />)
       },
       {
         accessor: 'amount',

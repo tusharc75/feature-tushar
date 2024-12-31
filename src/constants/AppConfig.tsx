@@ -1,4 +1,4 @@
-import { ThemeProvider, createTheme, useTheme } from '@material-ui/core/styles';
+import { ThemeProvider, createTheme, useTheme } from '@mui/material/styles';
 import React, { ReactNode, useEffect } from 'react';
 import { useStore, THEME } from 'src/StateProvider/fastContext';
 

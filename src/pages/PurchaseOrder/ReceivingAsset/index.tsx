@@ -1,8 +1,9 @@
-import { Button, Grid, IconButton } from '@material-ui/core';
-import Box from '@material-ui/core/Box/Box';
-import { Cancel } from '@material-ui/icons';
-import HistoryIcon from '@material-ui/icons/History';
-import TrackChangesIcon from '@material-ui/icons/TrackChanges';
+import { IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import Box from '@mui/material/Box/Box';
+import { Cancel } from '@mui/icons-material';
+import HistoryIcon from '@mui/icons-material/History';
+import TrackChangesIcon from '@mui/icons-material/TrackChanges';
 import { startCase } from 'lodash';
 import { useContext, useEffect, useState, useRef } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -25,6 +26,7 @@ import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateReceiveProduct, generateRejectProduct } from 'src/pages/PurchaseOrder/walkmeSteps';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, checkReceivedProduct, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -62,15 +64,15 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
       let receiveIndex = dataRows.findIndex((e) => e.qty - (e?.actualReceived || 0) > 0);
       let rejectIndex = dataRows.findIndex((e) => e.qty - (e?.rejectQuantity || 0) > 0);
       let stepData = [];
-      if(receiveIndex > -1) {
+      if (receiveIndex > -1) {
         stepData.push(generateReceiveProduct(user?.user?.brandPolicy?.storageLocation, receiveIndex, resources?.purchaseOrder?.titleSingular));
       }
-      if(rejectIndex > -1) {
+      if (rejectIndex > -1) {
         stepData.push(generateRejectProduct(user?.user?.brandPolicy?.storageLocation, rejectIndex, resources?.purchaseOrder?.titleSingular));
       }
       if (walkmeInstance && walkmeInstance.type === 'flow' && !isStepDataSet.current) {
         isStepDataSet.current = true;
-        let steps = generateReceiveProduct(user?.user?.brandPolicy?.storageLocation,0, resources?.purchaseOrder?.titleSingular).steps;
+        let steps = generateReceiveProduct(user?.user?.brandPolicy?.storageLocation, 0, resources?.purchaseOrder?.titleSingular).steps;
         walkmeInstance.instance.push(steps);
         walkmeInstance.handleNext();
       }
@@ -217,10 +219,10 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
                   </HtmlTooltip>
                 } */}
               {permissions?.purchaseOrder?.isUpdate &&
-              row?.original?.type === MATERIAL_TYPE.product &&
-              allowedToEdit &&
-              row?.original?.qty - (row?.original?.rejectQuantity || 0) &&
-              ![PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? (
+                row?.original?.type === MATERIAL_TYPE.product &&
+                allowedToEdit &&
+                row?.original?.qty - (row?.original?.rejectQuantity || 0) &&
+                ![PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? (
                 <HtmlTooltip title="Reject">
                   <span>
                     <IconButton
@@ -384,36 +386,32 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
     return (
       <>
         {permissions?.purchaseOrder?.isUpdate && allowedToEdit && (
-          <Button
+          <ThemeButton
             id={'receive-button'}
-            variant={'contained'}
-            color="primary"
-            size="small"
             disabled={
               selectedRecords.length === 0 || (selectedRecords?.filter((e: any) => e.qty - (e?.actualReceived || 0) > 0).length > 0 ? false : true)
             }
             onClick={() => {
               setReceiveDialog(true);
             }}
+            buttonType='theme'
           >
             Receive
-          </Button>
+          </ThemeButton>
         )}
         {permissions?.purchaseOrder?.isUpdate && allowedToEdit && (
-          <Button
+          <ThemeButton
             id={'reject-button'}
-            variant={'contained'}
-            color="primary"
-            size="small"
             disabled={
               selectedRecords.length === 0 || (selectedRecords?.filter((e: any) => e.qty - (e?.rejectQuantity || 0) > 0)?.length > 0 ? false : true)
             }
             onClick={() => {
               setRejectDialog(true);
             }}
+            buttonType='theme'
           >
             Reject
-          </Button>
+          </ThemeButton>
         )}
       </>
     );
@@ -449,7 +447,7 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
         leftSideContents={<LeftSideContents />}
         hasXpadding={true}
       />
-      <Grid item xs={12} md={12} sm={12}>
+      <Grid size={{ xs: 12, md: 12, sm: 12 }}>
         {columns ? (
           <Box zIndex={5} width={'100%'}>
             <CustomReactTable

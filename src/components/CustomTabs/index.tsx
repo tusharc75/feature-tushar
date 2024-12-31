@@ -1,7 +1,7 @@
 import React from 'react';
 
-import Tab, { TabProps } from '@material-ui/core/Tab';
-import Tabs, { TabsProps } from '@material-ui/core/Tabs';
+import Tab, { TabProps } from '@mui/material/Tab';
+import Tabs, { TabsProps } from '@mui/material/Tabs';
 
 interface TabPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;

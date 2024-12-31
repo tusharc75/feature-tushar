@@ -1,5 +1,7 @@
-import { Box, Button, Dialog, Grid, IconButton, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, Dialog, IconButton, TextField } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Grid from '@mui/material/Grid2';
+import Autocomplete from '@mui/material/Autocomplete';
 import { FieldArray, Form, Formik } from 'formik';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -9,8 +11,8 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { read } from 'xlsx';
-import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
-import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import axiosInstance from 'src/axios/axiosInstance';
 import { RiDeleteBin6Fill } from 'react-icons/ri';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -130,28 +132,39 @@ const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
                       size="small"
                       options={excelMappingData}
                       getOptionLabel={(option) => option?.name || ''}
-                      getOptionSelected={(option: any, val) => option?._id === val}
+                      isOptionEqualToValue={(option: any, val) => option?._id === val}
                       value={selectedView}
                       onChange={(event: any, newValue: any) => {
                         setSelectedView(newValue ? newValue : null);
                       }}
-                      renderOption={(option) => (
-                        <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'} width={'100%'}>
-                          <span style={{ width: 'calc(100% - 71px)' }}>{option?.name}</span>
-                          <Box>
-                            <HtmlTooltip title={'Delete'} placement="top" arrow enterTouchDelay={0}>
-                              <IconButton
-                                size="small"
-                                onClick={() => {
-                                  setConfirmationDelete({ open: true, data: [option] });
-                                }}
-                              >
-                                <RiDeleteBin6Fill />
-                              </IconButton>
-                            </HtmlTooltip>
+                      renderOption={(props, option, state, ownerState) => {
+                        const { key, ...optionProps } = props;
+                        return (
+                          <Box
+                            key={key}
+                            component="li"
+                            {...optionProps}
+                            display={'flex'}
+                            alignItems={'center'}
+                            justifyContent={'space-between'}
+                            width={'100%'}
+                          >
+                            <span style={{ width: 'calc(100% - 71px)' }}>{ownerState.getOptionLabel(option)}</span>
+                            <Box>
+                              <HtmlTooltip title={'Delete'} placement="top" arrow enterTouchDelay={0}>
+                                <IconButton
+                                  size="small"
+                                  onClick={() => {
+                                    setConfirmationDelete({ open: true, data: [option] });
+                                  }}
+                                >
+                                  <RiDeleteBin6Fill />
+                                </IconButton>
+                              </HtmlTooltip>
+                            </Box>
                           </Box>
-                        </Box>
-                      )}
+                        );
+                      }}
                       id="select-view"
                       renderInput={(params) => (
                         <TextField {...params} margin="dense" size={'small'} fullWidth label="Select Excel Mapping" variant="outlined" />
@@ -167,13 +180,13 @@ const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
                       values?.cell?.map((data, index) => {
                         return (
                           <Grid container spacing={2} alignItems="center">
-                            <Grid item md={11} lg={11}>
+                            <Grid size={{ md: 11, lg: 11 }}>
                               <Grid container spacing={2}>
-                                <Grid item sm={12} xs={12} md={3} lg={3}>
+                                <Grid size={{ sm: 12, xs: 12, md: 3, lg: 3 }}>
                                   <Autocomplete
                                     options={sheetNames}
                                     disableClearable
-                                    getOptionSelected={(option: any, val) => option === val}
+                                    isOptionEqualToValue={(option: any, val) => option === val}
                                     value={data?.sheetName}
                                     onChange={(e, val) => {
                                       arrayHelpers.replace(index, {
@@ -195,7 +208,7 @@ const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
                                     )}
                                   />
                                 </Grid>
-                                <Grid item sm={12} xs={12} md={3} lg={3}>
+                                <Grid size={{ sm: 12, xs: 12, md: 3, lg: 3 }}>
                                   <TextField
                                     variant="outlined"
                                     type="text"
@@ -213,7 +226,7 @@ const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
                                     }}
                                   />
                                 </Grid>
-                                <Grid item sm={12} xs={12} md={3} lg={3}>
+                                <Grid size={{ sm: 12, xs: 12, md: 3, lg: 3 }}>
                                   <TextField
                                     variant="outlined"
                                     type="text"
@@ -231,11 +244,11 @@ const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
                                     }}
                                   />
                                 </Grid>
-                                <Grid item sm={12} xs={12} md={3} lg={3}>
+                                <Grid size={{ sm: 12, xs: 12, md: 3, lg: 3 }}>
                                   <Autocomplete
                                     options={['1', '2']}
                                     disableClearable
-                                    getOptionSelected={(option: any, val) => option === val}
+                                    isOptionEqualToValue={(option: any, val) => option === val}
                                     value={data?.headerRow}
                                     onChange={(e, val) => {
                                       arrayHelpers.replace(index, {
@@ -259,7 +272,7 @@ const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
                                 </Grid>
                               </Grid>
                             </Grid>
-                            <Grid item md={1} lg={1}>
+                            <Grid size={{ md: 1, lg: 1 }}>
                               <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
                                 <HtmlTooltip title="Remove">
                                   <IconButton
@@ -287,12 +300,12 @@ const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button size="small" onClick={handleClose} color="primary">
+              <ThemeButton buttonType="transparent" onClick={handleClose}>
                 Cancel
-              </Button>
-              <Button size="small" type="submit" color="primary" onClick={submitForm} variant="contained">
+              </ThemeButton>
+              <ThemeButton buttonType="theme" onClick={submitForm}>
                 Submit
-              </Button>
+              </ThemeButton>
             </CustomDialogFooter>
             {confirmationDelete.open && (
               <ConfirmationDialog

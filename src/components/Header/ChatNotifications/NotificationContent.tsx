@@ -1,12 +1,21 @@
-import { Button, IconButton, List, Menu, MenuItem, Typography } from '@material-ui/core';
-import { AddCircle, ClearAll, DoneAllOutlined, Markunread, Settings } from '@material-ui/icons';
+import { Button, IconButton, List, Menu, MenuItem, Typography } from '@mui/material';
+import { AddCircle, ClearAll, DoneAllOutlined, Markunread, Settings } from '@mui/icons-material';
 import { useMemo, useState } from 'react';
 import { useData } from 'src/StateProvider/Provider';
 import { TabOptions, tabOptions } from '.';
 import HtmlTooltip from '../../CustomTooltipTitle';
 import { HistoryItem, NotificationItem } from './listITems';
 
-const NotificationContent = ({ handleMarkAllReadUnread, handleClearAll, handleReadSingle, data, isLoading, setNewChat, handleClickHistory, isReplayVisible }) => {
+const NotificationContent = ({
+  handleMarkAllReadUnread,
+  handleClearAll,
+  handleReadSingle,
+  data,
+  isLoading,
+  setNewChat,
+  handleClickHistory,
+  isReplayVisible
+}) => {
   const {
     state: {
       user: { user }
@@ -63,7 +72,7 @@ const NotificationContent = ({ handleMarkAllReadUnread, handleClearAll, handleRe
 
   return (
     <>
-      <div className="[border-bottom:1px_solid_var(--common-border-color)] flex justify-between items-center px-[20px] py-[10px]">
+      <div className="flex items-center justify-between px-[20px] py-[10px] [border-bottom:1px_solid_var(--common-border-color)]">
         <h6 className="text-[16px] font-semibold ">Chats</h6>
         <HtmlTooltip
           title={isLoading || data?.unread?.length === 0 ? 'No Unread chat notifications' : 'Mark all as read'}
@@ -84,7 +93,7 @@ const NotificationContent = ({ handleMarkAllReadUnread, handleClearAll, handleRe
           </span>
         </HtmlTooltip>
       </div>
-      <div className={`flex items-center gap-1 justify-between px-[20px] py-[8px] [border-bottom:1px_solid_var(--common-border-color)]`}>
+      <div className={`flex items-center justify-between gap-1 px-[20px] py-[8px] [border-bottom:1px_solid_var(--common-border-color)]`}>
         <div className="tabs flex gap-[24px]">
           {tabOptions?.map((tabItem) => {
             return (
@@ -93,8 +102,8 @@ const NotificationContent = ({ handleMarkAllReadUnread, handleClearAll, handleRe
                   <div className={`${tab === tabItem ? 'bg-[var(--primary)]' : 'bg-[transparent]'} ${otherClasses}`} />
                   {tabItem}{' '}
                   <span
-                    className={`text-[#D3E0FF] px-2 py-[1px] block rounded-[5px] ml-2 bg-[#2A3042] text-[12px] font-semibold ${
-                      isLoading || tab === tabItem ? 'grayscale dark:opacity-50 opacity-70' : ''
+                    className={`ml-2 block rounded-[5px] bg-[#2A3042] px-2 py-[1px] text-[12px] font-semibold text-[#D3E0FF] ${
+                      isLoading || tab === tabItem ? 'opacity-70 grayscale dark:opacity-50' : ''
                     } ${tabItem === tabOptions[tabOptions.length - 1] && !Boolean(unreadMessages) ? 'sr-only' : ''}`}
                   >
                     {tabItem === tabOptions[tabOptions.length - 1] ? unreadMessages : data[tabItem]?.length || 0}
@@ -108,8 +117,8 @@ const NotificationContent = ({ handleMarkAllReadUnread, handleClearAll, handleRe
           <Settings />
         </IconButton>
       </div>
-      <div className={`min-h-[300px] max-h-[calc(100vh-200px)] overflow-y-auto`}>
-        <div className="p-[15px_20px] dark:[border-bottom:1px_solid_var(--common-border-color)] [border-bottom:1px_solid_#F4F4F4]">
+      <div className={`max-h-[calc(100vh-200px)] min-h-[300px] overflow-y-auto`}>
+        <div className="p-[15px_20px] [border-bottom:1px_solid_#F4F4F4] dark:[border-bottom:1px_solid_var(--common-border-color)]">
           <Button onClick={() => setNewChat(true)} startIcon={<AddCircle className="text-[var(--new-theme-color)] [font-size:30px_!important]" />}>
             Start a New Chat
           </Button>

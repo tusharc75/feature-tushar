@@ -1,6 +1,6 @@
-import { Button } from '@material-ui/core';
-import AddIcon from '@material-ui/icons/Add';
-import { Skeleton } from '@material-ui/lab';
+import { Button } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import { Skeleton } from '@mui/material';
 import React, { useEffect, useRef } from 'react';
 import { VariableSizeList as List } from 'react-window';
 import InfiniteLoader from 'react-window-infinite-loader';
@@ -73,7 +73,9 @@ const RenderColumns: React.FC<colDataInterface> = ({
   state,
   dispatch,
   fetchSingleColumn,
-  column
+  column,
+  background,
+  color
 }) => {
   const { data, count, loading, page, filterQuery, rowDef, selectedRecords, refreshDataCount } = state;
 
@@ -109,6 +111,8 @@ const RenderColumns: React.FC<colDataInterface> = ({
         rowDef={rowDef}
         passFailStatus={passFailStatus}
         passFailAccessor={passFailAccessor}
+        background={background}
+        color={color}
       />
     );
 

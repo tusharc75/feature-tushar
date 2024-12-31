@@ -1,8 +1,8 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Checkbox, CheckboxProps, CircularProgress, IconButton, TableCell, TextField } from '@material-ui/core';
-import { Check, DragIndicator, Edit, ExpandLess, ExpandMore } from '@material-ui/icons';
-import { Autocomplete } from '@material-ui/lab';
+import { Checkbox, CheckboxProps, CircularProgress, IconButton, TableCell, TextField } from '@mui/material';
+import { Check, DragIndicator, Edit, ExpandLess, ExpandMore } from '@mui/icons-material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { Column, ColumnDef, Header, Table, flexRender } from '@tanstack/react-table';
 import { eq, isEqual } from 'lodash';
 import React, { useEffect, useState } from 'react';
@@ -516,7 +516,7 @@ const RenderInputs = ({ columnDef, row, cell, cellValue, submitInput, resetField
           }}
           options={columnDef?.option || []}
           getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-          getOptionSelected={(option: any, val) => option.optionValue === val}
+          isOptionEqualToValue={(option: any, val) => option.optionValue === val}
           value={
             columnDef?.option?.filter((data) => data.optionValue === cellValue).length
               ? columnDef?.option?.filter((data) => data.optionValue === cellValue)[0]
@@ -708,6 +708,7 @@ export const CellRenderer = ({
       return (
         <td {...props}>
           <RenderInputs
+            key={cellValue}
             cell={cell}
             cellValue={cellValue}
             columnDef={columnDef}

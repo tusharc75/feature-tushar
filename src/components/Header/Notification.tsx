@@ -1,5 +1,5 @@
-import { Badge, Box, Button, IconButton, List, ListItem, Menu, MenuItem, Popover, Typography, useMediaQuery } from '@material-ui/core';
-import { ClearAll, DoneAllOutlined, Settings, Visibility } from '@material-ui/icons';
+import { Badge, Box, Button, IconButton, List, ListItem, Menu, MenuItem, Popover, Typography, useMediaQuery } from '@mui/material';
+import { ClearAll, DoneAllOutlined, Settings, Visibility } from '@mui/icons-material';
 import { useContext, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Accepted, Assigned, Changed, Created, Rejected } from 'src/assets/notificationIcons';
@@ -12,7 +12,7 @@ import { displayCardDate } from '../../constants/helpers';
 
 import styles from './Header.module.scss';
 
-import NotificationsNoneIcon from '@material-ui/icons/NotificationsNone';
+import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import ChangesDialog from 'src/pages/ResourceLogs/ChangesDialog';
 import HtmlTooltip from '../CustomTooltipTitle';
 
@@ -127,7 +127,7 @@ const Notification = () => {
           toggle: true,
           _id: d._id
         })
-        .then(() => { })
+        .then(() => {})
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
@@ -156,7 +156,7 @@ const Notification = () => {
     <>
       {isMobile ? (
         <>
-          <MenuItem onClick={anchorEl === null ? getAllNotifications : () => { }}>
+          <MenuItem onClick={anchorEl === null ? getAllNotifications : () => {}}>
             <Badge
               variant="dot"
               overlap="circular"
@@ -305,8 +305,9 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
               <div className={`${tab === 'all' ? 'bg-[var(--primary)]' : 'bg-[transparent]'} ${otherClasses}`} />
               All{' '}
               <span
-                className={`ml-2 block rounded-[5px] bg-[#2A3042] px-2 py-[1px] text-[12px] font-semibold text-[#D3E0FF] ${isLoading || tab === 'all' ? 'opacity-70 grayscale dark:opacity-50' : ''
-                  }`}
+                className={`ml-2 block rounded-[5px] bg-[#2A3042] px-2 py-[1px] text-[12px] font-semibold text-[#D3E0FF] ${
+                  isLoading || tab === 'all' ? 'opacity-70 grayscale dark:opacity-50' : ''
+                }`}
               >
                 {data.all.length || 0}
               </span>
@@ -315,8 +316,9 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
               <div className={`${tab === 'unread' ? 'bg-[var(--primary)]' : 'bg-[transparent]'} ${otherClasses}`} />
               Unread{' '}
               <span
-                className={`ml-2 block rounded-[5px] bg-[#D3E0FF] px-2 py-[1px] text-[12px] font-semibold text-[#2A3042] ${isLoading || tab === 'unread' ? 'opacity-70 grayscale dark:opacity-50' : ''
-                  }`}
+                className={`ml-2 block rounded-[5px] bg-[#D3E0FF] px-2 py-[1px] text-[12px] font-semibold text-[#2A3042] ${
+                  isLoading || tab === 'unread' ? 'opacity-70 grayscale dark:opacity-50' : ''
+                }`}
               >
                 {data.unread.length || 0}
               </span>

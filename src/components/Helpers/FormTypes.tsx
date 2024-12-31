@@ -1,8 +1,16 @@
-import DateUtils from '@date-io/date-fns';
+import { Image } from '@mui/icons-material';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import CreditCardIcon from '@mui/icons-material/CreditCard';
+import DeleteIcon from '@mui/icons-material/Delete';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+import InfoIcon from '@mui/icons-material/Info';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
+import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
+import Grid from '@mui/material/Grid2';
 import {
   Avatar,
   Box,
-  Button,
   Checkbox,
   Chip,
   CircularProgress,
@@ -11,7 +19,6 @@ import {
   FormControlLabel,
   FormHelperText,
   FormLabel,
-  Grid,
   IconButton,
   ImageList,
   ImageListItem,
@@ -21,53 +28,45 @@ import {
   Switch,
   TextField,
   Typography,
-  makeStyles,
   useTheme
-} from '@material-ui/core';
-import InputAdornment from '@material-ui/core/InputAdornment';
-import { Image } from '@material-ui/icons';
-import AddCircleIcon from '@material-ui/icons/AddCircle';
-import CreditCardIcon from '@material-ui/icons/CreditCard';
-import DeleteIcon from '@material-ui/icons/Delete';
-import HighlightOffIcon from '@material-ui/icons/HighlightOff';
-import InfoIcon from '@material-ui/icons/Info';
-import LocationOnIcon from '@material-ui/icons/LocationOn';
-import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
-import Autocomplete, { createFilterOptions } from '@material-ui/lab/Autocomplete';
-import { DatePicker, KeyboardDatePicker, KeyboardDateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+} from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import InputAdornment from '@mui/material/InputAdornment';
 import parse from 'autosuggest-highlight/parse';
 import { find, isArray, result, throttle } from 'lodash';
 import MuiPhoneInput from 'material-ui-phone-number';
 import React, { Fragment, useContext, useEffect, useRef } from 'react';
 import NumberFormat from 'react-number-format';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import GroupSignature from 'src/components/Helpers/FormTypes/GroupSignature';
+import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import { handleAutoCalculation, optionConverter } from '../../constants/formulaUtility';
 import {
   checkValue,
   CustomDialogTransition,
-  dateFormatForInputControl,
   documentUploadMaxSize,
   documentUploadSupportExtensions,
   formatAmountWithCurrency,
   getUniqueCurrencies,
   imageUploadMaxSize
 } from '../../constants/helpers';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import HtmlTooltip from '../CustomTooltipTitle';
+import { LOGIC } from '../FormBuilder/helper';
 import ImageCropTool from '../ImageCropTool';
 import AddDisplayTypeDialog from '../productBuilder/AddDisplayTypeDialog';
 import Counter from './FormTypes/Counter';
 import DataList from './FormTypes/DataList';
+import Description from './FormTypes/Description';
 import Dropdown from './FormTypes/Dropdown';
 import RichTextEditor from './FormTypes/RichTextEditor';
 import Signature from './FormTypes/Signature';
-import { LOGIC } from '../FormBuilder/helper';
-import Description from './FormTypes/Description';
-import GroupSignature from 'src/components/Helpers/FormTypes/GroupSignature';
-import { useData } from 'src/StateProvider/Provider';
+import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
+import CustomDatePicker from 'src/components/CustomDatePicker';
+import CurrencyAutocomplete from './CurrencyAutocomplete';
 
 type MultiFileType = {
   fileName: string;
@@ -105,7 +104,7 @@ const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false, wa
   <div className="form-types">
     {isTooltip && info ? (
       <Grid container spacing={1}>
-        <Grid item style={{ flexGrow: 1 }}>
+        <Grid style={{ flexGrow: 1 }}>
           {children}
           {warningTooltip && (
             <Box ml={1}>
@@ -115,7 +114,7 @@ const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false, wa
             </Box>
           )}
         </Grid>
-        <Grid item>
+        <Grid>
           <Box style={{ marginTop: '7px' }}>
             <HtmlTooltip title={<Typography>{info}</Typography>}>
               <InfoIcon color="disabled" />
@@ -136,7 +135,7 @@ const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false, wa
       </>
     ) : (
       <Grid container spacing={1} alignItems="center">
-        <Grid item xs={12} sm={12} md={12}>
+        <Grid size={{ xs: 12, sm: 12, md: 12 }}>
           {children}
           {warningTooltip && (
             <Box ml={1}>
@@ -202,12 +201,12 @@ const AddOptionDialog = ({ addFieldOption, options, setOptions, setOpen, label, 
           />
         </CustomDialogContent>
         <CustomDialogFooter>
-          <Button variant="outlined" color="primary" onClick={() => setOpen(false)}>
+          <ThemeButton buttonType="transparent" onClick={() => setOpen(false)}>
             Cancel
-          </Button>
-          <Button variant="contained" disabled={!Boolean(inputVal)} color="primary" onClick={onSave}>
+          </ThemeButton>
+          <ThemeButton buttonType="theme" disabled={!Boolean(inputVal)} onClick={onSave}>
             Save
-          </Button>
+          </ThemeButton>
         </CustomDialogFooter>
       </Dialog>
     </div>
@@ -365,7 +364,6 @@ const FormTypes = (props) => {
   const [option, setOptionsList] = React.useState([]);
   const [optionSaveDialog, setOptionSaveDialog] = React.useState(false);
   const [value, setValue] = React.useState(null);
-  const [currencyData, setCurrencyData] = React.useState([]);
   const [isImgUploading, setImgUploading] = React.useState(false);
   const [isFileUploading, setFileUploading] = React.useState(false);
   const [fileUploadProgress, setFileUploadProgress] = React.useState(0);
@@ -401,13 +399,6 @@ const FormTypes = (props) => {
       }, 200),
     []
   );
-
-  React.useEffect(() => {
-    const sortedArr = getUniqueCurrencies().sort((a, b) =>
-      a?.name?.toUpperCase() < b?.name?.toUpperCase() ? -1 : a?.name?.toUpperCase() > b?.name?.toUpperCase() ? 1 : 0
-    );
-    setCurrencyData(sortedArr);
-  }, []);
 
   React.useEffect(() => {
     let active = true;
@@ -985,14 +976,16 @@ const FormTypes = (props) => {
           helperText={touched[name] && errors[name]}
           ref={inputNumberRef}
           onChange={onChange ? onChange : (e) => handleChange(name, e.target.value)}
-          InputProps={{
-            inputComponent: CustomFormat as any,
-            inputProps: {
-              allowNegative: false,
-              onValueChange: (values) => {
-                handleChange(name, values.value);
-              },
-              selectedCurrencyCode: selectedCurrencyCode
+          slotProps={{
+            input: {
+              inputComponent: CustomFormat as any,
+              inputProps: {
+                allowNegative: false,
+                onValueChange: (values) => {
+                  handleChange(name, values.value);
+                },
+                selectedCurrencyCode: selectedCurrencyCode
+              }
             }
           }}
         />
@@ -1015,27 +1008,27 @@ const FormTypes = (props) => {
           helperText={touched[name] && errors[name]}
           ref={inputNumberRef}
           onChange={onChange ? onChange : (e) => handleChange(name, e.target.value)}
-          InputProps={{
-            inputComponent: CustomFormat as any,
-            inputProps: {
+          slotProps={{
+            input: {
+              inputComponent: CustomFormat as any,
               allowNegative: false,
               onValueChange: (values) => {
                 handleChange(name, values.value);
               },
-              selectedCurrencyCode: selectedCurrencyCode
-            },
-            startAdornment: startAdornment ? (
-              startAdornment
-            ) : (
-              <InputAdornment position="start">
-                {result(
-                  find(getUniqueCurrencies(), function (obj) {
-                    return obj.currencyCode === (user?.user?.brandCurrency || 'USD');
-                  }),
-                  'symbolNative'
-                )}
-              </InputAdornment>
-            )
+              selectedCurrencyCode: selectedCurrencyCode,
+              startAdornment: startAdornment ? (
+                startAdornment
+              ) : (
+                <InputAdornment position="start">
+                  {result(
+                    find(getUniqueCurrencies(), function (obj) {
+                      return obj.currencyCode === (user?.user?.brandCurrency || 'USD');
+                    }),
+                    'symbolNative'
+                  )}
+                </InputAdornment>
+              )
+            }
           }}
         />
       </InfoLabel>
@@ -1057,32 +1050,34 @@ const FormTypes = (props) => {
           onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}
-          InputProps={{
-            endAdornment: '%',
-            inputProps: { min: 0 },
-            readOnly: fieldData && fieldData?.isUneditable ? true : false
+          slotProps={{
+            input: {
+              endAdornment: '%',
+              inputProps: { min: 0 },
+              readOnly: fieldData && fieldData?.isUneditable ? true : false
+            }
           }}
           ref={inputNumberRef}
           onChange={
             onChange
               ? onChange
               : (e) => {
-                handleChange(
-                  name,
-                  e.target.value === ''
-                    ? 0
-                    : parseFloat(parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces === undefined ? 2 : fieldData?.decimalPlaces))
-                );
-              }
+                  handleChange(
+                    name,
+                    e.target.value === ''
+                      ? 0
+                      : parseFloat(parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces === undefined ? 2 : fieldData?.decimalPlaces))
+                  );
+                }
           }
-        // onChange={
-        //   onChange
-        //     ? onChange
-        //     : (e) => {
-        //       handleChange(name, e.target.value ?
-        //         parseFloat((parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces === undefined ? 2 : fieldData?.decimalPlaces))) : 0);
-        //     }
-        // }
+          // onChange={
+          //   onChange
+          //     ? onChange
+          //     : (e) => {
+          //       handleChange(name, e.target.value ?
+          //         parseFloat((parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces === undefined ? 2 : fieldData?.decimalPlaces))) : 0);
+          //     }
+          // }
         />
       </InfoLabel>
     ) : type === 'email' ? (
@@ -1146,14 +1141,14 @@ const FormTypes = (props) => {
             onChange
               ? onChange
               : (val) => {
-                // check to see if the value has only country code
-                // 5 is choosen here because some country code has 4 digit and "+"
-                if (val?.length < 5) {
-                  handleChange(name, '');
-                } else {
-                  handleChange(name, val);
+                  // check to see if the value has only country code
+                  // 5 is choosen here because some country code has 4 digit and "+"
+                  if (val?.length < 5) {
+                    handleChange(name, '');
+                  } else {
+                    handleChange(name, val);
+                  }
                 }
-              }
           }
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}
@@ -1185,6 +1180,7 @@ const FormTypes = (props) => {
               {...params}
               variant="outlined"
               margin="dense"
+              size="small"
               label={getLabel(label)}
               name={name}
               error={touched[name] && Boolean(errors[name])}
@@ -1271,7 +1267,7 @@ const FormTypes = (props) => {
           doNotShowInfoTooltip={doNotShowInfoTooltip}
         >
           <Grid container spacing={1}>
-            <Grid item style={{ flexGrow: 1 }}>
+            <Grid style={{ flexGrow: 1 }}>
               <Autocomplete
                 {...rest}
                 limitTags={2}
@@ -1283,7 +1279,7 @@ const FormTypes = (props) => {
                 }
                 freeSolo={type === 'dropDown' && !lookup}
                 getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                getOptionSelected={(option: any, val) => option.optionValue === val}
+                isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                 value={
                   option.filter((data) => data.optionValue === values[name]).length
                     ? option.filter((data) => data.optionValue === values[name])[0]
@@ -1292,66 +1288,66 @@ const FormTypes = (props) => {
                 onChange={
                   onChange
                     ? onChange
-                    : (e, val) => {
-                      if (setFieldValue) {
-                        if (!lookup) {
-                          if (typeof val === 'string' && /^[a-zA-Z ]*$/.test(val)) {
-                            const newOption = {
-                              order: option.length,
-                              default: false,
-                              optionLabel: val,
-                              optionValue: val
-                            };
-
-                            if (!option?.find((o) => o?.optionValue.includes(val)) && (addAdditionalOption || fieldData?.addAdditionalOption)) {
-                              addFieldOption(newOption);
-                              setOptionsList([...option, newOption]);
-                            }
-                            if (addAdditionalOption || fieldData?.addAdditionalOption) {
-                              handleChange(name, val);
-                            }
-                          } else if (val && val.inputValue && /^[a-zA-Z ]*$/.test(val.inputValue)) {
-                            const newOption = {
-                              order: option.length,
-                              default: false,
-                              optionLabel: val.inputValue,
-                              optionValue: val.inputValue
-                            };
-                            if (
-                              !option?.find((o) => o?.optionValue.includes(val.inputValue)) &&
-                              (addAdditionalOption || fieldData?.addAdditionalOption)
-                            ) {
-                              setOptionsList([...option, newOption]);
-                              addFieldOption(newOption);
-                            }
-                            if (addAdditionalOption || fieldData?.addAdditionalOption) {
-                              handleChange(name, val.inputValue);
-                            }
-                          } else {
-                            if (val) {
+                    : (e, val: any) => {
+                        if (setFieldValue) {
+                          if (!lookup) {
+                            if (typeof val === 'string' && /^[a-zA-Z ]*$/.test(val)) {
                               const newOption = {
-                                ...val,
-                                optionLabel: val.optionValue
+                                order: option.length,
+                                default: false,
+                                optionLabel: val,
+                                optionValue: val
+                              };
+
+                              if (!option?.find((o) => o?.optionValue.includes(val)) && (addAdditionalOption || fieldData?.addAdditionalOption)) {
+                                addFieldOption(newOption);
+                                setOptionsList([...option, newOption]);
+                              }
+                              if (addAdditionalOption || fieldData?.addAdditionalOption) {
+                                handleChange(name, val);
+                              }
+                            } else if (val && val.inputValue && /^[a-zA-Z ]*$/.test(val.inputValue)) {
+                              const newOption = {
+                                order: option.length,
+                                default: false,
+                                optionLabel: val.inputValue,
+                                optionValue: val.inputValue
                               };
                               if (
-                                !option?.find((o) => o?.optionValue.includes(val.optionValue)) &&
+                                !option?.find((o) => o?.optionValue.includes(val.inputValue)) &&
                                 (addAdditionalOption || fieldData?.addAdditionalOption)
                               ) {
+                                setOptionsList([...option, newOption]);
                                 addFieldOption(newOption);
-                                setOptionsList([newOption, ...option]);
                               }
-                              handleChange(name, val && val.optionValue ? val.optionValue : '');
+                              if (addAdditionalOption || fieldData?.addAdditionalOption) {
+                                handleChange(name, val.inputValue);
+                              }
+                            } else {
+                              if (val) {
+                                const newOption = {
+                                  ...val,
+                                  optionLabel: val.optionValue
+                                };
+                                if (
+                                  !option?.find((o) => o?.optionValue.includes(val.optionValue)) &&
+                                  (addAdditionalOption || fieldData?.addAdditionalOption)
+                                ) {
+                                  addFieldOption(newOption);
+                                  setOptionsList([newOption, ...option]);
+                                }
+                                handleChange(name, val && val.optionValue ? val.optionValue : '');
+                              }
+                              //  This else was not there, so In budget create dialog if I was removing the selected dropdown value, the value did not get clear
+                              else {
+                                handleChange(name, val && val.optionValue ? val.optionValue : '');
+                              }
                             }
-                            //  This else was not there, so In budget create dialog if I was removing the selected dropdown value, the value did not get clear
-                            else {
-                              handleChange(name, val && val.optionValue ? val.optionValue : '');
-                            }
+                          } else {
+                            handleChange(name, val && val.optionValue ? val.optionValue : '');
                           }
-                        } else {
-                          handleChange(name, val && val.optionValue ? val.optionValue : '');
                         }
                       }
-                    }
                 }
                 filterOptions={(options, params) => {
                   const filtered = filter(options, params);
@@ -1440,7 +1436,7 @@ const FormTypes = (props) => {
       fieldData?.displayUnits &&
       Array.isArray(fieldData?.displayUnits) &&
       fieldData?.displayUnits.map((_unit, i) => (
-        <Grid key={_unit} item xs={12} sm={6} md={6}>
+        <Grid key={_unit} size={{ xs: 12, sm: 6, md: 6 }}>
           <Box display="flex">
             <Box flexGrow={1}>
               <InfoLabel
@@ -1462,7 +1458,7 @@ const FormTypes = (props) => {
                       fieldData?.decimalPlaces
                     )}
                     getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                    getOptionSelected={(option: any, val) => option.optionValue === val}
+                    isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                     value={
                       optionConverter(
                         option,
@@ -1473,16 +1469,16 @@ const FormTypes = (props) => {
                         fieldData.decimalPlaces
                       ).filter((data) => data.optionValue.toString() === values[name + '_' + _unit.toLowerCase()]?.toString()).length
                         ? optionConverter(
-                          option,
-                          fieldData?.units,
-                          fieldData?.unitoption,
-                          fieldData?.dropdownOnConverter,
-                          _unit,
-                          fieldData?.decimalPlaces
-                        ).filter((data) => data.optionValue.toString() === values[name + '_' + _unit.toLowerCase()]?.toString())[0]
+                            option,
+                            fieldData?.units,
+                            fieldData?.unitoption,
+                            fieldData?.dropdownOnConverter,
+                            _unit,
+                            fieldData?.decimalPlaces
+                          ).filter((data) => data.optionValue.toString() === values[name + '_' + _unit.toLowerCase()]?.toString())[0]
                         : ''
                     }
-                    onChange={onChange ? onChange : (e, val) => handleConverterChange(name, _unit, val && parseFloat(val.optionValue))}
+                    onChange={onChange ? onChange : (e, val: any) => handleConverterChange(name, _unit, val && parseFloat(val.optionValue))}
                     renderInput={(params) => (
                       <TextField
                         {...params}
@@ -1512,9 +1508,11 @@ const FormTypes = (props) => {
                         ? onChange
                         : (e) => handleConverterChange(name, _unit, e.target.value === '' ? '' : parseFloat(e.target.value.replace(/[^0-9\.]/g, '')))
                     }
-                    InputProps={{
-                      inputProps: { min: 0 },
-                      readOnly: fieldData && fieldData?.isUneditable ? true : false
+                    slotProps={{
+                      input: {
+                        inputProps: { min: 0 },
+                        readOnly: fieldData && fieldData?.isUneditable ? true : false
+                      }
                     }}
                   />
                 )}
@@ -1536,12 +1534,12 @@ const FormTypes = (props) => {
                 {(fieldData?.leval === 'product-custom' ||
                   fieldData?.leval === 'product-builder-custom' ||
                   fieldData?.leval === 'price-builder-custom') && (
-                    <HtmlTooltip title="Remove">
-                      <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
-                        <HighlightOffIcon color="error" />
-                      </IconButton>
-                    </HtmlTooltip>
-                  )}
+                  <HtmlTooltip title="Remove">
+                    <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
+                      <HighlightOffIcon color="error" />
+                    </IconButton>
+                  </HtmlTooltip>
+                )}
                 {isExtraDispayType && (
                   <AddDisplayTypeDialog
                     handleAddDisplayType={handleAddDisplayType}
@@ -1569,7 +1567,7 @@ const FormTypes = (props) => {
         fieldData?.displayCurrency?.map((_currency, i) =>
           fieldData?.isConverter && fieldData?.displayUnits?.length ? (
             fieldData?.displayUnits?.map((_unit, j) => (
-              <Grid key={_unit} item xs={12} sm={6} md={6}>
+              <Grid key={_unit} size={{ xs: 12, sm: 6, md: 6 }}>
                 <Box display="flex">
                   <Box flexGrow={1}>
                     <InfoLabel
@@ -1589,8 +1587,8 @@ const FormTypes = (props) => {
                         value={
                           values[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()]
                             ? values[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()].toLocaleString(undefined, {
-                              maximumFractionDigits: fieldData?.decimalPlaces
-                            })
+                                maximumFractionDigits: fieldData?.decimalPlaces
+                              })
                             : values[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()]
                         }
                         error={
@@ -1606,33 +1604,35 @@ const FormTypes = (props) => {
                           onChange
                             ? onChange
                             : (e) => {
-                              if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
-                                handleCurrencyChangeWithConverterChange(
-                                  name,
-                                  _currency,
-                                  _unit,
-                                  e.target.value === ''
-                                    ? 0
-                                    : e.target.value.slice(-1) === '.' || e?.target?.value?.slice(-2) === '.0'
-                                      ? e.target.value.replace(/,/g, '')
-                                      : parseFloat(e.target.value.replace(/,/g, ''))
-                                );
+                                if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
+                                  handleCurrencyChangeWithConverterChange(
+                                    name,
+                                    _currency,
+                                    _unit,
+                                    e.target.value === ''
+                                      ? 0
+                                      : e.target.value.slice(-1) === '.' || e?.target?.value?.slice(-2) === '.0'
+                                        ? e.target.value.replace(/,/g, '')
+                                        : parseFloat(e.target.value.replace(/,/g, ''))
+                                  );
+                                }
                               }
-                            }
                         }
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              {result(
-                                find(getUniqueCurrencies(), function (obj) {
-                                  return obj.currencyCode === _currency;
-                                }),
-                                'symbolNative'
-                              )}
-                            </InputAdornment>
-                          ),
-                          inputProps: { min: 0, max: 9999999999 },
-                          readOnly: fieldData && fieldData?.isUneditable ? true : false
+                        slotProps={{
+                          input: {
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                {result(
+                                  find(getUniqueCurrencies(), function (obj) {
+                                    return obj.currencyCode === _currency;
+                                  }),
+                                  'symbolNative'
+                                )}
+                              </InputAdornment>
+                            ),
+                            inputProps: { min: 0, max: 9999999999 },
+                            readOnly: fieldData && fieldData?.isUneditable ? true : false
+                          }
                         }}
                       />
                     </InfoLabel>
@@ -1654,12 +1654,12 @@ const FormTypes = (props) => {
                       {(fieldData?.leval === 'product-custom' ||
                         fieldData?.leval === 'product-builder-custom' ||
                         fieldData?.leval === 'price-builder-custom') && (
-                          <HtmlTooltip title="Remove">
-                            <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
-                              <HighlightOffIcon color="error" />
-                            </IconButton>
-                          </HtmlTooltip>
-                        )}
+                        <HtmlTooltip title="Remove">
+                          <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
+                            <HighlightOffIcon color="error" />
+                          </IconButton>
+                        </HtmlTooltip>
+                      )}
                       {fieldData?.displayUnits?.length !== fieldData?.units?.length && (
                         <HtmlTooltip title="Add Converter" className="formActionButton">
                           <IconButton
@@ -1715,7 +1715,7 @@ const FormTypes = (props) => {
               </Grid>
             ))
           ) : (
-            <Grid key={_currency} item xs={12} sm={6} md={6}>
+            <Grid key={_currency} size={{ xs: 12, sm: 6, md: 6 }}>
               <Box display="flex">
                 <Box flexGrow={1}>
                   <InfoLabel
@@ -1735,8 +1735,8 @@ const FormTypes = (props) => {
                       value={
                         values[name + '_' + _currency.toLowerCase()]
                           ? values[name + '_' + _currency.toLowerCase()].toLocaleString(undefined, {
-                            maximumFractionDigits: fieldData?.decimalPlaces
-                          })
+                              maximumFractionDigits: fieldData?.decimalPlaces
+                            })
                           : values[name + '_' + _currency.toLowerCase()]
                       }
                       error={touched[name + '_' + _currency.toLowerCase()] && Boolean(errors[name + '_' + _currency.toLowerCase()])}
@@ -1746,14 +1746,14 @@ const FormTypes = (props) => {
                         onChange
                           ? onChange
                           : (e) => {
-                            if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
-                              if (fieldData?.displayCurrency?.length > 1) {
-                                handleCurrencyChange(name, _currency, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
-                              } else {
-                                handleChange(name + '_' + _currency.toLowerCase(), e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
+                              if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
+                                if (fieldData?.displayCurrency?.length > 1) {
+                                  handleCurrencyChange(name, _currency, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
+                                } else {
+                                  handleChange(name + '_' + _currency.toLowerCase(), e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
+                                }
                               }
                             }
-                          }
                       }
                       onBlur={(e) => {
                         if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
@@ -1771,19 +1771,21 @@ const FormTypes = (props) => {
                           }
                         }
                       }}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            {result(
-                              find(getUniqueCurrencies(), function (obj) {
-                                return obj.currencyCode === _currency;
-                              }),
-                              'symbolNative'
-                            )}
-                          </InputAdornment>
-                        ),
-                        inputProps: { min: 0 },
-                        readOnly: fieldData && fieldData?.isUneditable ? true : false
+                      slotProps={{
+                        input: {
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              {result(
+                                find(getUniqueCurrencies(), function (obj) {
+                                  return obj.currencyCode === _currency;
+                                }),
+                                'symbolNative'
+                              )}
+                            </InputAdornment>
+                          ),
+                          inputProps: { min: 0 },
+                          readOnly: fieldData && fieldData?.isUneditable ? true : false
+                        }
                       }}
                     />
                   </InfoLabel>
@@ -1806,12 +1808,12 @@ const FormTypes = (props) => {
                     {(fieldData?.leval === 'product-custom' ||
                       fieldData?.leval === 'product-builder-custom' ||
                       fieldData?.leval === 'price-builder-custom') && (
-                        <HtmlTooltip title="Remove">
-                          <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
-                            <HighlightOffIcon color="error" />
-                          </IconButton>
-                        </HtmlTooltip>
-                      )}
+                      <HtmlTooltip title="Remove">
+                        <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
+                          <HighlightOffIcon color="error" />
+                        </IconButton>
+                      </HtmlTooltip>
+                    )}
                     {isExtraDispayType && (
                       <AddDisplayTypeDialog
                         handleAddDisplayType={handleAddDisplayType}
@@ -1861,12 +1863,14 @@ const FormTypes = (props) => {
             onChange
               ? onChange
               : (e) => {
-                handleChange(name, e.target.value === '' ? '' : parseFloat(parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces || 0)));
-              }
+                  handleChange(name, e.target.value === '' ? '' : parseFloat(parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces || 0)));
+                }
           }
-          InputProps={{
-            inputProps: { min: 0 },
-            readOnly: fieldData && fieldData?.isUneditable ? true : false
+          slotProps={{
+            input: {
+              inputProps: { min: 0 },
+              readOnly: fieldData && fieldData?.isUneditable ? true : false
+            }
           }}
         />
         {rest?.isMinMaxValue && (
@@ -1905,16 +1909,18 @@ const FormTypes = (props) => {
             onChange
               ? onChange
               : (e) => {
-                if (fieldData?.returnType === 'decimal') {
-                  handleChange(name, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
-                } else {
-                  handleChange(name, e.target.value);
+                  if (fieldData?.returnType === 'decimal') {
+                    handleChange(name, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
+                  } else {
+                    handleChange(name, e.target.value);
+                  }
                 }
-              }
           }
-          InputProps={{
-            inputProps: { min: 0 },
-            readOnly: fieldData && fieldData?.isUneditable ? true : false
+          slotProps={{
+            input: {
+              inputProps: { min: 0 },
+              readOnly: fieldData && fieldData?.isUneditable ? true : false
+            }
           }}
         />
       </InfoLabel>
@@ -1925,56 +1931,16 @@ const FormTypes = (props) => {
         warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
         warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
       >
-        <Autocomplete
+        <CurrencyAutocomplete
           {...rest}
-          limitTags={2}
-          fullWidth
-          value={
-            currencyData.filter((data) => data.currencyCode === values[name]).length
-              ? currencyData.filter((data) => data.currencyCode === values[name])[0]
-              : ''
-          }
-          options={currencyData}
-          getOptionLabel={(option: any) => (option ? `${option.currencyCode} - ${option.currencyName} - (${option.symbolNative})` : '')}
-          getOptionSelected={(option: any, val) => option.currencyCode === val}
-          onChange={onChange ? onChange : (e, val) => handleChange(name, val && val.currencyCode ? val.currencyCode : '')}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              variant="outlined"
-              name={name}
-              label={getLabel(label)}
-              error={touched[name] && Boolean(errors[name])}
-              helperText={touched[name] && errors[name]}
-              required={required}
-            />
-          )}
-          renderOption={(option) => {
-            const { currencyCode, currencyName, symbolNative } = option;
-            return `${currencyCode} - ${currencyName} - (${symbolNative})`;
-          }}
-        // renderOption={(option) => {
-        //   const { currencyCode, name, countryCode, symbolNative } = option;
-        //   return (
-        //     <Grid container alignItems="center">
-        //       <Grid item>
-        //         <Avatar
-        //           variant="rounded"
-        //           src={`https://lipis.github.io/flag-icon-css/flags/4x3/${countryCode.toLowerCase()}.svg`}
-        //           style={{ marginRight: 20, width: "40px", height: "30px" }}
-        //         />
-        //       </Grid>
-        //       <Grid item xs>
-        //         <Typography>
-        //           {currencyCode} ({symbolNative})
-        //         </Typography>
-        //         <Typography variant="body2" color="textSecondary">
-        //           {name}
-        //         </Typography>
-        //       </Grid>
-        //     </Grid>
-        //   );
-        // }}
+          required={true}
+          value={values[name]}
+          label={getLabel(label)}
+          name={name}
+          fullWidth={true}
+          onChange={onChange ? onChange : (e, val: any) => handleChange(name, val && val.currencyCode ? val.currencyCode : '')}
+          helperText={touched[name] && errors[name]}
+          error={touched[name] && Boolean(errors[name])}
         />
       </InfoLabel>
     ) : type === 'multiSelect' ? (
@@ -1986,7 +1952,11 @@ const FormTypes = (props) => {
         warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
       >
         <Grid container spacing={1}>
-          <Grid item xs={!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) ? 10 : 12}>
+          <Grid
+            size={{
+              xs: !lookup && (addAdditionalOption || fieldData?.addAdditionalOption) ? 10 : 12
+            }}
+          >
             <Autocomplete
               {...rest}
               limitTags={2}
@@ -2006,100 +1976,100 @@ const FormTypes = (props) => {
               ]}
               getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
               value={values[name] ? option.filter((data: any) => values[name].includes(data.optionValue)) : []}
-              getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+              isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
               onChange={
                 onChange
                   ? (e, value: any, reason) => {
-                    const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
-                    if (isSelectedAll) {
-                      onChange(
-                        e,
-                        option.filter((opt) => opt.optionValue !== 'selectAll'),
-                        reason
-                      );
-                    } else {
-                      onChange(e, value, reason);
-                    }
-                  }
-                  : (e, value: any, reason) => {
-                    if (setFieldValue) {
-                      if (!lookup) {
-                        if (reason === 'clear') {
-                          setFieldValue(name, []);
-                        } else if (reason === 'remove-option' && values[name].length === 1) {
-                          setFieldValue(name, []);
-                        }
-                        let modValues = [];
-                        if (!value.some((val) => val.optionValue === 'selectAll')) {
-                          modValues = value;
-                        } else {
-                          modValues = option.filter((opt) => opt.optionValue !== 'selectAll');
-                        }
-                        modValues.forEach((val) => {
-                          if (typeof val === 'string' && /^[a-zA-Z ]*$/.test(val)) {
-                            const newOption = {
-                              order: option.length,
-                              default: false,
-                              optionLabel: val,
-                              optionValue: val
-                            };
-
-                            if (!option?.find((o) => o?.optionValue.includes(val)) && (addAdditionalOption || fieldData?.addAdditionalOption)) {
-                              addFieldOption(newOption);
-                              setOptionsList([...option, newOption]);
-                            }
-                            if (addAdditionalOption || fieldData?.addAdditionalOption) {
-                              setFieldValue(name, [...values[name], val]);
-                            }
-                          } else if (val && val.inputValue && /^[a-zA-Z ]*$/.test(val.inputValue)) {
-                            const newOption = {
-                              order: option.length,
-                              default: false,
-                              optionLabel: val.inputValue,
-                              optionValue: val.inputValue
-                            };
-
-                            if (!option?.find((o) => o?.optionValue.includes(val)) && (addAdditionalOption || fieldData?.addAdditionalOption)) {
-                              addFieldOption(newOption);
-                              setOptionsList([...option, newOption]);
-                            }
-                            if (addAdditionalOption || fieldData?.addAdditionalOption) {
-                              setFieldValue(name, [...values[name], val.inputValue]);
-                            }
-                          } else {
-                            if (val) {
-                              const newOption = {
-                                ...val,
-                                optionLabel: val.optionValue
-                              };
-                              if (
-                                !option?.find((o) => o?.optionValue.includes(val.optionValue)) &&
-                                (addAdditionalOption || fieldData?.addAdditionalOption)
-                              ) {
-                                addFieldOption(newOption);
-                                setOptionsList([newOption, ...option]);
-                              }
-                              setFieldValue(
-                                name,
-                                modValues.filter((v) => v.optionValue).map((val) => val.optionValue)
-                              );
-                            }
-                          }
-                        });
-                      } else {
-                        if (value.some((val) => val.optionValue === 'selectAll')) {
-                          setFieldValue(
-                            name,
-                            option.filter((opt) => opt.optionValue !== 'selectAll').map((val) => val.optionValue)
-                          );
-                        }
-                        setFieldValue(
-                          name,
-                          value.map((val) => val.optionValue)
+                      const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
+                      if (isSelectedAll) {
+                        onChange(
+                          e,
+                          option.filter((opt) => opt.optionValue !== 'selectAll'),
+                          reason
                         );
+                      } else {
+                        onChange(e, value, reason);
                       }
                     }
-                  }
+                  : (e, value: any, reason: any) => {
+                      if (setFieldValue) {
+                        if (!lookup) {
+                          if (reason === 'clear') {
+                            setFieldValue(name, []);
+                          } else if (reason === 'remove-option' && values[name].length === 1) {
+                            setFieldValue(name, []);
+                          }
+                          let modValues = [];
+                          if (!value.some((val) => val.optionValue === 'selectAll')) {
+                            modValues = value;
+                          } else {
+                            modValues = option.filter((opt) => opt.optionValue !== 'selectAll');
+                          }
+                          modValues.forEach((val) => {
+                            if (typeof val === 'string' && /^[a-zA-Z ]*$/.test(val)) {
+                              const newOption = {
+                                order: option.length,
+                                default: false,
+                                optionLabel: val,
+                                optionValue: val
+                              };
+
+                              if (!option?.find((o) => o?.optionValue.includes(val)) && (addAdditionalOption || fieldData?.addAdditionalOption)) {
+                                addFieldOption(newOption);
+                                setOptionsList([...option, newOption]);
+                              }
+                              if (addAdditionalOption || fieldData?.addAdditionalOption) {
+                                setFieldValue(name, [...values[name], val]);
+                              }
+                            } else if (val && val.inputValue && /^[a-zA-Z ]*$/.test(val.inputValue)) {
+                              const newOption = {
+                                order: option.length,
+                                default: false,
+                                optionLabel: val.inputValue,
+                                optionValue: val.inputValue
+                              };
+
+                              if (!option?.find((o) => o?.optionValue.includes(val)) && (addAdditionalOption || fieldData?.addAdditionalOption)) {
+                                addFieldOption(newOption);
+                                setOptionsList([...option, newOption]);
+                              }
+                              if (addAdditionalOption || fieldData?.addAdditionalOption) {
+                                setFieldValue(name, [...values[name], val.inputValue]);
+                              }
+                            } else {
+                              if (val) {
+                                const newOption = {
+                                  ...val,
+                                  optionLabel: val.optionValue
+                                };
+                                if (
+                                  !option?.find((o) => o?.optionValue.includes(val.optionValue)) &&
+                                  (addAdditionalOption || fieldData?.addAdditionalOption)
+                                ) {
+                                  addFieldOption(newOption);
+                                  setOptionsList([newOption, ...option]);
+                                }
+                                setFieldValue(
+                                  name,
+                                  modValues.filter((v) => v.optionValue).map((val) => val.optionValue)
+                                );
+                              }
+                            }
+                          });
+                        } else {
+                          if (value.some((val) => val.optionValue === 'selectAll')) {
+                            setFieldValue(
+                              name,
+                              option.filter((opt) => opt.optionValue !== 'selectAll').map((val) => val.optionValue)
+                            );
+                          }
+                          setFieldValue(
+                            name,
+                            value.map((val) => val.optionValue)
+                          );
+                        }
+                      }
+                    }
               }
               filterOptions={(options, params) => {
                 const filtered = filter(options, params);
@@ -2136,7 +2106,7 @@ const FormTypes = (props) => {
             />
           </Grid>
           {!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) && (
-            <Grid item xs={2}>
+            <Grid size={{ xs: 2 }}>
               <Box style={{ marginTop: '7px' }}>
                 <IconButton onClick={() => setOptionSaveDialog(true)} size="small" color="primary">
                   <AddCircleIcon />
@@ -2236,9 +2206,9 @@ const FormTypes = (props) => {
             onChange
               ? onChange
               : (event, newValue) => {
-                setOptions(newValue ? [newValue, ...optionsList] : optionsList);
-                setValue(newValue);
-              }
+                  setOptions(newValue ? [newValue, ...optionsList] : optionsList);
+                  setValue(newValue);
+                }
           }
           onInputChange={(event, newInputValue) => {
             handleChange(name, newInputValue);
@@ -2254,34 +2224,36 @@ const FormTypes = (props) => {
               required={required}
             />
           )}
-          renderOption={(option: any) => {
+          renderOption={(props, option: any) => {
             const matches = option?.structured_formatting?.main_text_matched_substrings || [];
             const parts = parse(
               option?.structured_formatting.main_text,
               matches?.map((match) => [match?.offset, match?.offset + match?.length])
             );
+            const { key, ...optionProps } = props;
             return (
-              <Grid container alignItems="center">
-                <Grid item>
-                  <LocationOnIcon
-                    style={{
-                      color: theme.palette.text.secondary,
-                      marginRight: theme.spacing(2)
-                    }}
-                  />
+              <Box key={key} component="li" {...optionProps}>
+                <Grid container alignItems="center">
+                  <Grid>
+                    <LocationOnIcon
+                      style={{
+                        color: theme.palette.text.secondary,
+                        marginRight: theme.spacing(2)
+                      }}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 'auto' }}>
+                    {parts?.map((part, index) => (
+                      <span key={index} style={{ fontWeight: part.highlight ? 700 : 400 }}>
+                        {part.text}
+                      </span>
+                    ))}
+                    <Typography variant="body2" color="textSecondary">
+                      {option.structured_formatting.secondary_text}
+                    </Typography>
+                  </Grid>
                 </Grid>
-                <Grid item xs>
-                  {parts?.map((part, index) => (
-                    <span key={index} style={{ fontWeight: part.highlight ? 700 : 400 }}>
-                      {part.text}
-                    </span>
-                  ))}
-
-                  <Typography variant="body2" color="textSecondary">
-                    {option.structured_formatting.secondary_text}
-                  </Typography>
-                </Grid>
-              </Grid>
+              </Box>
             );
           }}
         />
@@ -2306,19 +2278,19 @@ const FormTypes = (props) => {
           onChange={
             onChange
               ? onChange
-              : async (event, newValue) => {
-                setOptions(newValue ? [newValue, ...optionsList] : optionsList);
-                if (newValue && newValue.place_id) {
-                  try {
-                    const placeDetails = await fetchPlaceDetails(newValue.place_id);
-                    handleChange(name, placeDetails);
-                  } catch (error) {
+              : async (event, newValue: any) => {
+                  setOptions(newValue ? [newValue, ...optionsList] : optionsList);
+                  if (newValue && newValue.place_id) {
+                    try {
+                      const placeDetails = await fetchPlaceDetails(newValue.place_id);
+                      handleChange(name, placeDetails);
+                    } catch (error) {
+                      handleChange(name, { locationName: newValue.description });
+                    }
+                  } else {
                     handleChange(name, { locationName: newValue.description });
                   }
-                } else {
-                  handleChange(name, { locationName: newValue.description });
                 }
-              }
           }
           onInputChange={(event, newInputValue, reason) => {
             if (reason === 'input') {
@@ -2346,7 +2318,7 @@ const FormTypes = (props) => {
 
             return (
               <Grid container alignItems="center">
-                <Grid item>
+                <Grid>
                   <LocationOnIcon
                     style={{
                       color: theme.palette.text.secondary,
@@ -2354,7 +2326,7 @@ const FormTypes = (props) => {
                     }}
                   />
                 </Grid>
-                <Grid item xs>
+                <Grid size={{ xs: 'auto' }}>
                   {parts?.map((part, index) => (
                     <span key={index} style={{ fontWeight: part.highlight ? 700 : 400 }}>
                       {part.text}
@@ -2448,9 +2420,9 @@ const FormTypes = (props) => {
         <input accept="image/*" style={{ display: 'none' }} id="multiple-images-button" multiple={false} type="file" onChange={readImageFile} />
         <div className="flex items-center gap-2">
           <label htmlFor="multiple-images-button">
-            <Button disabled={readingImage} variant="contained" color="primary" component="span" size={'small'}>
+            <ThemeButton disabled={readingImage} buttonType="theme">
               Upload image(s)
-            </Button>
+            </ThemeButton>
           </label>
         </div>
         <Box mt={1}>
@@ -2458,18 +2430,18 @@ const FormTypes = (props) => {
             <ImageList style={{ transform: 'translateZ(0)', width: '100%' }}>
               {values[name]
                 ? values[name].map((item, i) => (
-                  <ImageListItem style={{ height: '150px', width: '160px' }} key={item}>
-                    <img src={item} alt={`demo ${i + 1}`} />
-                    <ImageListItemBar
-                      title={''}
-                      actionIcon={
-                        <IconButton onClick={() => removeImage(item)} aria-label={`demo ${i + 1}`}>
-                          <DeleteIcon color="error" />
-                        </IconButton>
-                      }
-                    />
-                  </ImageListItem>
-                ))
+                    <ImageListItem style={{ height: '150px', width: '160px' }} key={item}>
+                      <img src={item} alt={`demo ${i + 1}`} />
+                      <ImageListItemBar
+                        title={''}
+                        actionIcon={
+                          <IconButton onClick={() => removeImage(item)} aria-label={`demo ${i + 1}`}>
+                            <DeleteIcon color="error" />
+                          </IconButton>
+                        }
+                      />
+                    </ImageListItem>
+                  ))
                 : null}
             </ImageList>
           </Box>
@@ -2531,17 +2503,9 @@ const FormTypes = (props) => {
           />
           <div className="flex items-center gap-2">
             <label htmlFor={name}>
-              <Button
-                disabled={isFileUploading || !canEdit}
-                variant="contained"
-                color="primary"
-                size="small"
-                component="span"
-                className="normal-case"
-                startIcon={isFileUploading && <CircularProgress size={15} />}
-              >
+              <ThemeButton disabled={isFileUploading || !canEdit} buttonType="theme" startIcon={isFileUploading && <CircularProgress size={15} />}>
                 {isFileUploading ? 'Uploading...' : required ? 'Upload File *' : 'Upload File'}
-              </Button>
+              </ThemeButton>
             </label>
           </div>
           {doNotShowUploadedFile ? null : (
@@ -2592,7 +2556,7 @@ const FormTypes = (props) => {
         </Box>
         <Box display="flex" alignItems="center">
           <Grid container spacing={1} alignItems="center">
-            <Grid item xs={12} sm={12} md={12}>
+            <Grid size={{ xs: 12, sm: 12, md: 12 }}>
               <input
                 disabled={isFileUploading || !canEdit}
                 id={name}
@@ -2606,17 +2570,13 @@ const FormTypes = (props) => {
               />
               <div className="flex items-center gap-2">
                 <label htmlFor={name}>
-                  <Button
+                  <ThemeButton
                     disabled={isFileUploading || !canEdit}
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    component="span"
-                    className="normal-case"
-                    startIcon={isFileUploading && <CircularProgress size={15} />}
+                    buttonType="theme"
+                    isLoading={isFileUploading}
                   >
                     {isFileUploading ? 'Uploading File(s)' : required ? 'Upload File(s) *' : 'Upload File(s)'}
-                  </Button>
+                  </ThemeButton>
                 </label>
               </div>
               {touched[name] && Boolean(errors[name]) && (
@@ -2660,7 +2620,7 @@ const FormTypes = (props) => {
                   </>
                 ))}
                 {isFileUploading && (
-                  <Grid item xs={10} sm={10} md={10}>
+                  <Grid size={{ xs: 10, sm: 10, md: 10 }}>
                     <Typography variant="body2" className="text-truncate" color={'textPrimary'}>
                       {`Uploading... ${fileUploadProgress}%`}
                     </Typography>
@@ -2698,29 +2658,19 @@ const FormTypes = (props) => {
         warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
         warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
       >
-        <MuiPickersUtilsProvider utils={DateUtils}>
-          <KeyboardDatePicker
-            {...rest}
-            disabled={fieldData?.isUneditable || rest?.disabled}
-            clearable
-            autoOk
-            required={required}
-            variant="inline"
-            inputVariant="outlined"
-            value={values[name] || null}
-            name={name}
-            label={getLabel(label)}
-            {...(fieldData?.restrictFutureDate ? { maxDate: new Date() } : {})}
-            {...(fieldData?.restrictBackDate ? { minDate: new Date() } : {})}
-            onChange={onChange ? onChange : (date) => handleChange(name, date ? date : '')}
-            error={customError[name] || (touched[name] && Boolean(errors[name]))}
-            helperText={customError[name] || (touched[name] && errors[name])}
-            format={dateFormatForInputControl}
-            InputLabelProps={{
-              shrink: true
-            }}
-          />
-        </MuiPickersUtilsProvider>
+        <CustomDatePicker
+          {...rest}
+          disabled={fieldData?.isUneditable || rest?.disabled}
+          required={required}
+          value={values[name]}
+          name={name}
+          label={getLabel(label)}
+          {...(fieldData?.restrictFutureDate ? { maxDate: new Date() } : {})}
+          {...(fieldData?.restrictBackDate ? { minDate: new Date() } : {})}
+          onChange={onChange ? onChange : (date) => handleChange(name, date ? date : '')}
+          error={customError[name] || (touched[name] && Boolean(errors[name]))}
+          helperText={customError[name] || (touched[name] && errors[name])}
+        />
       </InfoLabel>
     ) : type === 'dateTime' ? (
       <InfoLabel
@@ -2729,30 +2679,22 @@ const FormTypes = (props) => {
         warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
         warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
       >
-        <MuiPickersUtilsProvider utils={DateUtils}>
-          <KeyboardDateTimePicker
-            {...rest}
-            autoOk
-            clearable
-            required={required}
-            variant="inline"
-            inputVariant="outlined"
-            ampm={false}
-            value={values[name]}
-            name={name}
-            label={getLabel(label)}
-            {...(fieldData?.restrictFutureDate ? { maxDate: new Date() } : {})}
-            {...(fieldData?.restrictBackDate ? { minDate: new Date() } : {})}
-            onChange={(date) => handleChange(name, date)}
-            onError={console.error}
-            format={dateFormatForInputControl + ' HH:mm'}
-            error={touched[name] && Boolean(errors[name])}
-            helperText={touched[name] && errors[name]}
-            InputLabelProps={{
-              shrink: true
-            }}
-          />
-        </MuiPickersUtilsProvider>
+        <CustomDateTimePicker
+          {...rest}
+          required={required}
+          variant="inline"
+          inputVariant="outlined"
+          ampm={false}
+          value={values[name]}
+          name={name}
+          label={getLabel(label)}
+          {...(fieldData?.restrictFutureDate ? { maxDateTime: new Date() } : {})}
+          {...(fieldData?.restrictBackDate ? { minDateTime: new Date() } : {})}
+          onChange={(date) => handleChange(name, date)}
+          onError={console.error}
+          error={touched[name] && Boolean(errors[name])}
+          helperText={touched[name] && errors[name]}
+        />
       </InfoLabel>
     ) : type === 'year' ? (
       <InfoLabel
@@ -2761,26 +2703,18 @@ const FormTypes = (props) => {
         warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
         warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
       >
-        <MuiPickersUtilsProvider utils={DateUtils}>
-          <DatePicker
-            {...rest}
-            autoOk
-            clearable
-            required={required}
-            variant="inline"
-            inputVariant="outlined"
-            value={values[name] || new Date()}
-            name={name}
-            label={getLabel(label)}
-            views={['year']}
-            onChange={(date) => handleChange(name, date)}
-            error={touched[name] && Boolean(errors[name])}
-            helperText={touched[name] && errors[name]}
-            InputLabelProps={{
-              shrink: true
-            }}
-          />
-        </MuiPickersUtilsProvider>
+        <CustomDatePicker
+          {...rest}
+          required={required}
+          value={values[name] || new Date()}
+          name={name}
+          label={getLabel(label)}
+          views={['year']}
+          onChange={(date) => handleChange(name, date)}
+          error={touched[name] && Boolean(errors[name])}
+          helperText={touched[name] && errors[name]}
+          inputFormat={'YYYY'}
+        />
       </InfoLabel>
     ) : type === 'colorPicker' ? (
       <InfoLabel
@@ -2826,14 +2760,7 @@ const FormTypes = (props) => {
         fieldData={fieldData}
       />
     ) : type === 'counter' ? (
-      <Counter
-        label={label}
-        values={values}
-        name={name}
-        setFieldValue={setFieldValue}
-        fieldData={fieldData}
-        touched={touched}
-        errors={errors} />
+      <Counter label={label} values={values} name={name} setFieldValue={setFieldValue} fieldData={fieldData} touched={touched} errors={errors} />
     ) : type === 'description' ? (
       <Description fieldData={fieldData} />
     ) : null

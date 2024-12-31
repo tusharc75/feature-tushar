@@ -1,5 +1,5 @@
-import { Grid, useMediaQuery } from '@material-ui/core';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { useMediaQuery } from '@mui/material';
+import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';

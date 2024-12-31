@@ -1,6 +1,6 @@
-import { Box, CircularProgress, TableBody } from '@material-ui/core';
-import MaUTable from '@material-ui/core/Table';
-import { Error } from '@material-ui/icons';
+import { Box, CircularProgress, TableBody } from '@mui/material';
+import MaUTable from '@mui/material/Table';
+import { Error } from '@mui/icons-material';
 import { Column, flexRender } from '@tanstack/react-table';
 import { defaultRangeExtractor, Range, useVirtualizer } from '@tanstack/react-virtual';
 import React, { ForwardedRef, forwardRef, Fragment, useEffect } from 'react';

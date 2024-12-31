@@ -1,15 +1,14 @@
-import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
-import { Box, IconButton, Paper, Typography } from '@material-ui/core';
+import { useState, useEffect, useContext } from 'react';
+import { Box, IconButton, Typography } from '@mui/material';
 import axiosInstance from '../../../axios/axiosInstance';
 import BoxWithBorder from '../../../components/BoxWithBorder';
-import { Skeleton } from '@material-ui/lab';
-import RefreshIcon from '@material-ui/icons/Refresh';
+import { Skeleton } from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import Accordion from '@material-ui/core/Accordion';
-import AccordionSummary from '@material-ui/core/AccordionSummary';
-import AccordionDetails from '@material-ui/core/AccordionDetails';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import routes from 'src/components/Helpers/Routes';
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 

@@ -1,9 +1,9 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
 import { Formik, Form } from 'formik';
-import { Box, Button } from '@material-ui/core';
+import { Box } from '@mui/material';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import CustomButton from '../../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { useData } from '../../../StateProvider/Provider';
@@ -19,24 +19,19 @@ import {
   SERVICE_ORDER_STATUS
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
-import moment from 'moment';
 import InputField from 'src/components/Helpers/InputField';
+import dayjs from 'dayjs';
 
-const ManageServiceOrderDialog = ({
-  isClone,
-  serviceOrderId,
-  onClose,
-  onSuccess,
-  open,
-}) => {
-
-  const { state: { user, resources } }: any = useData();
+const ManageServiceOrderDialog = ({ isClone, serviceOrderId, onClose, onSuccess, open }) => {
+  const {
+    state: { user, resources }
+  }: any = useData();
 
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -171,8 +166,8 @@ const ManageServiceOrderDialog = ({
 
   function validate(values) {
     const errors = {};
-    let estimateStartDate = moment(values?.estimateStartDate);
-    let estimateEndDate = moment(values?.estimateEndDate);
+    let estimateStartDate = dayjs(values?.estimateStartDate);
+    let estimateEndDate = dayjs(values?.estimateEndDate);
     if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
       errors['estimateEndDate'] = 'Please enter valid end date';
     }
@@ -210,7 +205,7 @@ const ManageServiceOrderDialog = ({
                       ? `Create ${resources?.fieldServiceOrder?.titleSingular}`
                       : `${isClone ? `Clone - ${cloneHeading}` : `Update ${serviceDetails?.fieldServiceOrderNumber}`}`
                   }
-                  onClose={(e, reason) => {
+                  onClose={() => {
                     if (isEqual(initialData.values, values)) {
                       onClose();
                     } else {
@@ -231,12 +226,17 @@ const ManageServiceOrderDialog = ({
                       setFieldValue={(name, value) => {
                         setFieldValue(name, value);
                         if (name === 'customerAccount') {
-                          const customerAccount = initialData?.fields?.find((e) => e?.fieldName === 'customerAccount')?.option.find((d) => d.optionValue === value);
-                          const collaborator = [...customerAccount.fieldServiceManager || [], ...customerAccount?.lead || []];
+                          const customerAccount = initialData?.fields
+                            ?.find((e) => e?.fieldName === 'customerAccount')
+                            ?.option.find((d) => d.optionValue === value);
+                          const collaborator = [...(customerAccount.fieldServiceManager || []), ...(customerAccount?.lead || [])];
                           if (collaborator?.length) {
-                            setFieldValue('collaborator', collaborator?.filter((e) => e !== values['owner']))
+                            setFieldValue(
+                              'collaborator',
+                              collaborator?.filter((e) => e !== values['owner'])
+                            );
                           } else {
-                            setFieldValue('collaborator', [])
+                            setFieldValue('collaborator', []);
                           }
                         }
                         if (name === 'wellNumber') {
@@ -259,11 +259,8 @@ const ManageServiceOrderDialog = ({
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                  <Button
-                    type="button"
-                    variant="outlined"
-                    color="primary"
-                    size="small"
+                  <ThemeButton
+                    buttonType="transparent"
                     onClick={() => {
                       if (isEqual(initialData.values, values)) {
                         onClose();
@@ -273,12 +270,11 @@ const ManageServiceOrderDialog = ({
                     }}
                   >
                     Cancel
-                  </Button>
-                  <CustomButton
+                  </ThemeButton>
+                  <ThemeButton
                     id="dialog-save-button"
-                    loading={loading}
-                    variant="contained"
-                    color="primary"
+                    isLoading={loading}
+                    buttonType="theme"
                     disabled={loading}
                     onClick={(e) => {
                       e.preventDefault();
@@ -287,7 +283,7 @@ const ManageServiceOrderDialog = ({
                     }}
                   >
                     Save
-                  </CustomButton>
+                  </ThemeButton>
                 </CustomDialogFooter>
                 {showConfirmDialog ? (
                   <ConfirmCancelDialog
@@ -297,7 +293,6 @@ const ManageServiceOrderDialog = ({
                       handleScroll(errors);
                       submitForm();
                     }}
-                    close={() => setShowConfirmDialog(false)}
                     onClose={() => {
                       setShowConfirmDialog(false);
                       onClose();

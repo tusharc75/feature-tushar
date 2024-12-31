@@ -1,3 +1,4 @@
+import { ExpandMore } from '@mui/icons-material';
 import {
   Box,
   CircularProgress,
@@ -10,12 +11,12 @@ import {
   TableContainer,
   TableHead,
   TableRow
-} from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
+} from '@mui/material';
+import dayjs from 'dayjs';
 import { kebabCase } from 'lodash';
 import moment from 'moment';
 import { forwardRef, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
-import { View, momentLocalizer } from 'react-big-calendar';
+import { View, dayjsLocalizer } from 'react-big-calendar';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FiExternalLink } from 'react-icons/fi';
@@ -29,7 +30,6 @@ import { useAppTheme } from 'src/constants/AppConfig';
 import { cn, workOrderSupervisor } from 'src/constants/helpers';
 import '../PlanningView/Calendar/calendarView.scss';
 
-const localizer = momentLocalizer(moment);
 const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
@@ -226,6 +226,8 @@ function WorkOrderCalendar({ getFilterQuery, filterQuery, reference, setOpen }, 
       padding: '8px 16px'
     };
   };
+
+  const localizer = dayjsLocalizer(dayjs);
 
   return (
     <>

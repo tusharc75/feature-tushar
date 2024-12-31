@@ -1,5 +1,5 @@
-import { Accordion, AccordionDetails, AccordionSummary, CircularProgress } from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
+import { Accordion, AccordionDetails, AccordionSummary, CircularProgress } from '@mui/material';
+import { ExpandMore } from '@mui/icons-material';
 import { kebabCase } from 'lodash';
 import { useState } from 'react';
 import { ComponentCommonProps, Section } from 'src/pages/UserManual/type';
@@ -41,7 +41,7 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
                     >
                       <h2 className="my-7 pb-2 text-[25px] font-bold leading-[1.25] text-gray-500 lg:text-[32px]">{subSection.sectionName}</h2>
                       <div
-                        className="prose mt-4 max-w-full dark:prose-invert [&_img]:max-w-full &_img]:cursor-pointer"
+                        className="&_img]:cursor-pointer prose mt-4 max-w-full dark:prose-invert [&_img]:max-w-full"
                         onClick={handleClick}
                         dangerouslySetInnerHTML={{ __html: subSection.content }}
                       ></div>
@@ -66,7 +66,7 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
           </div>
           {zoomedImage && (
             <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/80 backdrop-blur-sm" onClick={() => setZoomedImage(null)}>
-              <img src={zoomedImage?.src} alt={zoomedImage?.alt} className="object-contain rounded-lg shadow-lg" />
+              <img src={zoomedImage?.src} alt={zoomedImage?.alt} className="rounded-lg object-contain shadow-lg" />
             </div>
           )}
         </div>

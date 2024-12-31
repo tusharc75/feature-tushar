@@ -1,7 +1,7 @@
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { IconButton, Menu, MenuItem, TextField } from '@material-ui/core';
-import { DragIndicator, Settings } from '@material-ui/icons';
+import { IconButton, Menu, MenuItem, TextField } from '@mui/material';
+import { DragIndicator, Settings } from '@mui/icons-material';
 import update from 'immutability-helper';
 import React, { useMemo } from 'react';
 import Field from './Field';
@@ -110,10 +110,11 @@ const SingleSection = ({
       <div
         ref={setNodeRef}
         style={style}
-        className={`p-2 ${isDragging
-          ? "bg-[var(--dark-secondary,theme('colors.cyan.100'))] [border:1px_dashed_var(--common-border-color)]"
-          : 'border border-[var(--common-border-color)] bg-[var(--dark-primary,white)]'
-          }   transition-all duration-300`}
+        className={`p-2 ${
+          isDragging
+            ? "bg-[var(--dark-secondary,theme('colors.cyan.100'))] [border:1px_dashed_var(--common-border-color)]"
+            : 'border border-[var(--common-border-color)] bg-[var(--dark-primary,white)]'
+        }   transition-all duration-300`}
       >
         <div className={isDragging ? 'opacity-40' : ''}>
           <div className="mb-2 flex items-center justify-between gap-2">
@@ -125,21 +126,23 @@ const SingleSection = ({
                 id="standard-basic"
                 variant="outlined"
                 margin="dense"
+                size="small"
                 value={section.sectionName}
                 onChange={(event) => onChangeSectionName(section.sectionId, event.target.value)}
               />
             </div>
-            <IconButton
-              aria-label="setting"
-              onClick={handleClick}
-            >
+            <IconButton aria-label="setting" onClick={handleClick}>
               <Settings fontSize="small" />
             </IconButton>
             <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
-              <MenuItem onClick={() => {
-                setOpenProperties(true)
-                handleClose()
-              }}>Edit Properties</MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setOpenProperties(true);
+                  handleClose();
+                }}
+              >
+                Edit Properties
+              </MenuItem>
               {/* <MenuItem
                 onClick={() => deleteSection(section.sectionId)}
                 disabled={section.field.filter((_field) => _field.editAble === false).length > 0 ? true : true}
@@ -189,12 +192,7 @@ const SingleSection = ({
         </div>
       </div>
       {openProperties && (
-        <SectionProperties
-          handleClose={() => setOpenProperties(false)}
-          section={section}
-          setSections={setSections}
-          sections={sections}
-        />
+        <SectionProperties handleClose={() => setOpenProperties(false)} section={section} setSections={setSections} sections={sections} />
       )}
     </>
   );

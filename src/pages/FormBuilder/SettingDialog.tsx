@@ -1,4 +1,5 @@
-import { Box, Button, Checkbox, Dialog, FormControlLabel, Grid, TextField } from '@material-ui/core';
+import { Box, Checkbox, Dialog, FormControlLabel, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Field, FieldArray, Form, Formik } from 'formik';
 import { isEmpty, isEqual } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -8,15 +9,15 @@ import CustomDialogContent from '../../components/CustomDialog/CustomDialogConte
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition } from '../../constants/helpers';
-import { Autocomplete } from '@material-ui/lab';
+import Autocomplete from '@mui/material/Autocomplete';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const SettingDialog = ({ entities, resource, handleClose }) => {
   const [initialValues, setInitialValues] = useState({
     entityWiseResourceName: false,
-    entityResources: {},
+    entityResources: {}
   });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -32,25 +33,23 @@ const SettingDialog = ({ entities, resource, handleClose }) => {
         values[d.entity] = {
           resourceLabel: d.resourceLabel,
           homePageLabel: d.homePageLabel
-        }
-      })
+        };
+      });
       setInitialValues({
         entityWiseResourceName: true,
         entityResources: values
       });
       setSelectedEntities(entities?.filter((e: any) => data?.find((d: any) => d?.entity === e?._id)) || []);
     }
-  }
+  };
 
   useEffect(() => {
     fetchData();
   }, [resource]);
 
   const handleSave = (values) => {
-
     const payload = [];
     if (values?.entityWiseResourceName) {
-
       selectedEntities?.forEach((entity) => {
         payload.push({
           entity: entity._id,
@@ -60,7 +59,8 @@ const SettingDialog = ({ entities, resource, handleClose }) => {
       });
     }
 
-    axiosInstance().post(`/sa-formbuilder/entity-wise-resource-names/${resource}`, payload)
+    axiosInstance()
+      .post(`/sa-formbuilder/entity-wise-resource-names/${resource}`, payload)
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -88,7 +88,7 @@ const SettingDialog = ({ entities, resource, handleClose }) => {
       });
     }
     return errors;
-  }
+  };
 
   return (
     <Dialog
@@ -104,12 +104,7 @@ const SettingDialog = ({ entities, resource, handleClose }) => {
         }
       }}
     >
-      <Formik
-        enableReinitialize={true}
-        initialValues={initialValues}
-        onSubmit={handleSave}
-        validate={validation}
-      >
+      <Formik enableReinitialize={true} initialValues={initialValues} onSubmit={handleSave} validate={validation}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
           <>
             <CustomDialogHeader
@@ -147,44 +142,41 @@ const SettingDialog = ({ entities, resource, handleClose }) => {
                       <Autocomplete
                         id="entities"
                         multiple
-                        size='small'
+                        size="small"
                         disableCloseOnSelect
                         options={entities || []}
                         getOptionLabel={(option: any) => (option ? option?.entityName : '')}
-                        getOptionSelected={(option: any, val) => option?._id === val?._id}
+                        isOptionEqualToValue={(option: any, val) => option?._id === val?._id}
                         value={selectedEntities}
                         onChange={(e, val) => {
                           setSelectedEntities(val);
                         }}
-                        renderInput={(params) => <TextField {...params}
-                          margin="dense"
-                          variant="outlined"
-                          label="Entities"
-                          fullWidth
-                          name="entities" />}
+                        renderInput={(params) => (
+                          <TextField {...params} margin="dense" size="small" variant="outlined" label="Entities" fullWidth name="entities" />
+                        )}
                       />
                       <FieldArray name="entityResources">
                         {() =>
                           selectedEntities?.map((entity, index) => (
                             <Box pt={2}>
                               <Grid container spacing={1}>
-                                <Grid item xs={4}>
+                                <Grid size={{ xs: 4 }}>
                                   <TextField
                                     disabled
                                     variant="outlined"
                                     size="small"
-                                    value={entities.find((e) => e._id === entity._id)?.entityName || ""}
+                                    value={entities.find((e) => e._id === entity._id)?.entityName || ''}
                                     label="Entity"
                                     fullWidth
                                   />
                                 </Grid>
-                                <Grid item xs={4}>
+                                <Grid size={{ xs: 4 }}>
                                   <Field
                                     as={TextField}
                                     variant="outlined"
                                     size="small"
                                     required={true}
-                                    value={values['entityResources'][entity._id]?.resourceLabel || ""}
+                                    value={values['entityResources'][entity._id]?.resourceLabel || ''}
                                     label="Resource Label (Singular)"
                                     fullWidth
                                     onChange={(e) => {
@@ -192,10 +184,10 @@ const SettingDialog = ({ entities, resource, handleClose }) => {
                                     }}
                                   />
                                 </Grid>
-                                <Grid item xs={4}>
+                                <Grid size={{ xs: 4 }}>
                                   <Field
                                     as={TextField}
-                                    value={values['entityResources'][entity._id]?.homePageLabel || ""}
+                                    value={values['entityResources'][entity._id]?.homePageLabel || ''}
                                     variant="outlined"
                                     size="small"
                                     required={true}
@@ -217,30 +209,25 @@ const SettingDialog = ({ entities, resource, handleClose }) => {
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button
-                size="small"
+              <ThemeButton
+                buttonType='transparent'
                 onClick={() => {
                   if (isEqual(values, initialValues)) handleClose();
                   setShowConfirmDialog(true);
                 }}
-                color="primary"
               >
                 Cancel
-              </Button>
-              <Button
-                size="small"
-                type="submit"
-                color="primary"
-                variant="contained"
-                disabled={(values.entityWiseResourceName && !selectedEntities?.length || !isEmpty(errors))}
+              </ThemeButton>
+              <ThemeButton
+                buttonType='theme'
+                disabled={(values.entityWiseResourceName && !selectedEntities?.length) || !isEmpty(errors)}
                 onClick={submitForm}
               >
                 Save
-              </Button>
+              </ThemeButton>
             </CustomDialogFooter>
             {showConfirmDialog ? (
               <ConfirmCancelDialog
-                close={() => setShowConfirmDialog(false)}
                 open={showConfirmDialog}
                 onSave={() => {
                   setShowConfirmDialog(false);

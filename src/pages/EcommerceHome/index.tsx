@@ -1,5 +1,5 @@
-import { Box, Button, CircularProgress } from '@material-ui/core';
-import { makeStyles } from '@material-ui/styles';
+import { Box, CircularProgress } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -15,6 +15,7 @@ import DropContainer, { SingleSection } from './DropContainer';
 import Sidebar, { SidebarItem } from './Sidebar';
 import { useDndSensors } from 'src/hooks';
 import { useData } from 'src/StateProvider/Provider';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const useClasses = makeStyles(() => ({
   root: {
@@ -185,7 +186,7 @@ const EcommerceHome = () => {
         <Box className="controls-v1">
           <Box sx={{ display: 'flex' }}>
             <label
-              className={`new-headerbox-button-v1 ${isMobile && !isTablet ? 'w-[26px] h-[26px] p-1' : ''}`}
+              className={`new-headerbox-button-v1 ${isMobile && !isTablet ? 'h-[26px] w-[26px] p-1' : ''}`}
               onClick={handleExportField}
               style={{ cursor: 'pointer' }}
             >
@@ -206,28 +207,26 @@ const EcommerceHome = () => {
             />
             <label
               htmlFor="import-file"
-              className={`new-headerbox-button-v1 ${isMobile && !isTablet ? 'w-[26px] h-[26px] p-1' : ''}`}
+              className={`new-headerbox-button-v1 ${isMobile && !isTablet ? 'h-[26px] w-[26px] p-1' : ''}`}
               style={{ marginRight: '8px', cursor: 'pointer' }}
             >
               {isMobile && !isTablet ? <MobileImportIcon size={18} color={'var(--primary-text)'} /> : 'Import'}
             </label>
 
-            <Button
-              color="primary"
-              variant="contained"
-              size="small"
+            <ThemeButton
               disabled={isSubmitting || loading}
               onClick={handleClickSave}
-              startIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
+              isLoading={isSubmitting}
+              buttonType='theme'
             >
               Save
-            </Button>
+            </ThemeButton>
           </Box>
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
         <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
-          <div className="grid gap-2 grid-cols-1 md:grid-cols-[250px_1fr] lg:grid-cols-[300px_1fr]">
+          <div className="grid grid-cols-1 gap-2 md:grid-cols-[250px_1fr] lg:grid-cols-[300px_1fr]">
             <Sidebar />
             <div className="container-with-border p-4">
               {loading ? (

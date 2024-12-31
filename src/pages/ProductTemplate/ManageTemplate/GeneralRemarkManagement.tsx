@@ -1,12 +1,13 @@
-import { Box, Dialog, Grid, makeStyles } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import React, { useState } from 'react';
+import { Box, Dialog } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import TinyMce from '../../../components/TinyMCE/index';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const GeneralRemarkManagement = (props) => {
   const { classes, generalRemarkOpen, setGeneralRemarkOpen, generalRemarkData, setGeneralRemarkData, initialValues } = props;
@@ -29,7 +30,7 @@ const GeneralRemarkManagement = (props) => {
       >
         <CustomDialogHeader
           title={`General Remark`}
-          onClose={(e, reason) => {
+          onClose={() => {
             setGeneralRemarkOpen(false);
           }}
           isMinimized={!fullScreen}
@@ -57,16 +58,14 @@ const GeneralRemarkManagement = (props) => {
           </Grid>
         </CustomDialogContent>
         <CustomDialogFooter>
-          <Button
-            variant="contained"
-            size="small"
-            color="primary"
+          <ThemeButton
             onClick={() => {
               setGeneralRemarkOpen(false);
             }}
+            buttonType='transparent'
           >
             Close
-          </Button>
+          </ThemeButton>
         </CustomDialogFooter>
       </Dialog>
     </>

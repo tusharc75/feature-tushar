@@ -1,8 +1,8 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
+import { Box, IconButton, MenuItem } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -22,7 +22,6 @@ import ManageSupportTicket from './ManageSupportTicket';
 import axios, { CancelTokenSource } from 'axios';
 
 const SupportTicket = () => {
-
   const renderedFrom = camelCase(sidebarResource.supportTicket);
   const toastConfig = useContext(CustomToastContext);
 
@@ -34,14 +33,13 @@ const SupportTicket = () => {
     state: { user, selectedEntity, resources }
   }: any = useData();
 
-
   const types = [
     {
-      key: `My ${resources?.supportTicket?.titlePlural}`,
+      key: `My Support Tickets`,
       value: 1
     },
     {
-      key: `All ${resources?.supportTicket?.titlePlural}`,
+      key: `All Support Tickets`,
       value: 2
     }
   ];
@@ -228,11 +226,11 @@ const SupportTicket = () => {
         <MenuItem
           disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
           onClick={() => {
-            if (selectedRecords.length === 1){
+            if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-              }else{
-                setDeleteRecord(null)
-              }
+            } else {
+              setDeleteRecord(null);
+            }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -245,12 +243,12 @@ const SupportTicket = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: resources?.supportTicket?.titlePlural }]} />
+        <CustomBreadCrumbs routes={[{ title: 'Support Tickets' }]} />
         <ImportExportLinks
           permissions={{ isCreate: true, isUpdate: true, isRead: true }}
-          module={resources?.supportTicket?.titlePlural}
+          module={'Support Tickets'}
           api={routes.supportTicket.path}
-          afterImportCompleted={() => { }}
+          afterImportCompleted={() => {}}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
@@ -299,8 +297,12 @@ const SupportTicket = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.supportTicket?.titleSingular?.toLowerCase()} :
-            ${deleteRecord?.supportTicketNumber || ''}` : `selected ${resources?.supportTicket?.titlePlural?.toLowerCase()}`} ?`}
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `support ticket :
+            ${deleteRecord?.supportTicketNumber || ''}`
+              : `selected support tickets`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

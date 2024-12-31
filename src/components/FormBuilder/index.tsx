@@ -1,4 +1,4 @@
-import Box from '@material-ui/core/Box';
+import Box from '@mui/material/Box';
 import { CHILD_RESOURCE, addItemAtIndex, removeItemAtIndex } from '../../constants/helpers';
 
 import { DndContext, DragEndEvent } from '@dnd-kit/core';
@@ -103,7 +103,7 @@ export const FormBuilder = ({
         setSection([...newSections]);
       }
     } else if (activeItemType === 'Field' && overItemType === 'Section') {
-      const overSectionId = over.data.current?.props?.section?.sectionId
+      const overSectionId = over.data.current?.props?.section?.sectionId;
       if (sectionId === overSectionId) {
         return;
       }
@@ -144,7 +144,7 @@ export const FormBuilder = ({
   return (
     <Box>
       <DndContext onDragEnd={onDragEnd} onDragOver={moveSection} sensors={sensors}>
-        <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] lg:grid-cols-[300px_1fr] xl:grid-cols-[350px_1fr] gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-[280px_1fr] lg:grid-cols-[300px_1fr] xl:grid-cols-[350px_1fr]">
           <Sidebar
             filterFieldType={filterFieldType}
             sections={section}

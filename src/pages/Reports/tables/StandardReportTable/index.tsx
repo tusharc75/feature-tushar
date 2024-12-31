@@ -1,7 +1,5 @@
-import MomentUtils from '@date-io/moment';
-import { CircularProgress, Dialog, IconButton } from '@material-ui/core';
-import { History, Visibility } from '@material-ui/icons';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { Dialog, IconButton } from '@mui/material';
+import { History, Visibility } from '@mui/icons-material';
 import axios from 'axios';
 import { camelCase, isArray, isEmpty, isNumber, isObject, startCase } from 'lodash';
 import React, { useEffect, useState } from 'react';
@@ -589,16 +587,12 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
   }, [columns?.length, selectedReport.resource, footerData]);
 
   return (
-    <MuiPickersUtilsProvider utils={MomentUtils}>
+    <>
       {showGrid && (
         <div className={cn('inline-flex justify-between gap-2', !isSidebarOpen ? 'w-[calc(100%-40px)]' : 'w-full')}>
           <>
             <ThemeButton
               iconForMobile={<MdFilterList />}
-              size="small"
-              variant="outlined"
-              color="primary"
-              disableElevation
               onClick={() => {
                 setShowGrid(false);
                 dispatch({ type: 'onlyFilter', filters: {} });
@@ -629,22 +623,20 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
                   {reportConfig?.isExportPdf && (
                     <ThemeButton
                       iconForMobile={false}
-                      variant="outlined"
-                      size="small"
                       disabled={isProcessing === 'pdf'}
                       onClick={() => exportData('pdf', 'pdf')}
-                      startIcon={isProcessing === 'pdf' && <CircularProgress color="inherit" size={18} />}
+                      isLoading={isProcessing === 'pdf'}
+                      buttonType="theme"
                     >
                       Export To PDF
                     </ThemeButton>
                   )}
                   <ThemeButton
                     iconForMobile={false}
-                    variant="outlined"
-                    size="small"
                     disabled={isProcessing === 'excel'}
                     onClick={() => exportData('excel', 'excel')}
-                    startIcon={isProcessing === 'excel' && <CircularProgress color="inherit" size={18} />}
+                    isLoading={isProcessing === 'excel'}
+                    buttonType="theme"
                   >
                     Export To Excel
                   </ThemeButton>
@@ -766,7 +758,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
           />
         </Dialog>
       )}
-    </MuiPickersUtilsProvider>
+    </>
   );
 };
 

@@ -1,4 +1,5 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
@@ -19,9 +20,9 @@ import {
 } from 'src/constants/helpers';
 import Steps, { getIndex } from 'src/components/Steps';
 import { isMobile, isTablet } from 'react-device-detect';
-import { Edit } from '@material-ui/icons';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
-import { Skeleton } from '@material-ui/lab';
+import EditIcon from '@mui/icons-material/Edit';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
+import { Skeleton } from '@mui/material';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -138,8 +139,8 @@ const AssemblyOrderDetail = () => {
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.assemblyOrder, data));
         setAllowedToDelete(
           permissions?.assemblyOrder?.isDelete &&
-            checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
-            data?.canDelete
+          checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
+          data?.canDelete
         );
         setAssemblyOrderData({ ...data });
       })
@@ -182,14 +183,9 @@ const AssemblyOrderDetail = () => {
             {assemblyOrderData ? (
               <>
                 {permissions?.assemblyOrder?.isUpdate && allowedToEdit && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    className={'btn-outline-v1'}
-                    size="small"
-                    onClick={() => setOpenUpdateDialog(true)}
-                  >
-                    {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                  </Button>
+                  <ThemeButton iconForMobile={<EditIcon />} onClick={() => setOpenUpdateDialog(true)} mobileTooltip={'Edit'}>
+                    {'Edit'}
+                  </ThemeButton>
                 )}
                 {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />}
               </>
@@ -217,7 +213,7 @@ const AssemblyOrderDetail = () => {
               <DetailsPage data={assemblyOrderData} fields={allFields} />
             ) : (
               <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </Grid>
             )}
           </Box>
@@ -235,10 +231,10 @@ const AssemblyOrderDetail = () => {
               setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
               handleNext={
                 assemblyOrderProcessStepsNames[currentStep] === 'Work Order' &&
-                !assemblyOrderData?.material?.filter((m) => m?.type === MATERIAL_TYPE.package && !m?.parentId)?.every((m) => m?.managedPackage)
+                  !assemblyOrderData?.material?.filter((m) => m?.type === MATERIAL_TYPE.package && !m?.parentId)?.every((m) => m?.managedPackage)
                   ? () => {
-                      setOpenManagedPackageDialog(true);
-                    }
+                    setOpenManagedPackageDialog(true);
+                  }
                   : null
               }
               updateStatus={(step: number) => {

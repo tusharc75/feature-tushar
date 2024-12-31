@@ -1,4 +1,4 @@
-import { BoxProps, Checkbox, Typography } from '@material-ui/core';
+import { BoxProps, Checkbox, Typography } from '@mui/material';
 import React, { ReactNode, useMemo } from 'react';
 import RenderColumns from './RenderColumns';
 import { TActios, TInitialState } from './hooks/useCardReducer';
@@ -154,6 +154,8 @@ const CardColTimeline = <D,>({
                   state={state}
                   dispatch={dispatch}
                   fetchSingleColumn={fetchSingleColumn}
+                  background={background}
+                  color={color}
                 />
               </div>
             </div>

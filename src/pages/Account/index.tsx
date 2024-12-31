@@ -1,11 +1,11 @@
-import { Box, Button, Chip, IconButton, MenuItem, MenuList } from '@material-ui/core';
-import ButtonGroup from '@material-ui/core/ButtonGroup';
-import ClickAwayListener from '@material-ui/core/ClickAwayListener';
-import Grow from '@material-ui/core/Grow';
-import Paper from '@material-ui/core/Paper';
-import Popper from '@material-ui/core/Popper';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { Box, Button, Chip, IconButton, MenuItem, MenuList } from '@mui/material';
+import ButtonGroup from '@mui/material/ButtonGroup';
+import ClickAwayListener from '@mui/material/ClickAwayListener';
+import Grow from '@mui/material/Grow';
+import Paper from '@mui/material/Paper';
+import Popper from '@mui/material/Popper';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';
 import { AiOutlineDeploymentUnit } from 'react-icons/ai';
@@ -41,7 +41,7 @@ import routes from './../../components/Helpers/Routes';
 import ManageAccountDialog from './ManageAccount/index';
 import WarhouseList from './Warehouse/WarhouseList';
 import axios, { CancelTokenSource } from 'axios';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const options = ['All', 'Approved', 'Disapproved'];
 
@@ -92,7 +92,6 @@ export default function Account(props) {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
 
   const [multipleApproveDisapproveAccount, setMultipleApproveDisapproveAccount] = useState<any>({ show: false, approved: false, selectedRecords: 0 });
 
@@ -256,7 +255,7 @@ export default function Account(props) {
             disabled={accountPermissions?.isDelete && row?.original?.canDelete ? false : true}
             aria-label="Delete"
             onClick={() => {
-              setDeleteRecord(row?.original)
+              setDeleteRecord(row?.original);
               setShowDeleteConfirmBox(true);
             }}
           >
@@ -398,26 +397,27 @@ export default function Account(props) {
     } else {
       ids = selectedRecords?.map((d) => d._id);
     }
-    axiosInstance().put(`/${accountApi}/remove`, {
-      ids
-    }).then(({ data }) => {
-      setIsSubmitting(false);
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
+    axiosInstance()
+      .put(`/${accountApi}/remove`, {
+        ids
+      })
+      .then(({ data }) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setShowDeleteConfirmBox(false);
+        setDeleteRecord(null);
+        dispatch({ type: 'selection', selectedRecords: [] });
+        fetchAccounts();
+      })
+      .catch((error) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig(error);
       });
-      setShowDeleteConfirmBox(false);
-      setDeleteRecord(null);
-      dispatch({ type: 'selection', selectedRecords: [] });
-      fetchAccounts();
-    }).catch((error) => {
-      setIsSubmitting(false);
-      toastConfig.setToastConfig(error);
-    });
-
   };
-
 
   const handleSingleApproveDisapproveAccount = () => {
     axiosInstance()
@@ -517,23 +517,24 @@ export default function Account(props) {
           extraImportExportLinks={[
             ...(accountResource === 'supplierAccount' && user?.user?.brandPolicy?.serializedAssetCertification
               ? [
-                {
-                  title: 'Supplier View Template',
-                  api: `${accountApi}/items/unknown/template`,
-                  type: 'download'
-                },
-                {
-                  title: 'Supplier View Export',
-                  api: `${accountApi}/items/unknown/template?export=true${selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
+                  {
+                    title: 'Supplier View Template',
+                    api: `${accountApi}/items/unknown/template`,
+                    type: 'download'
+                  },
+                  {
+                    title: 'Supplier View Export',
+                    api: `${accountApi}/items/unknown/template?export=true${
+                      selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
                     }`,
-                  type: 'export'
-                },
-                {
-                  title: 'Supplier View Import',
-                  api: `${accountApi}/items/unknown/import`,
-                  type: 'import'
-                }
-              ]
+                    type: 'export'
+                  },
+                  {
+                    title: 'Supplier View Import',
+                    api: `${accountApi}/items/unknown/import`,
+                    type: 'import'
+                  }
+                ]
               : [])
           ]}
         />
@@ -603,12 +604,14 @@ export default function Account(props) {
         {showDeleteConfirmBox ? (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord ?
-              `${resources?.[accountResource]?.titleSingular?.toLowerCase()} : ${deleteRecord?.accountName}` :
-              `selected ${resources?.[accountResource]?.titlePlural?.toLowerCase()}`} ?`}
+            message={`Are you sure you want to delete ${
+              deleteRecord
+                ? `${resources?.[accountResource]?.titleSingular?.toLowerCase()} : ${deleteRecord?.accountName}`
+                : `selected ${resources?.[accountResource]?.titlePlural?.toLowerCase()}`
+            } ?`}
             onClose={() => {
-              setShowDeleteConfirmBox(false)
-              setDeleteRecord(null)
+              setShowDeleteConfirmBox(false);
+              setDeleteRecord(null);
             }}
             okBtnLoading={isSubmitting}
             onOk={handleDeleteAccounts}
@@ -617,8 +620,9 @@ export default function Account(props) {
         {singleApproveDisapproveAccount.show ? (
           <ConfirmationDialog
             open={singleApproveDisapproveAccount.show}
-            message={`Are you sure you want to ${singleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} account: ${singleApproveDisapproveAccount.accountName
-              } ? `}
+            message={`Are you sure you want to ${singleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} account: ${
+              singleApproveDisapproveAccount.accountName
+            } ? `}
             onClose={() =>
               setSingleApproveDisapproveAccount({
                 id: null,
@@ -633,8 +637,9 @@ export default function Account(props) {
         {multipleApproveDisapproveAccount.show ? (
           <ConfirmationDialog
             open={multipleApproveDisapproveAccount.show}
-            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${multipleApproveDisapproveAccount.selectedRecords
-              } account(s) ? `}
+            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${
+              multipleApproveDisapproveAccount.selectedRecords
+            } account(s) ? `}
             onClose={() =>
               setMultipleApproveDisapproveAccount({
                 show: false,
@@ -822,12 +827,12 @@ const ActionMenuItems = ({
       )}
       {accountPermissions?.isDelete && (
         <MenuItem
-          disabled={selectedRecords?.every((e => e?.canDelete)) ? false : true}
+          disabled={selectedRecords?.every((e) => e?.canDelete) ? false : true}
           onClick={() => {
             if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
             } else {
-              setDeleteRecord(null)
+              setDeleteRecord(null);
             }
             setShowDeleteConfirmBox(true);
           }}

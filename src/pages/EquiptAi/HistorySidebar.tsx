@@ -1,8 +1,8 @@
-import { IconButton, List, ListItem, ListItemText, Menu, MenuItem } from '@material-ui/core';
-import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
+import { IconButton, List, ListItem, ListItemText, Menu, MenuItem } from '@mui/material';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Chat, Delete } from '@material-ui/icons';
-import { Skeleton } from '@material-ui/lab';
+import { Chat, Delete } from '@mui/icons-material';
+import { Skeleton } from '@mui/material';
 import { groupBy } from 'lodash';
 import moment from 'moment';
 import { FiSidebar } from 'react-icons/fi';
@@ -124,8 +124,7 @@ const HistorySidebar = ({
         <ThemeButton
           mobileTooltip="New Chat"
           iconForMobile={<Chat fontSize={'small'} />}
-          color="primary"
-          borderColor="none"
+          buttonType="theme"
           startIcon={<Chat fontSize={'small'} />}
           size="small"
           onClick={() => hadleNewChat()}

@@ -1,7 +1,7 @@
-import { Box, MenuItem } from '@material-ui/core';
-import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { Box, MenuItem } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/Delete';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
@@ -228,8 +228,7 @@ const TransferInventory = () => {
         onClick={() => {
           if (selectedRecords?.length === 1) {
             setDeleteRecord(selectedRecords[0]);
-          }
-          else {
+          } else {
             setDeleteRecord(null);
           }
           setShowDeleteConfirmBox(true);
@@ -314,8 +313,12 @@ const TransferInventory = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.transferInventory?.titleSingular?.toLowerCase()} :
-            ${deleteRecord?._id ? deleteRecord?.transferNumber || '' : ''}` : `selected ${resources?.transferInventory?.titlePlural?.toLowerCase()}`} ?`}
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.transferInventory?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?._id ? deleteRecord?.transferNumber || '' : ''}`
+              : `selected ${resources?.transferInventory?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

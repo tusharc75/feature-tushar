@@ -1,7 +1,8 @@
-import { Box, Button, CircularProgress, Grid, Menu, MenuItem } from '@material-ui/core';
-import CachedIcon from '@material-ui/icons/Cached';
-import ExpandMore from '@material-ui/icons/ExpandMore';
-import { Skeleton } from '@material-ui/lab';
+import { Box, CircularProgress, Menu, MenuItem } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import CachedIcon from '@mui/icons-material/Cached';
+import ExpandMore from '@mui/icons-material/ExpandMore';
+import { Skeleton } from '@mui/material';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
@@ -15,7 +16,6 @@ import { VscVersions } from 'react-icons/vsc';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ShowDoaData from 'src/components/ShowDoaData';
 import ShowQuoteStatus from 'src/components/ShowQuoteStatus';
 import Steps, { getIndex } from 'src/components/Steps';
@@ -47,6 +47,7 @@ import QuoteBuilder from './QuoteBuilder';
 import RoadmapViews from './RoadMapViews';
 import Versions from './Versions';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const QuotationDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -401,83 +402,56 @@ const QuotationDetails = () => {
               <>
                 {quotationData.rentalJob && quotationData.rentalJob.status === RENTAL_STATUS.jobStarted && (
                   <>
-                    <HtmlTooltip title="Renewal">
-                      <Button
-                        onClick={() => {
-                          setRenewal(true);
-                        }}
-                        variant="outlined"
-                        size="small"
-                        className="btn-outline-v1 mx-1"
-                        startIcon={<MdAutorenew />}
-                        color="primary"
-                      >
-                        Renewal
-                      </Button>
-                    </HtmlTooltip>
-                    <HtmlTooltip title="Release">
-                      <Button
-                        onClick={() => {
-                          setReleaseConfirm(true);
-                        }}
-                        variant="outlined"
-                        size="small"
-                        className="btn-outline-v1 mx-1"
-                        startIcon={<SiSemanticrelease />}
-                        color="primary"
-                      >
-                        Release
-                      </Button>
-                    </HtmlTooltip>
+                    <ThemeButton
+                      iconForMobile={<MdAutorenew />}
+                      onClick={() => {
+                        setRenewal(true);
+                      }}
+                      startIcon={<MdAutorenew />}
+                      mobileTooltip={`Renewal`}
+                    >
+                      Renewal
+                    </ThemeButton>
+                    <ThemeButton
+                      iconForMobile={<SiSemanticrelease />}
+                      onClick={() => {
+                        setReleaseConfirm(true);
+                      }}
+                      startIcon={<SiSemanticrelease />}
+                      mobileTooltip={`Release`}
+                    >
+                      Release
+                    </ThemeButton>
                   </>
                 )}
-                <HtmlTooltip title={`${resources?.quotation?.titleSingular} Summary`}>
-                  <Button
-                    onClick={() => {
-                      setShowQuotationSummaryDialog(true);
-                    }}
-                    variant="outlined"
-                    size="small"
-                    className="btn-outline-v1 mx-1"
-                    startIcon={<GiReceiveMoney />}
-                    color="primary"
-                  >
-                    Summary
-                  </Button>
-                </HtmlTooltip>
-                <HtmlTooltip title={`Version : ${currentVersion}`}>
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                    color="primary"
-                    size="small"
-                    className={` btn-outline-v1`}
-                    onClick={() => {
-                      setShowAllVersionStatus(true);
-                    }}
-                    style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                    startIcon={isMobile && !isTablet ? null : <VscVersions />}
-                  >
-                    {isMobile && !isTablet ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
-                  </Button>
-                </HtmlTooltip>
-
+                <ThemeButton
+                  mobileTooltip={`${resources?.quotation?.titleSingular} Summary`}
+                  onClick={() => {
+                    setShowQuotationSummaryDialog(true);
+                  }}
+                  startIcon={<GiReceiveMoney />}
+                  iconForMobile={<GiReceiveMoney size={20} />}
+                >
+                  Summary
+                </ThemeButton>
+                <ThemeButton
+                  iconForMobile={<VscVersions size={20} />}
+                  onClick={() => {
+                    setShowAllVersionStatus(true);
+                  }}
+                  startIcon={<VscVersions />}
+                  mobileTooltip={`Version : ${currentVersion}`}
+                >
+                  {`Version : ${currentVersion}`}
+                </ThemeButton>
                 {allowedToEdit && (
-                  <Button
-                    className="btn-outline-v1"
-                    variant="outlined"
-                    color="default"
-                    size="small"
-                    onClick={openActionsAction}
-                    aria-controls="action"
-                    endIcon={<ExpandMore />}
-                  >
-                    Action
-                  </Button>
+                  <ThemeButton iconForMobile={<ExpandMore />} onClick={openActionsAction} endIcon={<ExpandMore />} mobileTooltip={`Actions`}>
+                    Actions
+                  </ThemeButton>
                 )}
                 <Menu
                   anchorEl={anchorElAction}
                   keepMounted
-                  getContentAnchorEl={null}
                   anchorOrigin={{
                     vertical: 'bottom',
                     horizontal: 'left'
@@ -574,7 +548,7 @@ const QuotationDetails = () => {
           <Box>
             {loading || !quotationFields.length ? (
               <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </Grid>
             ) : (
               <>

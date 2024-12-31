@@ -1,16 +1,15 @@
-import { Box, Button, IconButton } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
-import moment from 'moment';
+import { Box, IconButton } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
 import { useEffect, useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CustomDialogTransition, PRODUCT_SERIAL_NUMBER_STATUS, dateTimeFormat } from 'src/constants/helpers';
+import { CustomDialogTransition, PRODUCT_SERIAL_NUMBER_STATUS, displayDateTime } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { Autorenew } from '@material-ui/icons';
+import { Autorenew } from '@mui/icons-material';
 import RevertQtyDialog from 'src/pages/ProductInventory/History/RevertQtyDialog';
 
 function ProcessLogs({ onClose, logsData, productName, product, referenceType }) {
@@ -66,7 +65,7 @@ function ProcessLogs({ onClose, logsData, productName, product, referenceType })
         Header: 'Processed Date',
         width: 200,
         Cell: ({ row }) => {
-          return row?.original['date'] ? <p className="text-truncate">{moment(row?.original['date']).format(dateTimeFormat)}</p> : <NoDataCell />;
+          return row?.original['date'] ? <p className="text-truncate">{displayDateTime(row?.original['date'])}</p> : <NoDataCell />;
         }
       },
       {

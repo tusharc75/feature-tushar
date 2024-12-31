@@ -1,5 +1,6 @@
-import { Box, Button, Dialog, Grid } from '@material-ui/core';
-import { Add } from '@material-ui/icons';
+import { Box, Dialog } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { Add } from '@mui/icons-material';
 import axios, { CancelTokenSource } from 'axios';
 import moment from 'moment';
 import queryString from 'query-string';
@@ -14,6 +15,7 @@ import CustomContainer from '../../../components/CustomContainer';
 import { SearchFilter } from '../../../components/SearchFilter';
 import MyCalendar from '../Calendar/MyCalendar';
 import { CustomDialogTransition } from 'src/constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const Event = () => {
   const history = useHistory();
@@ -37,7 +39,7 @@ const Event = () => {
         .then(({ data: { data } }) => {
           setFilter([{ _id: referenceId, type: referenceType, name: data.name }]);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     }
   }, [referenceId]);
 
@@ -89,9 +91,9 @@ const Event = () => {
           <Box p={1}>
             <Box mb={2} display="flex" alignItems="center">
               <Box mr={2} minWidth="150px" height="100%">
-                <Button fullWidth startIcon={<Add />} variant="outlined" size="small" onClick={() => setOpenDialog(true)}>
+                <ThemeButton fullWidth startIcon={<Add />} onClick={() => setOpenDialog(true)}>
                   Create Event
-                </Button>
+                </ThemeButton>
               </Box>
               <SearchFilter
                 handleChangeFilter={handleChangeFilter}
@@ -123,7 +125,7 @@ const Event = () => {
                 eventId={activityData ? activityData.id : null}
                 handleClose={handleClose}
                 isMinimized={false}
-                onMinimizeMaximize={() => {}}
+                onMinimizeMaximize={() => { }}
                 showManimizeMaximize={false}
               />
             </Dialog>

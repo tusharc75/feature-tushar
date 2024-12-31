@@ -1,5 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Button, Checkbox, CircularProgress, Dialog, FormControlLabel, Grid, IconButton, TextField } from '@material-ui/core';
+import { Box, Checkbox, Dialog, FormControlLabel, IconButton, TextField } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Grid from '@mui/material/Grid2';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from 'src/constants/helpers';
@@ -7,9 +9,9 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { FieldArray, Form, Formik } from 'formik';
-import { Autocomplete } from '@material-ui/lab';
+import Autocomplete from '@mui/material/Autocomplete';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import axiosInstance from 'src/axios/axiosInstance';
 import { isArray } from 'lodash';
 
@@ -156,17 +158,14 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
             <CustomDialogContent>
               <Box>
                 <Box mb={2}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    type="submit"
+                  <ThemeButton
+                    buttonType="theme"
                     onClick={() => {
                       addRemove(values, 'add', values?.notifications?.length);
                     }}
                   >
                     Add
-                  </Button>
+                  </ThemeButton>
                 </Box>
                 <Form>
                   <FieldArray
@@ -184,12 +183,12 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                             </Box>
                             <Box p={2} pt={1}>
                               <Grid container spacing={2}>
-                                <Grid item md={4} lg={4} sm={6} xs={12}>
+                                <Grid size={{ md: 4, lg: 4, sm: 6, xs: 12 }}>
                                   <Autocomplete
                                     id="field"
                                     options={fields}
-                                    getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
-                                    getOptionSelected={(option: any, val) => option?.fieldName === val}
+                                    getOptionLabel={(option: any) => (option ? option?.fieldLabel || '' : '')}
+                                    isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
                                     value={
                                       fields && fields.filter((f) => f?.fieldName === data?.field).length
                                         ? fields && fields.filter((f) => f?.fieldName === data?.field)[0]
@@ -205,6 +204,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                       <TextField
                                         {...params}
                                         margin="dense"
+                                        size="small"
                                         variant="outlined"
                                         label="Field"
                                         placeholder="Field"
@@ -226,12 +226,12 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                     )}
                                   />
                                 </Grid>
-                                <Grid item md={4} lg={4} sm={6} xs={12}>
+                                <Grid size={{ md: 4, lg: 4, sm: 6, xs: 12 }}>
                                   <Autocomplete
                                     id="rule"
                                     options={RULE}
-                                    getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                                    getOptionSelected={(option: any, val) => option.optionValue === val}
+                                    getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+                                    isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                                     value={
                                       RULE && RULE?.filter((d) => d?.optionValue === data?.rule)?.length
                                         ? RULE && RULE?.filter((d) => d?.optionValue === data?.rule)[0]
@@ -247,6 +247,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                       <TextField
                                         {...params}
                                         margin="dense"
+                                        size="small"
                                         variant="outlined"
                                         label="Rule"
                                         placeholder="Rule"
@@ -268,12 +269,12 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                     )}
                                   />
                                 </Grid>
-                                <Grid item md={4} lg={4} sm={6} xs={12}>
+                                <Grid size={{ md: 4, lg: 4, sm: 6, xs: 12 }}>
                                   <Autocomplete
                                     id="notificationUserField"
                                     options={notificationUserField}
-                                    getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
-                                    getOptionSelected={(option: any, val) => option?.fieldName === val}
+                                    getOptionLabel={(option: any) => (option ? option?.fieldLabel || '' : '')}
+                                    isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
                                     value={
                                       notificationUserField &&
                                       notificationUserField.filter((f) => f?.fieldName === data?.notificationUserField).length
@@ -291,6 +292,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                       <TextField
                                         {...params}
                                         margin="dense"
+                                        size="small"
                                         variant="outlined"
                                         label="Notification User Field"
                                         placeholder="Notification User Field"
@@ -312,7 +314,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                     )}
                                   />
                                 </Grid>
-                                <Grid item md={12} lg={12} sm={12} xs={12}>
+                                <Grid size={{ md: 12, lg: 12, sm: 12, xs: 12 }}>
                                   <TextField
                                     fullWidth
                                     label="Message"
@@ -342,7 +344,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                     }
                                   />
                                 </Grid>
-                                <Grid item md={4} lg={4} sm={6} xs={12}>
+                                <Grid size={{ md: 4, lg: 4, sm: 6, xs: 12 }}>
                                   <Box pt={0.5}>
                                     <FormControlLabel
                                       control={
@@ -362,7 +364,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                     />
                                   </Box>
                                 </Grid>
-                                <Grid item md={4} lg={4} sm={6} xs={12}>
+                                <Grid size={{ md: 4, lg: 4, sm: 6, xs: 12 }}>
                                   <Box pt={0.5}>
                                     <FormControlLabel
                                       control={
@@ -393,20 +395,17 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button size="small" color="primary" disabled={submitting} onClick={onClose}>
+              <ThemeButton buttonType="transparent" onClick={onClose}>
                 Cancel
-              </Button>
-              <Button
+              </ThemeButton>
+              <ThemeButton
                 disabled={submitting}
-                variant="contained"
-                color="primary"
-                size="small"
-                type="submit"
+                buttonType="theme"
                 onClick={submitForm}
-                endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                isLoading={submitting}
               >
                 Save
-              </Button>
+              </ThemeButton>
             </CustomDialogFooter>
           </>
         )}

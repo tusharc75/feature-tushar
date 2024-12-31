@@ -1,17 +1,19 @@
-import { Box, Button, CircularProgress } from '@material-ui/core';
-import CloseIcon from '@material-ui/icons/Close';
-import EditIcon from '@material-ui/icons/Edit';
+import EditIcon from '@mui/icons-material/Edit';
+import { Box } from '@mui/material';
 import { camelCase, findIndex } from 'lodash';
 import queryString from 'query-string';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { IoMdDownload } from 'react-icons/io';
 import { useHistory, useParams } from 'react-router-dom';
+import { DownloadIcon } from 'src/assets/svg/svgIcons';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import ButtonWithPulse from 'src/components/ButtonWithPulse';
+import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Steps, { getIndex } from 'src/components/Steps';
-import { ownerAndColaborator } from 'src/constants/messageHelpers';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { generateAddExistingProduct } from 'src/pages/RentalManagement/walkmeSteps';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { useData } from '../../StateProvider/Provider';
@@ -23,14 +25,11 @@ import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import {
   ACTIVITY_RESOURCE,
-  DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_STATUS,
-  DELIVERY_TICKET_TYPE,
   QUOTATION_STATUS,
   RENTAL_STATUS,
   RENTAL_STEPS,
   checkIsAllowedToEdit,
-  deliveryTicket,
   rentalManagement,
   rentalManagementSteps,
   serializedAsset,
@@ -50,10 +49,6 @@ import RentalManagementViews from './RoadMapViews';
 import SerializedAsset from './SerializedAsset';
 import Services from './Services';
 import { updateRentalProcessStatus } from './rentalOfflineHelper';
-import ButtonWithPulse from 'src/components/ButtonWithPulse';
-import { useGetWalkmeInstance } from 'src/components/CustomIntro';
-import { generateAddExistingProduct } from 'src/pages/RentalManagement/walkmeSteps';
-import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 
 const RentalManagementDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -201,7 +196,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const checkDeliveryTicketFields = () => {
@@ -219,7 +214,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   useEffect(() => {
@@ -420,48 +415,41 @@ const RentalManagementDetailsPage = () => {
               <>
                 <Fragment>
                   {permissions?.iotChart?.isRead && (
-                    <Button
-                      className="btn-outline-v1"
+                    <ThemeButton
                       id={'rental-management-view-iot-chart-button'}
-                      variant="outlined"
-                      color="primary"
-                      size="small"
                       onClick={() => {
                         history.push(`${routes.iotChart.path}?referenceData=${rentalManagementData?.shippingAddress?.optionValue}`);
                       }}
                     >
                       {`View ${resources?.iotChart?.titlePlural}`}
-                    </Button>
+                    </ThemeButton>
                   )}
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                    className={`btn-outline-v1 ${(isMobile || isTablet) && 'no-hover'}`}
+                  <ThemeButton
                     id={'rental-management-download-button'}
                     type="button"
-                    size="small"
-                    // disabled={isDownloading ? true : false}
-                    startIcon={isMobile ? '' : <IoMdDownload />}
+                    disabled={isDownloading ? true : false}
+                    iconForMobile={<DownloadIcon />}
+                    startIcon={<DownloadIcon />}
                     onClick={(e) => {
                       handleDownload();
                     }}
+                    mobileTooltip={isDownloading ? 'Please wait...' : 'Download'}
                   >
-                    {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloading ? 'Please wait...' : 'Download'}
-                  </Button>
+                    {isDownloading ? 'Please wait...' : 'Download'}
+                  </ThemeButton>
                   {['Add Products', 'Add Services', 'Add-on'].includes(rentalSteps[currentStep]?.name) &&
                     versionNotClonned &&
                     (rentalManagementData?.addQuotationStep || user?.user?.brandPolicy?.rentalQuotation) && (
-                      <Button
-                        className="btn-outline-v1"
+                      <ThemeButton
                         id={'rental-management-create-new-version-button'}
-                        variant="contained"
-                        size="small"
+                        buttonType="theme"
                         onClick={() => {
                           setVersionNotClonned(false);
                           cloneVersion();
                         }}
                       >
                         Create New Version
-                      </Button>
+                      </ThemeButton>
                     )}
                   {permissions?.rentalManagement?.isUpdate &&
                     !isOffline &&
@@ -469,60 +457,47 @@ const RentalManagementDetailsPage = () => {
                     allowedToEdit &&
                     rentalSteps?.length - 1 === currentStep && (
                       <Fragment>
-                        <ButtonWithPulse
-                          id={'rental-management-close-button'}
-                          variant={'outlined'}
-                          color="default"
-                          size="small"
-                          onClick={() => updateJobStatus(RENTAL_STATUS.closed)}
-                          className={'btn-outline-v1'}
-                        >
+                        <ButtonWithPulse id={'rental-management-close-button'} onClick={() => updateJobStatus(RENTAL_STATUS.closed)}>
                           Close
                         </ButtonWithPulse>
                       </Fragment>
                     )}
+
                   {user?.role?.selectedEntity?.policy?.isRentalReopen && rentalManagementData?.status === RENTAL_STATUS.closed && (
-                    <Button
-                      className="buttonStyleBigScreen"
+                    <ThemeButton
                       id={'rental-management-re-open-button'}
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      endIcon={reOpening ? <CircularProgress size={20} /> : null}
                       disabled={reOpening}
                       onClick={() => {
                         handleRentalReOpen();
                       }}
+                      buttonType="theme"
+                      isLoading={reOpening}
                     >
                       Re-Open
-                    </Button>
+                    </ThemeButton>
                   )}
                   {permissions?.rentalManagement?.isUpdate &&
                     !isOffline &&
                     ![RENTAL_STATUS.cancelled, RENTAL_STATUS.closed].includes(rentalManagementData?.status) && (
                       <Fragment>
-                        <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : 'Edit'}>
-                          <span>
-                            <Button
-                              disabled={allowedToEdit ? false : true}
-                              variant={isMobile && !isTablet ? 'text' : 'contained'}
-                              className={'btn-outline-v1'}
-                              onClick={handleOpenUpdateDialog}
-                              id={'rental-management-edit-button'}
-                            >
-                              {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
-                            </Button>
-                          </span>
-                        </HtmlTooltip>
+                        <ThemeButton
+                          iconForMobile={<EditIcon />}
+                          disabled={allowedToEdit ? false : true}
+                          onClick={handleOpenUpdateDialog}
+                          mobileTooltip={'Edit'}
+                          id={'rental-management-edit-button'}
+                        >
+                          {'Edit'}
+                        </ThemeButton>
                       </Fragment>
                     )}
                 </Fragment>
                 {/* {permissions?.rentalManagement?.isUpdate &&
-                    [RENTAL_STATUS.new, RENTAL_STATUS.inProgress].includes(rentalManagementData?.status) && (
-                      <Button variant="outlined" color="primary" size="small" onClick={() => setShowCancelConfirmBox(true)}>
-                        {'Cancel ' + routes.rentalManagement.title}
-                      </Button>
-                    )} */}
+                  [RENTAL_STATUS.new, RENTAL_STATUS.inProgress].includes(rentalManagementData?.status) && (
+                    <ThemeButton onClick={() => setShowCancelConfirmBox(true)}>
+                      {'Cancel ' + routes.rentalManagement.title}
+                    </ThemeButton>
+                  )} */}
                 <ActivityButton
                   referenceId={rentalManagementData?._id}
                   resource={ACTIVITY_RESOURCE.rentalManagement}
@@ -560,11 +535,11 @@ const RentalManagementDetailsPage = () => {
                 setCurrentStep={setCurrentStep}
                 handlePrev={
                   rentalSteps[currentStep]?.name === 'Quotation' &&
-                  allowedToEdit &&
-                  [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer].includes(quotationData?.versions[currentVersion]?.status)
+                    allowedToEdit &&
+                    [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer].includes(quotationData?.versions[currentVersion]?.status)
                     ? () => {
-                        setShowCancelConfirmBox({ open: true, isQuote: true });
-                      }
+                      setShowCancelConfirmBox({ open: true, isQuote: true });
+                    }
                     : null
                 }
                 isStepEnded={[RENTAL_STATUS.invoiced, RENTAL_STATUS.closed, RENTAL_STATUS.cancelled].includes(rentalManagementData?.status)}
@@ -588,12 +563,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                    [
-                      QUOTATION_STATUS.acceptByCustomer,
-                      QUOTATION_STATUS.rejectByCustomer,
-                      QUOTATION_STATUS.sentToCustomer,
-                      QUOTATION_STATUS.waitingForSupplierPrice
-                    ].includes(quotationData?.versions[currentVersion]?.status)
+                      [
+                        QUOTATION_STATUS.acceptByCustomer,
+                        QUOTATION_STATUS.rejectByCustomer,
+                        QUOTATION_STATUS.sentToCustomer,
+                        QUOTATION_STATUS.waitingForSupplierPrice
+                      ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }
@@ -612,12 +587,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                    [
-                      QUOTATION_STATUS.acceptByCustomer,
-                      QUOTATION_STATUS.rejectByCustomer,
-                      QUOTATION_STATUS.sentToCustomer,
-                      QUOTATION_STATUS.waitingForSupplierPrice
-                    ].includes(quotationData?.versions[currentVersion]?.status)
+                      [
+                        QUOTATION_STATUS.acceptByCustomer,
+                        QUOTATION_STATUS.rejectByCustomer,
+                        QUOTATION_STATUS.sentToCustomer,
+                        QUOTATION_STATUS.waitingForSupplierPrice
+                      ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }

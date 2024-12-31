@@ -1,6 +1,7 @@
-import { Box, Grid, IconButton, MenuItem } from '@material-ui/core';
-import AddIcon from '@material-ui/icons/Add';
-import DeleteIcon from '@material-ui/icons/Delete';
+import { Box, IconButton, MenuItem } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -402,7 +403,7 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
             />
           </>
         )}
-        <Grid item xs={12} md={12} sm={12}>
+        <Grid size={{xs:12, md:12, sm:12}}>
           {columns ? (
             <Box zIndex={5}>
               <CustomReactTable

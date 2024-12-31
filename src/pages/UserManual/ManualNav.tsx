@@ -1,4 +1,4 @@
-import { IconButton } from '@material-ui/core';
+import { IconButton } from '@mui/material';
 import { RiMenu2Fill } from 'react-icons/ri';
 import Logo from 'src/assets/svg/logoNew.svg';
 import { MoonIcon, SunIcon } from 'src/assets/svg/svgIcons';
@@ -29,19 +29,19 @@ const ManualNav = ({ state }: ComponentCommonProps) => {
         </div>
       </div>
       <div className="flex items-center gap-3">
-      <SearchBar state={state} />
-      <IconButton
-        onClick={() => {
-          toggleThemeColor();
-        }}
-        size="small"
-        style={{ padding: 5 }}
-        aria-describedby={`current theme ${themeColor}`}
-        aria-label="Them switcher"
-        color="inherit"
-      >
-        {themeColor === 'light' ? <MoonIcon /> : <SunIcon />}
-      </IconButton>
+        <SearchBar state={state} />
+        <IconButton
+          onClick={() => {
+            toggleThemeColor();
+          }}
+          size="small"
+          style={{ padding: 5 }}
+          aria-describedby={`current theme ${themeColor}`}
+          aria-label="Them switcher"
+          color="inherit"
+        >
+          {themeColor === 'light' ? <MoonIcon /> : <SunIcon />}
+        </IconButton>
       </div>
     </nav>
   );

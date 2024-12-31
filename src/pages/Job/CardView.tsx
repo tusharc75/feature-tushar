@@ -1,6 +1,8 @@
-import { Box, Grid, IconButton, makeStyles, Typography } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { Box, IconButton, Theme, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { makeStyles } from '@mui/styles';
+import DeleteIcon from '@mui/icons-material/Delete';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { ReactNode, useEffect } from 'react';
 import { FaSuitcase, FaTruck } from 'react-icons/fa';
 import { useHistory } from 'react-router-dom';
@@ -10,7 +12,7 @@ import routes from 'src/components/Helpers/Routes';
 import { SEARCH, useStore } from 'src/StateProvider/fastContext';
 import { useData } from 'src/StateProvider/Provider';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   cardBox: {
     borderRadius: '12px',
     boxShadow: '0px 3px 30px rgba(0, 0, 0, 0.08)',
@@ -90,7 +92,7 @@ const CardView = ({ jobs, setShowManageJobDialog, setSingleJobDelete, dispatch, 
                       }}
                     >
                       <div
-                        className="flex flex-wrap justify-between items-start pb-[16px] mb-[18px]"
+                        className="mb-[18px] flex flex-wrap items-start justify-between pb-[16px]"
                         style={{ borderBottom: '1px solid var(--common-border-color)' }}
                       >
                         <div>
@@ -101,13 +103,13 @@ const CardView = ({ jobs, setShowManageJobDialog, setSingleJobDelete, dispatch, 
                             <strong>Customer Account :</strong> {job?.customerAccount}
                           </Typography>
                         </div>
-                        <span className="p-[5px_10px] line-clamp-1 bg-[var(--new-theme-color)] text-white text-[12px] leading-[13px] rounded-[14px] font-semibold">
+                        <span className="line-clamp-1 rounded-[14px] bg-[var(--new-theme-color)] p-[5px_10px] text-[12px] font-semibold leading-[13px] text-white">
                           Fleet Required
                         </span>
                         {/* {parseInt((Math.random() * 10)?.toFixed(0)) % 2 === 0 ? <Chip color="primary" label="Fleet Required" /> : null} */}
                       </div>
-                      <div className="flex justify-between gap-2 items-end">
-                        <Box className={`flex gap-2 flex-wrap`}>
+                      <div className="flex items-end justify-between gap-2">
+                        <Box className={`flex flex-wrap gap-2`}>
                           <RenderIconCard
                             icon={<FaSuitcase size={30} />}
                             label={'Job Total'}
@@ -124,7 +126,7 @@ const CardView = ({ jobs, setShowManageJobDialog, setSingleJobDelete, dispatch, 
                             <span>
                               <IconButton
                                 style={{ border: '1px solid var(--common-border-color)' }}
-                                className="p-[6px_!important] dark:bg-[var(--dark-primary)] disabled:opacity-40 rounded-[5px_!important] [display:block_!important] mb-2"
+                                className="mb-2 rounded-[5px_!important] p-[6px_!important] [display:block_!important] disabled:opacity-40 dark:bg-[var(--dark-primary)]"
                                 size="small"
                                 disabled={!permissions?.job?.isCreate}
                                 aria-label="Clone"
@@ -143,7 +145,7 @@ const CardView = ({ jobs, setShowManageJobDialog, setSingleJobDelete, dispatch, 
                               <IconButton
                                 aria-label={`Delete`}
                                 style={{ border: '1px solid var(--common-border-color)' }}
-                                className="p-[6px_!important] dark:bg-[var(--dark-primary)] disabled:opacity-40 rounded-[5px_!important] [display:block_!important] "
+                                className="rounded-[5px_!important] p-[6px_!important] [display:block_!important] disabled:opacity-40 dark:bg-[var(--dark-primary)] "
                                 disabled={!job?.canDelete}
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -186,9 +188,9 @@ type TIconCardProps = {
 
 const RenderIconCard: React.FC<TIconCardProps> = ({ icon, label, value, className, ...others }) => {
   return (
-    <div {...others} className={` text-center bg-[#F1F5FF] dark:bg-[var(--dark-primary)] min-w-[114px] py-[8px] rounded-[8px] ${className}`}>
+    <div {...others} className={` min-w-[114px] rounded-[8px] bg-[#F1F5FF] py-[8px] text-center dark:bg-[var(--dark-primary)] ${className}`}>
       <div
-        className={`icon bg-[#2A3042] p-2 [--size:38px] rounded-[8px] max-w-max w-[var(--size)] h-[var(--size)] flex items-center justify-center text-white mx-auto mb-[8px]`}
+        className={`icon mx-auto mb-[8px] flex h-[var(--size)] w-[var(--size)] max-w-max items-center justify-center rounded-[8px] bg-[#2A3042] p-2 text-white [--size:38px]`}
       >
         {icon}
       </div>

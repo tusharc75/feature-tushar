@@ -1,24 +1,8 @@
-import {
-  Box,
-  Dialog,
-  FormControl,
-  FormControlLabel,
-  FormGroup,
-  Grid,
-  IconButton,
-  Switch,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-  makeStyles
-} from '@material-ui/core';
-import { ControlPoint, Edit } from '@material-ui/icons';
-import { Skeleton } from '@material-ui/lab';
-import { startCase } from 'lodash';
+import { ControlPoint, Edit } from '@mui/icons-material';
+import { Skeleton, Theme } from '@mui/material';
+import { Box, Dialog, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { makeStyles } from '@mui/styles';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { FcFlowChart } from 'react-icons/fc';
@@ -27,7 +11,6 @@ import { Link, useHistory, useLocation, useParams } from 'react-router-dom';
 import { GeneratePasswordIcon, ResetPasswordIcon } from 'src/assets/svg/svgIcons';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import QuotesInAccordion from 'src/components/QuotesInAccordion/QuotesInAccordion';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -72,7 +55,7 @@ import UserSession from './UserSession';
 
 import { isMobile, isTablet } from 'react-device-detect';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   dataValue: {
     fontWeight: 500,
     color: theme.palette.primary.main
@@ -392,7 +375,6 @@ const UserDetailsPage = () => {
       });
   };
 
-  const isLoggedInUserBrandAdmin = 'userType' in user?.user && user?.user?.userType === userType.brandAdmin;
   return (
     <>
       <Box className="main-container-v1">
@@ -404,7 +386,7 @@ const UserDetailsPage = () => {
             <Box className="control-buttons-v1">
               {permissions?.role?.isUpdate && permissions?.entity?.isUpdate && (
                 <span className="max-[768px]:hidden">
-                  <ThemeButton iconForMobile={<RiSettingsFill />} className="" tooltip="Assign Entity/Role" onClick={entityDialogOpen}>
+                  <ThemeButton iconForMobile={<RiSettingsFill />} mobileTooltip="Assign Entity/Role" onClick={entityDialogOpen}>
                     Assign Entity/Role
                   </ThemeButton>
                 </span>
@@ -415,13 +397,13 @@ const UserDetailsPage = () => {
                   onClick={() => {
                     setGenerateAutoPassword(true);
                   }}
-                  tooltip="Generate Password"
+                  mobileTooltip="Generate Password"
                 >
                   Generate Password
                 </ThemeButton>
               )}
               {permissions?.user?.isUpdate && (
-                <ThemeButton tooltip="Reset Password" iconForMobile={<ResetPasswordIcon />} onClick={handleResetPassword}>
+                <ThemeButton mobileTooltip="Reset Password" iconForMobile={<ResetPasswordIcon />} onClick={handleResetPassword}>
                   Reset Password
                 </ThemeButton>
               )}
@@ -436,6 +418,7 @@ const UserDetailsPage = () => {
                         : true
                       : false
                   }
+                  mobileTooltip={'Edit'}
                 >
                   Edit
                 </ThemeButton>
@@ -460,7 +443,7 @@ const UserDetailsPage = () => {
             <Box style={{ padding: '8px', minHeight: '450px' }}>
               {loading || !userFields.length || !userData ? (
                 <Grid container spacing={2} style={{ padding: '8px' }}>
-                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
                 </Grid>
               ) : (
                 <>
@@ -471,7 +454,6 @@ const UserDetailsPage = () => {
                     <CustomTab value={3} label={'User Session'} />
                     <CustomTab value={4} label={'Assigned Entity'} />
                   </CustomTabs>
-
                   <TabPanel value={tabValue} index={0}>
                     <DetailsPageHeader logo={userData?.avatar ? userData.avatar : undefined} mainPoints={mainPoints} />
                     <DetailsPage data={userData} fields={userFields} />
@@ -532,30 +514,24 @@ const UserDetailsPage = () => {
                         </Table>
                       </TableContainer>
                     ) : null}
-
-                    {/* </div> */}
                   </TabPanel>
                   <TabPanel value={tabValue} index={3}>
                     <UserSession id={id} />
                   </TabPanel>
                   <TabPanel value={tabValue} index={4}>
                     <Grid container spacing={2}>
-                      <Grid item xs={12} sm={12} md={12} lg={12}>
-                        <Box
-                          width="100%"
-                          padding={1}
-                          bgcolor="var(--dark-secondary, var(--accordion-expanded-summary-bg, #EFFBF9))"
-                          display="flex"
-                          justifyContent="space-between"
-                        >
-                          <Typography variant="subtitle2">Assigned Entity ({entities?.length || 0})</Typography>
+                      <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
+                        <div className="relative flex justify-between rounded-t bg-[var(--dark-secondary,var(--accordion-expanded-summary-bg,#EFFBF9))] px-7 py-4">
+                          <h6 className="text-sm font-semibold leading-[1.05] ">Assigned Entity ({entities?.length || 0})</h6>
                           {permissions?.entity?.isUpdate && permissions?.role?.isUpdate && (
-                            <IconButton title="Assign entities" color="primary" size="small" onClick={entityDialogOpen}>
-                              <ControlPoint />
-                            </IconButton>
+                            <span className="absolute right-7 top-[50%] [transform:translateY(-50%)]">
+                              <IconButton title="Assign entities" color="primary" size="small" onClick={entityDialogOpen}>
+                                <ControlPoint />
+                              </IconButton>
+                            </span>
                           )}
-                        </Box>
-                        <Box padding={1}>
+                        </div>
+                        <div className="pt-3">
                           {loading ? (
                             <Box display="flex">
                               {[1, 2].map((i) => (
@@ -592,14 +568,14 @@ const UserDetailsPage = () => {
                               <Typography>No Entities </Typography>
                             </Box>
                           )}
-                        </Box>
+                        </div>
                       </Grid>
                     </Grid>
                   </TabPanel>
                 </>
               )}
             </Box>
-            <div className="pt-3 ">
+            <div className="pt-3">
               <QuickLinks quickLinks={quickLinks} />
               {permissions?.[opportunity.opportunityResource]?.isRead && (
                 <Box mb={2}>

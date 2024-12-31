@@ -1,5 +1,5 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
-import { Delete, Edit } from '@material-ui/icons';
+import { Box, IconButton, MenuItem } from '@mui/material';
+import { Delete, Edit } from '@mui/icons-material';
 import React from 'react';
 import { useData } from 'src/StateProvider/Provider';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';

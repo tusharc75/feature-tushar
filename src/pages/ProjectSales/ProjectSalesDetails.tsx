@@ -1,16 +1,16 @@
-import { Box, Button, Grid, IconButton, Paper, Typography } from '@material-ui/core';
-import { ControlPoint } from '@material-ui/icons';
-import { Skeleton } from '@material-ui/lab';
+import { Box, IconButton, Paper, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { ControlPoint } from '@mui/icons-material';
+import { Skeleton } from '@mui/material';
 import React, { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-
-import { Edit } from '@material-ui/icons';
+import EditIcon from '@mui/icons-material/Edit';
 import queryString from 'query-string';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdDelete } from 'react-icons/md';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -304,14 +304,9 @@ const ProjectSalesDetails = () => {
             ) : (
               <>
                 {(permissions?.projectSales?.isUpdate && isTeamMember) || isManager ? (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    size="small"
-                    className={'btn-outline-v1'}
-                    onClick={handleOpenUpdateDialog}
-                  >
-                    {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                  </Button>
+                  <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                    {'Edit'}
+                  </ThemeButton>
                 ) : null}
                 {permissions?.projectSales?.isDelete && isManager ? (
                   <DeleteButton
@@ -334,7 +329,7 @@ const ProjectSalesDetails = () => {
       <Box className={`detail-container-v1`}>
         {loading || !projectSalesFields.length || !projectSalesData ? (
           <Grid container spacing={2} style={{ padding: '16px' }}>
-            <CommonSkeleton lenArray={[...Array(7).keys()]} />
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Grid>
         ) : (
           <>

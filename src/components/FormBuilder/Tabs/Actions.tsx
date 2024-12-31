@@ -1,13 +1,15 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { Box, Button, CircularProgress, Dialog, Grid, IconButton, TextField, Typography } from '@material-ui/core';
+import { Box, CircularProgress, Dialog, IconButton, TextField, Typography } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Grid from '@mui/material/Grid2';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
-import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
-import { Autocomplete } from '@material-ui/lab';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import Autocomplete from '@mui/material/Autocomplete';
 import { getLookupResource, getResourceField } from '../helper';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -152,25 +154,22 @@ export default function Actions({ onClose, onSuccess, resource, resourceData }) 
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button size="small" color="primary" disabled={submitting} onClick={onClose}>
+        <ThemeButton buttonType="transparent" onClick={onClose}>
           Cancel
-        </Button>
-        <Button
+        </ThemeButton>
+        <ThemeButton
           disabled={submitting}
-          variant="contained"
-          color="primary"
-          size="small"
-          type="submit"
+          buttonType="theme"
           onClick={() => {
             const err: any = validate();
             if (!err?.length) {
               handleSave();
             }
           }}
-          endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+          isLoading={submitting}
         >
           Save
-        </Button>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );
@@ -217,13 +216,13 @@ const Card = ({ resource, action, state, setState, index, addRemove, actionType,
     >
       <Box width={'94%'}>
         <Grid container spacing={2}>
-          <Grid item sm={3} md={3} lg={3}>
+          <Grid size={{ sm: 3, md: 3, lg: 3 }}>
             <Autocomplete
               id="field"
               options={fields}
               disabled={resourceFieldsLoading}
-              getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
-              getOptionSelected={(option: any, val) => option?.fieldName === val}
+              getOptionLabel={(option: any) => (option ? option?.fieldLabel || '' : '')}
+              isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
               value={
                 fields && fields.filter((data) => data?.fieldName === action?.field).length
                   ? fields && fields.filter((data) => data?.fieldName === action?.field)[0]
@@ -238,19 +237,22 @@ const Card = ({ resource, action, state, setState, index, addRemove, actionType,
                 <TextField
                   {...params}
                   margin="dense"
+                  size="small"
                   variant="outlined"
                   label="Field"
                   placeholder="Field"
                   name="field"
                   required
-                  InputProps={{
-                    ...params.InputProps,
-                    endAdornment: (
-                      <Fragment>
-                        {resourceFieldsLoading ? <CircularProgress color="inherit" size={20} /> : null}
-                        {params.InputProps.endAdornment}
-                      </Fragment>
-                    )
+                  slotProps={{
+                    input: {
+                      ...params.InputProps,
+                      endAdornment: (
+                        <Fragment>
+                          {resourceFieldsLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                          {params.InputProps.endAdornment}
+                        </Fragment>
+                      )
+                    }
                   }}
                   error={Boolean(error?.find((e) => e?.index === index && e?.actionType === actionType && e?.name === 'field')?.error)}
                   helperText={
@@ -261,12 +263,12 @@ const Card = ({ resource, action, state, setState, index, addRemove, actionType,
               )}
             />
           </Grid>
-          <Grid item sm={3} md={3} lg={3}>
+          <Grid size={{ sm: 3, md: 3, lg: 3 }}>
             <Autocomplete
               id="resource"
               options={resource}
-              getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-              getOptionSelected={(option: any, val) => option.optionValue === val}
+              getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+              isOptionEqualToValue={(option: any, val) => option.optionValue === val}
               value={
                 resource && resource?.filter((data) => data.optionValue === action?.resource)?.length
                   ? resource && resource?.filter((data) => data.optionValue === action?.resource)[0]
@@ -281,6 +283,7 @@ const Card = ({ resource, action, state, setState, index, addRemove, actionType,
                 <TextField
                   {...params}
                   margin="dense"
+                  size="small"
                   variant="outlined"
                   label="Resource"
                   placeholder="Resource"
@@ -295,13 +298,13 @@ const Card = ({ resource, action, state, setState, index, addRemove, actionType,
               )}
             />
           </Grid>
-          <Grid item sm={3} md={3} lg={3}>
+          <Grid size={{ sm: 3, md: 3, lg: 3 }}>
             <Autocomplete
               id="resourceField"
               options={resourceFields}
               disabled={resourceFieldsLoading}
-              getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
-              getOptionSelected={(option: any, val) => option?.fieldName === val}
+              getOptionLabel={(option: any) => (option ? option?.fieldLabel || '' : '')}
+              isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
               value={
                 resourceFields && resourceFields.filter((data) => data?.fieldName === action?.resourceField).length
                   ? resourceFields && resourceFields.filter((data) => data?.fieldName === action?.resourceField)[0]
@@ -316,19 +319,22 @@ const Card = ({ resource, action, state, setState, index, addRemove, actionType,
                 <TextField
                   {...params}
                   margin="dense"
+                  size="small"
                   variant="outlined"
                   label="Resource Field"
                   placeholder="Resource Field"
                   name="resourceField"
                   required
-                  InputProps={{
-                    ...params.InputProps,
-                    endAdornment: (
-                      <Fragment>
-                        {resourceFieldsLoading ? <CircularProgress color="inherit" size={20} /> : null}
-                        {params.InputProps.endAdornment}
-                      </Fragment>
-                    )
+                  slotProps={{
+                    input: {
+                      ...params.InputProps,
+                      endAdornment: (
+                        <Fragment>
+                          {resourceFieldsLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                          {params.InputProps.endAdornment}
+                        </Fragment>
+                      )
+                    }
                   }}
                   error={Boolean(error?.find((e) => e?.index === index && e?.actionType === actionType && e?.name === 'resourceField')?.error)}
                   helperText={
@@ -339,12 +345,12 @@ const Card = ({ resource, action, state, setState, index, addRemove, actionType,
               )}
             />
           </Grid>
-          <Grid item sm={3} md={3} lg={3}>
+          <Grid size={{ sm: 3, md: 3, lg: 3 }}>
             <Autocomplete
               id="action"
               options={ACTION}
-              getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-              getOptionSelected={(option: any, val) => option.optionValue === val}
+              getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+              isOptionEqualToValue={(option: any, val) => option.optionValue === val}
               value={
                 ACTION && ACTION?.filter((data) => data.optionValue === action?.action)?.length
                   ? ACTION && ACTION?.filter((data) => data.optionValue === action?.action)[0]
@@ -359,6 +365,7 @@ const Card = ({ resource, action, state, setState, index, addRemove, actionType,
                 <TextField
                   {...params}
                   margin="dense"
+                  size="small"
                   variant="outlined"
                   label="Action"
                   placeholder="Action"

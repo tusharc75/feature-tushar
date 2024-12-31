@@ -1,5 +1,5 @@
-import { Button, Grow } from '@material-ui/core';
-import { Close } from '@material-ui/icons';
+import { Button, Grow } from '@mui/material';
+import { Close } from '@mui/icons-material';
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import Chatbox, { useChatboxReducer } from 'src/components/AiChatbox';
@@ -25,7 +25,9 @@ const AgentChat = () => {
   return (
     <div className="fixed bottom-2 right-3 z-[1300] ">
       <Grow in={isChatboxOpen} unmountOnExit>
-        <Chatbox state={state} setState={setState} mode="popup" handleClose={() => setIsChatboxOpen(false)} />
+        <span>
+          <Chatbox state={state} setState={setState} mode="popup" handleClose={() => setIsChatboxOpen(false)} />
+        </span>
       </Grow>
       {AI_AGENT && localStorage.getItem('token') && (
         <HtmlTooltip title={isChatboxOpen ? '' : 'Equipt Genie'} className="block">

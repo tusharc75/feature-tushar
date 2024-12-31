@@ -1,7 +1,5 @@
-import { Box, IconButton } from '@material-ui/core';
-import { FormatListNumbered } from '@material-ui/icons';
-import DateRangeIcon from '@material-ui/icons/DateRange';
-import RefreshIcon from '@material-ui/icons/Refresh';
+import { Box, IconButton } from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useData } from 'src/StateProvider/Provider';
@@ -193,40 +191,40 @@ function PlanningView() {
               permissions={permissions?.planningView}
               module={resources?.planningView?.titlePlural}
               api={routes.planningView.path}
-              afterImportCompleted={() => { }}
-              onExportToExcelSuccess={() => { }}
+              afterImportCompleted={() => {}}
+              onExportToExcelSuccess={() => {}}
               additionalParams={queryString}
               onlyExport={true}
             />
           )}
         </Box>
         <Box className={`detail-container-v1`}>
-        <div className="absolute right-[25px] top-[25px] flex justify-end gap-1 max-md:right-[15px] max-md:top-[15px]">
-                <IconButtonTabs
-                  onItemClick={resetSelectedRecords}
-                  items={
-                    [
-                      {
-                        value: 'list',
-                        icon: <TfiLayoutListThumbAlt />,
-                        tooltip: 'List View'
-                      },
-                      {
-                        value: 'calendar',
-                        icon: <FaRegCalendar />,
-                        tooltip: 'Calendar View'
-                      }
-                    ] as const
+          <div className="absolute right-[25px] top-[25px] flex justify-end gap-1 max-md:right-[15px] max-md:top-[15px]">
+            <IconButtonTabs
+              onItemClick={resetSelectedRecords}
+              items={
+                [
+                  {
+                    value: 'list',
+                    icon: <TfiLayoutListThumbAlt />,
+                    tooltip: 'List View'
+                  },
+                  {
+                    value: 'calendar',
+                    icon: <FaRegCalendar />,
+                    tooltip: 'Calendar View'
                   }
-                  setValue={setView}
-                  value={view}
-                />
-                <HtmlTooltip title={'Refresh'}>
-                  <IconButton style={{ width: 32, height: 32 }} size="small" onClick={onClickRefreshIcon}>
-                    <RefreshIcon fontSize="small" />
-                  </IconButton>
-                </HtmlTooltip>
-              </div>
+                ] as const
+              }
+              setValue={setView}
+              value={view}
+            />
+            <HtmlTooltip title={'Refresh'}>
+              <IconButton style={{ width: 32, height: 32 }} size="small" onClick={onClickRefreshIcon}>
+                <RefreshIcon fontSize="small" />
+              </IconButton>
+            </HtmlTooltip>
+          </div>
           {view === 'calendar' && (
             <CalendarView
               resourceList={resourceList}
@@ -235,8 +233,8 @@ function PlanningView() {
               setQueryString={setQueryString}
               ref={ref}
             />
-          ) }
-          {view === 'list' &&(
+          )}
+          {view === 'list' && (
             <ListView
               resourceList={resourceList}
               selectedResource={selectedResource}

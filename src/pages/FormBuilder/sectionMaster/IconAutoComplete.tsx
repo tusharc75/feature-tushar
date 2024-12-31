@@ -1,9 +1,9 @@
-import { Typography } from '@material-ui/core';
-import ListSubheader from '@material-ui/core/ListSubheader';
-import TextField from '@material-ui/core/TextField';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
-import useMediaQuery from '@material-ui/core/useMediaQuery';
-import Autocomplete, { AutocompleteRenderGroupParams, AutocompleteRenderInputParams } from '@material-ui/lab/Autocomplete';
+import { Box, Typography } from '@mui/material';
+import ListSubheader from '@mui/material/ListSubheader';
+import TextField from '@mui/material/TextField';
+import { makeStyles, useTheme } from '@mui/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import Autocomplete, { AutocompleteRenderGroupParams, AutocompleteRenderInputParams } from '@mui/material/Autocomplete';
 import React from 'react';
 import { ListChildComponentProps, VariableSizeList } from 'react-window';
 import { AllSidebarIconList, DynamicIcon } from 'src/assets/IconGenerator';
@@ -138,16 +138,26 @@ export default function IconAutoComplete({ ...rest }) {
             variant="outlined"
             label="Select Icon"
             fullWidth
-            InputProps={{ ...params.InputProps, startAdornment: Icon }}
+            slotProps={{
+              input: {
+                ...params.InputProps,
+                startAdornment: Icon
+              }
+            }}
           />
         );
       }}
-      renderOption={(option) => (
-        <Typography noWrap className="flex gap-2">
-          <span className=" flex-shrink-0">{DynamicIcon(option as string, { size: 18 })}</span>
-          {option}
-        </Typography>
-      )}
+      renderOption={(props, option) => {
+        const { key, ...optionProps } = props;
+        return (
+          <Box component="li" key={key} {...optionProps}>
+            <Typography noWrap className="flex gap-2">
+              <span className=" flex-shrink-0">{DynamicIcon(option as string, { size: 18 })}</span>
+              {option}
+            </Typography>
+          </Box>
+        );
+      }}
       fullWidth
       multiple={false}
       {...rest}

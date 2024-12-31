@@ -1,5 +1,5 @@
-import { Box, Button, IconButton, MenuItem } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
+import { Box, IconButton, MenuItem } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -70,7 +70,7 @@ const Warehouse = ({ reference, api, id, accountId = '' }) => {
               setShowDeleteConfirmBox(true);
             }}
           >
-            <DeleteIcon color="error" />
+            <DeleteIcon color="error" fontSize='small' />
           </IconButton>
         </HtmlTooltip>
       </>
@@ -150,14 +150,10 @@ const Warehouse = ({ reference, api, id, accountId = '' }) => {
       <>
         {permissions[reference]?.isUpdate && (
           <DeleteButton
-            variant="contained"
-            color="primary"
-            size="small"
             disabled={selectedRecords.length === 0}
             onClick={() => {
               setShowDeleteConfirmBox(true);
             }}
-            mode="light"
             text="Delete"
           />
         )}
@@ -206,8 +202,11 @@ const Warehouse = ({ reference, api, id, accountId = '' }) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
           open={true}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.warehouse?.titleSingular?.toLowerCase()} :
-             ${deleteRecord?.warehouseName}` : `selected ${resources?.warehouse?.titlePlural?.toLowerCase()}`} ?`}
+          message={`Are you sure you want to delete ${deleteRecord
+            ? `${resources?.warehouse?.titleSingular?.toLowerCase()} :
+             ${deleteRecord?.warehouseName}`
+            : `selected ${resources?.warehouse?.titlePlural?.toLowerCase()}`
+            } ?`}
           okBtnLoading={isSubmitting}
           onClose={() => {
             setDeleteRecord(null);

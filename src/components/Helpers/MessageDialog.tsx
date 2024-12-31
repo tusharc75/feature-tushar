@@ -1,15 +1,14 @@
-import React from 'react';
 import PropTypes from 'prop-types';
-import { makeStyles } from '@material-ui/core/styles';
-import Button from '@material-ui/core/Button';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogActions from '@material-ui/core/DialogActions';
-import Dialog from '@material-ui/core/Dialog';
-import { Typography } from '@material-ui/core';
+import { makeStyles } from '@mui/styles';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import Dialog from '@mui/material/Dialog';
+import { Theme, Typography } from '@mui/material';
 import { CustomDialogTransition } from 'src/constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     width: '100%',
     maxWidth: 360,
@@ -26,7 +25,6 @@ export default function MessageDialog({ onClose, open, message, header = 'Messag
 
   return (
     <Dialog
-      disableBackdropClick
       TransitionComponent={CustomDialogTransition}
       disableEscapeKeyDown
       maxWidth="xs"
@@ -43,9 +41,9 @@ export default function MessageDialog({ onClose, open, message, header = 'Messag
       </DialogTitle>
       <DialogContent dividers>{message ? <Typography>{message}</Typography> : null}</DialogContent>
       <DialogActions>
-        <Button size="small" onClick={onClose} color="primary">
+        <ThemeButton buttonType='transparent' onClick={onClose}>
           Close
-        </Button>
+        </ThemeButton>
       </DialogActions>
     </Dialog>
   );

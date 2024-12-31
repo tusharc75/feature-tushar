@@ -1,15 +1,15 @@
-import { Box, Dialog, DialogActions, IconButton, PaperProps, Typography } from '@material-ui/core';
-import type { DialogProps } from '@material-ui/core/Dialog';
-import MuiDialogContent from '@material-ui/core/DialogContent';
-import MuiDialogTitle from '@material-ui/core/DialogTitle';
-import { withStyles } from '@material-ui/core/styles';
-import CloseIcon from '@material-ui/icons/Close';
+import { Box, Dialog, DialogActions, IconButton, PaperProps, Theme, Typography } from '@mui/material';
+import type { DialogProps } from '@mui/material/Dialog';
+import MuiDialogContent from '@mui/material/DialogContent';
+import MuiDialogTitle from '@mui/material/DialogTitle';
+import CloseIcon from '@mui/icons-material/Close';
 import React, { FC, ReactElement, ReactNode, useState } from 'react';
 import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 import { useAppTheme } from 'src/constants/AppConfig';
 import styles from './dashboardModal.module.scss';
 import { CustomDialogTransition } from 'src/constants/helpers';
-// node_modules/@material-ui/core/Dialog/Dialog.d.ts
+import { withStyles } from '@mui/styles';
+// node_modules/@mui/material/Dialog/Dialog.d.ts
 
 export interface ModalProps extends React.HTMLAttributes<HTMLDivElement> {
   modalHead?: ModalHead | null;
@@ -30,7 +30,7 @@ export interface ModalHead {
   fullScreenOption?: boolean;
 }
 
-const CustomDialogContent = withStyles((theme) => ({
+const CustomDialogContent = withStyles((theme: Theme) => ({
   root: {
     padding: theme.spacing(2)
   }

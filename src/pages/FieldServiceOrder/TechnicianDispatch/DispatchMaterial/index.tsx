@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { Button, Dialog, Grid, Box, IconButton } from '@material-ui/core';
+import { Dialog, IconButton } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
@@ -120,14 +120,12 @@ const DispatchMaterial = ({ handleClose, data, handleSubmit }) => {
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button size="small" color="primary" onClick={handleClose}>
+        <ThemeButton buttonType="transparent" onClick={handleClose}>
           {'Cancel'}
-        </Button>
-        <CustomButton
-          loading={false}
-          variant="contained"
-          color="primary"
-          type="submit"
+        </ThemeButton>
+        <ThemeButton
+          isLoading={false}
+buttonType="theme"
           onClick={() => {
             handleSubmit([
               {
@@ -141,7 +139,7 @@ const DispatchMaterial = ({ handleClose, data, handleSubmit }) => {
         >
           {' '}
           Dispatch
-        </CustomButton>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

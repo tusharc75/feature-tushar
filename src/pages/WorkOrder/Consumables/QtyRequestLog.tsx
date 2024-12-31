@@ -1,21 +1,21 @@
-import { Box, Button, IconButton } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
-import moment from 'moment';
+import { Box, IconButton } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CustomDialogTransition, MATERIAL_REQUEST_STATUS, dateTimeFormat } from 'src/constants/helpers';
+import { CustomDialogTransition, MATERIAL_REQUEST_STATUS, displayDateTime } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import ProcessLogs from './ProcessLogs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import HistoryIcon from '@material-ui/icons/History';
+import HistoryIcon from '@mui/icons-material/History';
 import QtyWithdrawalDialog from './QtyWithdrawalDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const renderedFrom = 'workOrder_consumables_request';
 
@@ -47,7 +47,7 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
         width: 200,
         Cell: ({ row }) => {
           return row?.original['requestDate'] ? (
-            <p className="text-truncate">{moment(row?.original['requestDate']).format(dateTimeFormat)}</p>
+            <p className="text-truncate">{displayDateTime(row?.original['requestDate'])}</p>
           ) : (
             <NoDataCell />
           );
@@ -136,7 +136,7 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
         width: 200,
         Cell: ({ row }) => {
           return row?.original['processDate'] ? (
-            <p className="text-truncate">{moment(row?.original['processDate']).format(dateTimeFormat)}</p>
+            <p className="text-truncate">{displayDateTime(row?.original['processDate'])}</p>
           ) : (
             <NoDataCell />
           );
@@ -180,16 +180,14 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
         Cell: ({ row }: any) => (
           <div style={{ display: 'flex', justifyContent: 'right' }}>
             {row.original['status'] === MATERIAL_REQUEST_STATUS.requested && (
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
+              <ThemeButton
+                buttonType="theme"
                 onClick={() => {
                   setWithdrawalQtyDialog({ open: true, data: row.original });
                 }}
               >
                 Close
-              </Button>
+              </ThemeButton>
             )}
             {row.original['processesLogs'] && row.original['processesLogs']?.length > 0 && (
               <Box ml={1}>
@@ -288,7 +286,7 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
           <ProcessLogs
             onClose={() => {
               setOpenProcessLogs({ open: false, logs: [] });
-              fetchData()
+              fetchData();
             }}
             logsData={openProcessLogs.logs}
             productName={productName}

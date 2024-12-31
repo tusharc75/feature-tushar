@@ -1,20 +1,22 @@
 import { useState, useEffect, Fragment, useContext, useRef } from 'react';
-import { Box, Button, Grid, makeStyles, Paper, IconButton } from '@material-ui/core';
+import { Box, Button, Paper, IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { makeStyles } from '@mui/styles';
 import { useParams } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
 import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
 import axiosInstance from 'src/axios/axiosInstance';
-import Skeleton from '@material-ui/lab/Skeleton';
+import Skeleton from '@mui/material/Skeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import Carousel from 'react-material-ui-carousel';
 import { BsImage } from 'react-icons/bs';
 import styles from './product-detail-page.module.scss';
-import { MdAdd, MdAddShoppingCart, MdOutlineHorizontalRule } from 'react-icons/md';
+import { MdAddShoppingCart } from 'react-icons/md';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import QuantityDialog from '../QuantityDialog';
-import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
-import AddIcon from '@material-ui/icons/Add';
-import RemoveIcon from '@material-ui/icons/Remove';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
 import Parts from '../Parts';
 import { useData } from 'src/StateProvider/Provider';
 
@@ -228,7 +230,7 @@ const ProductDetails = () => {
         <CustomBreadCrumbs routes={[{ ...routes.pos, title: resources?.pos?.titlePlural }, { title: productData?.productName }]} />
       </Grid>
       <Grid container spacing={1} className="detail-container">
-        <Grid item xs={12} sm={12} md={12} lg={12}>
+        <Grid size={{xs:12, sm:12, md:12, lg:12}}>
           <Paper>
             <div className="container">
               <Box>
@@ -236,11 +238,12 @@ const ProductDetails = () => {
                 {productData ? (
                   <Grid container className={`py-5`} spacing={4}>
                     <Grid
-                      item
-                      xs={12}
-                      sm={6}
-                      md={6}
-                      lg={6}
+                      size={{
+                      xs:12,
+                      sm:6,
+                      md:6,
+                      lg:6
+                      }}
                       style={{ maxHeight: '450px', minHeight: '450px' }}
                       className="d-flex flex-column align-items-center"
                     >
@@ -306,11 +309,11 @@ const ProductDetails = () => {
                         </div>
                       )}
                     </Grid>
-                    <Grid item xs={12} sm={6} md={6} lg={6}>
+                    <Grid size={{xs:12, sm:6, md:6, lg:6}}>
                       <Box border={1} borderColor="var(--common-border-color)" borderRadius={5} style={{ height: '100%' }}>
-                        <Grid className="px-2 py-2 first-content-Layout">
+                        <Grid className="first-content-Layout px-2 py-2">
                           <h4>{productData.productCategory?.optionLabel}</h4>
-                          <h2 className="pt-1 pb-1" style={{ color: 'white', fontSize: '1.5rem' }}>
+                          <h2 className="pb-1 pt-1" style={{ color: 'white', fontSize: '1.5rem' }}>
                             {productData.productName}
                           </h2>
                           {productData?.availableInventory ? <h4>{`Inventory : ${productData?.availableInventory}`}</h4> : <h4>{`No inventory`}</h4>}
@@ -388,37 +391,37 @@ const ProductDetails = () => {
                     </Grid>
                   </Grid>
                 ) : (
-                  <Grid container className="py-4 px-2">
-                    <Grid item xs={6} className="d-flex flex-column align-items-center">
+                  <Grid container className="px-2 py-4">
+                    <Grid size={{xs:6}} className="d-flex flex-column align-items-center">
                       <Box display="flex" justifyContent="center" alignItems="center">
                         <Skeleton width={200} height={200} />
                       </Box>
                       <Skeleton width={120} height={50} />
                     </Grid>
-                    <Grid item xs={6}>
+                    <Grid size={{xs:6}}>
                       <Skeleton width={70} height={50} />
                       <Skeleton width={100} height={50} />
                       <Skeleton width={120} height={50} />
                       <Skeleton width={150} height={50} />
                       <Grid container className="mt-4">
-                        <Grid item xs={12} md={6} className="d-flex flex-column gap-3">
+                        <Grid size={{xs:12, md:6}} className="d-flex flex-column gap-3">
                           <Grid container spacing={2}>
-                            <Grid item xs={6}>
+                            <Grid size={{xs:6}}>
                               <Skeleton width="100%" height={70} />
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid size={{xs:6}}>
                               <Skeleton width="100%" height={70} />
                             </Grid>
                           </Grid>
                           <Grid container spacing={2}>
-                            <Grid item xs={6}>
+                            <Grid size={{xs:6}}>
                               <Skeleton width="100%" height={70} />
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid size={{xs:6}}>
                               <Skeleton width="100%" height={70} />
                             </Grid>
                           </Grid>
-                          <Box className="my-3 d-flex gap-4 align-items-baseline">
+                          <Box className="d-flex align-items-baseline my-3 gap-4">
                             {
                               <div className="d-flex align-items-center gap-2">
                                 <Skeleton width={100} height={50} />

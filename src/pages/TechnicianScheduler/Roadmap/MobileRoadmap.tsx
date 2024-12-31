@@ -1,12 +1,11 @@
-import { Avatar, Box, Collapse, IconButton, Typography } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import { Close, DateRange, ExpandLess, ExpandMore, Image, Map } from '@material-ui/icons';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import { TreeItem, TreeView } from '@material-ui/lab';
-import moment from 'moment';
+import { Avatar, Box, Collapse, IconButton, Theme, Typography } from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import { Close, DateRange, ExpandLess, ExpandMore, Image, Map } from '@mui/icons-material';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import { TreeItem, TreeView } from '@mui/x-tree-view';
 import React, { Fragment, useCallback, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { dateTimeFormat } from 'src/constants/helpers';
+import { displayDateTime } from 'src/constants/helpers';
 import MapView from '../Map';
 import { getColorFromPriority, getPriority } from './helperFunctions';
 import styles from './roadmap.module.scss';
@@ -21,7 +20,7 @@ type TProps = {
   setSelected: (data) => void;
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     '&:hover > $content': {
       backgroundColor: theme.palette.action.hover
@@ -60,7 +59,7 @@ const MobileRoadmap: React.FC<TProps> = ({ activity, expanded, selected, handleT
         <Fragment key={data._id}>
           <div
             role="button"
-            className="grid grid-cols-[1fr_auto] gap-4 items-center min-h-[70px] pr-4"
+            className="grid min-h-[70px] grid-cols-[1fr_auto] items-center gap-4 pr-4"
             onClick={(event) => {
               handleSelect(event, data, 'technician');
             }}
@@ -99,7 +98,7 @@ const MobileRoadmap: React.FC<TProps> = ({ activity, expanded, selected, handleT
             </div>
           </div>
           <Collapse in={compareCollapse(index)}>
-            <div className="py-4 px-4 border border-[var(--common-border-color)] -mb-[1px] -mr-[1px] -ml-[24px] bg-[var(--dark-secondary,white)]">
+            <div className="-mb-[1px] -ml-[24px] -mr-[1px] border border-[var(--common-border-color)] bg-[var(--dark-secondary,white)] px-4 py-4">
               {!selected ? (
                 <Box>
                   <CalendarData activity={data} />
@@ -133,7 +132,8 @@ const MobileRoadmap: React.FC<TProps> = ({ activity, expanded, selected, handleT
       return (
         <TreeItem
           key={index}
-          nodeId={data._id.toString()}
+          itemId={data._id.toString()}
+          id={data._id.toString()}
           label={label}
           children={children}
           style={{ borderBottom: '1px solid var(--common-border-color)' }}
@@ -205,18 +205,18 @@ const CalendarData: React.FC<TCalendarProps> = ({ activity }) => {
   // const createDate = activity.createDate;
   if (!services || !services.length) return <p className=" text-center text-sm">No Data found</p>;
   return (
-    <div className="grid gap-5 roadmapContainer">
+    <div className="roadmapContainer grid gap-5">
       {services.map((service, index) => {
         const priority = getPriority(service.status);
         const bgColor = getColorFromPriority(priority);
         return (
           <div key={service._id}>
-            <span className="text-[12px] flex gap-2 items-center mb-[7px]">
-              <DateRange className="max-w-[16px] max-h-[16px]" />
-              <span className="text-[#6B6B6B] dark:text-gray-200">{moment(service.startDate).format(dateTimeFormat)}</span>
+            <span className="mb-[7px] flex items-center gap-2 text-[12px]">
+              <DateRange className="max-h-[16px] max-w-[16px]" />
+              <span className="text-[#6B6B6B] dark:text-gray-200">{displayDateTime(service.startDate)}</span>
             </span>
             <HtmlTooltip title={<p>{service?.fieldTicket[0]?.fieldTicketNumber}</p>} placement="top">
-              <div className={`rounded-md px-3 py-2 min-h-[20px] flex flex-wrap ${bgColor}`}>
+              <div className={`flex min-h-[20px] flex-wrap rounded-md px-3 py-2 ${bgColor}`}>
                 <h6 className={`${styles.servicesText} truncate text-sm`} title={service?.serviceDetail?.serviceName}>
                   {service?.serviceDetail?.serviceName}
                 </h6>

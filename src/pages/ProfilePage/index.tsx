@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext, Fragment } from 'react';
-import { Box, Grid, Paper } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { Box, Paper, Theme } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { makeStyles } from '@mui/styles';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ProfileSidebar from './components/ProfileSidebar';
 import { profileMenuItems } from '../../constants/helpers';
@@ -13,7 +14,7 @@ import CustomContainer from '../../components/CustomContainer';
 import { useData } from '../../StateProvider/Provider';
 import { SET_USER } from 'src/StateProvider/actionTypes';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   paper: {
     padding: theme.spacing(1),
     textAlign: 'center',
@@ -125,14 +126,14 @@ export default function ProfilePage(props) {
   return (
     <Fragment>
       <Grid container className="headerbox">
-        <Grid item md={12} sm={12} xs={12}>
+        <Grid size={{md:12, sm:12, xs:12}}>
           <CustomBreadCrumbs routes={[profileBreadCrumbs]} />
         </Grid>
       </Grid>
       <CustomContainer>
         <Box p={{ xs: 0, md: 2 }}>
           <Grid container spacing={3}>
-            <Grid item sm={12} md={4} lg={3}>
+            <Grid size={{sm:12, md:4, lg:3}}>
               <div>
                 <ProfileSidebar
                   onItemClick={handleItemClick}
@@ -143,7 +144,7 @@ export default function ProfilePage(props) {
                 />
               </div>
             </Grid>
-            <Grid item sm={12} md={8} lg={9} className="bgbox">
+            <Grid size={{sm:12, md:8, lg:9}} className="bgbox">
               {activeItem === profileMenuItems.profile ? (
                 <ManageProfile
                   displayUserDetails={true}
@@ -158,9 +159,12 @@ export default function ProfilePage(props) {
               ) : activeItem === profileMenuItems.notification ? (
                 <NotificationPreference notificationPreferenceData={notificationPreferenceData} user={userData._id} onSuccess={fetchUserData} />
               ) : activeItem === profileMenuItems.uiPreference ? (
-                <UiPreference userData={userData} onSuccess={() => {
-                  fetchUserData(true)
-                }} />
+                <UiPreference
+                  userData={userData}
+                  onSuccess={() => {
+                    fetchUserData(true);
+                  }}
+                />
               ) : activeItem === profileMenuItems.setting ? (
                 <Paper className={classes.paper}>setting</Paper>
               ) : activeItem === profileMenuItems.users ? (

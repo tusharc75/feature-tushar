@@ -1,5 +1,3 @@
-import moment from 'moment';
-import { dateFormat } from '../constants/helpers';
 export const validateEmail = (value) => {
   var reg = /^([A-Za-z0-9_\-.])+([A-Za-z0-9_\-.])+([A-Za-z]{2,4})$/;
 
@@ -30,10 +28,6 @@ export const getErrorMessage = (err) => {
     }
   }
   return '';
-};
-
-export const displayDate = (date) => {
-  return date ? moment(date).format(dateFormat) : '';
 };
 
 export const getBordActionUrl = (type) => {

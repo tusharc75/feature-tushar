@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import { CustomDialogTransition, sidebarResource } from '../../../constants/helpers';
 import ResourceLogsGrid from 'src/pages/ResourceLogs/ResourceLogsGrid';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -15,7 +15,11 @@ type HistoryDialogProps = {
 export default function HistoryDialog({ onClose, open, resourceId, resource, resourceLabel = '' }: HistoryDialogProps) {
   return (
     <Dialog
-      disableBackdropClick
+      onClose={(event, reason) => {
+        if (reason !== 'backdropClick') {
+          onClose();
+        }
+      }}
       disableEscapeKeyDown
       fullWidth
       TransitionComponent={CustomDialogTransition}
@@ -23,7 +27,6 @@ export default function HistoryDialog({ onClose, open, resourceId, resource, res
       fullScreen
       aria-labelledby="confirmation-dialog-title"
       open={open}
-      onClose={onClose}
     >
       <CustomDialogHeader title={<>History - {resourceLabel}</>} showManimizeMaximize={false} showRequiredLabel={false} onClose={onClose} />
       <CustomDialogContent isFooterPresent={false}>

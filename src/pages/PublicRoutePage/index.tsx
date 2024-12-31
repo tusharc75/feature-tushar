@@ -1,18 +1,21 @@
-import { useParams, useLocation } from 'react-router-dom';
+import { Box, TextField, Theme } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { makeStyles } from '@mui/styles';
 import axios from 'axios';
-import { backendApi } from './../../config';
-import { Grid, Box, Button, Typography, Paper, makeStyles, Dialog, TextField, AppBar, Toolbar } from '@material-ui/core';
-import { Fragment, useContext, useEffect, useState } from 'react';
-import { SVG } from '../../assets';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import QuoteSupplierPrice from './QuoteSupplierPrice';
+import { useContext, useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import QuotationSupplierPrice from './QuotationSupplierPrice';
-import QuotationCustomerAccept from './QuotationCustomer/QuotationCustomerAccept';
-import IrtTicket from './IrtTicket';
 import { sidebarResource } from 'src/constants/helpers';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { SVG } from '../../assets';
+import { backendApi } from './../../config';
+import IrtTicket from './IrtTicket';
+import QuotationCustomerAccept from './QuotationCustomer/QuotationCustomerAccept';
+import QuotationSupplierPrice from './QuotationSupplierPrice';
+import QuoteSupplierPrice from './QuoteSupplierPrice';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   header: {
     background: '#163340',
     textAlign: 'center',
@@ -122,7 +125,7 @@ const PublicRoutePage = () => {
   }, [resourceData?.referenceIdType]);
 
   return (
-    <div className="h-screen w-screen max-w-[100vw] overflow-hidden block m-0">
+    <div className="m-0 block h-screen w-screen max-w-[100vw] overflow-hidden">
       <div className={`${classes.header} flex items-center justify-between`}>
         <img className={classes.logo} src={SVG('LogoNew')} alt="equip logo" title="eQuipt Logo" />
         <h2 style={{ paddingTop: '10px', paddingRight: '10px', color: 'white', textAlign: 'right' }}>
@@ -134,12 +137,12 @@ const PublicRoutePage = () => {
           <Box style={{ padding: '10px', display: 'flex', justifyContent: 'center' }}>
             <Box style={{ marginTop: '50px', width: '400px' }} boxShadow={3}>
               <Grid spacing={1} style={{ padding: '10px', display: 'flex', justifyContent: 'center' }} container>
-                <Grid item xs={12} sm={12} md={12}>
+                <Grid size={{ xs: 12, sm: 12, md: 12 }}>
                   <h1 style={{ padding: '10px', display: 'flex', justifyContent: 'center', color: '#047d1c' }} title={'Authentication Required'}>
                     Authentication Required
                   </h1>
                 </Grid>
-                <Grid item xs={10} sm={10} md={10}>
+                <Grid size={{ xs: 10, sm: 10, md: 10 }}>
                   <TextField
                     id="outlined-full-width"
                     margin="normal"
@@ -156,10 +159,13 @@ const PublicRoutePage = () => {
                     size="small"
                   />
                 </Grid>
-                <Grid item xs={10} sm={10} md={10}>
-                  <Button style={{ marginBottom: '20px' }} variant="contained" color="primary" size="medium" fullWidth onClick={fetchResourceData}>
+                <Grid size={{ xs: 10, sm: 10, md: 10 }}>
+                  <ThemeButton
+                    onClick={fetchResourceData}
+                    buttonType='theme'
+                  >
                     Submit
-                  </Button>
+                  </ThemeButton>
                 </Grid>
               </Grid>
             </Box>

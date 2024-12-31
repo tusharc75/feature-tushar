@@ -1,5 +1,5 @@
-import { InputBaseComponentProps } from '@material-ui/core';
-import type { TextFieldProps as MuiTextFieldProps } from '@material-ui/core/TextField';
+import { InputBaseComponentProps } from '@mui/material';
+import type { TextFieldProps as MuiTextFieldProps } from '@mui/material/TextField';
 
 type TextFieldProps = Omit<MuiTextFieldProps, 'onChange' | 'select' | 'multiline' | 'defaultValue' | 'value' | 'autoFocus' | 'variant'>;
 

@@ -1,17 +1,16 @@
 import {
-  Button,
   Checkbox,
-  CircularProgress,
   Dialog,
   FormControl,
   FormControlLabel,
-  Grid,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
   Typography
-} from '@material-ui/core';
+} from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Grid from '@mui/material/Grid2';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
@@ -100,7 +99,7 @@ const AssignQuoteDialog = ({ quoteDialogOpen, onSuccess, handleCloseDialog, assi
         ) : quotesConst.length ? (
           <>
             <Grid container>
-              <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
+              <Grid size={{ xs: 12, md: 6, sm: 6 }} className="d-flex align-items-center gap-1">
                 <FormControl component="fieldset">
                   <FormControlLabel
                     value="top"
@@ -121,7 +120,7 @@ const AssignQuoteDialog = ({ quoteDialogOpen, onSuccess, handleCloseDialog, assi
                   />
                 </FormControl>
               </Grid>
-              <Grid item xs={12} md={6} sm={6} container justify="flex-end">
+              <Grid size={{ xs: 12, md: 6, sm: 6 }} container justifyContent="flex-end">
                 <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
               </Grid>
             </Grid>
@@ -151,12 +150,12 @@ const AssignQuoteDialog = ({ quoteDialogOpen, onSuccess, handleCloseDialog, assi
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button disabled={isAssigning} onClick={handleCloseDialog} color="primary" size="small">
+        <ThemeButton disabled={isAssigning} onClick={handleCloseDialog} buttonType="transparent">
           Cancel
-        </Button>
-        <Button disabled={!selectedQuotes.length || isAssigning} onClick={handleAssignQuotes} color="primary" size="small" variant="contained">
-          {isAssigning ? <CircularProgress size={22} /> : 'Save'}
-        </Button>
+        </ThemeButton>
+        <ThemeButton disabled={!selectedQuotes.length || isAssigning} onClick={handleAssignQuotes} buttonType="theme">
+          Save
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

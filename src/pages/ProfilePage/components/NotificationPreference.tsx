@@ -1,18 +1,20 @@
 import { useContext, useState } from 'react';
-import { Grid, Box, Checkbox, FormControlLabel, Typography, Button, CircularProgress } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
+import { Box, Checkbox, FormControlLabel, Typography, Theme } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { makeStyles } from '@mui/styles';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
 import { BsEnvelopeOpen, BsDisplay } from 'react-icons/bs';
 import styles from '../profilePage.module.scss';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   tableCell: {
     fontSize: 'medium'
   },
@@ -39,13 +41,13 @@ const RenderCheckBox = ({ name, val, id, onChange, isDisable }) => (
 );
 
 const PreferenceOptions = ({ id, icon, heading, subtitle }) => (
-  <Grid item key={id} sm={12} md={6} lg={4} container>
-    <Grid item sm={3} style={{ marginTop: '7px' }}>
+  <Grid key={id} size={{sm:12, md:6, lg:4}} container>
+    <Grid size={{sm:3}} style={{ marginTop: '7px' }}>
       {icon}
     </Grid>
-    <Grid item sm={7} container>
-      <Grid item xs container direction="column">
-        <Grid item xs>
+    <Grid size={{sm:7}} container>
+      <Grid size={{xs: 12, sm: 7}} container direction="column">
+        <Grid size={{xs: 12, sm: 7}} container>
           <Typography align="left" variant="h6">
             <strong>{heading}</strong>
           </Typography>
@@ -62,7 +64,7 @@ export default function NotificationPreference({ notificationPreferenceData, use
   const toastConfig = useContext(CustomToastContext);
   const [rows, setRows] = useState(notificationPreferenceData);
   const [isUpdating, setUpdating] = useState(false);
-  const [isEdit,setIsEdit]=  useState(false);
+  const [isEdit, setIsEdit] = useState(false);
   const [isAllPreference, setAllPreference] = useState({
     portal: notificationPreferenceData.every((d) => d.portal),
     email: notificationPreferenceData.every((d) => d.email)
@@ -152,33 +154,28 @@ export default function NotificationPreference({ notificationPreferenceData, use
           </Grid>
         </Box>
         <div className="header-panel">
-          <div className="flex flex-wrap gap-[8px] justify-end">
+          <div className="flex flex-wrap justify-end gap-[8px]">
             {isEdit && (
-            <Button
-              disabled={isUpdating}
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={() => {
-                updateNotificationPref();
-              }}
-            >
-              {isUpdating && <CircularProgress size={22} />}
-              Update
-            </Button>
+              <ThemeButton
+                onClick={() => {
+                  updateNotificationPref();
+                }}
+                disabled={isUpdating}
+                isLoading={isUpdating}
+                buttonType='theme'
+              >
+                Update
+              </ThemeButton>
             )}
             {!isEdit && (
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={() => {
-                setIsEdit(!isEdit)
-              }}
-            >
-              {isUpdating && <CircularProgress size={22} />}
-              Edit
-            </Button>
+              <ThemeButton
+                onClick={() => {
+                  setIsEdit(!isEdit);
+                }}
+                buttonType='theme'
+              >
+                Edit
+              </ThemeButton>
             )}
           </div>
         </div>

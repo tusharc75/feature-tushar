@@ -1,7 +1,5 @@
-import MomentUtils from '@date-io/moment';
-import { Box, IconButton, MenuItem } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { Box, IconButton, MenuItem } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
@@ -21,9 +19,7 @@ import axios, { CancelTokenSource } from 'axios';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 
-
 const ScheduleReport = () => {
-
   const renderedFrom = camelCase(sidebarResource.scheduleReport);
 
   const toastConfig = useContext(CustomToastContext);
@@ -137,7 +133,7 @@ const ScheduleReport = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" fontSize='small' />
+              <DeleteIcon color="error" fontSize="small" />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -218,7 +214,7 @@ const ScheduleReport = () => {
             if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
             } else {
-              setDeleteRecord(null)
+              setDeleteRecord(null);
             }
             setShowDeleteConfirmBox(true);
           }}
@@ -230,69 +226,67 @@ const ScheduleReport = () => {
   };
 
   return (
-    <MuiPickersUtilsProvider utils={MomentUtils}>
-      <section className="main-container-v1">
-        <div className="headerbox-v1">
-          <CustomBreadCrumbs
-            routes={[
-              { title: 'Reports', path: '/reports' },
-              { title: 'Schedule Report', path: '' }
-            ]}
-          />
-        </div>
-        <CustomContainer>
-          <ListingPageHeader
-            isActionButtonVisible={permissions?.scheduleReport?.isDelete}
-            actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
-            actionMenuItems={<ActionMenuItems />}
-            addButtonOnclick={() => {
-              setShowManageDialog({ open: true, id: null });
-            }}
-            isAddButtonVisible={permissions?.scheduleReport?.isCreate}
-          />
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs
+          routes={[
+            { title: 'Reports', path: '/reports' },
+            { title: 'Schedule Report', path: '' }
+          ]}
+        />
+      </div>
+      <CustomContainer>
+        <ListingPageHeader
+          isActionButtonVisible={permissions?.scheduleReport?.isDelete}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          actionMenuItems={<ActionMenuItems />}
+          addButtonOnclick={() => {
+            setShowManageDialog({ open: true, id: null });
+          }}
+          isAddButtonVisible={permissions?.scheduleReport?.isCreate}
+        />
 
-          {columns ? (
-            <CustomReactTable
-              height={'calc(100vh - 200px)'}
-              columns={columns}
-              state={state}
-              dispatch={dispatch}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchData}
-              showOnlyShowFilteredRecordSwitch={false}
-              showFilters={false}
-              resource={sidebarResource.scheduleReport}
-            />
-          ) : (
-            <Box p={2} height={500}>
-              <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>
-          )}
-        </CustomContainer>
-        {showDeleteConfirmBox && (
-          <ConfirmationDialog
-            open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.scheduleReport?.titleSingular?.toLowerCase()} : ${deleteRecord?.scheduleName || ''}` : `selected ${resources?.scheduleReport?.titlePlural?.toLowerCase()}`} ?`}
-            onClose={() => {
-              setDeleteRecord(null);
-              setShowDeleteConfirmBox(false);
-            }}
-            okBtnLoading={isSubmitting}
-            onOk={handleDelete}
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            refreshGrid={fetchData}
+            showOnlyShowFilteredRecordSwitch={false}
+            showFilters={false}
+            resource={sidebarResource.scheduleReport}
           />
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
         )}
-        {showManageDialog.open && (
-          <ManageScheduleReport
-            id={showManageDialog.id}
-            handleClose={() => setShowManageDialog({ open: false, id: null })}
-            onSuccess={() => {
-              fetchData();
-              setShowManageDialog({ open: false, id: null });
-            }}
-          />
-        )}
-      </section>
-    </MuiPickersUtilsProvider>
+      </CustomContainer>
+      {showDeleteConfirmBox && (
+        <ConfirmationDialog
+          open={showDeleteConfirmBox}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.scheduleReport?.titleSingular?.toLowerCase()} : ${deleteRecord?.scheduleName || ''}` : `selected ${resources?.scheduleReport?.titlePlural?.toLowerCase()}`} ?`}
+          onClose={() => {
+            setDeleteRecord(null);
+            setShowDeleteConfirmBox(false);
+          }}
+          okBtnLoading={isSubmitting}
+          onOk={handleDelete}
+        />
+      )}
+      {showManageDialog.open && (
+        <ManageScheduleReport
+          id={showManageDialog.id}
+          handleClose={() => setShowManageDialog({ open: false, id: null })}
+          onSuccess={() => {
+            fetchData();
+            setShowManageDialog({ open: false, id: null });
+          }}
+        />
+      )}
+    </section>
   );
 };
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Box, CircularProgress, Dialog } from '@material-ui/core';
-import { DirectionsRenderer, GoogleMap, Marker, LoadScript, Polyline } from '@react-google-maps/api';
+import { Box, CircularProgress, Dialog } from '@mui/material';
+import { GoogleMap, Marker, Polyline } from '@react-google-maps/api';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -104,7 +104,6 @@ const MapView = ({ handleClose, lat, lng }) => {
     }
   }, [pathCoordinates, map]);
 
-  //   const polylineCoordinates = [];
 
   return (
     <Dialog
@@ -118,7 +117,7 @@ const MapView = ({ handleClose, lat, lng }) => {
     >
       <CustomDialogHeader
         title={'Truck Map'}
-        onClose={(e, reason) => {
+        onClose={() => {
           handleClose();
         }}
         showRequiredLabel={false}

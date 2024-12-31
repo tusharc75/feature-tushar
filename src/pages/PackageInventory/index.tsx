@@ -1,5 +1,5 @@
-import { Box, IconButton, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, IconButton, TextField } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -13,7 +13,7 @@ import { ListingPageHeader } from 'src/components/PageHeaders';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import VisibilityOutlinedIcon from '@material-ui/icons/VisibilityOutlined';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import ShowAvailableInventory from 'src/pages/PackageInventory/ShowAvailableInventory';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 
@@ -256,7 +256,7 @@ const LeftSideContents = ({ plantOptions, plantId, setPlantId, resources }) => {
         options={plantOptions}
         getOptionLabel={(option: any) => option.optionLabel || ''}
         disableClearable
-        getOptionSelected={(option: any, val) => option.optionValue === val}
+        isOptionEqualToValue={(option: any, val) => option.optionValue === val}
         value={
           plantOptions.filter((data) => data.optionValue === plantId).length ? plantOptions.filter((data) => data.optionValue === plantId)[0] : ''
         }

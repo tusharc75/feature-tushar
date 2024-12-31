@@ -379,44 +379,37 @@ export const fetchFieldOptions = async ({ resource, sidebarResource, toastConfig
     const {
       data: { data }
     } = req;
-    const coloum = data?.filter((e) => !FILTER_NOT_APPLIED.includes(e?.fieldData?.type));
-    var modifiedColumn: any = coloum?.map((col: any) => {
-      const d = col.fieldData;
-      if (d?.type === 'dropDown') {
-        d.type = 'multiSelect';
-      }
-      return d;
-    });
+    let coloum = data?.filter((e) => !FILTER_NOT_APPLIED.includes(e?.fieldData?.type));
     if (resource === sidebarResource.user || resource === sidebarResource.employeeMaster) {
-      modifiedColumn?.forEach((e) => {
-        if (e.fieldName === 'firstName') {
-          e.fieldName = 'concatedName';
-          e.fieldLabel = 'Name';
-          e.type = 'singleLine';
+      coloum?.forEach((e) => {
+        if (e?.fieldData?.fieldName === 'firstName') {
+          e.fieldData.fieldName = 'concatedName';
+          e.fieldData.fieldLabel = 'Name';
+          e.fieldData.type = 'singleLine';
         }
       });
-      modifiedColumn = modifiedColumn?.filter((e) => e.fieldName !== 'lastName');
+      coloum = coloum?.filter((e) => e?.fieldData?.fieldName !== 'lastName');
     } else if (resource === sidebarResource.customerContact || resource === sidebarResource.supplierContact || resource === sidebarResource.lead) {
-      modifiedColumn?.forEach((e) => {
-        if (e.fieldName === 'firstName') {
-          e.fieldName = 'concatedName';
-          e.fieldLabel = 'Name';
-          e.type = 'singleLine';
+      coloum?.forEach((e) => {
+        if (e?.fieldData?.fieldName === 'firstName') {
+          e.fieldData.fieldName = 'concatedName';
+          e.fieldData.fieldLabel = 'Name';
+          e.fieldData.type = 'singleLine';
         }
       });
-      modifiedColumn = modifiedColumn?.filter((e) => !['lastName', 'middleName', 'salutation']?.includes(e.fieldName));
+      coloum = coloum?.filter((e) => !['lastName', 'middleName', 'salutation']?.includes(e?.fieldData?.fieldName));
     }
     if (resource === sidebarResource.serializedAsset) {
-      const currentOwner: any = modifiedColumn?.find((e) => e.fieldName === 'currentOwner');
+      const currentOwner: any = coloum?.find((e) => e?.fieldData?.fieldName === 'currentOwner');
       if (currentOwner) {
-        currentOwner.lookup = true;
-        currentOwner.option = [
-          ...(modifiedColumn?.find((e) => e.lookupResource === sidebarResource.customerAccount)?.option || []),
-          ...(modifiedColumn?.find((e) => e.lookupResource === sidebarResource.supplierAccount)?.option || [])
+        currentOwner.fieldData.lookup = true;
+        currentOwner.fieldData.option = [
+          ...(coloum?.find((e) => e?.fieldData?.lookupResource === sidebarResource.customerAccount)?.fieldData?.option || []),
+          ...(coloum?.find((e) => e?.fieldData?.lookupResource === sidebarResource.supplierAccount)?.fieldData?.option || [])
         ];
       }
     }
-    return modifiedColumn;
+    return coloum;
   } catch (error) {
     if (toastConfig) toastConfig.setToastConfig?.(error);
     throw error;
@@ -586,6 +579,99 @@ export const createFilterModel = (formValues, coloums) => {
   }
 
   return Object.fromEntries(filterModel);
+};
+
+export const createFilterData = (coloums, filterByIds, deepFilters, filterTerm) => {
+  const dateFields: any = [];
+  coloums
+    ?.filter((c) => c?.fieldData?.type === 'date')
+    ?.map((c) => {
+      dateFields.push(`from_${c?.fieldData?.fieldName}`);
+      dateFields.push(`to_${c?.fieldData?.fieldName}`);
+    });
+
+  let filterById: any = [];
+  let deepFilter: any = [];
+
+  if (filterByIds?.length > 0) {
+    filterById = filterByIds
+      ?.filter((f) => f?.term?.length > 0)
+      ?.map((f) => {
+        const term = filterTerm[f?.field] === '$nin' ? '$nin' : '$in';
+        return {
+          field: f?.field,
+          term: {
+            [term]: f?.term?.map?.((d: any) => d.optionValue)
+          }
+        };
+      });
+  }
+
+  if (deepFilters?.length > 0) {
+    deepFilter = [
+      ...deepFilter,
+      ...deepFilters
+        ?.filter((d) => {
+          const hasTermLength = d?.term?.length ? true : false;
+          if (dateFields?.length > 0) {
+            return hasTermLength && !dateFields?.includes(d?.field);
+          }
+          return hasTermLength;
+        })
+        ?.map((d) => {
+          if (filterTerm[d?.field] === '$nin' && Array.isArray(d?.term)) {
+            return {
+              ...d,
+              term: { $nin: d?.term }
+            };
+          }
+          return d;
+        })
+    ];
+
+    coloums
+      ?.filter((c) => c?.fieldData?.type === 'date')
+      ?.map((f) => {
+        if (deepFilters?.some((d) => [`from_${f?.fieldData?.fieldName}`, `to_${f?.fieldData?.fieldName}`].includes(d?.field))) {
+          deepFilter.push({
+            field: f?.fieldData?.fieldName,
+            term: {
+              from: deepFilters?.find((d) => d?.field === `from_${f?.fieldData?.fieldName}`)
+                ? deepFilters?.find((d) => d?.field === `from_${f?.fieldData?.fieldName}`)?.term
+                : null,
+              to: deepFilters?.find((d) => d?.field === `to_${f?.fieldData?.fieldName}`)
+                ? deepFilters?.find((d) => d?.field === `to_${f?.fieldData?.fieldName}`)?.term
+                : null
+            }
+          });
+        }
+      });
+  }
+
+  return { filterById, deepFilter };
+};
+
+export const createFilterSetData = (val, columns) => {
+  const filterById: any = [];
+  const deepFilter: any = [];
+  Object.keys(val?.filterValue || {})?.map((v) => {
+    if (val?.filterValue[v]?.length > 0) {
+      const col = columns?.find((c) => c?.fieldData?.fieldName === v);
+      if (col?.fieldData?.lookup) {
+        filterById.push({
+          field: v,
+          term: val?.filterValue[v]
+        });
+      } else {
+        deepFilter.push({
+          field: v,
+          term: val?.filterValue[v]
+        });
+      }
+    }
+  });
+
+  return { filterById, deepFilter };
 };
 
 export const filtermodelToFormValue = (filtermodel: FilterModel) => {

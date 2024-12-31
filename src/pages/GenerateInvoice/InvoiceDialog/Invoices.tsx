@@ -1,15 +1,16 @@
-import { Box, Grid, IconButton } from '@material-ui/core';
+import { Box, IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { gridLoadingTimeout, invoice, isObjectEmpty, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { gridLoadingTimeout, invoice, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ViewInvoice from '../../Invoice/ViewInvoice';
-import VisibilityIcon from '@material-ui/icons/Visibility';
-import DeleteIcon from '@material-ui/icons/Delete';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import DeleteIcon from '@mui/icons-material/Delete';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
 import { camelCase } from 'lodash';
@@ -196,7 +197,7 @@ const Invoices = ({ resourceId, resource, invoiceFieldName, fetchParentData = nu
 
   return (
     <Box>
-      <Grid item xs={12} md={12} sm={12} className="mt-3">
+      <Grid size={{xs:12, md:12, sm:12}} className="mt-3">
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

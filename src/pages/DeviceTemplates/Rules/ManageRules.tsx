@@ -1,16 +1,16 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { Box, Button, Checkbox, Dialog, FormControlLabel, Grid, IconButton, TextField } from '@material-ui/core';
+import { Box, Checkbox, Dialog, FormControlLabel, IconButton, TextField } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, sidebarResource, yupSchema } from 'src/constants/helpers';
-import { FieldArray, Form, Formik, getIn } from 'formik';
+import { CustomDialogTransition } from 'src/constants/helpers';
+import { FieldArray, Form, Formik } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import AddIcon from '@material-ui/icons/Add';
-import CloseIcon from '@material-ui/icons/Close';
-import { Autocomplete } from '@material-ui/lab';
+import AddIcon from '@mui/icons-material/Add';
+import CloseIcon from '@mui/icons-material/Close';
+import Autocomplete from '@mui/material/Autocomplete';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -192,7 +192,7 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
               <Fragment>
                 <CustomDialogHeader
                   title={id ? (isClone ? `Clone - ${initialValue?.ruleName}` : `Update Rule - ${initialValue?.ruleName}`) : 'Create Rule'}
-                  onClose={(e, reason) => {
+                  onClose={() => {
                     if (isEqual(initialValue, values)) {
                       onClose();
                     } else {
@@ -211,6 +211,7 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
                       <div className="name-container mb-2 sm:mb-3 md:mb-4">
                         <TextField
                           margin="dense"
+                          size="small"
                           type="text"
                           label="Rule Name"
                           name="ruleName"
@@ -405,11 +406,8 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                  <Button
-                    type="button"
-                    variant="outlined"
-                    color="primary"
-                    size="small"
+                  <ThemeButton
+buttonType="transparent"
                     onClick={() => {
                       if (isEqual(initialValue, values)) {
                         onClose();
@@ -419,11 +417,10 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
                     }}
                   >
                     Cancel
-                  </Button>
-                  <CustomButton
-                    loading={loading}
-                    variant="contained"
-                    color="primary"
+                  </ThemeButton>
+                  <ThemeButton
+                    isLoading={loading}
+buttonType="theme"
                     disabled={isEqual(initialValue, values)}
                     onClick={(e) => {
                       e.preventDefault();
@@ -431,7 +428,7 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
                     }}
                   >
                     Save
-                  </CustomButton>
+                  </ThemeButton>
                 </CustomDialogFooter>
 
                 {showConfirmDialog ? (
@@ -441,7 +438,6 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
                       setShowConfirmDialog(false);
                       submitForm();
                     }}
-                    close={() => setShowConfirmDialog(false)}
                     onClose={() => {
                       setShowConfirmDialog(false);
                       onClose();

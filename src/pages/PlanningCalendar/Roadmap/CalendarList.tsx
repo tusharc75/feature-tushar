@@ -1,8 +1,9 @@
-import { Box, Typography } from '@material-ui/core';
-import { TreeItem, TreeView } from '@material-ui/lab';
+import { Box, Typography } from '@mui/material';
+import { SimpleTreeView, TreeItem } from '@mui/x-tree-view';
 import moment from 'moment';
 import React from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { displayDateTime } from 'src/constants/helpers';
 
 const types = [
   { _id: '1', name: 'Planned', type: 'planned', color: '!bg-[hsl(46.5deg,95.24%,91.76%)] dark:!bg-[#dda900]' },
@@ -29,7 +30,7 @@ export default function CalendarList({
 }) {
   return (
     <>
-      <TreeView expanded={expanded} selected={selected} onNodeSelect={handleSelect}>
+      <SimpleTreeView multiSelect={false} expandedItems={expanded} selectedItems={selected} onSelectedItemsChange={handleSelect}>
         {rowVirtualizer.getVirtualItems().map((row) => {
           const newActivity = activity[row.index];
           return (
@@ -50,7 +51,7 @@ export default function CalendarList({
             </div>
           );
         })}
-      </TreeView>
+      </SimpleTreeView>
     </>
   );
 }
@@ -73,7 +74,7 @@ const TreeNode = ({ obj, index, endDate, startDate, totalDay, dayPixel }) => {
                 <>
                   <p className="mx-auto my-2 max-w-fit rounded px-3 py-[2px] text-center [border:1px_solid_gray]">{data.qty}</p>
                   <p className="text-[12px] text-gray-400">
-                    {moment(data.startDate).format('DD MMM YY')} - {moment(data.endDate).format('DD MMM YY')}
+                    {displayDateTime(data.startDate, 'DD MMM YY')} - {displayDateTime(data.endDate, 'DD MMM YY')}
                   </p>
                 </>
               }
@@ -102,7 +103,8 @@ const TreeNode = ({ obj, index, endDate, startDate, totalDay, dayPixel }) => {
     <TreeItem
       key={index}
       data-id={obj?._id}
-      nodeId={obj._id.toString()}
+      itemId={obj._id.toString()}
+      id={obj._id.toString()}
       label={label}
       children={children}
       classes={{

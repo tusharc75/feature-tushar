@@ -1,23 +1,23 @@
 import {
-  Button,
   Checkbox,
-  CircularProgress,
   Dialog,
   FormControl,
   FormControlLabel,
-  Grid,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
-  Typography,
-  makeStyles
-} from '@material-ui/core';
-import Step from '@material-ui/core/Step';
-import StepContent from '@material-ui/core/StepContent';
-import StepLabel from '@material-ui/core/StepLabel';
-import Stepper from '@material-ui/core/Stepper';
+  Theme,
+  Typography
+} from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Step from '@mui/material/Step';
+import StepContent from '@mui/material/StepContent';
+import StepLabel from '@mui/material/StepLabel';
+import Stepper from '@mui/material/Stepper';
+import { makeStyles } from '@mui/styles';
 import { useContext, useEffect, useState } from 'react';
+import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
@@ -25,9 +25,8 @@ import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import Loader from '../Loader';
 import { ListingPageHeader } from '../PageHeaders';
-import { CustomDialogTransition } from 'src/constants/helpers';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   button: {
     marginTop: theme.spacing(1),
     marginRight: theme.spacing(1)
@@ -56,10 +55,12 @@ const AssignRegionalRolesUserDialog = ({ entitiesDialogOpen, onSuccess, handleCl
   const classes = useStyles();
 
   const handleNext = () => {
+    handleSearch('');
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
 
   const handleBack = () => {
+    handleSearch('');
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
@@ -92,7 +93,7 @@ const AssignRegionalRolesUserDialog = ({ entitiesDialogOpen, onSuccess, handleCl
   }, []);
 
   const handleSearch = (e) => {
-    let value = e.target.value;
+    let value = e?.target?.value || '';
     setSearch(value);
     let resultUser = [];
     let resultEntity = [];
@@ -250,20 +251,13 @@ const AssignRegionalRolesUserDialog = ({ entitiesDialogOpen, onSuccess, handleCl
                     <Typography>{getStepContent(index)}</Typography>
                     <div className={classes.actionsContainer}>
                       <div>
-                        <Button size="small" disabled={activeStep === 0} onClick={handleBack} className={classes.button}>
+                        <ThemeButton buttonType="transparent" disabled={activeStep === 0} onClick={handleBack}>
                           Back
-                        </Button>
+                        </ThemeButton>
                         {activeStep !== steps.length - 1 && (
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            size="small"
-                            onClick={handleNext}
-                            disabled={selectedUser.length === 0}
-                            className={classes.button}
-                          >
+                          <ThemeButton buttonType="theme" onClick={handleNext} disabled={selectedUser.length === 0} className={classes.button}>
                             Next
-                          </Button>
+                          </ThemeButton>
                         )}
                       </div>
                     </div>
@@ -277,18 +271,12 @@ const AssignRegionalRolesUserDialog = ({ entitiesDialogOpen, onSuccess, handleCl
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button disabled={isAssigning} onClick={handleCloseDialog} color="primary" size="small">
+        <ThemeButton onClick={handleCloseDialog} buttonType="transparent">
           Cancel
-        </Button>
-        <Button
-          disabled={!selectedEntity?.length || !selectedUser?.length}
-          onClick={handleAssignEntity}
-          color="primary"
-          size="small"
-          variant="contained"
-        >
-          {isAssigning ? <CircularProgress size={22} /> : 'Save'}
-        </Button>
+        </ThemeButton>
+        <ThemeButton disabled={!selectedEntity?.length || !selectedUser?.length} onClick={handleAssignEntity} buttonType="theme" isLoading={isAssigning}>
+          Save
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

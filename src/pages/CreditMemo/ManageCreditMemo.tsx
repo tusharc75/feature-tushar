@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -15,14 +15,13 @@ import { cloneResourceData, CustomDialogTransition, GenerateResourceLineNumber, 
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
-import { FaDiceOne } from 'react-icons/fa';
 import InputField from 'src/components/Helpers/InputField';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = null, invoiceData = null, isRedirectToDetailPage = true }) => {
-
   const history = useHistory();
   const {
-    state: { user,resources }
+    state: { user, resources }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -72,12 +71,17 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = 
         }
         tempInitialData['creditMemoNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
 
-        let referenceData: any = {}
+        let referenceData: any = {};
         if (invoiceData) {
           const responseFieldResponce: any = await axiosInstance().get(`/field?resource=${sidebarResource?.invoice}`);
           const invoiceField = responseFieldResponce?.data?.data;
-          referenceData = cloneResourceData(invoiceField.map((d: any) => d.fieldData), fieldsDataForCreate, invoiceData, user.user?.brandCurrency);
-          referenceData.invoice = invoiceData?._id
+          referenceData = cloneResourceData(
+            invoiceField.map((d: any) => d.fieldData),
+            fieldsDataForCreate,
+            invoiceData,
+            user.user?.brandCurrency
+          );
+          referenceData.invoice = invoiceData?._id;
           if (referenceData) {
             for (const key in referenceData) {
               if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
@@ -168,10 +172,10 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = 
                   else setShowConfirmDialog(true);
                 }}
                 title={`${creditMemoId
-                  ? isClone
-                    ? `Clone - ${cloneHeading}`
-                    : `Update - ${initialData.values?.creditMemoNumber ? `${initialData.values?.creditMemoNumber}` : ''}`
-                  : `Create ${resources?.creditMemo?.titleSingular}`
+                    ? isClone
+                      ? `Clone - ${cloneHeading}`
+                      : `Update - ${initialData.values?.creditMemoNumber ? `${initialData.values?.creditMemoNumber}` : ''}`
+                    : `Create ${resources?.creditMemo?.titleSingular}`
                   }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
@@ -195,33 +199,26 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = 
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
-                  disabled={submitting}
+                <ThemeButton
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
+                  buttonType='transparent'
                 >
                   Cancel
-                </Button>
-                <Button
-                  disabled={loading || submitting}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
-                  size="small"
+                </ThemeButton>
+                <ThemeButton
                   onClick={submitForm}
-                  endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                  disabled={loading || submitting}
+                  isLoading={submitting}
+                  buttonType='theme'
                 >
-                  {' '}
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

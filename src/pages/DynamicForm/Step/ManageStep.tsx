@@ -1,4 +1,5 @@
-import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
+import { Box, Dialog } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -15,6 +16,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from 'src/components/Helpers/FormTypes';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ManageStep = ({ onClose, onSuccess, resource, resourceId, stepId, id = null, fields = [] }) => {
   const {
@@ -34,19 +36,21 @@ const ManageStep = ({ onClose, onSuccess, resource, resourceId, stepId, id = nul
   }, []);
 
   const fetchFields = () => {
-    setLoading(true)
+    setLoading(true);
     if (id) {
-      axiosInstance().get(`/dynamic-form/step/detail/${resourceId}/${stepId}/${id}`, {
-        headers: {
-          Resource: resource
-        }
-      }).then(({ data: { data } }) => {
-        setInitialData({
-          fields: fields,
-          values: getObjKeysWithValues(data, fields)
-        });
-        setLoading(false)
-      })
+      axiosInstance()
+        .get(`/dynamic-form/step/detail/${resourceId}/${stepId}/${id}`, {
+          headers: {
+            Resource: resource
+          }
+        })
+        .then(({ data: { data } }) => {
+          setInitialData({
+            fields: fields,
+            values: getObjKeysWithValues(data, fields)
+          });
+          setLoading(false);
+        })
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
@@ -56,7 +60,7 @@ const ManageStep = ({ onClose, onSuccess, resource, resourceId, stepId, id = nul
         fields: fields,
         values: tempInitialData
       });
-      setLoading(false)
+      setLoading(false);
     }
   };
 
@@ -67,43 +71,49 @@ const ManageStep = ({ onClose, onSuccess, resource, resourceId, stepId, id = nul
   const handleSubmit = async (values) => {
     setSubmitting(true);
     if (id) {
-      axiosInstance().put(`/dynamic-form/step/${resourceId}`, { ...values, _id: id, stepId },
-        {
-          headers: {
-            Resource: resource
+      axiosInstance()
+        .put(
+          `/dynamic-form/step/${resourceId}`,
+          { ...values, _id: id, stepId },
+          {
+            headers: {
+              Resource: resource
+            }
           }
-        }
-      ).then(({ data }) => {
-        onSuccess();
-        setSubmitting(false);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
+        )
+        .then(({ data }) => {
+          onSuccess();
+          setSubmitting(false);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+        })
+        .catch((error) => {
+          setSubmitting(false);
+          toastConfig.setToastConfig(error);
         });
-      }).catch((error) => {
-        setSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
     } else {
-      axiosInstance().post(`/dynamic-form/step/${resourceId}`, [{ ...values, stepId }],
-        {
+      axiosInstance()
+        .post(`/dynamic-form/step/${resourceId}`, [{ ...values, stepId }], {
           headers: {
             Resource: resource
           }
-        }
-      ).then(({ data }) => {
-        onSuccess();
-        setSubmitting(false);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
+        })
+        .then(({ data }) => {
+          onSuccess();
+          setSubmitting(false);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+        })
+        .catch((error) => {
+          setSubmitting(false);
+          toastConfig.setToastConfig(error);
         });
-      }).catch((error) => {
-        setSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
     }
   };
 
@@ -151,7 +161,7 @@ const ManageStep = ({ onClose, onSuccess, resource, resourceId, stepId, id = nul
                             <Box marginY={2}>
                               <Grid spacing={3} container>
                                 {form.sectionFields.map((field) => (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
                                     <FormTypes
                                       {...field}
                                       fieldData={field}
@@ -168,8 +178,8 @@ const ManageStep = ({ onClose, onSuccess, resource, resourceId, stepId, id = nul
                                       imageOrFileUploadCompletePercentage={
                                         ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                           ? (completePercentage) => {
-                                            setUploadingImageOrFileProgress(completePercentage);
-                                          }
+                                              setUploadingImageOrFileProgress(completePercentage);
+                                            }
                                           : null
                                       }
                                       required={field.required}
@@ -190,32 +200,26 @@ const ManageStep = ({ onClose, onSuccess, resource, resourceId, stepId, id = nul
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
-                  disabled={submitting}
+                <ThemeButton
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
+                  buttonType='transparent'
                 >
                   Cancel
-                </Button>
-                <Button
-                  disabled={uploadingImageOrFileProgress > 0 || loading || submitting}
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  type="submit"
+                </ThemeButton>
+                <ThemeButton
                   onClick={submitForm}
-                  endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                  disabled={uploadingImageOrFileProgress > 0 || loading || submitting}
+                  isLoading={submitting}
+                  buttonType='theme'
                 >
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

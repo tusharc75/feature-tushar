@@ -1,5 +1,5 @@
-import { Divider, IconButton, List, ListItem, Menu } from '@material-ui/core';
-import { Delete, Edit, SwapHoriz } from '@material-ui/icons';
+import { Divider, IconButton, List, ListItem, Menu } from '@mui/material';
+import { Delete, Edit, SwapHoriz } from '@mui/icons-material';
 import React, { Dispatch, Fragment, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { FaStar } from 'react-icons/fa6';
 import { ImSpinner2 } from 'react-icons/im';
@@ -195,7 +195,6 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
         anchorEl={anchorEl}
         onClose={() => setAnchorEl(null)}
         keepMounted={false}
-        getContentAnchorEl={null}
         transitionDuration={walkmeInstance ? 0 : 250}
         anchorOrigin={{
           vertical: 'bottom',
@@ -298,7 +297,7 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
               >
                 Reset
               </ThemeButton>
-              <ThemeButton borderColor="none" color="primary" iconForMobile={false} onClick={openCreateEditModal}>
+              <ThemeButton buttonType="theme" iconForMobile={false} onClick={openCreateEditModal}>
                 Create view
               </ThemeButton>
             </div>

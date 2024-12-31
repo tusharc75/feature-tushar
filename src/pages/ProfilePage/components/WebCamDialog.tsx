@@ -1,15 +1,13 @@
 import { useState, useRef, useContext, useEffect } from 'react';
-import { Button } from '@material-ui/core';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { CustomDialogTransition } from '../../../constants/helpers';
-import Dialog from '@material-ui/core/Dialog';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import Dialog from '@mui/material/Dialog';
 import Webcam from 'react-webcam';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { CircularProgress } from '@material-ui/core';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const WebCamDialog = ({ open, onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -135,19 +133,20 @@ const WebCamDialog = ({ open, onClose, onSuccess }) => {
             ))}
         </CustomDialogContent>
         <CustomDialogFooter>
-          <Button type="button" disabled={isScanning} color="primary" size="small" onClick={onClose}>
+          <ThemeButton
+            onClick={onClose}
+            buttonType='transparent'
+          >
             Cancel
-          </Button>
-          <CustomButton
-            variant="contained"
-            color="primary"
+          </ThemeButton>
+          <ThemeButton
             onClick={handleCapture}
-            size="small"
             disabled={isScanning}
-            startIcon={isScanning && <CircularProgress size={15} />}
+            buttonType='theme'
+            isLoading={isScanning}
           >
             {isScanning ? 'Scanning...' : 'Capture'}
-          </CustomButton>
+          </ThemeButton>
         </CustomDialogFooter>
       </Dialog>
     </>

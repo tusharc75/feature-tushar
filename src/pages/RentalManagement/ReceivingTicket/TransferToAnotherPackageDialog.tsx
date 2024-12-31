@@ -1,5 +1,5 @@
-import { Box, Button, Dialog, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, Dialog, TextField } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -8,7 +8,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { ASSET_STATUS, CustomDialogTransition, MATERIAL_TYPE, rentalManagement } from 'src/constants/helpers';
 import AssetDetailsChangeDialog from 'src/pages/RentalManagement/ReceivingTicket/AssetDetailsChangeDialog';
 
@@ -141,7 +141,7 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
                 setSelectedPackage(val);
               }}
               getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-              getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+              isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
               renderInput={(props) => (
                 <TextField {...props} placeholder={''} variant="outlined" name="packages" required={true} label={'Select Package'} />
               )}
@@ -149,13 +149,12 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
           </Box>
         </CustomDialogContent>
         <CustomDialogFooter>
-          <Button variant="outlined" color="primary" size="small" onClick={onClose}>
+          <ThemeButton buttonType="transparent" onClick={onClose}>
             Cancel
-          </Button>
-          <CustomButton
-            loading={isSubmitting}
-            variant="contained"
-            color="primary"
+          </ThemeButton>
+          <ThemeButton
+            isLoading={isSubmitting}
+            buttonType="theme"
             disabled={!selectedPackage || isSubmitting}
             onClick={(e) => {
               const receivingStatus = user?.user?.brandPolicy?.rentalReceivingAvailableStatus ? ASSET_STATUS.available : ASSET_STATUS.underReview;
@@ -168,7 +167,7 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
             }}
           >
             Save
-          </CustomButton>
+          </ThemeButton>
         </CustomDialogFooter>
       </Dialog>
       {openAssetDataDialog.open && (

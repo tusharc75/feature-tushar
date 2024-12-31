@@ -1,5 +1,5 @@
 import { FC, useEffect, useState, Fragment, useRef, useContext } from 'react';
-import { Button, Dialog, Grid, Box } from '@material-ui/core';
+import { Dialog, Box } from '@mui/material';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -9,15 +9,13 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomButton from '../../../components/Helpers/CustomButton';
-// import { FaDiceOne } from 'react-icons/fa';
-// import FormTypes from '../../../components/Helpers/FormTypes';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import { uniq, map, orderBy, isEqual } from 'lodash';
-import moment from 'moment';
+import { isEqual } from 'lodash';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import InputField from 'src/components/Helpers/InputField';
+import dayjs from 'dayjs';
 interface EditDialogProps {
   onClose: VoidFunction | any;
   handleSaveData: VoidFunction | any;
@@ -95,7 +93,7 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = ({
       });
     } else {
       let unitOptions: any = [];
-      let pricingMethodOptions: any = []
+      let pricingMethodOptions: any = [];
       if (rowData?.[`${rowData.type}Detail`]?.unit) {
         unitOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.unit);
       }
@@ -162,8 +160,8 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = ({
 
   function validate(values) {
     const errors = {};
-    let estimateStartDate = moment(values?.estimateStartDate);
-    let estimateEndDate = moment(values?.estimateEndDate);
+    let estimateStartDate = dayjs(values?.estimateStartDate);
+    let estimateEndDate = dayjs(values?.estimateEndDate);
     if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
       errors['estimateEndDate'] = 'Please enter valid estimate end date';
     }
@@ -316,9 +314,8 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = ({
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+buttonType="transparent"
                   onClick={() => {
                     if (!isEqual(ref.current.values, initialData.values)) {
                       setShowConfirmDialog(true);
@@ -328,37 +325,33 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = ({
                   }}
                 >
                   {'Close'}
-                </Button>
+                </ThemeButton>
 
                 {isBulkedit === false && showSaveAndNext && (
-                  <CustomButton
-                    loading={loadingEdit}
+                  <ThemeButton
+                    isLoading={loadingEdit}
                     disabled={isEqual(ref?.current?.values, initialData.values) || loadingEdit}
-                    variant="contained"
-                    color="primary"
-                    type="submit"
+buttonType="theme"
                     onClick={() => {
                       setSaveAndNext(true);
                       submitForm();
                     }}
                   >
                     {'Save & Next'}
-                  </CustomButton>
+                  </ThemeButton>
                 )}
 
-                <CustomButton
-                  loading={loadingEdit}
+                <ThemeButton
+                  isLoading={loadingEdit}
                   disabled={isEqual(ref?.current?.values, initialData.values) || loadingEdit}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+buttonType="theme"
                   onClick={() => {
                     setSaveAndNext(false);
                     submitForm();
                   }}
                 >
                   {'Save'}
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmationDialog && (
                 <ConfirmationDialog
@@ -374,7 +367,6 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = ({
               )}
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

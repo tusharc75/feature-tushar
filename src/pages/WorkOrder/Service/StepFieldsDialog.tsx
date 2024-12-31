@@ -1,93 +1,94 @@
-import React, { useContext, useEffect } from 'react';
-import { Dialog, Box, Grid, Button, Typography, IconButton } from '@material-ui/core';
-import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
+import { Box, Dialog, IconButton, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { Theme } from '@mui/material/styles';
+import { makeStyles } from '@mui/styles';
 import { Form, Formik } from 'formik';
+import React, { useContext, useEffect } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
-import FormTypes from 'src/components/Helpers/FormTypes';
-import { workOrder, WORKORDER_SERVICE_STEP_STATUS, yupSchema, convertMsToTime, sidebarResource, CustomDialogTransition, gridSize } from 'src/constants/helpers';
-import { dateTimeFormat } from 'src/constants/helpers';
-import moment from 'moment';
-import styles from './StepFieldsDialog.module.scss';
-import DetailsPage from 'src/components/Shared/DetailsPage';
-import AccessTimeIcon from '@material-ui/icons/AccessTime';
-import SettingsIcon from '@material-ui/icons/Settings';
-import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
+import { MdKeyboardArrowDown } from 'react-icons/md';
 import axiosInstance from 'src/axios/axiosInstance';
+import { AddField } from 'src/components/FormBuilder/AddField';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import FormTypes from 'src/components/Helpers/FormTypes';
+import DetailsPage from 'src/components/Shared/DetailsPage';
+import {
+  convertMsToTime,
+  CustomDialogTransition,
+  displayDateTime,
+  gridSize,
+  sidebarResource,
+  workOrder,
+  WORKORDER_SERVICE_STEP_STATUS,
+  yupSchema
+} from 'src/constants/helpers';
+import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import { RenderPassFailChip } from './Steps';
-import { MdKeyboardArrowDown } from 'react-icons/md';
-import ControlPointIcon from '@material-ui/icons/ControlPoint';
-import { AddField } from 'src/components/FormBuilder/AddField';
-import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
-import { isMobile, isTablet } from 'react-device-detect';
-import CustomButton from 'src/components/Helpers/CustomButton';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    stepTags: {
-      minHeight: '26px',
-      paddingInline: '5px',
-      fontWeight: 500
-    },
-    sectionContainer: {
-      padding: '0 15px 18px',
-      marginTop: '20px'
-    },
-    sectionHead: {
+const useStyles = makeStyles(() => ({
+  stepTags: {
+    minHeight: '26px',
+    paddingInline: '5px',
+    fontWeight: 500
+  },
+  sectionContainer: {
+    padding: '0 15px 18px',
+    marginTop: '20px'
+  },
+  sectionHead: {
+    fontWeight: 600,
+    fontSize: '16px',
+    lineHeight: '1.6',
+    color: 'var(--dark-primary-text,#2A3042)',
+    '& span': {
       fontWeight: 600,
+      width: '19px',
+      height: '19px',
       fontSize: '16px',
-      lineHeight: '1.6',
-      color: 'var(--dark-primary-text,#2A3042)',
-      '& span': {
-        fontWeight: 600,
-        width: '19px',
-        height: '19px',
-        fontSize: '16px',
-        borderRadius: '3px',
-        display: 'inline-grid',
-        placeItems: 'center',
-        marginRight: '6px',
-        verticalAlign: 'text-top',
-        cursor: 'pointer'
-      }
-    },
-    sectionRow: {
-      overflow: 'hidden',
-      '& > div': {
-        display: 'flex',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        marginBlock: '11px',
-        gap: '23px'
-      }
-    },
-    sectionColTItle: {
-      flexBasis: '125px',
-      fontWeight: 500,
-      fontSize: '12px',
-      lineHeight: '1.5',
-      color: 'var(--dark-primary-text,#8A8A8A)'
-    },
-    sectionColDetail: {
-      fontWeight: 400,
-      fontSize: '12px',
-      lineHeight: 1.5,
-      color: 'var(--dark-primary-text,#2A3042)',
-      textTransform: 'capitalize'
-    },
-    centerText: {
-      textAlign: 'center',
-      marginBlock: '30px'
-    },
-    transition: {
-      overflow: 'hidden',
-      transition: 'height .3s'
+      borderRadius: '3px',
+      display: 'inline-grid',
+      placeItems: 'center',
+      marginRight: '6px',
+      verticalAlign: 'text-top',
+      cursor: 'pointer'
     }
-  })
-);
+  },
+  sectionRow: {
+    overflow: 'hidden',
+    '& > div': {
+      display: 'flex',
+      alignItems: 'center',
+      flexWrap: 'wrap',
+      marginBlock: '11px',
+      gap: '23px'
+    }
+  },
+  sectionColTItle: {
+    flexBasis: '125px',
+    fontWeight: 500,
+    fontSize: '12px',
+    lineHeight: '1.5',
+    color: 'var(--dark-primary-text,#8A8A8A)'
+  },
+  sectionColDetail: {
+    fontWeight: 400,
+    fontSize: '12px',
+    lineHeight: 1.5,
+    color: 'var(--dark-primary-text,#2A3042)',
+    textTransform: 'capitalize'
+  },
+  centerText: {
+    textAlign: 'center',
+    marginBlock: '30px'
+  },
+  transition: {
+    overflow: 'hidden',
+    transition: 'height .3s'
+  }
+}));
 
 const StepFieldsDialog = ({
   handleClose,
@@ -127,15 +128,14 @@ const StepFieldsDialog = ({
 
   const [saveAndComplete, setSaveAndComplete] = React.useState({ saveAndComplete: false, saveAndNextAndComplete: false });
 
-
   const RenderStepData = () => {
     const [time, setTime] = React.useState(
       user?.brandPolicy?.workOrderTimer
         ? convertMsToTime(
-          stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
-            ? (stepData?.duration || 0) + (new Date().getTime() - new Date(stepData?.pauseDate || stepData?.startDate).getTime())
-            : stepData?.duration || 0
-        )
+            stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
+              ? (stepData?.duration || 0) + (new Date().getTime() - new Date(stepData?.pauseDate || stepData?.startDate).getTime())
+              : stepData?.duration || 0
+          )
         : 0
     );
 
@@ -166,7 +166,7 @@ const StepFieldsDialog = ({
         <h6 className={`${classes.sectionHead} `} onClick={() => setIsVisible((prev) => !prev)}>
           <span
             style={{ transform: isVisible ? 'rotate(180deg)' : 'rotate(0)' }}
-            className="bg-[#DBDBDBE5] text-[#5B5B5B] dark:text-black dark:bg-white"
+            className="bg-[#DBDBDBE5] text-[#5B5B5B] dark:bg-white dark:text-black"
           >
             <MdKeyboardArrowDown />
           </span>
@@ -205,14 +205,14 @@ const StepFieldsDialog = ({
             {stepData?.startDate ? (
               <div>
                 <p className={classes.sectionColTItle}>Start Date:</p>
-                <p className={classes.sectionColDetail}>{moment(stepData.startDate).format(dateTimeFormat)}</p>
+                <p className={classes.sectionColDetail}>{displayDateTime(stepData.startDate)}</p>
               </div>
             ) : null}
 
             {stepData?.endDate ? (
               <div>
                 <p className={classes.sectionColTItle}>End Date:</p>
-                <p className={classes.sectionColDetail}>{moment(stepData.endDate).format(dateTimeFormat)}</p>
+                <p className={classes.sectionColDetail}>{displayDateTime(stepData.endDate)}</p>
               </div>
             ) : null}
           </div>
@@ -272,11 +272,10 @@ const StepFieldsDialog = ({
   const handleSubmitData = async (values) => {
     if (saveAndComplete.saveAndComplete || saveAndComplete.saveAndNextAndComplete) {
       handleSubmit(values, step, saveAndComplete.saveAndComplete, saveAndComplete.saveAndNextAndComplete);
-    }
-    else {
+    } else {
       handleSubmit(values, step);
     }
-  }
+  };
 
   return (
     <>
@@ -304,23 +303,14 @@ const StepFieldsDialog = ({
           }}
           showManimizeMaximize={true}
         />
-        <Formik
-          initialValues={fieldData?.values}
-          validationSchema={yupSchema(fieldData?.fields)}
-          onSubmit={handleSubmitData}
-          enableReinitialize
-        >
+        <Formik initialValues={fieldData?.values} validationSchema={yupSchema(fieldData?.fields)} onSubmit={handleSubmitData} enableReinitialize>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <>
               <CustomDialogContent>
                 <div className={`${styles.content} pt-2`}>
                   {fieldData?.fields?.length ? (
                     !isEditing ? (
-                      <DetailsPage
-                        containerPadding={'0px'}
-                        data={fieldData.orignalValues}
-                        fields={fieldData.fields.map((f) => ({ fieldData: f }))}
-                      />
+                      <DetailsPage containerPadding={'0px'} data={fieldData.orignalValues} fields={fieldData.fields.map((f) => ({ fieldData: f }))} />
                     ) : (
                       <Form autoComplete="off" autoCorrect="off" noValidate>
                         {fieldData?.formsData.length > 0 &&
@@ -344,12 +334,16 @@ const StepFieldsDialog = ({
                                 <Box marginY={2}>
                                   <Grid spacing={2} container>
                                     {form?.sectionFields?.map((field, index2) => (
-                                      <Grid key={index2} item
-                                        xs={12}
-                                        sm={field?.columnSize ? field?.columnSize : gridSize(field.type)}
-                                        md={field?.columnSize ? field?.columnSize : gridSize(field.type)}
-                                        lg={field?.columnSize ? field?.columnSize : gridSize(field.type)}
-                                        xl={field?.columnSize ? field?.columnSize : gridSize(field.type)}>
+                                      <Grid
+                                        key={index2}
+                                        size={{
+                                          xs: 12,
+                                          sm: field?.columnSize ? field?.columnSize : gridSize(field.type),
+                                          md: field?.columnSize ? field?.columnSize : gridSize(field.type),
+                                          lg: field?.columnSize ? field?.columnSize : gridSize(field.type),
+                                          xl: field?.columnSize ? field?.columnSize : gridSize(field.type)
+                                        }}
+                                      >
                                         <FormTypes
                                           {...field}
                                           row={field.type === 'radio'}
@@ -448,79 +442,69 @@ const StepFieldsDialog = ({
                     {!isEditing ? (
                       <>
                         <Box ml={1} />
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          onClick={handleClose}
-                          color="primary">
+                        <ThemeButton buttonType="transparent" onClick={handleClose}>
                           Cancel
-                        </Button>
+                        </ThemeButton>
                         <Box ml={1} />
                         {allowedToEdit && fieldData?.fields?.length > 0 && (
-                          <Button variant="contained" size="small" onClick={() => setEditing(true)} color="primary">
+                          <ThemeButton buttonType="theme" onClick={() => setEditing(true)}>
                             Edit
-                          </Button>
+                          </ThemeButton>
                         )}
                       </>
                     ) : (
                       <>
                         <Box ml={1} />
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          onClick={handleClose}
-                          color="primary">
+                        <ThemeButton buttonType="transparent" onClick={handleClose}>
                           Cancel
-                        </Button>
+                        </ThemeButton>
                         <Box ml={1} />
-                        <CustomButton
+                        <ThemeButton
                           disabled={isSubmitting}
-                          loading={isSubmitting}
-                          variant="contained"
-                          color="primary"
+                          isLoading={isSubmitting}
+                          buttonType="theme"
                           onClick={() => {
-                            setSaveAndComplete({ saveAndComplete: false, saveAndNextAndComplete: false })
+                            setSaveAndComplete({ saveAndComplete: false, saveAndNextAndComplete: false });
                             submitForm();
                           }}
                         >
                           {' '}
                           Save
-                        </CustomButton>
-                        {!step?.isPassFail &&
+                        </ThemeButton>
+                        {!step?.isPassFail && (
                           <>
                             <Box ml={1} />
-                            <CustomButton
+                            <ThemeButton
                               disabled={isSubmitting}
-                              loading={isSubmitting}
-                              variant="contained"
-                              color="primary"
+                              isLoading={isSubmitting}
+                              buttonType="theme"
                               onClick={() => {
-                                setSaveAndComplete({ saveAndComplete: true, saveAndNextAndComplete: false })
+                                setSaveAndComplete({ saveAndComplete: true, saveAndNextAndComplete: false });
                                 submitForm();
                               }}
                             >
                               {' '}
                               Complete
-                            </CustomButton>
-                            {nextStep &&
+                            </ThemeButton>
+                            {nextStep && (
                               <>
                                 <Box ml={1} />
-                                <CustomButton
+                                <ThemeButton
                                   disabled={isSubmitting}
-                                  loading={isSubmitting}
-                                  variant="contained"
-                                  color="primary"
+                                  isLoading={isSubmitting}
+                                  buttonType="theme"
                                   onClick={() => {
-                                    setSaveAndComplete({ saveAndComplete: true, saveAndNextAndComplete: true })
+                                    setSaveAndComplete({ saveAndComplete: true, saveAndNextAndComplete: true });
                                     submitForm();
                                   }}
                                 >
                                   {' '}
                                   Complete & Next
-                                </CustomButton>
-                              </>}
+                                </ThemeButton>
+                              </>
+                            )}
                           </>
-                        }
+                        )}
                       </>
                     )}
                   </div>

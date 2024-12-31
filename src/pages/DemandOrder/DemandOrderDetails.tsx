@@ -1,12 +1,13 @@
-import { Box, Button, Grid, Menu, MenuItem } from '@material-ui/core';
-import { Edit, ExpandMore } from '@material-ui/icons';
+import { Box, Menu, MenuItem } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { ExpandMore } from '@mui/icons-material';
+import EditIcon from '@mui/icons-material/Edit';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -157,30 +158,28 @@ const DemandOrderDetails = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ ...routes.demandOrder, title: resources?.demandOrder?.titlePlural }, { title: `${demandOrderData?.demandOrderNumber}` }]} />
+          <CustomBreadCrumbs
+            routes={[{ ...routes.demandOrder, title: resources?.demandOrder?.titlePlural }, { title: `${demandOrderData?.demandOrderNumber}` }]}
+          />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {demandOrderData?.status !== DEMAND_ORDER_STATUS.converted && (
               <>
                 {demandOrderData?.material?.length > 0 && (
-                  <Button
-                    variant={'contained'}
-                    className="btn-outline-v1"
-                    size="small"
+                  <ThemeButton
+                    endIcon={<ExpandMore fontSize="small" />}
                     onClick={(e) => {
                       setConvertAnchorEl(e.currentTarget);
                     }}
-                    aria-controls="convert-menu"
-                    endIcon={<ExpandMore fontSize="small" />}
+                    mobileTooltip={'Convert'}
                   >
                     {'Convert'}
-                  </Button>
+                  </ThemeButton>
                 )}
                 <Menu
                   anchorEl={convertAnchorEl}
                   keepMounted
-                  getContentAnchorEl={null}
                   anchorOrigin={{
                     vertical: 'bottom',
                     horizontal: 'left'
@@ -207,14 +206,9 @@ const DemandOrderDetails = () => {
                   </MenuItem>
                 </Menu>
                 {permissions?.demandOrder?.isUpdate && allowedToEdit && (
-                  <Button
-                    className="btn-outline-v1"
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    size="small"
-                    onClick={handleOpenUpdateDialog}
-                  >
-                    {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                  </Button>
+                  <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                    {'Edit'}
+                  </ThemeButton>
                 )}
                 {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>
@@ -229,19 +223,15 @@ const DemandOrderDetails = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0}>
-            Header
-          </CustomTab>
-          <CustomTab value={1}>
-            Details
-          </CustomTab>
+          <CustomTab value={0}>Header</CustomTab>
+          <CustomTab value={1}>Details</CustomTab>
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
             {loading || !fields.length ? (
               <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </Grid>
             ) : (
               <>

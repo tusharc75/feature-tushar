@@ -1,18 +1,5 @@
-import {
-  Box,
-  Button,
-  Dialog,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  makeStyles
-} from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import Autocomplete from '@mui/material/Autocomplete';
+import { Box, Dialog, Table, TableBody, TableCell, TableHead, TableRow, TextField } from '@mui/material';
 import { FieldArray, Form, Formik } from 'formik';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -22,7 +9,8 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CustomDialogTransition, sidebarResource, workOrder } from 'src/constants/helpers';
+import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ConsumablesQtyDialog = ({
   referenceId,
@@ -203,7 +191,7 @@ const ConsumablesQtyDialog = ({
           }))
         }}
         enableReinitialize={true}
-        onSubmit={() => {}}
+        onSubmit={() => { }}
       >
         {({ values }) => (
           <>
@@ -252,7 +240,7 @@ const ConsumablesQtyDialog = ({
                                           <Autocomplete
                                             options={storageLocationOptions}
                                             getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                                            getOptionSelected={(option: any, val) => option.optionValue === val}
+                                            isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                                             value={
                                               storageLocationOptions.filter((data) => data.optionValue === value['storageLocation']).length
                                                 ? storageLocationOptions.filter((data) => data.optionValue === value['storageLocation'])[0]
@@ -269,6 +257,7 @@ const ConsumablesQtyDialog = ({
                                                 {...params}
                                                 style={{ minWidth: '200px' }}
                                                 margin="dense"
+                                                size="small"
                                                 name="storageLocation"
                                                 label="Storage Location"
                                                 placeholder="Storage Location"
@@ -337,7 +326,7 @@ const ConsumablesQtyDialog = ({
                                               serialNumber: val
                                             });
                                           }}
-                                          getOptionSelected={(item, current) => item === current}
+                                          isOptionEqualToValue={(item, current) => item === current}
                                           getOptionLabel={(option) => option}
                                           renderInput={(props) => (
                                             <TextField
@@ -379,7 +368,7 @@ const ConsumablesQtyDialog = ({
                                       <Autocomplete
                                         options={storageLocationOptions}
                                         getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                                        getOptionSelected={(option: any, val) => option.optionValue === val}
+                                        isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                                         value={
                                           storageLocationOptions.filter((data) => data.optionValue === value['storageLocation']).length
                                             ? storageLocationOptions.filter((data) => data.optionValue === value['storageLocation'])[0]
@@ -470,7 +459,7 @@ const ConsumablesQtyDialog = ({
                                         serialNumber: val
                                       });
                                     }}
-                                    getOptionSelected={(item, current) => item === current}
+                                    isOptionEqualToValue={(item, current) => item === current}
                                     getOptionLabel={(option) => option}
                                     renderInput={(props) => (
                                       <TextField
@@ -501,11 +490,11 @@ const ConsumablesQtyDialog = ({
               )}
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button variant="outlined" disabled={isSubmitting} size="small" color="primary" onClick={onClose}>
+              <ThemeButton buttonType="transparent" disabled={isSubmitting}  onClick={onClose}>
                 Cancel
-              </Button>
+              </ThemeButton>
               {consumeRequest ? (
-                <Button
+                <ThemeButton
                   onClick={() => {
                     if (
                       !validate(values.products).consumedQty &&
@@ -515,15 +504,13 @@ const ConsumablesQtyDialog = ({
                       handleRequest(values);
                     }
                   }}
-                  size="small"
-                  variant="contained"
                   disabled={isSubmitting}
-                  color="primary"
+                  buttonType="theme"
                 >
                   Request
-                </Button>
+                </ThemeButton>
               ) : (
-                <Button
+                <ThemeButton
                   onClick={() => {
                     if (
                       !Boolean(validate(values.products).consumedQty) &&
@@ -533,13 +520,11 @@ const ConsumablesQtyDialog = ({
                       handleSubmit(values);
                     }
                   }}
-                  size="small"
-                  variant="contained"
+                  buttonType="theme"
                   disabled={isSubmitting}
-                  color="primary"
                 >
                   Save
-                </Button>
+                </ThemeButton>
               )}
             </CustomDialogFooter>
           </>

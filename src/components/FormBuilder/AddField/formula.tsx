@@ -1,20 +1,20 @@
 import { useState, useRef } from 'react';
-import Button from '@material-ui/core/Button';
-import Typography from '@material-ui/core/Typography';
-import TextField from '@material-ui/core/TextField';
-import Box from '@material-ui/core/Box';
-import Select from '@material-ui/core/Select';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormControl from '@material-ui/core/FormControl';
+import Typography from '@mui/material/Typography';
+import TextField from '@mui/material/TextField';
+import Box from '@mui/material/Box';
+import Select from '@mui/material/Select';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
 import { checkFormula } from '../../../constants/formulaUtility';
-import Chip from '@material-ui/core/Chip';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import Grid from '@material-ui/core/Grid';
+import Chip from '@mui/material/Chip';
+import Autocomplete from '@mui/material/Autocomplete';
+import Grid from '@mui/material/Grid';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { IconButton } from '@material-ui/core';
+import { IconButton } from '@mui/material';
 import { FiMaximize2 } from 'react-icons/fi';
 import ContentFullScreen from 'src/components/ContentFullScreen';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export const Formula = ({ fields, values, setFieldValue, _id, touched, errors }) => {
   const [formulaError, setFormulaError] = useState(null);
@@ -110,7 +110,7 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
                     return _field.fieldLabel;
                   })
               }
-              getOptionLabel={(option) => option}
+              getOptionLabel={(option) => option || ''}
               value={values['inputFields'] ? convertValuetoLabel(values['inputFields']) : []}
               renderTags={(value: string[], getTagProps) =>
                 value.map((option: string, index: number) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
@@ -120,6 +120,7 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
                 <TextField
                   {...params}
                   margin="dense"
+                  size="small"
                   variant="outlined"
                   label="Input Parameters"
                   placeholder="Input Parameters"
@@ -144,6 +145,7 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
               variant="outlined"
               label="Formula"
               margin="dense"
+              size="small"
               fullWidth
               multiline
               rows={stepFullScreen ? 30 : 4}
@@ -167,13 +169,13 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
                     {formulaError}{' '}
                   </Typography>
                 )}
-                <Button size="small" onClick={handleCheckSyntax} color="primary">
+                <ThemeButton buttonType='transparent' onClick={handleCheckSyntax}>
                   Check Syntax
-                </Button>
+                </ThemeButton>
               </Grid>
               <Grid item xs={6}>
                 {values['type'] === 'currencyAmount' && (
-                  <FormControl fullWidth margin="dense" variant="outlined">
+                  <FormControl fullWidth margin="dense" variant="outlined" size="small">
                     <InputLabel id="demo-simple-select-outlined-label">Formula applied on Currency</InputLabel>
                     <Select
                       labelId="demo-simple-select-outlined-label"

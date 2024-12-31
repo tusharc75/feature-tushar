@@ -1,22 +1,18 @@
 import { useState, useEffect, useContext } from 'react';
-import { Box, Grid, Typography, FormControl, InputLabel, Select, MenuItem } from '@material-ui/core';
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { Box, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Line } from 'react-chartjs-2';
-import { dateFormatForInputControl } from '../../../constants/helpers';
-  import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import DateFnsUtils from '@date-io/date-fns';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import moment from 'moment';
 import axiosInstance from 'src/axios/axiosInstance';
+import dayjs from 'dayjs';
+import DurationFilter from 'src/components/DurationFilter';
 
-const UserSession = ({id}) => {
+const UserSession = ({ id }) => {
   const toastConfig = useContext(CustomToastContext);
-  const [timeFrame, setTimeFrame] = useState<any>('1-year');
   const [trackingTime, setTrackingTime] = useState({
-    between: {
-      from: new Date(moment().subtract(1, 'year').calendar()),
-      to: new Date()
-    }
+    from: new Date(dayjs().subtract(1, 'year').toDate()),
+    to: new Date()
   });
   const [userTrackingData, setUserTrackingData] = useState({
     labels: [],
@@ -28,66 +24,24 @@ const UserSession = ({id}) => {
     userTimeTracker();
   }, [trackingTime]);
 
-  useEffect(() => {
-    switch (timeFrame) {
-      case '1-month':
-        setTrackingTime({
-          between: {
-            from: new Date(moment().subtract('1', 'month').calendar()),
-            to: new Date()
-          }
-        });
-        break;
-
-      case '3-months':
-        setTrackingTime({
-          between: {
-            from: new Date(moment().subtract('3', 'months').calendar()),
-            to: new Date()
-          }
-        });
-        break;
-
-      case '6-months':
-        setTrackingTime({
-          between: {
-            from: new Date(moment().subtract('6', 'months').calendar()),
-            to: new Date()
-          }
-        });
-        break;
-
-      case '1-year':
-        setTrackingTime({
-          between: {
-            from: new Date(moment().subtract('1', 'year').calendar()),
-            to: new Date()
-          }
-        });
-        break;
-      default:
-        break;
-    }
-  }, [timeFrame]);
-
   const convertDate = (str) => {
     let date = new Date(str),
       month = ('0' + (date.getMonth() + 1)).slice(-2),
       day = ('0' + date.getDate()).slice(-2);
     return [month, day, date.getFullYear()].join('-');
   };
-  
+
   const userTimeTracker = async () => {
     setUserTrackingDataLoading(true);
-    const parsedFromTime = convertDate(trackingTime.between.from);
-    const parsedToTime = convertDate(trackingTime.between.to);
-    const { from, to } = trackingTime.between;
+    const parsedFromTime = convertDate(trackingTime.from);
+    const parsedToTime = convertDate(trackingTime.to);
+    const { from, to } = trackingTime;
 
     const hour = 1000 * 60 * 60;
     const day = 1000 * 60 * 60 * 24;
     // const month = 1000 * 60 * 60 * 24 * 30
     // const year = 1000 * 60 * 60 * 24 * 30 * 12
-    const dateDiff = moment(to).diff(from, 'days');
+    const dateDiff = dayjs(to).diff(dayjs(from), 'days');
     const time = dateDiff > 90 ? day : hour;
     axiosInstance()
       .get(`/user-activity/${id}/${parsedFromTime}/${parsedToTime}`)
@@ -103,7 +57,7 @@ const UserSession = ({id}) => {
         });
 
         data.forEach((obj) => {
-          labels.push(moment(obj?.date).format('DD/MMM'));
+          labels.push(dayjs(obj?.date).tz().format('DD/MMM'));
           dataSets.push(obj?.totalDuration / time);
         });
         setUserTrackingData({
@@ -124,98 +78,23 @@ const UserSession = ({id}) => {
   };
   return (
     <>
-      <Box
-        width="100%"
-        padding={1}
-        bgcolor="var(--dark-secondary, var(--accordion-expanded-summary-bg, #EFFBF9))"
-        display="flex"
-        justifyContent="space-between"
-      >
-        <Grid container>
-          <Grid item xs={8}>
-            <Box display="flex">
-              <Box padding="5px">
-                <Typography variant="subtitle2">User Time Track</Typography>
-              </Box>
-            </Box>
-          </Grid>
-        </Grid>
-      </Box>
-      <Box padding="10px">
-        <Grid item xs={12} sm={12} md={12}>
-          <MuiPickersUtilsProvider utils={DateFnsUtils}>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={4}>
-                <FormControl fullWidth size="small" variant="outlined">
-                  <InputLabel id="duration">Select Duration</InputLabel>
-                  <Select
-                    labelId="duration"
-                    id="time-duration"
-                    value={timeFrame}
-                    onChange={(e) => setTimeFrame(e.target.value)}
-                    label="Select Duration"
-                  >
-                    <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
-                    <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
-                    <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
-                    <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
-                    <MenuItem value={'custom'}>Custom</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={6} sm={4}>
-                <KeyboardDatePicker
-                  disabled={timeFrame !== 'custom'}
-                  inputVariant="outlined"
-                  variant="inline"
-                  fullWidth
-                  autoOk
-                  size="small"
-                  openTo="year"
-                  format={dateFormatForInputControl}
-                  maxDate={trackingTime.between.to}
-                  label="From"
-                  views={['year', 'month', 'date']}
-                  value={trackingTime.between.from}
-                  onChange={(date) => {
-                    setTrackingTime({ between: { from: date, to: trackingTime.between.to } });
-                  }}
-                />
-              </Grid>
-              <Grid item xs={6} sm={4}>
-                <KeyboardDatePicker
-                  disabled={timeFrame !== 'custom'}
-                  inputVariant="outlined"
-                  variant="inline"
-                  fullWidth
-                  autoOk
-                  size="small"
-                  minDate={trackingTime.between.from}
-                  openTo="year"
-                  format={dateFormatForInputControl}
-                  label="To"
-                  views={['year', 'month', 'date']}
-                  value={trackingTime.between.to}
-                  onChange={(date) => {
-                    setTrackingTime({ between: { to: date, from: trackingTime.between.from } });
-                  }}
-                />
-              </Grid>
+      <div className="relative flex justify-between rounded-t bg-[var(--dark-secondary,var(--accordion-expanded-summary-bg,#EFFBF9))] px-7 py-4">
+        <h6 className="text-sm font-semibold leading-[1.05] ">User Time Track</h6>
+      </div>
+      <div className="rounded-b border p-[20px_28px_32px]">
+        <DurationFilter label={''} defaultTimeFrame="1-year" duration={trackingTime} setDuration={setTrackingTime} showAll={true} />
+        <Typography className="subtitle1 m-2">
+          {userTrackingDataLoading ? (
+            <Grid container spacing={2} style={{ padding: '8px' }}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Grid>
-          </MuiPickersUtilsProvider>
-        </Grid>
-      </Box>
-      <Typography className="subtitle1 m-2">
-        {userTrackingDataLoading ? (
-          <Grid container spacing={2} style={{ padding: '8px' }}>
-            <CommonSkeleton lenArray={[...Array(7).keys()]} />
-          </Grid>
-        ) : userTrackingData.labels.length === 0 ? (
-          <h3>No activity found in the selected date range</h3>
-        ) : (
-          <Line type="line" data={userTrackingData} />
-        )}
-      </Typography>
+          ) : userTrackingData.labels.length === 0 ? (
+            <h3>No activity found in the selected date range</h3>
+          ) : (
+            <Line type="line" data={userTrackingData} />
+          )}
+        </Typography>
+      </div>
     </>
   );
 };

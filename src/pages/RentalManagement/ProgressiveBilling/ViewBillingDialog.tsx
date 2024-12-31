@@ -1,9 +1,8 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
+import Grid from '@mui/material/Grid2';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import { Box, Dialog, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Box, Dialog, IconButton, Menu, MenuItem } from '@mui/material';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
@@ -22,18 +21,18 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
-import { Delete, ExpandMore } from '@material-ui/icons';
+import { Delete, ExpandMore } from '@mui/icons-material';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import { camelCase, startCase } from 'lodash';
-import EditIcon from '@material-ui/icons/Edit';
+import EditIcon from '@mui/icons-material/Edit';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { useData } from 'src/StateProvider/Provider';
 import { FiExternalLink } from 'react-icons/fi';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess, allowCreateInvoice, isLatestInvoice }) => {
   const renderedFrom = `${camelCase(sidebarResource.rentalManagementInvoice)}_view_invoice`;
@@ -415,18 +414,17 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
                 {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />}
                 <Box ml={1} />
                 {allowedToEdit && (
-                  <Button
-                    variant="outlined"
-                    color="default"
-                    size="small"
+                  <ThemeButton
+                    mobileTooltip="Actions"
+                    buttonType="yellow"
+                    iconForMobile={<ExpandMore />}
                     onClick={handleClick}
                     aria-controls="action-menu"
                     disabled={selectedRecords?.length && isLatestInvoice ? false : true}
                     endIcon={<ExpandMore />}
-                    className="new-dropdown-v1"
                   >
                     Actions
-                  </Button>
+                  </ThemeButton>
                 )}
                 <Menu
                   id="action-menu"
@@ -434,7 +432,6 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
                   keepMounted
                   open={Boolean(anchorEl)}
                   onClose={handleClose}
-                  getContentAnchorEl={null}
                   anchorOrigin={{
                     vertical: 'bottom',
                     horizontal: 'right'
@@ -483,17 +480,14 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
           </Fragment>
         </CustomDialogContent>
         <CustomDialogFooter>
-          <Button
-            type="button"
-            variant="outlined"
-            color="primary"
-            size="small"
+          <ThemeButton
+            buttonType='transparent'
             onClick={() => {
               onClose();
             }}
           >
             Cancel
-          </Button>
+          </ThemeButton>
         </CustomDialogFooter>
       </Dialog>
       {isProductEdit.open && (

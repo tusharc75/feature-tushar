@@ -1,19 +1,18 @@
 import { Fragment, useEffect, useState } from 'react';
-import { Box, Button, Dialog } from '@material-ui/core';
+import { Box, Dialog } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Form, Formik } from 'formik';
 import { CHILD_RESOURCE, CustomDialogTransition, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomButton from 'src/components/Helpers/CustomButton';
 import { uniq, map, orderBy } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import InputField from 'src/components/Helpers/InputField';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const UpdateProductDialog = ({ onClose, materialData, handleUpdate, loadingEdit, workOrderData }) => {
-
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fields, setFields] = useState([]);
@@ -41,7 +40,6 @@ const UpdateProductDialog = ({ onClose, materialData, handleUpdate, loadingEdit,
     });
     setFields(customData);
   };
-
 
   return (
     <Dialog
@@ -77,41 +75,38 @@ const UpdateProductDialog = ({ onClose, materialData, handleUpdate, loadingEdit,
               ></CustomDialogHeader>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                    <InputField
-                        errors={errors}
-                        values={values}
-                        setFieldValue={(name, value) => {
-                          setFieldValue(name, value);
-                        }}
-                        touched={touched}
-                        fieldsData={initialData.fields}
-                        size="small"
-                        fullWidth
-                    />
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={(name, value) => {
+                      setFieldValue(name, value);
+                    }}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                  />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType="transparent"
                   onClick={() => {
                     onClose();
                   }}
                 >
                   {'Close'}
-                </Button>
-                <CustomButton
-                  loading={loadingEdit}
+                </ThemeButton>
+                <ThemeButton
                   disabled={loadingEdit}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+                  isLoading={loadingEdit}
+                  buttonType="theme"
                   onClick={() => {
                     submitForm();
                   }}
                 >
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
             </Fragment>
           )}

@@ -1,12 +1,7 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
-import Box from '@material-ui/core/Box';
-import Button from '@material-ui/core/Button';
-import {
-  CustomDialogTransition,
-  getObjKeys,
-  yupSchema,
-} from '../../constants/helpers';
-import Dialog from '@material-ui/core/Dialog';
+import Box from '@mui/material/Box';
+import { CustomDialogTransition, getObjKeys, yupSchema } from '../../constants/helpers';
+import Dialog from '@mui/material/Dialog';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
@@ -20,10 +15,9 @@ import routes from 'src/components/Helpers/Routes';
 import InputField from 'src/components/Helpers/InputField';
 import { isMobile, isTablet } from 'react-device-detect';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export default function WorkOrderCostDialog({ onClose, workOrderCostFields, onSuccess, isSubmitting, currency, id }) {
-
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -34,21 +28,28 @@ export default function WorkOrderCostDialog({ onClose, workOrderCostFields, onSu
   }, []);
 
   const fetchData = async () => {
-    axiosInstance().get(`${routes?.workOrder?.path}/total-consumables-cost/${id}`).then(({ data: { data } }) => {
-      const tempInitialData = getObjKeys('', workOrderCostFields);
-      const calValues = autoCalculateSpecificFields({ [`consumableCost_${currency.toLowerCase()}`]: data?.totalConsumablesCost }, tempInitialData, workOrderCostFields);
-      Object.assign(tempInitialData, calValues);
-      setInitialData({
-        fields: workOrderCostFields,
-        values: tempInitialData
+    axiosInstance()
+      .get(`${routes?.workOrder?.path}/total-consumables-cost/${id}`)
+      .then(({ data: { data } }) => {
+        const tempInitialData = getObjKeys('', workOrderCostFields);
+        const calValues = autoCalculateSpecificFields(
+          { [`consumableCost_${currency.toLowerCase()}`]: data?.totalConsumablesCost },
+          tempInitialData,
+          workOrderCostFields
+        );
+        Object.assign(tempInitialData, calValues);
+        setInitialData({
+          fields: workOrderCostFields,
+          values: tempInitialData
+        });
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
       });
-    }).catch((err) => {
-      toastConfig.setToastConfig(err);
-    });
-  }
+  };
 
   const handleSubmit = (values) => {
-    onSuccess(values)
+    onSuccess(values);
   };
 
   return (
@@ -65,12 +66,7 @@ export default function WorkOrderCostDialog({ onClose, workOrderCostFields, onSu
       }}
     >
       {initialData.fields.length ? (
-        <Formik
-          initialValues={initialData.values}
-          enableReinitialize={true}
-          validationSchema={yupSchema(initialData.fields)}
-          onSubmit={handleSubmit}
-        >
+        <Formik initialValues={initialData.values} enableReinitialize={true} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
           {({ values, errors, setFieldValue, touched, submitForm, setValues }) => (
             <Fragment>
               <CustomDialogHeader
@@ -99,9 +95,8 @@ export default function WorkOrderCostDialog({ onClose, workOrderCostFields, onSu
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType="transparent"
                   disabled={isSubmitting}
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
@@ -109,13 +104,11 @@ export default function WorkOrderCostDialog({ onClose, workOrderCostFields, onSu
                   }}
                 >
                   Cancel
-                </Button>
-                <CustomButton
+                </ThemeButton>
+                <ThemeButton
                   disabled={isSubmitting}
-                  loading={isSubmitting}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+                  isLoading={isSubmitting}
+                  buttonType="theme"
                   onClick={(e) => {
                     e.preventDefault();
                     submitForm();
@@ -123,11 +116,10 @@ export default function WorkOrderCostDialog({ onClose, workOrderCostFields, onSu
                 >
                   {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

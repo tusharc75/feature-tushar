@@ -1,6 +1,6 @@
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
-import { useMediaQuery } from '@material-ui/core';
+import { useMediaQuery } from '@mui/material';
 import {
   ExpandedState,
   Row,
@@ -15,7 +15,6 @@ import {
   getSortedRowModel,
   useReactTable
 } from '@tanstack/react-table';
-import moment from 'moment';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { SEARCH, useStore } from 'src/StateProvider/fastContext';
 import SwipableListForMobile from 'src/components/CustomReactTable/SwipableListForMobile';
@@ -40,6 +39,7 @@ import {
   getUniqueRows,
   useSkipper
 } from './utils';
+import dayjs from 'dayjs';
 
 const handleApplySavedSize = (columns, columnSavedSizes) => {
   if (columnSavedSizes && Object.keys(columnSavedSizes).length) {
@@ -472,7 +472,7 @@ const CustomReactTable = ({
         // set column width to header width
         ws['!cols'] = fitToColumn(columns, ws);
 
-        const name = `${camelCaseToWords(renderedFrom) || 'My Sheet'}-${moment().format(dateTimeFormat)}`;
+        const name = `${camelCaseToWords(renderedFrom) || 'My Sheet'}-${dayjs().tz().format(dateTimeFormat)}`;
         xlsx.utils.book_append_sheet(wb, ws, `Page-${(page ?? 0) + 1}`);
         xlsx.writeFile(wb, `${name}.xlsx`);
       } catch (error) {

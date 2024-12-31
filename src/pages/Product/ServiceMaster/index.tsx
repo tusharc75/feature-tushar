@@ -1,7 +1,7 @@
-import { Box, Button, IconButton, MenuItem } from '@material-ui/core';
-import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
+import { Box, IconButton, MenuItem } from '@mui/material';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FcApproval } from 'react-icons/fc';
@@ -28,6 +28,7 @@ import FrequencyDialog from './FrequencyDialog';
 import { FiExternalLink } from 'react-icons/fi';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import ServiceCondition from 'src/pages/Product/ServiceMaster/ServiceCondition';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 interface Props {
   renderedFrom: string;
@@ -155,14 +156,14 @@ const ServiceMaster = (props: Props) => {
       },
       ...(serviceColumns && serviceColumns?.some((column) => column?.fieldData?.fieldName === 'frequency')
         ? [
-            {
-              accessor: 'frequency',
-              Header: 'Frequency',
-              width: 150,
-              minWidth: 150,
-              Cell: ({ row }) => (row.original?.frequency ? <p>{row.original?.frequency}</p> : <NoDataCell />)
-            }
-          ]
+          {
+            accessor: 'frequency',
+            Header: 'Frequency',
+            width: 150,
+            minWidth: 150,
+            Cell: ({ row }) => (row.original?.frequency ? <p>{row.original?.frequency}</p> : <NoDataCell />)
+          }
+        ]
         : []),
       {
         accessor: 'stepName',
@@ -523,10 +524,11 @@ const ServiceMaster = (props: Props) => {
     return (
       <>
         {dataRows?.length ? (
-          <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
-            <GrDrag fontSize="small" color="primary" className="mr-1" />
+          <ThemeButton
+            startIcon={<GrDrag fontSize="small" />}
+            onClick={() => setArrangeView(true)}>
             Arrange
-          </Button>
+          </ThemeButton>
         ) : null}
         <ImportExportMenu
           permissions={permissions?.packages}

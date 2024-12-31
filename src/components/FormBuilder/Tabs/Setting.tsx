@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Button, Checkbox, CircularProgress, Dialog, FormControlLabel, TextField } from '@material-ui/core';
+import { Box, Checkbox, Dialog, FormControlLabel, TextField } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { Form, Formik } from 'formik';
@@ -8,7 +9,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Autocomplete } from '@material-ui/lab';
+import Autocomplete from '@mui/material/Autocomplete';
 
 const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -26,8 +27,8 @@ const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
     setFields(
       response?.data?.data
         ? response?.data?.data
-          ?.filter((d) => d?.fieldData?.primaryField)
-          ?.map((r) => ({ optionLabel: r?.fieldData?.fieldLabel, optionValue: r?.fieldData?.fieldName }))
+            ?.filter((d) => d?.fieldData?.primaryField)
+            ?.map((r) => ({ optionLabel: r?.fieldData?.fieldLabel, optionValue: r?.fieldData?.fieldName }))
         : []
     );
   };
@@ -115,8 +116,8 @@ const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
                     <Autocomplete
                       id="collaborateToolsField"
                       options={fields}
-                      getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                      getOptionSelected={(option: any, val) => option.optionValue === val}
+                      getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+                      isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                       value={
                         fields && fields?.filter((data) => data.optionValue === values['collaborateToolsField'])?.length
                           ? fields && fields?.filter((data) => data.optionValue === values['collaborateToolsField'])[0]
@@ -129,6 +130,7 @@ const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
                         <TextField
                           {...params}
                           margin="dense"
+                          size="small"
                           variant="outlined"
                           label="Workspace Tools Field"
                           placeholder="Workspace Tools Field"
@@ -144,20 +146,17 @@ const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button size="small" color="primary" disabled={submitting} onClick={onClose}>
+              <ThemeButton buttonType="transparent" onClick={onClose}>
                 Cancel
-              </Button>
-              <Button
+              </ThemeButton>
+              <ThemeButton
                 disabled={submitting}
-                variant="contained"
-                color="primary"
-                size="small"
-                type="submit"
+                buttonType="theme"
                 onClick={submitForm}
-                endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                isLoading={submitting}
               >
                 Save
-              </Button>
+              </ThemeButton>
             </CustomDialogFooter>
           </>
         )}

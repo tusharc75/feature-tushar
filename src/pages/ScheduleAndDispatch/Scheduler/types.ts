@@ -34,6 +34,7 @@ export type TabKey = 'assets' | 'services' | 'technicians' | 'customerDetail';
 export type Tab = {
   key: TabKey;
   label: string;
+  show: boolean;
 };
 
 export type SelectedAsset = {

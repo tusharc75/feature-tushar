@@ -1,12 +1,13 @@
-import React, { useContext, useState } from 'react';
-import { Menu, MenuItem, Button, useMediaQuery } from '@material-ui/core';
+import { useContext, useState } from 'react';
+import { Menu, MenuItem, useMediaQuery } from '@mui/material';
 import axiosInstance from '../../axios/axiosInstance';
 import { IMPORT_EXPORT_TYPE, downloadExcel } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { MdImportExport } from 'react-icons/md';
 import HtmlTooltip from '../CustomTooltipTitle';
 import ImportExportDialog from './ImportExportDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const AsynImportExportMenu = ({
   ids = [],
@@ -43,16 +44,14 @@ const AsynImportExportMenu = ({
     setAnchorEl(null);
   };
 
-
   const handleExport = () => {
-    let exportApi
+    let exportApi;
     if (onlyExport) {
-      exportApi = `${api}/export`
+      exportApi = `${api}/export`;
       if (additionalParams) {
         exportApi = `${exportApi}${additionalParams}`;
       }
-    }
-    else {
+    } else {
       exportApi = `${api}/template?export=true`;
       if (additionalParams) {
         exportApi = `${exportApi}&${additionalParams}`;
@@ -61,14 +60,16 @@ const AsynImportExportMenu = ({
     if (exportCount > 0) {
       exportApi = exportApi + `&ids=${JSON.stringify(ids)}`;
     }
-    axiosInstance().get(exportApi).then((response) => {
-      setRefresh(!refresh)
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: 'Export to excel added in queue successfully.'
-      });
-    })
+    axiosInstance()
+      .get(exportApi)
+      .then((response) => {
+        setRefresh(!refresh);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: 'Export to excel added in queue successfully.'
+        });
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -79,10 +80,12 @@ const AsynImportExportMenu = ({
     if (additionalParams) {
       exportApi = `${exportApi}?${additionalParams}`;
     }
-    axiosInstance().get(exportApi, { responseType: 'arraybuffer' }).then((response) => {
-      const fileName = response.headers['content-disposition'].split('filename=')[1];
-      downloadExcel(response.data, fileName);
-    })
+    axiosInstance()
+      .get(exportApi, { responseType: 'arraybuffer' })
+      .then((response) => {
+        const fileName = response.headers['content-disposition'].split('filename=')[1];
+        downloadExcel(response.data, fileName);
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -92,26 +95,22 @@ const AsynImportExportMenu = ({
     <>
       <HtmlTooltip title={<>Import/Export {title}</>} placement="top" arrow enterTouchDelay={0}>
         <span>
-          {onlyExport ?
-            <Button
-              variant="outlined"
+          {onlyExport ? (
+            <ThemeButton
               size="small"
               onClick={() => {
                 setDialog({ open: true, type: IMPORT_EXPORT_TYPE.export });
               }}
-              className={`btn-outline-v-1`}>
+            >
               Export All
-            </Button>
-            :
-            <Button
+            </ThemeButton>
+          ) : (
+            <ThemeButton
               onClick={(e) => handleClick(e)}
               endIcon={<ArrowDropDownIcon />}
-              variant={'outlined'}
-              color="primary"
+              buttonType="theme"
               aria-controls="simple-menu"
               aria-haspopup="true"
-              className="min-h-[32px]"
-              size="small"
             >
               {isMobile ? (
                 <>
@@ -121,7 +120,8 @@ const AsynImportExportMenu = ({
               ) : (
                 <>Import/Export {title}</>
               )}
-            </Button>}
+            </ThemeButton>
+          )}
         </span>
       </HtmlTooltip>
       <Menu
@@ -129,7 +129,6 @@ const AsynImportExportMenu = ({
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
-        getContentAnchorEl={null}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'right'
@@ -156,8 +155,7 @@ const AsynImportExportMenu = ({
               handleClose();
             }}
           >
-            Export to Excel{' '}
-            {isExportCount ? (exportCount === 0 || exportCount === total ? '(All)' : `(${exportCount})`) : null}
+            Export to Excel {isExportCount ? (exportCount === 0 || exportCount === total ? '(All)' : `(${exportCount})`) : null}
           </MenuItem>
         )}
         {permissions?.isCreate && (
@@ -171,11 +169,11 @@ const AsynImportExportMenu = ({
           </MenuItem>
         )}
       </Menu>
-      {dialog.open &&
+      {dialog.open && (
         <ImportExportDialog
           handleClose={() => {
             if (dialog.type === IMPORT_EXPORT_TYPE.import) {
-              afterImportCompleted()
+              afterImportCompleted();
             }
             setDialog({ open: false, type: null });
             setAnchorEl(null);
@@ -189,7 +187,7 @@ const AsynImportExportMenu = ({
           api={api}
           additionalParams={additionalParams}
         />
-      }
+      )}
     </>
   );
 };

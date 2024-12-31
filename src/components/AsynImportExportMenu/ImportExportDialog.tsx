@@ -1,10 +1,10 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Button, CircularProgress, Dialog, Grid, IconButton } from '@material-ui/core';
+import { Box, CircularProgress, Dialog, IconButton } from '@mui/material';
 import {
   CustomDialogTransition,
   IMPORT_EXPORT_STATUS,
   IMPORT_EXPORT_TYPE,
-  dateTimeFormat,
+  displayDateTime,
   gridLoadingTimeout,
   prepareDataForGrid
 } from 'src/constants/helpers';
@@ -15,11 +15,10 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { AiOutlineExport, AiOutlineImport } from 'react-icons/ai';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import moment from 'moment';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { GetApp } from '@material-ui/icons';
+import { GetApp } from '@mui/icons-material';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import CustomButton from '../Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import NoDataCell from '../Helpers/NoDataCell';
 import routes from '../Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -33,7 +32,6 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [downloading, setDownloading] = useState({ loading: false, type: null });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, pageSizes } = state;
-
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -88,7 +86,7 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
         accessor: 'date',
         Header: 'Date & Time',
         Cell: ({ row }) => {
-          return row.original?.date ? <p className="text-truncate">{moment(row?.original?.date)?.format(dateTimeFormat)}</p> : <NoDataCell />;
+          return row.original?.date ? <p className="text-truncate">{displayDateTime(row?.original?.date)}</p> : <NoDataCell />;
         }
       },
       {
@@ -268,41 +266,43 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
         <Box pt={2} />
         {type === 'Import' ? (
           <label htmlFor="importFromExcelMenu" style={{ cursor: 'pointer' }}>
-            <Button size="small" variant="outlined" component="span" startIcon={<AiOutlineImport />}>
+            <ThemeButton buttonType="transparent" startIcon={<AiOutlineImport />}>
               {ImportInput}
               Import from Excel
-            </Button>
+            </ThemeButton>
           </label>
         ) : (
-          <Button type="button" size="small" color="primary" variant="outlined" onClick={handleExport} startIcon={<AiOutlineExport />}>
+          <ThemeButton buttonType="transparent" onClick={handleExport} startIcon={<AiOutlineExport />}>
             Export to Excel
-          </Button>
+          </ThemeButton>
         )}
-        {columns ? <CustomReactTable
-          height={fullScreen ? 'calc(100vh - 285px)' : 'calc(100vh - 393px)'}
-          columns={columns}
-          state={state}
-          dispatch={dispatch}
-          renderedFrom={renderedFrom}
-          refreshGrid={fetchData}
-          hideSelection={true}
-          showFilters={false}
-          showArrangeView={false}
-        /> : <Box p={2} height={300}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        {columns ? (
+          <CustomReactTable
+            height={fullScreen ? 'calc(100vh - 285px)' : 'calc(100vh - 393px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            refreshGrid={fetchData}
+            hideSelection={true}
+            showFilters={false}
+            showArrangeView={false}
+          />
+        ) : (
+          <Box p={2} height={300}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
       </CustomDialogContent>
       <CustomDialogFooter>
-        <CustomButton
-          variant="contained"
-          className="no-shadow"
-          size="small"
+        <ThemeButton
+          buttonType="transparent"
           onClick={(e) => {
             handleClose();
           }}
         >
           Close
-        </CustomButton>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

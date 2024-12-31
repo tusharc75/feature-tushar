@@ -1,10 +1,10 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import { Edit } from '@material-ui/icons';
-import { Skeleton } from '@material-ui/lab';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import EditIcon from '@mui/icons-material/Edit';
+import { Skeleton } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -99,14 +99,9 @@ const InventoryCycleDetailPage = () => {
             {inventoryCycleData ? (
               <>
                 {permissions?.inventoryCycle?.isUpdate && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    className={'btn-outline-v1'}
-                    size="small"
-                    onClick={handleOpenUpdateDialog}
-                  >
-                    {isMobile ? <Edit /> : 'Edit'}
-                  </Button>
+                  <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                    {'Edit'}
+                  </ThemeButton>
                 )}
                 {permissions?.inventoryCycle?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>
@@ -118,11 +113,11 @@ const InventoryCycleDetailPage = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <Grid container spacing={1}>
-          <Grid item xs={12} sm={12} md={12} lg={12} spacing={2}>
+          <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }} spacing={2}>
             <Box>
               {loading || !formsData.length ? (
                 <Grid container spacing={2} style={{ padding: '8px' }}>
-                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
                 </Grid>
               ) : (
                 <DetailsPage data={inventoryCycleData} fields={formsData} />
@@ -147,7 +142,7 @@ const InventoryCycleDetailPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.inventoryCycle?.titleSingular?.toLowerCase()} : ${headingLbl} ?`}          
+          message={`Are you sure you want to delete ${resources?.inventoryCycle?.titleSingular?.toLowerCase()} : ${headingLbl} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

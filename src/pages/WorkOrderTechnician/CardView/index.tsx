@@ -5,13 +5,12 @@ import CardColTimeline, { useCardReducer } from 'src/components/CardColTimeline'
 import { useData } from 'src/StateProvider/Provider';
 import routes from 'src/components/Helpers/Routes';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { Info } from '@material-ui/icons';
+import { Info } from '@mui/icons-material';
 import { WORKORDER_SERVICE_STATUS, WORKORDER_TECHNICIAN_SERVICE_STATUS, workOrderColormap } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
-import { camelCase } from 'lodash';
 import TechnicianDialog from '../TechnicianDialog';
-import { IconButton } from '@material-ui/core';
-import DescriptionIcon from '@material-ui/icons/Description';
+import { IconButton } from '@mui/material';
+import DescriptionIcon from '@mui/icons-material/Description';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 
 const LIMIT = 25;

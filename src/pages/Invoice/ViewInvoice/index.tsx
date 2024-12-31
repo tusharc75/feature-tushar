@@ -1,13 +1,9 @@
-import { Box, Dialog, IconButton } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
+import { Box, Dialog, IconButton } from '@mui/material';
 import { camelCase, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { FaFileInvoice } from 'react-icons/fa';
-import { FaFileZipper } from 'react-icons/fa6';
-import { IoMdDownload } from 'react-icons/io';
 import { useData } from 'src/StateProvider/Provider';
-import { CancelInvoiceIcon } from 'src/assets/svg/svgIcons';
+import { CancelInvoiceIcon, DownloadIcon } from 'src/assets/svg/svgIcons';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import CommentDialog from 'src/components/CommentDialog';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -36,7 +32,6 @@ import CreditMemo from '../CreditMemo';
 import { FiExternalLink } from 'react-icons/fi';
 
 const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = `${camelCase(sidebarResource.invoice)}_view`;
 
@@ -328,26 +323,26 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
         {resource === sidebarResource.fieldTicket && (
           <>
             <ThemeButton
-              iconForMobile={<FaFileZipper />}
+              iconForMobile={<DownloadIcon />}
               type="button"
               disabled={isDownloadingZip ? true : false}
-              startIcon={isMobile ? '' : <IoMdDownload />}
+              startIcon={<DownloadIcon />}
               onClick={(e) => {
                 handleDownloadZip();
               }}
-              tooltip={isDownloadingZip ? 'Please wait...' : 'Save as Zip File'}
+              mobileTooltip={isDownloadingZip ? 'Please wait...' : 'Save as Zip File'}
             >
               {isDownloadingZip ? 'Please wait...' : 'Save as Zip File'}
             </ThemeButton>
             <ThemeButton
               type="button"
-              iconForMobile={<FaFileInvoice />}
+              iconForMobile={<DownloadIcon />}
               disabled={isDownloadingPdf ? true : false}
-              startIcon={<IoMdDownload />}
+              startIcon={<DownloadIcon />}
               onClick={(e) => {
                 handleDownloadPdf();
               }}
-              tooltip={isDownloadingPdf ? 'Please wait...' : 'Download Invoice Tickets'}
+              mobileTooltip={isDownloadingPdf ? 'Please wait...' : 'Download Invoice Tickets'}
             >
               {isDownloadingPdf ? 'Please wait...' : 'Download Invoice Tickets'}
             </ThemeButton>
@@ -367,10 +362,9 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
           ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled]?.includes(invoiceData?.status) && (
             <ThemeButton
               iconForMobile={<CancelInvoiceIcon />}
-              tooltip="Cancel Invoice"
-              borderColor="red"
+              mobileTooltip="Cancel Invoice"
               mode="light"
-              hasMobileBorder={false}
+              buttonType="red"
               onClick={() => setCommentDialog(true)}
             >
               Cancel Invoice
@@ -460,17 +454,14 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
           </Fragment>
         </CustomDialogContent>
         <CustomDialogFooter>
-          <Button
-            type="button"
-            variant="outlined"
-            color="primary"
-            size="small"
+          <ThemeButton
+            buttonType='transparent'
             onClick={() => {
               onClose();
             }}
           >
             Cancel
-          </Button>
+          </ThemeButton>
         </CustomDialogFooter>
       </Dialog>
       {commentDialog && (

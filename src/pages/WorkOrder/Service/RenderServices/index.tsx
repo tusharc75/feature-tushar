@@ -1,16 +1,16 @@
-import { Chip, IconButton } from '@material-ui/core';
-import { ArrowBackIos, ArrowForwardIos, DeleteOutline, FormatQuote, Message, MoreHoriz, People } from '@material-ui/icons';
-import React, { useEffect, useState } from 'react';
+import { ArrowBackIos, ArrowForwardIos, DeleteOutline, FormatQuote, Message, MoreHoriz, People } from '@mui/icons-material';
+import { Chip, IconButton } from '@mui/material';
+import React, { useState } from 'react';
+import { MdKeyboardDoubleArrowUp } from 'react-icons/md';
 import { PostWorkIcon, PreWorkIcon, WorkStations } from 'src/assets/svg/svgIcons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { ButtonType, ThemeButton } from 'src/components/Helpers/Buttons';
+import { ThemeButton, ThemeButtonProps } from 'src/components/Helpers/Buttons';
 import { WORKORDER_SERVICE_STATUS, cn, getChipColor, sidebarResource } from 'src/constants/helpers';
 import { RenderStatusIcon } from '../index';
 import RenderTotalTime from './RenderTotalTime';
 import useTab from './useTab';
-import { MdKeyboardDoubleArrowUp } from 'react-icons/md';
 
-export type ServicesButtons = { visible: boolean; id: string | number } & ButtonType;
+export type ServicesButtons = { visible: boolean; id: string | number } & ThemeButtonProps;
 
 type RenderServiceProps = {
   isColapsed: boolean;
@@ -100,8 +100,9 @@ const RenderService = ({
                   if (!visible) return null;
                   return (
                     <span
-                      className={`absolute -right-[5.5px] rounded-full bg-[var(--dark-secondary,_white)] ${isMobileSlideOpen ? 'opacity-100' : 'sr-only opacity-0'
-                        }`}
+                      className={`absolute -right-[5.5px] rounded-full bg-[var(--dark-secondary,_white)] ${
+                        isMobileSlideOpen ? 'opacity-100' : 'sr-only opacity-0'
+                      }`}
                       style={{ top: isMobileSlideOpen ? `-${(index + 1) * 32 + (index + 1) * 8}px` : '-24px', transition: `top 0.${index + 2}s` }}
                     >
                       <ThemeButton key={id} {...rest} className={`${isColapsed ? 'hidden' : ''} round`}>
@@ -156,7 +157,7 @@ const RenderService = ({
                 );
               })}
               <IconButton size={'small'} onClick={handleColapse}>
-                {isColapsed ? <ArrowForwardIos /> : <ArrowBackIos />}
+                <ArrowForwardIos fontSize="small" className={cn('transition-all', isColapsed ? '' : '[transform:rotate(180deg)]')} />
               </IconButton>
             </div>
             <div className={`max-h-[calc(100vh-300px)] overflow-y-auto overflow-x-hidden`}>
@@ -228,8 +229,9 @@ const RenderServices = ({
         return (
           <div
             key={data.uniqueId}
-            className={`transition-all duration-300 ${isMobile ? 'rounded-md p-2' : 'px-3 py-[14px] first-of-type:[border-radius:5px_5px_0_0] last-of-type:[border-radius:0_0_5px_5px]'
-              } min-w-[var(--tab-size)] max-w-[var(--tab-size)]`}
+            className={`transition-all duration-300 ${
+              isMobile ? 'rounded-md p-2' : 'px-3 py-[14px] first-of-type:[border-radius:5px_5px_0_0] last-of-type:[border-radius:0_0_5px_5px]'
+            } min-w-[var(--tab-size)] max-w-[var(--tab-size)]`}
             style={{
               ...style
             }}
@@ -310,7 +312,7 @@ const RenderServices = ({
                 <>
                   {data?.type === 'service' && (
                     <div className="flex flex-grow items-center justify-end gap-1">
-                      <HtmlTooltip title='Actions'>
+                      <HtmlTooltip title="Actions">
                         <IconButton
                           size="small"
                           color="primary"

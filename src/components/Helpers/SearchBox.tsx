@@ -1,5 +1,5 @@
-import { Close } from '@material-ui/icons';
-import React, { memo, useRef, useState } from 'react';
+import { Close } from '@mui/icons-material';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FiSearch } from 'react-icons/fi';
 import { cn, DebounceCallBack, debounceCallBack } from 'src/constants/helpers';
@@ -12,7 +12,7 @@ type SerachBoxProps = React.InputHTMLAttributes<HTMLInputElement> & {
 };
 
 function SearchBox({ onChange, value, size, width, placeholder, className, containerProps = {}, fullWidth, ...otherProps }: SerachBoxProps) {
-  const [inputvalue, setInputValue] = useState<string>(value ?? '');
+  const [inputvalue, setInputValue] = useState<string>('');
   const { className: containerClassName, ...restOfContainerProps } = containerProps;
   const debounceRef = useRef<DebounceCallBack>(null);
 
@@ -31,6 +31,10 @@ function SearchBox({ onChange, value, size, width, placeholder, className, conta
     const [debouncedTracker, _] = debounceRef.current;
     debouncedTracker(e);
   };
+  
+  useEffect(() => {
+    setInputValue(value ? value : '');
+  }, [value]);
 
   return (
     <>

@@ -1,47 +1,39 @@
-import { makeStyles } from "@material-ui/core/styles";
-import { Grid, Typography, IconButton } from "@material-ui/core";
-import { Delete } from "@material-ui/icons";
-import { Link } from "react-router-dom";
-import BoxWithBorder from "../../components/BoxWithBorder";
+import { makeStyles } from '@mui/styles';
+import { Typography, IconButton, Theme } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { Delete } from '@mui/icons-material';
+import BoxWithBorder from '../../components/BoxWithBorder';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     // flexGrow: 1,
   },
   heading: {
     fontSize: theme.typography.pxToRem(17),
-    flexBasis: "33.33%",
-    flexShrink: 0,
+    flexBasis: '33.33%',
+    flexShrink: 0
   },
   secondaryHeading: {
     fontSize: theme.typography.pxToRem(15),
-    color: theme.palette.text.secondary,
+    color: theme.palette.text.secondary
   },
   actionsItems: {
-    color: "grey",
-    float: "right",
-  },
+    color: 'grey',
+    float: 'right'
+  }
 }));
 
 function DisplayData({ label, value, color }) {
   return (
     <div className="cTr">
       <div className="td1">
-        <Typography
-          color="textSecondary"
-          className="text-truncate"
-          variant="subtitle1"
-        >
+        <Typography color="textSecondary" className="text-truncate" variant="subtitle1">
           {label}
         </Typography>
       </div>
       <div className="td2">
-        {" "}
-        <Typography
-          title={value}
-          className="text-truncate"
-          style={{ color: color ? color : "" }}
-        >
+        {' '}
+        <Typography title={value} className="text-truncate" style={{ color: color ? color : '' }}>
           {value}
         </Typography>
       </div>
@@ -49,12 +41,7 @@ function DisplayData({ label, value, color }) {
   );
 }
 
-export default function AssignedEntities({
-  data,
-  unassignEntity,
-  permissions,
-  selectedEntity,
-}) {
+export default function AssignedEntities({ data, unassignEntity, permissions, selectedEntity }) {
   const classes = useStyles();
 
   return (
@@ -62,46 +49,24 @@ export default function AssignedEntities({
       {data && data.length ? (
         <Grid container spacing={1}>
           {data.map((obj, index) => (
-            <Grid item md={6} xs={12} sm={12} key={index}>
+            <Grid size={{md:6, xs:12, sm:12}} key={index}>
               <BoxWithBorder>
                 <span
                   className={classes.actionsItems}
-                  title={
-                    selectedEntity === obj._id
-                      ? "Default entity can't be un-assigned"
-                      : `Un-assign ${obj.entityName}`
-                  }
+                  title={selectedEntity === obj._id ? "Default entity can't be un-assigned" : `Un-assign ${obj.entityName}`}
                 >
                   {permissions?.role?.isUpdate && (
-                    <IconButton
-                      disabled={selectedEntity === obj._id}
-                      onClick={() => unassignEntity(obj)}
-                      size="small"
-                    >
-                      <Delete
-                        color={
-                          selectedEntity === obj._id ? "disabled" : "error"
-                        }
-                      />
+                    <IconButton disabled={selectedEntity === obj._id} onClick={() => unassignEntity(obj)} size="small">
+                      <Delete color={selectedEntity === obj._id ? 'disabled' : 'error'} />
                     </IconButton>
                   )}
                 </span>
-                <Typography
-                  title={obj?.entityName ?? ""}
-                  className="text-capitalize"
-                >
-                  <p
-                    className="link"
-                    onClick={() => window.open(`/entity/detail/${obj._id}`)}
-                  >
-                    {obj?.entityName ?? ""}
+                <Typography title={obj?.entityName ?? ''} className="text-capitalize">
+                  <p className="link" onClick={() => window.open(`/entity/detail/${obj._id}`)}>
+                    {obj?.entityName ?? ''}
                   </p>
                 </Typography>
-                <DisplayData
-                  label="Address"
-                  value={obj?.address ?? "____"}
-                  color={null}
-                />
+                <DisplayData label="Address" value={obj?.address ?? '____'} color={null} />
               </BoxWithBorder>
             </Grid>
           ))}

@@ -1,5 +1,6 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import { Edit } from '@material-ui/icons';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import EditIcon from '@mui/icons-material/Edit';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
@@ -10,7 +11,7 @@ import ManageAddressDialog from '../../components/Address/ManageAddressDialog';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { GoogleMap, GoogleMapProps, Marker } from '@react-google-maps/api';
@@ -109,7 +110,7 @@ const AddressDetailPage = () => {
       stylers: [{ color: '#17263c' }]
     },
     { featureType: 'transit', stylers: [{ visibility: 'on' }] },
-    { featureType: 'poi', stylers: [{ visibility: 'on' }] },
+    { featureType: 'poi', stylers: [{ visibility: 'on' }] }
   ];
 
   const mapLightTheme: GoogleMapProps['options']['styles'] = [
@@ -157,7 +158,8 @@ const AddressDetailPage = () => {
   };
 
   const handleDeleteAddress = () => {
-    axiosInstance().put(`/address/remove`, { ids: [id] })
+    axiosInstance()
+      .put(`/address/remove`, { ids: [id] })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -211,9 +213,9 @@ const AddressDetailPage = () => {
             <Box className="control-buttons-v1">
               <>
                 {permissions?.address?.isUpdate && (
-                  <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
-                    {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                  </Button>
+                  <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                    {'Edit'}
+                  </ThemeButton>
                 )}
                 {permissions?.address?.isDelete && (
                   <span title={id ? "Primarily selected address can't be deleted" : 'Permanently delete this address'}>
@@ -228,12 +230,12 @@ const AddressDetailPage = () => {
           <Box>
             {loading || !addressFields.length ? (
               <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </Grid>
             ) : (
               <DetailsPage data={addressData} fields={addressFields} />
             )}
-            {(addressData?.latitude && addressData?.longitude) && (
+            {addressData?.latitude && addressData?.longitude && (
               <Box height={400} width={'100%'} borderRadius={4} overflow="hidden" marginTop={2}>
                 <GoogleMap
                   key={themeColor}
@@ -241,7 +243,7 @@ const AddressDetailPage = () => {
                     mapTypeId: google.maps.MapTypeId.ROADMAP,
                     streetViewControl: true,
                     gestureHandling: 'cooperative',
-                    styles: themeColor === 'dark' ? mapDarkTheme : mapLightTheme,
+                    styles: themeColor === 'dark' ? mapDarkTheme : mapLightTheme
                   }}
                   mapContainerStyle={{
                     height: '100%',

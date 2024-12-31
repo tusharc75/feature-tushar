@@ -1,4 +1,4 @@
-import { Chip, TextField } from '@material-ui/core';
+import { Chip, TextField } from '@mui/material';
 import React, { useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Topics } from 'src/components/AiChatbox';
@@ -89,7 +89,7 @@ const SelectTopicModal = ({ handleClose, topics, setSelectedTopics, selectedTopi
           >
             Cancel
           </ThemeButton>
-          <ThemeButton disabled={selectedTopics.length === 0} color="primary" borderColor="none" iconForMobile={false} onClick={handleClose}>
+          <ThemeButton disabled={selectedTopics.length === 0} buttonType="theme" iconForMobile={false} onClick={handleClose}>
             Apply
           </ThemeButton>
         </>

@@ -1,5 +1,6 @@
 import { FC, useEffect, useState, Fragment, useRef, useContext } from 'react';
-import { Button, Dialog, Grid, Box } from '@material-ui/core';
+import { Dialog, Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -9,18 +10,18 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomButton from '../../../components/Helpers/CustomButton';
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { uniq, map, orderBy, isEqual, uniqBy } from 'lodash';
-import { autoCalculateSpecificFields, } from '../../../constants/formulaUtility';
+import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import moment from 'moment';
 import { bulkUpdate, calculateRowsField } from 'src/components/RentalManagment/helper';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -130,9 +131,11 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
         element.isMulitFormula = false;
       });
       const initialData = getObjKeys('', data);
-      data?.filter((e) => e.type === 'date')?.forEach((e) => {
-        initialData[e?.fieldName] = ''
-      })
+      data
+        ?.filter((e) => e.type === 'date')
+        ?.forEach((e) => {
+          initialData[e?.fieldName] = '';
+        });
       setInitialData({
         fields: data,
         values: initialData
@@ -164,8 +167,8 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
             const assetPricingMethod = {
               optionValue: 'Per Job',
               optionLabel: 'Per Job'
-            }
-            pricingMethodOptions.push(assetPricingMethod)
+            };
+            pricingMethodOptions.push(assetPricingMethod);
             element.option = [assetPricingMethod];
             element.value = 'Per Job';
           }
@@ -220,7 +223,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
         }
       ]);
       setPriceConditionListConst(priceData || []);
-      updateRateChangeState(values, priceData, pricingMethodOptions)
+      updateRateChangeState(values, priceData, pricingMethodOptions);
     }
   }
 
@@ -240,24 +243,26 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
         };
       }),
       'optionValue'
-    )
+    );
     setPriceConditionList(tempPriceCondition);
     var tempPricingMethod = pricingMethodOptions;
     if (values['pricingCondition'] && values['pricingCondition'] !== '') {
       tempPricingMethod = uniqBy(
-        priceData?.filter((d) => d.conditionId === values['pricingCondition'] || values['pricingCondition']?.optionValue)?.map((d) => {
-          return {
-            optionLabel: d?.pricingMethod,
-            optionValue: d?.pricingMethod
-          };
-        }),
+        priceData
+          ?.filter((d) => d.conditionId === values['pricingCondition'] || values['pricingCondition']?.optionValue)
+          ?.map((d) => {
+            return {
+              optionLabel: d?.pricingMethod,
+              optionValue: d?.pricingMethod
+            };
+          }),
         'optionValue'
-      )
+      );
     }
-    setPricingMethodList(tempPricingMethod)
+    setPricingMethodList(tempPricingMethod);
 
-    return { tempPriceCondition, tempPricingMethod }
-  }
+    return { tempPriceCondition, tempPricingMethod };
+  };
 
   const EvaluteproductFields = async (fields) => {
     const sections = uniq(map(fields, 'sectionName'));
@@ -398,7 +403,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
                                     size="small"
                                   />
                                 ) : field.fieldName === 'taxCode' ? (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                     <Box display="flex">
                                       <Box flexGrow={1}>
                                         <FormTypes
@@ -437,7 +442,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
                                     </Box>
                                   </Grid>
                                 ) : rateChangeFields.includes(field.fieldName) && !isBulkedit ? (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                     <Box display="flex">
                                       <Box flexGrow={1}>
                                         <FormTypes
@@ -453,11 +458,20 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
                                           setFieldValue={(name, value) => {
                                             setFieldValue(name, value);
                                           }}
-                                          options={field.fieldName === 'pricingCondition' ? priceConditionList :
-                                            field.fieldName === 'pricingMethod' ? pricingMethodList : field.option}
+                                          options={
+                                            field.fieldName === 'pricingCondition'
+                                              ? priceConditionList
+                                              : field.fieldName === 'pricingMethod'
+                                                ? pricingMethodList
+                                                : field.option
+                                          }
                                           onChange={(e, val) => {
                                             const value = val && val.optionValue ? val.optionValue : '';
-                                            const { tempPriceCondition, tempPricingMethod } = updateRateChangeState({ ...values, [field.fieldName]: value }, priceConditionListConst, priceMethodListConst)
+                                            const { tempPriceCondition, tempPricingMethod } = updateRateChangeState(
+                                              { ...values, [field.fieldName]: value },
+                                              priceConditionListConst,
+                                              priceMethodListConst
+                                            );
                                             if (values['pricingCondition']) {
                                               if (!tempPriceCondition?.find((e) => e.optionValue === values['pricingCondition'])) {
                                                 setFieldValue('pricingCondition', '');
@@ -469,13 +483,26 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
                                                 setFieldValue('pricingMethod', '');
                                               }
                                             }
-                                            let priceValue
+                                            let priceValue;
                                             if (field.fieldName === 'pricingCondition') {
-                                              priceValue = priceConditionListConst?.find((d) => d.conditionId === value && d.pricingMethod === values['pricingMethod'] && d.unit === values['unit']);
+                                              priceValue = priceConditionListConst?.find(
+                                                (d) =>
+                                                  d.conditionId === value && d.pricingMethod === values['pricingMethod'] && d.unit === values['unit']
+                                              );
                                             } else if (field.fieldName === 'pricingMethod') {
-                                              priceValue = priceConditionListConst?.find((d) => d.conditionId === values['pricingCondition'] && d.pricingMethod === value && d.unit === values['unit']);
+                                              priceValue = priceConditionListConst?.find(
+                                                (d) =>
+                                                  d.conditionId === values['pricingCondition'] &&
+                                                  d.pricingMethod === value &&
+                                                  d.unit === values['unit']
+                                              );
                                             } else {
-                                              priceValue = priceConditionListConst?.find((d) => d.conditionId === values['pricingCondition'] && d.pricingMethod === values['pricingMethod'] && d.unit === value);
+                                              priceValue = priceConditionListConst?.find(
+                                                (d) =>
+                                                  d.conditionId === values['pricingCondition'] &&
+                                                  d.pricingMethod === values['pricingMethod'] &&
+                                                  d.unit === value
+                                              );
                                             }
                                             let priceFieldName = 'price_' + quotationData?.currency?.toLowerCase();
                                             const result = autoCalculateSpecificFields(
@@ -499,7 +526,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
                                     </Box>
                                   </Grid>
                                 ) : ['estimateStartDate', 'estimateEndDate'].includes(field.fieldName) ? (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                     <Box display="flex">
                                       <Box flexGrow={1}>
                                         <FormTypes
@@ -528,7 +555,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
                                     </Box>
                                   </Grid>
                                 ) : (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                     <Box display="flex">
                                       <Box flexGrow={1}>
                                         <FormTypes
@@ -563,9 +590,8 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType="transparent"
                   onClick={() => {
                     if (!isEqual(ref.current.values, initialData.values)) {
                       setShowConfirmDialog(true);
@@ -575,14 +601,12 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
                   }}
                 >
                   {'Close'}
-                </Button>
+                </ThemeButton>
                 {isBulkedit === false && showSaveAndNext && (
-                  <CustomButton
-                    loading={loadingEdit}
-                    disabled={isEqual(ref?.current?.values, initialData.values) || loadingEdit}
-                    variant="contained"
-                    color="primary"
-                    type="submit"
+                  <ThemeButton
+                    isLoading={Boolean(loadingEdit)}
+                    disabled={isEqual(ref?.current?.values, initialData.values) || Boolean(loadingEdit)}
+                    buttonType="theme"
                     onClick={() => {
                       setSaveAndNext(true);
                       submitForm();
@@ -590,14 +614,12 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
                   >
                     {' '}
                     Save & Next
-                  </CustomButton>
+                  </ThemeButton>
                 )}
-                <CustomButton
-                  loading={loadingEdit}
-                  disabled={isEqual(ref?.current?.values, initialData.values) || loadingEdit}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+                <ThemeButton
+                  isLoading={Boolean(loadingEdit)}
+                  disabled={isEqual(ref?.current?.values, initialData.values) || Boolean(loadingEdit)}
+                  buttonType="theme"
                   onClick={() => {
                     setSaveAndNext(false);
                     submitForm();
@@ -605,7 +627,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
                 >
                   {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmationDialog && (
                 <ConfirmationDialog

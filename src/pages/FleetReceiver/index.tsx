@@ -1,4 +1,6 @@
-import { Box, Grid, makeStyles, Typography } from '@material-ui/core';
+import { Box, Theme, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { makeStyles } from '@mui/styles';
 import { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
@@ -6,12 +8,10 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ManageFleetReceiverDialog from './ReceiverDialog';
-import moment from 'moment';
-import { dateFormat } from 'src/constants/helpers';
-import LocalShippingIcon from '@material-ui/icons/LocalShipping';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import { useData } from 'src/StateProvider/Provider';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   fleetBox: {
     cursor: 'pointer',
     display: 'flex',
@@ -63,10 +63,10 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const FleetReceiver = () => {
-    const {
+  const {
     state: { resources }
   }: any = useData();
-  
+
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
 
@@ -104,7 +104,7 @@ const FleetReceiver = () => {
           fleets?.length > 0 ? (
             <Grid container spacing={2}>
               {fleets?.map((data, index) => (
-                <Grid item xs={12} sm={6} md={4}>
+                <Grid size={{xs:12, sm:6, md:4}}>
                   <Box
                     key={index}
                     className={`${classes.fleetBox} p-[15px] md:p-[27px_20px_45px]`}

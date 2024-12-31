@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useState } from 'react';
-import { Typography, TextField, Box } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Typography, TextField, Box } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import Signature from 'src/components/Helpers/FormTypes/Signature';
 import { useData } from 'src/StateProvider/Provider';
 import { isObject } from 'lodash';
@@ -39,7 +39,7 @@ const GroupSignature = ({ label, values, name, setFieldValue, fieldData, touched
           size="small"
           value={selectedSignatureUsers ? selectedSignatureUsers : []}
           getOptionLabel={(option) => option.optionLabel}
-          getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+          isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
           onChange={(_, newVal: any) => {
             const updatedFieldValue = newVal?.map((ele) => {
               const data = (values[name] || [])?.find((e) => e.user === ele.optionValue);

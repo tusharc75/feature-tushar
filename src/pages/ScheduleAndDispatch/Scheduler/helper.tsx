@@ -1,5 +1,5 @@
-import { Collapse, IconButton } from '@material-ui/core';
-import { ExpandLess, ExpandMore } from '@material-ui/icons';
+import { Collapse, IconButton } from '@mui/material';
+import { ExpandLess, ExpandMore } from '@mui/icons-material';
 
 export const CollapsibleWrapper = ({ index, title, isExpand, accordionType, handleOpen, children }) => {
   return (

@@ -1,24 +1,24 @@
 import { useState, useEffect, useContext } from 'react';
-import Button from '@material-ui/core/Button';
 import { Formik, Form } from 'formik';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, WORK_FLOW_STATUS } from '../../constants/helpers';
-import { Box, CircularProgress, TextField } from '@material-ui/core';
+import { Box, TextField } from '@mui/material';
 import { useHistory } from 'react-router-dom';
 import { isEqual } from 'lodash';
 import { getLookupResource } from 'src/components/FormBuilder/helper';
-import { Autocomplete } from '@material-ui/lab';
+import Autocomplete from '@mui/material/Autocomplete';
 import { object, string } from 'yup';
 import ConfirmationCancelDialog from '../../components/ConfirmCancelDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const workFlowSchema = object().shape({
   workflowName: string().required('Please enter Workflow Name'),
@@ -110,7 +110,7 @@ const ManageWorkFlow = ({ onClose, onSuccess, isRedirectToDetailPage = false, da
       }}
     >
       {resourceOption && resourceOption?.length > 0 ? (
-        <Formik initialValues={initialValues} validationSchema={workFlowSchema} onSubmit={handleSubmit} validate={() => {}}>
+        <Formik initialValues={initialValues} validationSchema={workFlowSchema} onSubmit={handleSubmit} validate={() => { }}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <>
               <CustomDialogHeader
@@ -149,7 +149,7 @@ const ManageWorkFlow = ({ onClose, onSuccess, isRedirectToDetailPage = false, da
                       options={resourceOption}
                       disabled={data}
                       getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                      getOptionSelected={(option: any, val) => option.optionValue === val}
+                      isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                       value={
                         resourceOption && resourceOption?.filter((data) => data.optionValue === values['workflowResource'])?.length
                           ? resourceOption && resourceOption?.filter((data) => data.optionValue === values['workflowResource'])[0]
@@ -162,6 +162,7 @@ const ManageWorkFlow = ({ onClose, onSuccess, isRedirectToDetailPage = false, da
                         <TextField
                           {...params}
                           margin="dense"
+                          size="small"
                           variant="outlined"
                           label="Workflow Resource"
                           placeholder="Workflow Resource"
@@ -176,34 +177,29 @@ const ManageWorkFlow = ({ onClose, onSuccess, isRedirectToDetailPage = false, da
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
-                  disabled={submitting}
+
+
+                <ThemeButton
+                  buttonType='transparent'
                   onClick={() => {
                     if (isEqual(initialValues, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
                 >
                   Cancel
-                </Button>
-                <Button
+                </ThemeButton>
+                <ThemeButton
+                  buttonType='theme'
                   disabled={submitting}
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  type="submit"
                   onClick={submitForm}
-                  endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                  isLoading={submitting}
                 >
-                  {' '}
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
 
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

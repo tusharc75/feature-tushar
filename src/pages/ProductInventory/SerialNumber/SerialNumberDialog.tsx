@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Box, Button, Grid, TextField } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
+import { Box, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import Dialog from '@mui/material/Dialog';
 import { CustomDialogTransition, productInventory, sidebarResource } from '../../../constants/helpers';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import History from './index';
 import axiosInstance from 'src/axios/axiosInstance';
 import AddSerialNumber from './AddSerialNumber';
-import { Autocomplete } from '@material-ui/lab';
-import routes from 'src/components/Helpers/Routes';
+import Autocomplete from '@mui/material/Autocomplete';
 import { useData } from 'src/StateProvider/Provider';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const SerialNumberDialog = ({ close, product, warehouse, productName }) => {
   const {
@@ -54,7 +55,7 @@ const SerialNumberDialog = ({ close, product, warehouse, productName }) => {
           setSerialNumberCount(0);
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   return (
@@ -62,14 +63,14 @@ const SerialNumberDialog = ({ close, product, warehouse, productName }) => {
       <CustomDialogHeader title={`Serial Numbers - ${productName}`} onClose={close} showRequiredLabel={false}></CustomDialogHeader>
       <CustomDialogContent isFooterPresent={false}>
         <Grid container spacing={3}>
-          <Grid item xs={6} sm={6}>
+          <Grid size={{ xs: 6, sm: 6 }}>
             {warehouseOptions && (
               <Autocomplete
                 options={warehouseOptions}
                 getOptionLabel={(option: any) => option.optionLabel}
                 disableClearable
                 style={{ width: '300px' }}
-                getOptionSelected={(option: any, val) => option.optionValue === val}
+                isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                 value={
                   warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
                     ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
@@ -81,26 +82,23 @@ const SerialNumberDialog = ({ close, product, warehouse, productName }) => {
                   }
                 }}
                 renderInput={(params) => (
-                  <TextField {...params} margin="dense" name="plant" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
+                  <TextField {...params} margin="dense" size="small" name="plant" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
                 )}
               />
             )}
           </Grid>
-          <Grid item xs={6} sm={6}>
+          <Grid size={{ xs: 6, sm: 6 }}>
             <Grid container direction="row" justifyContent="flex-end" alignItems="center">
               {serialNumberCount ? (
                 <Box>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
+                  <ThemeButton
+                    buttonType='theme'
                     onClick={() => {
                       setAddserialNumber(true);
                     }}
-                    aria-controls="action-menu"
                   >
                     Add Serial Numbers
-                  </Button>
+                  </ThemeButton>
                 </Box>
               ) : null}
             </Grid>

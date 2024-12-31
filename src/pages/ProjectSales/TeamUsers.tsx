@@ -1,13 +1,12 @@
-import { makeStyles } from '@material-ui/core/styles';
-import { Typography, Box, List, ListItem, ListItemSecondaryAction, ListItemText, IconButton, Chip, Grid } from '@material-ui/core';
-import { Delete } from '@material-ui/icons';
-import { Link } from 'react-router-dom';
-
+import { makeStyles } from '@mui/styles';
+import { List, ListItem, ListItemText, IconButton, Theme } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { Delete } from '@mui/icons-material';
 import BoxWithBorder from '../../components/BoxWithBorder';
 import CopyToClipboard from '../../components/Helpers/CopyToClipboard';
-import { isMobile, isTablet } from 'react-device-detect';
+import { isMobile } from 'react-device-detect';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     flexGrow: 1
   },
@@ -41,12 +40,12 @@ const TeamUsers = ({ data, permissions, managerId, removeUser }) => {
         <Grid container>
           {data && data.length
             ? data.map((obj) => (
-                <Grid item xs={isMobile ? 12 : 6} key={obj._id}>
+                <Grid size={{xs:isMobile ? 12 : 6}} key={obj._id}>
                   <BoxWithBorder key={obj._id} style={{ margin: '8px' }}>
                     <ListItem disableGutters className={classes.list}>
                       <ListItemText
                         primary={
-                          <div className={`flex gap-2 justify-between max-w-full mb-1 min-h-[30px] items-center`}>
+                          <div className={`mb-1 flex min-h-[30px] max-w-full items-center justify-between gap-2`}>
                             <p className="link line-clamp-1" onClick={() => window.open(`/user/detail/${obj._id}`)}>
                               {`${obj.firstName} ${obj.lastName}` || ''}
                             </p>
@@ -57,7 +56,7 @@ const TeamUsers = ({ data, permissions, managerId, removeUser }) => {
                                     display: 'inline-block',
                                     fontWeight: 600
                                   }}
-                                  className=" max-w-full dark:bg-[rgb(70,70,108)] bg-[#EFFBF9] text-sm text-[#298B88] dark:text-white rounded-[4px] p-[1px_6px]"
+                                  className=" max-w-full rounded-[4px] bg-[#EFFBF9] p-[1px_6px] text-sm text-[#298B88] dark:bg-[rgb(70,70,108)] dark:text-white"
                                 >
                                   Manager
                                 </span>
@@ -84,7 +83,7 @@ const TeamUsers = ({ data, permissions, managerId, removeUser }) => {
                           </div>
                         }
                         secondary={
-                          <div className="flex gap-2 mr-2">
+                          <div className="mr-2 flex gap-2">
                             <span className=" line-clamp-1">{obj.email || ''}</span>
                             <CopyToClipboard textToCopy={obj.email || ''} />
                           </div>

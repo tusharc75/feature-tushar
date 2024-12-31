@@ -1,14 +1,13 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import { Edit } from '@material-ui/icons';
-import { Skeleton } from '@material-ui/lab';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import EditIcon from '@mui/icons-material/Edit';
+import { Skeleton } from '@mui/material';
 import { cloneDeep } from 'lodash';
-import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdDelete } from 'react-icons/md';
 import { useHistory, useParams } from 'react-router-dom';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
-import { SVG } from '../../assets';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -28,8 +27,7 @@ import {
   processFieldName,
   sidebarResource,
   stepsToIgnoreManualCompleteForOpportunity,
-  supplierContact,
-  yyyyMMDD
+  supplierContact
 } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -555,23 +553,24 @@ function OpportunityDetailsPage() {
       <Box className="main-container-v1">
         <Box className="headerbox-v1">
           <Box className="nav-v1">
-            <CustomBreadCrumbs routes={[{ ...routes.opportunity, title: resources?.opportunity?.titlePlural }, { title: opportunityData?.opportunityName }]} />
+            <CustomBreadCrumbs
+              routes={[{ ...routes.opportunity, title: resources?.opportunity?.titlePlural }, { title: opportunityData?.opportunityName }]}
+            />
           </Box>
           <Box className="controls-v1">
             <Box className="control-buttons-v1">
               {opportunityData ? (
                 <>
                   {allowedToEdit ? (
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      size="small"
+                    <ThemeButton
+                      iconForMobile={<EditIcon />}
                       onClick={() => {
                         setOpenUpdateDialog(true);
                       }}
-                      className={'btn-outline-v1'}
+                      mobileTooltip={'Edit'}
                     >
-                      {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                    </Button>
+                      {'Edit'}
+                    </ThemeButton>
                   ) : null}
 
                   {allowedToDelete ? (
@@ -609,7 +608,7 @@ function OpportunityDetailsPage() {
             />
             {loading || !opportunityFields.length ? (
               <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </Grid>
             ) : (
               <DetailsPage data={copyOfOpportunityData} fields={opportunityFields} />
@@ -728,7 +727,7 @@ function OpportunityDetailsPage() {
         {showConfirmBox ? (
           <ConfirmationDialog
             open={showConfirmBox}
-            message={`Are you sure you want to delete ${resources?.opportunity?.titleSingular?.toLowerCase()} : ${opportunityData?.opportunityName || ''} ?`}           
+            message={`Are you sure you want to delete ${resources?.opportunity?.titleSingular?.toLowerCase()} : ${opportunityData?.opportunityName || ''} ?`}
             onClose={() => setShowConfirmBox(false)}
             onOk={handleDeleteOpportunity}
           />

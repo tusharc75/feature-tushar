@@ -1,5 +1,3 @@
-import MomentUtils from '@date-io/moment';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import axios from 'axios';
 import { camelCase, kebabCase, startCase } from 'lodash';
 import React from 'react';
@@ -285,7 +283,7 @@ const CustomReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: Tab
   }, [selectedData, selectedResources]);
 
   return (
-    <MuiPickersUtilsProvider utils={MomentUtils}>
+    <>
       {showGrid && (
         <div className={cn('inline-flex items-center justify-between gap-2', !isSidebarOpen ? 'w-[calc(100%-40px)]' : 'w-full')}>
           <h6 className="text-[14px] font-semibold leading-[24px]">{selectedReport.title}</h6>
@@ -304,14 +302,7 @@ const CustomReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: Tab
               onlyExport={true}
             />
           ) : (
-            <ThemeButton
-              iconForMobile={false}
-              variant="outlined"
-              size="small"
-              disabled={isExporting}
-              onClick={exportData}
-              className={`btn-outline-v-1`}
-            >
+            <ThemeButton iconForMobile={false} disabled={isExporting} onClick={exportData}>
               Export All
             </ThemeButton>
           )}
@@ -337,7 +328,7 @@ const CustomReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: Tab
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </div>
       )}
-    </MuiPickersUtilsProvider>
+    </>
   );
 };
 
