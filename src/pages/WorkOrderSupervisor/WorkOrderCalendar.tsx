@@ -138,7 +138,7 @@ function WorkOrderCalendar({ getFilterQuery, filterQuery, reference, setOpen }, 
               id: d._id,
               title: d?.repairOrderNumber,
               start: new Date(d?.createDate),
-              end: new Date(d?.expectedCompletionDate),
+              end: d?.expectedCompletionDate ? new Date(d?.expectedCompletionDate) : new Date(d?.createDate),
               allDay: true,
               startDraggable: false,
               endDraggable: false
@@ -155,6 +155,7 @@ function WorkOrderCalendar({ getFilterQuery, filterQuery, reference, setOpen }, 
             };
           }
         });
+        console.log('rows', rows);
 
         setEvents([...rows]);
       })
