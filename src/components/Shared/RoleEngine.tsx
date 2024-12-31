@@ -98,7 +98,7 @@ const RoleEngine = ({
         tableData.push(tableRow);
       }
       setTableData(tableData);
-      handleSearchFilter(tableSearchFilterState);
+      handleSearchFilter(tableSearchFilterState, tableData);
     };
     generateTableData();
   }, [field, resource]);
@@ -444,11 +444,7 @@ const RoleEngine = ({
     validateTier2(resource, field, selectedResource);
   }, [selectedResource]);
 
-  const handleSearchFilter = (
-    tableSearchFilterState: TableSearchFilterState
-    //  _deepSearch = deepSearch
-  ) => {
-    let data = [...tableData];
+  const handleSearchFilter = (tableSearchFilterState: TableSearchFilterState, data = [...tableData]) => {
     const { search, sort } = tableSearchFilterState;
     if (search) {
       let tempData: TableData[] = [];
@@ -551,8 +547,9 @@ const RoleEngine = ({
                   </span>
                 </HtmlTooltip>
               </TableCell>
-              <TableCell align="center" className="bg-[var(--form-head-bg)_!important]">
+              <TableCell align="left" className="bg-[var(--form-head-bg)_!important]">
                 <FormControlLabel
+                  sx={{ m: 0 }}
                   control={
                     <Checkbox
                       disabled={isDisable || tier === ROLE_TIER.tier2}
@@ -566,8 +563,9 @@ const RoleEngine = ({
                   label="Read"
                 />
               </TableCell>
-              <TableCell align="center" className="bg-[var(--form-head-bg)_!important]">
+              <TableCell align="left" className="bg-[var(--form-head-bg)_!important]">
                 <FormControlLabel
+                  sx={{ m: 0 }}
                   control={
                     <Checkbox
                       disabled={isDisable || tier === ROLE_TIER.tier2 || tier === ROLE_TIER.tier3}
@@ -586,8 +584,9 @@ const RoleEngine = ({
                   label="Create"
                 />
               </TableCell>
-              <TableCell align="center" className="bg-[var(--form-head-bg)_!important]">
+              <TableCell align="left" className="bg-[var(--form-head-bg)_!important]">
                 <FormControlLabel
+                  sx={{ m: 0 }}
                   control={
                     <Checkbox
                       disabled={isDisable || tier === ROLE_TIER.tier2 || tier === ROLE_TIER.tier3}
@@ -606,8 +605,9 @@ const RoleEngine = ({
                   label="Update"
                 />
               </TableCell>
-              <TableCell align="center" className="bg-[var(--form-head-bg)_!important]">
+              <TableCell align="left" className="bg-[var(--form-head-bg)_!important]">
                 <FormControlLabel
+                  sx={{ m: 0 }}
                   control={
                     <Checkbox
                       disabled={isDisable || tier === ROLE_TIER.tier2 || tier === ROLE_TIER.tier3}
@@ -626,8 +626,9 @@ const RoleEngine = ({
                   label="Delete"
                 />
               </TableCell>
-              <TableCell align="center" className="bg-[var(--form-head-bg)_!important]">
+              <TableCell align="left" className="bg-[var(--form-head-bg)_!important]">
                 <FormControlLabel
+                  sx={{ m: 0 }}
                   control={
                     <Checkbox
                       disabled={isDisable || tier === ROLE_TIER.tier2 || tier === ROLE_TIER.tier3}
@@ -685,7 +686,7 @@ const Row = ({ _resource, isDisable, handleChange, fieldCheckbox }) => {
   return (
     <React.Fragment>
       <TableRow>
-        <TableCell style={{ minWidth: 300 }}>
+        <TableCell sx={{ minWidth: 300, py: 0 }}>
           <Box display="flex" justifyContent={'flex-start'} className="cursor-pointer" alignItems={'center'} onClick={() => setOpen(!open)}>
             <Typography className="tableMainHeader">{_resource?.resourceLabel}</Typography>
             {fieldCheckbox.length > 0 && (
@@ -697,7 +698,7 @@ const Row = ({ _resource, isDisable, handleChange, fieldCheckbox }) => {
             )}
           </Box>
         </TableCell>
-        <TableCell align="center">
+        <TableCell align="left" sx={{ py: 0 }}>
           <Checkbox
             indeterminate={isReadAllChecked}
             disabled={isDisable || _resource.isReadDisabled}
@@ -705,7 +706,7 @@ const Row = ({ _resource, isDisable, handleChange, fieldCheckbox }) => {
             onChange={handleChange('resource', _resource.resourceId, 'isRead')}
           />
         </TableCell>
-        <TableCell align="center">
+        <TableCell align="left" sx={{ py: 0 }}>
           <Checkbox
             indeterminate={isCreateAllChecked}
             disabled={isDisable || _resource.isCreateDisabled}
@@ -713,7 +714,7 @@ const Row = ({ _resource, isDisable, handleChange, fieldCheckbox }) => {
             onChange={handleChange('resource', _resource.resourceId, 'isCreate')}
           />
         </TableCell>
-        <TableCell align="center">
+        <TableCell align="left" sx={{ py: 0 }}>
           <Checkbox
             indeterminate={isUpdateAllChecked}
             disabled={isDisable || _resource.isUpdateDisabled}
@@ -721,14 +722,14 @@ const Row = ({ _resource, isDisable, handleChange, fieldCheckbox }) => {
             onChange={handleChange('resource', _resource.resourceId, 'isUpdate')}
           />
         </TableCell>
-        <TableCell align="center">
+        <TableCell align="left" sx={{ py: 0 }}>
           <Checkbox
             disabled={isDisable || _resource.isDeleteDisabled}
             checked={_resource.isDelete}
             onChange={handleChange('resource', _resource.resourceId, 'isDelete')}
           />
         </TableCell>
-        <TableCell align="center">
+        <TableCell align="left" sx={{ py: 0 }}>
           <Checkbox
             disabled={isDisable || _resource?.isHiddenDisabled}
             checked={!!_resource.isHidden}

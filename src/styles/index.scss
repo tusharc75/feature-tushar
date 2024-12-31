@@ -194,6 +194,7 @@
   --outlined-button-text: #fff;
   --outlined-button-disabled-bg: #22223d;
   --outlined-button-disabled-text: #a4a4ad;
+  --mui-overlays-24: unset;
 }
 
 [data-mode='dark'] {
@@ -1371,8 +1372,6 @@ body::-webkit-scrollbar-thumb {
       border-bottom: 1px solid var(--common-border-color);
 
       & td {
-        padding: 0px 15px !important;
-
         & .tableMainHeader {
           font-size: 1rem;
           color: var(--primary-text);

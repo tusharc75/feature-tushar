@@ -40,7 +40,7 @@ const getButtonStyle = ({ buttonType = 'default', mode = 'dark', iconForMobile =
   const buttonProps: ButtonProps = {
     sx: {
       height: '32px',
-      fontSize: '14px',
+      fontSize: { xs: '13px', md: '14px' },
       gap: '5px',
       alignItems: 'center',
       '& .MuiButton-icon': {
@@ -93,7 +93,7 @@ const getButtonStyle = ({ buttonType = 'default', mode = 'dark', iconForMobile =
         background: 'var(--new-theme-color)',
         padding: '4px 10px',
         fontWeight: 500,
-        fontSize: '13.5px',
+        fontSize: { xs: '13px', md: '13.5px' },
         color: 'white',
         '&:hover': {
           backgroundColor: 'var(--new-theme-color-hover)'
@@ -144,99 +144,6 @@ const getButtonStyle = ({ buttonType = 'default', mode = 'dark', iconForMobile =
       break;
     }
   }
-
-  // switch (backgroundColor) {
-  //   case 'none': {
-  //     buttonProps.variant = 'outlined';
-  //     buttonProps.sx = {
-  //       ...buttonProps.sx,
-  //       ...(mode === 'dark' ? { background: 'var(--dark-primary, white)' } : { background: 'var(--dark-secondary, white)' })
-  //     };
-  //     break;
-  //   }
-  //   case 'error':
-  //   case 'info':
-  //   case 'inherit':
-  //   case 'primary':
-  //   case 'secondary':
-  //   case 'success':
-  //   case 'warning': {
-  //     buttonProps.variant = 'contained';
-  //     buttonProps.color = backgroundColor;
-  //     buttonProps.sx = { ...buttonProps.sx, padding: '4px 10px' };
-  //     break;
-  //   }
-  //   case 'theme': {
-  //     buttonProps.sx = {
-  //       ...buttonProps.sx,
-  //       background: 'var(--new-theme-color)',
-  //       '&:hover': {
-  //         backgroundColor: 'var(--new-theme-color-hover)'
-  //       },
-  //       '&:disabled': {
-  //         backgroundColor: 'var(--new-theme-color-hover)'
-  //       }
-  //     };
-  //     buttonProps.variant = 'contained';
-  //     buttonProps.sx = { ...buttonProps.sx, padding: '4px 10px' };
-  //     break;
-  //   }
-  //   case 'yellow': {
-  //     buttonProps.sx = {
-  //       ...buttonProps.sx,
-  //       background: 'var(--new-theme-secondary-color)',
-  //       color: 'black',
-  //       '&:disabled': { background: 'var(--new-theme-secondary-color-hover)', opacity: 0.7, color: 'black' },
-  //       '&:hover': { background: 'var(--new-theme-secondary-color-hover)' }
-  //     };
-  //     buttonProps.variant = 'contained';
-  //     buttonProps.sx = { ...buttonProps.sx, padding: '4px 10px' };
-  //     break;
-  //   }
-  // }
-
-  // switch (borderColor) {
-  //   case 'default': {
-  //     buttonProps.sx = { ...buttonProps.sx, border: '1px solid var(--common-border-color)' };
-  //     break;
-  //   }
-  //   case 'none': {
-  //     buttonProps.sx = { ...buttonProps.sx, border: '1px solid transparent' };
-  //     break;
-  //   }
-  //   case 'red': {
-  //     buttonProps.sx = { ...buttonProps.sx, border: '1px solid var(--common-red-border-color)' };
-  //     break;
-  //   }
-  //   case 'theme': {
-  //     buttonProps.sx = { ...buttonProps.sx, border: '1px solid var(--new-theme-color)', fontWeight: '600' };
-  //     break;
-  //   }
-  //   case 'yellow': {
-  //     buttonProps.sx = { ...buttonProps.sx, border: '1px solid var(--new_theme_secondary_border_color)', color: 'black' };
-  //     break;
-  //   }
-  // }
-  // switch (textColor) {
-  //   case 'primary': {
-  //     if (borderColor !== 'yellow' && backgroundColor !== 'yellow') {
-  //       buttonProps.sx = { ...buttonProps.sx, color: 'var(--primary-button-text)' };
-  //     }
-  //     break;
-  //   }
-  //   case 'red': {
-  //     buttonProps.sx = { ...buttonProps.sx, color: '#d43e3e' };
-  //     break;
-  //   }
-  //   case 'white': {
-  //     buttonProps.sx = { ...buttonProps.sx, color: 'white', '&:disabled': { color: 'white' } };
-  //     break;
-  //   }
-  //   case 'theme': {
-  //     buttonProps.sx = { ...buttonProps.sx, color: 'var(--new-theme-color)' };
-  //     break;
-  //   }
-  // }
 
   if (isMobile && iconForMobile) {
     buttonProps.sx = {
