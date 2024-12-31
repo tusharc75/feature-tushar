@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, TableBody, TableCell, TableHead, TableRow, TextField, Autocomplete } from '@mui/material';
+import { Box, IconButton, TableBody, TableCell, TableHead, TableRow, TextField, Autocomplete } from '@mui/material';
 import MaUTable from '@mui/material/Table';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import axios, { CancelTokenSource } from 'axios';
@@ -12,6 +12,7 @@ import routes from 'src/components/Helpers/Routes';
 import { ASSET_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { SchedularComponentProps } from 'src/pages/ScheduleAndDispatch/Scheduler/types';
 import AssetQtyDialog from './AssetQtyDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const AddSerializedAssets = ({ schedularState }: SchedularComponentProps) => {
   const {
@@ -177,23 +178,21 @@ const AddSerializedAssets = ({ schedularState }: SchedularComponentProps) => {
           )}
           <div className="flex items-center gap-3">
             {selectedProduct && selectedWarehouse && !isVirtualizedTableView && (
-              <Button disabled={false} variant="contained" size="small" color="primary" onClick={() => setOpenAssetQtyDialog(true)}>
+              <ThemeButton disabled={false} buttonType="theme" onClick={() => setOpenAssetQtyDialog(true)}>
                 Auto Select Asset
-              </Button>
+              </ThemeButton>
             )}
             {isVirtualizedTableView && (
-              <Button
+              <ThemeButton
                 disabled={false}
-                variant="contained"
-                size="small"
-                color="primary"
+                buttonType="theme"
                 onClick={() => {
                   setIsVirtualizedTableView(false);
                   setSelectedAssets([]);
                 }}
               >
                 Reset
-              </Button>
+              </ThemeButton>
             )}
           </div>
         </div>
@@ -217,15 +216,13 @@ const AddSerializedAssets = ({ schedularState }: SchedularComponentProps) => {
       )}
 
       <div className="flex justify-end">
-        <Button
+        <ThemeButton
           disabled={!selectedAssets?.length && !selectedRecords?.length}
-          variant="contained"
-          size="small"
-          color="primary"
+            buttonType="theme"
           onClick={() => handleAdd()}
         >
           Save & Next
-        </Button>
+        </ThemeButton>
       </div>
 
       {openAssetQtyDialog && (

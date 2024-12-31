@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, TextField } from '@mui/material';
+import { Box, Dialog, TextField } from '@mui/material';
 import { FieldArray, Form, Formik } from 'formik';
 import { useContext, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -11,6 +11,7 @@ import { convertDateInDateTime, CustomDialogTransition, sublease, SUBLEASE_TYPE 
 import AssetDialog from 'src/pages/Sublease/Receiving/AssetDialog';
 import moment from 'moment';
 import CustomDatePicker from 'src/components/CustomDatePicker';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess, subleaseData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -218,10 +219,10 @@ const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess, subleaseData
                 )}
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button variant="outlined" size="small" color="primary" onClick={onClose} id="receive-dialog-cancel-button">
+                <ThemeButton buttonType="transparent" onClick={onClose} id="receive-dialog-cancel-button">
                   Cancel
-                </Button>
-                <Button
+                </ThemeButton>
+                <ThemeButton
                   onClick={() => {
                     if (
                       !validate(values.material).qty &&
@@ -230,13 +231,11 @@ const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess, subleaseData
                       handleSubmit(values);
                     }
                   }}
-                  size="small"
-                  variant="contained"
-                  color="primary"
+                  buttonType="theme"
                   id="receive-dialog-save-button"
                 >
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
             </>
           )}

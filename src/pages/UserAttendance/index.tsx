@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import FaceDialog from './faceDialog';
 import MfaAuthDialog from './mfaAuthDialog';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import CustomContainer from 'src/components/CustomContainer';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 function UserAttendance() {
   const [openDialog, setOpenDialog] = useState({ open: false, type: '' });
@@ -17,25 +18,23 @@ function UserAttendance() {
       <CustomContainer>
         <div className="header-panel">
           <Box width={'100%'} display={'flex'} justifyContent={'center'}>
-            <Button
-              variant="contained"
-              color="primary"
+            <ThemeButton
+             buttonType="theme"
               onClick={() => {
                 setOpenDialog({ open: true, type: 'face' });
               }}
             >
               Face Verification
-            </Button>
+            </ThemeButton>
             <Box ml={2} />
-            <Button
-              variant="contained"
-              color="primary"
+            <ThemeButton
+              buttonType="theme"
               onClick={() => {
                 setOpenDialog({ open: true, type: 'mfa' });
               }}
             >
               MFA Verification
-            </Button>
+            </ThemeButton>
           </Box>
         </div>
       </CustomContainer>
