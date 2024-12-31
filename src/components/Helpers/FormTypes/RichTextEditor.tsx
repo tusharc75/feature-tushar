@@ -1,6 +1,8 @@
 import React, { useContext, useRef, useState } from 'react';
 import { Editor } from '@tinymce/tinymce-react';
-import { Box, Button, CircularProgress, Dialog, Grid, IconButton, TextField, Theme, Typography } from '@mui/material';
+import { Box, CircularProgress, Dialog, IconButton, TextField, Theme, Typography } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -180,7 +182,7 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
         <Dialog
           onClose={(event, reason) => {
             if (reason !== 'backdropClick') {
-              setIsUploadImage(false)
+              setIsUploadImage(false);
             }
           }}
           open={true}
@@ -194,7 +196,7 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
           <CustomDialogContent>
             <div>
               <Grid container spacing={3}>
-                <Grid item xs={12} style={{ display: 'flex' }}>
+                <Grid size={{xs:12}} style={{ display: 'flex' }}>
                   <input
                     id="avatar"
                     name="avatar"
@@ -211,15 +213,13 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
 
                   <label htmlFor="avatar">
                     <IconButton title="Add picture" size="small" aria-label="upload picture" component="span">
-                      <Button
+                      <ThemeButton
                         startIcon={<HiOutlinePhotograph />}
-                        // size="small"
-                        variant="outlined"
-                        component="span"
+                        buttonType='transparent'
                         disabled={isImageLoading}
                       >
                         Upload Image
-                      </Button>
+                      </ThemeButton>
                     </IconButton>
                   </label>
                   <Box display="flex">
@@ -234,31 +234,32 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
                   </Box>
                 </Grid>
                 {imageUrl || uploadError ? (
-                  <Grid item container>
+                  <Grid container>
                     {imageUrl ? (
                       <>
-                        <Grid item xs={10}>
+                        <Grid size={{xs:10}}>
                           <Typography noWrap variant="body2">
                             {imageUrl.substring(imageUrl.lastIndexOf('/') + 1)}
                           </Typography>
                         </Grid>
-                        <Grid item xs={2}>
-                          <Button size="small" startIcon={<AiOutlineClose />} onClick={() => setImageUrl('')} />
+                        <Grid size={{xs:2}}>
+                          <ThemeButton buttonType='transparent'
+ startIcon={<AiOutlineClose />} onClick={() => setImageUrl('')} />
                         </Grid>
                       </>
                     ) : null}
 
                     {uploadError ? (
-                      <Grid item xs={12}>
+                      <Grid size={{xs:12}}>
                         <Typography className={classes.errorText}>Please Upload Image/Photo</Typography>
                       </Grid>
                     ) : null}
                   </Grid>
                 ) : null}
-                <Grid item xs={6}>
+                <Grid size={{xs:6}}>
                   <TextField id="width" type="number" name="width" size="small" label="Width" variant="outlined" onChange={handleChange} />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid size={{xs:6}}>
                   <TextField
                     id="height"
                     name="height"
@@ -271,16 +272,15 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
                     onChange={handleChange}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid size={{xs:12}}>
                   <TextField id="alt" name="Alternative Text" size="small" label="alt" fullWidth variant="outlined" onChange={handleChange} />
                 </Grid>
               </Grid>
             </div>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button
-              size="small"
-              color="primary"
+            <ThemeButton
+              buttonType="transparent"
               onClick={() => {
                 setImageDetails({ width: 0, height: 60, alt: '' });
                 setImageUrl('');
@@ -288,10 +288,10 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
               }}
             >
               Cancel
-            </Button>
-            <Button variant="contained" color="primary" type="submit" onClick={handleSubmit}>
+            </ThemeButton>
+            <ThemeButton buttonType="theme" onClick={handleSubmit}>
               Save
-            </Button>
+            </ThemeButton>
           </CustomDialogFooter>
         </Dialog>
       ) : null}
