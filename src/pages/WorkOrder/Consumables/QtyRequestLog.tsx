@@ -1,4 +1,4 @@
-import { Box, Button, IconButton } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -15,6 +15,7 @@ import ProcessLogs from './ProcessLogs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import HistoryIcon from '@mui/icons-material/History';
 import QtyWithdrawalDialog from './QtyWithdrawalDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const renderedFrom = 'workOrder_consumables_request';
 
@@ -95,25 +96,25 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
       },
       ...(user?.user?.brandPolicy?.storageLocation
         ? [
-            {
-              accessor: 'storageLocation',
-              Header: 'Storage Location',
-              width: 200,
-              Cell: ({ row }) => {
-                return row?.original['storageLocation'] ? (
-                  <a
-                    className="link text-truncate"
-                    href={`${routes?.storageLocationDetail?.path}/${row?.original['storageLocationId']}`}
-                    target="_blank"
-                  >
-                    {row?.original['storageLocation']}
-                  </a>
-                ) : (
-                  <NoDataCell />
-                );
-              }
+          {
+            accessor: 'storageLocation',
+            Header: 'Storage Location',
+            width: 200,
+            Cell: ({ row }) => {
+              return row?.original['storageLocation'] ? (
+                <a
+                  className="link text-truncate"
+                  href={`${routes?.storageLocationDetail?.path}/${row?.original['storageLocationId']}`}
+                  target="_blank"
+                >
+                  {row?.original['storageLocation']}
+                </a>
+              ) : (
+                <NoDataCell />
+              );
             }
-          ]
+          }
+        ]
         : []),
       {
         accessor: 'processBy',
@@ -179,16 +180,14 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
         Cell: ({ row }: any) => (
           <div style={{ display: 'flex', justifyContent: 'right' }}>
             {row.original['status'] === MATERIAL_REQUEST_STATUS.requested && (
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
+              <ThemeButton
+                buttonType="theme"
                 onClick={() => {
                   setWithdrawalQtyDialog({ open: true, data: row.original });
                 }}
               >
                 Close
-              </Button>
+              </ThemeButton>
             )}
             {row.original['processesLogs'] && row.original['processesLogs']?.length > 0 && (
               <Box ml={1}>

@@ -18,7 +18,7 @@ import {
 } from 'src/constants/helpers';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Button, IconButton, Menu, MenuItem } from '@mui/material';
+import { IconButton, Menu, MenuItem } from '@mui/material';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -555,9 +555,9 @@ const Consumables = ({
       {allowedToEdit && (
         <Box className="mb-3 flex flex-wrap justify-between gap-2">
           {isCreate && permissions?.product?.isRead && (
-            <Button variant={'contained'} color="primary" size="small" onClick={() => setConsumablesDialog(true)}>
+            <ThemeButton  buttonType="theme" onClick={() => setConsumablesDialog(true)}>
               {materialSubType === MATERIAL_SUB_TYPE.bom ? `Add BOM` : `Add Products/Consumables`}
-            </Button>
+            </ThemeButton>
           )}
           <Box display="flex" ml={'auto'}>
             <Box ml={1}></Box>
@@ -574,7 +574,7 @@ const Consumables = ({
             />
             <Box ml={1}></Box>
             {!user?.user?.brandPolicy?.workOrderConsumableConsumeHide && (
-              <Button
+              <ThemeButton
                 disabled={
                   selectedRecords?.length &&
                   selectedRecords?.every((r) => !r?.serializedProduct && !r?.hideSelection && r?.type === MATERIAL_TYPE.product)
@@ -582,15 +582,13 @@ const Consumables = ({
                     : true
                 }
                 onClick={() => setOpenConsumablesQtyDialog(true)}
-                color="primary"
-                size="small"
-                variant="contained"
+                buttonType="theme"
               >
                 {consumeRequest ? 'Request ' : 'Consume '}{' '}
                 {selectedRecords?.filter((e) => !e?.hideSelection && !e?.serializedProduct && e?.type === MATERIAL_TYPE.product).length > 0
                   ? '(' + selectedRecords?.filter((e) => !e?.hideSelection && !e?.serializedProduct && e?.type === MATERIAL_TYPE.product).length + ')'
                   : ''}
-              </Button>
+              </ThemeButton>
             )}
             <Box ml={1}></Box>
             <ThemeButton

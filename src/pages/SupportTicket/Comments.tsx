@@ -6,11 +6,11 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import TinyMce from './../../components/TinyMCE';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import { Button } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { displayDateTime } from 'src/constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const Comments = ({ uniqueId }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -86,7 +86,7 @@ const Comments = ({ uniqueId }) => {
               </div>
             ))}
             <Grid style={{ marginTop: data?.length > 0 ? '5px' : '0' }} container justifyContent="center" alignItems="center" spacing={2}>
-              <Grid size={{xs:12}}>
+              <Grid size={{ xs: 12 }}>
                 <TinyMce
                   id="comment"
                   onChange={(value) => {
@@ -97,10 +97,10 @@ const Comments = ({ uniqueId }) => {
                   height={200}
                 />
               </Grid>
-              <Grid size={{xs:12}}>
-                <Button disabled={comment === ''} variant="contained" color="primary" size="small" onClick={handleSubmit}>
+              <Grid size={{ xs: 12 }}>
+                <ThemeButton disabled={comment === ''} buttonType="theme" onClick={handleSubmit}>
                   Send
-                </Button>
+                </ThemeButton>
               </Grid>
             </Grid>
           </div>
