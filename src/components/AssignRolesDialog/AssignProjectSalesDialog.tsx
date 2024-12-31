@@ -1,6 +1,5 @@
 import {
   Checkbox,
-  CircularProgress,
   Dialog,
   FormControl,
   FormControlLabel,
@@ -58,9 +57,8 @@ const AssignProjectSalesDialog = ({ projectSalesDialogOpen, onSuccess, handleClo
     }
 
     let api = type.some((item) => item?.type === customerContact.contactResource)
-      ? `/project-sales?filterById=[{"field": "staticData.customerAccount", "term": "${
-          type.find((item) => item.type === customerAccount.accountResource).id
-        }"}]`
+      ? `/project-sales?filterById=[{"field": "staticData.customerAccount", "term": "${type.find((item) => item.type === customerAccount.accountResource).id
+      }"}]`
       : user?.user?._id
         ? `/project-sales?filterById=[{"field": "projectManager", "term": "${user?.user?._id}"}]`
         : `/project-sales`;
@@ -203,11 +201,11 @@ const AssignProjectSalesDialog = ({ projectSalesDialogOpen, onSuccess, handleClo
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
-        <ThemeButton disabled={isAssigning} onClick={handleCloseDialog} buttonType="transparent">
+        <ThemeButton onClick={handleCloseDialog} buttonType="transparent">
           Cancel
         </ThemeButton>
-        <ThemeButton disabled={!selectedProjectSales.length || isAssigning} onClick={handleAssignProjectSales} buttonType="theme">
-          {isAssigning ? <CircularProgress size={22} /> : 'Save'}
+        <ThemeButton disabled={!selectedProjectSales.length || isAssigning} isLoading={isAssigning} onClick={handleAssignProjectSales} buttonType="theme">
+          Save
         </ThemeButton>
       </CustomDialogFooter>
     </Dialog>

@@ -1,4 +1,4 @@
-import { CircularProgress, Dialog, TextField } from '@mui/material';
+import { Dialog, TextField } from '@mui/material';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Grid from '@mui/material/Grid2';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -199,7 +199,7 @@ const FollowUpsDialog = ({ onClose, section, resource, referenceId, onSuccess })
                 disabled={submitting}
                 buttonType="theme"
                 onClick={submitForm}
-                endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                isLoading={submitting}
               >
                 Save
               </ThemeButton>

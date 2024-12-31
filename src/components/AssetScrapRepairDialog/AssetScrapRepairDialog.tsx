@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { Box, TextField, Theme } from '@mui/material';
-import { CircularProgress, Dialog } from '@mui/material';
+import { Dialog } from '@mui/material';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
@@ -98,9 +98,9 @@ export default function AssetScrapRepairDialog({ statusToUpdate, setStatusToUpda
               });
           }}
           disabled={statusToUpdate.isUpdating}
+          isLoading={statusToUpdate.isUpdating}
           buttonType="theme"
         >
-          {statusToUpdate.isUpdating ? <CircularProgress style={{ marginRight: '8px' }} size={20} color="inherit" /> : null}
           Change Status
         </ThemeButton>
       </CustomDialogFooter>

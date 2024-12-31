@@ -1,6 +1,5 @@
 import {
   Checkbox,
-  CircularProgress,
   Dialog,
   FormControl,
   FormControlLabel,
@@ -169,11 +168,11 @@ const AssignOpportunityDialog = ({ opportunityDialogOpen, onSuccess, handleClose
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
-        <ThemeButton disabled={isAssigning} onClick={handleCloseDialog} buttonType="transparent">
+        <ThemeButton onClick={handleCloseDialog} buttonType="transparent">
           Cancel
         </ThemeButton>
-        <ThemeButton disabled={!selectedOpportunities.length || isAssigning} onClick={handleAssignOpportunities} buttonType="theme">
-          {isAssigning ? <CircularProgress size={22} /> : 'Save'}
+        <ThemeButton disabled={!selectedOpportunities.length || isAssigning} isLoading={isAssigning} onClick={handleAssignOpportunities} buttonType="theme">
+          Save
         </ThemeButton>
       </CustomDialogFooter>
     </Dialog>

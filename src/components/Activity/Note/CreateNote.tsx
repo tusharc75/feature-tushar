@@ -1,4 +1,4 @@
-import { CircularProgress, IconButton, Paper } from '@mui/material';
+import { IconButton, Paper } from '@mui/material';
 import Box from '@mui/material/Box';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Grid from '@mui/material/Grid2';
@@ -254,7 +254,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
 
   return !initialValues ? (
     <>
-      <CustomDialogHeader onClose={() => {}} title={`${noteId ? 'Edit' : 'New'} Note`}></CustomDialogHeader>
+      <CustomDialogHeader onClose={() => { }} title={`${noteId ? 'Edit' : 'New'} Note`}></CustomDialogHeader>
       <CustomDialogContent>
         <CommonSkeleton lenArray={[...Array(4).keys()]} />
       </CustomDialogContent>
@@ -376,7 +376,6 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
             </ThemeButton>
             <ThemeButton
               buttonType="theme"
-              endIcon={uploading && <CircularProgress size={20} />}
               onClick={() => {
                 if (Object.keys(errors).length) {
                   Object.keys(errors).map((k) => {
@@ -385,6 +384,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
                 } else submitForm();
               }}
               disabled={uploadingImageOrFileProgress > 0 || uploading}
+              isLoading={uploading}
             >
               Save
             </ThemeButton>
