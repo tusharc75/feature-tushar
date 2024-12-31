@@ -1,6 +1,4 @@
 import { MoreVert } from '@mui/icons-material';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
@@ -9,8 +7,8 @@ import { IoCalendarOutline } from 'react-icons/io5';
 import { Link, useHistory } from 'react-router-dom';
 import DisplayData from 'src/components/CardDisplayData';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
-import CreateProjectSales from '../../pages/ProjectSales/CreateProjectSales';
 import { displayDate } from 'src/constants/helpers';
+import CreateProjectSales from '../../pages/ProjectSales/CreateProjectSales';
 import AssignProjectSalesDialog from '../AssignRolesDialog/AssignProjectSalesDialog';
 import routes from '../Helpers/Routes';
 
@@ -69,57 +67,48 @@ export default function ProjectInAccordion({
     <>
       <Accordion expanded={expandProject} className="omsAccordian" onChange={() => setExpandProject(!expandProject)}>
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
-          <Grid container className="pos_rel">
-            <Grid item xs={8}>
-              <Box display="flex">
-                <Box>
-                  <IconButton size="small">{expandProject === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
-                </Box>
-                <Box padding="5px">
-                  <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }}>
-                    {resources?.projectSales?.titlePlural} ({projectSales?.length || 0})
-                  </Typography>
-                </Box>
-              </Box>
-            </Grid>
-            <Grid item xs={4} container justify="flex-end">
-              {isAllowedToEdit && (
-                <>
-                  <IconButton
-                    aria-haspopup="true"
-                    color="primary"
-                    size="small"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleOpenMenu(e);
+          <div className="flex items-center justify-between">
+            <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }}>
+              {resources?.projectSales?.titlePlural} ({projectSales?.length || 0})
+            </Typography>
+
+            {isAllowedToEdit && (
+              <>
+                <IconButton
+                  aria-haspopup="true"
+                  color="primary"
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    handleOpenMenu(e);
+                  }}
+                >
+                  <MoreVert />
+                </IconButton>
+                <Menu id="menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
+                  <MenuItem
+                    disabled={!permissions?.projectSales?.isCreate}
+                    onClick={() => {
+                      setShowCreateProjectSalesDialog(true);
+                      handleCloseMenu();
                     }}
                   >
-                    <MoreVert />
-                  </IconButton>
-                  <Menu id="menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
-                    <MenuItem
-                      disabled={!permissions?.projectSales?.isCreate}
-                      onClick={() => {
-                        setShowCreateProjectSalesDialog(true);
-                        handleCloseMenu();
-                      }}
-                    >
-                      Create New
-                    </MenuItem>
-                    <MenuItem
-                      disabled={!permissions?.projectSales?.isUpdate}
-                      onClick={() => {
-                        setShowAddProjectSalesDialog(true);
-                        handleCloseMenu();
-                      }}
-                    >
-                      Add Exisiting
-                    </MenuItem>
-                  </Menu>
-                </>
-              )}
-            </Grid>
-          </Grid>
+                    Create New
+                  </MenuItem>
+                  <MenuItem
+                    disabled={!permissions?.projectSales?.isUpdate}
+                    onClick={() => {
+                      setShowAddProjectSalesDialog(true);
+                      handleCloseMenu();
+                    }}
+                  >
+                    Add Exisiting
+                  </MenuItem>
+                </Menu>
+              </>
+            )}
+          </div>
         </AccordionSummary>
         <AccordionDetails>
           <Box>

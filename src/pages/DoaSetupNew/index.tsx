@@ -42,14 +42,14 @@ const DoaSetup = ({ resource, entity }) => {
   return (
     <>
       <Box mt={2} className="single-form-v1">
-        <div className="form-head-v1">
-          <Typography className="form-label-style-v1 pr" component={'h3'}>
-            {`${resource} DOA Details`}
-          </Typography>
+        <div className="relative flex justify-between rounded-t bg-[var(--dark-secondary,var(--accordion-expanded-summary-bg,#EFFBF9))] px-7 py-4">
+          <h6 className="pr-[80px] text-sm font-semibold leading-[1.05]">{`${resource} DOA Details`}</h6>
           {permissions.entity?.isUpdate && (
-            <ThemeButton buttonType="theme" onClick={() => setOpen(true)}>
-              {doaData ? `Edit DOA` : `Add DOA`}
-            </ThemeButton>
+            <span className="absolute right-5 top-[50%] [transform:translateY(-50%)]">
+              <ThemeButton buttonType="theme" onClick={() => setOpen(true)}>
+                {doaData ? `Edit DOA` : `Add DOA`}
+              </ThemeButton>
+            </span>
           )}
         </div>
         <Box className="formdata-v1">

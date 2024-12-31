@@ -1,4 +1,4 @@
-import { Checkbox, CircularProgress, FormControl, FormControlLabel, List, ListItem, ListItemIcon, ListItemText, Typography } from '@mui/material';
+import { Checkbox, FormControl, FormControlLabel, List, ListItem, ListItemIcon, ListItemText, Typography } from '@mui/material';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -164,12 +164,12 @@ const AssignRolesDialog = ({ rolesDialogOpen, onSuccess, handleCloseDialog, user
       </CustomDialogContent>
       <CustomDialogFooter>
         {!isRenderedFromUserSetUp && (
-          <ThemeButton disabled={isAssigning} onClick={handleCloseDialog} buttonType="transparent">
+          <ThemeButton onClick={handleCloseDialog} buttonType="transparent">
             Cancel
           </ThemeButton>
         )}
-        <ThemeButton disabled={!selectedRoles.length || isAssigning} onClick={handleAssignRoles} buttonType="theme">
-          {isAssigning ? <CircularProgress size={22} /> : isRenderedFromUserSetUp ? 'Save & Finish' : 'Save'}
+        <ThemeButton disabled={!selectedRoles.length || isAssigning} onClick={handleAssignRoles} buttonType="theme" isLoading={isAssigning}>
+          {isRenderedFromUserSetUp ? 'Save & Finish' : 'Save'}
         </ThemeButton>
       </CustomDialogFooter>
 

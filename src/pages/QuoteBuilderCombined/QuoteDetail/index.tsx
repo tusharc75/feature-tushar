@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog, Menu, MenuItem, TextField, Typography } from '@mui/material';
+import { Box, CircularProgress, Dialog, Menu, MenuItem, TextField, Typography } from '@mui/material';
 import { ExpandMore } from '@mui/icons-material';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
@@ -493,7 +493,7 @@ export default function QuoteDetail() {
     };
     axiosInstance()
       .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
-      .then(() => {})
+      .then(() => { })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -663,8 +663,8 @@ export default function QuoteDetail() {
                     <MenuItem
                       disabled={
                         allowedToEdit &&
-                        !['Sent for DOA', 'Sent to Customer']?.includes(quoteData?.versions[currentVersion]?.status) &&
-                        !quoteData?.versions[currentVersion]?.status?.includes('Accepted')
+                          !['Sent for DOA', 'Sent to Customer']?.includes(quoteData?.versions[currentVersion]?.status) &&
+                          !quoteData?.versions[currentVersion]?.status?.includes('Accepted')
                           ? false
                           : true
                       }
@@ -870,7 +870,7 @@ export default function QuoteDetail() {
             />
           </CustomDialogContent>
           <CustomDialogFooter>
-            <ThemeButton buttonType="transparent"  onClick={() => setReopenReasonDialog(false)} >
+            <ThemeButton buttonType="transparent" onClick={() => setReopenReasonDialog(false)} >
               Close
             </ThemeButton>
             <ThemeButton buttonType="theme" disabled={reopenReason === ''} onClick={handleReOpenQuote} >

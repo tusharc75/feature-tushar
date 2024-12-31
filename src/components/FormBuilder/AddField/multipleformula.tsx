@@ -4,13 +4,14 @@ import Box from '@mui/material/Box';
 import FormControl from '@mui/material/FormControl';
 import Chip from '@mui/material/Chip';
 import Autocomplete from '@mui/material/Autocomplete';
-import { Button, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import { checkFormula } from '../../../constants/formulaUtility';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { IconButton } from '@mui/material';
 import { FiMaximize2 } from 'react-icons/fi';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import Grid from '@mui/material/Grid';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export const MultipleFormula = ({ fields, values, setFieldValue, _id, touched, errors }) => {
   useEffect(() => {
@@ -247,9 +248,9 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id, touched, e
                               {formulaError}
                             </Typography>
                           )}
-                          <Button size="small" onClick={handleCheckSyntax} color="primary">
+                          <ThemeButton onClick={handleCheckSyntax} buttonType='transparent'>
                             Check Syntax
-                          </Button>
+                          </ThemeButton>
                         </td>
                       </tr>
                     }

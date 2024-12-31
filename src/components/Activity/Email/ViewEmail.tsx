@@ -1,5 +1,5 @@
 import { useAccount, useMsal } from '@azure/msal-react';
-import { CircularProgress, IconButton } from '@mui/material';
+import { IconButton } from '@mui/material';
 import Box from '@mui/material/Box';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Divider from '@mui/material/Divider';
@@ -448,7 +448,7 @@ export const ViewEmail = ({
                                       __html: initialValues.content || initialValues.message
                                     }}
                                   />
-                                  {<AttachmentThumbnail attachments={otherAttachments} canEdit={false} handleDeleteAttachment={(attachment) => {}} />}
+                                  {<AttachmentThumbnail attachments={otherAttachments} canEdit={false} handleDeleteAttachment={(attachment) => { }} />}
                                   <ImageAttachments
                                     imageAttachments={imageAttachments}
                                     onImageClick={(attachment) => {
@@ -569,14 +569,14 @@ export const ViewEmail = ({
                                   <Box className={classes.footer}>
                                     <ThemeButton
                                       buttonType="theme"
-                                      endIcon={sending ? <CircularProgress color="inherit" size={14} /> : <AiOutlineSend size={14} />}
                                       disabled={sending || uploadingImageOrFileProgress > 0 || generatingFile}
                                       onClick={(e) => {
                                         e.preventDefault();
                                         submitForm();
                                       }}
+                                      isLoading={sending}
                                     >
-                                      {sending ? <>Sending ... </> : 'send'}
+                                      send
                                     </ThemeButton>
                                   </Box>
                                 </Box>

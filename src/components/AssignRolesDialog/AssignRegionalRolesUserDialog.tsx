@@ -1,6 +1,5 @@
 import {
   Checkbox,
-  CircularProgress,
   Dialog,
   FormControl,
   FormControlLabel,
@@ -272,11 +271,11 @@ const AssignRegionalRolesUserDialog = ({ entitiesDialogOpen, onSuccess, handleCl
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
-        <ThemeButton disabled={isAssigning} onClick={handleCloseDialog} buttonType="transparent">
+        <ThemeButton onClick={handleCloseDialog} buttonType="transparent">
           Cancel
         </ThemeButton>
-        <ThemeButton disabled={!selectedEntity?.length || !selectedUser?.length} onClick={handleAssignEntity} buttonType="theme">
-          {isAssigning ? <CircularProgress size={22} /> : 'Save'}
+        <ThemeButton disabled={!selectedEntity?.length || !selectedUser?.length} onClick={handleAssignEntity} buttonType="theme" isLoading={isAssigning}>
+          Save
         </ThemeButton>
       </CustomDialogFooter>
     </Dialog>

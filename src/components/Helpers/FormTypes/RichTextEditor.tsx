@@ -196,7 +196,7 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
           <CustomDialogContent>
             <div>
               <Grid container spacing={3}>
-                <Grid size={{xs:12}} style={{ display: 'flex' }}>
+                <Grid size={{ xs: 12 }} style={{ display: 'flex' }}>
                   <input
                     id="avatar"
                     name="avatar"
@@ -237,29 +237,29 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
                   <Grid container>
                     {imageUrl ? (
                       <>
-                        <Grid size={{xs:10}}>
+                        <Grid size={{ xs: 10 }}>
                           <Typography noWrap variant="body2">
                             {imageUrl.substring(imageUrl.lastIndexOf('/') + 1)}
                           </Typography>
                         </Grid>
-                        <Grid size={{xs:2}}>
+                        <Grid size={{ xs: 2 }}>
                           <ThemeButton buttonType='transparent'
- startIcon={<AiOutlineClose />} onClick={() => setImageUrl('')} />
+                            startIcon={<AiOutlineClose />} onClick={() => setImageUrl('')} />
                         </Grid>
                       </>
                     ) : null}
 
                     {uploadError ? (
-                      <Grid size={{xs:12}}>
+                      <Grid size={{ xs: 12 }}>
                         <Typography className={classes.errorText}>Please Upload Image/Photo</Typography>
                       </Grid>
                     ) : null}
                   </Grid>
                 ) : null}
-                <Grid size={{xs:6}}>
+                <Grid size={{ xs: 6 }}>
                   <TextField id="width" type="number" name="width" size="small" label="Width" variant="outlined" onChange={handleChange} />
                 </Grid>
-                <Grid size={{xs:6}}>
+                <Grid size={{ xs: 6 }}>
                   <TextField
                     id="height"
                     name="height"
@@ -272,7 +272,7 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
                     onChange={handleChange}
                   />
                 </Grid>
-                <Grid size={{xs:12}}>
+                <Grid size={{ xs: 12 }}>
                   <TextField id="alt" name="Alternative Text" size="small" label="alt" fullWidth variant="outlined" onChange={handleChange} />
                 </Grid>
               </Grid>
@@ -295,17 +295,6 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
           </CustomDialogFooter>
         </Dialog>
       ) : null}
-
-      {/* <Button
-          size="small"
-          color="primary"
-          onClick={() => {
-            setIsUploadImage(true);
-          }}
-        >
-          Upload Image
-        </Button> */}
-
       <Editor
         id={name}
         onInit={(evt, editor) => (editorRef.current = editor)}

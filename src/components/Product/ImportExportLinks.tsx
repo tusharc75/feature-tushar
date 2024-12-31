@@ -1,18 +1,18 @@
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import { Box, Button, IconButton, Menu, MenuItem, Theme, useMediaQuery } from '@mui/material';
+import { Box, IconButton, Menu, MenuItem, Theme, useMediaQuery } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { isEmpty } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { IoIosArrowDropdown } from 'react-icons/io';
 import { MdImportExport } from 'react-icons/md';
 import { DownloadIcon, ExportIcon, ImportIcon } from 'src/assets/svg/svgIcons';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { CustomImport } from 'src/components/productBuilder/CustomImport';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import { downloadExcel } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import SelectionDialog from './SelectionDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -106,7 +106,6 @@ export default function ImportExportLinks({
     setIsSelection(false);
     if (event.target.files && event.target.files.length) {
       toastConfig.setToastConfig({
-        hideDuration: null,
         open: true,
         type: 'info',
         message: `Uploading ${module}, Please wait...`
@@ -153,7 +152,6 @@ export default function ImportExportLinks({
   const uploadExtraData = (event, apiUrl = null) => {
     if (event.target.files && event.target.files.length) {
       toastConfig.setToastConfig({
-        hideDuration: null,
         open: true,
         type: 'info',
         message: `Uploading ${module}, Please wait...`
@@ -200,7 +198,6 @@ export default function ImportExportLinks({
 
   const exportToExcel = (apiUrl = null) => {
     toastConfig.setToastConfig({
-      hideDuration: null,
       open: true,
       type: 'info',
       message: `Your file will be downloaded/uploaded in a matter of seconds`
@@ -499,28 +496,14 @@ export default function ImportExportLinks({
           )}
         </div>
       ) : (
-        <HtmlTooltip title={'Import/Export'} placement="top" arrow enterTouchDelay={0}>
-          <span>
-            <Button
-              onClick={(e) => handleClick(e)}
-              endIcon={<ArrowDropDownIcon />}
-              variant={'outlined'}
-              color="primary"
-              aria-controls="simple-menu"
-              aria-haspopup="true"
-              className="min-h-[32px]"
-              size="small"
-            >
-              {isMobile ? (
-                <>
-                  <MdImportExport size={20} />
-                </>
-              ) : (
-                'Import/Export'
-              )}
-            </Button>
-          </span>
-        </HtmlTooltip>
+        <ThemeButton
+          onClick={(e) => handleClick(e)}
+          endIcon={<ArrowDropDownIcon />}
+          mobileTooltip='Import/Export'
+          iconForMobile={<MdImportExport size={20} />}
+        >
+          Import/Export
+        </ThemeButton>
       )}
       {isMobile && (
         <IconButton onClick={handleClick} className={`expand-icon-v1`} style={{ padding: '3px' }}>

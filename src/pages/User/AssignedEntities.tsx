@@ -14,7 +14,8 @@ import BoxWithBorder from '../../components/BoxWithBorder';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import RoleEngine from '../../components/Shared/RoleEngine';
 import UserRoles from './UserRoles';
-import { CustomDialogTransition } from 'src/constants/helpers';
+import { cn, CustomDialogTransition } from 'src/constants/helpers';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 export default function AssignedEntities({ entities, permissions, userId, onSuccess, loggedInUser, entityAccessIds = [], roleAccessIds = [] }) {
   const {
@@ -163,11 +164,7 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
           onOk={DeleteEntity}
         />
       ) : null}
-      <BoxWithBorder
-        style={{
-          padding: '5px'
-        }}
-      >
+      <div>
         <Box>
           <>
             {isMobile || isTablet ? (
@@ -205,74 +202,49 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
                   setCurrentEntity(entities[newValue]);
                 }}
               >
-                {entities.map((c, i) =>
-                  currentTabIndex === i ? (
-                    <CustomTab key={i} value={i}>
-                      {c?.entity?.entityName}
-                      {permissions?.user?.isDelete && !Boolean(userId === user?._id && currentEntity?.entity?._id === selectedEntity) ? (
+                {entities.map((c, i) => (
+                  <CustomTab key={i} value={i} className="relative">
+                    <span className={cn('block ', currentTabIndex === i && 'pr-[18px]')}>{c?.entity?.entityName}</span>
+                    {permissions?.user?.isDelete &&
+                      currentTabIndex === i &&
+                      !Boolean(userId === user?._id && currentEntity?.entity?._id === selectedEntity) ? (
+                      <HtmlTooltip className="absolute right-4" title={'Delete'}>
                         <IconButton aria-label="delete" size="small" className="ml-1" onClick={() => handleDeleteEntity()}>
-                          <Delete color="error" />
+                          <Delete color='error' />
                         </IconButton>
-                      ) : null}
-                    </CustomTab>
-                  ) : (
-                    <CustomTab key={i} value={i} label={c?.entity?.entityName} />
-                  )
-                )}
+                      </HtmlTooltip>
+                    ) : null}
+                  </CustomTab>
+                ))}
               </CustomTabs>
             )}
 
             <Box style={{ padding: '0px', minHeight: '300px' }}>
-              <Box display="flex" padding={1} bgcolor="var(--dark-secondary, var(--accordion-expanded-summary-bg, #EFFBF9))">
-                <Grid container>
-                  <Grid size={{xs:10}}>
-                    <Box display="flex">
-                      <Grid container>
-                        <Grid size={{xs:4}}>
-                          <Typography variant="subtitle2">Assigned Roles ({currentEntity?.role?.length || '0'})</Typography>
-                        </Grid>
-                        <Grid size={{xs:8}} justifyContent="flex-start"></Grid>
-                      </Grid>
-                    </Box>
-                  </Grid>
-                  <Grid size={{xs:2}} container justifyContent="flex-end">
-                    {permissions?.user?.isUpdate && (
-                      <IconButton color="primary" size="small" onClick={handleAssignRole}>
-                        <ControlPoint />
-                      </IconButton>
-                    )}
-                  </Grid>
-                </Grid>
-              </Box>
-              <Grid container spacing={1}>
-                <Grid size={{xs:12, sm:12, md:4}}>
-                  <BoxWithBorder
-                    style={{
-                      padding: '0px',
-                      height: '352px'
-                    }}
-                  >
-                    {
-                      <Box
-                        style={{
-                          height: '100%',
-                          overflowY: 'auto'
+              <div className="relative flex justify-between rounded-t bg-[var(--dark-secondary,var(--accordion-expanded-summary-bg,#EFFBF9))] px-7 py-4">
+                <h6 className="text-sm font-semibold leading-[1.05] ">Assigned Roles ({currentEntity?.role?.length || '0'})</h6>
+                {permissions?.user?.isUpdate && (
+                  <span className="absolute right-7 top-[50%] [transform:translateY(-50%)]">
+                    <IconButton color="primary" size="small" onClick={handleAssignRole}>
+                      <ControlPoint />
+                    </IconButton>
+                  </span>
+                )}
+              </div>
+              <div className="grid grid-cols-12 border p-4">
+                <div className="col-span-12  pr-4 md:col-span-4">
+                  <div className="h-[352px] overflow-y-auto">
+                    {currentEntity.role && (
+                      <UserRoles
+                        permissions={permissions}
+                        data={currentEntity.role}
+                        unassignRole={(data) => {
+                          setRoleRemoveConfirmBox({ open: true, data: data });
                         }}
-                      >
-                        {currentEntity.role && (
-                          <UserRoles
-                            permissions={permissions}
-                            data={currentEntity.role}
-                            unassignRole={(data) => {
-                              setRoleRemoveConfirmBox({ open: true, data: data });
-                            }}
-                          />
-                        )}
-                      </Box>
-                    }
-                  </BoxWithBorder>
-                </Grid>
-                <Grid size={{xs:12, sm:12, md:8, lg:8}}>
+                      />
+                    )}
+                  </div>
+                </div>
+                <div className="col-span-12 md:col-span-8">
                   <BoxWithBorder
                     style={{
                       padding: '0px',
@@ -283,12 +255,12 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
                       field={unionRoleData ? unionRoleData.field : []}
                       resource={unionRoleData ? unionRoleData.resource : []}
                       isDisable={true}
-                      setField={() => {}}
-                      setResource={() => {}}
+                      setField={() => { }}
+                      setResource={() => { }}
                     />
                   </BoxWithBorder>
-                </Grid>
-              </Grid>
+                </div>
+              </div>
             </Box>
           </>
         </Box>
@@ -305,7 +277,7 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
             okBtnLoading={isSubmitting}
           />
         )}
-      </BoxWithBorder>
+      </div>
     </>
   );
 }

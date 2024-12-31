@@ -1,4 +1,4 @@
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -103,10 +103,10 @@ const LeadDetailsPage = () => {
           }
           setHasPermissionToConvertToOpportunity(
             dontHavePermissions.length === 0 &&
-              user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity &&
-              allowedToEdit &&
-              leadData[processFieldName] &&
-              currentStepToShow + 1 >= steps.length
+            user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity &&
+            allowedToEdit &&
+            leadData[processFieldName] &&
+            currentStepToShow + 1 >= steps.length
           );
         } else {
           setShowAtLast(false);
@@ -336,11 +336,7 @@ const LeadDetailsPage = () => {
           <Box className="control-buttons-v1">
             {!isLeadAlreadyConvertedToOpportunity && hasPermissionToConvertToOpportunity && (
               <>
-                <Button
-                  variant={'contained'}
-                  color="primary"
-                  size="small"
-                  className={'no-shadow'}
+                <ThemeButton
                   onClick={() => {
                     const leadName = [leadData.firstName, leadData.middleName, leadData.lastName].filter((d) => d).join(' ');
                     setConvertLeadToOpportunityConfirmationDialog({
@@ -350,9 +346,12 @@ const LeadDetailsPage = () => {
                       message: `Are you sure you want to convert ${leadName} to opportunity?`
                     });
                   }}
+                  buttonType='theme'
+                  iconForMobile={<FaSyncAlt size={15} />}
+                  mobileTooltip={'Convert Lead To Opportunity'}
                 >
-                  {isMobile && !isTablet ? <FaSyncAlt size={15} /> : 'Convert Lead To Opportunity'}
-                </Button>
+                  {'Convert Lead To Opportunity'}
+                </ThemeButton>
               </>
             )}
             {leadsPermissions.isUpdate && allowedToEdit && (

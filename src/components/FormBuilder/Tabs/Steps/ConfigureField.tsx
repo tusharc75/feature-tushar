@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, CircularProgress, Dialog } from '@mui/material';
+import { Box, Dialog } from '@mui/material';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -133,14 +133,14 @@ const ConfigureField = ({ step = null, handleClose, handleSucess }) => {
         />
       </CustomDialogContent>
       <CustomDialogFooter>
-        <ThemeButton disabled={isSubmitting} buttonType="transparent" onClick={handleClose}>
+        <ThemeButton buttonType="transparent" onClick={handleClose}>
           Close
         </ThemeButton>
         <ThemeButton
           buttonType="theme"
           disabled={isSubmitting}
           onClick={handleSave}
-          endIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
+          isLoading={isSubmitting}
         >
           Save
         </ThemeButton>

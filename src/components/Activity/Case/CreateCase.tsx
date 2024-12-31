@@ -1,4 +1,4 @@
-import { Box, Breadcrumbs, CircularProgress, Divider, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
+import { Box, Breadcrumbs, Divider, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Grid from '@mui/material/Grid2';
 import TableChartIcon from '@mui/icons-material/TableChart';
@@ -73,7 +73,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
           setInitialValues(null);
           setInitialValues(data);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     } else {
       let initialData = {
         name: '',
@@ -340,7 +340,6 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
               </CustomDialogContent>
               <CustomDialogFooter>
                 <ThemeButton
-                  disabled={isSubmitting}
                   buttonType="transparent"
                   onClick={() => {
                     if (isEqual(initialValues, values)) handleClose();
@@ -349,8 +348,8 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                 >
                   Cancel
                 </ThemeButton>
-                <ThemeButton disabled={isSubmitting} buttonType="theme" onClick={submitForm}>
-                  {isSubmitting ? <CircularProgress size={22} /> : 'Save'}
+                <ThemeButton disabled={isSubmitting} buttonType="theme" isLoading={isSubmitting} onClick={submitForm}>
+                  Save
                 </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (

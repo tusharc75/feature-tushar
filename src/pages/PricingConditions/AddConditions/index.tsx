@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { MenuItem, Box, Button, IconButton, Menu } from '@mui/material';
+import { MenuItem, Box, IconButton, Menu } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import Add from '@mui/icons-material/Add';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -17,12 +17,11 @@ import ConditionDialog from './ConditionDialog';
 import { camelCase, startCase } from 'lodash';
 import { ExpandMore } from '@mui/icons-material';
 import { isMobile, isTablet } from 'react-device-detect';
-import styles from '../../Leads/Header.module.scss';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { addDisable, deleteDisable, editDisable, updateDisable } from 'src/constants/messageHelpers';
+import { addDisable, deleteDisable, updateDisable } from 'src/constants/messageHelpers';
 import { FiExternalLink } from 'react-icons/fi';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
@@ -60,24 +59,22 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       .then(({ data: { data, count } }) => {
         setCondition(JSON.parse(JSON.stringify(data)));
         data.forEach((element) => {
-          element.detail = `${
-            element.materialType === MATERIAL_TYPE.product
-              ? element.productDetail?.productName
-              : element.materialType === MATERIAL_TYPE.service
-                ? element.serviceDetail?.serviceName
-                : element.materialType === MATERIAL_TYPE.package
-                  ? element.packageDetail?.packageName
-                  : element.competencyDetail.competencyName
-          }`;
-          element.description = `${
-            element.materialType === MATERIAL_TYPE.product
-              ? element.productDetail?.productDescription
-              : element.materialType === MATERIAL_TYPE.service
-                ? element.serviceDetail?.serviceDescription
-                : element.materialType === MATERIAL_TYPE.package
-                  ? element.packageDetail?.packageDescription
-                  : ''
-          }`;
+          element.detail = `${element.materialType === MATERIAL_TYPE.product
+            ? element.productDetail?.productName
+            : element.materialType === MATERIAL_TYPE.service
+              ? element.serviceDetail?.serviceName
+              : element.materialType === MATERIAL_TYPE.package
+                ? element.packageDetail?.packageName
+                : element.competencyDetail.competencyName
+            }`;
+          element.description = `${element.materialType === MATERIAL_TYPE.product
+            ? element.productDetail?.productDescription
+            : element.materialType === MATERIAL_TYPE.service
+              ? element.serviceDetail?.serviceDescription
+              : element.materialType === MATERIAL_TYPE.package
+                ? element.packageDetail?.packageDescription
+                : ''
+            }`;
           element.materialType = startCase(element.materialType);
           element.conditionType = PRICING_TYPE?.filter((e) => element.conditionType?.includes(e.optionValue))
             ?.map((e) => e.optionLabel)
@@ -202,14 +199,13 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
               size="small"
               onClick={() => {
                 window.open(
-                  `${
-                    row?.original?.materialType === 'Product'
-                      ? routes.productDetail.path
-                      : row?.original?.materialType === 'Service'
-                        ? routes.serviceMasterDetail.path
-                        : row?.original?.materialType === 'Package'
-                          ? routes.packagesDetail.path
-                          : routes?.competenciesDetail.path
+                  `${row?.original?.materialType === 'Product'
+                    ? routes.productDetail.path
+                    : row?.original?.materialType === 'Service'
+                      ? routes.serviceMasterDetail.path
+                      : row?.original?.materialType === 'Package'
+                        ? routes.packagesDetail.path
+                        : routes?.competenciesDetail.path
                   }/${row?.original?.materialId}`
                 );
               }}
@@ -321,18 +317,14 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
         <Box display="flex" gap={'8px'} flexWrap={'wrap'}>
           <HtmlTooltip title={permissions?.pricingCondition?.isUpdate ? 'Add' : addDisable}>
             <span>
-              <Button
-                variant={'outlined'}
-                color="primary"
-                size="small"
+              <ThemeButton
+                endIcon={<ExpandMore fontSize="small" />}
                 startIcon={<Add />}
                 onClick={openAddActions}
                 disabled={!permissions?.pricingCondition?.isUpdate}
-                aria-controls="add-menu"
               >
                 {'Add'}
-                <ExpandMore fontSize="small" />
-              </Button>
+              </ThemeButton>
             </span>
           </HtmlTooltip>
           <Menu
@@ -590,9 +582,8 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete pricing setup condition  ${
-            deleteRecord?.productDetail?.productName || deleteRecord?.packageDetail?.packageName || ''
-          } ?`}
+          message={`Are you sure you want to delete pricing setup condition  ${deleteRecord?.productDetail?.productName || deleteRecord?.packageDetail?.packageName || ''
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

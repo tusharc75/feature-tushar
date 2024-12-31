@@ -1,5 +1,5 @@
 import { useAccount, useMsal } from '@azure/msal-react';
-import { CircularProgress, FormControlLabel, Switch } from '@mui/material';
+import { FormControlLabel, Switch } from '@mui/material';
 import Box from '@mui/material/Box';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Chip from '@mui/material/Chip';
@@ -277,7 +277,7 @@ export const CreateEmail = ({
             toastConfig.setToastConfig(err);
           });
       }
-    } catch (e) {}
+    } catch (e) { }
   };
 
   const handleSendEmail = async (values) => {
@@ -670,15 +670,9 @@ export const CreateEmail = ({
                       submitForm();
                     }}
                     id={'send-email-dialog-send-button'}
+                    isLoading={sending}
                   >
-                    {sending ? (
-                      <>
-                        <CircularProgress color="inherit" size={14} style={{ marginRight: '10px' }} />
-                        Sending ...{' '}
-                      </>
-                    ) : (
-                      'send'
-                    )}
+                    send
                   </ThemeButton>
                 )}
               </CustomDialogFooter>

@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import clsx from 'clsx';
-import { Typography, Box, IconButton, Tabs, Tab, Menu, MenuItem, Button, Theme } from '@mui/material';
+import { Typography, Box, IconButton, Tabs, Tab, Menu, MenuItem, Theme } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
 import { Skeleton } from '@mui/material';
@@ -22,7 +22,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Accordion, AccordionSummary, AccordionDetails } from 'src/components/CustomAccordion';
-import routes from 'src/components/Helpers/Routes';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -458,28 +458,26 @@ const CustomerAccounts = (props) => {
             </Typography>
             {(permissions?.projectSales?.isUpdate && isTeamMember) || isManager ? (
               <>
-                <Button
-                  variant={isMobile && !isTablet ? 'outlined' : 'contained'}
-                  style={isMobile && !isTablet ? { color: 'var(--info-dark)', marginLeft: 'auto' } : { marginLeft: 'auto' }}
-                  color="primary"
-                  size="small"
-                  onClick={() => {
+                <ThemeButton
+                  buttonType='theme'
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
                     setShowAccountCreateDialog(true);
                   }}
                 >
-                  {isMobile && !isTablet ? 'New' : 'Create New'}
-                </Button>
-                <Button
-                  variant={isMobile && !isTablet ? 'outlined' : 'contained'}
-                  style={isMobile && !isTablet ? { color: 'var(--info-dark)', marginLeft: '10px' } : { marginLeft: '10px' }}
-                  color="primary"
-                  size="small"
-                  onClick={() => {
+                  {'Create New'}
+                </ThemeButton>
+                <ThemeButton
+                  buttonType='theme'
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
                     handleOpenDialog('customer-account');
                   }}
                 >
-                  {isMobile && !isTablet ? 'Add' : 'Add Existing'}
-                </Button>
+                  {'Add Existing'}
+                </ThemeButton>
               </>
             ) : null}
           </AccordionSummary>
@@ -510,13 +508,13 @@ const CustomerAccounts = (props) => {
                         tabIndex={i}
                         label={
                           <Grid container alignItems="center">
-                            <Grid size={{xs:8}}>
+                            <Grid size={{ xs: 8 }}>
                               <Box component={'h4'} fontWeight={'bold'} className="title_container">
                                 <AccountCircleIcon />
                                 <span className="tabs_title">{c.accountName}</span>
                               </Box>
                             </Grid>
-                            <Grid size={{xs:4}} container justifyContent="flex-end">
+                            <Grid size={{ xs: 4 }} container justifyContent="flex-end">
                               <IconButton
                                 title={`Remove Account: ${c?.accountName}`}
                                 aria-haspopup="true"
@@ -544,7 +542,7 @@ const CustomerAccounts = (props) => {
                         <Accordion expanded={expandCustomerContact} onChange={() => setExpandCustomerContact(!expandCustomerContact)}>
                           <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
                             <Grid container>
-                              <Grid size={{xs:8}}>
+                              <Grid size={{ xs: 8 }}>
                                 <Box component="div" display="flex" alignItems="center" flexGrow={1}>
                                   <IconButton size="small" onClick={(e) => e.preventDefault()}>
                                     {expandCustomerContact === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}
@@ -556,7 +554,7 @@ const CustomerAccounts = (props) => {
                                   </Box>
                                 </Box>
                               </Grid>
-                              <Grid size={{xs:4}} container justifyContent="flex-end" alignItems="center">
+                              <Grid size={{ xs: 4 }} container justifyContent="flex-end" alignItems="center">
                                 <Typography variant="subtitle2">
                                   {(permissions?.projectSales?.isUpdate && isTeamMember) || isManager ? (
                                     <IconButton

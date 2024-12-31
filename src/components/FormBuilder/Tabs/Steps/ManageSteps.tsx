@@ -393,7 +393,6 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
             <CustomDialogFooter>
               <ThemeButton
                 buttonType="transparent"
-                disabled={isSubmitting}
                 onClick={() => {
                   if (isEqual(initialValues, values)) onClose();
                   else setShowConfirmDialog(true);
@@ -405,9 +404,8 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
                 disabled={isSubmitting}
                 buttonType="theme"
                 onClick={submitForm}
-                endIcon={isSubmitting && <CircularProgress color="inherit" size={18} />}
+                isLoading={isSubmitting}
               >
-                {' '}
                 Save
               </ThemeButton>
             </CustomDialogFooter>

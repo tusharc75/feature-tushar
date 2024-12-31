@@ -29,34 +29,32 @@ const UserRoles = ({ data, unassignRole, permissions }: props) => {
   return (
     <div className={classes.root}>
       <div className={classes.demo}>
-        <List style={{ padding: 0 }}>
+        <List sx={{ padding: 0 }}>
           {data && data.length
             ? data.map((obj: any, i: string) => (
-                <BoxWithBorder key={i} style={{ padding: '0px' }}>
-                  <ListItem>
-                    <ListItemText
-                      primary={
-                        <Typography title={obj.name || ''} className={permissions?.role?.isRead ? 'link text-truncate' : 'text-truncate'}>
-                          {permissions?.role?.isRead ? <Link to={`/role/detail/${obj._id}`}>{obj.name || ''}</Link> : <span>{obj.name || ''}</span>}
-                        </Typography>
-                      }
-                      secondary={
-                        <Typography color="textSecondary" title={obj.description || ''} className="text-truncate">
-                          {obj.description || ''}
-                        </Typography>
-                      }
-                    />
-                    {permissions?.user?.isUpdate && (
-                      <ListItemSecondaryAction>
-                        <HtmlTooltip title={'Unassign Role'}>
-                          <IconButton size="small" edge="end" aria-label="delete" onClick={() => unassignRole(obj)}>
-                            <DeleteIcon color={'error'} />
-                          </IconButton>
-                        </HtmlTooltip>
-                      </ListItemSecondaryAction>
-                    )}
-                  </ListItem>
-                </BoxWithBorder>
+                <ListItem key={i} className="rounded border">
+                  <ListItemText
+                    primary={
+                      <Typography title={obj.name || ''} className={permissions?.role?.isRead ? 'link text-truncate' : 'text-truncate'}>
+                        {permissions?.role?.isRead ? <Link to={`/role/detail/${obj._id}`}>{obj.name || ''}</Link> : <span>{obj.name || ''}</span>}
+                      </Typography>
+                    }
+                    secondary={
+                      <Typography color="textSecondary" title={obj.description || ''} className="text-truncate">
+                        {obj.description || ''}
+                      </Typography>
+                    }
+                  />
+                  {permissions?.user?.isUpdate && (
+                    <ListItemSecondaryAction>
+                      <HtmlTooltip title={'Unassign Role'}>
+                        <IconButton size="small" edge="end" aria-label="delete" onClick={() => unassignRole(obj)}>
+                          <DeleteIcon color={'error'} />
+                        </IconButton>
+                      </HtmlTooltip>
+                    </ListItemSecondaryAction>
+                  )}
+                </ListItem>
               ))
             : null}
         </List>

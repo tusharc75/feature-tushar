@@ -1,7 +1,6 @@
 import {
   Box,
   Checkbox,
-  CircularProgress,
   Collapse,
   FormControl,
   FormControlLabel,
@@ -458,7 +457,7 @@ const AssignEntityDialog = ({
           disabled={!selectedData?.length || !selectedRole?.length || isAssigning}
           onClick={isRenderedFromContact ? handleAccessPortal : handleAssignEntity}
           buttonType="theme"
-          endIcon={isAssigning && <CircularProgress size={20} />}
+          isLoading={isAssigning}
         >
           {'Save'}
         </ThemeButton>

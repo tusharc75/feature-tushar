@@ -1,8 +1,7 @@
-import { Button, Dialog, IconButton, Menu, MenuItem, TextField, Theme, useMediaQuery } from '@mui/material';
+import { Dialog, IconButton, Menu, MenuItem, TextField, Theme, useMediaQuery } from '@mui/material';
 import Box from '@mui/material/Box/Box';
 import { makeStyles } from '@mui/styles';
 import AddBoxRoundedIcon from '@mui/icons-material/AddBoxRounded';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import Edit from '@mui/icons-material/Edit';
 import HelpIcon from '@mui/icons-material/HelpOutline';
 import InfoIcon from '@mui/icons-material/Info';
@@ -62,6 +61,7 @@ import GpsLocationCell from 'src/components/CustomReactTable/Cells/GpsLocationCe
 import WarningIcon from '@mui/icons-material/Warning';
 import FreeStyleMultiSelect from 'src/components/CustomReactTable/Cells/FreeStyleMultiSelect';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { ExpandMore } from '@mui/icons-material';
 
 const stepGlobalDataAdded = {
   createTicket: false,
@@ -1252,11 +1252,7 @@ const LoadingTicket = ({
           <PreviewDownloadMultiple referenceIds={uniqueLoadingTicket} />
         </span>
         {allowedToEdit && !rentalPolicyData?.hideAssetChangeStatus && (
-          <Button
-            variant={'outlined'}
-            color="primary"
-            aria-controls="simple-menu"
-            aria-haspopup="true"
+          <ThemeButton
             disabled={
               !allowUpdateStatus ||
               selectedRecords.length === 0 ||
@@ -1276,12 +1272,11 @@ const LoadingTicket = ({
                 ].includes(f.status)
               )
             }
-            size="small"
             onClick={handleClick}
-            endIcon={<ArrowDropDownIcon />}
+            endIcon={<ExpandMore />}
           >
             Change Status
-          </Button>
+          </ThemeButton>
         )}
         {(allowedToEdit || isProcessor) && (
           <>
@@ -1289,32 +1284,30 @@ const LoadingTicket = ({
               selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
               selectedRecords?.length ? (
               <HtmlTooltip title="Remove Assets From Loading Ticket(s)">
-                <Button
+                <ThemeButton
                   onClick={() => {
                     setShowRemoveTicketDialog(true);
                   }}
-                  variant={isMobile ? 'text' : 'outlined'}
-                  color="primary"
-                  size="small"
-                  style={isMobile ? { color: 'var(--danger-light)' } : {}}
+                  iconForMobile={<IoRemoveCircleOutline size={22} />}
+                  mobileTooltip='Remove Loading Ticket'
                   disabled={selectedRecords.length === 0 || currentStep === 4 || selectedRecords.some((f) => !f.hasOwnProperty('loadingTicketId'))}
                 >
-                  {isMobile ? <IoRemoveCircleOutline size={22} /> : 'Remove Loading Ticket'}
-                </Button>
+                  Remove Loading Ticket
+                </ThemeButton>
               </HtmlTooltip>
             ) : null}
             {showProcessDeliveryTicket && !isOffline && (
               <HtmlTooltip title="Process Multiple Loading Ticket(s)">
-                <Button
+                <ThemeButton
                   onClick={() => {
                     setOpenDeliveryTicketDialog(true);
                   }}
-                  variant={isMobile ? 'text' : 'contained'}
-                  color="primary"
-                  size="small"
+                  buttonType='theme'
+                  iconForMobile={<AddBoxRoundedIcon />}
+                  mobileTooltip='Process Loading Ticket'
                 >
-                  {isMobile ? <AddBoxRoundedIcon /> : 'Process Loading Ticket'}
-                </Button>
+                  Process Loading Ticket
+                </ThemeButton>
               </HtmlTooltip>
             )}
           </>

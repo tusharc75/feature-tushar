@@ -1,5 +1,5 @@
 import AddIcon from '@mui/icons-material/Add';
-import { Box, Button, Dialog, Typography, useMediaQuery } from '@mui/material';
+import { Box, Dialog, Typography, useMediaQuery } from '@mui/material';
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import { useCallback, useState } from 'react';
@@ -9,9 +9,9 @@ import { CustomDialogTransition } from '../../../../constants/helpers';
 import ActivityModelHandler from '../../ActivityModelHandler';
 import { CreateCase } from '../../Case/CreateCase';
 import { CreateTask } from '../../Task/CreateTask';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export default function ActivityList(props) {
-  const isMobileDevices = useMediaQuery('(max-width:768px)');
   const { type, fetchRoadmap, activity, expanded, selected, handleToggle, handleSelect } = props;
   const {
     state: {
@@ -90,10 +90,14 @@ export default function ActivityList(props) {
         })}
       </SimpleTreeView>
       <div className="py-2">
-        <Button style={{ justifyContent: 'flex-start' }} fullWidth onClick={() => setCreate(true)} startIcon={isMobileDevices ? null : <AddIcon />}>
+        <ThemeButton
+          onClick={() => setCreate(true)}
+          iconForMobile={<AddIcon />}
+          sx={{ ml: 2, mr: 2 }}
+        >
           Create {type}
-        </Button>
-      </div>
+        </ThemeButton>
+      </div >
       {activityData && (
         <ActivityModelHandler
           fetchBoard={fetchRoadmap}
@@ -101,55 +105,58 @@ export default function ActivityList(props) {
           activityType={activityData.type}
           activityId={activityData.id}
         />
-      )}
-      {isCreate && (
-        <Dialog
-          open={true}
-          fullScreen={fullScreen || isMobile || isTablet}
-          TransitionComponent={CustomDialogTransition}
-          fullWidth
-          maxWidth="md"
-          onClose={(e, reason) => {
-            if (reason !== 'backdropClick') {
-              closeDialog();
-              setFullScreen(false);
-            }
-          }}
-        >
-          {type === 'task' && (
-            <CreateTask
-              taskId={null}
-              relatedTo={[{ type: 'user', referenceId: user._id, access: true }]}
-              handleClose={() => {
-                fetchRoadmap(false);
+      )
+      }
+      {
+        isCreate && (
+          <Dialog
+            open={true}
+            fullScreen={fullScreen || isMobile || isTablet}
+            TransitionComponent={CustomDialogTransition}
+            fullWidth
+            maxWidth="md"
+            onClose={(e, reason) => {
+              if (reason !== 'backdropClick') {
                 closeDialog();
                 setFullScreen(false);
-              }}
-              isMinimized={!fullScreen}
-              onMinimizeMaximize={() => {
-                setFullScreen((prevState) => !prevState);
-              }}
-              showManimizeMaximize={true}
-            />
-          )}
-          {type === 'case' && (
-            <CreateCase
-              caseId={null}
-              relatedTo={[{ type: 'user', referenceId: user._id, access: true }]}
-              handleClose={() => {
-                fetchRoadmap(false);
-                closeDialog();
-                setFullScreen(false);
-              }}
-              isMinimized={!fullScreen}
-              onMinimizeMaximize={() => {
-                setFullScreen((prevState) => !prevState);
-              }}
-              showManimizeMaximize={true}
-            />
-          )}
-        </Dialog>
-      )}
+              }
+            }}
+          >
+            {type === 'task' && (
+              <CreateTask
+                taskId={null}
+                relatedTo={[{ type: 'user', referenceId: user._id, access: true }]}
+                handleClose={() => {
+                  fetchRoadmap(false);
+                  closeDialog();
+                  setFullScreen(false);
+                }}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                  setFullScreen((prevState) => !prevState);
+                }}
+                showManimizeMaximize={true}
+              />
+            )}
+            {type === 'case' && (
+              <CreateCase
+                caseId={null}
+                relatedTo={[{ type: 'user', referenceId: user._id, access: true }]}
+                handleClose={() => {
+                  fetchRoadmap(false);
+                  closeDialog();
+                  setFullScreen(false);
+                }}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                  setFullScreen((prevState) => !prevState);
+                }}
+                showManimizeMaximize={true}
+              />
+            )}
+          </Dialog>
+        )
+      }
     </>
   );
 }

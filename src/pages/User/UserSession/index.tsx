@@ -11,8 +11,8 @@ import DurationFilter from 'src/components/DurationFilter';
 const UserSession = ({ id }) => {
   const toastConfig = useContext(CustomToastContext);
   const [trackingTime, setTrackingTime] = useState({
-      from: new Date(dayjs().subtract(1, 'year').toDate()),
-      to: new Date()
+    from: new Date(dayjs().subtract(1, 'year').toDate()),
+    to: new Date()
   });
   const [userTrackingData, setUserTrackingData] = useState({
     labels: [],
@@ -36,7 +36,7 @@ const UserSession = ({ id }) => {
     const parsedFromTime = convertDate(trackingTime.from);
     const parsedToTime = convertDate(trackingTime.to);
     const { from, to } = trackingTime;
-    
+
     const hour = 1000 * 60 * 60;
     const day = 1000 * 60 * 60 * 24;
     // const month = 1000 * 60 * 60 * 24 * 30
@@ -78,37 +78,23 @@ const UserSession = ({ id }) => {
   };
   return (
     <>
-      <Box
-        width="100%"
-        padding={1}
-        bgcolor="var(--dark-secondary, var(--accordion-expanded-summary-bg, #EFFBF9))"
-        display="flex"
-        justifyContent="space-between"
-      >
-        <Grid container>
-          <Grid size={{xs:8}}>
-            <Box display="flex">
-              <Box padding="5px">
-                <Typography variant="subtitle2">User Time Track</Typography>
-              </Box>
-            </Box>
-          </Grid>
-        </Grid>
-      </Box>
-      <Box padding="10px">
+      <div className="relative flex justify-between rounded-t bg-[var(--dark-secondary,var(--accordion-expanded-summary-bg,#EFFBF9))] px-7 py-4">
+        <h6 className="text-sm font-semibold leading-[1.05] ">User Time Track</h6>
+      </div>
+      <div className="rounded-b border p-[20px_28px_32px]">
         <DurationFilter label={''} defaultTimeFrame="1-year" duration={trackingTime} setDuration={setTrackingTime} showAll={true} />
-      </Box>
-      <Typography className="subtitle1 m-2">
-        {userTrackingDataLoading ? (
-          <Grid container spacing={2} style={{ padding: '8px' }}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Grid>
-        ) : userTrackingData.labels.length === 0 ? (
-          <h3>No activity found in the selected date range</h3>
-        ) : (
-          <Line type="line" data={userTrackingData} />
-        )}
-      </Typography>
+        <Typography className="subtitle1 m-2">
+          {userTrackingDataLoading ? (
+            <Grid container spacing={2} style={{ padding: '8px' }}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Grid>
+          ) : userTrackingData.labels.length === 0 ? (
+            <h3>No activity found in the selected date range</h3>
+          ) : (
+            <Line type="line" data={userTrackingData} />
+          )}
+        </Typography>
+      </div>
     </>
   );
 };

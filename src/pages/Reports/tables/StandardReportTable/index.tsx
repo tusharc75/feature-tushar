@@ -1,4 +1,4 @@
-import { CircularProgress, Dialog, IconButton } from '@mui/material';
+import { Dialog, IconButton } from '@mui/material';
 import { History, Visibility } from '@mui/icons-material';
 import axios from 'axios';
 import { camelCase, isArray, isEmpty, isNumber, isObject, startCase } from 'lodash';
@@ -625,7 +625,8 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
                       iconForMobile={false}
                       disabled={isProcessing === 'pdf'}
                       onClick={() => exportData('pdf', 'pdf')}
-                      startIcon={isProcessing === 'pdf' && <CircularProgress color="inherit" size={18} />}
+                      isLoading={isProcessing === 'pdf'}
+                      buttonType="theme"
                     >
                       Export To PDF
                     </ThemeButton>
@@ -634,7 +635,8 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
                     iconForMobile={false}
                     disabled={isProcessing === 'excel'}
                     onClick={() => exportData('excel', 'excel')}
-                    startIcon={isProcessing === 'excel' && <CircularProgress color="inherit" size={18} />}
+                    isLoading={isProcessing === 'excel'}
+                    buttonType="theme"
                   >
                     Export To Excel
                   </ThemeButton>

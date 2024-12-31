@@ -1,4 +1,4 @@
-import { Box, Button, IconButton } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { sortBy } from 'lodash';
@@ -16,6 +16,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { useDndSensors } from 'src/hooks';
 import { AddOutlined } from '@mui/icons-material';
 import routes from 'src/components/Helpers/Routes';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const Steps = ({ resourceData, tab, fetchData, workflowId = null }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -133,17 +134,14 @@ const Steps = ({ resourceData, tab, fetchData, workflowId = null }) => {
   return (
     <Box>
       <Box>
-        <Button
-          variant="outlined"
-          color="primary"
-          size="small"
+        <ThemeButton
           onClick={() => {
             setOpen({ open: true, data: null });
           }}
           startIcon={<AddOutlined />}
         >
           Add Step
-        </Button>
+        </ThemeButton>
       </Box>
       <Box pt={2}>
         <DndContext onDragEnd={handleOnDragEnd} onDragStart={onDragStart} sensors={sensors} modifiers={[restrictToVerticalAxis]}>

@@ -1,5 +1,4 @@
 import { useState, useRef } from 'react';
-import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
@@ -15,6 +14,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { IconButton } from '@mui/material';
 import { FiMaximize2 } from 'react-icons/fi';
 import ContentFullScreen from 'src/components/ContentFullScreen';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export const Formula = ({ fields, values, setFieldValue, _id, touched, errors }) => {
   const [formulaError, setFormulaError] = useState(null);
@@ -169,9 +169,9 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
                     {formulaError}{' '}
                   </Typography>
                 )}
-                <Button size="small" onClick={handleCheckSyntax} color="primary">
+                <ThemeButton buttonType='transparent' onClick={handleCheckSyntax}>
                   Check Syntax
-                </Button>
+                </ThemeButton>
               </Grid>
               <Grid item xs={6}>
                 {values['type'] === 'currencyAmount' && (

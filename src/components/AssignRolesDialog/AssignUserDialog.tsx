@@ -1,6 +1,5 @@
 import {
   Checkbox,
-  CircularProgress,
   Dialog,
   FormControl,
   FormControlLabel,
@@ -162,11 +161,11 @@ const AssignUserDialog = ({ usersDialogOpen, onSuccess, handleCloseDialog, roleI
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
-        <ThemeButton disabled={isAssigning} onClick={handleCloseDialog} buttonType="transparent">
+        <ThemeButton onClick={handleCloseDialog} buttonType="transparent">
           Cancel
         </ThemeButton>
-        <ThemeButton disabled={!selectedUsers.length || isAssigning} onClick={handleAssignRoles} buttonType="theme">
-          {isAssigning ? <CircularProgress size={22} /> : 'Save'}
+        <ThemeButton disabled={!selectedUsers.length || isAssigning} onClick={handleAssignRoles} buttonType="theme" isLoading={isAssigning}>
+          Save
         </ThemeButton>
       </CustomDialogFooter>
     </Dialog>

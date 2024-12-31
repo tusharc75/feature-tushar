@@ -1,4 +1,4 @@
-import { Box, Button, Chip, IconButton, Typography } from '@mui/material';
+import { Box, Chip, IconButton, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PersonIcon from '@mui/icons-material/Person';
@@ -11,6 +11,7 @@ import routes from 'src/components/Helpers/Routes';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { displayDateTime, IRT_APPROVER_STATUS } from 'src/constants/helpers';
 import AssignUserDialog from './AssignUserDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const Approver = ({ irtTicketData }) => {
   const [approver, setAapprover] = useState(null);
@@ -50,7 +51,7 @@ const Approver = ({ irtTicketData }) => {
   return (
     <Box>
       <Grid container spacing={2}>
-        <Grid size={{xs:12, sm:5, md:4, lg:3}}>
+        <Grid size={{ xs: 12, sm: 5, md: 4, lg: 3 }}>
           <Grid
             container
             spacing={2}
@@ -59,20 +60,17 @@ const Approver = ({ irtTicketData }) => {
             }}
           >
             <Box pl={1} pb={2}>
-              <Button
-                variant="outlined"
-                color="primary"
-                size="small"
+              <ThemeButton
                 onClick={() => {
                   setOpenDialog(true);
                 }}
               >
                 Add Approver
-              </Button>
+              </ThemeButton>
             </Box>
             {approver ? (
               approver?.map((item, index) => (
-                <Grid size={{xs:12}} key={index}>
+                <Grid size={{ xs: 12 }} key={index}>
                   <Box
                     style={{
                       borderWidth: '1px',
@@ -139,7 +137,7 @@ const Approver = ({ irtTicketData }) => {
             )}
           </Grid>
         </Grid>
-        <Grid size={{xs:12, sm:7, md:8, lg:9}}>
+        <Grid size={{ xs: 12, sm: 7, md: 8, lg: 9 }}>
           {selected && (
             <Box
               p={2}

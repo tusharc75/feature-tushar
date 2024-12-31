@@ -16,9 +16,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     backgroundColor: theme.palette.background.paper,
     width: '100%'
   },
-  title: {
-    margin: theme.spacing(4, 0, 2)
-  },
   list: {
     width: '100%',
     padding: 0
@@ -34,38 +31,38 @@ const AssignedUsers = (props) => {
       <List disablePadding>
         {user && user.length
           ? user.map((obj) => (
-              <BoxWithBorder key={obj._id} style={{ marginBottom: '8px' }}>
-                <ListItem disableGutters className={classes.list}>
-                  <ListItemText
-                    primary={
-                      <Typography className="flex justify-between">
-                        <a href={`/user/detail/${obj._id}`} className="link" target="_blank" rel="noreferrer">
-                          {`${obj.firstName} ${obj.lastName}` || ''}
-                        </a>
-                      </Typography>
-                    }
-                    secondary={
-                      <div className="mr-1 flex items-center">
-                        <span className=" truncate">{obj.email}</span>
-                        <CopyToClipboard textToCopy={obj.email} className="ml-1 cursor-pointer" />
-                      </div>
-                    }
-                  />
-                  {permissions?.role?.isUpdate && (
-                    <IconButton
-                      title={selectedEntity === obj._id ? "Primary user can't be unassigned" : 'Unassign User'}
-                      size="small"
-                      disabled={selectedEntity === obj._id}
-                      edge="end"
-                      aria-label="delete"
-                      onClick={() => unassignEntity(obj)}
-                    >
-                      <DeleteIcon color={selectedEntity === obj._id ? 'disabled' : 'error'} />
-                    </IconButton>
-                  )}
-                </ListItem>
-              </BoxWithBorder>
-            ))
+            <BoxWithBorder key={obj._id} style={{ marginBottom: '8px' }}>
+              <ListItem disableGutters className={classes.list}>
+                <ListItemText
+                  primary={
+                    <Typography className="flex justify-between">
+                      <a href={`/user/detail/${obj._id}`} className="link" target="_blank" rel="noreferrer">
+                        {`${obj.firstName} ${obj.lastName}` || ''}
+                      </a>
+                    </Typography>
+                  }
+                  secondary={
+                    <div className="mr-1 flex items-center">
+                      <span className=" truncate">{obj.email}</span>
+                      <CopyToClipboard textToCopy={obj.email} className="ml-1 cursor-pointer" />
+                    </div>
+                  }
+                />
+                {permissions?.role?.isUpdate && (
+                  <IconButton
+                    title={selectedEntity === obj._id ? "Primary user can't be unassigned" : 'Unassign User'}
+                    size="small"
+                    disabled={selectedEntity === obj._id}
+                    edge="end"
+                    aria-label="delete"
+                    onClick={() => unassignEntity(obj)}
+                  >
+                    <DeleteIcon fontSize='small' color={selectedEntity === obj._id ? 'disabled' : 'error'} />
+                  </IconButton>
+                )}
+              </ListItem>
+            </BoxWithBorder>
+          ))
           : null}
       </List>
     </div>
