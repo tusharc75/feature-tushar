@@ -221,7 +221,7 @@ const RentalManagement = () => {
       deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters);
+    const { filterByIds, deepFilters } = filters;
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
