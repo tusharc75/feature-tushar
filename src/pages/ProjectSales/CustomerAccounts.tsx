@@ -463,7 +463,9 @@ const CustomerAccounts = (props) => {
                   style={isMobile && !isTablet ? { color: 'var(--info-dark)', marginLeft: 'auto' } : { marginLeft: 'auto' }}
                   color="primary"
                   size="small"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
                     setShowAccountCreateDialog(true);
                   }}
                 >
@@ -474,7 +476,9 @@ const CustomerAccounts = (props) => {
                   style={isMobile && !isTablet ? { color: 'var(--info-dark)', marginLeft: '10px' } : { marginLeft: '10px' }}
                   color="primary"
                   size="small"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
                     handleOpenDialog('customer-account');
                   }}
                 >
@@ -510,13 +514,13 @@ const CustomerAccounts = (props) => {
                         tabIndex={i}
                         label={
                           <Grid container alignItems="center">
-                            <Grid size={{xs:8}}>
+                            <Grid size={{ xs: 8 }}>
                               <Box component={'h4'} fontWeight={'bold'} className="title_container">
                                 <AccountCircleIcon />
                                 <span className="tabs_title">{c.accountName}</span>
                               </Box>
                             </Grid>
-                            <Grid size={{xs:4}} container justifyContent="flex-end">
+                            <Grid size={{ xs: 4 }} container justifyContent="flex-end">
                               <IconButton
                                 title={`Remove Account: ${c?.accountName}`}
                                 aria-haspopup="true"
@@ -544,7 +548,7 @@ const CustomerAccounts = (props) => {
                         <Accordion expanded={expandCustomerContact} onChange={() => setExpandCustomerContact(!expandCustomerContact)}>
                           <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
                             <Grid container>
-                              <Grid size={{xs:8}}>
+                              <Grid size={{ xs: 8 }}>
                                 <Box component="div" display="flex" alignItems="center" flexGrow={1}>
                                   <IconButton size="small" onClick={(e) => e.preventDefault()}>
                                     {expandCustomerContact === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}
@@ -556,7 +560,7 @@ const CustomerAccounts = (props) => {
                                   </Box>
                                 </Box>
                               </Grid>
-                              <Grid size={{xs:4}} container justifyContent="flex-end" alignItems="center">
+                              <Grid size={{ xs: 4 }} container justifyContent="flex-end" alignItems="center">
                                 <Typography variant="subtitle2">
                                   {(permissions?.projectSales?.isUpdate && isTeamMember) || isManager ? (
                                     <IconButton
