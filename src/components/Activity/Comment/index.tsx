@@ -1,7 +1,7 @@
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Grid from '@mui/material/Grid';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Grid from '@mui/material/Grid2';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { makeStyles } from '@mui/styles';
@@ -108,10 +108,10 @@ export const Comment = ({ referenceId }) => {
         comment.map((element, index) => (
           <Box key={index} mt={1}>
             <Grid container className={`${classes.comments_wrapper}`}>
-              <Grid item className={` ${classes.comment_avatar}`}>
+              <Grid className={` ${classes.comment_avatar}`}>
                 <Avatar className={` ${avatarClass} `}>{element.firstName[0] + element.lastName[0]}</Avatar>
               </Grid>
-              <Grid item className={`${classes.comments_container} `}>
+              <Grid className={`${classes.comments_container} `}>
                 <Typography variant="body2" className={classes.boldFont}>
                   {element.firstName + ' ' + element.lastName}
                   <Typography variant="caption" className={classes.marginLeft}>
@@ -138,9 +138,9 @@ export const Comment = ({ referenceId }) => {
               onChange={handleChange}
               variant="outlined"
             />
-            <Button color="primary" size="small" variant="contained" onClick={postComment}>
+            <ThemeButton buttonType="theme" onClick={postComment}>
               Send
-            </Button>
+            </ThemeButton>
           </div>
         </div>
       </Box>

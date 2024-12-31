@@ -1,5 +1,5 @@
 import { useState, Fragment, useRef } from 'react';
-import Button from '@mui/material/Button';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Dialog from '@mui/material/Dialog';
 import TextField from '@mui/material/TextField';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -9,7 +9,7 @@ import Select from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
 import Checkbox from '@mui/material/Checkbox';
 import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Grid2';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
@@ -268,7 +268,13 @@ export const AddField = (props) => {
             <CustomDialogContent>
               <Form autoComplete="off" autoCorrect="off" noValidate onKeyPress={onKeyPress}>
                 {['formAddInlineEdit', 'builder']?.includes(refrence) && (
-                  <FormControl fullWidth margin="dense" variant="outlined" size="small" error={touched['sectionName'] && Boolean(errors['sectionName'])}>
+                  <FormControl
+                    fullWidth
+                    margin="dense"
+                    variant="outlined"
+                    size="small"
+                    error={touched['sectionName'] && Boolean(errors['sectionName'])}
+                  >
                     <InputLabel id="demo-simple-select-outlined-label">Section Name</InputLabel>
                     <Select
                       labelId="demo-simple-select-outlined-label"
@@ -325,7 +331,7 @@ export const AddField = (props) => {
                 {(values['type'] === 'decimal' || values['type'] === 'formula' || values['type'] === 'converter') && (
                   <Grid spacing={3} container>
                     {values['type'] === 'formula' && (
-                      <Grid item xs={12} sm={6} md={6}>
+                      <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                         <FormControl fullWidth margin="dense" variant="outlined" size="small">
                           <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
                           <Select
@@ -345,7 +351,7 @@ export const AddField = (props) => {
                       </Grid>
                     )}
                     {(values['type'] === 'decimal' || values['type'] === 'converter' || values['returnType'] === 'decimal') && (
-                      <Grid item xs={12} sm={6} md={6}>
+                      <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                         <FormControl fullWidth margin="dense" size="small" variant="outlined">
                           <InputLabel id="demo-simple-select-outlined-label">Number of decimal places</InputLabel>
                           <Select
@@ -481,18 +487,17 @@ export const AddField = (props) => {
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button
-                size="small"
+              <ThemeButton
                 onClick={() => {
                   setShowConfirmDialog(true);
                 }}
-                color="primary"
+                buttonType="transparent"
               >
                 Cancel
-              </Button>
-              <Button size="small" type="submit" color="primary" onClick={submitForm} variant="contained">
+              </ThemeButton>
+              <ThemeButton buttonType="theme" onClick={submitForm}>
                 {fieldData ? 'Update' : 'Add'}
-              </Button>
+              </ThemeButton>
             </CustomDialogFooter>
             {showConfirmDialog ? (
               <ConfirmCancelDialog

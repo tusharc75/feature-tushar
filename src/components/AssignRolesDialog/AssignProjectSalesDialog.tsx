@@ -1,5 +1,4 @@
 import {
-  Button,
   Checkbox,
   CircularProgress,
   Dialog,
@@ -11,6 +10,7 @@ import {
   ListItemText,
   Typography
 } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -203,18 +203,12 @@ const AssignProjectSalesDialog = ({ projectSalesDialogOpen, onSuccess, handleClo
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button disabled={isAssigning} onClick={handleCloseDialog} color="primary" size="small">
+        <ThemeButton disabled={isAssigning} onClick={handleCloseDialog} buttonType="transparent">
           Cancel
-        </Button>
-        <Button
-          disabled={!selectedProjectSales.length || isAssigning}
-          onClick={handleAssignProjectSales}
-          color="primary"
-          size="small"
-          variant="contained"
-        >
+        </ThemeButton>
+        <ThemeButton disabled={!selectedProjectSales.length || isAssigning} onClick={handleAssignProjectSales} buttonType="theme">
           {isAssigning ? <CircularProgress size={22} /> : 'Save'}
-        </Button>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );
