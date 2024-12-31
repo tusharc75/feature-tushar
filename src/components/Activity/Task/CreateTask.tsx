@@ -2,7 +2,6 @@ import {
   Box,
   Breadcrumbs,
   Chip,
-  CircularProgress,
   Divider,
   FormControl,
   InputLabel,
@@ -95,7 +94,7 @@ export const CreateTask = ({
           setInitialValues(null);
           setInitialValues(data);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     } else {
       let initialData = {
         name: defaultName,
@@ -195,7 +194,7 @@ export const CreateTask = ({
                       </Breadcrumbs>
                     </Box>
                     <Grid container spacing={3}>
-                      <Grid size={{xs:12, md:7, sm:6}}>
+                      <Grid size={{ xs: 12, md: 7, sm: 6 }}>
                         <TextField
                           variant="outlined"
                           type="text"
@@ -269,7 +268,7 @@ export const CreateTask = ({
                           </Box>
                         )}
                       </Grid>
-                      <Grid size={{xs:12, md:5, sm:6}}>
+                      <Grid size={{ xs: 12, md: 5, sm: 6 }}>
                         <Fragment>
                           <Box mt={1}>
                             <Box>
@@ -297,7 +296,7 @@ export const CreateTask = ({
                             </Box>
                             <Box pt={1}>
                               <Grid container spacing={1}>
-                                <Grid size={{xs:12, sm:12, md:12}}>
+                                <Grid size={{ xs: 12, sm: 12, md: 12 }}>
                                   <UserDropdown
                                     name="assignee"
                                     label="Assignee"
@@ -312,7 +311,7 @@ export const CreateTask = ({
                                     email={[]}
                                   />
                                 </Grid>
-                                <Grid size={{xs:12, sm:12, md:12}}>
+                                <Grid size={{ xs: 12, sm: 12, md: 12 }}>
                                   <UserDropdown
                                     name="reporter"
                                     label="Reporter"
@@ -330,7 +329,7 @@ export const CreateTask = ({
                             </Box>
                             <Box pt={1}>
                               <Grid container spacing={1}>
-                                <Grid size={{xs:12, sm:12, md:12}}>
+                                <Grid size={{ xs: 12, sm: 12, md: 12 }}>
                                   <CustomDatePicker
                                     label="Start Date"
                                     name="startDate"
@@ -344,7 +343,7 @@ export const CreateTask = ({
                                     maxDate={initialValues.parentData && initialValues.parentData.dueDate}
                                   />
                                 </Grid>
-                                <Grid size={{xs:12, sm:12, md:12}}>
+                                <Grid size={{ xs: 12, sm: 12, md: 12 }}>
                                   <CustomDatePicker
                                     label="Due Date"
                                     name="dueDate"
@@ -382,7 +381,7 @@ export const CreateTask = ({
               <CustomDialogFooter>
                 <ThemeButton
                   disabled={isSubmitting}
-buttonType='transparent'
+                  buttonType='transparent'
                   onClick={() => {
                     if (isEqual(initialValues, values)) handleClose();
                     else setShowConfirmDialog(true);
@@ -390,8 +389,8 @@ buttonType='transparent'
                 >
                   Cancel
                 </ThemeButton>
-                <ThemeButton disabled={isSubmitting} buttonType='theme' onClick={submitForm}>
-                  {isSubmitting ? <CircularProgress size={22} /> : 'Save'}
+                <ThemeButton disabled={isSubmitting} isLoading={isSubmitting} buttonType='theme' onClick={submitForm}>
+                  Save
                 </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (

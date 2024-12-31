@@ -1,5 +1,5 @@
 import { useAccount, useMsal } from '@azure/msal-react';
-import { Box, CircularProgress, TextField, Typography, useMediaQuery } from '@mui/material';
+import { Box, TextField, Typography, useMediaQuery } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { ArrowRightAlt } from '@mui/icons-material';
@@ -78,7 +78,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
         .then(({ data: { data } }) => {
           setInitialValues(data);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     } else {
       setInitialValues({
         name: '',
@@ -442,11 +442,11 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <ThemeButton disabled={isSubmitting} buttonType="transparent" onClick={handleClose}>
+                <ThemeButton buttonType="transparent" onClick={handleClose}>
                   Cancel
                 </ThemeButton>
-                <ThemeButton disabled={isSubmitting} buttonType="theme" onClick={submitForm}>
-                  {isSubmitting ? <CircularProgress size={22} /> : 'Save'}
+                <ThemeButton disabled={isSubmitting} isLoading={isSubmitting} buttonType="theme" onClick={submitForm}>
+                  Save
                 </ThemeButton>
                 {eventId && (
                   <ThemeButton
