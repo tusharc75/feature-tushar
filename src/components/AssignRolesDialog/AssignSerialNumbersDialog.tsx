@@ -21,6 +21,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import ManageTransferInventory from 'src/pages/TransferInventory/ManageTransferInventory';
 import AddSerialNumber from 'src/pages/ProductInventory/SerialNumber/AddSerialNumber';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const AssignSerialNumbersDialog = ({
   selectedProducts = [],
@@ -324,19 +325,17 @@ const AssignSerialNumbersDialog = ({
   const rightSideContents = () => {
     return selectedWarehouse != filterByPlant?.optionValue && referenceType === 'Rental Job' ? (
       <>
-        <Button
+        <ThemeButton 
           style={{ minWidth: 'max-content' }}
-          size="small"
-          color="primary"
           onClick={() => {
             setShowTransferInventoryDialog(true);
           }}
-          variant={'contained'}
           disabled={selectedRecords?.length === 0 || products?.some((d) => d?.qty < 0)}
+          buttonType='theme'
         >
           {`Transfer to ${filterByPlant?.optionLabel}`}
           {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
-        </Button>
+        </ThemeButton>
       </>
     ) : null;
   };
@@ -353,16 +352,14 @@ const AssignSerialNumbersDialog = ({
             </span>
           </HtmlTooltip>
         ) : serialNumberCount ? (
-          <Button
-            variant={'contained'}
-            color="primary"
-            size="small"
+          <ThemeButton 
             onClick={() => {
               setAddserialNumber(true);
             }}
+            buttonType='theme'
           >
             Add New Serial Numbers
-          </Button>
+          </ThemeButton>
         ) : null}
       </>
     );

@@ -11,6 +11,7 @@ import { CustomDialogTransition, purchaseOrder } from 'src/constants/helpers';
 import { useHistory } from 'react-router-dom';
 import ManageIrtTicket from 'src/pages/IrtTicket/ManageIrtTicket';
 import { useData } from 'src/StateProvider/Provider';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const InventoryStatesDialog = ({ onClose, product, warehouse, data, purchaseOrderData }) => {
   const history = useHistory();
@@ -92,10 +93,7 @@ const InventoryStatesDialog = ({ onClose, product, warehouse, data, purchaseOrde
                         <TableCell>{item?.managers?.map((e) => e.optionLabel)?.toString()}</TableCell>
                         <TableCell>
                           {irtTicketData?.find((d) => d.warehouse?.optionValue === item?.warehouse?.optionValue) ? (
-                            <Button
-                              variant={'contained'}
-                              color="primary"
-                              size="small"
+                            <ThemeButton 
                               onClick={() => {
                                 history.push(
                                   `${routes.irtTicketDetail.path}/${
@@ -104,20 +102,19 @@ const InventoryStatesDialog = ({ onClose, product, warehouse, data, purchaseOrde
                                 );
                               }}
                               startIcon={<FaEye />}
+                              buttonType='theme'
                             >
                               View
-                            </Button>
+                            </ThemeButton>
                           ) : (
-                            <Button
-                              variant={'contained'}
-                              color="primary"
-                              size="small"
+                            <ThemeButton 
                               onClick={() => {
                                 setIrtTicketDialog({ open: true, data: item });
                               }}
+                              buttonType='theme'
                             >
                               {`Create ${resources?.irtTicket?.titleSingular}`}
-                            </Button>
+                            </ThemeButton>
                           )}
                         </TableCell>
                       </TableRow>

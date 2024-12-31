@@ -336,11 +336,7 @@ const LeadDetailsPage = () => {
           <Box className="control-buttons-v1">
             {!isLeadAlreadyConvertedToOpportunity && hasPermissionToConvertToOpportunity && (
               <>
-                <Button
-                  variant={'contained'}
-                  color="primary"
-                  size="small"
-                  className={'no-shadow'}
+                <ThemeButton 
                   onClick={() => {
                     const leadName = [leadData.firstName, leadData.middleName, leadData.lastName].filter((d) => d).join(' ');
                     setConvertLeadToOpportunityConfirmationDialog({
@@ -350,9 +346,12 @@ const LeadDetailsPage = () => {
                       message: `Are you sure you want to convert ${leadName} to opportunity?`
                     });
                   }}
+                  buttonType='theme'
+                  iconForMobile={<FaSyncAlt size={15} />} 
+                  mobileTooltip={'Convert Lead To Opportunity'}
                 >
-                  {isMobile && !isTablet ? <FaSyncAlt size={15} /> : 'Convert Lead To Opportunity'}
-                </Button>
+                  {'Convert Lead To Opportunity'}
+                </ThemeButton>
               </>
             )}
             {leadsPermissions.isUpdate && allowedToEdit && (
