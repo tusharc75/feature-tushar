@@ -55,6 +55,11 @@ const SendMessage = ({
 
   useEffect(() => {
     numberOfMentions.current = 0;
+    if (!initialMessage) {
+      setMessage('');
+      setFiles([]);
+      setFilesWithUrl([]);
+    }
   }, [channelId]);
 
   const postMessage = async () => {
