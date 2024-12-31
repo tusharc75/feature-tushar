@@ -9,21 +9,29 @@ import { Column, Header, Table } from '@tanstack/react-table';
 
 export const childrenProperty = 'subRows';
 
-export const gridFilterParser = (filters) => {
+export const gridFilterParser = (filters, filterTerm = {}) => {
   const filterByIds: any = [];
   const deepFilters: any = [];
   if (!isEmpty(filters)) {
     Object.keys(filters).forEach((field) => {
+      const term = filterTerm[field] === '$nin' ? '$nin' : '$in';
       if (filters[field].operator && filters[field].condition1) {
         filterByIds.push({
           field: field,
-          term: { $in: filters[field].condition1?.filter?.map((e) => e.optionValue) }
+          term: { [term]: filters[field].condition1?.filter?.map((e) => e.optionValue) }
         });
       } else {
-        deepFilters.push({
-          field: field,
-          term: Array.isArray(filters[field].filter) ? filters[field].filter : filters[field].filter
-        });
+        if (term === '$nin') {
+          deepFilters.push({
+            field: field,
+            term: { [term]: filters[field].filter }
+          });
+        } else {
+          deepFilters.push({
+            field: field,
+            term: Array.isArray(filters[field].filter) ? filters[field].filter : filters[field].filter
+          });
+        }
       }
     });
   }
@@ -581,7 +589,9 @@ export const createFilterModel = (formValues, coloums) => {
   return Object.fromEntries(filterModel);
 };
 
-export const createFilterData = (coloums, filterByIds, deepFilters, filterTerm) => {
+export const createFilterData = (coloums, filterByIds, deepFilters) => {
+  const filterModel = new Map();
+
   const dateFields: any = [];
   coloums
     ?.filter((c) => c?.fieldData?.type === 'date')
@@ -590,65 +600,53 @@ export const createFilterData = (coloums, filterByIds, deepFilters, filterTerm) 
       dateFields.push(`to_${c?.fieldData?.fieldName}`);
     });
 
-  let filterById: any = [];
-  let deepFilter: any = [];
-
   if (filterByIds?.length > 0) {
-    filterById = filterByIds
+    filterByIds
       ?.filter((f) => f?.term?.length > 0)
       ?.map((f) => {
-        const term = filterTerm[f?.field] === '$nin' ? '$nin' : '$in';
-        return {
-          field: f?.field,
-          term: {
-            [term]: f?.term?.map?.((d: any) => d.optionValue)
+        filterModel.set(f?.field, {
+          operator: 'OR',
+          condition1: {
+            filter: f?.term ?? []
           }
-        };
+        });
       });
   }
 
   if (deepFilters?.length > 0) {
-    deepFilter = [
-      ...deepFilter,
-      ...deepFilters
-        ?.filter((d) => {
-          const hasTermLength = d?.term?.length ? true : false;
-          if (dateFields?.length > 0) {
-            return hasTermLength && !dateFields?.includes(d?.field);
-          }
-          return hasTermLength;
-        })
-        ?.map((d) => {
-          if (filterTerm[d?.field] === '$nin' && Array.isArray(d?.term)) {
-            return {
-              ...d,
-              term: { $nin: d?.term }
-            };
-          }
-          return d;
-        })
-    ];
+    deepFilters
+      ?.filter((d) => {
+        const hasTermLength = d?.term?.length ? true : false;
+        if (dateFields?.length > 0) {
+          return hasTermLength && !dateFields?.includes(d?.field);
+        }
+        return hasTermLength;
+      })
+      ?.map((d) => {
+        filterModel.set(d?.field, { filter: d?.term });
+      });
 
     coloums
       ?.filter((c) => c?.fieldData?.type === 'date')
       ?.map((f) => {
         if (deepFilters?.some((d) => [`from_${f?.fieldData?.fieldName}`, `to_${f?.fieldData?.fieldName}`].includes(d?.field))) {
-          deepFilter.push({
-            field: f?.fieldData?.fieldName,
-            term: {
-              from: deepFilters?.find((d) => d?.field === `from_${f?.fieldData?.fieldName}`)
-                ? deepFilters?.find((d) => d?.field === `from_${f?.fieldData?.fieldName}`)?.term
-                : null,
-              to: deepFilters?.find((d) => d?.field === `to_${f?.fieldData?.fieldName}`)
-                ? deepFilters?.find((d) => d?.field === `to_${f?.fieldData?.fieldName}`)?.term
-                : null
+          const fromDate = deepFilters?.find((d) => d?.field === `from_${f?.fieldData?.fieldName}`)
+            ? deepFilters?.find((d) => d?.field === `from_${f?.fieldData?.fieldName}`)?.term
+            : null;
+          const toDate = deepFilters?.find((d) => d?.field === `to_${f?.fieldData?.fieldName}`)
+            ? deepFilters?.find((d) => d?.field === `to_${f?.fieldData?.fieldName}`)?.term
+            : null;
+          filterModel.set(f?.fieldData?.fieldName, {
+            filter: {
+              from: fromDate,
+              to: toDate
             }
           });
         }
       });
   }
 
-  return { filterById, deepFilter };
+  return Object.fromEntries(filterModel);
 };
 
 export const createFilterSetData = (val, columns) => {

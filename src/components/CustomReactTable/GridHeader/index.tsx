@@ -13,10 +13,10 @@ import { Table } from '@tanstack/react-table';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { ExportIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
-import { createFilterData, createFilterSetData, fetchFieldOptions } from '../utils';
+import { createFilterData, createFilterSetData, fetchFieldOptions, filtermodelToFormValue } from '../utils';
 import { useUserTempFilters } from 'src/components/CustomReactTable/GridFilter/utils';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import DisplayFilterChip from 'src/pages/Reports/tables/DisplayFilterChip';
+import DisplayFilters from 'src/components/CustomReactTable/DisplayFilters';
 
 type GridHeaderProps = {
   resource: any;
@@ -61,15 +61,25 @@ const GridHeader = ({
 }: GridHeaderProps) => {
   const toastConfig = useContext(CustomToastContext);
   const { selectedRecords, loading, filters: customFilters, dataRows }: TInitialState = state;
+  const { getTempFilter, setTempFilter } = useUserTempFilters();
 
   const isMobileView = useMediaQuery('(max-width:768px)');
 
   const [selectedFilter, setSelectedFilter] = useState(null);
+  const [currentFomValue, setCurrentFomValue] = useState({});
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [coloums, setColoums] = useState(null);
   const [deepFilters, setDeepFilters] = useState([]);
   const [filterByIds, setFilterByIds] = useState([]);
   const [filterTerm, setFilterTerm] = useState({});
+
+  useEffect(() => {
+    const filters = getTempFilter(resource);
+    if (filters) {
+      if (filters.formValues) setCurrentFomValue(filters.formValues);
+      if (filters.filters) dispatch({ type: 'filter', filters: filters.filters });
+    }
+  }, [dispatch, resource]);
 
   const handleFilterOpen = () => {
     setIsFilterOpen(true);
@@ -79,14 +89,18 @@ const GridHeader = ({
     setIsFilterOpen(false);
   };
 
-  const handleApplyFilter = (filterByIdsP = filterByIds, deepFiltersP = deepFilters) => {
-    const { filterById, deepFilter } = createFilterData(coloums, filterByIdsP, deepFiltersP, filterTerm);
-    dispatch({ type: 'filter', filters: { filterByIds: filterById, deepFilters: deepFilter } });
+  const handleApplyFilter = () => {
+    const filters = createFilterData(coloums, filterByIds, deepFilters);
+    const fromValue = filtermodelToFormValue(filters);
+    dispatch({ type: 'filter', filters, filterTerm });
+    setTempFilter(resource, { formValues: fromValue || {}, filters });
+    setCurrentFomValue(fromValue);
     handleFilterClose();
   };
 
   useEffect(() => {
     if (!resource || !showFilters) return;
+    const filters = getTempFilter(resource);
     const applyDefaultFilter = async () => {
       try {
         const responce: any = await axiosInstance().get(`/user-resource-filter?resource=${resource}`);
@@ -95,19 +109,25 @@ const GridHeader = ({
           const columns = await fetchFieldOptions({ resource, sidebarResource, toastConfig });
           if (columns.length === 0) return;
           const { filterById, deepFilter } = createFilterSetData(defaultFilter, columns);
-          const { filterById: filterByIdP, deepFilter: deepFilterP } = createFilterData(coloums, filterById, deepFilter, defaultFilter?.filterTerm);
           setSelectedFilter(defaultFilter);
           setFilterByIds(filterById);
           setDeepFilters(deepFilter);
           setFilterTerm(defaultFilter?.filterTerm || {});
-          dispatch({ type: 'filter', filters: { filterByIds: filterByIdP, deepFilters: deepFilterP } });
-          if (defaultFilter.sortBy && deepFilterP?.length > 0) {
-            dispatch({
-              type: 'sort',
-              sorting: [{ colId: defaultFilter.sortBy, sort: defaultFilter.orderBy ?? 'asc' }],
-              loading: isClientSideGrid ? false : true
-            });
+          let deepFilterP;
+          if (defaultFilter?.filterValue) deepFilterP = createFilterData(coloums, filterById, deepFilter);
+          if (defaultFilter && deepFilterP) {
+            dispatch({ type: 'filter', filters: deepFilterP });
+            if (defaultFilter.sortBy) {
+              dispatch({
+                type: 'sort',
+                sorting: [{ colId: defaultFilter.sortBy, sort: defaultFilter.orderBy ?? 'asc' }],
+                loading: isClientSideGrid ? false : true
+              });
+            }
           }
+        } else if (filters) {
+          if (filters.formValues) setCurrentFomValue(filters.formValues);
+          if (filters.filters) dispatch({ type: 'filter', filters: filters.filters });
         }
       } catch (error) {
         toastConfig.setToastConfig(error);
@@ -129,16 +149,24 @@ const GridHeader = ({
             />
           )}
           {topLeftSlot}
-          <DisplayFilterChip
-            filterTerm={filterTerm}
-            resourceColumns={coloums ? coloums : []}
-            deepFilters={deepFilters}
+          <DisplayFilters
+            columns={newColumns}
+            customColumns={coloums}
+            customFilters={customFilters}
+            dispatchTable={dispatch}
+            showFilters={showFilters}
+            handleFilterOpen={handleFilterOpen}
+            selectedFilter={selectedFilter}
+            setSelectedFilter={setSelectedFilter}
+            currentFomValue={currentFomValue}
+            setCurrentFomValue={setCurrentFomValue}
+            resource={resource}
             filterByIds={filterByIds}
-            fetchResourceData={(deepFilter, filterById) => {
-              handleApplyFilter(filterById, deepFilter);
-            }}
-            setDeepFilters={setDeepFilters}
             setFilterByIds={setFilterByIds}
+            deepFilters={deepFilters}
+            setDeepFilters={setDeepFilters}
+            filterTerm={filterTerm}
+            setFilterTerm={setFilterTerm}
           />
         </div>
         {isFilterOpen && (
