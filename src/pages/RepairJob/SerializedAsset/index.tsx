@@ -1,4 +1,4 @@
-import { Button, IconButton, Menu, MenuItem } from '@mui/material';
+import { IconButton, Menu, MenuItem } from '@mui/material';
 import Box from '@mui/material/Box/Box';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -37,6 +37,7 @@ import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import RepairProcess from '../RepairProcess';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const SerializedAsset = ({
   repairJobData,
@@ -401,18 +402,14 @@ const SerializedAsset = ({
       <>
         {allowedToEdit && alloweOperation && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
           <Fragment>
-            <Button
-              variant="outlined"
-              color="primary"
-              aria-controls="simple-menu"
-              aria-haspopup="true"
+            <ThemeButton
+              buttonType="transparent"
               disabled={selectedRecords.length === 0 || !allowUpdateStatus}
-              size="small"
               onClick={handleClick}
               endIcon={<ArrowDropDownIcon />}
             >
               Change Status
-            </Button>
+            </ThemeButton>
             <Menu
               id="simple-menu"
               anchorEl={anchorEl}
@@ -457,10 +454,8 @@ const SerializedAsset = ({
                 {ASSET_STATUS.lost}
               </MenuItem>
             </Menu>
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
+            <ThemeButton
+              buttonType="theme"
               disabled={
                 selectedRecords.length === 0 ||
                 selectedRecords.some((s) => !s?.canRepair || s.repairTypeId || [ASSET_STATUS.scrap, ASSET_STATUS.needRepair].includes(s.status)) ||
@@ -474,7 +469,7 @@ const SerializedAsset = ({
               }}
             >
               {isMobile && !isTablet ? 'Complete' : 'Complete Repair'}
-            </Button>
+            </ThemeButton>
           </Fragment>
         )}
         {user.user?.brandPolicy?.repairJobSendSupplierRequired && (

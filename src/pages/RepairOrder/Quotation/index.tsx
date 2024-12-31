@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, Menu, MenuItem, Typography, useMediaQuery } from '@mui/material';
+import { Box, IconButton, Menu, MenuItem, Typography, useMediaQuery } from '@mui/material';
 import { ExpandMore } from '@mui/icons-material';
 import EditIcon from '@mui/icons-material/Edit';
 import { capitalize, isArray } from 'lodash';
@@ -373,15 +373,14 @@ const Quotation = ({
 
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
+      _subRow.detail = `${_subRow.type === 'serializedAsset'
           ? _subRow.serializedAssetDetail?.assetNumber
           : _subRow.type === 'product'
             ? _subRow.productDetail?.productName
             : _subRow.type === 'service'
               ? _subRow.serviceDetail?.serviceName
               : _subRow.packageDetail?.packageName
-      }`;
+        }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
@@ -665,8 +664,8 @@ const Quotation = ({
             <Box display={'flex'} gap={8}>
               {repairOrderData?.addQuotationStep &&
                 (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-                quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
-                  <Button
+                  quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+                  <ThemeButton
                     disabled={material
                       .filter((e) => e.parentId === null)
                       .some(
@@ -676,53 +675,47 @@ const Quotation = ({
                           d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined
                       )}
                     onClick={handleSendToCustomer}
-                    variant="contained"
-                    size="small"
-                    color="primary"
+                    buttonType="theme"
                   >
                     Process Quotation
-                  </Button>
+                  </ThemeButton>
                 ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
-                  <Button
+                  <ThemeButton
                     onClick={() => {
                       setCustomerAcceptable(true);
                     }}
-                    variant="contained"
-                    size="small"
+                    buttonType="theme"
                     className="mx-1"
-                    color="primary"
                   >
                     Accept / Reject
-                  </Button>
+                  </ThemeButton>
                 ) : [QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.acceptByCustomer].includes(
-                    quotationData?.versions[currentVersion]?.status
-                  ) ? (
-                  <Button
+                  quotationData?.versions[currentVersion]?.status
+                ) ? (
+                  <ThemeButton
                     onClick={() => {
                       cloneVersion();
                     }}
-                    variant="contained"
-                    size="small"
+                    buttonType="theme"
                     className="mx-1"
-                    color="primary"
                   >
                     Create New Version
-                  </Button>
+                  </ThemeButton>
                 ) : null)}
               {![QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                 quotationData?.versions[currentVersion]?.status
               ) && (
-                <ThemeButton
-                  mobileTooltip="Actions"
-                  buttonType="yellow"
-                  iconForMobile={<ExpandMore />}
-                  onClick={openActions}
-                  disabled={selectedRecords?.length === 0}
-                  endIcon={<ExpandMore />}
-                >
-                  Actions
-                </ThemeButton>
-              )}
+                  <ThemeButton
+                    mobileTooltip="Actions"
+                    buttonType="yellow"
+                    iconForMobile={<ExpandMore />}
+                    onClick={openActions}
+                    disabled={selectedRecords?.length === 0}
+                    endIcon={<ExpandMore />}
+                  >
+                    Actions
+                  </ThemeButton>
+                )}
               <Menu
                 anchorEl={anchorEl}
                 keepMounted

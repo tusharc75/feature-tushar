@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Dialog, Button, Box, TextField, Paper, useTheme } from '@mui/material';
+import { Dialog, Box, TextField, Paper } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { useHistory } from 'react-router-dom';
 import { Autocomplete, Skeleton } from '@mui/material';
@@ -223,12 +223,12 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
             </Grid>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button variant="outlined" size="small" color="primary" disabled={loading}>
+            <ThemeButton buttonType="theme" disabled={loading}>
               Cancel
-            </Button>
-            <Button variant="contained" size="small" color="primary" disabled={loading}>
+            </ThemeButton>
+            <ThemeButton buttonType="theme" disabled={loading}>
               Submit
-            </Button>
+            </ThemeButton>
           </CustomDialogFooter>
         </>
       ) : (
