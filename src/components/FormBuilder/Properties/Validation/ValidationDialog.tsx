@@ -1,4 +1,5 @@
-import { Box, Button, Dialog, TextField } from '@mui/material';
+import { Box, Dialog, TextField } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Form, Formik } from 'formik';
 import { useEffect, useState } from 'react';
@@ -163,12 +164,12 @@ const ValidationDialog = ({ onClose, data, fields, fieldsToExclude, fieldValue, 
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button size="small" onClick={onClose} color="primary">
+                <ThemeButton buttonType='transparent' onClick={onClose}>
                   Cancel
-                </Button>
-                <Button size="small" type="submit" color="primary" variant="contained" onClick={submitForm}>
+                </ThemeButton>
+                <ThemeButton buttonType='theme' onClick={submitForm}>
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
             </>
           )}

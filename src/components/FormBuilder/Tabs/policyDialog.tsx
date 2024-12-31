@@ -1,5 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Button, CircularProgress, Dialog, FormControlLabel, Checkbox, TextField, IconButton, Typography, Grid } from '@mui/material';
+import { Box, CircularProgress, Dialog, FormControlLabel, Checkbox, TextField, IconButton, Typography } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Grid from '@mui/material/Grid2';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -166,20 +168,17 @@ const PolicyDialog = ({ resourceData, resource, onClose, onSuccess }) => {
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button size="small" color="primary" onClick={onClose}>
+                <ThemeButton buttonType="transparent" onClick={onClose}>
                   Cancel
-                </Button>
-                <Button
+                </ThemeButton>
+                <ThemeButton
                   disabled={isSubmitting}
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  type="submit"
+                  buttonType="theme"
                   onClick={submitForm}
                   endIcon={isSubmitting && <CircularProgress color="inherit" size={18} />}
                 >
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
             </>
           )}
@@ -225,7 +224,7 @@ const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource
       <>
         {!loading ? (
           <Grid container spacing={2}>
-            <Grid item lg={6} md={6} sm={6} xs={12}>
+            <Grid size={{lg:6, md:6, sm:6, xs:12}}>
               <DropDownField
                 options={options}
                 error={null}
@@ -259,7 +258,7 @@ const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource
     }
     return (
       <Grid container spacing={2}>
-        <Grid item lg={6} md={6} sm={6} xs={12}>
+        <Grid size={{lg:6, md:6, sm:6, xs:12}}>
           <Autocomplete
             fullWidth
             size="small"

@@ -1,4 +1,6 @@
-import { Box, Button, Checkbox, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select, TextField } from '@mui/material';
+import { Box, Checkbox, FormControl, FormControlLabel, InputLabel, MenuItem, Select, TextField } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Grid from '@mui/material/Grid2';
 import IconButton from '@mui/material/IconButton';
 import SettingsIcon from '@mui/icons-material/Settings';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -55,7 +57,7 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
   return (
     <Box>
       <Grid container spacing={1}>
-        <Grid item xs={10} md={10} sm={10}>
+        <Grid size={{ xs: 10, md: 10, sm: 10 }}>
           <TextField
             variant="outlined"
             type="text"
@@ -74,7 +76,7 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
             }}
           />
         </Grid>
-        <Grid item xs={2} md={2} sm={2} container justify="flex-end">
+        <Grid size={{ xs: 2, md: 2, sm: 2 }} container justifyContent="flex-end">
           <HtmlTooltip title="Change Field Name">
             <IconButton aria-label="setting" onClick={handleClick} size="small">
               <SettingsIcon color="primary" fontSize="small" />
@@ -96,7 +98,7 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
       )}
       <Box>
         <Grid container>
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <FormControlLabel
               control={
                 <Checkbox
@@ -111,7 +113,7 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
               label="Required"
             />
           </Grid>
-          <Grid item xs={12} md={6}></Grid>
+          <Grid size={{ xs: 12, md: 6 }}></Grid>
         </Grid>
       </Box>
       {(module === 'product-template' || module === 'price-template') && (
@@ -150,7 +152,7 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
         values['type'] === 'currencyAmount') && (
         <Grid spacing={3} container>
           {values['type'] === 'formula' && (
-            <Grid item xs={12} sm={6} md={6}>
+            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
               <FormControl fullWidth margin="dense" size="small" variant="outlined">
                 <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
                 <Select
@@ -176,7 +178,7 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
             values['type'] === 'percent' ||
             values['type'] === 'currencyAmount' ||
             values['returnType'] === 'decimal') && (
-            <Grid item xs={12} sm={6} md={6}>
+            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
               <DecimalPlaces
                 values={values}
                 setFieldValue={(name, value) => {
@@ -512,16 +514,14 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
       {fieldData.type === 'description' && <Description values={htmlDescription} setFieldValue={setFieldValue} />}
       {fieldData.type === 'counter' && (
         <Box mt={1}>
-          <Button
-            variant="contained"
-            size="small"
-            color="primary"
+          <ThemeButton
+            buttonType="theme"
             onClick={() => {
               setSubFieldOpen(true);
             }}
           >
             Counter Sub Fields
-          </Button>
+          </ThemeButton>
         </Box>
       )}
       {subFieldOpen && (

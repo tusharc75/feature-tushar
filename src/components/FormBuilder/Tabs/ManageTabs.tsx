@@ -1,4 +1,5 @@
-import { Box, Button, CircularProgress, Dialog, TextField } from '@mui/material';
+import { Box, CircularProgress, Dialog, TextField } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
@@ -133,7 +134,7 @@ const ManageTabs = ({ onClose, data, onSuccess, resource, resourceId, workflowId
                     name="tabName"
                     fullWidth
                     margin="dense"
-                    size='small'
+                    size="small"
                     value={values['tabName']}
                     error={touched['tabName'] && Boolean(errors['tabName'])}
                     helperText={touched['tabName'] && errors['tabName']}
@@ -154,7 +155,7 @@ const ManageTabs = ({ onClose, data, onSuccess, resource, resourceId, workflowId
                       <TextField
                         {...params}
                         margin="dense"
-                        size='small'
+                        size="small"
                         variant="outlined"
                         label="Steps Style"
                         placeholder="Steps Style"
@@ -169,9 +170,8 @@ const ManageTabs = ({ onClose, data, onSuccess, resource, resourceId, workflowId
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button
-                size="small"
-                color="primary"
+              <ThemeButton
+                buttonType="transparent"
                 disabled={isSubmitting}
                 onClick={() => {
                   if (isEqual(initialValues, values)) onClose();
@@ -179,19 +179,16 @@ const ManageTabs = ({ onClose, data, onSuccess, resource, resourceId, workflowId
                 }}
               >
                 Cancel
-              </Button>
-              <Button
+              </ThemeButton>
+              <ThemeButton
                 disabled={isSubmitting}
-                variant="contained"
-                color="primary"
-                size="small"
-                type="submit"
+                buttonType="theme"
                 onClick={submitForm}
                 endIcon={isSubmitting && <CircularProgress color="inherit" size={18} />}
               >
                 {' '}
                 Save
-              </Button>
+              </ThemeButton>
             </CustomDialogFooter>
 
             {showConfirmDialog ? (
