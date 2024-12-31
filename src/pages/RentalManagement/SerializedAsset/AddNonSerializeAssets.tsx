@@ -1,8 +1,6 @@
 import { makeStyles } from '@mui/styles';
 import {
   Box,
-  Button,
-  CircularProgress,
   Dialog,
   Link,
   Paper,
@@ -26,6 +24,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { read, utils, writeFile } from 'xlsx';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { addAssetsInRental } from '../rentalOfflineHelper';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 interface DialogProps {
   closeDialog: () => void;
@@ -222,16 +221,13 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
       <CustomDialogContent isFooterPresent={false}>
         <Box display="flex" flexDirection="column" component={'form'} onSubmit={handleSubmit}>
           <Box alignSelf={'flex-end'} mb={2}>
-            <Button
-              type="submit"
-              variant="contained"
-              size="small"
-              color="primary"
-              endIcon={isSubmitting && <CircularProgress size={18} />}
+            <ThemeButton
               disabled={isSubmitting || dataWithNumber.length === 0}
+              buttonType='theme'
+              isLoading={isSubmitting}
             >
               Add
-            </Button>
+            </ThemeButton>
           </Box>
           <Box display="flex" justifyContent="space-between" alignItems="center">
             <Box mb={1} display="flex">

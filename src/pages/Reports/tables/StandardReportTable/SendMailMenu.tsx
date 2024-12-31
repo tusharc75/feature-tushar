@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Menu, MenuItem, Button, CircularProgress } from '@mui/material';
+import { Menu, MenuItem } from '@mui/material';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const SendMailMenu = ({ exportData, isProcessing }) => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -19,20 +20,14 @@ const SendMailMenu = ({ exportData, isProcessing }) => {
     <>
       <HtmlTooltip title={'Send Mail'} placement="top" arrow enterTouchDelay={0}>
         <span>
-          <Button
-            onClick={(e) => handleClick(e)}
-            endIcon={<ArrowDropDownIcon />}
-            variant={'outlined'}
-            color="primary"
-            aria-controls="simple-menu"
-            aria-haspopup="true"
-            className="min-h-[32px]"
-            size="small"
+          <ThemeButton
             disabled={isProcessing === 'sendMail'}
-            startIcon={isProcessing === 'sendMail' && <CircularProgress color="inherit" size={18} />}
+            buttonType='theme'
+            isLoading={isProcessing}
+            onClick={(e) => handleClick(e)}
           >
             Send Mail
-          </Button>
+          </ThemeButton>
         </span>
       </HtmlTooltip>
       <Menu

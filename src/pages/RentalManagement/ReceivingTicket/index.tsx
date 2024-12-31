@@ -1,4 +1,4 @@
-import { Button, CircularProgress, Dialog, IconButton, Menu, MenuItem, TextField, Theme } from '@mui/material';
+import { Button, Dialog, IconButton, Menu, MenuItem, TextField, Theme } from '@mui/material';
 import Box from '@mui/material/Box/Box';
 import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
@@ -79,6 +79,7 @@ import ChangePreviousAssetDataDialog from 'src/pages/RentalManagement/LoadingTic
 import GpsLocationCell from 'src/components/CustomReactTable/Cells/GpsLocationCell';
 import WarningIcon from '@mui/icons-material/Warning';
 import FreeStyleMultiSelect from 'src/components/CustomReactTable/Cells/FreeStyleMultiSelect';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -2520,13 +2521,19 @@ const ReceivingTicket = ({
             </Box>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button size="small" variant="outlined" color="primary" onClick={() => setStatusToUpdate((prevState) => ({ ...prevState, open: false }))}>
-              Cancel
-            </Button>
-            <Button size="small" onClick={handleChangeStatus} disabled={statusToUpdate.isUpdating} variant="contained" color="primary">
-              {statusToUpdate.isUpdating ? <CircularProgress style={{ marginRight: '8px' }} size={20} color="inherit" /> : null}
-              Change Status
-            </Button>
+            <ThemeButton
+                onClick={() => setStatusToUpdate((prevState) => ({ ...prevState, open: false }))}
+                buttonType='transparent'
+              >
+                Cancel
+              </ThemeButton>
+              <ThemeButton
+                disabled={statusToUpdate.isUpdating}
+                buttonType='theme'
+                isLoading={statusToUpdate.isUpdating}
+              >
+                Change Status
+              </ThemeButton>
           </CustomDialogFooter>
         </Dialog>
       )}

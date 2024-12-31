@@ -2,7 +2,7 @@ import Box from '@mui/material/Box/Box';
 import { useState, useEffect, useContext } from 'react';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import Grid from '@mui/material/Grid2';
-import { Button, CircularProgress, Dialog } from '@mui/material';
+import { Dialog } from '@mui/material';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomDialogTransition, gridLoadingTimeout, rentalManagement, ASSET_STATUS } from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
@@ -14,6 +14,7 @@ import ManageRentalManagementDialog from '../ManageRental';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import AssetDetailsChangeDialog from 'src/pages/RentalManagement/ReceivingTicket/AssetDetailsChangeDialog';
 import PackageDialog from 'src/pages/RentalManagement/ReceivingTicket/PackageDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const renderedFrom = 'rental_management_existing';
 
@@ -175,29 +176,24 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
       <div className="listing-grid p-3">
         <Box mb={2}>
           <Grid size={{xs:12, sm:12, md:12}} container justifyContent={'flex-end'}>
-            <Button
-              size="small"
-              color="primary"
+            <ThemeButton
               onClick={() => {
                 setShowRentalDialog(true);
               }}
-              variant="contained"
+              buttonType='transparent'
             >
               {`Create ${resources?.rentalManagement?.titleSingular}`}
-            </Button>
-            <Box mx={1} />
-            <Button
-              size="small"
-              color="primary"
+            </ThemeButton>
+            <ThemeButton
+              disabled={isSubmitting || selectedRecords.length > 1 || selectedRecords.length === 0}
+              buttonType='theme'
+              isLoading={isSubmitting}
               onClick={() => {
                 setOpenPackageDialog(true);
               }}
-              variant={'contained'}
-              disabled={isSubmitting || selectedRecords.length > 1 || selectedRecords.length === 0}
-              endIcon={isSubmitting && <CircularProgress color="inherit" size={18} />}
             >
               {`Perform Transfer`}
-            </Button>
+            </ThemeButton>
           </Grid>
         </Box>
         {columns ? (
