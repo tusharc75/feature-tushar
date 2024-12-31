@@ -1,3 +1,4 @@
+import CloseIcon from '@mui/icons-material/Close';
 import {
   Box,
   Checkbox,
@@ -12,11 +13,11 @@ import {
   TableRow,
   TextField
 } from '@mui/material';
-import { ExpandMore } from '@mui/icons-material';
 import Autocomplete from '@mui/material/Autocomplete';
+import dayjs from 'dayjs';
 import { camelCase, groupBy } from 'lodash';
 import moment from 'moment';
-import React, { forwardRef, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import { forwardRef, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { View, dayjsLocalizer } from 'react-big-calendar';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -25,15 +26,13 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import CustomCalendar from 'src/components/CustomCalendar';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { cn, displayDate, sidebarResource } from 'src/constants/helpers';
 import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
 import './calendarView.scss';
-import CloseIcon from '@mui/icons-material/Close';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import dayjs from 'dayjs';
 
 const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
@@ -47,57 +46,57 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const FILTERS = [
     ...(permissions?.warehouse?.isRead
       ? [
-        {
-          label: resources?.warehouse?.titlePlural,
-          value: 'Warehouse',
-          key: 'warehouse'
-        }
-      ]
+          {
+            label: resources?.warehouse?.titlePlural,
+            value: 'Warehouse',
+            key: 'warehouse'
+          }
+        ]
       : []),
     ...(permissions?.product?.isRead
       ? [
-        {
-          label: resources?.product?.titlePlural,
-          value: 'Product',
-          key: 'product'
-        }
-      ]
+          {
+            label: resources?.product?.titlePlural,
+            value: 'Product',
+            key: 'product'
+          }
+        ]
       : []),
     ...(permissions?.serializedAsset?.isRead
       ? [
-        {
-          label: resources?.serializedAsset?.titlePlural,
-          value: 'Serialized Asset',
-          key: 'asset'
-        }
-      ]
+          {
+            label: resources?.serializedAsset?.titlePlural,
+            value: 'Serialized Asset',
+            key: 'asset'
+          }
+        ]
       : []),
     ...(permissions?.serviceMaster?.isRead
       ? [
-        {
-          label: resources?.serviceMaster?.titlePlural,
-          value: 'Service Master',
-          key: 'service'
-        }
-      ]
+          {
+            label: resources?.serviceMaster?.titlePlural,
+            value: 'Service Master',
+            key: 'service'
+          }
+        ]
       : []),
     ...(permissions?.customerAccount?.isRead
       ? [
-        {
-          label: resources?.customerAccount?.titlePlural,
-          value: 'Customer Account',
-          key: 'customerAccount'
-        }
-      ]
+          {
+            label: resources?.customerAccount?.titlePlural,
+            value: 'Customer Account',
+            key: 'customerAccount'
+          }
+        ]
       : []),
     ...(permissions?.competencies?.isRead
       ? [
-        {
-          label: resources?.competencies?.titlePlural,
-          value: 'Competencies',
-          key: 'competencies'
-        }
-      ]
+          {
+            label: resources?.competencies?.titlePlural,
+            value: 'Competencies',
+            key: 'competencies'
+          }
+        ]
       : [])
   ];
 
@@ -765,12 +764,20 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 renderOption={(props, option, state, ownerState) => {
                   const { key, ...optionProps } = props;
                   return (
-                  <Box component="li" key={key} {...optionProps} display={'flex'} alignItems={'center'} justifyContent={'space-between'} width={'100%'}>
-                    <Checkbox style={{ marginRight: 8 }} checked={selectedFilters?.some((_s) => _s.key === option.key)} />
-                    {ownerState.getOptionLabel(option)}
-                  </Box>
-                )
-              }}
+                    <Box
+                      component="li"
+                      key={key}
+                      {...optionProps}
+                      display={'flex'}
+                      alignItems={'center'}
+                      justifyContent={'space-between'}
+                      width={'100%'}
+                    >
+                      <Checkbox style={{ marginRight: 8 }} checked={selectedFilters?.some((_s) => _s.key === option.key)} />
+                      {ownerState.getOptionLabel(option)}
+                    </Box>
+                  );
+                }}
                 size="small"
                 renderInput={(params) => <TextField {...params} label="Filters" variant="outlined" />}
                 value={selectedFilters}
@@ -878,7 +885,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               </div>
               {isOpen.data?.map((d) => (
                 <Accordion key={d.key} defaultExpanded>
-                  <AccordionSummary expandIcon={<ExpandMore />}>
+                  <AccordionSummary>
                     <h6 className=" text-sm font-semibold">{d.heading}</h6>
                   </AccordionSummary>
                   <AccordionDetails>
