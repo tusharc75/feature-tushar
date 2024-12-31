@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Box, Button, TextField } from '@mui/material';
+import { Box, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import Dialog from '@mui/material/Dialog';
 import { CustomDialogTransition, productInventory, sidebarResource } from '../../../constants/helpers';
@@ -10,6 +10,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import AddSerialNumber from './AddSerialNumber';
 import Autocomplete from '@mui/material/Autocomplete';
 import { useData } from 'src/StateProvider/Provider';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const SerialNumberDialog = ({ close, product, warehouse, productName }) => {
   const {
@@ -62,7 +63,7 @@ const SerialNumberDialog = ({ close, product, warehouse, productName }) => {
       <CustomDialogHeader title={`Serial Numbers - ${productName}`} onClose={close} showRequiredLabel={false}></CustomDialogHeader>
       <CustomDialogContent isFooterPresent={false}>
         <Grid container spacing={3}>
-          <Grid size={{xs:6, sm:6}}>
+          <Grid size={{ xs: 6, sm: 6 }}>
             {warehouseOptions && (
               <Autocomplete
                 options={warehouseOptions}
@@ -86,21 +87,18 @@ const SerialNumberDialog = ({ close, product, warehouse, productName }) => {
               />
             )}
           </Grid>
-          <Grid size={{xs:6, sm:6}}>
+          <Grid size={{ xs: 6, sm: 6 }}>
             <Grid container direction="row" justifyContent="flex-end" alignItems="center">
               {serialNumberCount ? (
                 <Box>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
+                  <ThemeButton
+                    buttonType='theme'
                     onClick={() => {
                       setAddserialNumber(true);
                     }}
-                    aria-controls="action-menu"
                   >
                     Add Serial Numbers
-                  </Button>
+                  </ThemeButton>
                 </Box>
               ) : null}
             </Grid>

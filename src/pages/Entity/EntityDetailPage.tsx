@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, IconButton, Typography } from '@mui/material';
+import { Box, Dialog, IconButton, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { ControlPoint } from '@mui/icons-material';
 import EditIcon from '@mui/icons-material/Edit';
@@ -291,9 +291,9 @@ const EntityDetailsPage = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-          id: user._id,
-          name: `${user.firstName} ${user.lastName}`
-        }))
+        id: user._id,
+        name: `${user.firstName} ${user.lastName}`
+      }))
       : [];
 
     setUserList(rows);
@@ -342,9 +342,9 @@ const EntityDetailsPage = () => {
                   {'DOA Details '}
                 </Typography>
                 {permissions.entity?.isUpdate && (
-                  <Button variant="contained" className="float-right-button-v1" color="primary" size="small" onClick={() => setDoaDialogOpen(true)}>
+                  <ThemeButton buttonType='theme' onClick={() => setDoaDialogOpen(true)}>
                     {doa.length > 0 ? 'Edit DOA' : 'Add DOA'}
-                  </Button>
+                  </ThemeButton>
                 )}
               </Box>
               <Box className="formdata-v1">
@@ -410,7 +410,7 @@ const EntityDetailsPage = () => {
                     {users.length > showRecordsBeforeViewAll && (
                       <>
                         <Box marginY={2} />
-                        <Button
+                        <ThemeButton
                           onClick={() =>
                             history.push(`/user`, {
                               id: entityData._id,
@@ -419,12 +419,11 @@ const EntityDetailsPage = () => {
                               text: 'Entity'
                             })
                           }
-                          variant="outlined"
-                          className="accordion-outlined-button"
+                          fullWidth
                           startIcon={<FaEye />}
                         >
                           View All &#8599;
-                        </Button>
+                        </ThemeButton>
                       </>
                     )}
                   </>

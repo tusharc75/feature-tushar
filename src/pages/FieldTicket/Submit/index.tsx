@@ -1,4 +1,4 @@
-import { Box, Button, IconButton } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import HistoryIcon from '@mui/icons-material/History';
 import { camelCase, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
@@ -22,6 +22,7 @@ import { generateFieldTicketSubmit, generateFieldTicketReopen } from '../walkmeS
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { findAll, objectStore } from 'src/constants/indexdbhelper';
 import { useData } from 'src/StateProvider/Provider';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, resourcePolicy }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Submit`;
@@ -261,22 +262,20 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
         {allowedToEdit && fieldTicketSubmitFields?.some((f) => f?.isRead) && (
           <Fragment>
             {(fieldTicketData.status === FIELD_TICKET_STATUS.new || fieldTicketData.status === FIELD_TICKET_STATUS.inProgress) && (
-              <Button
+              <ThemeButton
                 id={'submit-field-ticket'}
-                variant="contained"
-                color="primary"
-                size="small"
+                buttonType='theme'
                 onClick={() => {
                   setSubmitDialog(true);
                 }}
               >
                 Submit
-              </Button>
+              </ThemeButton>
             )}
             {fieldTicketData.status === FIELD_TICKET_STATUS.readyToInvoice && !isOffline && (
-              <Button variant="contained" color="primary" size="small" onClick={() => setCommentDialog(true)} id={'reopen-field-ticket'}>
+              <ThemeButton buttonType='theme' onClick={() => setCommentDialog(true)} id={'reopen-field-ticket'}>
                 Re-Open
-              </Button>
+              </ThemeButton>
             )}
           </Fragment>
         )}

@@ -4,9 +4,9 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@mui/material/Grid2';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CHILD_RESOURCE, MATERIAL_TYPE, asyncForEach, fieldTicket, restoreObjKeysWithValues, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, fieldTicket, restoreObjKeysWithValues, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Button, IconButton, MenuItem, TextField } from '@mui/material';
+import { IconButton, MenuItem, TextField } from '@mui/material';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -35,6 +35,7 @@ import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineCo
 import { deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
 import HideWhenOffline from 'src/components/HideWhenOffline';
 import { FiExternalLink } from 'react-icons/fi';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, stepFullScreen, fetchData: fetchFieldTicketData, refreshChild }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Consumables`;
@@ -611,15 +612,13 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
     return (
       <>
         <HideWhenOffline>
-          <Button
+          <ThemeButton
             disabled={!Boolean(selectedRecords?.length)}
             onClick={() => setOpenConsumablesQtyDialog(true)}
-            color="primary"
-            size="small"
-            variant="contained"
+            buttonType='theme'
           >
             {consumeRequest ? 'Request ' : 'Consume '} {selectedRecords?.length > 0 ? '(' + selectedRecords?.length + ')' : ''}
-          </Button>
+          </ThemeButton>
         </HideWhenOffline>
       </>
     );
@@ -702,7 +701,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
             </>
           )}
           <Grid container spacing={2}>
-            <Grid size={{xs:12, md:12, sm:12}}>
+            <Grid size={{ xs: 12, md: 12, sm: 12 }}>
               {columns ? (
                 <CustomReactTable
                   height={stepFullScreen ? 'calc(100vh - 300px)' : '300px'}

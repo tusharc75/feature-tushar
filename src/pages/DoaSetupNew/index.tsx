@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -8,6 +8,7 @@ import BoxWithBorder from 'src/components/BoxWithBorder';
 import ManageDoa from './ManageDoa';
 import DoaStepper from './Stepper';
 import axios, { CancelTokenSource } from 'axios';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const DoaSetup = ({ resource, entity }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -46,14 +47,14 @@ const DoaSetup = ({ resource, entity }) => {
             {`${resource} DOA Details`}
           </Typography>
           {permissions.entity?.isUpdate && (
-            <Button variant="contained" className="float-right-button-v1" color="primary" size="small" onClick={() => setOpen(true)}>
+            <ThemeButton buttonType="theme" onClick={() => setOpen(true)}>
               {doaData ? `Edit DOA` : `Add DOA`}
-            </Button>
+            </ThemeButton>
           )}
         </div>
         <Box className="formdata-v1">
           <Grid container style={{ padding: '8px' }} spacing={1}>
-            <Grid size={{xs:12, sm:12}}>
+            <Grid size={{ xs: 12, sm: 12 }}>
               <BoxWithBorder
                 style={{
                   padding: '0px'

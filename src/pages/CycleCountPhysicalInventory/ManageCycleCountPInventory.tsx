@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from 'react';
-import { Dialog, Button, useTheme, TextField } from '@mui/material';
+import { Dialog, useTheme, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Autocomplete, Skeleton } from '@mui/material';
 import axiosInstance from '../../axios/axiosInstance';
@@ -16,6 +16,7 @@ import { useData } from '../../StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Formik } from 'formik';
 import { object, string } from 'yup';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ManageCycleCountPInventorSchema = object().shape({
   inventoryCycle: string().required('Please enter inventory cycle'),
@@ -107,12 +108,12 @@ const ManageCycleCountPInventory = ({ open, close, onSuccess }) => {
             </Grid>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button variant="outlined" size="small" color="primary" disabled={loading}>
+            <ThemeButton buttonType='transparent'>
               Cancel
-            </Button>
-            <Button variant="contained" size="small" color="primary" disabled={loading}>
+            </ThemeButton>
+            <ThemeButton buttonType='theme' disabled={loading}>
               Submit
-            </Button>
+            </ThemeButton>
           </CustomDialogFooter>
         </>
       ) : (
@@ -212,12 +213,12 @@ const ManageCycleCountPInventory = ({ open, close, onSuccess }) => {
                 </Grid>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button size="small" variant="outlined" color="primary" onClick={close}>
+                <ThemeButton buttonType='transparent' onClick={close}>
                   Cancel
-                </Button>
-                <Button size="small" variant="contained" color="primary" onClick={submitForm}>
-                  {'Submit'}
-                </Button>
+                </ThemeButton>
+                <ThemeButton buttonType='theme' onClick={submitForm}>
+                  Submit
+                </ThemeButton>
               </CustomDialogFooter>
             </>
           )}

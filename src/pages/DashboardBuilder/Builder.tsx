@@ -1,13 +1,13 @@
-import { Box, Button, Checkbox, FormControl, FormControlLabel, FormGroup, FormLabel, Radio, RadioGroup, TextField } from '@mui/material';
+import { Box, Checkbox, FormControl, FormControlLabel, FormGroup, FormLabel, Radio, RadioGroup, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import Autocomplete from '@mui/material/Autocomplete';
 import { makeStyles } from '@mui/styles';
 import { camelCase, startCase } from 'lodash';
 import React from 'react';
-
 import axiosInstance from 'src/axios/axiosInstance';
 import { generateId } from 'src/constants/helpers';
 import { CHART_TYPES, GRAPH_TYPES, IFormDataType, KPIListType, defaultFormConfigs, statuses } from './builderHelpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const useClasses = makeStyles(() => ({
   column: {
@@ -327,9 +327,9 @@ const Builder = (props: Props) => {
         </Box>
       </div>
       <Box mt={2}>
-        <Button disableRipple fullWidth color="primary" onClick={addFormConfigs} variant="contained">
+        <ThemeButton fullWidth onClick={addFormConfigs} buttonType='theme'>
           {Boolean(selectedData) ? 'Apply Changes' : 'Add Chart'}
-        </Button>
+        </ThemeButton>
       </Box>
     </Box>
   );
