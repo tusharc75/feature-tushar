@@ -1,4 +1,4 @@
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import queryString from 'query-string';
@@ -130,17 +130,15 @@ const FormBuilder = () => {
     return (
       <>
         {permissions.formBuilder?.isCreate && (
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
+          <ThemeButton
+            buttonType="theme"
             onClick={() => {
               history.push('/form-builder/0');
             }}
             startIcon={<AddOutlined />}
           >
             Add
-          </Button>
+          </ThemeButton>
         )}
       </>
     );

@@ -1,9 +1,10 @@
-import { Button, Dialog, TextField } from '@mui/material';
+import { Dialog, TextField } from '@mui/material';
 import { useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomDialogTransition } from 'src/constants/helpers';
 
 export default function QCcomment({ onClose, onSubmit, type }) {
@@ -41,19 +42,17 @@ export default function QCcomment({ onClose, onSubmit, type }) {
         />
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button variant="outlined" color="primary" size="small" onClick={onClose}>
+        <ThemeButton buttonType="transparent" onClick={onClose}>
           Cancel
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          size="small"
+        </ThemeButton>
+        <ThemeButton
+          buttonType="theme"
           onClick={() => {
             onSubmit(type, comment);
           }}
         >
           Submit
-        </Button>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

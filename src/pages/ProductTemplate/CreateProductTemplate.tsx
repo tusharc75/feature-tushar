@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment, useRef } from 'react';
-import { Box, Button, Menu, MenuItem, IconButton, useMediaQuery, Theme } from '@mui/material';
+import { Box, Menu, MenuItem, IconButton, useMediaQuery, Theme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { useParams, useHistory } from 'react-router-dom';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
@@ -475,10 +475,8 @@ const ProductTemplate = () => {
                           )}
                         </Box>
                         <Box ml={1}>
-                          <Button
-                            color="primary"
-                            variant="contained"
-                            size="small"
+                          <ThemeButton
+                            buttonType="theme"
                             onClick={() => {
                               if (
                                 hasPermissionToUpdate &&
@@ -495,7 +493,7 @@ const ProductTemplate = () => {
                             }}
                           >
                             Close
-                          </Button>
+                          </ThemeButton>
                         </Box>
                       </div>
                     </div>

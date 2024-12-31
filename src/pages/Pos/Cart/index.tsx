@@ -137,16 +137,6 @@ const AssignCartDialog = ({ handleCloseDialog, fetchCart, products, handleDelete
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
-        {/* {(products?.length > 0) &&
-                <Button
-                    onClick={() => { }}
-                    color="primary"
-                    size="small"
-                    variant="contained"
-                >
-                    {"Place your order"}
-                </Button>
-            } */}
       </CustomDialogFooter>
     </Dialog>
   );
