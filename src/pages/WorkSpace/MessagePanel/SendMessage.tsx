@@ -55,6 +55,11 @@ const SendMessage = ({
 
   useEffect(() => {
     numberOfMentions.current = 0;
+    if (!initialMessage) {
+      setMessage('');
+      setFiles([]);
+      setFilesWithUrl([]);
+    }
   }, [channelId]);
 
   const postMessage = async () => {
@@ -163,9 +168,9 @@ const SendMessage = ({
         return;
       }
     }
-    if (key === 'Enter' && !e.ctrlKey) {
+    if (key === 'Enter' && !e.ctrlKey && !e.metaKey) {
       e.preventDefault();
-      postMessage();
+      if (message && message !== initialMessage && !isLoading) postMessage();
     }
   };
 
