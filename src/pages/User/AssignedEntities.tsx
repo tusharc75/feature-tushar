@@ -206,11 +206,11 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
                   <CustomTab key={i} value={i} className="relative">
                     <span className={cn('block ', currentTabIndex === i && 'pr-[18px]')}>{c?.entity?.entityName}</span>
                     {permissions?.user?.isDelete &&
-                    currentTabIndex === i &&
-                    !Boolean(userId === user?._id && currentEntity?.entity?._id === selectedEntity) ? (
+                      currentTabIndex === i &&
+                      !Boolean(userId === user?._id && currentEntity?.entity?._id === selectedEntity) ? (
                       <HtmlTooltip className="absolute right-4" title={'Delete'}>
                         <IconButton aria-label="delete" size="small" className="ml-1" onClick={() => handleDeleteEntity()}>
-                          <Delete className="text-white" />
+                          <Delete color='error' />
                         </IconButton>
                       </HtmlTooltip>
                     ) : null}
@@ -255,8 +255,8 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
                       field={unionRoleData ? unionRoleData.field : []}
                       resource={unionRoleData ? unionRoleData.resource : []}
                       isDisable={true}
-                      setField={() => {}}
-                      setResource={() => {}}
+                      setField={() => { }}
+                      setResource={() => { }}
                     />
                   </BoxWithBorder>
                 </div>

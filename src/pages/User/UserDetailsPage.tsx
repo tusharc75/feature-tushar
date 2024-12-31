@@ -454,7 +454,6 @@ const UserDetailsPage = () => {
                     <CustomTab value={3} label={'User Session'} />
                     <CustomTab value={4} label={'Assigned Entity'} />
                   </CustomTabs>
-
                   <TabPanel value={tabValue} index={0}>
                     <DetailsPageHeader logo={userData?.avatar ? userData.avatar : undefined} mainPoints={mainPoints} />
                     <DetailsPage data={userData} fields={userFields} />
@@ -515,8 +514,6 @@ const UserDetailsPage = () => {
                         </Table>
                       </TableContainer>
                     ) : null}
-
-                    {/* </div> */}
                   </TabPanel>
                   <TabPanel value={tabValue} index={3}>
                     <UserSession id={id} />
@@ -534,7 +531,7 @@ const UserDetailsPage = () => {
                             </span>
                           )}
                         </div>
-                        <div className="rounded-b border p-[20px_28px_32px]">
+                        <div className="pt-3">
                           {loading ? (
                             <Box display="flex">
                               {[1, 2].map((i) => (
@@ -578,7 +575,7 @@ const UserDetailsPage = () => {
                 </>
               )}
             </Box>
-            <div className="pt-3 ">
+            <div className="pt-3">
               <QuickLinks quickLinks={quickLinks} />
               {permissions?.[opportunity.opportunityResource]?.isRead && (
                 <Box mb={2}>

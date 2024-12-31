@@ -377,7 +377,7 @@ const EntityDetailsPage = () => {
               <Box className="form-head-v1">
                 <Typography component={'h3'}>Assigned Users ({users.length || 0})</Typography>
                 {permissions.entity.isUpdate && (
-                  <IconButton className="float-right-button-v1" title="Assign users" color="primary" size="small" onClick={userDialogOpen}>
+                  <IconButton title="Assign users" color="primary" size="small" onClick={userDialogOpen}>
                     <ControlPoint />
                   </IconButton>
                 )}
@@ -405,7 +405,6 @@ const EntityDetailsPage = () => {
                 ) : users.length ? (
                   <>
                     <AssignedUsers permissions={permissions} user={users.slice(0, showUsers)} unassignEntity={handleUnassignUser} type="entity" />
-
                     {users.length > showRecordsBeforeViewAll && (
                       <>
                         <Box marginY={2} />
