@@ -1,7 +1,5 @@
 import {
-  Button,
   Checkbox,
-  CircularProgress,
   Dialog,
   FormControl,
   FormControlLabel,
@@ -11,6 +9,7 @@ import {
   ListItemText,
   Typography
 } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -58,9 +57,8 @@ const AssignProjectSalesDialog = ({ projectSalesDialogOpen, onSuccess, handleClo
     }
 
     let api = type.some((item) => item?.type === customerContact.contactResource)
-      ? `/project-sales?filterById=[{"field": "staticData.customerAccount", "term": "${
-          type.find((item) => item.type === customerAccount.accountResource).id
-        }"}]`
+      ? `/project-sales?filterById=[{"field": "staticData.customerAccount", "term": "${type.find((item) => item.type === customerAccount.accountResource).id
+      }"}]`
       : user?.user?._id
         ? `/project-sales?filterById=[{"field": "projectManager", "term": "${user?.user?._id}"}]`
         : `/project-sales`;
@@ -203,18 +201,12 @@ const AssignProjectSalesDialog = ({ projectSalesDialogOpen, onSuccess, handleClo
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button disabled={isAssigning} onClick={handleCloseDialog} color="primary" size="small">
+        <ThemeButton onClick={handleCloseDialog} buttonType="transparent">
           Cancel
-        </Button>
-        <Button
-          disabled={!selectedProjectSales.length || isAssigning}
-          onClick={handleAssignProjectSales}
-          color="primary"
-          size="small"
-          variant="contained"
-        >
-          {isAssigning ? <CircularProgress size={22} /> : 'Save'}
-        </Button>
+        </ThemeButton>
+        <ThemeButton disabled={!selectedProjectSales.length || isAssigning} isLoading={isAssigning} onClick={handleAssignProjectSales} buttonType="theme">
+          Save
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

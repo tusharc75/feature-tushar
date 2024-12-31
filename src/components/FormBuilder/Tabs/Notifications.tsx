@@ -1,5 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Button, Checkbox, CircularProgress, Dialog, FormControlLabel, Grid, IconButton, TextField } from '@mui/material';
+import { Box, Checkbox, CircularProgress, Dialog, FormControlLabel, IconButton, TextField } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Grid from '@mui/material/Grid2';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from 'src/constants/helpers';
@@ -156,17 +158,14 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
             <CustomDialogContent>
               <Box>
                 <Box mb={2}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    type="submit"
+                  <ThemeButton
+                    buttonType="theme"
                     onClick={() => {
                       addRemove(values, 'add', values?.notifications?.length);
                     }}
                   >
                     Add
-                  </Button>
+                  </ThemeButton>
                 </Box>
                 <Form>
                   <FieldArray
@@ -184,7 +183,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                             </Box>
                             <Box p={2} pt={1}>
                               <Grid container spacing={2}>
-                                <Grid item md={4} lg={4} sm={6} xs={12}>
+                                <Grid size={{ md: 4, lg: 4, sm: 6, xs: 12 }}>
                                   <Autocomplete
                                     id="field"
                                     options={fields}
@@ -205,7 +204,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                       <TextField
                                         {...params}
                                         margin="dense"
-                                        size='small'
+                                        size="small"
                                         variant="outlined"
                                         label="Field"
                                         placeholder="Field"
@@ -227,7 +226,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                     )}
                                   />
                                 </Grid>
-                                <Grid item md={4} lg={4} sm={6} xs={12}>
+                                <Grid size={{ md: 4, lg: 4, sm: 6, xs: 12 }}>
                                   <Autocomplete
                                     id="rule"
                                     options={RULE}
@@ -248,7 +247,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                       <TextField
                                         {...params}
                                         margin="dense"
-                                        size='small'
+                                        size="small"
                                         variant="outlined"
                                         label="Rule"
                                         placeholder="Rule"
@@ -270,7 +269,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                     )}
                                   />
                                 </Grid>
-                                <Grid item md={4} lg={4} sm={6} xs={12}>
+                                <Grid size={{ md: 4, lg: 4, sm: 6, xs: 12 }}>
                                   <Autocomplete
                                     id="notificationUserField"
                                     options={notificationUserField}
@@ -293,7 +292,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                       <TextField
                                         {...params}
                                         margin="dense"
-                                        size='small'
+                                        size="small"
                                         variant="outlined"
                                         label="Notification User Field"
                                         placeholder="Notification User Field"
@@ -315,7 +314,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                     )}
                                   />
                                 </Grid>
-                                <Grid item md={12} lg={12} sm={12} xs={12}>
+                                <Grid size={{ md: 12, lg: 12, sm: 12, xs: 12 }}>
                                   <TextField
                                     fullWidth
                                     label="Message"
@@ -345,7 +344,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                     }
                                   />
                                 </Grid>
-                                <Grid item md={4} lg={4} sm={6} xs={12}>
+                                <Grid size={{ md: 4, lg: 4, sm: 6, xs: 12 }}>
                                   <Box pt={0.5}>
                                     <FormControlLabel
                                       control={
@@ -365,7 +364,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                     />
                                   </Box>
                                 </Grid>
-                                <Grid item md={4} lg={4} sm={6} xs={12}>
+                                <Grid size={{ md: 4, lg: 4, sm: 6, xs: 12 }}>
                                   <Box pt={0.5}>
                                     <FormControlLabel
                                       control={
@@ -396,20 +395,17 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button size="small" color="primary" disabled={submitting} onClick={onClose}>
+              <ThemeButton buttonType="transparent" disabled={submitting} onClick={onClose}>
                 Cancel
-              </Button>
-              <Button
+              </ThemeButton>
+              <ThemeButton
                 disabled={submitting}
-                variant="contained"
-                color="primary"
-                size="small"
-                type="submit"
+                buttonType="theme"
                 onClick={submitForm}
                 endIcon={submitting && <CircularProgress color="inherit" size={18} />}
               >
                 Save
-              </Button>
+              </ThemeButton>
             </CustomDialogFooter>
           </>
         )}

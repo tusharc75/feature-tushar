@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Theme } from '@mui/material';
+import { Box, Divider, Theme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import axios from 'axios';
 import { startCase } from 'lodash';
@@ -12,6 +12,7 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { backendApi } from '../../config';
 import { MATERIAL_TYPE, downloadExcel, gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -453,15 +454,12 @@ const QuotationSupplierPrice = ({ openAuthData, openAuthId }) => {
       <Box display="flex" className="pb-2" justifyContent="flex-end">
         <Box mx={1} />
         {!isSubmited && (
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            // disabled={disabledSubmitButton}
+          <ThemeButton
+            buttonType='theme'
             onClick={handleSubmit}
           >
             Submit
-          </Button>
+          </ThemeButton>
         )}
         <Box mx={1} />
       </Box>

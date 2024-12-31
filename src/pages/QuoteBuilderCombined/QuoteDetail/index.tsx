@@ -870,12 +870,12 @@ export default function QuoteDetail() {
             />
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button size="small" onClick={() => setReopenReasonDialog(false)} color="primary">
+            <ThemeButton buttonType="transparent"  onClick={() => setReopenReasonDialog(false)} >
               Close
-            </Button>
-            <Button size="small" variant="contained" disabled={reopenReason === ''} onClick={handleReOpenQuote} color="primary">
+            </ThemeButton>
+            <ThemeButton buttonType="theme" disabled={reopenReason === ''} onClick={handleReOpenQuote} >
               Save
-            </Button>
+            </ThemeButton>
           </CustomDialogFooter>
         </Dialog>
       )}

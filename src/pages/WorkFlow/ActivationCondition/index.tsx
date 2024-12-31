@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, Typography } from '@mui/material';
+import { Box, IconButton, Typography } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -9,6 +9,7 @@ import AddConditionDialog from 'src/pages/WorkFlow/ActivationCondition/AddCondit
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ActivationCondition = ({ resource, fetchWorkFlowData, activationCondition = [], loading, id }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -87,16 +88,14 @@ const ActivationCondition = ({ resource, fetchWorkFlowData, activationCondition 
     <Fragment>
       <Box className="conditions-container flex flex-col gap-1 sm:mb-3 sm:p-3 md:mb-4 md:p-2">
         <Box>
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
+          <ThemeButton
+            buttonType="theme"
             onClick={() => {
               setOpen({ open: true, data: null });
             }}
           >
             Add Condition
-          </Button>
+          </ThemeButton>
         </Box>
         {resourceFields?.length > 0 && !loading ? (
           activationCondition?.length > 0 ? (
@@ -113,16 +112,15 @@ const ActivationCondition = ({ resource, fetchWorkFlowData, activationCondition 
                 mt={2}
                 borderRadius={'5px'}
               >
-                <Typography variant="body2">{`${resourceFields?.find((f) => ele?.fieldName === f?.fieldName)?.fieldLabel} is ${
-                  resourceFields?.find((f) => f?.fieldName === ele?.fieldName)?.lookup
+                <Typography variant="body2">{`${resourceFields?.find((f) => ele?.fieldName === f?.fieldName)?.fieldLabel} is ${resourceFields?.find((f) => f?.fieldName === ele?.fieldName)?.lookup
                     ? data && data[ele?.fieldName]
                       ? data[ele?.fieldName]
-                          ?.filter((d) => ele['fieldValue']?.split(',').includes(d?.optionValue))
-                          ?.map((v) => v?.optionLabel)
-                          ?.join(', ')
+                        ?.filter((d) => ele['fieldValue']?.split(',').includes(d?.optionValue))
+                        ?.map((v) => v?.optionLabel)
+                        ?.join(', ')
                       : ''
                     : ele['fieldValue']
-                }`}</Typography>
+                  }`}</Typography>
 
                 <div className="min-w-fit">
                   <HtmlTooltip title={'Edit'}>

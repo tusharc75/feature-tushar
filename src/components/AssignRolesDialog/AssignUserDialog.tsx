@@ -1,5 +1,4 @@
 import {
-  Button,
   Checkbox,
   CircularProgress,
   Dialog,
@@ -11,6 +10,7 @@ import {
   ListItemText,
   Typography
 } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
@@ -162,12 +162,12 @@ const AssignUserDialog = ({ usersDialogOpen, onSuccess, handleCloseDialog, roleI
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button disabled={isAssigning} onClick={handleCloseDialog} color="primary" size="small">
+        <ThemeButton disabled={isAssigning} onClick={handleCloseDialog} buttonType="transparent">
           Cancel
-        </Button>
-        <Button disabled={!selectedUsers.length || isAssigning} onClick={handleAssignRoles} color="primary" size="small" variant="contained">
+        </ThemeButton>
+        <ThemeButton disabled={!selectedUsers.length || isAssigning} onClick={handleAssignRoles} buttonType="theme">
           {isAssigning ? <CircularProgress size={22} /> : 'Save'}
-        </Button>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

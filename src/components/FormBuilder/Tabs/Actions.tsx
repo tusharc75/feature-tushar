@@ -1,5 +1,7 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { Box, Button, CircularProgress, Dialog, Grid, IconButton, TextField, Typography } from '@mui/material';
+import { Box, CircularProgress, Dialog, IconButton, TextField, Typography } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Grid from '@mui/material/Grid2';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -152,15 +154,12 @@ export default function Actions({ onClose, onSuccess, resource, resourceData }) 
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button size="small" color="primary" disabled={submitting} onClick={onClose}>
+        <ThemeButton buttonType="transparent" disabled={submitting} onClick={onClose}>
           Cancel
-        </Button>
-        <Button
+        </ThemeButton>
+        <ThemeButton
           disabled={submitting}
-          variant="contained"
-          color="primary"
-          size="small"
-          type="submit"
+          buttonType="theme"
           onClick={() => {
             const err: any = validate();
             if (!err?.length) {
@@ -170,7 +169,7 @@ export default function Actions({ onClose, onSuccess, resource, resourceData }) 
           endIcon={submitting && <CircularProgress color="inherit" size={18} />}
         >
           Save
-        </Button>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );
@@ -217,7 +216,7 @@ const Card = ({ resource, action, state, setState, index, addRemove, actionType,
     >
       <Box width={'94%'}>
         <Grid container spacing={2}>
-          <Grid item sm={3} md={3} lg={3}>
+          <Grid size={{ sm: 3, md: 3, lg: 3 }}>
             <Autocomplete
               id="field"
               options={fields}
@@ -264,7 +263,7 @@ const Card = ({ resource, action, state, setState, index, addRemove, actionType,
               )}
             />
           </Grid>
-          <Grid item sm={3} md={3} lg={3}>
+          <Grid size={{ sm: 3, md: 3, lg: 3 }}>
             <Autocomplete
               id="resource"
               options={resource}
@@ -299,7 +298,7 @@ const Card = ({ resource, action, state, setState, index, addRemove, actionType,
               )}
             />
           </Grid>
-          <Grid item sm={3} md={3} lg={3}>
+          <Grid size={{ sm: 3, md: 3, lg: 3 }}>
             <Autocomplete
               id="resourceField"
               options={resourceFields}
@@ -346,7 +345,7 @@ const Card = ({ resource, action, state, setState, index, addRemove, actionType,
               )}
             />
           </Grid>
-          <Grid item sm={3} md={3} lg={3}>
+          <Grid size={{ sm: 3, md: 3, lg: 3 }}>
             <Autocomplete
               id="action"
               options={ACTION}

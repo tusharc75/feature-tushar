@@ -299,7 +299,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
   return (
     <>
       <Box display="flex" justifyContent="flex-end" pt={1}>
-        <Box display="flex" alignItems="center" gap={8}>
+        <Box display="flex" alignItems="center">
           {allowedToEdit && (
             <Fragment>
               <ThemeButton

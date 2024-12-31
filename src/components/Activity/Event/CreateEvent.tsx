@@ -1,5 +1,7 @@
 import { useAccount, useMsal } from '@azure/msal-react';
-import { Box, Button, CircularProgress, Grid, TextField, Typography, useMediaQuery } from '@mui/material';
+import { Box, TextField, Typography, useMediaQuery } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { ArrowRightAlt } from '@mui/icons-material';
 import Autocomplete from '@mui/material/Autocomplete';
 import axios, { CancelTokenSource } from 'axios';
@@ -76,7 +78,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
         .then(({ data: { data } }) => {
           setInitialValues(data);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     } else {
       setInitialValues({
         name: '',
@@ -301,7 +303,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                     )}
                     <Box pt={1} display="flex" flexDirection={isMobile ? 'column' : 'row'}>
                       <Grid container spacing={2}>
-                        <Grid item xs={7}>
+                        <Grid size={{ xs: 7 }}>
                           <CustomDatePicker
                             size="small"
                             disablePast={true}
@@ -318,7 +320,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                           />
                         </Grid>
 
-                        <Grid item xs={5}>
+                        <Grid size={{ xs: 5 }}>
                           <CustomDateTimePicker
                             size="small"
                             label="Start Time"
@@ -346,7 +348,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                       )}
 
                       <Grid container spacing={2}>
-                        <Grid item xs={7}>
+                        <Grid size={{ xs: 7 }}>
                           <CustomDatePicker
                             size="small"
                             disablePast={true}
@@ -363,7 +365,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                             margin="dense"
                           />
                         </Grid>
-                        <Grid item xs={5}>
+                        <Grid size={{ xs: 5 }}>
                           <CustomDateTimePicker
                             size="small"
                             label="End Time"
@@ -440,17 +442,16 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button disabled={isSubmitting} color="primary" size="small" onClick={handleClose}>
+                <ThemeButton buttonType="transparent" onClick={handleClose}>
                   Cancel
-                </Button>
-                <Button disabled={isSubmitting} type="button" color="primary" variant="contained" size="small" onClick={submitForm}>
-                  {isSubmitting ? <CircularProgress size={22} /> : 'Save'}
-                </Button>
+                </ThemeButton>
+                <ThemeButton disabled={isSubmitting} isLoading={isSubmitting} buttonType="theme" onClick={submitForm}>
+                  Save
+                </ThemeButton>
                 {eventId && (
-                  <Button
+                  <ThemeButton
                     disabled={isSubmitting}
-                    variant="outlined"
-                    size="small"
+                    buttonType="theme"
                     style={{ color: 'red', borderColor: 'red' }}
                     onClick={() =>
                       axiosInstance()
@@ -469,7 +470,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                     }
                   >
                     Delete
-                  </Button>
+                  </ThemeButton>
                 )}
               </CustomDialogFooter>
             </>

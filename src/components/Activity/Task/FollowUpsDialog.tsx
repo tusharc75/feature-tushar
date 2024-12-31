@@ -1,4 +1,6 @@
-import { Button, CircularProgress, Dialog, Grid, TextField } from '@mui/material';
+import { Dialog, TextField } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Grid from '@mui/material/Grid2';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Form, Formik } from 'formik';
 import { useContext, useEffect, useState } from 'react';
@@ -108,7 +110,7 @@ const FollowUpsDialog = ({ onClose, section, resource, referenceId, onSuccess })
             <CustomDialogContent>
               <Form>
                 <Grid container spacing={2}>
-                  <Grid item md={12} lg={12} xs={12} sm={12}>
+                  <Grid size={{ md: 12, lg: 12, xs: 12, sm: 12 }}>
                     <TextField
                       fullWidth
                       label="Subject"
@@ -126,7 +128,7 @@ const FollowUpsDialog = ({ onClose, section, resource, referenceId, onSuccess })
                       helperText={touched['name'] && errors['name']}
                     />
                   </Grid>
-                  <Grid item md={12} lg={12} xs={12} sm={12}>
+                  <Grid size={{ md: 12, lg: 12, xs: 12, sm: 12 }}>
                     <TextField
                       fullWidth
                       label="Description"
@@ -142,7 +144,7 @@ const FollowUpsDialog = ({ onClose, section, resource, referenceId, onSuccess })
                       }}
                     />
                   </Grid>
-                  <Grid item md={12} lg={12} xs={12} sm={12}>
+                  <Grid size={{ md: 12, lg: 12, xs: 12, sm: 12 }}>
                     <UserDropdown
                       name="assignee"
                       label="Assignee"
@@ -157,7 +159,7 @@ const FollowUpsDialog = ({ onClose, section, resource, referenceId, onSuccess })
                       email={[]}
                     />
                   </Grid>
-                  <Grid item xs={6} sm={12} md={6} lg={6}>
+                  <Grid size={{ xs: 6, sm: 12, md: 6, lg: 6 }}>
                     <CustomDatePicker
                       label="Due Date"
                       name="dueDate"
@@ -170,7 +172,7 @@ const FollowUpsDialog = ({ onClose, section, resource, referenceId, onSuccess })
                       }}
                     />
                   </Grid>
-                  <Grid item md={12} lg={12} xs={12} sm={12}>
+                  <Grid size={{ md: 12, lg: 12, xs: 12, sm: 12 }}>
                     <Autocomplete
                       id="field"
                       multiple
@@ -190,20 +192,17 @@ const FollowUpsDialog = ({ onClose, section, resource, referenceId, onSuccess })
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button size="small" color="primary" disabled={submitting} onClick={onClose}>
+              <ThemeButton buttonType="transparent" disabled={submitting} onClick={onClose}>
                 Cancel
-              </Button>
-              <Button
+              </ThemeButton>
+              <ThemeButton
                 disabled={submitting}
-                variant="contained"
-                color="primary"
-                size="small"
-                type="submit"
+                buttonType="theme"
                 onClick={submitForm}
-                endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                isLoading={submitting}
               >
                 Save
-              </Button>
+              </ThemeButton>
             </CustomDialogFooter>
           </>
         )}

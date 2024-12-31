@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
-import Button from '@mui/material/Button';
-import Grid from '@mui/material/Grid';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Grid from '@mui/material/Grid2';
 import { sortBy } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -60,38 +60,36 @@ const ProductGridSupplierAskPrice = (props) => {
     <>
       <Box padding={2} style={{ border: '1px solid #D4D6D7', borderRadius: 4 }}>
         <Grid container>
-          <Grid item xs={12} sm={3} md={3} container justify="flex-start">
+          <Grid size={{ xs: 12, sm: 3, md: 3 }} container justifyContent="flex-start">
             {productData?.supplierContact?.optionLabel && (
-              <Grid item xs={12} sm={12} md={12}>
+              <Grid size={{ xs: 12, sm: 12, md: 12 }}>
                 <Typography variant="subtitle2">{`Supplier Contact : ${productData?.supplierContact?.optionLabel}`}</Typography>
               </Grid>
             )}
           </Grid>
-          <Grid item xs={12} sm={3} md={3} container justify="flex-start">
+          <Grid size={{ xs: 12, sm: 3, md: 3 }} container justifyContent="flex-start">
             {productData?.requestDate && (
-              <Grid item xs={12} sm={12} md={12}>
+              <Grid size={{ xs: 12, sm: 12, md: 12 }}>
                 <Typography variant="subtitle2">{`Request Date : ${displayDateTime(productData?.requestDate)}`}</Typography>
               </Grid>
             )}
             {productData?.responseDate && (
-              <Grid item xs={12} sm={12} md={12}>
+              <Grid size={{ xs: 12, sm: 12, md: 12 }}>
                 <Typography variant="subtitle2">{`Response Date : ${displayDateTime(productData?.responseDate)}`}</Typography>
               </Grid>
             )}
           </Grid>
           {productData?.status === 'Submit' && (
-            <Grid item xs={12} sm={6} md={6} container justify="flex-end">
+            <Grid size={{ xs: 12, sm: 6, md: 6 }} container justifyContent="flex-end">
               <Box ml={1} mt={1}>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType="theme"
                   onClick={() => {
                     handleAdd(productData?._id);
                   }}
-                  variant="contained"
                 >
                   Apply
-                </Button>
+                </ThemeButton>
               </Box>
               <Box ml={1} mt={1}>
                 <DeleteButton

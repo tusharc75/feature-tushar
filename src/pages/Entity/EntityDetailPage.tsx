@@ -409,7 +409,7 @@ const EntityDetailsPage = () => {
                     {users.length > showRecordsBeforeViewAll && (
                       <>
                         <Box marginY={2} />
-                        <Button
+                        <ThemeButton
                           onClick={() =>
                             history.push(`/user`, {
                               id: entityData._id,
@@ -418,12 +418,11 @@ const EntityDetailsPage = () => {
                               text: 'Entity'
                             })
                           }
-                          variant="outlined"
-                          className="accordion-outlined-button"
+                          fullWidth
                           startIcon={<FaEye />}
                         >
                           View All &#8599;
-                        </Button>
+                        </ThemeButton>
                       </>
                     )}
                   </>

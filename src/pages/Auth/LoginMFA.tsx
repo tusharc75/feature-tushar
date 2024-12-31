@@ -231,14 +231,12 @@ const LoginMFA = () => {
                     </div>
                   )}
                   <ThemeButton
-                    disableElevation
                     buttonType="theme"
                     type="submit"
                     fullWidth
                     sx={{ paddingBlock: 10, height: 40 }}
                     disabled={otp.length < 6 || isSubmitting}
                     onClick={handleSubmit}
-                    startIcon={isSubmitting && <CircularProgress color="inherit" size={20} />}
                   >
                     Submit
                   </ThemeButton>

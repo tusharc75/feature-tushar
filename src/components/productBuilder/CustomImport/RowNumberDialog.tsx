@@ -1,4 +1,6 @@
-import { Box, Button, Dialog, Grid, IconButton, TextField } from '@mui/material';
+import { Box, Dialog, IconButton, TextField } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Grid from '@mui/material/Grid2';
 import Autocomplete from '@mui/material/Autocomplete';
 import { FieldArray, Form, Formik } from 'formik';
 import { useContext, useEffect, useState } from 'react';
@@ -135,10 +137,18 @@ const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
                       onChange={(event: any, newValue: any) => {
                         setSelectedView(newValue ? newValue : null);
                       }}
-                      renderOption={(props, option,state,ownerState) => {
+                      renderOption={(props, option, state, ownerState) => {
                         const { key, ...optionProps } = props;
                         return (
-                          <Box key={key} component="li" {...optionProps} display={'flex'} alignItems={'center'} justifyContent={'space-between'} width={'100%'}>
+                          <Box
+                            key={key}
+                            component="li"
+                            {...optionProps}
+                            display={'flex'}
+                            alignItems={'center'}
+                            justifyContent={'space-between'}
+                            width={'100%'}
+                          >
                             <span style={{ width: 'calc(100% - 71px)' }}>{ownerState.getOptionLabel(option)}</span>
                             <Box>
                               <HtmlTooltip title={'Delete'} placement="top" arrow enterTouchDelay={0}>
@@ -170,9 +180,9 @@ const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
                       values?.cell?.map((data, index) => {
                         return (
                           <Grid container spacing={2} alignItems="center">
-                            <Grid item md={11} lg={11}>
+                            <Grid size={{ md: 11, lg: 11 }}>
                               <Grid container spacing={2}>
-                                <Grid item sm={12} xs={12} md={3} lg={3}>
+                                <Grid size={{ sm: 12, xs: 12, md: 3, lg: 3 }}>
                                   <Autocomplete
                                     options={sheetNames}
                                     disableClearable
@@ -198,7 +208,7 @@ const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
                                     )}
                                   />
                                 </Grid>
-                                <Grid item sm={12} xs={12} md={3} lg={3}>
+                                <Grid size={{ sm: 12, xs: 12, md: 3, lg: 3 }}>
                                   <TextField
                                     variant="outlined"
                                     type="text"
@@ -216,7 +226,7 @@ const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
                                     }}
                                   />
                                 </Grid>
-                                <Grid item sm={12} xs={12} md={3} lg={3}>
+                                <Grid size={{ sm: 12, xs: 12, md: 3, lg: 3 }}>
                                   <TextField
                                     variant="outlined"
                                     type="text"
@@ -234,7 +244,7 @@ const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
                                     }}
                                   />
                                 </Grid>
-                                <Grid item sm={12} xs={12} md={3} lg={3}>
+                                <Grid size={{ sm: 12, xs: 12, md: 3, lg: 3 }}>
                                   <Autocomplete
                                     options={['1', '2']}
                                     disableClearable
@@ -262,7 +272,7 @@ const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
                                 </Grid>
                               </Grid>
                             </Grid>
-                            <Grid item md={1} lg={1}>
+                            <Grid size={{ md: 1, lg: 1 }}>
                               <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
                                 <HtmlTooltip title="Remove">
                                   <IconButton
@@ -290,12 +300,12 @@ const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button size="small" onClick={handleClose} color="primary">
+              <ThemeButton buttonType="transparent" onClick={handleClose}>
                 Cancel
-              </Button>
-              <Button size="small" type="submit" color="primary" onClick={submitForm} variant="contained">
+              </ThemeButton>
+              <ThemeButton buttonType="theme" onClick={submitForm}>
                 Submit
-              </Button>
+              </ThemeButton>
             </CustomDialogFooter>
             {confirmationDelete.open && (
               <ConfirmationDialog

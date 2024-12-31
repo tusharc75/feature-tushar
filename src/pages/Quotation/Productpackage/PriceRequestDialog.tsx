@@ -322,8 +322,6 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                               Accept
                             </ThemeButton>
                             <ThemeButton
-                              borderColor="red"
-                              textColor="red"
                               iconForMobile={<FaThumbsDown />}
                               onClick={() => {
                                 setResponse({ open: true, type: 'Reject', id: data?._id });
@@ -397,26 +395,21 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button
-                color="primary"
-                size="small"
+              <ThemeButton
                 onClick={() => {
                   setResponse({ open: false, type: '', id: '' });
                 }}
               >
                 Cancel
-              </Button>
-              <Button
-                type="button"
-                color="primary"
-                variant="contained"
-                size="small"
+              </ThemeButton>
+              <ThemeButton
+                buttonType="theme"
                 onClick={() => {
                   response.type === 'Reject' && handleReject();
                 }}
               >
                 Save
-              </Button>
+              </ThemeButton>
             </CustomDialogFooter>
           </Dialog>
         )}

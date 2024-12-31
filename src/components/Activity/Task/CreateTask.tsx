@@ -1,18 +1,16 @@
 import {
   Box,
   Breadcrumbs,
-  Button,
   Chip,
-  CircularProgress,
   Divider,
   FormControl,
-  Grid,
   InputLabel,
   MenuItem,
   Select,
   TextField,
   Typography
 } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import axios, { CancelTokenSource } from 'axios';
 import { Form, Formik } from 'formik';
@@ -96,7 +94,7 @@ export const CreateTask = ({
           setInitialValues(null);
           setInitialValues(data);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     } else {
       let initialData = {
         name: defaultName,
@@ -184,21 +182,19 @@ export const CreateTask = ({
                         {initialValues.parent &&
                           initialValues.parent.map((_p, index) => {
                             return (
-                              <Button
-                                size="small"
+                              <ThemeButton
+                                buttonType='transparent'
                                 key={index}
-                                className="asdfasfdasdfas cursor-pointer"
                                 onClick={() => setId(_p._id)}
-                                color="primary"
                               >
                                 {_p.name}
-                              </Button>
+                              </ThemeButton>
                             );
                           })}
                       </Breadcrumbs>
                     </Box>
                     <Grid container spacing={3}>
-                      <Grid item xs={12} md={7} sm={6}>
+                      <Grid size={{ xs: 12, md: 7, sm: 6 }}>
                         <TextField
                           variant="outlined"
                           type="text"
@@ -272,7 +268,7 @@ export const CreateTask = ({
                           </Box>
                         )}
                       </Grid>
-                      <Grid item xs={12} md={5} sm={6}>
+                      <Grid size={{ xs: 12, md: 5, sm: 6 }}>
                         <Fragment>
                           <Box mt={1}>
                             <Box>
@@ -300,7 +296,7 @@ export const CreateTask = ({
                             </Box>
                             <Box pt={1}>
                               <Grid container spacing={1}>
-                                <Grid item xs={12} sm={12} md={12}>
+                                <Grid size={{ xs: 12, sm: 12, md: 12 }}>
                                   <UserDropdown
                                     name="assignee"
                                     label="Assignee"
@@ -315,7 +311,7 @@ export const CreateTask = ({
                                     email={[]}
                                   />
                                 </Grid>
-                                <Grid item xs={12} sm={12} md={12}>
+                                <Grid size={{ xs: 12, sm: 12, md: 12 }}>
                                   <UserDropdown
                                     name="reporter"
                                     label="Reporter"
@@ -333,7 +329,7 @@ export const CreateTask = ({
                             </Box>
                             <Box pt={1}>
                               <Grid container spacing={1}>
-                                <Grid item xs={12} sm={12} md={12}>
+                                <Grid size={{ xs: 12, sm: 12, md: 12 }}>
                                   <CustomDatePicker
                                     label="Start Date"
                                     name="startDate"
@@ -347,7 +343,7 @@ export const CreateTask = ({
                                     maxDate={initialValues.parentData && initialValues.parentData.dueDate}
                                   />
                                 </Grid>
-                                <Grid item xs={12} sm={12} md={12}>
+                                <Grid size={{ xs: 12, sm: 12, md: 12 }}>
                                   <CustomDatePicker
                                     label="Due Date"
                                     name="dueDate"
@@ -383,20 +379,19 @@ export const CreateTask = ({
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
+                <ThemeButton
                   disabled={isSubmitting}
-                  color="primary"
-                  size="small"
+                  buttonType='transparent'
                   onClick={() => {
                     if (isEqual(initialValues, values)) handleClose();
                     else setShowConfirmDialog(true);
                   }}
                 >
                   Cancel
-                </Button>
-                <Button disabled={isSubmitting} type="button" color="primary" size="small" variant="contained" onClick={submitForm}>
-                  {isSubmitting ? <CircularProgress size={22} /> : 'Save'}
-                </Button>
+                </ThemeButton>
+                <ThemeButton disabled={isSubmitting} isLoading={isSubmitting} buttonType='theme' onClick={submitForm}>
+                  Save
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog

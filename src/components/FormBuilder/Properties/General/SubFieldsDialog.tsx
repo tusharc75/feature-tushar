@@ -1,5 +1,6 @@
 import React from 'react';
-import { Dialog, Button } from '@mui/material';
+import { Dialog } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -93,12 +94,12 @@ const SubFieldsDialog = ({ handleClose, fields = [], setFieldValue }) => {
         />
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button variant="outlined" size="small" color="primary" onClick={handleClose}>
+        <ThemeButton buttonType='transparent' onClick={handleClose}>
           Close
-        </Button>
-        <Button variant="contained" size="small" color="primary" onClick={handleSave}>
+        </ThemeButton>
+        <ThemeButton buttonType='theme' onClick={handleSave}>
           Save
-        </Button>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

@@ -1,12 +1,9 @@
 import {
   Box,
-  Button,
   Checkbox,
-  CircularProgress,
   Collapse,
   FormControl,
   FormControlLabel,
-  Grid,
   List,
   ListItem,
   ListItemIcon,
@@ -14,6 +11,7 @@ import {
   Theme,
   Typography
 } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { Check } from '@mui/icons-material';
 import { startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -400,20 +398,13 @@ const AssignEntityDialog = ({
                           <div className="max-w-full">{getStepContent(index)}</div>
                           <div className={classes.actionsContainer}>
                             <div>
-                              <Button size="small" disabled={activeStep === 0} onClick={handleBack} className={classes.button}>
+                              <ThemeButton buttonType="transparent" disabled={activeStep === 0} onClick={handleBack}>
                                 Back
-                              </Button>
+                              </ThemeButton>
                               {activeStep !== steps.length - 1 && (
-                                <Button
-                                  variant="contained"
-                                  color="primary"
-                                  size="small"
-                                  onClick={handleNext}
-                                  disabled={selectedData.length === 0}
-                                  className={classes.button}
-                                >
+                                <ThemeButton buttonType="theme" onClick={handleNext} disabled={selectedData.length === 0} className={classes.button}>
                                   Next
-                                </Button>
+                                </ThemeButton>
                               )}
                             </div>
                           </div>
@@ -459,19 +450,17 @@ const AssignEntityDialog = ({
         </div>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button disabled={isAssigning} onClick={handleCloseDialog} color="primary" size="small">
+        <ThemeButton disabled={isAssigning} onClick={handleCloseDialog} buttonType="transparent">
           Cancel
-        </Button>
-        <Button
+        </ThemeButton>
+        <ThemeButton
           disabled={!selectedData?.length || !selectedRole?.length || isAssigning}
           onClick={isRenderedFromContact ? handleAccessPortal : handleAssignEntity}
-          color="primary"
-          size="small"
-          variant="contained"
-          endIcon={isAssigning && <CircularProgress size={20} />}
+          buttonType="theme"
+          isLoading={isAssigning}
         >
           {'Save'}
-        </Button>
+        </ThemeButton>
       </CustomDialogFooter>
     </>
   );

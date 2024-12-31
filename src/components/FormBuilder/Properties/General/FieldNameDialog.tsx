@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Dialog, Box, Grid, TextField, Button } from '@mui/material';
+import { Dialog, TextField } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import ConfirmCancelDialog from '../../../ConfirmCancelDialog';
@@ -85,8 +86,8 @@ const FieldNameDialog = ({ fieldData, handleSave, handleClose }) => {
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button
-                size="small"
+              <ThemeButton
+                buttonType="transparent"
                 onClick={() => {
                   if (isEqual(values, initialValues)) {
                     handleClose();
@@ -94,13 +95,12 @@ const FieldNameDialog = ({ fieldData, handleSave, handleClose }) => {
                     setShowConfirmDialog(true);
                   }
                 }}
-                color="primary"
               >
                 Cancel
-              </Button>
-              <Button size="small" type="submit" color="primary" variant="contained" onClick={submitForm}>
+              </ThemeButton>
+              <ThemeButton buttonType="theme" onClick={submitForm}>
                 Save
-              </Button>
+              </ThemeButton>
             </CustomDialogFooter>
             {showConfirmDialog ? (
               <ConfirmCancelDialog

@@ -1,11 +1,10 @@
 import { Box } from '@mui/material';
-import Button from '@mui/material/Button';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Dialog from '@mui/material/Dialog';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import { sortBy } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -290,10 +289,10 @@ const AddExistingProduct = (props) => {
             </div>
             <div className="ml-auto flex flex-wrap items-start justify-end gap-2 ">
               <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
-              <Button size="small" color="primary" onClick={handleAdd} variant="contained" disabled={selectedRecords.length > 0 ? false : true}>
+              <ThemeButton buttonType='theme' onClick={handleAdd} disabled={selectedRecords.length > 0 ? false : true}>
                 {selectedRecords.length ? '(' + selectedRecords.length + ')  ' : ''}
                 Add
-              </Button>
+              </ThemeButton>
             </div>
           </div>
         </Box>

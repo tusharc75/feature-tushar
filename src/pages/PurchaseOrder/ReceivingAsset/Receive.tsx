@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Dialog, Button, Box, TextField, Typography } from '@mui/material';
+import { Dialog, Box, TextField, Typography } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
@@ -23,6 +23,7 @@ import moment from 'moment';
 import CustomAssetDialog from 'src/pages/ConvertInventory/InventoryToAsset/CustomAssetDialog';
 import { isEqual, startCase } from 'lodash';
 import CustomDatePicker from 'src/components/CustomDatePicker';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderData }) => {
   const [fullScreen, setFullScreen] = useState(true);
@@ -547,10 +548,10 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
                 )}
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button variant="outlined" disabled={isSubmitting} size="small" color="primary" onClick={onClose}>
+                <ThemeButton buttonType="transparent" disabled={isSubmitting} onClick={onClose}>
                   Cancel
-                </Button>
-                <Button
+                </ThemeButton>
+                <ThemeButton
                   id={'dialog-save-button'}
                   onClick={() => {
                     if (
@@ -564,13 +565,11 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
                       handleSubmit(values);
                     }
                   }}
-                  size="small"
-                  variant="contained"
+                  buttonType="theme"
                   disabled={isSubmitting}
-                  color="primary"
                 >
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
             </>
           )}

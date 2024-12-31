@@ -3,7 +3,8 @@ import { makeStyles } from '@mui/styles';
 import DialogContent from '@mui/material/DialogContent';
 import Dialog from '@mui/material/Dialog';
 import { FaTimesCircle } from 'react-icons/fa';
-import { Button, DialogActions, Theme } from '@mui/material';
+import { DialogActions, Theme } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomDialogTransition } from 'src/constants/helpers';
@@ -61,17 +62,15 @@ export default function RecordDeletedDialog() {
       </DialogContent>
 
       <DialogActions>
-        <Button
+        <ThemeButton
           onClick={() => {
             setToastConfig({ open: false, type: '', message: '' });
             history.push('/');
           }}
-          variant="contained"
-          color="primary"
-          size="small"
+          buttonType="theme"
         >
           Back To Home
-        </Button>
+        </ThemeButton>
       </DialogActions>
     </Dialog>
   );

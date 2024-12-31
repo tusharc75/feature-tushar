@@ -1,4 +1,4 @@
-import { Box, Button, ClickAwayListener, Dialog, Grow, MenuItem, MenuList, Paper, Popper, Theme } from '@mui/material';
+import { Box, ClickAwayListener, Dialog, Grow, MenuItem, MenuList, Paper, Popper, Theme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import axios, { CancelTokenSource } from 'axios';
 import { lowerCase, startCase } from 'lodash';
@@ -21,6 +21,7 @@ import routes from '../../../components/Helpers/Routes';
 import { SearchFilter } from '../../../components/SearchFilter';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import MyCalendar from './MyCalendar';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const useStyles = makeStyles((theme: Theme) => ({
   topbar: {
@@ -144,9 +145,9 @@ const BigCalendar = () => {
             <div className="flex flex-wrap gap-2">
               <div className="flex flex-wrap gap-2">
                 <div className="flex flex-wrap items-center gap-3">
-                  <Button aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick} size="small" color="primary" variant="contained">
+                  <ThemeButton aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick} buttonType="theme">
                     Create Activity
-                  </Button>
+                  </ThemeButton>
                   <div className="flex flex-wrap gap-2">
                     {['Event', 'Task', 'Case'].map((item) => (
                       <>

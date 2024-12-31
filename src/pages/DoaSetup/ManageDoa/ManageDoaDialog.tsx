@@ -26,6 +26,7 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition, getUniqueCurrencies, removeEmptyKeys } from '../../../constants/helpers';
 import CurrencyAutocomplete from 'src/components/Helpers/CurrencyAutocomplete';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const DoaApproveType = [
   {
@@ -383,7 +384,7 @@ const DoaDialog = ({
                                         setCurrency(val?.currencyCode ? val?.currencyCode : '');
                                         setCurrencySymbol(val?.symbolNative);
                                       }}
-
+                                      size='small'
                                     />
                                   </div>
                                 )}
@@ -492,9 +493,6 @@ const DoaDialog = ({
                                                       )
                                                     },
                                                   }}
-                                                  // startAdornment={
-                                                  //   currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ''
-                                                  // }
                                                   variant="outlined"
                                                   type="text"
                                                   size="small"
@@ -508,8 +506,6 @@ const DoaDialog = ({
                                                       ['amount']: e.target.value.replace(/[^0-9]/g, '')
                                                     });
                                                   }}
-                                                  // error={userList.find(v => v.name === userVal.name) === "" || userList.find(v => v.name === userVal.name) === undefined}
-                                                  // helperText={userList.find(v => v.name === userVal.name) === "" || userList.find(v => v.name === userVal.name) === undefined ? " User is Required" : ""}
                                                   required
                                                 />
                                                 {validate(values) && check && (userVal.id === selectedEntity[0] || userVal.id === 'self') && (
@@ -562,16 +558,14 @@ const DoaDialog = ({
                                         ))
                                       ) : (
                                         <Grid size={{ md: 1 }} className="d-flex  align-items-center justify-content-center">
-                                          <Button
-                                            variant="contained"
-                                            color="primary"
-                                            size="large"
+                                          <ThemeButton
+                                            buttonType='theme'
                                             onClick={() => {
                                               arrayHelpers.push({ user: '', amount: 0, disable: false });
                                             }}
                                           >
                                             Add Users
-                                          </Button>
+                                          </ThemeButton>
                                         </Grid>
                                       )}
                                     </div>
@@ -584,19 +578,13 @@ const DoaDialog = ({
                       </div>
                       <CustomDialogFooter>
                         {!isRenderedFromUserSetUp && (
-                          <Button variant="outlined" color="primary" size="small" onClick={onClose}>
+                          <ThemeButton buttonType='transparent' onClick={onClose}>
                             Cancel
-                          </Button>
+                          </ThemeButton>
                         )}
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          type="submit"
-                          size="small"
-                          disabled={
-                            currency === '' && selectedType === 2
-                            // ||values.users.filter(item => item.name === "" || item.name === undefined || item.id === "" || item.id === undefined).length > 0
-                          }
+                        <ThemeButton
+                          buttonType="theme"
+                          disabled={currency === '' && selectedType === 2}
                           onClick={() => {
                             if (values.users.length === 0) {
                               handleSubmit(values.users);
@@ -606,17 +594,15 @@ const DoaDialog = ({
                           }}
                         >
                           {isRenderedFromUserSetUp ? 'Save & Continue' : 'Save'}
-                        </Button>
+                        </ThemeButton>
                       </CustomDialogFooter>
                     </>
                   )}
                 </Formik>
               </div>
-              {/* </TabPanel> */}
             </>
           </>
         )}
-        {/* </Dialog> */}
       </>
     </Dialog>
   );

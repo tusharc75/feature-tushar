@@ -216,10 +216,10 @@ const Login = () => {
                         onClick={submitForm}
                         disabled={isSubmitting}
                         isLoading={isSubmitting}
+                        sx={{ height: 40 }}
                       >
                         Sign In
                       </ThemeButton>
-
                       <AuthenticatedTemplate>
                         {invalidAzureLogin ? (
                           <span>Not authorized loging out in {counter}</span>

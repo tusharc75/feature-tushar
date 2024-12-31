@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { camelCase, startCase } from 'lodash';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { Box, Button, IconButton, MenuItem, Typography } from '@mui/material';
+import { Box, IconButton, MenuItem, Typography } from '@mui/material';
 import axiosInstance from 'src/axios/axiosInstance';
 import { MATERIAL_TYPE, gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
 import ManageStep from '../ManageStep';
@@ -24,6 +24,7 @@ import { flattenArray } from 'src/constants/columns';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { FiExternalLink } from 'react-icons/fi';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const View = ({
   step,
@@ -76,52 +77,52 @@ const View = ({
       },
       ...(step?.linkWithMaterial
         ? [
-            {
-              accessor: 'type',
-              Header: 'Type',
-              disableFilters: true,
-              disabled: true,
-              sticky: isMobile || isTablet ? 'none' : 'left',
-              width: 200,
-              Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
-            },
-            {
-              accessor: 'detail',
-              Header: 'Details',
-              minWidth: 300,
-              width: 300,
-              disabled: true,
-              sticky: isMobile || isTablet ? 'none' : 'left',
-              Cell: ({ row }) => (
-                <div className="flex items-center gap-2">
-                  <p className="text-truncate" title={row.original.detail}>
-                    {row.original.detail}
-                  </p>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      if (row.original.type === MATERIAL_TYPE.product) {
-                        window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                      }
-                      if (row.original.type === MATERIAL_TYPE.service) {
-                        window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                      }
-                      if (row.original.type === MATERIAL_TYPE.package) {
-                        window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                      }
-                    }}
-                  >
-                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                  </IconButton>
-                </div>
-              )
-            },
-            {
-              accessor: 'description',
-              Header: 'Description',
-              Cell: ({ row }) => (row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />)
-            }
-          ]
+          {
+            accessor: 'type',
+            Header: 'Type',
+            disableFilters: true,
+            disabled: true,
+            sticky: isMobile || isTablet ? 'none' : 'left',
+            width: 200,
+            Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
+          },
+          {
+            accessor: 'detail',
+            Header: 'Details',
+            minWidth: 300,
+            width: 300,
+            disabled: true,
+            sticky: isMobile || isTablet ? 'none' : 'left',
+            Cell: ({ row }) => (
+              <div className="flex items-center gap-2">
+                <p className="text-truncate" title={row.original.detail}>
+                  {row.original.detail}
+                </p>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    if (row.original.type === MATERIAL_TYPE.product) {
+                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                    }
+                    if (row.original.type === MATERIAL_TYPE.service) {
+                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                    }
+                    if (row.original.type === MATERIAL_TYPE.package) {
+                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                    }
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
+              </div>
+            )
+          },
+          {
+            accessor: 'description',
+            Header: 'Description',
+            Cell: ({ row }) => (row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />)
+          }
+        ]
         : [])
     ];
     const newColumns = await generateColumns(renderedFrom, step?.fields || [], null, false, data?.currency);
@@ -347,8 +348,8 @@ const View = ({
   const addButtonMenuItems = () => {
     return step?.linkWithMaterial
       ? step?.linkedMaterial?.map((m) => (
-          <MenuItem onClick={() => setOpenMaterial({ open: true, type: m })}>Add Existing {startCase(m) + 's'}</MenuItem>
-        ))
+        <MenuItem onClick={() => setOpenMaterial({ open: true, type: m })}>Add Existing {startCase(m) + 's'}</MenuItem>
+      ))
       : null;
   };
 
@@ -371,16 +372,14 @@ const View = ({
                     hasXpadding
                     leftSideContents={
                       !step?.linkWithMaterial ? (
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          size="small"
+                        <ThemeButton
                           onClick={() => {
                             setOpen({ open: true, id: null });
                           }}
+                          buttonType='theme'
                         >
                           Add
-                        </Button>
+                        </ThemeButton>
                       ) : null
                     }
                   />
@@ -408,17 +407,14 @@ const View = ({
             ) : (
               <>
                 <Box textAlign={'right'}>
-                  <Button
-                    className={'no-shadow'}
+                  <ThemeButton
                     onClick={() => {
                       setOpen({ open: true, id: dataRows[0] ? dataRows[0]?._id : null });
                     }}
-                    variant={'contained'}
-                    size="small"
-                    color="primary"
+                    buttonType='theme'
                   >
                     Edit
-                  </Button>
+                  </ThemeButton>
                 </Box>
                 <Box mt={2}>
                   <DetailsPage data={dataRows[0] || {}} fields={step?.fields?.map((f) => ({ fieldData: f }))} />

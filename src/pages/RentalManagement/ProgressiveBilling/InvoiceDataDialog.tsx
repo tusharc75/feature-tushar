@@ -1,4 +1,4 @@
-import { Box, Button, Dialog } from '@mui/material';
+import { Box, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -6,6 +6,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import { CustomDialogTransition, getObjKeys, sidebarResource, yupSchema } from 'src/constants/helpers';
@@ -85,12 +86,12 @@ const InvoiceDataDialog = ({ onClose, onSuccess, invoiceFields }) => {
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button size="small" color="primary" onClick={onClose}>
+                <ThemeButton buttonType="transparent" onClick={onClose}>
                   Cancel
-                </Button>
-                <Button variant="contained" color="primary" size="small" type="submit" onClick={submitForm}>
+                </ThemeButton>
+                <ThemeButton buttonType="theme" onClick={submitForm}>
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
             </>
           )}

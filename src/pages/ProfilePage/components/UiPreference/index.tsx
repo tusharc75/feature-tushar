@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import styles from '../../profilePage.module.scss';
 import DefaultRecordDialog from './DefaultRecordDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const UiPreference = ({ userData, onSuccess }) => {
   const [byDefaultRecordDialog, setByDefaultRecordDialog] = useState(false);
@@ -13,16 +14,14 @@ const UiPreference = ({ userData, onSuccess }) => {
       </div>
       <Box style={{ padding: '8px' }}>
         <div className="header-panel">
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
+          <ThemeButton
+            buttonType="theme"
             onClick={() => {
               setByDefaultRecordDialog(true);
             }}
           >
             By Default Record
-          </Button>
+          </ThemeButton>
         </div>
       </Box>
       {byDefaultRecordDialog && (

@@ -2,7 +2,7 @@ import { Box, IconButton, Menu, MenuItem } from '@mui/material';
 import { useState, useEffect, useContext, Fragment } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Button, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import { MATERIAL_REQUEST_STATUS, PRODUCT_SERIAL_NUMBER_STATUS } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
@@ -157,10 +157,8 @@ const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false
                   <Box display="flex" flexGrow={1}>
                     {row['status'] === MATERIAL_REQUEST_STATUS.requested && (
                       <Fragment>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          size="small"
+                        <ThemeButton
+                          buttonType="theme"
                           style={{ boxShadow: 'unset' }}
                           className="no-shadow"
                           disabled={loading}
@@ -169,19 +167,17 @@ const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false
                           }}
                         >
                           Process
-                        </Button>
+                        </ThemeButton>
                         <Box pl={1} />
-                        <Button
-                          variant="outlined"
-                          color="secondary"
-                          size="small"
+                        <ThemeButton
+                          buttonType="theme"
                           disabled={loading}
                           onClick={() => {
                             setQtyDialog({ open: true, status: MATERIAL_REQUEST_STATUS.closed, data: row });
                           }}
                         >
                           Close
-                        </Button>
+                        </ThemeButton>
                         <Box pl={1} />
                       </Fragment>
                     )}
