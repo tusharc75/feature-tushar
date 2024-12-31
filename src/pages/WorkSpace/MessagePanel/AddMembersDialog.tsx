@@ -1,6 +1,6 @@
 import { CircularProgress, TextField } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
-import { debounce } from 'lodash';
+import { debounce, uniqBy } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -15,6 +15,7 @@ const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
+  const [inputValue, setInputValue] = useState('');
 
   const fetchOptions = debounce(async (searchKey: string = '', page: number = 0) => {
     setLoading(true);
@@ -31,7 +32,9 @@ const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
       }));
 
       setOptions((currentOptions) => {
-        return page === 0 ? [...optionsData] : [...currentOptions, ...optionsData];
+        let alreadySelectedOptions: any = currentOptions?.filter((option) => selectedUsers?.includes(option?.optionValue)) || [];
+        optionsData = uniqBy([...alreadySelectedOptions, ...optionsData], 'optionValue');
+        return page === 0 ? optionsData : [...currentOptions, ...optionsData];
       });
       if (page > 0 && optionsData?.length > 0) {
         setCurrentPage(page);
@@ -93,15 +96,17 @@ const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
         onOpen={() => {
           fetchOptions('', 0);
         }}
+        inputValue={inputValue} 
         onInputChange={(event, value, reason) => {
           if (reason === 'input') {
+            setInputValue(value);
             fetchOptions(value);
           }
         }}
         loading={loading || !options}
         options={options}
         autoHighlight
-        value={selectedUsers?.map((userId) => options.find((option) => option.optionValue === userId) || { optionLabel: '', optionValue: userId })}
+        value={selectedUsers?.map((userId) => options?.find((option) => option?.optionValue === userId) || { optionLabel: '', optionValue: userId })}
         getOptionLabel={(option) => option.optionLabel || ''}
         isOptionEqualToValue={(option, val) => option.optionValue === val.optionValue}
         onChange={(event, newValue) => {
