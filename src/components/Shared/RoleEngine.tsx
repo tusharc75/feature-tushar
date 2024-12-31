@@ -52,6 +52,7 @@ interface RoleProps {
   tier?: string;
   child?: boolean;
   updateChildResource?: (resource: string, access: string, checked: boolean) => void;
+  height?: number | string;
 }
 
 type SortingType = 'asc' | 'des' | '';
@@ -70,6 +71,7 @@ const RoleEngine = ({
   style,
   tier = ROLE_TIER.tier1,
   child = false,
+  height = 400,
   updateChildResource = null
 }: RoleProps) => {
   const [isReadChecked, setIsReadChecked] = useState(false);
@@ -517,7 +519,7 @@ const RoleEngine = ({
         />
       </div>
       <TableContainer
-        style={{ height: 400, minHeight: 400, ...style }}
+        style={{ height: height, minHeight: height, ...style }}
         className="rounded-[4px] border border-[var(--common-border-color)] shadow-[0px_20.3165px_40.6331px_rgba(0,0,0,0.03)]"
       >
         <Table stickyHeader aria-label="roles" className="roles-table">
@@ -685,7 +687,7 @@ const Row = ({ _resource, isDisable, handleChange, fieldCheckbox }) => {
 
   return (
     <React.Fragment>
-      <TableRow>
+      <TableRow className="[&:not(:last-child)]:shadow-[0_1px_0px_0px_var(--common-border-color)]">
         <TableCell sx={{ minWidth: 300, py: 0 }}>
           <Box display="flex" justifyContent={'flex-start'} className="cursor-pointer" alignItems={'center'} onClick={() => setOpen(!open)}>
             <Typography className="tableMainHeader">{_resource?.resourceLabel}</Typography>
@@ -739,27 +741,27 @@ const Row = ({ _resource, isDisable, handleChange, fieldCheckbox }) => {
       </TableRow>
       {open &&
         fieldCheckbox.map((_field, innerIndex) => (
-          <TableRow key={innerIndex}>
-            <TableCell>
+          <TableRow key={innerIndex} className="[&:not(:last-child)]:shadow-[0_1px_0px_0px_var(--common-border-color)]">
+            <TableCell sx={{ py: 0 }}>
               <Typography variant="body1" style={{ fontWeight: '400' }}>
                 &emsp; {_field.fieldData.fieldLabel + (_field.fieldData.required ? ' *' : '')}
               </Typography>
             </TableCell>
-            <TableCell align="center">
+            <TableCell align="center" sx={{ py: 0 }}>
               <Checkbox
                 disabled={isDisable || _resource.isReadDisabled || _field.isReadDisabled}
                 checked={_field.isRead}
                 onChange={handleChange('field', _field.fieldData._id, 'isRead')}
               />
             </TableCell>
-            <TableCell align="center">
+            <TableCell align="center" sx={{ py: 0 }}>
               <Checkbox
                 disabled={isDisable || _resource.isCreateDisabled || _field.isCreateDisabled}
                 checked={_field.isCreate}
                 onChange={handleChange('field', _field.fieldData._id, 'isCreate')}
               />
             </TableCell>
-            <TableCell align="center">
+            <TableCell align="center" sx={{ py: 0 }}>
               <Checkbox
                 disabled={isDisable || _resource.isUpdateDisabled || _field.isUpdateDisabled}
                 checked={_field.isUpdate}
