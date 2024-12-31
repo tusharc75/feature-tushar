@@ -112,7 +112,7 @@ const ViewMembers = ({ selectedChannel, fetchChannelData, channelData, handleClo
                 </Avatar>
                 <span>{member.optionLabel}</span>
               </div>
-              {selectedChannel?.isOwner && (
+              {selectedChannel?.isOwner && selectedChannel?.createdBy?.user !== member?.optionValue && (
                 <HtmlTooltip title={<span className="block w-[200px] py-2 text-center">Remove {member.optionLabel}</span>}>
                   <IconButton onClick={() => setConfirmDialog({ open: true, data: member })} size="small">
                     <RemoveCircleOutline color="error" />
