@@ -170,12 +170,18 @@ const Filter = ({
           onCloseWithErrors();
         } else {
           onClose();
+          if (setDeepFilters) setDeepFilters([]);
+          if (setFilterByIds) setFilterByIds([]);
+          if (setFilterTerm) setFilterTerm({});
         }
       } else {
         handleApplyFilter();
       }
     } else {
       onClose();
+      if (setDeepFilters) setDeepFilters([]);
+      if (setFilterByIds) setFilterByIds([]);
+      if (setFilterTerm) setFilterTerm({});
     }
   };
 

@@ -123,7 +123,11 @@ const SingleLine = ({ fieldData, allFields, deepFilters, setDeepFilters, filterT
                         } else {
                           filter.term = filter.term?.filter((t) => t != o);
                         }
-                        setDeepFilters([...deepFilters?.filter((d) => d?.field != fieldData?.fieldName), filter]);
+                        if (filter.term?.length) {
+                          setDeepFilters([...deepFilters?.filter((d) => d?.field != fieldData?.fieldName), filter]);
+                        } else {
+                          setDeepFilters([...deepFilters?.filter((d) => d?.field != fieldData?.fieldName)]);
+                        }
                       } else {
                         setDeepFilters((pre) => [...pre, { field: fieldData?.fieldName, term: [o] }]);
                       }
