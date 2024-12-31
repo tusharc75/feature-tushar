@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Box, Button, Dialog, Typography } from '@mui/material';
+import { Box, Dialog, Typography } from '@mui/material';
 import axiosInstance from 'src/axios/axiosInstance';
 import { ACTIVITY_RESOURCE, CustomDialogTransition, rentalManagement } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -215,7 +215,7 @@ export default function AssetAvailability({ rentalId, handleClose }) {
                     ?.filter((e) => !e.baseWarehouse)
                     ?.map((product) => <ShowProduct key={product._id} product={product} resources={resources} />)}
                   <div className="mt-3" style={{ ...styles.buttonContaier }}>
-                    <ThemeButton 
+                    <ThemeButton
                       onClick={() => {
                         setTaskDialog(true);
                       }}

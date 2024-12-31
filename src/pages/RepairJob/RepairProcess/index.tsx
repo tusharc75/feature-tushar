@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, Typography } from '@mui/material';
+import { Box, Dialog, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -132,33 +132,25 @@ const RepairProcess = ({ onClose, onSuccess, assetId, assetNumber, repaired, rep
                         {activeStep === index ? (
                           step.status === REPAIR_PROCESS_STATUS.start ? (
                             <Fragment>
-                              <Button
-                                variant="outlined"
-                                color="secondary"
-                                aria-controls="simple-menu"
-                                aria-haspopup="true"
-                                size="small"
+                              <ThemeButton
+                                buttonType='theme'
                                 className="mr-2"
                                 onClick={() => handleUpdate(step?._id, step?.name, REPAIR_PROCESS_STATUS.complete)}
                               >
                                 {REPAIR_PROCESS_STATUS.complete}
-                              </Button>
+                              </ThemeButton>
                               <DeleteButton
                                 text={REPAIR_PROCESS_STATUS.failed}
                                 onClick={() => handleUpdate(step?._id, step?.name, REPAIR_PROCESS_STATUS.failed)}
                               />
                             </Fragment>
                           ) : (
-                            <Button
-                              variant="outlined"
-                              color="primary"
-                              aria-controls="simple-menu"
-                              aria-haspopup="true"
-                              size="small"
+                            <ThemeButton
+                              buttonType='theme'
                               onClick={() => handleUpdate(step?._id, step?.name, REPAIR_PROCESS_STATUS.start)}
                             >
                               {REPAIR_PROCESS_STATUS.start}
-                            </Button>
+                            </ThemeButton>
                           )
                         ) : null}
                         {step.status === REPAIR_PROCESS_STATUS.complete && (

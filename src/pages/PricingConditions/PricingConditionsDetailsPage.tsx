@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, useContext, Fragment } from 'react';
-import { Box, Button, Chip, IconButton, InputAdornment } from '@mui/material';
+import { Box, Chip, IconButton, InputAdornment } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Formik, Form } from 'formik';
 import axiosInstance from '../../axios/axiosInstance';
@@ -305,7 +305,6 @@ function PricingConditionsDetailsPage() {
                       <ThemeButton
                         isLoading={loading}
                         buttonType="theme"
-                        //disabled={loading || isEqual(ref?.current?.values, initialData?.values)}
                         onClick={(e) => {
                           e.preventDefault();
                           submitForm();
@@ -315,11 +314,7 @@ function PricingConditionsDetailsPage() {
                       </ThemeButton>
                     </Box>
                     <Box ml={1}>
-                      <Button
-                        type="button"
-                        variant="outlined"
-                        color="primary"
-                        size="small"
+                      <ThemeButton
                         onClick={() => {
                           if (!isEqual(ref.current.values, initialData.values)) {
                             setShowConfirmDialog(true);
@@ -329,7 +324,7 @@ function PricingConditionsDetailsPage() {
                         }}
                       >
                         Close
-                      </Button>
+                      </ThemeButton>
                     </Box>
                   </Grid>
                 </Grid>
@@ -592,7 +587,7 @@ function PricingConditionsDetailsPage() {
                                                   style={{ margin: 0 }}
                                                   value={
                                                     values[
-                                                      'rent_' + _pricingMethod + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())
+                                                    'rent_' + _pricingMethod + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())
                                                     ]
                                                   }
                                                   onChange={(e) =>
@@ -621,10 +616,7 @@ function PricingConditionsDetailsPage() {
                           <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Discount</h2>
                         </div>
                         <Box marginTop={2} marginBottom={1}>
-                          <Button
-                            variant="outlined"
-                            color="primary"
-                            size="small"
+                          <ThemeButton
                             onClick={() => {
                               setDiscount([
                                 ...discount,
@@ -639,7 +631,7 @@ function PricingConditionsDetailsPage() {
                             }}
                           >
                             Add Discount
-                          </Button>
+                          </ThemeButton>
                         </Box>
                         {discount.map((val, index) => (
                           <Box key={index} mb={2}>
@@ -762,10 +754,7 @@ function PricingConditionsDetailsPage() {
                           <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Charge</h2>
                         </div>
                         <Box marginTop={2} marginBottom={1}>
-                          <Button
-                            variant="outlined"
-                            color="primary"
-                            size="small"
+                          <ThemeButton
                             onClick={() => {
                               setCharge([
                                 ...charge,
@@ -778,7 +767,7 @@ function PricingConditionsDetailsPage() {
                             }}
                           >
                             Add Charge
-                          </Button>
+                          </ThemeButton>
                         </Box>
                         {charge.map((val, index) => (
                           <Box key={index} mb={2}>
@@ -859,10 +848,7 @@ function PricingConditionsDetailsPage() {
                           <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Tax</h2>
                         </div>
                         <Box marginTop={2} marginBottom={1}>
-                          <Button
-                            variant="outlined"
-                            color="primary"
-                            size="small"
+                          <ThemeButton
                             onClick={() => {
                               setTax([
                                 ...tax,
@@ -875,7 +861,7 @@ function PricingConditionsDetailsPage() {
                             }}
                           >
                             Add Tax
-                          </Button>
+                          </ThemeButton>
                         </Box>
                         {tax.map((val, index) => (
                           <Box key={index} mb={2}>

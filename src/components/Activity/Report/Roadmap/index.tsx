@@ -43,7 +43,7 @@ function Roadmap({ type, filter }) {
         setTreeList(data.treeList);
         if (shouldScroll) executeScroll();
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   let height = window.innerHeight - 250;

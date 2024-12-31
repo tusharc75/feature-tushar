@@ -1,4 +1,4 @@
-import { Box, Button, TextField } from '@mui/material';
+import { Box, TextField } from '@mui/material';
 import { AddOutlined } from '@mui/icons-material';
 import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase } from 'lodash';
@@ -202,7 +202,7 @@ const SendOutboundMessage = () => {
             <div className="align-items-center flex flex-wrap justify-end gap-[8px]">
               <SearchBox onChange={handleSearch} value={search} />
               <div className="flex flex-wrap items-center gap-[8px]">
-                <ThemeButton 
+                <ThemeButton
                   onClick={() => {
                     setManageSendOutBoundMessageDialog(true);
                   }}

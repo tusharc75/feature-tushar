@@ -1,4 +1,4 @@
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -103,10 +103,10 @@ const LeadDetailsPage = () => {
           }
           setHasPermissionToConvertToOpportunity(
             dontHavePermissions.length === 0 &&
-              user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity &&
-              allowedToEdit &&
-              leadData[processFieldName] &&
-              currentStepToShow + 1 >= steps.length
+            user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity &&
+            allowedToEdit &&
+            leadData[processFieldName] &&
+            currentStepToShow + 1 >= steps.length
           );
         } else {
           setShowAtLast(false);
@@ -336,7 +336,7 @@ const LeadDetailsPage = () => {
           <Box className="control-buttons-v1">
             {!isLeadAlreadyConvertedToOpportunity && hasPermissionToConvertToOpportunity && (
               <>
-                <ThemeButton 
+                <ThemeButton
                   onClick={() => {
                     const leadName = [leadData.firstName, leadData.middleName, leadData.lastName].filter((d) => d).join(' ');
                     setConvertLeadToOpportunityConfirmationDialog({
@@ -347,7 +347,7 @@ const LeadDetailsPage = () => {
                     });
                   }}
                   buttonType='theme'
-                  iconForMobile={<FaSyncAlt size={15} />} 
+                  iconForMobile={<FaSyncAlt size={15} />}
                   mobileTooltip={'Convert Lead To Opportunity'}
                 >
                   {'Convert Lead To Opportunity'}

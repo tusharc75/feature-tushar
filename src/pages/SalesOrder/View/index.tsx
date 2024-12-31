@@ -1,4 +1,4 @@
-import { Box, Button, Paper, Typography } from '@mui/material';
+import { Box, Paper, Typography } from '@mui/material';
 import { Fragment, useEffect, useState } from 'react';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { useHistory } from 'react-router-dom';
@@ -10,6 +10,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { lowerFirst, startCase } from 'lodash';
 import { COLOUR_MASTER, MATERIAL_TYPE } from 'src/constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const customNodeStyles = {
   salesOrder: {
@@ -217,17 +218,14 @@ const IrtTicketView = ({ salesOrderData }) => {
     <ContentFullScreen fullScreen={fullScreenOpen} setFullScreen={setFullScreenOpen}>
       <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
         <Box>
-          <Button
-            variant={'outlined'}
-            size="small"
+          <ThemeButton
             onClick={() => {
               setColorInfo(!colorInfo);
             }}
-            aria-controls="action-menu"
             endIcon={colorInfo ? <ExpandLess /> : <ExpandMore />}
           >
             {'Color Info'}
-          </Button>
+          </ThemeButton>
         </Box>
         {colorInfo && (
           <Box>

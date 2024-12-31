@@ -1,4 +1,4 @@
-import { Button, IconButton } from '@mui/material';
+import { IconButton } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import Box from '@mui/material/Box/Box';
 import { Cancel } from '@mui/icons-material';
@@ -219,10 +219,10 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
                   </HtmlTooltip>
                 } */}
               {permissions?.purchaseOrder?.isUpdate &&
-              row?.original?.type === MATERIAL_TYPE.product &&
-              allowedToEdit &&
-              row?.original?.qty - (row?.original?.rejectQuantity || 0) &&
-              ![PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? (
+                row?.original?.type === MATERIAL_TYPE.product &&
+                allowedToEdit &&
+                row?.original?.qty - (row?.original?.rejectQuantity || 0) &&
+                ![PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? (
                 <HtmlTooltip title="Reject">
                   <span>
                     <IconButton
@@ -386,7 +386,7 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
     return (
       <>
         {permissions?.purchaseOrder?.isUpdate && allowedToEdit && (
-          <ThemeButton 
+          <ThemeButton
             id={'receive-button'}
             disabled={
               selectedRecords.length === 0 || (selectedRecords?.filter((e: any) => e.qty - (e?.actualReceived || 0) > 0).length > 0 ? false : true)
@@ -396,11 +396,11 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
             }}
             buttonType='theme'
           >
-              Receive
+            Receive
           </ThemeButton>
         )}
         {permissions?.purchaseOrder?.isUpdate && allowedToEdit && (
-          <ThemeButton 
+          <ThemeButton
             id={'reject-button'}
             disabled={
               selectedRecords.length === 0 || (selectedRecords?.filter((e: any) => e.qty - (e?.rejectQuantity || 0) > 0)?.length > 0 ? false : true)
@@ -410,7 +410,7 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
             }}
             buttonType='theme'
           >
-              Reject
+            Reject
           </ThemeButton>
         )}
       </>
@@ -447,7 +447,7 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
         leftSideContents={<LeftSideContents />}
         hasXpadding={true}
       />
-      <Grid size={{xs:12, md:12, sm:12}}>
+      <Grid size={{ xs: 12, md: 12, sm: 12 }}>
         {columns ? (
           <Box zIndex={5} width={'100%'}>
             <CustomReactTable

@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import clsx from 'clsx';
-import { Typography, Box, IconButton, Tabs, Tab, Menu, MenuItem, Button, Theme } from '@mui/material';
+import { Typography, Box, IconButton, Tabs, Tab, Menu, MenuItem, Theme } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
 import { Skeleton } from '@mui/material';
@@ -22,7 +22,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Accordion, AccordionSummary, AccordionDetails } from 'src/components/CustomAccordion';
-import routes from 'src/components/Helpers/Routes';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -458,32 +458,26 @@ const CustomerAccounts = (props) => {
             </Typography>
             {(permissions?.projectSales?.isUpdate && isTeamMember) || isManager ? (
               <>
-                <Button
-                  variant={isMobile && !isTablet ? 'outlined' : 'contained'}
-                  style={isMobile && !isTablet ? { color: 'var(--info-dark)', marginLeft: 'auto' } : { marginLeft: 'auto' }}
-                  color="primary"
-                  size="small"
+                <ThemeButton
+                  buttonType='theme'
                   onClick={(e) => {
                     e.stopPropagation();
                     e.preventDefault();
                     setShowAccountCreateDialog(true);
                   }}
                 >
-                  {isMobile && !isTablet ? 'New' : 'Create New'}
-                </Button>
-                <Button
-                  variant={isMobile && !isTablet ? 'outlined' : 'contained'}
-                  style={isMobile && !isTablet ? { color: 'var(--info-dark)', marginLeft: '10px' } : { marginLeft: '10px' }}
-                  color="primary"
-                  size="small"
+                  {'Create New'}
+                </ThemeButton>
+                <ThemeButton
+                  buttonType='theme'
                   onClick={(e) => {
                     e.stopPropagation();
                     e.preventDefault();
                     handleOpenDialog('customer-account');
                   }}
                 >
-                  {isMobile && !isTablet ? 'Add' : 'Add Existing'}
-                </Button>
+                  {'Add Existing'}
+                </ThemeButton>
               </>
             ) : null}
           </AccordionSummary>

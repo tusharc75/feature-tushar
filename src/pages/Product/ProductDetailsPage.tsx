@@ -1,4 +1,4 @@
-import { Box, Button, Chip, IconButton, Typography } from '@mui/material';
+import { Box, Chip, IconButton, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { ControlPoint, ExpandLess, ExpandMore, InfoOutlined } from '@mui/icons-material';
 import EditIcon from '@mui/icons-material/Edit';
@@ -436,8 +436,6 @@ const ProductDetailsPage = () => {
                                               </Typography>
                                               <Box mx={1} />
                                               <HtmlTooltip
-                                                arrow
-                                                interactive
                                                 title={
                                                   <>
                                                     <Typography>Asset Status: </Typography>
@@ -472,12 +470,8 @@ const ProductDetailsPage = () => {
                                             <Fragment key={i._id}>
                                               {i?.assetNumber ? (
                                                 index === 5 ? (
-                                                  <Button
+                                                  <ThemeButton
                                                     fullWidth
-                                                    className="mt-3"
-                                                    variant="outlined"
-                                                    color="primary"
-                                                    size="small"
                                                     onClick={() => {
                                                       const warehouseFilter = [
                                                         {
@@ -500,7 +494,7 @@ const ProductDetailsPage = () => {
                                                     }}
                                                   >
                                                     View All
-                                                  </Button>
+                                                  </ThemeButton>
                                                 ) : (
                                                   <Chip
                                                     label={i?.assetNumber}

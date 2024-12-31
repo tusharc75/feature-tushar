@@ -1,11 +1,11 @@
-import React, { useContext, useState } from 'react';
-import { Menu, MenuItem, Button, useMediaQuery } from '@mui/material';
+import { useContext, useState } from 'react';
+import { Menu, MenuItem, useMediaQuery } from '@mui/material';
 import axiosInstance from '../../axios/axiosInstance';
 import { downloadExcel } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { MdImportExport } from 'react-icons/md';
-import HtmlTooltip from '../CustomTooltipTitle';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ImportExportMenu = ({
   ids = [],
@@ -24,7 +24,6 @@ const ImportExportMenu = ({
   title = '',
   ...others
 }) => {
-  const isMobile = useMediaQuery('(max-width:600px)');
 
   const toastConfig = useContext(CustomToastContext);
 
@@ -42,7 +41,6 @@ const ImportExportMenu = ({
   const uploadData = (event) => {
     if (event.target.files && event.target.files.length) {
       toastConfig.setToastConfig({
-        hideDuration: null,
         open: true,
         type: 'info',
         message: `Uploading ${module}, Please wait...`
@@ -90,7 +88,6 @@ const ImportExportMenu = ({
 
   const exportToExcel = () => {
     toastConfig.setToastConfig({
-      hideDuration: null,
       open: true,
       type: 'info',
       message: `Your file will be downloaded/uploaded in a matter of seconds`
@@ -168,30 +165,14 @@ const ImportExportMenu = ({
 
   return (
     <>
-      <HtmlTooltip title={<>Import/Export {title}</>} placement="top" arrow enterTouchDelay={0}>
-        <span>
-          <Button
-            onClick={(e) => handleClick(e)}
-            endIcon={<ArrowDropDownIcon />}
-            variant={'outlined'}
-            color="primary"
-            aria-controls="simple-menu"
-            aria-haspopup="true"
-            className="min-h-[32px]"
-            size="small"
-            {...others}
-          >
-            {isMobile ? (
-              <>
-                <MdImportExport size={20} />
-                {` ${title}`}
-              </>
-            ) : (
-              <>Import/Export {title}</>
-            )}
-          </Button>
-        </span>
-      </HtmlTooltip>
+      <ThemeButton
+        onClick={(e) => handleClick(e)}
+        endIcon={<ArrowDropDownIcon />}
+        mobileTooltip={`Import/Export ${title}`}
+        iconForMobile={<MdImportExport size={20} />}
+      >
+        {`Import/Export ${title}`}
+      </ThemeButton>
       <Menu
         id="import-export-links"
         anchorEl={anchorEl}
