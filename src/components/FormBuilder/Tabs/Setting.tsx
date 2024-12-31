@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Button, Checkbox, CircularProgress, Dialog, FormControlLabel, TextField } from '@mui/material';
+import { Box, Checkbox, Dialog, FormControlLabel, TextField } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { Form, Formik } from 'formik';
@@ -129,7 +130,7 @@ const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
                         <TextField
                           {...params}
                           margin="dense"
-                          size='small'
+                          size="small"
                           variant="outlined"
                           label="Workspace Tools Field"
                           placeholder="Workspace Tools Field"
@@ -145,20 +146,17 @@ const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button size="small" color="primary" disabled={submitting} onClick={onClose}>
+              <ThemeButton buttonType="transparent" onClick={onClose}>
                 Cancel
-              </Button>
-              <Button
+              </ThemeButton>
+              <ThemeButton
                 disabled={submitting}
-                variant="contained"
-                color="primary"
-                size="small"
-                type="submit"
+                buttonType="theme"
                 onClick={submitForm}
-                endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                isLoading={submitting}
               >
                 Save
-              </Button>
+              </ThemeButton>
             </CustomDialogFooter>
           </>
         )}

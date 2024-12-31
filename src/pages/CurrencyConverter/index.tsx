@@ -1,5 +1,4 @@
 import { Box, TextField } from '@mui/material';
-import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
 import Chip from '@mui/material/Chip';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -227,10 +226,10 @@ const CurrencyConverter = () => {
                   renderInput={(params) => (
                     <TextField {...params} margin="dense" size="small" variant="outlined" label="Currency in use" placeholder="Currency in use" />
                   )}
-                  // renderOption={(option) => {
-                  //   const { currencyCode, symbolNative, currencyName } = getUniqueCurrencies().find(d => d.currencyCode === option);
-                  //   return `${currencyCode} - ${currencyName} - (${symbolNative})`
-                  // }}
+                // renderOption={(option) => {
+                //   const { currencyCode, symbolNative, currencyName } = getUniqueCurrencies().find(d => d.currencyCode === option);
+                //   return `${currencyCode} - ${currencyName} - (${symbolNative})`
+                // }}
                 />
               </Grid>
               <Grid size={{ xs: 12, md: 4, sm: 4 }} container justifyContent="flex-end">

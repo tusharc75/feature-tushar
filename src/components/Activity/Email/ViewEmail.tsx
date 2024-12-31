@@ -1,9 +1,9 @@
 import { useAccount, useMsal } from '@azure/msal-react';
-import { CircularProgress, IconButton } from '@mui/material';
+import { IconButton } from '@mui/material';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Divider from '@mui/material/Divider';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Grid2';
 import Typography from '@mui/material/Typography';
 import { makeStyles } from '@mui/styles';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -405,25 +405,24 @@ export const ViewEmail = ({
                         </Box>
                         <Box mb={1} style={{ marginTop: '-31px', paddingRight: '52px' }}>
                           <Grid container spacing={1} justifyContent="space-between">
-                            <Grid item xs={12} sm={6}>
+                            <Grid size={{ xs: 12, sm: 6 }}>
                               <Typography variant="subtitle1">
-                                <span style={{ fontWeight: 500, fontSize: '0.875rem' }}>Subject</span> :{' '}
-                                {initialValues.name || initialValues.subject}{' '}
+                                <span style={{ fontWeight: 500, fontSize: '0.875rem' }}>Subject</span> : {initialValues.name || initialValues.subject}{' '}
                               </Typography>
                             </Grid>
-                            <Grid item xs={12} sm={6}>
+                            <Grid size={{ xs: 12, sm: 6 }}>
                               <Typography variant="subtitle1">
                                 <span style={{ fontWeight: 500, fontSize: '0.875rem' }}>To</span> : {initialValues.to.join()}{' '}
                               </Typography>
                             </Grid>
-                            <Grid item xs={12} sm={6}>
+                            <Grid size={{ xs: 12, sm: 6 }}>
                               {initialValues.to.length && (
                                 <Typography variant="subtitle1">
                                   <span style={{ fontWeight: 500, fontSize: '0.875rem' }}>Cc</span> : {initialValues.cc.join() || '----'}{' '}
                                 </Typography>
                               )}
                             </Grid>
-                            <Grid item xs={12} sm={6}>
+                            <Grid size={{ xs: 12, sm: 6 }}>
                               {initialValues?.relatedTo && initialValues.relatedTo.length ? (
                                 <RelatedToDispay relatedTo={initialValues.relatedTo} inline />
                               ) : null}
@@ -434,16 +433,14 @@ export const ViewEmail = ({
                         <Box className={classes.inboundEmail}>
                           <Box>
                             <Grid container>
-                              <Grid item style={{ flexBasis: '48px' }}>
+                              <Grid style={{ flexBasis: '48px' }}>
                                 <Box className={`${classes.profile} ${classes.myProfile}`}>{'You'}</Box>
                               </Grid>
-                              <Grid item style={{ flexBasis: 'calc(100% - 48px)' }}>
+                              <Grid style={{ flexBasis: 'calc(100% - 48px)' }}>
                                 <Box className={classes.mailText}>
                                   <Box className={classes.mailtextHead}>
                                     <Typography className={classes.mailFrom}>{values.mailbox}</Typography>
-                                    <Typography className={classes.mailTimeStamp}>
-                                      {displayDateTime(values?.createdBy.date)}
-                                    </Typography>
+                                    <Typography className={classes.mailTimeStamp}>{displayDateTime(values?.createdBy.date)}</Typography>
                                   </Box>
                                   <div
                                     className="max-image"
@@ -451,13 +448,7 @@ export const ViewEmail = ({
                                       __html: initialValues.content || initialValues.message
                                     }}
                                   />
-                                  {
-                                    <AttachmentThumbnail
-                                      attachments={otherAttachments}
-                                      canEdit={false}
-                                      handleDeleteAttachment={(attachment) => { }}
-                                    />
-                                  }
+                                  {<AttachmentThumbnail attachments={otherAttachments} canEdit={false} handleDeleteAttachment={(attachment) => { }} />}
                                   <ImageAttachments
                                     imageAttachments={imageAttachments}
                                     onImageClick={(attachment) => {
@@ -478,18 +469,14 @@ export const ViewEmail = ({
                             return (
                               <Box>
                                 <Grid container>
-                                  <Grid item style={{ flexBasis: '48px' }}>
-                                    <Box className={`${classes.profile} ${incomingMail.type === 'sender' ? classes.myProfile : ''}`}>
-                                      {initials}
-                                    </Box>
+                                  <Grid style={{ flexBasis: '48px' }}>
+                                    <Box className={`${classes.profile} ${incomingMail.type === 'sender' ? classes.myProfile : ''}`}>{initials}</Box>
                                   </Grid>
-                                  <Grid item style={{ flexBasis: 'calc(100% - 48px)' }}>
+                                  <Grid style={{ flexBasis: 'calc(100% - 48px)' }}>
                                     <Box className={classes.mailText}>
                                       <Box className={classes.mailtextHead}>
                                         <Typography className={classes.mailFrom}>{incomingMail.from}</Typography>
-                                        <Typography className={classes.mailTimeStamp}>
-                                          {displayDateTime(incomingMail.date)}
-                                        </Typography>
+                                        <Typography className={classes.mailTimeStamp}>{displayDateTime(incomingMail.date)}</Typography>
                                       </Box>
                                       <div
                                         className="max-image"
@@ -499,12 +486,8 @@ export const ViewEmail = ({
                                       />
 
                                       <Grid container>
-                                        <Grid item xs={6} sm={4} md={3}>
-                                          <AttachmentThumbnail
-                                            attachments={incomingMail.attachments}
-                                            handleDeleteAttachment={null}
-                                            canEdit={false}
-                                          />
+                                        <Grid size={{ xs: 6, sm: 4, md: 3 }}>
+                                          <AttachmentThumbnail attachments={incomingMail.attachments} handleDeleteAttachment={null} canEdit={false} />
                                         </Grid>
                                       </Grid>
                                     </Box>
@@ -518,10 +501,10 @@ export const ViewEmail = ({
                         <Box className={classes.inboundEmail}>
                           <Box>
                             <Grid container>
-                              <Grid item style={{ flexBasis: '48px' }}>
+                              <Grid style={{ flexBasis: '48px' }}>
                                 <Box className={`${classes.profile} ${classes.myProfile}`}>{'You'}</Box>
                               </Grid>
-                              <Grid item style={{ flexBasis: 'calc(100% - 48px)' }}>
+                              <Grid style={{ flexBasis: 'calc(100% - 48px)' }}>
                                 <Box className={`${classes.mailText} ${classes.inputBox}`}>
                                   {newOtherAttachments.length > 0 && (
                                     <AttachmentThumbnail
@@ -584,20 +567,17 @@ export const ViewEmail = ({
                                     onQuoteUpload={handleQuoteUpload}
                                   />
                                   <Box className={classes.footer}>
-                                    <Button
-                                      type="button"
-                                      size="small"
-                                      color="primary"
-                                      variant="contained"
-                                      endIcon={sending ? <CircularProgress color="inherit" size={14} /> : <AiOutlineSend size={14} />}
+                                    <ThemeButton
+                                      buttonType="theme"
                                       disabled={sending || uploadingImageOrFileProgress > 0 || generatingFile}
                                       onClick={(e) => {
                                         e.preventDefault();
                                         submitForm();
                                       }}
+                                      isLoading={sending}
                                     >
-                                      {sending ? <>Sending ... </> : 'send'}
-                                    </Button>
+                                      send
+                                    </ThemeButton>
                                   </Box>
                                 </Box>
                               </Grid>
@@ -610,9 +590,8 @@ export const ViewEmail = ({
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  color="primary"
-                  size="small"
+                <ThemeButton
+                  buttonType="transparent"
                   disabled={sending}
                   onClick={() => {
                     if (isEqual(initialValues, values)) handleClose();
@@ -620,7 +599,7 @@ export const ViewEmail = ({
                   }}
                 >
                   Cancel
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog

@@ -1,10 +1,10 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Button, CircularProgress, Dialog } from '@mui/material';
+import { Box, Dialog } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition, fieldLabelToFieldName } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { FormBuilder } from '../../../../components/FormBuilder';
 import { map, uniq } from 'lodash';
@@ -133,19 +133,17 @@ const ConfigureField = ({ step = null, handleClose, handleSucess }) => {
         />
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button disabled={isSubmitting} variant="outlined" size="small" color="primary" onClick={handleClose}>
+        <ThemeButton buttonType="transparent" onClick={handleClose}>
           Close
-        </Button>
-        <Button
-          variant="contained"
-          size="small"
-          color="primary"
+        </ThemeButton>
+        <ThemeButton
+          buttonType="theme"
           disabled={isSubmitting}
           onClick={handleSave}
-          endIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
+          isLoading={isSubmitting}
         >
           Save
-        </Button>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

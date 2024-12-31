@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import {
   Dialog,
-  Button,
   TextField,
   TableBody,
   TableCell,
@@ -348,7 +347,6 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
   const handleSave = (file) => {
     setLoading(true);
     toastConfig.setToastConfig({
-      hideDuration: null,
       open: true,
       type: 'info',
       message: `Uploading builder, Please wait...`
@@ -521,7 +519,6 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                     TransitionProps={{ unmountOnExit: true, timeout: walkmeInstance ? 0 : 200 }}
                   >
                     <MenuItem
-                      button
                       onClick={(e) => {
                         setAddAnchorEl(null);
                         setAddSystemColumn(true);
@@ -530,7 +527,6 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                       Add System Column
                     </MenuItem>
                     <MenuItem
-                      button
                       onClick={(e) => {
                         setAddAnchorEl(null);
                         setAddImportedColumn({ open: true, type: 'single' });
@@ -539,7 +535,6 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                       Add From Imported Excel Column
                     </MenuItem>
                     <MenuItem
-                      button
                       onClick={(e) => {
                         setAddAnchorEl(null);
                         setAddImportedColumn({ open: true, type: 'all' });
@@ -549,19 +544,16 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                     </MenuItem>
                   </Menu>
                 </>
-                <Button
+                <ThemeButton
                   id={'custom-import-dialog-add-view-menu-button'}
-                  variant={'outlined'}
-                  color="primary"
-                  size="small"
                   disabled={isUploading || templateImportHeader?.length === 0 || customImportHeader?.length === 0}
                   onClick={(e) => {
                     setShowViewDialog(true);
                   }}
-                  aria-controls="add-view-menu"
+                  isLoading={isUploading}
                 >
                   Save Excel Mapping
-                </Button>
+                </ThemeButton>
               </div>
             </div>
             {isUploading ? (
@@ -628,15 +620,15 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                                   {...params}
                                   label=""
                                   variant="outlined"
-                                  // error={
-                                  //   _key?.value === field?.fieldLabel?.toUpperCase() &&
-                                  //   !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader)
-                                  // }
-                                  // helperText={
-                                  //   _key?.value === field?.fieldLabel?.toUpperCase() &&
-                                  //   !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader) &&
-                                  //   'Required field'
-                                  // }
+                                // error={
+                                //   _key?.value === field?.fieldLabel?.toUpperCase() &&
+                                //   !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader)
+                                // }
+                                // helperText={
+                                //   _key?.value === field?.fieldLabel?.toUpperCase() &&
+                                //   !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader) &&
+                                //   'Required field'
+                                // }
                                 />
                               )}
                             />
@@ -655,7 +647,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
             </ThemeButton>
             <ThemeButton
               onClick={handleCustomImport}
-buttonType="theme"
+              buttonType="theme"
               disabled={
                 loading ||
                 // !values?.productCategory ||

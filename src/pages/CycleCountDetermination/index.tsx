@@ -1,4 +1,4 @@
-import { Box, Button, TextField } from '@mui/material';
+import { Box, TextField } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -18,6 +18,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageCycleCountDetermination from './ManageCycleCountDetermination';
 import axios, { CancelTokenSource } from 'axios';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const CycleCountDetermination = () => {
   const renderedFrom = camelCase(`${sidebarResource?.cycleCountDetermination}`);
@@ -143,17 +144,14 @@ const CycleCountDetermination = () => {
   const RightSideContents = () => {
     return (
       <>
-        <Button
-          className={'no-shadow'}
+        <ThemeButton
           onClick={() => {
             setOpen(true);
           }}
-          variant={'contained'}
-          size="small"
-          color="primary"
+          buttonType='theme'
         >
           Edit
-        </Button>
+        </ThemeButton>
       </>
     );
   };

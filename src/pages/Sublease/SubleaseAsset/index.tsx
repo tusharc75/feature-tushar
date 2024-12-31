@@ -1,4 +1,3 @@
-import { Button } from '@mui/material';
 import Box from '@mui/material/Box/Box';
 import { map, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -31,6 +30,7 @@ import CustomMessageDialog from 'src/components/MessageDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { generateStepSendToSupplier } from 'src/pages/Sublease/walkmeSteps';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, allowedToEdit, isProcessor, stepFullScreen }) => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -212,12 +212,12 @@ const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, a
   const previewDownloadProps =
     columns && pdfColumns
       ? {
-          fileName: `${resources?.sublease?.titleSingular}-${subleaseData?.subleaseName}`,
-          resource: sidebarResource.sublease,
-          referenceId: subleaseData?._id,
-          columns: [...pdfColumns, ...columns?.filter((e) => ['serialNumber', 'supplierSerialNumber']?.includes(e.field))],
-          defaultColumns: ['index', 'type', 'detail', 'description', 'qty']
-        }
+        fileName: `${resources?.sublease?.titleSingular}-${subleaseData?.subleaseName}`,
+        resource: sidebarResource.sublease,
+        referenceId: subleaseData?._id,
+        columns: [...pdfColumns, ...columns?.filter((e) => ['serialNumber', 'supplierSerialNumber']?.includes(e.field))],
+        defaultColumns: ['index', 'type', 'detail', 'description', 'qty']
+      }
       : null;
 
   const rightSideContents = () => {
@@ -238,11 +238,9 @@ const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, a
           />
         )}
         {allowedToEdit && (
-          <Button
-            variant={'contained'}
-            color="primary"
-            size="small"
+          <ThemeButton
             id="send-to-supplier-button"
+            buttonType='theme'
             disabled={checkUniqWarehouse() && (allowedToEdit || isProcessor) ? false : true}
             onClick={() => {
               if (!validateAction()) {
@@ -279,7 +277,7 @@ const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, a
             }}
           >
             Send to Supplier
-          </Button>
+          </ThemeButton>
         )}
       </>
     );

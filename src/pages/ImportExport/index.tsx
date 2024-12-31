@@ -17,6 +17,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const renderedFrom = 'import-export';
 
@@ -389,31 +390,26 @@ const ImportExport = () => {
               )}
             </Grid>
             <Grid >
-              <Button
-                size="small"
-                variant="outlined"
-                component="span"
+              <ThemeButton 
                 disabled={isImgUploading || !selectResource}
-                startIcon={<AiOutlineExport />}
                 onClick={() => {
                   handleDownloadTemplate();
                 }}
+                buttonType="theme" 
+                isLoading={downloading.loading && downloading.type === 'template'}
               >
-                Download Template {downloading.loading && downloading.type === 'template' && <CircularProgress size={20} />}
-              </Button>
+                Download Template
+              </ThemeButton>
             </Grid>
             <Grid >
-              <Button
-                type="button"
-                size="small"
-                color="primary"
-                variant="outlined"
-                onClick={handleExportExcel}
-                startIcon={<AiOutlineExport />}
+              <ThemeButton 
                 disabled={selectResource == null}
+                onClick={handleExportExcel}
+                buttonType="theme" 
+                isLoading={downloading.loading && downloading.type === 'export'}
               >
-                Export to Excel {downloading.loading && downloading.type === 'export' && <CircularProgress size={20} />}
-              </Button>
+                Export to Excel
+              </ThemeButton>
             </Grid>
           </Grid>
           <Grid container size={{xs:4, lg:4, md:4}} justifyContent="flex-end">

@@ -1,7 +1,5 @@
 import {
-  Button,
   Checkbox,
-  CircularProgress,
   Dialog,
   FormControl,
   FormControlLabel,
@@ -12,6 +10,7 @@ import {
   Theme,
   Typography
 } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Step from '@mui/material/Step';
 import StepContent from '@mui/material/StepContent';
 import StepLabel from '@mui/material/StepLabel';
@@ -56,12 +55,12 @@ const AssignRegionalRolesUserDialog = ({ entitiesDialogOpen, onSuccess, handleCl
   const classes = useStyles();
 
   const handleNext = () => {
-    handleSearch("");
+    handleSearch('');
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
 
   const handleBack = () => {
-    handleSearch("");
+    handleSearch('');
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
@@ -94,7 +93,7 @@ const AssignRegionalRolesUserDialog = ({ entitiesDialogOpen, onSuccess, handleCl
   }, []);
 
   const handleSearch = (e) => {
-    let value = e?.target?.value || "";
+    let value = e?.target?.value || '';
     setSearch(value);
     let resultUser = [];
     let resultEntity = [];
@@ -252,20 +251,13 @@ const AssignRegionalRolesUserDialog = ({ entitiesDialogOpen, onSuccess, handleCl
                     <Typography>{getStepContent(index)}</Typography>
                     <div className={classes.actionsContainer}>
                       <div>
-                        <Button size="small" disabled={activeStep === 0} onClick={handleBack} className={classes.button}>
+                        <ThemeButton buttonType="transparent" disabled={activeStep === 0} onClick={handleBack}>
                           Back
-                        </Button>
+                        </ThemeButton>
                         {activeStep !== steps.length - 1 && (
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            size="small"
-                            onClick={handleNext}
-                            disabled={selectedUser.length === 0}
-                            className={classes.button}
-                          >
+                          <ThemeButton buttonType="theme" onClick={handleNext} disabled={selectedUser.length === 0} className={classes.button}>
                             Next
-                          </Button>
+                          </ThemeButton>
                         )}
                       </div>
                     </div>
@@ -279,18 +271,12 @@ const AssignRegionalRolesUserDialog = ({ entitiesDialogOpen, onSuccess, handleCl
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button disabled={isAssigning} onClick={handleCloseDialog} color="primary" size="small">
+        <ThemeButton onClick={handleCloseDialog} buttonType="transparent">
           Cancel
-        </Button>
-        <Button
-          disabled={!selectedEntity?.length || !selectedUser?.length}
-          onClick={handleAssignEntity}
-          color="primary"
-          size="small"
-          variant="contained"
-        >
-          {isAssigning ? <CircularProgress size={22} /> : 'Save'}
-        </Button>
+        </ThemeButton>
+        <ThemeButton disabled={!selectedEntity?.length || !selectedUser?.length} onClick={handleAssignEntity} buttonType="theme" isLoading={isAssigning}>
+          Save
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

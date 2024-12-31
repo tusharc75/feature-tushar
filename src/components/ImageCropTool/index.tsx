@@ -1,10 +1,10 @@
 import { useState, useCallback, useContext, Fragment } from 'react';
 import Cropper from 'react-easy-crop';
-import { Button, Box, Grid, Typography, Slider } from '@mui/material';
+import { Box, Typography, Slider } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import getCropppedImg from './cropImage';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-
 import './cropImageStyles.scss';
 import { b64toBlob } from '../../constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -134,13 +134,13 @@ const ImageCropTool = (props) => {
         </div>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button onClick={() => setIsEditing(!isEditing)} color="primary" variant="contained" fullWidth disabled={croppingImg || isImgUploading}>
+        <ThemeButton onClick={() => setIsEditing(!isEditing)} buttonType='theme' fullWidth disabled={croppingImg || isImgUploading}>
           {isEditing ? 'Cancel Edit' : 'Edit'}
-        </Button>
+        </ThemeButton>
         <Box mx={1} />
-        <Button onClick={showCroppedImage} color="primary" variant="contained" fullWidth disabled={croppingImg || isImgUploading}>
+        <ThemeButton onClick={showCroppedImage} buttonType='theme' fullWidth disabled={croppingImg || isImgUploading}>
           {croppingImg ? 'Processing Image...' : isImgUploading ? 'Uploading Image...' : isEditing ? 'Crop & Upload Image' : 'Upload Image'}
-        </Button>
+        </ThemeButton>
       </CustomDialogFooter>
     </>
   );

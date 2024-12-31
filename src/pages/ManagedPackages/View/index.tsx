@@ -1,4 +1,4 @@
-import { Box, Button, Paper, Typography } from '@mui/material';
+import { Box, Paper, Typography } from '@mui/material';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
@@ -12,6 +12,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { camelCase, startCase } from 'lodash';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { useData } from 'src/StateProvider/Provider';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ManagedPackagesView = ({ managedPackagesData }) => {
   const { setToastConfig } = useContext(CustomToastContext);
@@ -203,17 +204,14 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
     <ContentFullScreen fullScreen={fullScreenOpen} setFullScreen={setFullScreenOpen}>
       <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
         <Box>
-          <Button
-            variant={'outlined'}
-            size="small"
+          <ThemeButton
             onClick={() => {
               setColorInfo(!colorInfo);
             }}
-            aria-controls="action-menu"
             endIcon={colorInfo ? <ExpandLess /> : <ExpandMore />}
           >
             {'Color Info'}
-          </Button>
+          </ThemeButton>
         </Box>
         {colorInfo && (
           <Box>

@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Box, Button, Dialog, Typography } from '@mui/material';
+import { Box, Dialog, Typography } from '@mui/material';
 import axiosInstance from 'src/axios/axiosInstance';
 import { ACTIVITY_RESOURCE, CustomDialogTransition, rentalManagement } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -12,6 +12,7 @@ import { CreateTask } from 'src/components/Activity/Task/CreateTask';
 import { isMobile, isTablet } from 'react-device-detect';
 import { SerializedAssetAvailableIllustration } from 'src/assets/svg/svgIcons';
 import { useData } from 'src/StateProvider/Provider';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 interface CssObj {
   [index: string]: React.CSSProperties;
@@ -214,16 +215,14 @@ export default function AssetAvailability({ rentalId, handleClose }) {
                     ?.filter((e) => !e.baseWarehouse)
                     ?.map((product) => <ShowProduct key={product._id} product={product} resources={resources} />)}
                   <div className="mt-3" style={{ ...styles.buttonContaier }}>
-                    <Button
-                      size="small"
-                      variant={'contained'}
-                      color="primary"
+                    <ThemeButton
                       onClick={() => {
                         setTaskDialog(true);
                       }}
+                      buttonType='theme'
                     >
                       Create Task
-                    </Button>
+                    </ThemeButton>
                   </div>
                 </div>
               </Box>

@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { Box, Button, Dialog, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, TextField } from '@mui/material';
+import { useContext, useEffect, useState } from 'react';
+import { Box, Dialog, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Form, Formik } from 'formik';
@@ -9,7 +9,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import FormTypes from 'src/components/Helpers/FormTypes';
-import { Autocomplete, Skeleton } from '@mui/material';
+import { Autocomplete } from '@mui/material';
 import ConfirmCancelDialog from 'src/components/ConfirmCancelDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
@@ -130,28 +130,7 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
           }}
           showManimizeMaximize={true}
         />
-        {!digitalData ? (
-          <>
-            <CustomDialogContent>
-              <Skeleton width="100%" height="70px" />
-              <Grid container spacing={2}>
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => (
-                  <Grid key={i} size={{xs:12, sm:6, md:6}}>
-                    <Skeleton width="100%" height="60px" />
-                  </Grid>
-                ))}
-              </Grid>
-            </CustomDialogContent>
-            <CustomDialogFooter>
-              <Button variant="outlined" size="small" color="primary" disabled>
-                Cancel
-              </Button>
-              <Button variant="contained" size="small" color="primary" disabled>
-                Submit
-              </Button>
-            </CustomDialogFooter>
-          </>
-        ) : (
+        {digitalData ? (
           <Formik initialValues={digitalData} validateOnMount validate={validate} onSubmit={handleSave}>
             {({ values, errors, touched, setFieldValue, submitForm }) => (
               <>
@@ -159,7 +138,7 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
                   <Form>
                     <Box marginY={2}>
                       <Grid spacing={3} container>
-                        <Grid size={{xs:12, sm:6, md:6}}>
+                        <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                           <FormControl component="fieldset" required error={Boolean(errors['column'])}>
                             <FormLabel component="legend">Column</FormLabel>
                             <RadioGroup row name={'column'} value={values['column'] || ''} onChange={(e) => setFieldValue('column', e.target.value)}>
@@ -170,7 +149,7 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
                           </FormControl>
                         </Grid>
                         {['menu', 'productCategory', 'productList'].includes(itemData.type) && (
-                          <Grid size={{xs:12, sm:6, md:6}}>
+                          <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                             <TextField
                               variant="outlined"
                               type="text"
@@ -188,7 +167,7 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
                         )}
                         {['imageSlider', 'image'].includes(itemData?.type) && (
                           <>
-                            <Grid size={{xs:12, sm:6, md:6}}>
+                            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                               <FormTypes
                                 fieldData={imageField}
                                 values={values}
@@ -213,7 +192,7 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
                                 row={true}
                               />
                             </Grid>
-                            <Grid size={{xs:12, sm:6, md:6}}>
+                            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                               <TextField
                                 variant="outlined"
                                 type="text"
@@ -228,7 +207,7 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
                                 onChange={(e) => setFieldValue('url', e.target.value.trimStart())}
                               />
                             </Grid>
-                            <Grid size={{xs:12, sm:6, md:6}}>
+                            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                               <TextField
                                 variant="outlined"
                                 type="text"
@@ -246,7 +225,7 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
                           </>
                         )}
                         {itemData.type === 'productList' && (
-                          <Grid size={{xs:12, sm:6, md:6}}>
+                          <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                             <Autocomplete
                               options={kpiValue}
                               freeSolo
@@ -286,7 +265,7 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
                 </CustomDialogContent>
                 <CustomDialogFooter>
                   <ThemeButton
-buttonType="transparent"
+                    buttonType="transparent"
                     onClick={() => {
                       onClose();
                     }}
@@ -295,7 +274,7 @@ buttonType="transparent"
                   </ThemeButton>
                   <ThemeButton
                     isLoading={loading}
-buttonType="theme"
+                    buttonType="theme"
                     disabled={uploadingImageOrFileProgress > 0 || loading}
                     onClick={submitForm}
                   >
@@ -315,7 +294,7 @@ buttonType="theme"
               </>
             )}
           </Formik>
-        )}
+        ) : null}
       </Dialog>
     </>
   );

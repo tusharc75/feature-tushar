@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import { Box, Dialog, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaEye } from 'react-icons/fa';
@@ -11,6 +11,7 @@ import { CustomDialogTransition, purchaseOrder } from 'src/constants/helpers';
 import { useHistory } from 'react-router-dom';
 import ManageIrtTicket from 'src/pages/IrtTicket/ManageIrtTicket';
 import { useData } from 'src/StateProvider/Provider';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const InventoryStatesDialog = ({ onClose, product, warehouse, data, purchaseOrderData }) => {
   const history = useHistory();
@@ -92,32 +93,27 @@ const InventoryStatesDialog = ({ onClose, product, warehouse, data, purchaseOrde
                         <TableCell>{item?.managers?.map((e) => e.optionLabel)?.toString()}</TableCell>
                         <TableCell>
                           {irtTicketData?.find((d) => d.warehouse?.optionValue === item?.warehouse?.optionValue) ? (
-                            <Button
-                              variant={'contained'}
-                              color="primary"
-                              size="small"
+                            <ThemeButton
                               onClick={() => {
                                 history.push(
-                                  `${routes.irtTicketDetail.path}/${
-                                    irtTicketData.find((d) => d.warehouse?.optionValue === item?.warehouse?.optionValue)?._id
+                                  `${routes.irtTicketDetail.path}/${irtTicketData.find((d) => d.warehouse?.optionValue === item?.warehouse?.optionValue)?._id
                                   }`
                                 );
                               }}
                               startIcon={<FaEye />}
+                              buttonType='theme'
                             >
                               View
-                            </Button>
+                            </ThemeButton>
                           ) : (
-                            <Button
-                              variant={'contained'}
-                              color="primary"
-                              size="small"
+                            <ThemeButton
                               onClick={() => {
                                 setIrtTicketDialog({ open: true, data: item });
                               }}
+                              buttonType='theme'
                             >
                               {`Create ${resources?.irtTicket?.titleSingular}`}
-                            </Button>
+                            </ThemeButton>
                           )}
                         </TableCell>
                       </TableRow>

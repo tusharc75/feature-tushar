@@ -1,5 +1,6 @@
 import React, { Fragment, useEffect, useRef, useState } from 'react';
-import { Typography, Box, Button, IconButton, Dialog } from '@mui/material';
+import { Typography, Box, IconButton, Dialog } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { AddCircle, CameraAlt, Delete, Info, Publish } from '@mui/icons-material';
 import SignaturePad from 'react-signature-canvas';
 import { FaSignature } from 'react-icons/fa';
@@ -65,13 +66,13 @@ const UseCamera = ({ handleToggleMode, usePad, setPicture, picture, isFullScreen
         <>
           <Box mb={1} style={{ float: 'right' }}>
             {picture === '' && cameraCount > 1 && (
-              <Button size="small" variant="contained" color="primary" onClick={switchCamera} style={{ marginRight: '10px' }}>
+              <ThemeButton buttonType="theme" onClick={switchCamera} style={{ marginRight: '10px' }}>
                 Switch Camera
-              </Button>
+              </ThemeButton>
             )}
-            <Button size="small" variant="contained" color="primary" onClick={handleToggleMode}>
+            <ThemeButton buttonType="theme" onClick={handleToggleMode}>
               Close Camera
-            </Button>
+            </ThemeButton>
           </Box>
           <div>
             {picture === '' ? (
@@ -95,29 +96,25 @@ const UseCamera = ({ handleToggleMode, usePad, setPicture, picture, isFullScreen
             }}
           >
             {picture !== '' ? (
-              <Button
+              <ThemeButton
                 onClick={(e) => {
                   e.preventDefault();
                   setPicture('');
                 }}
-                size="small"
-                variant="contained"
-                color="primary"
+                buttonType="theme"
               >
                 Retake
-              </Button>
+              </ThemeButton>
             ) : (
-              <Button
+              <ThemeButton
                 onClick={(e) => {
                   e.preventDefault();
                   capture();
                 }}
-                size="small"
-                variant="contained"
-                color="primary"
+                buttonType="theme"
               >
                 Capture
-              </Button>
+              </ThemeButton>
             )}
           </div>
         </>
@@ -254,20 +251,18 @@ const SignatureDialog = ({ onSave, open, close }) => {
       </CustomDialogContent>
       <CustomDialogFooter>
         <HtmlTooltip title={'Upload Signature'}>
-          <Button variant="contained" size="small" color="primary" onClick={() => inputRef?.current.click()} startIcon={<Publish />}>
+          <ThemeButton buttonType="theme" onClick={() => inputRef?.current.click()} startIcon={<Publish />}>
             Upload
-          </Button>
+          </ThemeButton>
         </HtmlTooltip>
-        <Button variant="contained" size="small" color="primary" onClick={handleToggleMode} startIcon={usePad ? <CameraAlt /> : <FaSignature />}>
+        <ThemeButton buttonType="theme" onClick={handleToggleMode} startIcon={usePad ? <CameraAlt /> : <FaSignature />}>
           {usePad ? 'Use Camera' : 'Use Sign Pad'}
-        </Button>
-        <Button variant="contained" size="small" color="primary" onClick={close}>
+        </ThemeButton>
+        <ThemeButton buttonType="theme" onClick={close}>
           Close
-        </Button>
-        <Button
-          variant="contained"
-          size="small"
-          color="primary"
+        </ThemeButton>
+        <ThemeButton
+          buttonType="theme"
           onClick={() => {
             if (picture !== '') {
               onSave(picture);
@@ -277,7 +272,7 @@ const SignatureDialog = ({ onSave, open, close }) => {
           }}
         >
           Save
-        </Button>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

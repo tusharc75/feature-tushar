@@ -6,7 +6,7 @@ import Grid from '@mui/material/Grid2';
 import axiosInstance from 'src/axios/axiosInstance';
 import { prepareDataForGrid, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Button, IconButton, Menu, MenuItem } from '@mui/material';
+import { IconButton, Menu, MenuItem } from '@mui/material';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -365,9 +365,11 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
         {allowedToEdit && (
           <Box display="flex" justifyContent="space-between" mb={2}>
             <Box display="flex" gap={'8px'} flexWrap={'wrap'}>
-              <Button variant="outlined" color="primary" size="small" startIcon={<Add />} onClick={() => setTechnicianDialog(true)}>
+              <ThemeButton
+                startIcon={<Add />}
+                onClick={() => setTechnicianDialog(true)}>
                 Add
-              </Button>
+              </ThemeButton>
             </Box>
             <Box display="flex" ml={1}>
               <ThemeButton

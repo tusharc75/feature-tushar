@@ -1,17 +1,6 @@
-import {
-  Box,
-  Breadcrumbs,
-  Button,
-  CircularProgress,
-  Divider,
-  FormControl,
-  Grid,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField,
-  Typography
-} from '@mui/material';
+import { Box, Breadcrumbs, Divider, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Grid from '@mui/material/Grid2';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import axios, { CancelTokenSource } from 'axios';
 import { Form, Formik } from 'formik';
@@ -170,15 +159,15 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                         {initialValues.parent &&
                           initialValues.parent.map((_p, index) => {
                             return (
-                              <Button variant="text" key={index} className="cursor-pointer uppercase" onClick={() => setId(_p._id)}>
+                              <ThemeButton key={index} buttonType="transparent" onClick={() => setId(_p._id)}>
                                 {_p.name}
-                              </Button>
+                              </ThemeButton>
                             );
                           })}
                       </Breadcrumbs>
                     </Box>
                     <Grid container spacing={3}>
-                      <Grid item xs={12} md={7} sm={6}>
+                      <Grid size={{ xs: 12, md: 7, sm: 6 }}>
                         <TextField
                           variant="outlined"
                           type="text"
@@ -215,16 +204,10 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                         {id && (
                           <Fragment>
                             <Box mt={1}>
-                              <Button
-                                variant="contained"
-                                size="small"
-                                disableElevation
-                                onClick={() => setOpenAddSub(true)}
-                                startIcon={<TableChartIcon />}
-                              >
+                              <ThemeButton buttonType="theme" disableElevation onClick={() => setOpenAddSub(true)} startIcon={<TableChartIcon />}>
                                 {' '}
                                 Add a child Case
-                              </Button>
+                              </ThemeButton>
                             </Box>
                             <Box mt={2}>
                               <SubCase
@@ -249,7 +232,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                           </Fragment>
                         )}
                       </Grid>
-                      <Grid item xs={12} md={5} sm={6}>
+                      <Grid size={{ xs: 12, md: 5, sm: 6 }}>
                         <Box pt={1}>
                           <FormControl variant="outlined" fullWidth>
                             <InputLabel id="demo-simple-select-outlined-label">Status</InputLabel>
@@ -356,20 +339,18 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  disabled={isSubmitting}
-                  color="primary"
-                  size="small"
+                <ThemeButton
+                  buttonType="transparent"
                   onClick={() => {
                     if (isEqual(initialValues, values)) handleClose();
                     else setShowConfirmDialog(true);
                   }}
                 >
                   Cancel
-                </Button>
-                <Button disabled={isSubmitting} type="button" size="small" color="primary" variant="contained" onClick={submitForm}>
-                  {isSubmitting ? <CircularProgress size={22} /> : 'Save'}
-                </Button>
+                </ThemeButton>
+                <ThemeButton disabled={isSubmitting} buttonType="theme" isLoading={isSubmitting} onClick={submitForm}>
+                  Save
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog

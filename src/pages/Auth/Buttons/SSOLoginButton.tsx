@@ -55,7 +55,9 @@ function SSOLoginButton() {
         }}
         disabled={checking}
         isLoading={checking}
-        buttonType='theme'
+        fullWidth
+        sx={{ height: 40 }}
+        startIcon={<FiLock />}
       >
         Continue with SAML SSO
       </ThemeButton>

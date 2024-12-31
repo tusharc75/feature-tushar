@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Dialog, Button, Box, Grid, CircularProgress, useTheme, useMediaQuery, InputAdornment } from '@mui/material';
+import { Dialog, Box, Grid, useTheme, useMediaQuery, InputAdornment } from '@mui/material';
 import { Formik, Form } from 'formik';
 import { CustomDialogTransition, getObjKeysWithValues, getUniqueCurrencies, yupSchema } from '../../constants/helpers';
 import FormTypes from '../Helpers/FormTypes';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
+import { ThemeButton } from '../Helpers/Buttons';
 
 const UpdateDetailsDialog = (props) => {
   const theme = useTheme();
@@ -151,12 +152,12 @@ const UpdateDetailsDialog = (props) => {
             </CustomDialogContent>
 
             <CustomDialogFooter>
-              <Button variant="outlined" color="primary" size="small" disabled={isUpdating} onClick={onClose}>
+              <ThemeButton buttonType="transparent" disabled={isUpdating} onClick={onClose}>
                 Cancel
-              </Button>
-              <Button variant="contained" color="primary" size="small" onClick={submitForm} disabled={isUpdating || uploadingImageOrFileProgress > 0}>
-                {isUpdating ? <CircularProgress size={20} /> : 'Save'}
-              </Button>
+              </ThemeButton>
+              <ThemeButton buttonType="theme" onClick={submitForm} disabled={isUpdating || uploadingImageOrFileProgress > 0}>
+                Save
+              </ThemeButton>
             </CustomDialogFooter>
           </>
         )}

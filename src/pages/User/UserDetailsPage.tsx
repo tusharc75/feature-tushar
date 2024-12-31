@@ -375,7 +375,6 @@ const UserDetailsPage = () => {
       });
   };
 
-  const isLoggedInUserBrandAdmin = 'userType' in user?.user && user?.user?.userType === userType.brandAdmin;
   return (
     <>
       <Box className="main-container-v1">
@@ -455,7 +454,6 @@ const UserDetailsPage = () => {
                     <CustomTab value={3} label={'User Session'} />
                     <CustomTab value={4} label={'Assigned Entity'} />
                   </CustomTabs>
-
                   <TabPanel value={tabValue} index={0}>
                     <DetailsPageHeader logo={userData?.avatar ? userData.avatar : undefined} mainPoints={mainPoints} />
                     <DetailsPage data={userData} fields={userFields} />
@@ -516,30 +514,24 @@ const UserDetailsPage = () => {
                         </Table>
                       </TableContainer>
                     ) : null}
-
-                    {/* </div> */}
                   </TabPanel>
                   <TabPanel value={tabValue} index={3}>
                     <UserSession id={id} />
                   </TabPanel>
                   <TabPanel value={tabValue} index={4}>
                     <Grid container spacing={2}>
-                      <Grid size={{xs:12, sm:12, md:12, lg:12}}>
-                        <Box
-                          width="100%"
-                          padding={1}
-                          bgcolor="var(--dark-secondary, var(--accordion-expanded-summary-bg, #EFFBF9))"
-                          display="flex"
-                          justifyContent="space-between"
-                        >
-                          <Typography variant="subtitle2">Assigned Entity ({entities?.length || 0})</Typography>
+                      <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
+                        <div className="relative flex justify-between rounded-t bg-[var(--dark-secondary,var(--accordion-expanded-summary-bg,#EFFBF9))] px-7 py-4">
+                          <h6 className="text-sm font-semibold leading-[1.05] ">Assigned Entity ({entities?.length || 0})</h6>
                           {permissions?.entity?.isUpdate && permissions?.role?.isUpdate && (
-                            <IconButton title="Assign entities" color="primary" size="small" onClick={entityDialogOpen}>
-                              <ControlPoint />
-                            </IconButton>
+                            <span className="absolute right-7 top-[50%] [transform:translateY(-50%)]">
+                              <IconButton title="Assign entities" color="primary" size="small" onClick={entityDialogOpen}>
+                                <ControlPoint />
+                              </IconButton>
+                            </span>
                           )}
-                        </Box>
-                        <Box padding={1}>
+                        </div>
+                        <div className="pt-3">
                           {loading ? (
                             <Box display="flex">
                               {[1, 2].map((i) => (
@@ -576,14 +568,14 @@ const UserDetailsPage = () => {
                               <Typography>No Entities </Typography>
                             </Box>
                           )}
-                        </Box>
+                        </div>
                       </Grid>
                     </Grid>
                   </TabPanel>
                 </>
               )}
             </Box>
-            <div className="pt-3 ">
+            <div className="pt-3">
               <QuickLinks quickLinks={quickLinks} />
               {permissions?.[opportunity.opportunityResource]?.isRead && (
                 <Box mb={2}>

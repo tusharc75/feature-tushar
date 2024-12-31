@@ -9,13 +9,13 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { MdZoomOutMap } from 'react-icons/md';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import { Box, Button, Paper, Typography } from '@mui/material';
+import { Box, Paper, Typography } from '@mui/material';
 import { ExpandMore, ExpandLess } from '@mui/icons-material';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { useData } from 'src/StateProvider/Provider';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const AssemblyOrderViews = (props) => {
-  const [themeColor] = useAppTheme();
   const { assemblyOrderNumber, id } = props;
   const [loading, setLoading] = useState(false);
   const [flowData, setFlowData] = useState([]);
@@ -341,17 +341,14 @@ const AssemblyOrderViews = (props) => {
     <ContentFullScreen fullScreen={fullDialogueOpen} setFullScreen={setFullDialogueOpen}>
       <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
         <Box>
-          <Button
-            variant={'outlined'}
-            size="small"
+          <ThemeButton
             onClick={() => {
               setColorInfo(!colorInfo);
             }}
-            aria-controls="action-menu"
             endIcon={colorInfo ? <ExpandLess /> : <ExpandMore />}
           >
             {'Color Info'}
-          </Button>
+          </ThemeButton>
         </Box>
         {colorInfo && (
           <Box>

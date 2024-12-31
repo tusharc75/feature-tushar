@@ -1,8 +1,6 @@
-import { Box, Card, CardContent, IconButton, Typography } from '@mui/material';
-import Grid from '@mui/material/Grid2';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { Box, Card, CardContent, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useEffect, useState } from 'react';
 import { BiCustomize } from 'react-icons/bi';
 import { IoCalendarOutline } from 'react-icons/io5';
@@ -10,10 +8,10 @@ import { Link } from 'react-router-dom';
 import DisplayData from 'src/components/CardDisplayData';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { displayDate } from 'src/constants/helpers';
 import { useData } from '../../StateProvider/Provider';
 import routes from '../../components/Helpers/Routes';
 import { formatAmountWithCurrency } from '../../constants/helpers';
-import { displayDate } from 'src/constants/helpers';
 
 export default function AccordionOfOpportunity({ opportunity, expanded = true, recordsPerLine = 2 }) {
   const {
@@ -47,18 +45,9 @@ export default function AccordionOfOpportunity({ opportunity, expanded = true, r
     <>
       <Accordion expanded={expandOpportunity} onChange={() => setExpandOpportunity(!expandOpportunity)}>
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
-          <Grid container>
-            <Grid size={{xs:8}}>
-              <Box display="flex">
-                <Box>
-                  <IconButton size="small">{expandOpportunity === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
-                </Box>
-                <Box padding="5px">
-                  <Typography variant="subtitle2">Opportunity ({opportunity ? 1 : 0})</Typography>
-                </Box>
-              </Box>
-            </Grid>
-          </Grid>
+          <div className="flex items-center justify-between">
+            <Typography variant="subtitle2">Opportunity ({opportunity ? 1 : 0})</Typography>
+          </div>
         </AccordionSummary>
         <AccordionDetails>
           <>
@@ -67,7 +56,7 @@ export default function AccordionOfOpportunity({ opportunity, expanded = true, r
                 {opportunity ? (
                   <Grid container spacing={1}>
                     {
-                      <Grid size={{xs:12, sm:12, md:recordsPerLineInLargeScreen}} key={1}>
+                      <Grid size={{ xs: 12, sm: 12, md: recordsPerLineInLargeScreen }} key={1}>
                         <Card className="detailCard  card-v1" variant="outlined">
                           <CardContent className="card-link">
                             <div className="mb-2">

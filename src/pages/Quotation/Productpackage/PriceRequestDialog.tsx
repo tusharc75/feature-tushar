@@ -1,22 +1,20 @@
-import { useState, useEffect, useContext } from 'react';
+import { Box, TextField, Typography } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
-import axiosInstance from '../../../axios/axiosInstance';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { CustomDialogTransition, displayDateTime, prepareDataForGrid } from '../../../constants/helpers';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import { Box, Button, IconButton, TextField, Typography } from '@mui/material';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { FaThumbsUp, FaThumbsDown } from 'react-icons/fa6';
+import { useContext, useEffect, useState } from 'react';
+import { FaThumbsDown, FaThumbsUp } from 'react-icons/fa6';
+import { Link } from 'react-router-dom';
+import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import routes from 'src/components/Helpers/Routes';
-import { Link } from 'react-router-dom';
+import axiosInstance from '../../../axios/axiosInstance';
+import { CustomDialogTransition, displayDateTime, prepareDataForGrid } from '../../../constants/helpers';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 
 const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId }) => {
   let renderedFrom = 'ViewQuotationSupplierPrice';
@@ -255,18 +253,13 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                 onChange={() => (expandSupplierGrid === data?._id ? setExpandSupplierGrid(null) : setExpandSupplierGrid(data?._id))}
               >
                 <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
-                  <div className="flex  items-center gap-[5px]">
-                    <Box>
-                      <IconButton size="small">{expandSupplierGrid === data?._id ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
+                  <div className="items-center gap-[5px] min-[768px]:flex">
+                    <Box className="line-clamp-1 min-w-0" title={data?.status ? data?.status : ''}>
+                      <Typography variant="subtitle2">{data?.status && `Status : ${data?.status}, `}</Typography>
                     </Box>
-                    <div className="items-center gap-[5px] min-[768px]:flex">
-                      <Box className="line-clamp-1 min-w-0" title={data?.status ? data?.status : ''}>
-                        <Typography variant="subtitle2">{data?.status && `Status : ${data?.status}, `}</Typography>
-                      </Box>
-                      <Box className="line-clamp-1  min-w-0" title={data?.requestDate ? displayDateTime(data?.requestDate) : ''}>
-                        <Typography variant="subtitle2">{data?.requestDate && `Request Date : ${displayDateTime(data?.requestDate)} `}</Typography>
-                      </Box>
-                    </div>
+                    <Box className="line-clamp-1  min-w-0" title={data?.requestDate ? displayDateTime(data?.requestDate) : ''}>
+                      <Typography variant="subtitle2">{data?.requestDate && `Request Date : ${displayDateTime(data?.requestDate)} `}</Typography>
+                    </Box>
                   </div>
                 </AccordionSummary>
                 <AccordionDetails>
@@ -329,8 +322,6 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                               Accept
                             </ThemeButton>
                             <ThemeButton
-                              borderColor="red"
-                              textColor="red"
                               iconForMobile={<FaThumbsDown />}
                               onClick={() => {
                                 setResponse({ open: true, type: 'Reject', id: data?._id });
@@ -404,26 +395,21 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button
-                color="primary"
-                size="small"
+              <ThemeButton
                 onClick={() => {
                   setResponse({ open: false, type: '', id: '' });
                 }}
               >
                 Cancel
-              </Button>
-              <Button
-                type="button"
-                color="primary"
-                variant="contained"
-                size="small"
+              </ThemeButton>
+              <ThemeButton
+                buttonType="theme"
                 onClick={() => {
                   response.type === 'Reject' && handleReject();
                 }}
               >
                 Save
-              </Button>
+              </ThemeButton>
             </CustomDialogFooter>
           </Dialog>
         )}

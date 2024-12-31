@@ -1,5 +1,4 @@
 import { useState, useEffect, useContext } from 'react';
-import Button from '@mui/material/Button';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
@@ -10,8 +9,8 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import { CustomDialogTransition } from './../../constants/helpers';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Formik, Form, FieldArray } from 'formik';
-import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ManageCycleCountDetermination = ({ onClose, onSuccess, data, warehouse, warehouseName }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -172,9 +171,13 @@ const ManageCycleCountDetermination = ({ onClose, onSuccess, data, warehouse, wa
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button onClick={() => handleSave(values.categoryArray)} variant={'contained'} size="small" color="primary" disabled={false}>
+              <ThemeButton
+                onClick={() => handleSave(values.categoryArray)}
+                disabled={false}
+                buttonType='theme'
+              >
                 Save
-              </Button>
+              </ThemeButton>
             </CustomDialogFooter>
           </>
         )}

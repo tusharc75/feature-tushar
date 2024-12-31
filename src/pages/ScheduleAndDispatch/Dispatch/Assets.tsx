@@ -1,4 +1,4 @@
-import { Box, Button, IconButton } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import { Help, LocalShipping } from '@mui/icons-material';
 import { camelCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -24,6 +24,7 @@ import {
 } from 'src/constants/helpers';
 import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const Assets = ({ rentalManagementData, onSuccess }) => {
   const renderedFrom = `${camelCase(sidebarResource.scheduleAndDispatch)}_${camelCase(sidebarResource.rentalManagement)}_asset`;
@@ -78,8 +79,8 @@ const Assets = ({ rentalManagementData, onSuccess }) => {
               style={{
                 backgroundColor:
                   row?.original?.warehouseId &&
-                  row?.original?.warehouseId !== rentalManagementData?.warehouse?.optionValue &&
-                  !row?.original?.loadingTicketId
+                    row?.original?.warehouseId !== rentalManagementData?.warehouse?.optionValue &&
+                    !row?.original?.loadingTicketId
                     ? COLOUR_MASTER.transferAsset.background
                     : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]?.includes(row?.original?.status)
                       ? COLOUR_MASTER.lostAssets.background
@@ -413,20 +414,18 @@ const Assets = ({ rentalManagementData, onSuccess }) => {
           />
           <div className="mt-4 flex justify-end gap-2">
             {dataRows?.some((d) => !d?.loadingTicketId) && (
-              <Button
+              <ThemeButton
                 disabled={!dataRows?.some((d) => !d?.loadingTicketId)}
-                variant="contained"
-                size="small"
-                color="primary"
+                buttonType="theme"
                 onClick={() => handleLoadingTicket()}
               >
                 Dispatch
-              </Button>
+              </ThemeButton>
             )}
             {dataRows?.some((d) => d?.loadingTicketId && d?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered && !d?.receivingTicketId) && (
-              <Button disabled={false} variant="contained" size="small" color="primary" onClick={() => handleReceivingTicket()}>
+              <ThemeButton disabled={false} buttonType="theme" onClick={() => handleReceivingTicket()}>
                 Receive
-              </Button>
+              </ThemeButton>
             )}
           </div>
         </div>

@@ -1,5 +1,5 @@
 import { Dialog, IconButton, InputAdornment, TextField, Theme } from '@mui/material';
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Add, Delete } from '@mui/icons-material';
 import { Autocomplete, ToggleButton, ToggleButtonGroup } from '@mui/material';
@@ -15,6 +15,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition, DOAType, DoaApproveType, getUniqueCurrencies } from 'src/constants/helpers';
 import { makeStyles } from '@mui/styles';
 import CurrencyAutocomplete from 'src/components/Helpers/CurrencyAutocomplete';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -263,16 +264,14 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
       ))
     ) : (
       <Grid size={{ md: 12, lg: 12 }} className="d-flex align-items-center justify-content-center">
-        <Button
-          variant="contained"
-          color="primary"
-          size="small"
+        <ThemeButton
+          buttonType='theme'
           onClick={() => {
             arrayHelpers.push({ _id: [], amount: 0 });
           }}
         >
-          Add {approveType}
-        </Button>
+          {`Add ${approveType}`}
+        </ThemeButton>
       </Grid>
     );
   };
@@ -481,12 +480,12 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
                     </CustomDialogContent>
                   </div>
                   <CustomDialogFooter>
-                    <Button variant="outlined" color="primary" size="small" onClick={onClose}>
+                    <ThemeButton buttonType='transparent' onClick={onClose}>
                       Cancel
-                    </Button>
-                    <Button variant="contained" color="primary" type="submit" size="small" onClick={submitForm}>
+                    </ThemeButton>
+                    <ThemeButton buttonType="theme" onClick={submitForm}>
                       Save
-                    </Button>
+                    </ThemeButton>
                   </CustomDialogFooter>
                 </>
               )}

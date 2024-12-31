@@ -1,10 +1,7 @@
-import { Button } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
 import axios from 'axios';
 import { useContext, useEffect, useState } from 'react';
-import { FcUnlock } from 'react-icons/fc';
-import { GoThumbsdown, GoThumbsup } from 'react-icons/go';
 import { useLocation, useParams } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -15,6 +12,7 @@ import DOAReasonDialog from '../DOA/DOAReasonDialog';
 import { backendApi } from './../../config';
 import CodeValidation from './CodeValidation';
 import styles from './quote-approval.module.scss';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const useStyles = makeStyles(() => ({
   header: {
@@ -152,26 +150,26 @@ const QuoteApproval = () => {
         <div>
           {replied ? (
             <Grid container className={classes.header}>
-              <Grid size={{xs:12, md:1, sm:2}}>
+              <Grid size={{ xs: 12, md: 1, sm: 2 }}>
                 <img className={classes.logo} src={SVG('LogoNew')} alt="equip logo" title="eQuipt Logo" />
               </Grid>
-              <Grid size={{xs:6, md:9, sm:8}} className="d-flex align-items-center justify-content-center">
+              <Grid size={{ xs: 6, md: 9, sm: 8 }} className="d-flex align-items-center justify-content-center">
                 <h1>Thanks, Response for the Quote has been sent.</h1>
               </Grid>
-              <Grid size={{xs:6, md:2, sm:2}}>
+              <Grid size={{ xs: 6, md: 2, sm: 2 }}>
                 {logo && <img src={logo} alt="brand" className={classes.brandLogo} />}
               </Grid>
             </Grid>
           ) : (
             <div>
               <Grid container className={classes.header}>
-                <Grid size={{xs:12, md:1, sm:2}}>
+                <Grid size={{ xs: 12, md: 1, sm: 2 }}>
                   <img className={classes.logo} src={SVG('LogoNew')} alt="equip logo" title="eQuipt Logo" />
                 </Grid>
-                <Grid size={{xs:6, md:9, sm:8}} className="d-flex align-items-center justify-content-center">
+                <Grid size={{ xs: 6, md: 9, sm: 8 }} className="d-flex align-items-center justify-content-center">
                   <h1>Approve Quote: {quoteData?.name}</h1>
                 </Grid>
-                <Grid size={{xs:6, md:2, sm:2}} className="pull-right"></Grid>
+                <Grid size={{ xs: 6, md: 2, sm: 2 }} className="pull-right"></Grid>
               </Grid>
 
               {pdf ? (
@@ -185,51 +183,45 @@ const QuoteApproval = () => {
               <div className={styles.main}>
                 <div className="mt-1">
                   <Grid container alignItems="center">
-                    <Grid size={{xs:12, md:4, sm:4}}>
+                    <Grid size={{ xs: 12, md: 4, sm: 4 }}>
                       <h2>
                         Total : {sellingPrice.toFixed(2)} {currency}
                       </h2>
                     </Grid>
                     {showUnlockAction && (
-                      <Grid size={{xs:12, md:8, sm:8}} className="centerItem d-flex" justifyContent="flex-end">
+                      <Grid size={{ xs: 12, md: 8, sm: 8 }} className="centerItem d-flex" justifyContent="flex-end">
                         <HtmlTooltip title="Click to unlock accept/reject options">
-                          <Button
-                            variant="outlined"
-                            color="primary"
-                            size="medium"
-                            startIcon={<FcUnlock />}
+                          <ThemeButton
+                            buttonType="transparent"
                             disabled={!Boolean(versionDetails)}
                             onClick={() => {
                               setShowValidationDialog(true);
                             }}
                           >
                             Unlock
-                          </Button>
+                          </ThemeButton>
                         </HtmlTooltip>
                       </Grid>
                     )}
 
                     {showAcceptRejectButtons && (
-                      <Grid size={{xs:12, md:8, sm:8}} className="centerItem d-flex" justifyContent="flex-end">
-                        <Button
-                          variant="contained"
+                      <Grid size={{ xs: 12, md: 8, sm: 8 }} className="centerItem d-flex" justifyContent="flex-end">
+                        <ThemeButton
+                          buttonType="theme"
                           className="mr-1"
-                          startIcon={<GoThumbsup />}
-                          color="primary"
                           onClick={() => setShowSignatureDialog(true)}
                         >
                           Accept
-                        </Button>
-                        <Button
-                          variant="outlined"
-                          startIcon={<GoThumbsdown />}
+                        </ThemeButton>
+                        <ThemeButton
+                          buttonType="theme"
                           onClick={() => {
                             setQuoteStatusChangeData('Rejected');
                             setShowQuoteStatusChangeDialog(true);
                           }}
                         >
                           Reject
-                        </Button>
+                        </ThemeButton>
                       </Grid>
                     )}
                   </Grid>

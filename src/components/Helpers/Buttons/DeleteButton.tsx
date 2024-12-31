@@ -17,8 +17,7 @@ function DeleteButton({ text, onClick, children, mode = 'dark', isVisible = true
     <ThemeButton
       className={` ${mode}`}
       tooltip={tooltip}
-      borderColor="red"
-      textColor="red"
+      buttonType="red"
       mobileTooltip={mobileTooltip}
       onClick={onClick}
       {...rest}

@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Theme } from '@mui/material';
+import { Box, Divider, Theme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import axios from 'axios';
 import { sortBy } from 'lodash';
@@ -11,6 +11,7 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { backendApi } from '../../config';
 import { downloadExcel, gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 let levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
@@ -151,9 +152,9 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
             const currencyField: any =
               e?.type === 'currencyAmount'
                 ? {
-                    ...ele,
-                    fieldName: ele.fieldName + '_' + quoteData.currency.toLowerCase()
-                  }
+                  ...ele,
+                  fieldName: ele.fieldName + '_' + quoteData.currency.toLowerCase()
+                }
                 : {};
 
             rows.forEach((data) => {
@@ -333,15 +334,12 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
       <Box display="flex" p={1} justifyContent="flex-end">
         <Box mx={1} />
         {!isSubmited && (
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            // disabled={disabledSubmitButton}
+          <ThemeButton
+            buttonType='theme'
             onClick={handleSubmit}
           >
             Submit
-          </Button>
+          </ThemeButton>
         )}
         <Box mx={1} />
       </Box>
@@ -379,7 +377,7 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
                 <CustomReactTable
                   height={'calc(100vh - 200px)'}
                   columns={columns}
-                  onSelect={() => {}}
+                  onSelect={() => { }}
                   state={state}
                   dispatch={dispatch}
                   renderedFrom={renderedFrom}

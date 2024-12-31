@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, IconButton } from '@mui/material';
+import { Box, Dialog, IconButton } from '@mui/material';
 import { AddOutlined } from '@mui/icons-material';
 import EditIcon from '@mui/icons-material/Edit';
 import { useContext, useEffect, useState } from 'react';
@@ -15,6 +15,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { DynamicIcon, defaultIcons } from 'src/assets/IconGenerator';
 import { ServiceManagementIcon } from 'src/assets/sidebar_assets/icons';
 import { CustomDialogTransition } from 'src/constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const renderedFrom = `section-master`;
 
@@ -105,17 +106,15 @@ const SectionMaster = ({ close }) => {
   const RightSideContents = () => {
     return (
       <>
-        <Button
-          variant="contained"
-          color="primary"
-          size="small"
+        <ThemeButton
+          buttonType="theme"
           onClick={() => {
             setOpenManageSectionMaster({ open: true, data: null });
           }}
           startIcon={<AddOutlined />}
         >
           Add
-        </Button>
+        </ThemeButton>
       </>
     );
   };

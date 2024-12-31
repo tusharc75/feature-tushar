@@ -1,6 +1,7 @@
-import { Box, Container, Button, ButtonGroup, TextField, IconButton } from '@mui/material';
+import { Box, Container, ButtonGroup, TextField, IconButton } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Add, Delete } from '@mui/icons-material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 function MultipleEntry({ discount, index, setDiscount, fieldNames, fieldLabels, label }) {
   return (
@@ -8,28 +9,28 @@ function MultipleEntry({ discount, index, setDiscount, fieldNames, fieldLabels, 
       {discount && discount[index] && discount[index]['group'].length ? (
         <Container className="p-0">
           <Grid container direction="row" justifyContent="space-evenly" alignItems="center">
-            <Grid size={{md:12}}>
+            <Grid size={{ md: 12 }}>
               <Box>
                 <Grid container spacing={2} direction="row" justifyContent="flex-start" alignItems="center">
-                  <Grid size={{md:1}}>
+                  <Grid size={{ md: 1 }}>
                     #
                   </Grid>
-                  <Grid size={{md:5}}>
+                  <Grid size={{ md: 5 }}>
                     {fieldLabels[0]}
                   </Grid>
-                  <Grid size={{md:4}}>
+                  <Grid size={{ md: 4 }}>
                     {fieldLabels[1]}
                   </Grid>
-                  <Grid size={{md:2}}></Grid>
+                  <Grid size={{ md: 2 }}></Grid>
                 </Grid>
               </Box>
               <Box className="p-1">
                 {discount[index]['group'].map((data, i) => (
                   <Grid container spacing={2} direction="row" justifyContent="flex-start" alignItems="center" key={i}>
-                    <Grid size={{md:1}}>
+                    <Grid size={{ md: 1 }}>
                       {i + 1}
                     </Grid>
-                    <Grid size={{md:5}}>
+                    <Grid size={{ md: 5 }}>
                       <TextField
                         name={'qty_' + i}
                         variant="outlined"
@@ -45,7 +46,7 @@ function MultipleEntry({ discount, index, setDiscount, fieldNames, fieldLabels, 
                         }}
                       />
                     </Grid>
-                    <Grid size={{md:4}}>
+                    <Grid size={{ md: 4 }}>
                       <TextField
                         name={'rate_' + index}
                         variant="outlined"
@@ -61,7 +62,7 @@ function MultipleEntry({ discount, index, setDiscount, fieldNames, fieldLabels, 
                         }}
                       />
                     </Grid>
-                    <Grid size={{md:2}}>
+                    <Grid size={{ md: 2 }}>
                       <ButtonGroup size="small" aria-label="small outlined button group">
                         <IconButton
                           size="small"
@@ -94,11 +95,8 @@ function MultipleEntry({ discount, index, setDiscount, fieldNames, fieldLabels, 
           </Grid>
         </Container>
       ) : (
-        <Grid size={{md:12}}>
-          <Button
-            variant="outlined"
-            color="primary"
-            size="small"
+        <Grid size={{ md: 12 }}>
+          <ThemeButton
             onClick={() => {
               const _list = [...discount];
               _list[index]['group'].push({ [fieldNames[0]]: 0, [fieldNames[1]]: 0 });
@@ -106,7 +104,7 @@ function MultipleEntry({ discount, index, setDiscount, fieldNames, fieldLabels, 
             }}
           >
             Add {label}
-          </Button>
+          </ThemeButton>
         </Grid>
       )}
     </Box>

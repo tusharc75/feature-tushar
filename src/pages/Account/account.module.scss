@@ -11,47 +11,58 @@
   background-color: aliceblue;
   padding: 1px;
 }
+
 .detail_page_div1 {
   background-color: var(--white);
   border-radius: 8px;
   padding: 12px;
 }
+
 .custom_grid {
   background-color: aliceblue;
 }
+
 .custom_box {
   text-align: center;
   min-height: 300px;
   vertical-align: middle;
   margin-top: 100px;
 }
+
 .cTr {
   width: 90%;
 }
+
 .td1 {
   width: 150px;
 }
+
 .td2 {
   word-wrap: break-word;
 }
+
 .custom_div12 {
   flex-grow: 1;
   padding: 10px;
 }
+
 .detail_page_div3 {
   // padding: 6px 1px;
   background-color: var(--white);
 }
+
 .custom_link {
   font-size: 17px;
   /* margin-bottom: 5px; */
 }
+
 .custom_box1 {
   min-height: 150px;
   justify-content: center;
   background: #f5f5f5;
   padding: 5px;
 }
+
 .custom_div13 {
   display: flex;
   justify-content: space-between;
@@ -71,20 +82,24 @@
 }
 
 @supports (not (gap: 0.25rem)) and (not (-webkit-gap: 0.25rem)) {
-  .account_header > *:not(:nth-child(1)) {
+  .account_header>*:not(:nth-child(1)) {
     margin-left: 0.25rem !important;
   }
 }
+
 .mobile_button_layout {
   padding: 5px !important;
 }
+
 .mobile_button_layout_secondary {
   padding: 5px !important;
   border-color: var(--warning-light) !important;
 }
+
 .custom_height {
   height: calc(100vh - 230px);
 }
+
 .account_name_link {
   color: var(--link);
   cursor: pointer;
@@ -93,9 +108,11 @@
 .account_name_link:hover {
   text-decoration: underline;
 }
+
 .f_size {
   font-size: 16px;
 }
+
 .related_contacts,
 .leads_data {
   padding: 6px;
@@ -103,10 +120,12 @@
   display: flex;
   justify-content: space-between;
 }
+
 .view_all_btn {
   padding: 0;
   background-color: rgb(238, 238, 238);
 }
+
 .btn {
   width: 100%;
 }
@@ -116,9 +135,11 @@
   grid-gap: 0.5rem;
   align-items: center;
 }
+
 .account_header_search_bar {
   display: block;
 }
+
 .updated_at_time,
 .created_at_time {
   font-size: 0.6 rem;
@@ -126,80 +147,81 @@
   display: block;
   font-weight: lighter;
 }
+
 .update_by,
 .create_by {
   font-size: 0.8rem;
   line-height: 1rem;
   display: block;
 }
+
 .account_header_add_btn_action_btn_group {
   display: flex;
   grid-gap: 0.5rem;
 }
+
 .account_header_logo {
   font-size: 3rem;
   color: #09445a;
 }
+
 .account_header_dropdown .MuiInputBase-root.MuiInput-root.MuiInputBase-formControl.MuiInput-formControl {
   color: #09445a;
   font-size: 24px;
 }
-.account_header_dropdown
-  .MuiFormLabel-root.MuiInputLabel-root.MuiInputLabel-formControl.MuiInputLabel-animated.MuiInputLabel-shrink.MuiFormLabel-filled {
+
+.account_header_dropdown .MuiFormLabel-root.MuiInputLabel-root.MuiInputLabel-formControl.MuiInputLabel-animated.MuiInputLabel-shrink.MuiFormLabel-filled {
   font-size: 22px;
   color: #414c50;
 }
+
 .account_header_dropdown .MuiInputBase-root.MuiInput-root.MuiInputBase-formControl.MuiInput-formControl {
   width: 100% !important;
 }
-.account_header.account_header-mobile
-  .MuiFormControl-root.MuiTextField-root
-  .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-formControl.MuiInputBase-adornedStart.MuiOutlinedInput-adornedStart.MuiInputBase-marginDense.MuiOutlinedInput-marginDense {
+
+.account_header.account_header-mobile .MuiFormControl-root.MuiTextField-root .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-formControl.MuiInputBase-adornedStart.MuiOutlinedInput-adornedStart.MuiInputBase-marginDense.MuiOutlinedInput-marginDense {
   padding-left: 18px !important;
   padding-right: 18px !important;
   height: 34px !important;
 }
-/* Button.account_header_add_btn{
-    padding-left: 18px;
-    padding-right: 18px;
-    width: 99px;
-    height: 34px;
-  } */
 
-.MuiButton-iconSizeMedium > *:first-child {
+.MuiButton-iconSizeMedium>*:first-child {
   font-size: 18px !important;
 }
-.account_header_inner_container
-  .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between
-  .MuiBox-root.MuiBox-root-40.account_header {
+
+.account_header_inner_container .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between .MuiBox-root.MuiBox-root-40.account_header {
   display: flex;
   gap: 0.25rem;
 }
+
 @media only screen and (max-width: 1299px) {
   .set_width_table {
     width: 93vw;
   }
 }
+
 @media only screen and (max-width: 1024px) {
   // .account_header {
   //   //margin-top: 15px;
   // }
 }
+
 @media only screen and (max-width: 960px) {
   .mobile_filter_side_header {
     width: 100%;
   }
+
   .search_box_input {
     flex: none !important;
     width: 300px !important;
   }
+
   .set_width_table {
     width: 97vw;
   }
 }
 
-@media only screen and (max-width: 830px) {
-}
+@media only screen and (max-width: 830px) {}
 
 @media only screen and (max-width: 768px) {
   .account_header {
@@ -207,9 +229,11 @@
     grid-gap: 8px;
     margin-top: 0;
   }
+
   .search_box_input {
     width: 100% !important;
   }
+
   .set_width_table {
     width: 95vw;
   }
@@ -218,33 +242,39 @@
     margin-top: 2px;
     width: 100%;
   }
+
   .account_header_search_bar {
     display: block;
   }
+
   .account_header_inner_container div.account_header {
     display: block;
   }
+
   .MuiButton-containedPrimary.account_header_add_btn,
   .MuiButton-outlined.Mui-disabled.account_header_action_btn,
   .MuiButtonBase-root.MuiButton-root.MuiButton-outlined.account_header_action_btn {
     width: 100% !important;
     /* display:inline; */
   }
+
   .account_header_dropdown .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-formControl.MuiInputBase-marginDense.MuiOutlinedInput-marginDense {
     width: 100% !important;
   }
+
   .account_header_dropdown .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-formControl.MuiInputBase-marginDense.MuiOutlinedInput-marginDense {
     width: 100% !important;
   }
+
   .account_header_dropdown .MuiInputBase-root.MuiInput-root.MuiInput-underline.MuiInputBase-formControl .MuiInput-formControl {
     width: 100% !important;
   }
+
   .account_header_dropdown .MuiInputBase-root.MuiInput-root.MuiInput-underline.MuiInputBase-formControl.MuiInput-formControl {
     width: 100% !important;
   }
-  .account_header_inner_container
-    .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between
-    .MuiBox-root.MuiBox-root-40.account_header {
+
+  .account_header_inner_container .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between .MuiBox-root.MuiBox-root-40.account_header {
     display: block;
   }
 }
@@ -255,13 +285,16 @@
   border-radius: 8;
   padding: 3px 2px;
 }
+
 .MuiDataGrid-root {
   border: 2px solid #aeb0b1ad !important;
   border-radius: 12px !important;
 }
+
 .makeStyles-root-51 {
   border: 2px solid #aeb0b1ad;
 }
+
 /* .MuiDataGrid-root .MuiDataGrid-mainGridContainer {
       border: 2px solid #aeb0b1ad;
       border-radius: 12px;
@@ -272,31 +305,33 @@
 }
 
 @media only screen and (max-width: 714px) {
-  .account_header_inner_container
-    .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between
-    .MuiBox-root.MuiBox-root-40.account_header {
+  .account_header_inner_container .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between .MuiBox-root.MuiBox-root-40.account_header {
     width: 100%;
   }
-  .account_header_inner_container
-    .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between
-    .MuiGrid-root.MuiGrid-item,
+
+  .account_header_inner_container .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between .MuiGrid-root.MuiGrid-item,
   .account_header.account_header-mobile {
     width: 100%;
   }
+
   .account_header.account_header-mobile .MuiFormControl-root.MuiTextField-root {
     width: 100% !important;
   }
+
   .account_header_dropdown .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-formControl.MuiInputBase-marginDense.MuiOutlinedInput-marginDense {
     width: 100% !important;
   }
+
   .account_header_account_tab,
   .account_headerActiveAccountTab,
   .account_headerInactiveAccountTab {
     margin: 0.6rem auto !important;
   }
+
   .account_header_inner_container div.account_header {
     width: 100%;
   }
+
   .account_header_dropdown .MuiInputBase-root.MuiInput-root.MuiInput-underline.MuiInputBase-formControl .MuiInput-formControl {
     width: 100% !important;
   }
@@ -305,17 +340,21 @@
     //margin-top: 1rem;
   }
 }
+
 @media only screen and (max-width: 425px) {
   .account_header.account_header-mobile {
     margin-top: 0;
   }
+
   .account_header_inner_container .MuiGrid-root.MuiGrid-item {
     width: 100%;
   }
+
   .account_header.account_header-mobile .MuiFormControl-root.MuiTextField-root {
     width: 100% !important;
   }
 }
+
 @media only screen and (max-width: 375px) {
   #demo_simple_select_outlined {
     width: 230px !important;
@@ -326,15 +365,18 @@
   .account_activities_div {
     width: 100%;
   }
+
   .account_header {
     display: block;
     grid-gap: 8px;
     margin-top: 0;
   }
+
   .account_header-mobile {
     flex: 1;
     justify-content: space-between !important;
   }
+
   .set_width_table {
     width: 100vw;
   }

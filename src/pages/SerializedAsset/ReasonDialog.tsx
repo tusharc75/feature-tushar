@@ -1,13 +1,13 @@
 import React from 'react';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid2';
 import { CustomDialogTransition, ASSET_STATUS } from '../../constants/helpers';
 import Dialog from '@mui/material/Dialog';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export default function ReasonDialog({ onClose, status, onAddReason, ...rest }) {
   const [value, setValue] = React.useState('');
@@ -36,7 +36,7 @@ export default function ReasonDialog({ onClose, status, onAddReason, ...rest }) 
         <Box>
           <Box pt={3} pb={3}>
             <Grid container spacing={3}>
-              <Grid size={{xs:12, sm:12, md:12}}>
+              <Grid size={{ xs: 12, sm: 12, md: 12 }}>
                 <TextField
                   id="outlined-multiline-static"
                   label={status === ASSET_STATUS.scrap ? 'Scrapping Reason' : status === ASSET_STATUS.lost ? 'Lost Reason' : 'Comment'}
@@ -56,22 +56,19 @@ export default function ReasonDialog({ onClose, status, onAddReason, ...rest }) 
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button color="primary" size="small" onClick={onClose}>
+        <ThemeButton buttonType="transparent" onClick={onClose}>
           Cancel
-        </Button>
-        <Button
+        </ThemeButton>
+        <ThemeButton
           disabled={!Boolean(value)}
-          type="button"
-          color="primary"
-          size="small"
-          variant="contained"
+          buttonType="theme"
           onClick={() => {
             onAddReason(value);
           }}
         >
           Save
-        </Button>
+        </ThemeButton>
       </CustomDialogFooter>
-    </Dialog>
+    </Dialog >
   );
 }

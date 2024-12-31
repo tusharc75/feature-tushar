@@ -70,7 +70,7 @@ const Warehouse = ({ reference, api, id, accountId = '' }) => {
               setShowDeleteConfirmBox(true);
             }}
           >
-            <DeleteIcon color="error" />
+            <DeleteIcon color="error" fontSize='small' />
           </IconButton>
         </HtmlTooltip>
       </>
@@ -150,14 +150,10 @@ const Warehouse = ({ reference, api, id, accountId = '' }) => {
       <>
         {permissions[reference]?.isUpdate && (
           <DeleteButton
-            variant="contained"
-            color="primary"
-            size="small"
             disabled={selectedRecords.length === 0}
             onClick={() => {
               setShowDeleteConfirmBox(true);
             }}
-            mode="light"
             text="Delete"
           />
         )}

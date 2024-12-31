@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, MenuItem, useMediaQuery } from '@mui/material';
+import { Box, IconButton, MenuItem, useMediaQuery } from '@mui/material';
 import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { AiFillEdit } from 'react-icons/ai';
@@ -144,14 +144,13 @@ const QuoteBuilder = ({
                 size="small"
                 onClick={() => {
                   window.open(
-                    `${
-                      row.original.type === MATERIAL_TYPE.serializedAsset
-                        ? routes.serializedAssetDetail.path
-                        : row.original.type === MATERIAL_TYPE.product
-                          ? routes.productDetail.path
-                          : row.original.type === MATERIAL_TYPE.package
-                            ? routes.packagesDetail.path
-                            : routes.serviceMasterDetail.path
+                    `${row.original.type === MATERIAL_TYPE.serializedAsset
+                      ? routes.serializedAssetDetail.path
+                      : row.original.type === MATERIAL_TYPE.product
+                        ? routes.productDetail.path
+                        : row.original.type === MATERIAL_TYPE.package
+                          ? routes.packagesDetail.path
+                          : routes.serviceMasterDetail.path
                     }/${row.original.materialId}`
                   );
                 }}
@@ -201,15 +200,14 @@ const QuoteBuilder = ({
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === 'product'
-            ? parent.productDetail?.productName
-            : parent.type === 'service'
-              ? parent.serviceDetail?.serviceName
-              : parent.packageDetail?.packageName
-      }`;
+      parent.detail = `${parent.type === 'serializedAsset'
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.type === 'service'
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -280,15 +278,14 @@ const QuoteBuilder = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail?.assetNumber
-          : _subRow.type === 'product'
-            ? _subRow.productDetail?.productName
-            : _subRow.type === 'service'
-              ? _subRow.serviceDetail?.serviceName
-              : _subRow.packageDetail?.packageName
-      }`;
+      _subRow.detail = `${_subRow.type === 'serializedAsset'
+        ? _subRow.serializedAssetDetail?.assetNumber
+        : _subRow.type === 'product'
+          ? _subRow.productDetail?.productName
+          : _subRow.type === 'service'
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
@@ -400,9 +397,9 @@ const QuoteBuilder = ({
           </>
         )}
         {allowedToEdit && currentStep === 'DOA' && DOAData?.length === 0 && (
-          <Button variant="contained" size="small" color="primary" onClick={handleSendForDOA}>
+          <ThemeButton buttonType="transparent" onClick={handleSendForDOA}>
             Send for DOA
-          </Button>
+          </ThemeButton>
         )}
       </>
     );

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Checkbox, CircularProgress, Dialog, List, ListItem, ListItemIcon, ListItemText, TextField } from '@mui/material';
+import { Checkbox, Dialog, List, ListItem, ListItemIcon, ListItemText, TextField } from '@mui/material';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
@@ -76,7 +76,7 @@ const DOAReasonDialog = ({ reasonDialogOpen, handleCloseDialog, QuoteStatusChang
               isLoading={isAssigning}
               buttonType='theme'
             >
-              {isAssigning ? <CircularProgress size={22} /> : 'Save'}
+              Save
             </ThemeButton>
           </CustomDialogFooter>
         </Dialog>

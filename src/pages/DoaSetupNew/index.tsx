@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -8,6 +8,7 @@ import BoxWithBorder from 'src/components/BoxWithBorder';
 import ManageDoa from './ManageDoa';
 import DoaStepper from './Stepper';
 import axios, { CancelTokenSource } from 'axios';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const DoaSetup = ({ resource, entity }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -41,19 +42,19 @@ const DoaSetup = ({ resource, entity }) => {
   return (
     <>
       <Box mt={2} className="single-form-v1">
-        <div className="form-head-v1">
-          <Typography className="form-label-style-v1 pr" component={'h3'}>
-            {`${resource} DOA Details`}
-          </Typography>
+        <div className="relative flex justify-between rounded-t bg-[var(--dark-secondary,var(--accordion-expanded-summary-bg,#EFFBF9))] px-7 py-4">
+          <h6 className="pr-[80px] text-sm font-semibold leading-[1.05]">{`${resource} DOA Details`}</h6>
           {permissions.entity?.isUpdate && (
-            <Button variant="contained" className="float-right-button-v1" color="primary" size="small" onClick={() => setOpen(true)}>
-              {doaData ? `Edit DOA` : `Add DOA`}
-            </Button>
+            <span className="absolute right-5 top-[50%] [transform:translateY(-50%)]">
+              <ThemeButton buttonType="theme" onClick={() => setOpen(true)}>
+                {doaData ? `Edit DOA` : `Add DOA`}
+              </ThemeButton>
+            </span>
           )}
         </div>
         <Box className="formdata-v1">
           <Grid container style={{ padding: '8px' }} spacing={1}>
-            <Grid size={{xs:12, sm:12}}>
+            <Grid size={{ xs: 12, sm: 12 }}>
               <BoxWithBorder
                 style={{
                   padding: '0px'

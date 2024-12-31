@@ -1,4 +1,4 @@
-import { Box, Button, Collapse, Dialog, IconButton, Typography } from '@mui/material';
+import { Box, Collapse, Dialog, IconButton, Typography } from '@mui/material';
 import { Add, Delete } from '@mui/icons-material';
 import EditIcon from '@mui/icons-material/Edit';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -112,17 +112,15 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
         <div className="flex flex-col items-center gap-2">
           <FileIcon size={150} className="text-center" />
           <p className=" line-clamp-1 text-[14px] font-normal">{getFileNameWithExtension(data)}</p>
-          <Button
+          <ThemeButton
+            buttonType='theme'
             onClick={() => {
               downloadExcel(data);
             }}
-            variant="contained"
-            className="no-shadow dark:[background:var(--dark-secondary)_!important]"
-            color="inherit"
             endIcon={<DownloadIcon />}
           >
             Download
-          </Button>
+          </ThemeButton>
         </div>
       </div>
     );
@@ -153,11 +151,10 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
                   return (
                     <div key={file._id} className="shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${
-                          expended[file?._id]
-                            ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
-                            : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
-                        }`}
+                        className={`head flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${expended[file?._id]
+                          ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
+                          : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
+                          }`}
                         onClick={() => {
                           setExpended((prev) => ({
                             ...prev,

@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Box, Button, Checkbox, CircularProgress, Dialog, FormControlLabel, TextField } from '@mui/material';
+import { Box, Checkbox, CircularProgress, Dialog, FormControlLabel, TextField } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { Form, Formik } from 'formik';
 import { isEqual, startCase } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -9,7 +10,6 @@ import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import { object, string } from 'yup';
-import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import Autocomplete from '@mui/material/Autocomplete';
 import { getLookupResource, getResourceField } from '../../helper';
@@ -164,7 +164,7 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
                     name="stepName"
                     fullWidth
                     margin="dense"
-                    size='small'
+                    size="small"
                     value={values['stepName']}
                     error={touched['stepName'] && Boolean(errors['stepName'])}
                     helperText={touched['stepName'] && errors['stepName']}
@@ -204,7 +204,7 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
                         <TextField
                           {...params}
                           margin="dense"
-                          size='small'
+                          size="small"
                           variant="outlined"
                           label="Linked Material"
                           placeholder="Linked Material"
@@ -253,7 +253,7 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
                           <TextField
                             {...params}
                             margin="dense"
-                            size='small'
+                            size="small"
                             variant="outlined"
                             label="Resource"
                             placeholder="Resource"
@@ -284,7 +284,7 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
                           <TextField
                             {...params}
                             margin="dense"
-                            size='small'
+                            size="small"
                             variant="outlined"
                             label="Resource Field"
                             placeholder="Resource Field"
@@ -298,7 +298,7 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
                                     {params.InputProps.endAdornment}
                                   </React.Fragment>
                                 )
-                              },
+                              }
                             }}
                             error={touched['linkResourceField'] && Boolean(errors['linkResourceField'])}
                             helperText={touched['linkResourceField'] && errors['linkResourceField']}
@@ -366,29 +366,24 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
                 </Box>
                 {!values['linkWithResource'] && (
                   <Box className="mt-2">
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
+                    <ThemeButton
+                      buttonType="theme"
                       onClick={() => {
                         setOpenField(true);
                       }}
                     >
                       Add Fields
-                    </Button>
+                    </ThemeButton>
                     {!values['linkWithMaterial'] && (
                       <>
-                        <Button
-                          className="ml-2"
-                          variant="contained"
-                          color="primary"
-                          size="small"
+                        <ThemeButton
+                          buttonType="theme"
                           onClick={() => {
                             setOpenStepActions(true);
                           }}
                         >
                           Create Actions
-                        </Button>
+                        </ThemeButton>
                       </>
                     )}
                   </Box>
@@ -396,29 +391,23 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button
-                size="small"
-                color="primary"
-                disabled={isSubmitting}
+              <ThemeButton
+                buttonType="transparent"
                 onClick={() => {
                   if (isEqual(initialValues, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
               >
                 Cancel
-              </Button>
-              <Button
+              </ThemeButton>
+              <ThemeButton
                 disabled={isSubmitting}
-                variant="contained"
-                color="primary"
-                size="small"
-                type="submit"
+                buttonType="theme"
                 onClick={submitForm}
-                endIcon={isSubmitting && <CircularProgress color="inherit" size={18} />}
+                isLoading={isSubmitting}
               >
-                {' '}
                 Save
-              </Button>
+              </ThemeButton>
             </CustomDialogFooter>
 
             {showConfirmDialog ? (

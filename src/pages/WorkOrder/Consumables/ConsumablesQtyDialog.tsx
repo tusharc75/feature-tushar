@@ -1,5 +1,5 @@
 import Autocomplete from '@mui/material/Autocomplete';
-import { Box, Button, Dialog, Table, TableBody, TableCell, TableHead, TableRow, TextField } from '@mui/material';
+import { Box, Dialog, Table, TableBody, TableCell, TableHead, TableRow, TextField } from '@mui/material';
 import { FieldArray, Form, Formik } from 'formik';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -10,6 +10,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ConsumablesQtyDialog = ({
   referenceId,
@@ -489,11 +490,11 @@ const ConsumablesQtyDialog = ({
               )}
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button variant="outlined" disabled={isSubmitting} size="small" color="primary" onClick={onClose}>
+              <ThemeButton buttonType="transparent" disabled={isSubmitting}  onClick={onClose}>
                 Cancel
-              </Button>
+              </ThemeButton>
               {consumeRequest ? (
-                <Button
+                <ThemeButton
                   onClick={() => {
                     if (
                       !validate(values.products).consumedQty &&
@@ -503,15 +504,13 @@ const ConsumablesQtyDialog = ({
                       handleRequest(values);
                     }
                   }}
-                  size="small"
-                  variant="contained"
                   disabled={isSubmitting}
-                  color="primary"
+                  buttonType="theme"
                 >
                   Request
-                </Button>
+                </ThemeButton>
               ) : (
-                <Button
+                <ThemeButton
                   onClick={() => {
                     if (
                       !Boolean(validate(values.products).consumedQty) &&
@@ -521,13 +520,11 @@ const ConsumablesQtyDialog = ({
                       handleSubmit(values);
                     }
                   }}
-                  size="small"
-                  variant="contained"
+                  buttonType="theme"
                   disabled={isSubmitting}
-                  color="primary"
                 >
                   Save
-                </Button>
+                </ThemeButton>
               )}
             </CustomDialogFooter>
           </>

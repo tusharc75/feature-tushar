@@ -1,7 +1,7 @@
-import { CircularProgress, IconButton, Paper } from '@mui/material';
+import { IconButton, Paper } from '@mui/material';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Grid from '@mui/material/Grid';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Grid from '@mui/material/Grid2';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -217,7 +217,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
           {otherAttachments.map((attachment, i) => {
             return (
               <>
-                <Grid item key={i} sm={3} xs={3} md={3} xl={3}>
+                <Grid key={i} size={{ sm: 3, xs: 3, md: 3, xl: 3 }}>
                   <Paper className={emailStyles.fileContainer}>
                     <img src={getFileIconSrc(attachment)} className={emailStyles.file} alt="attchment" />
                     <Typography noWrap variant="body2">
@@ -259,12 +259,12 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
         <CommonSkeleton lenArray={[...Array(4).keys()]} />
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button variant="outlined" color="primary" size="small" disabled>
+        <ThemeButton buttonType="transparent" disabled>
           Cancel
-        </Button>
-        <Button variant="contained" color="primary" size="small" disabled>
+        </ThemeButton>
+        <ThemeButton buttonType="theme" disabled>
           Save
-        </Button>
+        </ThemeButton>
       </CustomDialogFooter>
     </>
   ) : (
@@ -285,7 +285,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
             <Form autoComplete="off" autoCorrect="off" noValidate>
               <Box padding={1}>
                 <Grid container spacing={3}>
-                  <Grid item xs={12}>
+                  <Grid size={{ xs: 12 }}>
                     <TextField
                       variant="outlined"
                       type="text"
@@ -364,11 +364,8 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
             </Form>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button
-              size="small"
-              variant="outlined"
-              type="button"
-              color="primary"
+            <ThemeButton
+              buttonType="transparent"
               disabled={uploading}
               onClick={() => {
                 if (isEqual(initialValues, values)) handleClose();
@@ -376,13 +373,9 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
               }}
             >
               Cancel
-            </Button>
-            <Button
-              size="small"
-              type="button"
-              color="primary"
-              variant="contained"
-              endIcon={uploading && <CircularProgress size={20} />}
+            </ThemeButton>
+            <ThemeButton
+              buttonType="theme"
               onClick={() => {
                 if (Object.keys(errors).length) {
                   Object.keys(errors).map((k) => {
@@ -391,9 +384,10 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
                 } else submitForm();
               }}
               disabled={uploadingImageOrFileProgress > 0 || uploading}
+              isLoading={uploading}
             >
               Save
-            </Button>
+            </ThemeButton>
           </CustomDialogFooter>
           {showConfirmDialog ? (
             <ConfirmCancelDialog

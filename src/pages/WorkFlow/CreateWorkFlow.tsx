@@ -1,9 +1,8 @@
 import { useState, useEffect, Fragment, useContext } from 'react';
 import Grid from '@mui/material/Grid2';
-import { Box, Button, useMediaQuery } from '@mui/material';
+import { Box, useMediaQuery } from '@mui/material';
 import { useHistory, useParams } from 'react-router-dom';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import { isTablet } from 'react-device-detect';
 import routes from './../../components/Helpers/Routes';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
@@ -12,10 +11,10 @@ import { useData } from '../../StateProvider/Provider';
 import TextField from '@mui/material/TextField';
 import ActivationCondition from './ActivationCondition';
 import Notifications from 'src/pages/WorkFlow/Notifications';
-import { RiCloseCircleFill } from 'react-icons/ri';
 import ManageWorkFlow from 'src/pages/WorkFlow/ManageWorkFlow';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import DynamicTabs from 'src/components/FormBuilder/Tabs';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const CreateWorkFlow = () => {
   const {
@@ -72,8 +71,8 @@ const CreateWorkFlow = () => {
             <Fragment>
               <Box mb={2} width={'100%'}>
                 <Grid container alignItems="center">
-                  <Grid size={{xs:9}} container spacing={1}>
-                    <Grid size={{xs:6, md:4}}>
+                  <Grid size={{ xs: 9 }} container spacing={1}>
+                    <Grid size={{ xs: 6, md: 4 }}>
                       <TextField
                         variant="outlined"
                         type="text"
@@ -84,12 +83,12 @@ const CreateWorkFlow = () => {
                         margin="dense"
                         size="small"
                         value={workFlowData.workflowName || ''}
-                        // onChange={(e) => {
-                        //   setWorkFlowName(e.target.value.trimStart());
-                        // }}
+                      // onChange={(e) => {
+                      //   setWorkFlowName(e.target.value.trimStart());
+                      // }}
                       />
                     </Grid>
-                    <Grid size={{xs:6, md:4}}>
+                    <Grid size={{ xs: 6, md: 4 }}>
                       <TextField
                         variant="outlined"
                         type="text"
@@ -103,13 +102,10 @@ const CreateWorkFlow = () => {
                       />
                     </Grid>
                   </Grid>
-                  <Grid size={{xs:3}} container justifyContent="flex-end">
+                  <Grid size={{ xs: 3 }} container justifyContent="flex-end">
                     {permissions?.workflow?.isUpdate && (
                       <Box className="gap-1">
-                        <Button
-                          disabled={false}
-                          color="primary"
-                          size="small"
+                        <ThemeButton
                           onClick={() =>
                             setShowManageWorkFlowDialog({
                               open: true,
@@ -120,25 +116,21 @@ const CreateWorkFlow = () => {
                               }
                             })
                           }
-                          variant={'contained'}
+                          buttonType='theme'
+                          disabled={false}
                         >
                           {'Edit'}
-                        </Button>
+                        </ThemeButton>
                       </Box>
                     )}
                     <Box ml={1}>
-                      <Button
-                        color="primary"
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        size="small"
-                        style={isMobile && !isTablet ? { color: 'var(--error)' } : {}}
+                      <ThemeButton
                         onClick={() => {
                           history.push({ pathname: routes.workflow.path });
                         }}
                       >
-                        {' '}
-                        {isMobile && !isTablet ? <RiCloseCircleFill size={24} /> : 'Close'}
-                      </Button>
+                        Close
+                      </ThemeButton>
                     </Box>
                   </Grid>
                 </Grid>

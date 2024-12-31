@@ -1,8 +1,7 @@
 import { useState, Fragment, useRef } from 'react';
-import Button from '@mui/material/Button';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Dialog from '@mui/material/Dialog';
 import TextField from '@mui/material/TextField';
-import { object, string } from 'yup';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, fieldLabelToFieldName } from 'src/constants/helpers';
 import { Form, Formik } from 'formik';
@@ -149,12 +148,12 @@ export const AddAllColumnDialog = (props) => {
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button size="small" onClick={handleClose} color="primary">
+              <ThemeButton buttonType="transparent" onClick={handleClose}>
                 Cancel
-              </Button>
-              <Button size="small" type="submit" color="primary" onClick={submitForm} variant="contained">
+              </ThemeButton>
+              <ThemeButton buttonType="theme" onClick={submitForm}>
                 Add
-              </Button>
+              </ThemeButton>
             </CustomDialogFooter>
           </Fragment>
         )}

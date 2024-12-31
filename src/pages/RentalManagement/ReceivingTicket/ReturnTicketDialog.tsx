@@ -1,5 +1,5 @@
-import React, { useContext, useState } from 'react';
-import { Dialog, Button, Box, TextField, Chip, Typography } from '@mui/material';
+import React, { useState } from 'react';
+import { Dialog, Box, TextField, Chip, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
@@ -8,6 +8,7 @@ import { Formik, Form, FieldArray } from 'formik';
 import { isMobile, isTablet } from 'react-device-detect';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomDialogTransition } from 'src/constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -92,7 +93,7 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
                 <Box p={2}>
                   <Form>
                     <Box display="flex" justifyContent="space-evenly" alignItems="center">
-                      <Grid size={{md:12}}>
+                      <Grid size={{ md: 12 }}>
                         <Box>
                           <FieldArray
                             name="products"
@@ -101,12 +102,12 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
                                 {values.products.map((data, index) => (
                                   <Box key={data?.productId} border={'1px solid #dddddd'} borderRadius={4} mb={2} p={2} pt={2}>
                                     <Grid container spacing={2} alignItems="center">
-                                      <Grid size={{xs:12, md:1}}>
+                                      <Grid size={{ xs: 12, md: 1 }}>
                                         <Chip color="primary" label={index + 1} />
                                       </Grid>
-                                      <Grid size={{xs:12, md:11}}>
+                                      <Grid size={{ xs: 12, md: 11 }}>
                                         <Grid container spacing={2} alignItems="center">
-                                          <Grid size={{xs:12}}>
+                                          <Grid size={{ xs: 12 }}>
                                             <Typography>
                                               <b>{data?.product}</b>
                                             </Typography>
@@ -114,7 +115,7 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
                                         </Grid>
                                         <Box mt={1}>
                                           <Grid container spacing={2} alignItems="center">
-                                            <Grid size={{xs:12, md:3}}>
+                                            <Grid size={{ xs: 12, md: 3 }}>
                                               <TextField
                                                 fullWidth
                                                 label="Return Quantity"
@@ -136,7 +137,7 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
                                                 helperText={validate([data]).returnQuantity ? validate([data]).returnQuantity : ''}
                                               />
                                             </Grid>
-                                            <Grid size={{xs:12, md:3}}>
+                                            <Grid size={{ xs: 12, md: 3 }}>
                                               <TextField
                                                 fullWidth
                                                 label="Consumed Quantity"
@@ -149,7 +150,7 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
                                                 value={data.consumeQty}
                                               />
                                             </Grid>
-                                            <Grid size={{xs:12, md:3}}>
+                                            <Grid size={{ xs: 12, md: 3 }}>
                                               <TextField
                                                 fullWidth
                                                 label="Invoiced Quantity"
@@ -162,7 +163,7 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
                                                 value={data.invoiceQty}
                                               />
                                             </Grid>
-                                            <Grid size={{xs:12, md:3}}>
+                                            <Grid size={{ xs: 12, md: 3 }}>
                                               <TextField
                                                 fullWidth
                                                 label="Order Quantity"
@@ -196,21 +197,19 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
               )}
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button size="small" variant="outlined" color="primary" onClick={onClose}>
+              <ThemeButton buttonType="transparent" onClick={onClose}>
                 Cancel
-              </Button>
-              <Button
+              </ThemeButton>
+              <ThemeButton
                 onClick={() => {
                   if (!validate(values.products).returnQuantity) {
                     handleSubmit(values);
                   }
                 }}
-                variant="contained"
-                color="primary"
-                size="small"
+                buttonType="theme"
               >
                 Save
-              </Button>
+              </ThemeButton>
             </CustomDialogFooter>
           </>
         )}

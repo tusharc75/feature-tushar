@@ -1,34 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import { Image, MoreVert } from '@mui/icons-material';
 import {
+  Avatar,
   Box,
-  IconButton,
-  Typography,
+  Button,
   Card,
   CardContent,
-  Avatar,
+  IconButton,
   List,
   ListItem,
   ListItemAvatar,
   ListItemText,
-  MenuItem,
   Menu,
-  Button
+  MenuItem,
+  Typography
 } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import routes from './../../components/Helpers/Routes';
-import { Link } from 'react-router-dom';
-import { FaArrowAltCircleDown } from 'react-icons/fa';
-import { customerContact, supplierContact, customerAccount, supplierAccount } from '../../constants/helpers';
-import { useData } from '../../StateProvider/Provider';
-import ManageContactDialog from './../Contact/ManageContact';
+import React, { useEffect, useState } from 'react';
 import { AiOutlineMail } from 'react-icons/ai';
-import { FiStar } from 'react-icons/fi';
 import { BiPhone } from 'react-icons/bi';
-import CopyToClipboard from '../../components/Helpers/CopyToClipboard';
-import { Image, MoreVert } from '@mui/icons-material';
+import { FaArrowAltCircleDown } from 'react-icons/fa';
+import { FiStar } from 'react-icons/fi';
+import { Link } from 'react-router-dom';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
+import CopyToClipboard from '../../components/Helpers/CopyToClipboard';
+import { customerAccount, customerContact, supplierAccount, supplierContact } from '../../constants/helpers';
+import { useData } from '../../StateProvider/Provider';
+import routes from './../../components/Helpers/Routes';
+import ManageContactDialog from './../Contact/ManageContact';
 
 export default function ContactAccordionInDetailPage({ contacts, type, expanded = true, recordsPerLine = 2, userId, onSuccess, isAllowedToEdit }) {
   const {
@@ -78,46 +76,42 @@ export default function ContactAccordionInDetailPage({ contacts, type, expanded 
     <>
       <Accordion expanded={expandContact} className="accordContact" onChange={() => setExpandContact(!expandContact)}>
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
-          <Grid container className="pos_rel">
-            <Grid size={{xs:8}}>
-              <Box display="flex">
-                <Box>
-                  <IconButton size="small">{expandContact === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
-                </Box>
-                <Box padding="5px">
-                  <Typography variant="subtitle2">
-                    {type === 'customer' ? resources?.customerContact?.titlePlural : resources?.supplierContact?.titlePlural} ({contacts?.length ?? 0}
-                    )
-                  </Typography>
-                </Box>
-              </Box>
-            </Grid>
-            <Grid size={{xs:4}} container justifyContent="flex-end" alignItems="center">
-              <Typography variant="subtitle2">
-                {isAllowedToEdit && (
+          <div className="flex items-center justify-between">
+            <Typography variant="subtitle2">
+              {type === 'customer' ? resources?.customerContact?.titlePlural : resources?.supplierContact?.titlePlural} ({contacts?.length ?? 0})
+            </Typography>
+
+            {isAllowedToEdit && (
+              <>
+                {(type === 'customer' ? permissions?.customerContact?.isCreate : permissions?.supplierContact?.isCreate) && (
                   <>
-                    {(type === 'customer' ? permissions?.customerContact?.isCreate : permissions?.supplierContact?.isCreate) && (
-                      <>
-                        <IconButton aria-haspopup="true" color="primary" size="small" onClick={handleOpenMenu}>
-                          <MoreVert />
-                        </IconButton>
-                        <Menu id="menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
-                          <MenuItem
-                            onClick={() => {
-                              setShowCreateContactDialog(true);
-                              handleCloseMenu();
-                            }}
-                          >
-                            Create New
-                          </MenuItem>
-                        </Menu>
-                      </>
-                    )}
+                    <IconButton
+                      aria-haspopup="true"
+                      color="primary"
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        handleOpenMenu(e);
+                      }}
+                    >
+                      <MoreVert />
+                    </IconButton>
+                    <Menu id="menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
+                      <MenuItem
+                        onClick={() => {
+                          setShowCreateContactDialog(true);
+                          handleCloseMenu();
+                        }}
+                      >
+                        Create New
+                      </MenuItem>
+                    </Menu>
                   </>
                 )}
-              </Typography>
-            </Grid>
-          </Grid>
+              </>
+            )}
+          </div>
         </AccordionSummary>
         <AccordionDetails>
           <>
@@ -126,11 +120,11 @@ export default function ContactAccordionInDetailPage({ contacts, type, expanded 
                 {contacts && contacts?.length ? (
                   <Grid container spacing={1}>
                     {contacts.slice(0, maxRecordsToShow).map((obj, index) => (
-                      <Grid size={{xs:12, sm:12, md:recordsPerLineInLargeScreen}} key={index}>
+                      <Grid size={{ xs: 12, sm: 12, md: recordsPerLineInLargeScreen }} key={index}>
                         <Card className="detailCard  card-v1" variant="outlined">
                           <CardContent className="card-link">
                             <Grid container>
-                              <Grid size={{xs:12, sm:12}}>
+                              <Grid size={{ xs: 12, sm: 12 }}>
                                 <List>
                                   <ListItem>
                                     <ListItemAvatar>

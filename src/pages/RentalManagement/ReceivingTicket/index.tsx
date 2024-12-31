@@ -1,17 +1,15 @@
-import { Button, Dialog, IconButton, Menu, MenuItem, TextField, Theme } from '@mui/material';
+import { Dialog, IconButton, Menu, MenuItem, TextField, Theme } from '@mui/material';
 import Box from '@mui/material/Box/Box';
 import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
 import { ExpandMore } from '@mui/icons-material';
 import AddBoxRoundedIcon from '@mui/icons-material/AddBoxRounded';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import Edit from '@mui/icons-material/Edit';
 import HelpIcon from '@mui/icons-material/HelpOutline';
 import InfoIcon from '@mui/icons-material/Info';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import { groupBy, isArray, isEmpty, isObject, map, startCase, uniq, uniqBy } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { MdHandyman, MdHomeRepairService } from 'react-icons/md';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import CustomMessageDialog from 'src/components/MessageDialog';
@@ -2059,11 +2057,7 @@ const ReceivingTicket = ({
           <PreviewDownloadMultiple referenceIds={uniqueReceivingTicket} />
         </span>
         {allowedToEdit && !rentalPolicyData?.hideAssetChangeStatus && (
-          <Button
-            variant={'outlined'}
-            color="primary"
-            aria-controls="simple-menu"
-            aria-haspopup="true"
+          <ThemeButton
             disabled={
               selectedRecords?.length === 0 ||
               isOffline ||
@@ -2082,38 +2076,33 @@ const ReceivingTicket = ({
                 ].includes(f.status)
               )
             }
-            size="small"
             onClick={handleClick}
-            endIcon={<ArrowDropDownIcon />}
+            endIcon={<ExpandMore />}
           >
             {'Change Status'}
-          </Button>
+          </ThemeButton>
         )}
         {(repairJobCount > 0 || repairOrderCount > 0) && (
-          <Button
+          <ThemeButton
             onClick={openLinkActions}
-            variant="outlined"
-            size="small"
-            aria-controls="action-menu"
-            className="normal-case"
             endIcon={<ExpandMore fontSize="inherit" />}
           >
             Order(s)
-          </Button>
+          </ThemeButton>
         )}
         {showProcessDeliveryTicket && !isOffline && (
           <>
             <HtmlTooltip title="Process Multiple Receiving/Return Ticket(s)">
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                color="primary"
-                size="small"
+              <ThemeButton
+                iconForMobile={<AddBoxRoundedIcon />}
+                mobileTooltip='Process Ticket'
+                buttonType='theme'
                 onClick={() => {
                   setOpenDeliveryTicketDialog(true);
                 }}
               >
-                {isMobile && !isTablet ? <AddBoxRoundedIcon /> : 'Process Ticket'}
-              </Button>
+                {'Process Ticket'}
+              </ThemeButton>
             </HtmlTooltip>
           </>
         )}
@@ -2212,7 +2201,7 @@ const ReceivingTicket = ({
           rightSideContents={rightSideContents()}
           hasXpadding
         />
-        <Grid size={{xs:12, md:12, sm:12}}>
+        <Grid size={{ xs: 12, md: 12, sm: 12 }}>
           {columns ? (
             <CustomReactTable
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
@@ -2522,18 +2511,18 @@ const ReceivingTicket = ({
           </CustomDialogContent>
           <CustomDialogFooter>
             <ThemeButton
-                onClick={() => setStatusToUpdate((prevState) => ({ ...prevState, open: false }))}
-                buttonType='transparent'
-              >
-                Cancel
-              </ThemeButton>
-              <ThemeButton
-                disabled={statusToUpdate.isUpdating}
-                buttonType='theme'
-                isLoading={statusToUpdate.isUpdating}
-              >
-                Change Status
-              </ThemeButton>
+              onClick={() => setStatusToUpdate((prevState) => ({ ...prevState, open: false }))}
+              buttonType='transparent'
+            >
+              Cancel
+            </ThemeButton>
+            <ThemeButton
+              disabled={statusToUpdate.isUpdating}
+              buttonType='theme'
+              isLoading={statusToUpdate.isUpdating}
+            >
+              Change Status
+            </ThemeButton>
           </CustomDialogFooter>
         </Dialog>
       )}

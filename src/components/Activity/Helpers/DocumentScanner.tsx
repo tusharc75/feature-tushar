@@ -8,7 +8,6 @@ import Dialog from '@mui/material/Dialog';
 import Webcam from 'react-webcam';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { CircularProgress } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import SwitchCameraIcon from '@mui/icons-material/SwitchCamera';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -133,11 +132,10 @@ const DocumentScanner = ({ open, onClose, setFieldValue, onUploadFile }) => {
           <ThemeButton
             buttonType="theme"
             onClick={handleCapture}
-            size="small"
             disabled={isScanning}
-            startIcon={isScanning && <CircularProgress size={15} />}
+            isLoading={isScanning}
           >
-            {isScanning ? 'Scanning...' : 'Capture'}
+            Capture
           </ThemeButton>
         </CustomDialogFooter>
       </Dialog>

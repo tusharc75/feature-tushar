@@ -1,5 +1,5 @@
-import React, { useContext, useState } from 'react';
-import { Box, Button } from '@mui/material';
+import { useContext, useState } from 'react';
+import { Box } from '@mui/material';
 import FaceLiveNess from './FaceLiveNess';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -7,6 +7,7 @@ import { SET_SELECTED_ENTITY, SET_USER } from 'src/StateProvider/actionTypes';
 import routes from '../Helpers/Routes';
 import { camelCase } from 'lodash';
 import { useHistory } from 'react-router-dom';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const LogIn = ({ dispatch, notification, chatNotification }) => {
   const history = useHistory();
@@ -72,9 +73,9 @@ const LogIn = ({ dispatch, notification, chatNotification }) => {
   return (
     <div>
       <Box mt={2} />
-      <Button fullWidth variant="outlined" className="azure-login" onClick={handleFaceLogin}>
+      <ThemeButton fullWidth onClick={handleFaceLogin}>
         Face Login
-      </Button>
+      </ThemeButton>
       {camOpen && <FaceLiveNess onClose={() => setCamOpen(false)} onComplete={handleCapture} />}
     </div>
   );

@@ -1,8 +1,8 @@
 import { makeStyles } from '@mui/styles';
-import { Box, Container, Typography, Button, Theme } from '@mui/material';
+import { Box, Container, Typography, Theme } from '@mui/material';
 import { useHistory } from 'react-router-dom';
-
 import Footer from '../components/Footer';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const useStyles = makeStyles((theme: Theme) => ({
   heading: {
@@ -31,18 +31,16 @@ const NotFound = () => {
             Oops! Page not found!
           </Typography>
         </Box>
-
         <Box marginTop={5}>
-          <Button color="primary" onClick={() => history.push('/')}>
+          <ThemeButton onClick={() => history.push('/')}>
             Go Back
-          </Button>
+          </ThemeButton>
           <Box component="span" marginX={2} />
-          <Button color="primary" onClick={() => history.goBack()}>
+          <ThemeButton onClick={() => history.goBack()}>
             Home
-          </Button>
+          </ThemeButton>
         </Box>
       </Box>
-
       <Footer />
     </Container>
   );

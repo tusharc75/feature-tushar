@@ -183,10 +183,7 @@ const LoginMFA = () => {
               </FormControl>
               {selectedMethod === MFA_METHOD.emailOtp && tokenData?.authenticationMethod === MFA_METHOD.totp ? (
                 <Box mt={2} mb={2}>
-                  <ThemeButton
-                    onClick={handleResendCode}
-                    buttonType='theme'
-                  >
+                  <ThemeButton onClick={handleResendCode} buttonType="theme">
                     Send Code
                   </ThemeButton>
                 </Box>
@@ -231,14 +228,13 @@ const LoginMFA = () => {
                     </div>
                   )}
                   <ThemeButton
-                    disableElevation
                     buttonType="theme"
                     type="submit"
                     fullWidth
                     sx={{ paddingBlock: 10, height: 40 }}
                     disabled={otp.length < 6 || isSubmitting}
+                    isLoading={isSubmitting}
                     onClick={handleSubmit}
-                    startIcon={isSubmitting && <CircularProgress color="inherit" size={20} />}
                   >
                     Submit
                   </ThemeButton>

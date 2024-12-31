@@ -1,13 +1,14 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { makeStyles } from '@mui/styles';
 import Stepper from '@mui/material/Stepper';
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
-import Button from '@mui/material/Button';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import clsx from 'clsx';
 import { GiBackwardTime } from 'react-icons/gi';
 import IconButton from '@mui/material/IconButton';
-import { StepIconProps, Grid, Theme } from '@mui/material';
+import { StepIconProps, Theme } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { IoIosArrowDropleftCircle } from 'react-icons/io';
 import { GoPencil } from 'react-icons/go';
 import { BsCheckCircle } from 'react-icons/bs';
@@ -166,12 +167,10 @@ const CustomCommonSteps = (props) => {
             position="bottom"
             activeStep={currentStep}
             nextButton={
-              <Button
-                size="small"
-                color="primary"
+              <ThemeButton
+                buttonType="theme"
                 hidden={currentStep >= 3 || (currentStep === 0 && disableNextStep)}
                 disabled={currentStep >= steps.length || (currentStep === 0 && disableNextStep) || disableNextStep}
-                variant="contained"
                 endIcon={<KeyboardArrowRight />}
                 onClick={() => {
                   setCurrentStep(currentStep + 1);
@@ -181,18 +180,11 @@ const CustomCommonSteps = (props) => {
                 }}
               >
                 {steps[currentStep + 1] ?? ''}
-              </Button>
-
-              // : <Button size="small" disabled={loading} color="primary" onClick={handleNext}
-              //           variant="contained" endIcon={<KeyboardArrowRight/>}>
-              //     {steps[activeStep + 1]?.label ?? ""}
-              // </Button>
+              </ThemeButton>
             }
             backButton={
-              <Button
-                size="small"
-                variant="contained"
-                color={'primary'}
+              <ThemeButton
+                buttonType="theme"
                 startIcon={<KeyboardArrowLeft />}
                 disabled={currentStep === 0 || disablePreviousStep}
                 onClick={() => {
@@ -203,14 +195,14 @@ const CustomCommonSteps = (props) => {
                 }}
               >
                 {steps[currentStep - 1] ?? ''}
-              </Button>
+              </ThemeButton>
             }
           />
         </div>
       ) : (
         <div className="position-relative">
-          <Grid container xs={12}>
-            <Grid item xs={12} sm={2} md={1} className="d-flex align-items-center justify-content-center mt-2">
+          <Grid container size={{ xs: 12 }}>
+            <Grid size={{ xs: 12, sm: 2, md: 1 }} className="d-flex align-items-center justify-content-center mt-2">
               {!isMobile && (
                 <>
                   <div>
@@ -261,10 +253,10 @@ const CustomCommonSteps = (props) => {
                 </>
               )}
             </Grid>
-            <Grid item xs={12} sm={8} md={10}>
+            <Grid size={{ xs: 12, sm: 8, md: 10 }}>
               <div className={classes.pStepper}>
                 <Grid container>
-                  <Grid item xs={6}>
+                  <Grid size={{ xs: 6 }}>
                     {isMobile && !isTablet && (
                       <>
                         <div>
@@ -289,7 +281,7 @@ const CustomCommonSteps = (props) => {
                       </>
                     )}
                   </Grid>
-                  <Grid item xs={6} className="d-flex align-items-center justify-content-end mb-1 mt-1">
+                  <Grid size={{ xs: 6 }} className="d-flex align-items-center justify-content-end mb-1 mt-1">
                     {isMobile && !isTablet && (
                       <>
                         <div>
@@ -343,7 +335,7 @@ const CustomCommonSteps = (props) => {
                 </Stepper>
               </div>
             </Grid>
-            <Grid item xs={12} sm={2} md={1} className="d-flex align-items-center justify-content-center mt-2">
+            <Grid size={{ xs: 12, sm: 2, md: 1 }} className="d-flex align-items-center justify-content-center mt-2">
               {!isMobile &&
                 (currentStep < steps.length ? (
                   <IconButton

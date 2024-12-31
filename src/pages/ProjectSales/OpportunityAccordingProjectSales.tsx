@@ -1,10 +1,8 @@
-import { Box, Button, Card, CardContent, IconButton, Menu, MenuItem, Typography } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import MoreVert from '@mui/icons-material/MoreVert';
+import { Box, Button, Card, CardContent, IconButton, Menu, MenuItem, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useContext, useState } from 'react';
 import { BiCustomize } from 'react-icons/bi';
 import { FaArrowAltCircleDown } from 'react-icons/fa';
@@ -14,13 +12,13 @@ import { useHistory } from 'react-router-dom';
 import DisplayData from 'src/components/CardDisplayData';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { displayDate } from 'src/constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import axiosInstance from '../../axios/axiosInstance';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { formatAmountWithCurrency } from '../../constants/helpers';
-import { displayDate } from 'src/constants/helpers';
 import routes from './../../components/Helpers/Routes';
 import NewOpportunityProjectSales from './NewOpportunityProjectSales';
 import styles from './ProjectSales.module.scss';
@@ -147,27 +145,26 @@ export default function OpportunityAccordianProjectSales({
       </Menu>
       <Accordion expanded={expandOpportunity} onChange={() => setExpandOpportunity(!expandOpportunity)}>
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
-          <Grid container>
-            <Grid size={{xs:8}}>
-              <Box component="div" display="flex" alignItems="center" flexGrow={1}>
-                <IconButton size="small" onClick={(e) => e.preventDefault()}>
-                  {expandOpportunity === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+          <div className="flex items-center justify-between">
+            <Typography variant="subtitle2">Opportunity ({opportunities.length})</Typography>
+
+            <Typography variant="subtitle2">
+              {(permissions.isUpdate && isTeamMember) || isManager ? (
+                <IconButton
+                  aria-haspopup="true"
+                  color="primary"
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    handleClick(e);
+                  }}
+                >
+                  <MoreVert />
                 </IconButton>
-                <Box>
-                  <Typography variant="subtitle2">Opportunity ({opportunities.length})</Typography>
-                </Box>
-              </Box>
-            </Grid>
-            <Grid size={{xs:4}} container justifyContent="flex-end" alignItems="center">
-              <Typography variant="subtitle2">
-                {(permissions.isUpdate && isTeamMember) || isManager ? (
-                  <IconButton aria-haspopup="true" color="primary" size="small" onClick={handleClick}>
-                    <MoreVert />
-                  </IconButton>
-                ) : null}
-              </Typography>
-            </Grid>
-          </Grid>
+              ) : null}
+            </Typography>
+          </div>
         </AccordionSummary>
         <AccordionDetails>
           <>
@@ -185,9 +182,9 @@ export default function OpportunityAccordianProjectSales({
                       >
                         <Card className="detailCard  card-v1" variant="outlined">
                           <CardContent className="card-link">
-                            <Grid size={{xs:12}}>
+                            <Grid size={{ xs: 12 }}>
                               <Grid container className="detailCardHeader">
-                                <Grid size={{xs:7, sm:8}}>
+                                <Grid size={{ xs: 7, sm: 8 }}>
                                   {hasAccessToEntity(obj.entity) ? (
                                     obj.entity === selectedEntity ? (
                                       <p className="link text-truncate" onClick={() => window.open(`${routes.opportunityDetail.path}/${obj._id}`)}>
@@ -213,7 +210,7 @@ export default function OpportunityAccordianProjectSales({
                                     </span>
                                   )}
                                 </Grid>
-                                <Grid size={{xs:5, sm:4}}>
+                                <Grid size={{ xs: 5, sm: 4 }}>
                                   <Box display="flex" alignItems="center" justifyContent="flex-end">
                                     {obj?.estimatedAmount ? (
                                       <Typography
@@ -241,14 +238,14 @@ export default function OpportunityAccordianProjectSales({
                                 </Grid>
                               </Grid>
                               <Grid container className={styles.opportunity_layout_box}>
-                                <Grid size={{xs:12, sm:6, md:6}}>
+                                <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                                   {obj?.stage ? (
                                     <DisplayData key={index} label="Stage" value={obj?.stage ?? ''} icon={<BiCustomize size={15} />} />
                                   ) : (
                                     ''
                                   )}
                                 </Grid>
-                                <Grid size={{xs:12, sm:6, md:6}} className={styles.opportunity_closed_date}>
+                                <Grid size={{ xs: 12, sm: 6, md: 6 }} className={styles.opportunity_closed_date}>
                                   {obj.closeDate ? (
                                     <DisplayData
                                       key={index}

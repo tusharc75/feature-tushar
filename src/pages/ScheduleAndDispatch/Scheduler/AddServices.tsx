@@ -1,8 +1,9 @@
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { useEffect, useMemo, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
@@ -31,9 +32,9 @@ const AddServices = ({ schedularState }: SchedularComponentProps) => {
 
   const handleAdd = () => {
     setSelectedServices(selectedRecords);
-    if(schedularState?.tabs?.find((s)=> s.key==='technicians')?.show){
+    if (schedularState?.tabs?.find((s) => s.key === 'technicians')?.show) {
       setActiveTab('technicians');
-    }else{
+    } else {
       setActiveTab('customerDetail');
     }
   };
@@ -122,12 +123,12 @@ const AddServices = ({ schedularState }: SchedularComponentProps) => {
       )}
 
       <div className="flex justify-end gap-2">
-        <Button variant="outlined" color="secondary" size="small" onClick={() => setActiveTab('assets')}>
+        <ThemeButton buttonType="transparent" onClick={() => setActiveTab('assets')}>
           Back
-        </Button>
-        <Button disabled={false} variant="contained" size="small" color="primary" onClick={() => handleAdd()}>
+        </ThemeButton>
+        <ThemeButton disabled={false} buttonType="theme" onClick={() => handleAdd()}>
           Save & Next
-        </Button>
+        </ThemeButton>
       </div>
     </>
   );

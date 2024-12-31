@@ -1,6 +1,5 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
 import Grid from '@mui/material/Grid2';
-import Button from '@mui/material/Button';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import { Box, Checkbox, Dialog, FormControlLabel, FormGroup, IconButton } from '@mui/material';
@@ -38,6 +37,7 @@ import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { FiExternalLink } from 'react-icons/fi';
 import InvoiceDataDialog from 'src/pages/RentalManagement/ProgressiveBilling/InvoiceDataDialog';
 import CustomDatePicker from 'src/components/CustomDatePicker';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const calculateServiceDays = (serviceLog: any[], startDate: any, endDate: any) => {
   const uniqueDates = new Set<string>();
@@ -980,9 +980,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                         }
                       >
                         <span>
-                          <Button
-                            variant="contained"
-                            color="primary"
+                          <ThemeButton
+                            buttonType="theme"
                             disabled={
                               isApplingDate ||
                               !Boolean(
@@ -990,13 +989,12 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                                 ((endDate && moment(endDate)?.isValid()) || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
                               )
                             }
-                            size="small"
                             onClick={() => {
                               handleApplyDate();
                             }}
                           >
                             Apply
-                          </Button>
+                          </ThemeButton>
                         </span>
                       </HtmlTooltip>
                     </Box>
@@ -1033,17 +1031,14 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           )}
         </CustomDialogContent>
         <CustomDialogFooter>
-          <Button
-            type="button"
-            variant="outlined"
-            color="primary"
-            size="small"
+          <ThemeButton
+            buttonType="transparent"
             onClick={() => {
               onClose();
             }}
           >
             Cancel
-          </Button>
+          </ThemeButton>
           <HtmlTooltip
             title={
               rowsApplied?.length === 0
@@ -1054,11 +1049,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
             }
           >
             <span>
-              <Button
-                type="button"
-                variant="contained"
-                color="primary"
-                size="small"
+              <ThemeButton
+                buttonType="theme"
                 disabled={isSubmitting || rowsApplied?.length === 0 || rowsApplied.some((d) => d.invalidDate === true)}
                 onClick={() => {
                   if (invoiceResourceData?.policy?.rentalInvoiceFields?.length > 0) {
@@ -1069,7 +1061,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                 }}
               >
                 Create Bill
-              </Button>
+              </ThemeButton>
             </span>
           </HtmlTooltip>
         </CustomDialogFooter>

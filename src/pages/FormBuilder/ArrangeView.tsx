@@ -250,10 +250,7 @@ const ArrangeView = (props) => {
         </div>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <ThemeButton
-          onClick={close}
-          buttonType='transparent'
-        >
+        <ThemeButton onClick={close} buttonType="transparent">
           Cancel
         </ThemeButton>
         <ThemeButton
@@ -263,7 +260,7 @@ const ArrangeView = (props) => {
           disableElevation
           disabled={!hasChanged ? true : hasChanged && loading ? true : false}
           isLoading={loading}
-          buttonType='theme'
+          buttonType="theme"
         >
           {!loading && 'Save changes'}
         </ThemeButton>
@@ -299,10 +296,12 @@ const RenderSection = ({ section, index }) => {
       >
         <Accordion TransitionProps={{ unmountOnExit: true }}>
           <AccordionSummary expandIcon={<ExpandMore />}>
-            <IconButton size="small" {...attributes} {...listeners} className={` !cursor-grab`}>
-              <DragIndicator />
-            </IconButton>
-            <Typography variant="subtitle1">{section.section}</Typography>
+            <div className="flex items-center justify-between gap-2">
+              <IconButton size="small" {...attributes} {...listeners} className={` !cursor-grab`}>
+                <DragIndicator />
+              </IconButton>
+              <Typography variant="subtitle1">{section.section}</Typography>
+            </div>
           </AccordionSummary>
           <AccordionDetails>
             <SortableContext items={subItemIds} strategy={verticalListSortingStrategy}>

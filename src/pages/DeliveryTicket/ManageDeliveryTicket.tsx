@@ -40,7 +40,7 @@ import {
   setFieldsInAscendingOrder
 } from './../../constants/helpers';
 import { createDeliveryTicketOffline } from './deliveryTicketOfflineHelper';
-import { generateFormFieldSteps, generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
+import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 import routes from 'src/components/Helpers/Routes';
 import dayjs from 'dayjs';
 
@@ -661,11 +661,10 @@ const ManageDeliveryTicket = ({
                     onClose();
                   }
                 }}
-                title={`${
-                  deliveryTicketId
-                    ? `Update ${initialData.values?.ticketName ? `(${initialData.values?.ticketName})` : ''}`
-                    : `Create Transaction Ticket`
-                }`}
+                title={`${deliveryTicketId
+                  ? `Update ${initialData.values?.ticketName ? `(${initialData.values?.ticketName})` : ''}`
+                  : `Create Transaction Ticket`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -1039,7 +1038,6 @@ const ManageDeliveryTicket = ({
                 <ThemeButton
                   buttonType="transparent"
                   id={'manage-ticket-dialog-cancel-button'}
-                  disabled={isSubmitting || loading}
                   onClick={() => {
                     if (!isEqual(ref.current.values, initialData.values)) {
                       setShowConfirmDialog(true);
@@ -1052,7 +1050,7 @@ const ManageDeliveryTicket = ({
                 </ThemeButton>
                 <ThemeButton
                   disabled={isSubmitting || loading}
-                  isLoading={loading}
+                  isLoading={isSubmitting}
                   buttonType="theme"
                   id={'manage-ticket-dialog-save-button'}
                   onClick={(e) => {
@@ -1061,7 +1059,6 @@ const ManageDeliveryTicket = ({
                     submitForm();
                   }}
                 >
-                  {' '}
                   Save
                 </ThemeButton>
               </CustomDialogFooter>

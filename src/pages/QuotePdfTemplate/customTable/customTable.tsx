@@ -1,12 +1,12 @@
 import { useState, useContext, useEffect, Fragment } from 'react';
 import Grid from '@mui/material/Grid2';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Add, Cancel, Delete } from '@mui/icons-material';
 import Typography from '@mui/material/Typography';
 import axiosInstance from 'src/axios/axiosInstance';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export default function customTable({ id, classes, entity, table, setTable }) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -30,23 +30,22 @@ export default function customTable({ id, classes, entity, table, setTable }) {
   }
   return (
     <>
-      <Grid size={{xs:12}} className="mt-4">
+      <Grid size={{ xs: 12 }} className="mt-4">
         <Box className={classes.tinyMCEContainer}>
           <Typography className={classes.headingLabel} variant="h5" component="h5">
             Tables
           </Typography>
           <Box border={1} borderColor={'var(--common-border-color)'} padding={1}>
             <Fragment>
-              <Button
-                variant="contained"
-                color="primary"
+              <ThemeButton
+                buttonType="theme"
                 onClick={() => {
                   setTable((tables) => [...tables, { resourceName: null, columns: [''], fieldsOptions: [] }]);
                 }}
               >
                 <Add />
                 Add Table
-              </Button>
+              </ThemeButton>
               <Fragment>
                 {table.map((data, index) => {
                   return (
@@ -91,13 +90,13 @@ export default function customTable({ id, classes, entity, table, setTable }) {
                           )}
                           fullWidth
                         />
-                        <Button
+                        <ThemeButton
                           onClick={() => {
                             setTable((table) => [...table.slice(0, index), ...table.slice(index + 1)]);
                           }}
                         >
                           <Delete color="inherit" />
-                        </Button>
+                        </ThemeButton>
                       </Box>
                       <Box border={1} borderColor={'grey.100'} padding={0.5}>
                         {data.columns.map((column, indexCol) => {
@@ -140,7 +139,7 @@ export default function customTable({ id, classes, entity, table, setTable }) {
                                 )}
                                 fullWidth
                               />
-                              <Button
+                              <ThemeButton
                                 onClick={() => {
                                   setTable((table) => {
                                     const newTable = [...table];
@@ -150,8 +149,8 @@ export default function customTable({ id, classes, entity, table, setTable }) {
                                 }}
                               >
                                 <Add />
-                              </Button>
-                              <Button
+                              </ThemeButton>
+                              <ThemeButton
                                 onClick={() => {
                                   setTable((table) => {
                                     const newTable = [...table];
@@ -164,7 +163,7 @@ export default function customTable({ id, classes, entity, table, setTable }) {
                                 }}
                               >
                                 <Cancel />
-                              </Button>
+                              </ThemeButton>
                             </Box>
                           );
                         })}

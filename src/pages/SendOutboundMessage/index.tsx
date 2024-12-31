@@ -1,4 +1,4 @@
-import { Box, Button, TextField } from '@mui/material';
+import { Box, TextField } from '@mui/material';
 import { AddOutlined } from '@mui/icons-material';
 import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase } from 'lodash';
@@ -16,6 +16,7 @@ import SearchBox from 'src/components/Helpers/SearchBox';
 import { displayDateTime, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
 import ManageSendOutboundMessage from './manageSendOutboundMessage';
 import axios, { CancelTokenSource } from 'axios';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const renderedFrom = camelCase(sidebarResource.sendOutboundMessage);
 
@@ -201,18 +202,15 @@ const SendOutboundMessage = () => {
             <div className="align-items-center flex flex-wrap justify-end gap-[8px]">
               <SearchBox onChange={handleSearch} value={search} />
               <div className="flex flex-wrap items-center gap-[8px]">
-                <Button
-                  variant={'contained'}
-                  color="primary"
-                  size="small"
-                  className={`no-shadow`}
+                <ThemeButton
                   onClick={() => {
                     setManageSendOutBoundMessageDialog(true);
                   }}
                   startIcon={<AddOutlined />}
+                  buttonType='theme'
                 >
                   Send
-                </Button>
+                </ThemeButton>
               </div>
             </div>
           </div>

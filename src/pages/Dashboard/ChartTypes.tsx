@@ -1,8 +1,8 @@
 import React from 'react';
 import Chart from 'react-chartjs-2';
-import { Paper, Box, useTheme, useMediaQuery, Typography, Button, Badge, IconButton } from '@mui/material';
+import { Paper, Box, useTheme, useMediaQuery, Typography, Badge, IconButton } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import { ImportExport, TableChart, Timeline, Maximize } from '@mui/icons-material';
+import { ImportExport, TableChart, Timeline } from '@mui/icons-material';
 import { BsFilter, BsFillPinFill } from 'react-icons/bs';
 import { FiMaximize2 } from 'react-icons/fi';
 import { Skeleton } from '@mui/material';
@@ -26,6 +26,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import { formatAmountWithCurrency } from 'src/constants/helpers';
 import { FunnelChart } from 'react-funnel-pipeline';
 import 'react-funnel-pipeline/dist/index.css';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export interface ChartDataType extends IFormDataType {
   _id: any;
@@ -238,12 +239,12 @@ const ChartTypes = ({
   };
 
   return (
-    <Grid size={{xs:12, md:12}} >
+    <Grid size={{ xs: 12, md: 12 }} >
       {chart.graphType === 'Custom' ? (
         <Grid container spacing={1}>
           {loading ? (
             [...Array(4).keys()].map((_, index) => (
-              <Grid size={{xs:12, sm:6, md:3}} key={index + 1}>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index + 1}>
                 <Box p={2} component={Paper} height={'100%'} display="flex" flexDirection="column" justifyContent="space-between">
                   <Skeleton variant="text" width={150} height={30} />
                   <Skeleton variant="text" width={100} height={20} />
@@ -268,45 +269,38 @@ const ChartTypes = ({
               <div>
                 {chart.hasFilters && (
                   <Badge color="secondary" variant="dot" invisible={invisible}>
-                    <Button
+                    <ThemeButton
                       disabled={loading}
                       onClick={handleOpenFilter}
-                      size="small"
-                      disableElevation
-                      color="primary"
                       startIcon={<BsFilter fontSize={14} />}
                     >
                       Filters
-                    </Button>
+                    </ThemeButton>
                   </Badge>
                 )}
               </div>
               <div className="flex items-center">
                 {chart.hasExport && (
-                  <Button
+                  <ThemeButton
                     disabled={loading}
                     style={{ marginRight: chart.hasTableView ? 10 : 0 }}
                     onClick={handleOpenExport}
-                    color="primary"
-                    size="small"
                     startIcon={<ImportExport />}
                   >
                     Export to
-                  </Button>
+                  </ThemeButton>
                 )}
                 {chart.hasTableView && chartData?.tableData && (
-                  <Button
+                  <ThemeButton
                     disabled={loading}
-                    color="primary"
                     style={{ marginRight: 10 }}
                     onClick={() => {
                       setTableView(!tableView);
                     }}
-                    size="small"
                     startIcon={!tableView ? <TableChart /> : <Timeline />}
                   >
                     {!tableView ? 'Table' : 'Chart'} View
-                  </Button>
+                  </ThemeButton>
                 )}
                 {selectedDashboardId ? (
                   !chart?.pin ? (
@@ -433,7 +427,7 @@ const ChartTypes = ({
                                   if (parseValue !== null) {
                                     label += chart?.currency
                                       ? formatAmountWithCurrency(globalFilters.currency || currency, Number(parseValue) ? parseValue : '00')
-                                          .fullFormatAmountWithoutSpace
+                                        .fullFormatAmountWithoutSpace
                                       : parseValue;
                                   }
                                 }
@@ -459,7 +453,7 @@ const ChartTypes = ({
                             callback: function (value) {
                               return chart?.currency
                                 ? formatAmountWithCurrency(globalFilters.currency || currency, Number(value) ? value : '00')
-                                    .fullFormatAmountWithoutSpace
+                                  .fullFormatAmountWithoutSpace
                                 : value;
                             }
                           }
@@ -482,21 +476,21 @@ const ChartTypes = ({
                       },
                       ...(chart.stack &&
                         !chartData.datasets.some((d) => d.stack === 'stacked') && {
-                          scales: {
-                            x: {
-                              stacked: true,
-                              grid: {
-                                color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
-                              }
-                            },
-                            y: {
-                              stacked: true,
-                              grid: {
-                                color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
-                              }
+                        scales: {
+                          x: {
+                            stacked: true,
+                            grid: {
+                              color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
+                            }
+                          },
+                          y: {
+                            stacked: true,
+                            grid: {
+                              color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
                             }
                           }
-                        })
+                        }
+                      })
                     }}
                   />
                 </>

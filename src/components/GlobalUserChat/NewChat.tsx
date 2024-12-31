@@ -1,5 +1,6 @@
-import { useState, Fragment, useContext } from 'react';
-import { Avatar, TextField, Box, Button } from '@mui/material';
+import { useState, useContext } from 'react';
+import { Avatar, TextField, Box } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Autocomplete from '@mui/material/Autocomplete';
 
 import axiosInstance from '../../axios/axiosInstance';
@@ -94,15 +95,9 @@ const NewChat = (props) => {
           helperText={newUsers.length > 1 && groupName && 'Name must be at least 4 characters'}
         />
         <Box mt={4}>
-          <Button
-            disabled={!newUsers.length || (newUsers.length > 1 && !groupName)}
-            fullWidth
-            color="primary"
-            variant="contained"
-            onClick={createRoom}
-          >
+          <ThemeButton disabled={!newUsers.length || (newUsers.length > 1 && !groupName)} fullWidth buttonType="theme" onClick={createRoom}>
             Start Chatting
-          </Button>
+          </ThemeButton>
         </Box>
       </div>
     </div>
