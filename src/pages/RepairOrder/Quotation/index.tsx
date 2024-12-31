@@ -374,12 +374,12 @@ const Quotation = ({
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
       _subRow.detail = `${_subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail?.assetNumber
-          : _subRow.type === 'product'
-            ? _subRow.productDetail?.productName
-            : _subRow.type === 'service'
-              ? _subRow.serviceDetail?.serviceName
-              : _subRow.packageDetail?.packageName
+        ? _subRow.serializedAssetDetail?.assetNumber
+        : _subRow.type === 'product'
+          ? _subRow.productDetail?.productName
+          : _subRow.type === 'service'
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
         }`;
       _subRow.description =
         _subRow.type === 'service'
@@ -607,7 +607,7 @@ const Quotation = ({
   return (
     <Fragment>
       {invoiceStep ? (
-        <Box p={2}>
+        <Box pl={1}>
           <PreviewDownload
             fileName={`${resources?.repairOrder?.titleSingular}-${repairOrderData?.repairOrderNumber}`}
             resource={sidebarResource.repairOrder}
