@@ -450,7 +450,7 @@ const MaterialHandling = () => {
                   </Box>
                 </Box>
               </Grid>
-              <Grid size={{ xs: 12, md: 8, lg: filterByIds?.findIndex((f) => f?.field === '_id') === -1 ? 9 : 12 }}>
+              <Grid size={{ xs: 12, md: 8, lg: 9 }}>
                 {selectedWorkOrder && (
                   <>
                     {isMobile ? (
