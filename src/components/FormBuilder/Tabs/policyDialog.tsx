@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, CircularProgress, Dialog, FormControlLabel, Checkbox, TextField, IconButton, Typography } from '@mui/material';
+import { Box, Dialog, FormControlLabel, Checkbox, TextField, IconButton, Typography } from '@mui/material';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Grid from '@mui/material/Grid2';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -175,7 +175,7 @@ const PolicyDialog = ({ resourceData, resource, onClose, onSuccess }) => {
                   disabled={isSubmitting}
                   buttonType="theme"
                   onClick={submitForm}
-                  endIcon={isSubmitting && <CircularProgress color="inherit" size={18} />}
+                  isLoading={isSubmitting}
                 >
                   Save
                 </ThemeButton>

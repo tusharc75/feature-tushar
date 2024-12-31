@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext, Fragment } from 'react';
-import { Dialog, CircularProgress, useTheme, Box } from '@mui/material';
+import { Dialog, useTheme, Box } from '@mui/material';
 import { Formik, Form } from 'formik';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
@@ -178,7 +178,7 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
                   isLoading={isSubmitting}
                   buttonType='theme'
                 >
-                  {isSubmitting ? <CircularProgress size={22} /> : 'Submit'}
+                  Submit
                 </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Dialog, Box, Grid, CircularProgress, useTheme, useMediaQuery, InputAdornment } from '@mui/material';
+import { Dialog, Box, Grid, useTheme, useMediaQuery, InputAdornment } from '@mui/material';
 import { Formik, Form } from 'formik';
 import { CustomDialogTransition, getObjKeysWithValues, getUniqueCurrencies, yupSchema } from '../../constants/helpers';
 import FormTypes from '../Helpers/FormTypes';
@@ -156,7 +156,7 @@ const UpdateDetailsDialog = (props) => {
                 Cancel
               </ThemeButton>
               <ThemeButton buttonType="theme" onClick={submitForm} disabled={isUpdating || uploadingImageOrFileProgress > 0}>
-                {isUpdating ? <CircularProgress size={20} /> : 'Save'}
+                Save
               </ThemeButton>
             </CustomDialogFooter>
           </>

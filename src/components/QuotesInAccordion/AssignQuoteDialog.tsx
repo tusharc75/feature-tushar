@@ -1,6 +1,5 @@
 import {
   Checkbox,
-  CircularProgress,
   Dialog,
   FormControl,
   FormControlLabel,
@@ -155,7 +154,7 @@ const AssignQuoteDialog = ({ quoteDialogOpen, onSuccess, handleCloseDialog, assi
           Cancel
         </ThemeButton>
         <ThemeButton disabled={!selectedQuotes.length || isAssigning} onClick={handleAssignQuotes} buttonType="theme">
-          {isAssigning ? <CircularProgress size={22} /> : 'Save'}
+          Save
         </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
