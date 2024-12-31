@@ -167,11 +167,11 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, columns, filter
                       id="sorting"
                       options={columns}
                       size="small"
-                      value={columns.find((column) => column.fieldName === values['sortBy'])}
+                      value={columns.find((column) => column?.fieldData?.fieldName === values['sortBy'])}
                       onChange={(event: any, newValue: any) => {
-                        setFieldValue('sortBy', newValue?.fieldName || '');
+                        setFieldValue('sortBy', newValue?.fieldData?.fieldName || '');
                       }}
-                      getOptionLabel={(option: any) => option.fieldLabel || ''}
+                      getOptionLabel={(option: any) => option?.fieldData?.fieldLabel || ''}
                       style={{ flexGrow: 1, minWidth: 200 }}
                       renderInput={(params) => (
                         <TextField
