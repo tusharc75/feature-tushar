@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Dialog, Button, Box, TextField } from '@mui/material';
+import { Dialog, Box, TextField } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
@@ -21,6 +21,7 @@ import { useData } from 'src/StateProvider/Provider';
 import moment from 'moment';
 import { startCase } from 'lodash';
 import CustomDatePicker from 'src/components/CustomDatePicker';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderData, materialserializedAssets, materialSerialNumbers }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -444,10 +445,10 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
               )}
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button variant="outlined" disabled={isSubmitting} color="primary" size="small" onClick={onClose}>
+              <ThemeButton buttonType="transparent" disabled={isSubmitting} onClick={onClose}>
                 Cancel
-              </Button>
-              <Button
+              </ThemeButton>
+              <ThemeButton
                 id={'dialog-save-button'}
                 onClick={() => {
                   if (
@@ -460,13 +461,11 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                     handleReject(values.material, values.rejectDate);
                   }
                 }}
-                size="small"
-                variant="contained"
+                buttonType="theme"
                 disabled={isSubmitting}
-                color="primary"
               >
                 Save
-              </Button>
+              </ThemeButton>
             </CustomDialogFooter>
           </>
         )}

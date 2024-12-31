@@ -1,7 +1,7 @@
 import React, { useRef, Fragment, useState, useContext, useEffect } from 'react';
 import { Editor } from '@tinymce/tinymce-react';
 import axiosInstance from '../../axios/axiosInstance';
-import { IconButton, Box, Button, Typography, Theme } from '@mui/material';
+import { IconButton, Box, Typography, Theme } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
@@ -24,6 +24,7 @@ import './tinymce.scss';
 import { startCase } from 'lodash';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { useAppTheme } from 'src/constants/AppConfig';
+import { ThemeButton } from '../Helpers/Buttons';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -339,15 +340,12 @@ export default function TinyMCE(props) {
 
                           <label htmlFor="avatar">
                             <IconButton title="Add picture" size="small" aria-label="upload picture" component="span">
-                              <Button
-                                startIcon={<HiOutlinePhotograph />}
-                                // size="small"
-                                variant="outlined"
-                                component="span"
+                              <ThemeButton
+                                buttonType="transparent"
                                 disabled={disabledEditor || isImageLoading}
                               >
-                                Upload Image
-                              </Button>
+                                <HiOutlinePhotograph /> Upload Image
+                              </ThemeButton>
                             </IconButton>
                           </label>
                           <Box display="flex">
@@ -371,7 +369,7 @@ export default function TinyMCE(props) {
                                   </Typography>
                                 </Grid>
                                 <Grid item xs={2}>
-                                  <Button size="small" startIcon={<AiOutlineClose />} onClick={() => setImageUrl('')} />
+                                  <ThemeButton onClick={() => setImageUrl('')}> <AiOutlineClose /> </ThemeButton>
                                 </Grid>
                               </>
                             ) : null}
@@ -405,9 +403,8 @@ export default function TinyMCE(props) {
                     </div>
                   </CustomDialogContent>
                   <CustomDialogFooter>
-                    <Button
-                      size="small"
-                      color="primary"
+                    <ThemeButton
+                      buttonType="transparent"
                       onClick={() => {
                         let tempHeight = id && ['header', 'footer'].indexOf(id) >= 0 ? 60 : 0;
                         setImageDetails({ width: 0, height: tempHeight, alt: '' });
@@ -416,10 +413,10 @@ export default function TinyMCE(props) {
                       }}
                     >
                       Cancel
-                    </Button>
-                    <Button variant="contained" color="primary" type="submit" onClick={handleSubmit}>
+                    </ThemeButton>
+                    <ThemeButton buttonType="theme" onClick={handleSubmit}>
                       Save
-                    </Button>
+                    </ThemeButton>
                   </CustomDialogFooter>
                 </Dialog>
               ) : null}
@@ -438,44 +435,39 @@ export default function TinyMCE(props) {
                           accept=".docx,.doc"
                         />
                         <label htmlFor={`${id}file`}>
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            component="span"
+                          <ThemeButton
+                            buttonType="transparent"
                             disabled={disabledEditor || isImgUploading}
                             startIcon={<AiOutlineFileAdd />}
                           >
                             Upload File
-                          </Button>
+                          </ThemeButton>
                         </label>
                       </Box>
                     </Fragment>
                   )}
                   <span>
                     <Box display="flex" alignItems="center">
-                      <Button
-                        startIcon={<HiOutlinePhotograph />}
-                        size="small"
-                        variant="outlined"
+                      <ThemeButton
+                        buttonType="transparent"
                         disabled={disabledEditor}
                         onClick={() => setIsUploadImage(true)}
                       >
-                        Upload Image
-                      </Button>
+                        <HiOutlinePhotograph /> Upload Image
+                      </ThemeButton>
                     </Box>
                   </span>
                   <span>
                     {showVariableDropdown ? (
                       <>
-                        <Button
-                          variant="outlined"
-                          size="small"
+                        <ThemeButton
+                          buttonType="transparent"
                           onClick={openActions}
                           className={classes.varibalesButton}
                           aria-controls="action-menu"
                         >
                           Variables <ExpandMore />
-                        </Button>
+                        </ThemeButton>
                         <Menu
                           anchorEl={anchorEl}
                           keepMounted

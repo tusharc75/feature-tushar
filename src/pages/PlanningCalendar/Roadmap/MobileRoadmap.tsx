@@ -1,9 +1,10 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import type { Activity } from './types';
 import { useAppTheme } from 'src/constants/AppConfig';
-import { Typography, IconButton, Collapse, Button } from '@mui/material';
+import { Typography, IconButton, Collapse } from '@mui/material';
 import { ExpandMore, ExpandLess } from '@mui/icons-material';
 import { displayDate } from 'src/constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 interface MobileRoadmapProps {
   activity: Activity[];
@@ -115,18 +116,15 @@ const RenderSubTree: FC<TSubTreeProps> = ({ data, subTrees }) => {
       {subTrees.map((tree) => {
         return (
           <div className="mt-3 grid gap-2" key={tree._id}>
-            <Button
-              variant="contained"
-              role="button"
+            <ThemeButton
+              buttonType="theme"
               fullWidth
-              tabIndex={'0'}
               className="no-shadow px-3 py-2"
               style={{ background: tree.color }}
               onClick={() => handleChange(tree.name)}
-              endIcon={compareCollapse(tree.name) ? <ExpandLess /> : <ExpandMore />}
             >
               {tree.name}
-            </Button>
+            </ThemeButton>
             <Collapse in={compareCollapse(tree.name)}>
               <div className="grid gap-2 py-2">
                 {data.map((item) => {

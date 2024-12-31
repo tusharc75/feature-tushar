@@ -3,18 +3,18 @@ import { getObjKeys, sidebarResource, getObjKeysWithValues, CustomDialogTransiti
 import { useHistory } from 'react-router-dom';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { Box, Button, Dialog } from '@mui/material';
+import { Box, Dialog } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
-import routes from 'src/components/Helpers/Routes';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
 import { useData } from 'src/StateProvider/Provider';
 import InputField from 'src/components/Helpers/InputField';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export default function ManageContactDialog({
   contactResource,
@@ -220,21 +220,17 @@ export default function ManageContactDialog({
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
+                <ThemeButton
                   onClick={() => {
                     if (isEqual(contactData.initialValues, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
-                  variant="outlined"
-                  color="primary"
-                  size="small"
+                  buttonType="transparent" 
                 >
                   Cancel
-                </Button>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="small"
+                </ThemeButton>
+                <ThemeButton
+                  buttonType="theme"
                   disabled={loading || uploadingImageOrFileProgress > 0}
                   onClick={(e) => {
                     e.preventDefault();
@@ -243,7 +239,7 @@ export default function ManageContactDialog({
                   }}
                 >
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog && (
                 <ConfirmationCancelDialog

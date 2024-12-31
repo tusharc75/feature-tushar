@@ -1,4 +1,4 @@
-import { Box, Button, Container, FormControl, FormControlLabel, Paper, Radio, TextField, Typography } from '@mui/material';
+import { Box, Container, FormControl, FormControlLabel, Paper, Radio, TextField, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import Autocomplete from '@mui/material/Autocomplete';
 import RadioGroup from '@mui/material/RadioGroup';
@@ -9,6 +9,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import DetailsPage from '../../../components/Shared/DetailsPage';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { IRT_APPROVER_STATUS } from 'src/constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const resaonList = [
   'Inventory physically not here to release.  Action:  Complete paperwork and cycle count to correct inventory accuracy. ',
@@ -107,7 +108,7 @@ const IrtTicket = ({ openAuthId, openAuthData }) => {
               <DetailsPage data={irtTicketData} fields={fields} />
               <Box pt={2}>
                 <Grid container spacing={2}>
-                  <Grid size={{xs:6}}>
+                  <Grid size={{ xs: 6 }}>
                     <Paper>
                       <Box p={3}>
                         <Typography variant="h6" color="primary">
@@ -168,21 +169,20 @@ const IrtTicket = ({ openAuthId, openAuthData }) => {
                           />
                         </Box>
                         <Box pt={2}>
-                          <Button
-                            variant="contained"
-                            color="primary"
+                          <ThemeButton
+                            buttonType="theme"
                             disabled={isSubmited}
                             onClick={() => {
                               submitResponce();
                             }}
                           >
                             Submit
-                          </Button>
+                          </ThemeButton>
                         </Box>
                       </Box>
                     </Paper>
                   </Grid>
-                  <Grid size={{xs:6}}>
+                  <Grid size={{ xs: 6 }}>
                     <Paper>
                       <Box p={3}>
                         <Typography variant="h6" color="primary">
@@ -206,16 +206,15 @@ const IrtTicket = ({ openAuthId, openAuthData }) => {
                           />
                         </Box>
                         <Box my={3}>
-                          <Button
-                            variant="contained"
-                            color="primary"
+                          <ThemeButton
+                            buttonType="theme"
                             disabled={!isSubmited && selectedUsers?.length === 0}
                             onClick={() => {
                               handleForwardApproval();
                             }}
                           >
                             Forward Approval
-                          </Button>
+                          </ThemeButton>
                         </Box>
                       </Box>
                     </Paper>

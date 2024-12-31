@@ -1,4 +1,4 @@
-import { Box, Button, Dialog } from '@mui/material';
+import { Box, Dialog } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Form, Formik } from 'formik';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -13,6 +13,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import InfoIcon from '@mui/icons-material/Info';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CustomDatePicker from 'src/components/CustomDatePicker';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 function SettingsDialog({ onClose, warehouse }) {
   const toastConfig = useContext(CustomToastContext);
@@ -119,12 +120,12 @@ function SettingsDialog({ onClose, warehouse }) {
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button color="primary" size="small" onClick={onClose}>
+                <ThemeButton buttonType="transparent" onClick={onClose}>
                   Cancel
-                </Button>
-                <Button variant="contained" color="primary" size="small" onClick={submitForm}>
+                </ThemeButton>
+                <ThemeButton buttonType="theme" onClick={submitForm}>
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
             </>
           )}
