@@ -1,4 +1,4 @@
-import { Box, Grid, IconButton, InputAdornment } from '@mui/material';
+import { Box, IconButton, InputAdornment } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { FaDiceOne } from 'react-icons/fa';
 import { FaUserPlus } from 'react-icons/fa6';
@@ -6,6 +6,7 @@ import FollowUpsDialog from 'src/components/Activity/Task/FollowUpsDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { gridSize, setFieldsInAscendingOrder } from '../../constants/helpers';
 import FormTypes, { isFieldVisible, isSectionVisible } from './FormTypes';
+import Grid from '@mui/material/Grid2';
 
 const InputField = (props) => {
   const {
@@ -81,12 +82,13 @@ const InputField = (props) => {
                       ) : isFieldVisible(field, fieldsData, values) ? (
                         <Grid
                           key={field.fieldName}
-                          item
-                          xs={12}
-                          sm={field?.columnSize ? field?.columnSize : gridSize(field.type)}
-                          md={field?.columnSize ? field?.columnSize : gridSize(field.type)}
-                          lg={field?.columnSize ? field?.columnSize : gridSize(field.type)}
-                          xl={field?.columnSize ? field?.columnSize : gridSize(field.type)}
+                          size={{
+                            xs: 12,
+                            sm: field?.columnSize ? field?.columnSize : gridSize(field.type),
+                            md: field?.columnSize ? field?.columnSize : gridSize(field.type),
+                            lg: field?.columnSize ? field?.columnSize : gridSize(field.type),
+                            xl: field?.columnSize ? field?.columnSize : gridSize(field.type),
+                          }}
                         >
                           <FormTypes
                             {...rest}
@@ -106,23 +108,23 @@ const InputField = (props) => {
                             onChange={
                               field.fieldName === 'currency'
                                 ? (e, val) => {
-                                    if (val && val.currencyCode) {
-                                      setFieldValue(field.fieldName, val.currencyCode);
-                                      setCurrencySymbol(val.symbolNative);
-                                    } else {
-                                      setFieldValue(field.fieldName, '');
-                                      setCurrencySymbol(null);
-                                    }
+                                  if (val && val.currencyCode) {
+                                    setFieldValue(field.fieldName, val.currencyCode);
+                                    setCurrencySymbol(val.symbolNative);
+                                  } else {
+                                    setFieldValue(field.fieldName, '');
+                                    setCurrencySymbol(null);
                                   }
+                                }
                                 : null
                             }
                             imageOrFileUploadCompletePercentage={
                               ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                 ? (completePercentage) => {
-                                    if (onImageUploadCompletePercentage) {
-                                      onImageUploadCompletePercentage(completePercentage);
-                                    }
+                                  if (onImageUploadCompletePercentage) {
+                                    onImageUploadCompletePercentage(completePercentage);
                                   }
+                                }
                                 : null
                             }
                             fields={fieldsData}
