@@ -244,9 +244,8 @@ const ManageTransferInventory: FC<Props> = (props) => {
               </CustomDialogContent>
               <CustomDialogFooter>
                 <ThemeButton
-                  buttonType="transparent" 
+                  buttonType="transparent"
                   id="dialog-cancel-button"
-                  disabled={isSubmitting}
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
@@ -257,11 +256,10 @@ const ManageTransferInventory: FC<Props> = (props) => {
                 <ThemeButton
                   isLoading={isSubmitting}
                   disabled={isSubmitting}
-                  buttonType="transparent" 
+                  buttonType="theme"
                   id="dialog-save-button"
                   onClick={submitForm}
                 >
-                  {' '}
                   Save
                 </ThemeButton>
               </CustomDialogFooter>
