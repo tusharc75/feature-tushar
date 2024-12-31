@@ -1,5 +1,7 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { Box, Button, CircularProgress, Dialog, Grid, IconButton, TextField, Typography } from '@mui/material';
+import { Box, CircularProgress, Dialog, IconButton, TextField, Typography } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Grid from '@mui/material/Grid2';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -124,14 +126,11 @@ export default function Actions({ resource, onClose, onSuccess, stepData }) {
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button size="small" color="primary" onClick={onClose}>
+        <ThemeButton buttonType='transparent' onClick={onClose}>
           Cancel
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          size="small"
-          type="submit"
+        </ThemeButton>
+        <ThemeButton
+buttonType='theme'
           onClick={() => {
             const err: any = validate();
             if (!err?.length) {
@@ -140,7 +139,7 @@ export default function Actions({ resource, onClose, onSuccess, stepData }) {
           }}
         >
           Save
-        </Button>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );
@@ -170,7 +169,7 @@ const Card = ({ state, setState, index, addRemove, actionType, error, fields, re
       >
         <Box width={'94%'}>
           <Grid container spacing={2}>
-            <Grid item sm={6} md={6} lg={6}>
+            <Grid size={{sm:6, md:6, lg:6}}>
               <Autocomplete
                 id="formField"
                 options={fields}
@@ -201,7 +200,7 @@ const Card = ({ state, setState, index, addRemove, actionType, error, fields, re
                 )}
               />
             </Grid>
-            <Grid item sm={6} md={6} lg={6}>
+            <Grid size={{sm:6, md:6, lg:6}}>
               <Autocomplete
                 id="resourceField"
                 options={resourceFieldOptions}

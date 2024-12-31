@@ -1,6 +1,6 @@
-import { Button, Chip, CircularProgress, List, TextField } from '@mui/material';
+import { Chip, CircularProgress, List, TextField } from '@mui/material';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { Search } from '@mui/icons-material';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -114,9 +114,9 @@ const NewChat = ({ setSelectedChat, userId, closeAndOpenChat }) => {
             className="mb-3"
           />
         )}
-        <Button disabled={!newUsers.length || (newUsers.length > 1 && !groupName)} fullWidth color="primary" variant="contained" onClick={createRoom}>
+        <ThemeButton disabled={!newUsers.length || (newUsers.length > 1 && !groupName)} fullWidth buttonType='theme' onClick={createRoom}>
           Start Chatting
-        </Button>
+        </ThemeButton>
       </>
     </div>
   );

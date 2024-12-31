@@ -1,6 +1,6 @@
 import { MenuItem } from '@mui/material';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -624,10 +624,8 @@ const ProductBuilder = (props) => {
           )}
 
           {isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice && (
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
+            <ThemeButton
+              buttonType="theme"
               onClick={() => {
                 let tempSupplierAccountId = [];
                 selectedRecords?.forEach((element) => {
@@ -658,7 +656,7 @@ const ProductBuilder = (props) => {
               aria-controls="action-menu"
             >
               Ask Supplier to Quote
-            </Button>
+            </ThemeButton>
           )}
         </>
       );

@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
-import Button from '@mui/material/Button';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Dialog from '@mui/material/Dialog';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Grid2';
 import { sortBy } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -180,17 +180,15 @@ const SupplierAskPrice = (props) => {
       <div className="listing-grid p-3">
         <Box mb={2}>
           <Grid container>
-            <Grid item xs={12} sm={12} md={12} container justify="flex-end">
+            <Grid size={{xs:12, sm:12, md:12}} container justifyContent="flex-end">
               <Box ml={1} mt={1}>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+buttonType='theme'
                   onClick={handleAdd}
-                  variant="contained"
                   disabled={getLocalStorageArrayData(localStorageSelectedRecords).length === 1 ? false : true}
                 >
                   Apply
-                </Button>
+                </ThemeButton>
               </Box>
               <Box ml={1} mt={1}>
                 <DeleteButton

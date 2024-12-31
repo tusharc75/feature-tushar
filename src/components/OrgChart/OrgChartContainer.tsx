@@ -1,5 +1,5 @@
-import { Box, Button } from '@mui/material';
-import { Fragment, useState } from 'react';
+import { useState } from 'react';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { generateUniqueId } from '../../constants/helpers';
 import OrgChart from './OrgChart';
 import './OrgChartContainer.scss';
@@ -33,9 +33,9 @@ export default function OrgChartContainer({ data, onClick, updateChart = null, s
       </div>
       {isInContact && (
         <div>
-          <Button size="small" variant="contained" onClick={setShowAddContact} color="primary">
+          <ThemeButton buttonType='theme' onClick={setShowAddContact}>
             Add Contacts
-          </Button>
+          </ThemeButton>
         </div>
       )}
     </div>
