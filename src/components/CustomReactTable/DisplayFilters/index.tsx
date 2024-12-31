@@ -1,9 +1,10 @@
-import { Fragment, useContext, useState } from 'react';
+import { Fragment, useState } from 'react';
 import DisplayChips from './ChipDataDisplay';
 import { useUserTempFilters } from 'src/components/CustomReactTable/GridFilter/utils';
 
 function DisplayFilters({
   columns,
+  customColumns,
   dispatchTable,
   customFilters,
   showFilters,
@@ -12,7 +13,13 @@ function DisplayFilters({
   setSelectedFilter,
   currentFomValue,
   setCurrentFomValue,
-  resource
+  resource,
+  filterByIds,
+  setFilterByIds,
+  deepFilters,
+  setDeepFilters,
+  filterTerm,
+  setFilterTerm
 }) {
   const [chipData, setChipData] = useState([]);
   const [isFilterPresent, setIsFilterPresent] = useState<boolean>(false);
@@ -29,16 +36,32 @@ function DisplayFilters({
     delete formValues[`to_${name}`];
     setCurrentFomValue(formValues);
     // Dispatch the updated filters and update the chipData
-    dispatchTable({ type: 'filter', filters: newFilters });
+
+    const col = customColumns?.find((c) => c?.fieldData?.fieldName === name)?.fieldData;
+    const filterTermP = { ...filterTerm };
+    delete filterTermP[col?.fieldName];
+    if (col && col?.lookup) {
+      setFilterByIds(filterByIds?.filter((f) => f?.field != name));
+    } else if (col && col?.type === 'date') {
+      setDeepFilters(deepFilters?.filter((f) => ![`from_${name}`, `to_${name}`]?.includes(f?.field)));
+    } else {
+      setDeepFilters(deepFilters?.filter((f) => f?.field != name));
+    }
+    setFilterTerm(filterTermP);
+
+    dispatchTable({ type: 'filter', filters: newFilters, filterTerm: filterTermP });
     setTempFilter(resource, { formValues: formValues || {}, filters: newFilters });
     setChipData((prev) => prev.filter((item) => item.name !== name));
   };
 
   const clearFilterAll = () => {
-    dispatchTable({ type: 'filter', filters: {} });
+    dispatchTable({ type: 'filter', filters: {}, filterTerm: {} });
     setSelectedFilter(null);
     setChipData([]);
     setCurrentFomValue({});
+    setFilterByIds([]);
+    setDeepFilters([]);
+    setFilterTerm({});
   };
 
   return (
