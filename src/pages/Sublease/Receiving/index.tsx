@@ -8,6 +8,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -237,18 +238,16 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
           />
         )}
         {allowedToEdit && (
-          <Button
-            variant={'contained'}
-            color="primary"
-            size="small"
+          <ThemeButton 
             disabled={selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && e?.qty - e?.assetQty > 0).length ? false : true}
             id="receive-product"
             onClick={() => {
               setReceiveDialog(true);
             }}
+            buttonType='theme'
           >
             Receive
-          </Button>
+          </ThemeButton>
         )}
       </>
     );
