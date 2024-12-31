@@ -1,4 +1,5 @@
-import { Box, Button, Collapse, IconButton } from '@mui/material';
+import { Box, Collapse, IconButton } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import AddAlertIcon from '@mui/icons-material/AddAlert';
 import BuildIcon from '@mui/icons-material/Build';
@@ -131,17 +132,15 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
   return (
     <Box>
       <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
-        <Button
-          variant="contained"
-          color="primary"
-          size="small"
+        <ThemeButton
+          buttonType="theme"
           onClick={() => {
             setOpen({ open: true, data: null });
           }}
           startIcon={<AddOutlined />}
         >
           Add Tab
-        </Button>
+        </ThemeButton>
         <Box>
           {resourcePolicy.find((e) => e.resource === resource) && !workflowId && (
             <HtmlTooltip title={'Policy'}>

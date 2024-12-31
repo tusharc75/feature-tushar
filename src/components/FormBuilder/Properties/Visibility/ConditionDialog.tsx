@@ -1,4 +1,5 @@
-import { Box, Button, CircularProgress, Dialog, TextField } from '@mui/material';
+import { Box, CircularProgress, Dialog, TextField } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Autocomplete from '@mui/material/Autocomplete';
 import { useEffect, useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -409,12 +410,12 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button size="small" onClick={onClose} color="primary">
+                <ThemeButton buttonType='transparent' onClick={onClose}>
                   Cancel
-                </Button>
-                <Button size="small" type="submit" color="primary" variant="contained" onClick={submitForm}>
+                </ThemeButton>
+                <ThemeButton buttonType='theme' onClick={submitForm}>
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
             </>
           )}
