@@ -38,7 +38,7 @@ const ACCESS_OPTIONS = {
   everyone: 'everyone'
 };
 
-function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, filterData, columns }) {
+function SaveFilterDialog({ handleClose, handleSucess, resource, columns, filterData, deepFilters, filterByIds, filterTerm }) {
   const toastConfig = useContext(CustomToastContext);
   const [loading, setLoading] = useState(false);
 
@@ -52,28 +52,31 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
   });
 
   const handleSubmit = (values) => {
-    const updatedFilterValue = filterValue;
-    const colNames = Object.keys(filterValue);
-    for (const col of columns) {
-      const fieldName = col.fieldName;
-      if (colNames.includes(fieldName) && col.lookup) {
-        if (updatedFilterValue[fieldName]?.length) {
-          updatedFilterValue[fieldName] = filterValue[fieldName]?.map((e) => e.optionValue);
-        } else {
-          delete updatedFilterValue[fieldName];
-        }
-      }
-    }
+    const obj: any = {};
+    filterByIds
+      ?.filter((f) => f?.term?.length > 0)
+      ?.map((f) => {
+        obj[f?.field] = Array.isArray(f?.term) ? f?.term?.map((t) => t?.optionValue) : f?.term?.optionValue;
+      });
+
+    deepFilters
+      ?.filter((f) => f?.term?.length > 0)
+      ?.map((f) => {
+        obj[f?.field] = f?.term;
+      });
+
     const data = {
       title: values?.title,
       resource: resource,
-      filterValue: updatedFilterValue,
+      filterValue: obj,
+      filterTerm: filterTerm,
       default: values.default,
       sorting: values.sorting || false,
       sortBy: values.sortBy,
       orderBy: values.orderBy,
       access: values.access
     };
+
     setLoading(true);
     if (filterData) {
       axiosInstance()
