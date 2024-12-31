@@ -1,5 +1,5 @@
 import { Form, Formik } from 'formik';
-import { Button, CircularProgress, Dialog, Box } from '@mui/material';
+import { Dialog, Box } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -8,6 +8,7 @@ import { CustomDialogTransition, displayDate, normalizeDate } from 'src/constant
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, loading, minStartDate = null, maxEndDate = null }) => {
   const [initialValues, setInitialValues] = useState(null);
@@ -120,19 +121,19 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button disabled={loading} size="small" variant="outlined" color="primary" onClick={onClose}>
+              <ThemeButton
+                onClick={onClose}
+                buttonType='transparent'
+              >
                 Close
-              </Button>
-              <Button
+              </ThemeButton>
+              <ThemeButton
                 disabled={loading}
-                startIcon={loading && <CircularProgress size={18} color="inherit" />}
-                size="small"
-                variant="contained"
-                color="primary"
-                type="submit"
+                buttonType='theme'
+                isLoading={loading}
               >
                 Save
-              </Button>
+              </ThemeButton>
             </CustomDialogFooter>
           </Form>
         )}
