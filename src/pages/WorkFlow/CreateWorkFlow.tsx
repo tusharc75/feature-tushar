@@ -16,6 +16,7 @@ import { RiCloseCircleFill } from 'react-icons/ri';
 import ManageWorkFlow from 'src/pages/WorkFlow/ManageWorkFlow';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import DynamicTabs from 'src/components/FormBuilder/Tabs';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const CreateWorkFlow = () => {
   const {
@@ -106,10 +107,7 @@ const CreateWorkFlow = () => {
                   <Grid size={{xs:3}} container justifyContent="flex-end">
                     {permissions?.workflow?.isUpdate && (
                       <Box className="gap-1">
-                        <Button
-                          disabled={false}
-                          color="primary"
-                          size="small"
+                        <ThemeButton 
                           onClick={() =>
                             setShowManageWorkFlowDialog({
                               open: true,
@@ -120,10 +118,11 @@ const CreateWorkFlow = () => {
                               }
                             })
                           }
-                          variant={'contained'}
+                          buttonType='theme'
+                          disabled={false}
                         >
                           {'Edit'}
-                        </Button>
+                        </ThemeButton>
                       </Box>
                     )}
                     <Box ml={1}>

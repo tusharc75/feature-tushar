@@ -26,6 +26,7 @@ import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateReceiveProduct, generateRejectProduct } from 'src/pages/PurchaseOrder/walkmeSteps';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, checkReceivedProduct, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -385,36 +386,32 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
     return (
       <>
         {permissions?.purchaseOrder?.isUpdate && allowedToEdit && (
-          <Button
+          <ThemeButton 
             id={'receive-button'}
-            variant={'contained'}
-            color="primary"
-            size="small"
             disabled={
               selectedRecords.length === 0 || (selectedRecords?.filter((e: any) => e.qty - (e?.actualReceived || 0) > 0).length > 0 ? false : true)
             }
             onClick={() => {
               setReceiveDialog(true);
             }}
+            buttonType='theme'
           >
-            Receive
-          </Button>
+              Receive
+          </ThemeButton>
         )}
         {permissions?.purchaseOrder?.isUpdate && allowedToEdit && (
-          <Button
+          <ThemeButton 
             id={'reject-button'}
-            variant={'contained'}
-            color="primary"
-            size="small"
             disabled={
               selectedRecords.length === 0 || (selectedRecords?.filter((e: any) => e.qty - (e?.rejectQuantity || 0) > 0)?.length > 0 ? false : true)
             }
             onClick={() => {
               setRejectDialog(true);
             }}
+            buttonType='theme'
           >
-            Reject
-          </Button>
+              Reject
+          </ThemeButton>
         )}
       </>
     );

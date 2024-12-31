@@ -31,6 +31,7 @@ import CustomMessageDialog from 'src/components/MessageDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { generateStepSendToSupplier } from 'src/pages/Sublease/walkmeSteps';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, allowedToEdit, isProcessor, stepFullScreen }) => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -238,11 +239,9 @@ const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, a
           />
         )}
         {allowedToEdit && (
-          <Button
-            variant={'contained'}
-            color="primary"
-            size="small"
+          <ThemeButton 
             id="send-to-supplier-button"
+            buttonType='theme'
             disabled={checkUniqWarehouse() && (allowedToEdit || isProcessor) ? false : true}
             onClick={() => {
               if (!validateAction()) {
@@ -279,7 +278,7 @@ const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, a
             }}
           >
             Send to Supplier
-          </Button>
+          </ThemeButton>
         )}
       </>
     );
