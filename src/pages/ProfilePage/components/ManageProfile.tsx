@@ -413,14 +413,14 @@ export default function ManageProfile(props) {
         <div style={{ borderRadius: 8, minWidth: '300px' }}>
           {displayUserDetails ? (
             <Box style={{ position: 'relative' }}>
-              <HtmlTooltip title="Edit">
-                <IconButton
-                  onClick={handleOpenUpdateDialog}
-                  style={{ position: 'absolute', zIndex: 2, right: '0', padding: '4px', margin: '8px', marginRight: '22px' }}
-                >
+              <IconButton
+                onClick={handleOpenUpdateDialog}
+                style={{ position: 'absolute', zIndex: 2, right: '0', padding: '4px', margin: '8px', marginRight: '22px' }}
+              >
+                <HtmlTooltip title="Edit">
                   <HiOutlinePencilAlt color="primary" />
-                </IconButton>
-              </HtmlTooltip>
+                </HtmlTooltip>
+              </IconButton>
               <Box mb={2}>
                 {loading || userLoading ? (
                   <Grid container spacing={2} style={{ padding: '8px' }}>
