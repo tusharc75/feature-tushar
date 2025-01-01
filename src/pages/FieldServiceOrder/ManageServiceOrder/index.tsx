@@ -174,6 +174,8 @@ const ManageServiceOrderDialog = ({ isClone, serviceOrderId, onClose, onSuccess,
     return errors;
   }
 
+  console.log(initialData)
+
   return (
     <>
       <Dialog
