@@ -109,7 +109,7 @@ const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, isBulkUp
             handleSubmit(newValues);
           }}
         >
-          {({ values, errors, touched, setFieldValue }) => (
+          {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Form>
               <CustomDialogHeader
                 title={isBulkUpdate ? 'Update Start Date/End Date' : data?.assetNumber ? data?.assetNumber : ''}
@@ -166,7 +166,7 @@ const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, isBulkUp
                   Close
                 </ThemeButton>
                 <ThemeButton
-                  onClick={handleSubmit}
+                  onClick={submitForm}
                   disabled={loading}
                   buttonType='theme'
                   isLoading={loading}

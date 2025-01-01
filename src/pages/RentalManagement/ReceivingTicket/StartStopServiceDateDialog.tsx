@@ -69,7 +69,7 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
         enableReinitialize={true}
         validate={validate}
       >
-        {({ values, errors, touched, setFieldValue }) => (
+        {({ values, errors, touched, setFieldValue, submitForm }) => (
           <Form>
             <CustomDialogHeader
               title={`Set Actual ${type === 'start' ? 'Start' : type === 'startStop' ? 'Start/End' : 'End'} Date`}
@@ -128,7 +128,7 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
                 Close
               </ThemeButton>
               <ThemeButton
-                onClick={handleSubmit}
+                onClick={submitForm}
                 disabled={loading}
                 buttonType='theme'
                 isLoading={loading}

@@ -121,7 +121,7 @@ const AssetQtyDialog = ({ onClose, onSuccess, product, purchaseOrderData }) => {
                 <ThemeButton disabled={isSubmitting} buttonType="transparent" onClick={onClose}>
                   Cancel
                 </ThemeButton>
-                <ThemeButton onClick={onSuccess} buttonType="theme">
+                <ThemeButton onClick={submitForm} buttonType="theme">
                   Submit
                 </ThemeButton>
               </CustomDialogFooter>

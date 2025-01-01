@@ -214,7 +214,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
     >
       {!loadingInitialData ? (
         <Formik initialValues={initialData} onSubmit={handleSubmit} validateOnMount validate={validate}>
-          {({ touched, errors, setFieldValue, values }) => (
+          {({ touched, errors, setFieldValue, values, submitForm }) => (
             <Form autoComplete="off" autoCorrect="off" className="flex min-h-full flex-col">
               <CustomDialogHeader
                 title={`Convert Inventory`}
@@ -322,7 +322,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
                 <ThemeButton buttonType="transparent" onClick={handleClose}>
                   Cancel
                 </ThemeButton>
-                <ThemeButton onClick={handleConvert} isLoading={loading} disabled={loading} buttonType="theme">
+                <ThemeButton onClick={handleSuccess} isLoading={loading} disabled={loading} buttonType="theme">
                   Convert
                 </ThemeButton>
               </CustomDialogFooter>
