@@ -45,7 +45,7 @@ function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
         validateOnMount
         validate={validate}
       >
-        {({ touched, errors, setFieldValue, values }) => (
+        {({ touched, errors, setFieldValue, values, submitForm }) => (
           <Form autoComplete="off" autoCorrect="off" noValidate>
             <CustomDialogContent>
               {status === MATERIAL_REQUEST_STATUS.processed && data && (
@@ -125,13 +125,10 @@ function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
                 Cancel
               </ThemeButton>
               <ThemeButton
-                onClick={() => {
-                  onSuccess();
-                }}
+                onClick={submitForm}
                 isLoading={loading}
                 buttonType="theme"
                 disabled={loading}
-                type="submit"
               >
                 Submit
               </ThemeButton>

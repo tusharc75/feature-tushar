@@ -58,13 +58,11 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
     >
       <Formik
         initialValues={initialValues}
-        onSubmit={(val) => {
-          onSubmit(val);
-        }}
+        onSubmit={onSubmit}
         enableReinitialize={true}
         validate={validate}
       >
-        {({ values, errors, touched, setFieldValue }) => (
+        {({ values, errors, touched, setFieldValue, submitForm }) => (
           <Form>
             <CustomDialogHeader title={`Set ${type === 'start' ? 'Start' : type === 'stop' ? 'End' : 'Start/End'} Date`} onClose={onClose} />
             <CustomDialogContent>
@@ -116,11 +114,13 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
                 Close
               </ThemeButton>
               <ThemeButton
-                onClick={handleSubmit}
                 disabled={loading}
                 isLoading={loading}
                 buttonType='theme'
-                type='submit'
+                onClick={(e) => {
+                  e.preventDefault();
+                  submitForm();
+                }}
               >
                 Save
               </ThemeButton>
@@ -128,6 +128,6 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
           </Form>
         )}
       </Formik>
-    </Dialog>
+    </Dialog >
   );
 }

@@ -412,7 +412,6 @@ const ArrangeViewDialog = ({
               Reset
             </ThemeButton>
             <ThemeButton
-              type="submit"
               onClick={submitForm}
               iconForMobile={false}
               buttonType="theme"

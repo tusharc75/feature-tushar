@@ -234,7 +234,6 @@ const LoginMFA = () => {
                     sx={{ paddingBlock: 10, height: 40 }}
                     disabled={otp.length < 6 || isSubmitting}
                     isLoading={isSubmitting}
-                    onClick={handleSubmit}
                   >
                     Submit
                   </ThemeButton>
