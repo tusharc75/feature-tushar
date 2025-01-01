@@ -16,13 +16,13 @@ import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { camelCase, startCase } from 'lodash';
-import moment from 'moment';
 import { useData } from 'src/StateProvider/Provider';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import InvoiceDataDialog from 'src/pages/RentalManagement/ProgressiveBilling/InvoiceDataDialog';
 import CustomDatePicker from 'src/components/CustomDatePicker';
+import dayjs from 'dayjs';
 
 const renderedFrom = `${camelCase(sidebarResource.generateInvoice)}_create`;
 
@@ -313,7 +313,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
   const handleApplyDate = async () => {
     setIsDateApplying(true);
     let tempValues: any = { actualEndDate: endDate };
-    let newEndDate = moment(endDate).toISOString();
+    let newEndDate = dayjs(endDate).toISOString();
     const invoiceResponse = await axiosInstance().get(`/generate-invoice/${resourceData[0]?._id}/invoice/material-end-date-qty?resource=${resource}`);
     const invoicedProducts = invoiceResponse?.data?.data?.material;
 
@@ -453,7 +453,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
                             <ThemeButton
                               id="dialog-apply-button"
                               isLoading={isDateApplying}
-                              disabled={selectedRecords?.length && moment(endDate)?.isValid() ? isDateApplying : true}
+                              disabled={selectedRecords?.length && dayjs(endDate)?.isValid() ? isDateApplying : true}
 buttonType="theme"
                               onClick={() => {
                                 handleApplyDate();

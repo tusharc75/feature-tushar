@@ -1,15 +1,14 @@
 import { Map } from '@mui/icons-material';
 import { Box, Button, ButtonGroup, Typography, useMediaQuery } from '@mui/material';
-import moment from 'moment';
 import PropTypes from 'prop-types';
 import React, { memo, useEffect, useState } from 'react';
-
 import axios, { CancelTokenSource } from 'axios';
 import axiosInstance from 'src/axios/axiosInstance';
 import Loader from '../../../../components/Loader';
 import ActivityList from './ActivityList';
 import Calendar from './Calendar';
 import CalendarList from './CalendarList';
+import dayjs from 'dayjs';
 
 function Roadmap({ type, filter }) {
   const scrollRef = React.useRef<HTMLDivElement>(null);
@@ -47,8 +46,8 @@ function Roadmap({ type, filter }) {
   };
 
   let height = window.innerHeight - 250;
-  let startDate = moment('2023-01-01', 'YYYY-MM-DD');
-  let endDate = moment('2025-12-31', 'YYYY-MM-DD');
+  let startDate = dayjs('2023-01-01', 'YYYY-MM-DD');
+  let endDate = dayjs('2025-12-31', 'YYYY-MM-DD');
   let totalDay = endDate.diff(startDate, 'days');
 
   var dayPixel = 0;
@@ -143,7 +142,7 @@ function Roadmap({ type, filter }) {
                   ref={dayLiner}
                   style={{
                     position: 'absolute',
-                    left: (100 * moment().diff(startDate, 'days')) / totalDay + '%',
+                    left: (100 * dayjs().diff(startDate, 'days')) / totalDay + '%',
                     width: dayPixel
                   }}
                   className="h-full"

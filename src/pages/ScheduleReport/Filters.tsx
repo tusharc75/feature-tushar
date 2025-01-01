@@ -1,7 +1,6 @@
 import React, { Fragment } from 'react';
 import { Checkbox, FormControl, FormControlLabel, InputLabel, MenuItem, Select } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import moment from 'moment';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import dayjs from 'dayjs';

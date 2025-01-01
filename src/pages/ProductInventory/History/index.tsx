@@ -23,11 +23,11 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import RevertQtyDialog from './RevertQtyDialog';
-import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Autorenew } from '@mui/icons-material';
 import { FiExternalLink } from 'react-icons/fi';
+import dayjs from 'dayjs';
 
 export const ReferenceRenderer = (row) => {
   return (
@@ -100,7 +100,7 @@ const History = ({ product, warehouse, storageLocation }) => {
     serialNumber: []
   });
   const [duration, setDuration] = useState({
-    from: new Date(moment().subtract('1', 'year').calendar()),
+    from: new Date(dayjs().subtract(1, 'year').toDate()),
     to: new Date()
   });
 

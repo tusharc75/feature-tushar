@@ -18,10 +18,10 @@ import {
   sidebarResource
 } from '../../../constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
-import moment from 'moment';
 import { startCase } from 'lodash';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderData, materialserializedAssets, materialSerialNumbers }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -91,7 +91,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
 
     if (data?.length) {
       axiosInstance()
-        .post(`${purchaseOrder.api}/reject-inventory/${purchaseOrderID}`, { material: data, rejectDate: moment(rejectDate).format('MM/DD/YYYY') })
+        .post(`${purchaseOrder.api}/reject-inventory/${purchaseOrderID}`, { material: data, rejectDate: dayjs(rejectDate).format('MM/DD/YYYY') })
         .then(({ data }) => {
           setIsSubmitting(false);
           toastConfig.setToastConfig({
@@ -154,16 +154,16 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
   const validateDate = (values) => {
     let errors: any = {};
 
-    if (moment(values['rejectDate']).isBefore(convertDateTimToDate(purchaseOrderData?.purchaseOrderDate))) {
+    if (dayjs(values['rejectDate']).isBefore(convertDateTimToDate(purchaseOrderData?.purchaseOrderDate))) {
       errors['rejectDate'] = `Date entered prior to the purchase order date`;
     }
 
     if (lockDate) {
-      if (!moment(values['rejectDate']).isSameOrAfter(moment(lockDate))) {
+      if (!dayjs(values['rejectDate']).isSameOrAfter(dayjs(lockDate))) {
         errors['rejectDate'] = `Date entered prior to the locked date`;
       }
     }
-    if (moment(values['rejectDate']).isAfter(moment())) {
+    if (dayjs(values['rejectDate']).isAfter(dayjs())) {
       errors['rejectDate'] = `Please select valid date`;
     }
     return errors;
@@ -423,7 +423,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                         value={values.rejectDate}
                         minDate={
                           lockDate
-                            ? moment(lockDate).diff(moment(purchaseOrderData?.purchaseOrderDate), 'days') > 0
+                            ? dayjs(lockDate).diff(dayjs(purchaseOrderData?.purchaseOrderDate), 'days') > 0
                               ? lockDate
                               : purchaseOrderData?.purchaseOrderDate
                             : purchaseOrderData?.purchaseOrderDate

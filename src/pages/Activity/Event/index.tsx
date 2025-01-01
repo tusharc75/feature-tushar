@@ -2,7 +2,6 @@ import { Box, Dialog } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Add } from '@mui/icons-material';
 import axios, { CancelTokenSource } from 'axios';
-import moment from 'moment';
 import queryString from 'query-string';
 import { Fragment, useCallback, useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -16,6 +15,7 @@ import { SearchFilter } from '../../../components/SearchFilter';
 import MyCalendar from '../Calendar/MyCalendar';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 const Event = () => {
   const history = useHistory();
@@ -51,8 +51,8 @@ const Event = () => {
           const newData = data.map((d) => ({
             ...d,
             title: d.name,
-            start: d.startDate ? new Date(d.startDate) : moment().toDate(),
-            end: d.dueDate ? new Date(d.dueDate) : moment().add(20, 'days').toDate()
+            start: d.startDate ? new Date(d.startDate) : dayjs().toDate(),
+            end: d.dueDate ? new Date(d.dueDate) : dayjs().add(20, 'days').toDate()
           }));
 
           setEvents(newData);

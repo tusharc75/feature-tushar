@@ -9,9 +9,9 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { convertDateInDateTime, CustomDialogTransition, sublease, SUBLEASE_TYPE } from 'src/constants/helpers';
 import AssetDialog from 'src/pages/Sublease/Receiving/AssetDialog';
-import moment from 'moment';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess, subleaseData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -85,7 +85,7 @@ const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess, subleaseData
   const validateDate = (values) => {
     let errors: any = {};
 
-    if (moment(values['receiveDate']).isAfter(moment())) {
+    if (dayjs(values['receiveDate']).isAfter(dayjs())) {
       errors['receiveDate'] = `Please select valid date`;
     }
     return errors;

@@ -23,8 +23,8 @@ import {
 import ManageRepairOrder from '../RepairOrder/ManageRepairOrder';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Link } from 'react-router-dom';
-import moment from 'moment';
 import axios, { CancelTokenSource } from 'axios';
+import dayjs from 'dayjs';
 
 const renderedFrom = camelCase(sidebarResource?.workOrderPlanning);
 const WorkOrderPlanning = () => {
@@ -52,8 +52,8 @@ const WorkOrderPlanning = () => {
     newColumns?.forEach((o) => {
       if (o?.accessor === 'asset') {
         const getBackgroundColor = (row) => {
-          const today = moment();
-          const dueDate = moment(row?.original?.dueDate);
+          const today = dayjs();
+          const dueDate = dayjs(row?.original?.dueDate);
           const days = dueDate.diff(today, 'days');
           let color = '';
           if (row?.original?.status === 'Pending') {

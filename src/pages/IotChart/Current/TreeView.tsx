@@ -7,13 +7,13 @@ import MuiAccordion from '@mui/material/Accordion';
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import MuiAccordionSummary from '@mui/material/AccordionSummary';
 import { withStyles } from '@mui/styles';
-import moment from 'moment';
 import { useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { cn, CustomDialogTransition, dateTimeFormat24Hours, displayDateTime } from 'src/constants/helpers';
 import Chart from '../Helper/Chart';
 import FilterModel from '../Helper/FilterModel';
+import dayjs from 'dayjs';
 
 const Accordion = withStyles({
   root: {
@@ -63,7 +63,7 @@ const AccordionDetails = withStyles((theme: Theme) => ({
 
 export default function TreeView({ expandedAccordition, setExpandedAccordition, category, currentData, assetId, deviceTemplate = null }) {
   const [dateFilters, setDateFilters] = useState({
-    from: new Date(moment().subtract(8, 'days').format('MM/DD/YYYY')),
+    from: new Date(dayjs().subtract(8, 'days').format('MM/DD/YYYY')),
     to: new Date(),
     intervals: 'perCycle'
   });
@@ -72,7 +72,7 @@ export default function TreeView({ expandedAccordition, setExpandedAccordition, 
 
   const handleClose = () => {
     setDateFilters({
-      from: new Date(moment().subtract(8, 'days').format('MM/DD/YYYY')),
+      from: new Date(dayjs().subtract(8, 'days').format('MM/DD/YYYY')),
       to: new Date(),
       intervals: 'perCycle'
     });

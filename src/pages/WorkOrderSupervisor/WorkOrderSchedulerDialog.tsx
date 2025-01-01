@@ -17,10 +17,10 @@ import Autocomplete from '@mui/material/Autocomplete';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Formik, Form } from 'formik';
-import moment from 'moment';
 import { useData } from 'src/StateProvider/Provider';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
   const toastConfig = useContext(CustomToastContext);
@@ -97,9 +97,9 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
     if (values.service.length === 0) {
       errors['service'] = 'Please select service';
     }
-    if (!values.date || !moment(values.date).isValid()) {
+    if (!values.date || !dayjs(values.date).isValid()) {
       errors['date'] = 'Please select date';
-    } else if (moment(values.date).isBefore(moment(), 'day')) {
+    } else if (dayjs(values.date).isBefore(dayjs(), 'day')) {
       errors['date'] = 'Date cannot be in the past';
     }
     return errors;

@@ -1,4 +1,4 @@
-import moment from 'moment';
+import dayjs from "dayjs";
 
 type TPriority = 'low' | 'medium' | 'high';
 export const getPriority = (status: string = ''): TPriority => {
@@ -29,7 +29,7 @@ export const getColorFromPriority = (priority): string => {
 
 export const getPositionOfDate = (taskStartDate, taskEndDate, startDate, endDate, totalDay): React.CSSProperties => {
   return {
-    left: (100 * moment(taskStartDate).diff(startDate, 'days')) / totalDay + '%',
-    right: (100 * endDate.diff(moment(taskEndDate), 'days')) / totalDay + '%'
+    left: (100 * dayjs(taskStartDate).diff(startDate, 'days')) / totalDay + '%',
+    right: (100 * endDate.diff(dayjs(taskEndDate), 'days')) / totalDay + '%'
   } as React.CSSProperties;
 };

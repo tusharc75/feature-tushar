@@ -3,7 +3,6 @@ import Grid from '@mui/material/Grid2';
 import Dialog from '@mui/material/Dialog';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
-import moment from 'moment';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
@@ -29,6 +28,7 @@ import {
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 const ManageRentalManagementDialog = ({
   isClone,
@@ -204,13 +204,13 @@ const ManageRentalManagementDialog = ({
 
   function validate(values) {
     const errors = {};
-    let estimateStartDate = moment(values?.estimateStartDate);
-    let estimateEndDate = moment(values?.estimateEndDate);
+    let estimateStartDate = dayjs(values?.estimateStartDate);
+    let estimateEndDate = dayjs(values?.estimateEndDate);
     if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
       errors['estimateEndDate'] = 'Please enter valid estimate end date';
     }
-    let actualStartDate = moment(values?.actualStartDate);
-    let actualEndDate = moment(values?.actualEndDate);
+    let actualStartDate = dayjs(values?.actualStartDate);
+    let actualEndDate = dayjs(values?.actualEndDate);
     if (actualStartDate.format('YYYY-MM-DD') !== actualEndDate.format('YYYY-MM-DD')) {
       if (actualEndDate.diff(actualStartDate, 'days') <= 0) {
         errors['actualEndDate'] = 'Please enter valid actual end date';

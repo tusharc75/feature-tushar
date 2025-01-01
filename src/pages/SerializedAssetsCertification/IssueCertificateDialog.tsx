@@ -1,7 +1,6 @@
 import { Box, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isArray, isEqual } from 'lodash';
-import moment from 'moment';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -24,6 +23,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiryDate }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -84,10 +84,10 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiry
 
   function validate(values) {
     const errors = {};
-    if (moment(values.issueDate) > moment(values.expiryDate)) {
+    if (dayjs(values.issueDate) > dayjs(values.expiryDate)) {
       errors['expiryDate'] = 'Expiry date must greater then Issue date';
     }
-    if (certificateExpiryDate && moment(values.issueDate) < moment(certificateExpiryDate)) {
+    if (certificateExpiryDate && dayjs(values.issueDate) < dayjs(certificateExpiryDate)) {
       errors['issueDate'] = 'Issue date must greater then Certificate expiry date';
     }
     return errors;

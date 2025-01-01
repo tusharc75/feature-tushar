@@ -1,19 +1,19 @@
-import moment from 'moment';
+import dayjs, { Dayjs } from "dayjs";
 
 type GetDaysBetweenDatesOutput = string | { [key: string]: string[] };
 
-const getAllDaysInMonthFormatted = (date: moment.Moment): string[] => {
+const getAllDaysInMonthFormatted = (date: Dayjs): string[] => {
   const daysInMonth = date.daysInMonth();
   const days: string[] = [];
 
   for (let day = 1; day <= daysInMonth; day++) {
-    days.push(moment(date).date(day).format('D dd'));
+    days.push(dayjs(date).date(day).format('D dd'));
   }
 
   return days;
 };
 
-const getQuarterDetails = (date: moment.Moment): string => {
+const getQuarterDetails = (date: Dayjs): string => {
   const startOfQuarter = date.clone().startOf('quarter');
   const endOfQuarter = date.clone().endOf('quarter');
 
@@ -24,15 +24,15 @@ const getQuarterDetails = (date: moment.Moment): string => {
   return `${startMonth} - ${endMonth} ${year}`;
 };
 
-const getDifference = (startDate: moment.Moment, endDate: moment.Moment, type: 'quarters' | 'weeks' | 'months') => {
+const getDifference = (startDate: Dayjs, endDate: Dayjs, type: 'quarters' | 'weeks' | 'months') => {
   const diff = endDate.diff(startDate, type);
   return diff;
 };
 
 export const getDaysBetweenDates = (
   view: 'month' | 'week' | 'quarter',
-  startDate: moment.Moment,
-  endDate: moment.Moment
+  startDate: Dayjs,
+  endDate: Dayjs
 ): GetDaysBetweenDatesOutput[] => {
   const months: string[] = [];
   const week: { [key: string]: string[] }[] = [];
@@ -69,10 +69,10 @@ export const getDaysBetweenDates = (
 };
 
 export function getTableRow<T>(
-  startDate: moment.Moment,
-  endDate: moment.Moment,
-  dataStartDate: moment.Moment,
-  dataEndDate: moment.Moment,
+  startDate: Dayjs,
+  endDate: Dayjs,
+  dataStartDate: Dayjs,
+  dataEndDate: Dayjs,
   renderer: (data: T) => React.ReactNode,
   data: T,
   view: 'month' | 'week' | 'quarter',

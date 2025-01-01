@@ -19,11 +19,11 @@ import { Formik, Form, FieldArray } from 'formik';
 import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { read, utils, writeFile } from 'xlsx';
-import moment from 'moment';
 import CustomAssetDialog from 'src/pages/ConvertInventory/InventoryToAsset/CustomAssetDialog';
 import { isEqual, startCase } from 'lodash';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderData }) => {
   const [fullScreen, setFullScreen] = useState(true);
@@ -174,17 +174,17 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
   const validateDate = (values) => {
     let errors: any = {};
 
-    if (moment(values['receiveDate']).isBefore(convertDateTimToDate(purchaseOrderData?.purchaseOrderDate))) {
+    if (dayjs(values['receiveDate']).isBefore(convertDateTimToDate(purchaseOrderData?.purchaseOrderDate))) {
       errors['receiveDate'] = `Date entered prior to the purchase order date`;
     }
 
     if (lockDate) {
-      if (!moment(values['receiveDate']).isSameOrAfter(moment(lockDate))) {
+      if (!dayjs(values['receiveDate']).isSameOrAfter(dayjs(lockDate))) {
         errors['receiveDate'] = `Date entered prior to the locked date`;
       }
     }
 
-    if (moment(values['receiveDate']).isAfter(moment())) {
+    if (dayjs(values['receiveDate']).isAfter(dayjs())) {
       errors['receiveDate'] = `Please select valid date`;
     }
     return errors;
@@ -526,7 +526,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
                           value={values.receiveDate}
                           minDate={
                             lockDate
-                              ? moment(lockDate).diff(moment(purchaseOrderData?.purchaseOrderDate), 'days') > 0
+                              ? dayjs(lockDate).diff(dayjs(purchaseOrderData?.purchaseOrderDate), 'days') > 0
                                 ? lockDate
                                 : purchaseOrderData?.purchaseOrderDate
                               : purchaseOrderData?.purchaseOrderDate

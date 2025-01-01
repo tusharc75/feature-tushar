@@ -6,10 +6,8 @@ import { useHistory } from 'react-router-dom';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import IconButton from '@mui/material/IconButton';
-import moment from 'moment';
-import { displayDate } from 'src/constants/helpers';
-
-let dayname = moment.weekdaysShort();
+import { dayNamesShort, displayDate } from 'src/constants/helpers';
+import dayjs from 'dayjs';
 
 const useStyles = makeStyles((theme: Theme) => ({
   fontBold: {
@@ -51,14 +49,14 @@ const useStyles = makeStyles((theme: Theme) => ({
 const GetDays = function (month, year) {
   let blank_days = [];
 
-  let preMonth = moment(year + '-' + month + '-01')
+  let preMonth = dayjs(year + '-' + month + '-01')
     .subtract(1, 'months')
     .format('MM');
-  let nextMonth = moment(year + '-' + month + '-01')
+  let nextMonth = dayjs(year + '-' + month + '-01')
     .subtract(1, 'months')
     .format('MM');
   let blankDay = parseInt(
-    moment(year + '-' + month + '-01')
+    dayjs(year + '-' + month + '-01')
       .startOf('month')
       .format('d')
   );
@@ -66,7 +64,7 @@ const GetDays = function (month, year) {
     blank_days.push({
       day:
         parseInt(
-          moment(year + '-' + preMonth + '-01')
+          dayjs(year + '-' + preMonth + '-01')
             .endOf('month')
             .format('DD')
         ) -
@@ -76,7 +74,7 @@ const GetDays = function (month, year) {
   }
 
   let days_in_month = [];
-  for (let d = 1; d <= moment(year + '-' + month + '-01').daysInMonth(); d++) {
+  for (let d = 1; d <= dayjs(year + '-' + month + '-01').daysInMonth(); d++) {
     days_in_month.push({ day: d, month: month });
   }
   var total_slot = [...blank_days, ...days_in_month];
@@ -112,8 +110,8 @@ const GetDays = function (month, year) {
 
 export default function BigCalendar({ type, activity }) {
   const history = useHistory();
-  const [month, setMonth] = useState(moment().month() + 1);
-  const [year, setYear] = useState(moment().year());
+  const [month, setMonth] = useState(dayjs().month() + 1);
+  const [year, setYear] = useState(dayjs().year());
 
   const handlechange = (type) => {
     if (type === 'next') {
@@ -156,7 +154,7 @@ export default function BigCalendar({ type, activity }) {
         </Box>
         <Box className="d-flex align-items-center">
           <Typography className={classes.fontBold}>
-            {moment(month, 'MM').format('MMMM')} - {year}
+            {dayjs(month, 'MM').format('MMMM')} - {year}
           </Typography>
         </Box>
       </Box>
@@ -164,7 +162,7 @@ export default function BigCalendar({ type, activity }) {
         <table style={{ width: '100%' }}>
           <thead>
             <tr>
-              {dayname.map((day, key) => (
+              {dayNamesShort.map((day, key) => (
                 <td key={key} className={classes.tdWidth}>
                   <Box border={0.7} borderColor="var(--common-border-color)" className={classes.minusMargin} p={1}>
                     <Typography className={classes.calHeader}>{day}</Typography>

@@ -12,9 +12,9 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 import { fetch_rental_cost_fields } from '../../../components/RentalManagment/helper';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
-import moment from 'moment';
 import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 interface AdditionalCostDialogProps {
   onClose: VoidFunction | any;
@@ -76,8 +76,8 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({
 
   function validate(values) {
     const errors = {};
-    let actualStartDate = moment(values?.actualStartDate);
-    let actualEndDate = moment(values?.actualEndDate);
+    let actualStartDate = dayjs(values?.actualStartDate);
+    let actualEndDate = dayjs(values?.actualEndDate);
     if (actualEndDate.diff(actualStartDate, 'days') < 0) {
       errors['actualEndDate'] = 'Please enter valid actual end date';
     }

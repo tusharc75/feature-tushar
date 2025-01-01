@@ -4,11 +4,11 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Chat, Delete } from '@mui/icons-material';
 import { Skeleton } from '@mui/material';
 import { groupBy } from 'lodash';
-import moment from 'moment';
 import { FiSidebar } from 'react-icons/fi';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { cn } from 'src/constants/helpers';
+import dayjs from 'dayjs';
 
 type HistorySidebarProps = {
   setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -62,18 +62,18 @@ const HistorySidebar = ({
       return;
     }
     const formatter = (date: Date) => {
-      const momentDate = moment(date);
-      const currentYear = moment().year();
-      const currentMonth = moment().month();
+      const dayjsDate = dayjs(date);
+      const currentYear = dayjs().year();
+      const currentMonth = dayjs().month();
       let format = '';
 
-      if (momentDate.year() < currentYear) {
-        format = momentDate.format('YYYY');
-      } else if (momentDate.month() === currentMonth) {
+      if (dayjsDate.year() < currentYear) {
+        format = dayjsDate.format('YYYY');
+      } else if (dayjsDate.month() === currentMonth) {
         format = `Previous 30 days`;
       } else {
         // Current year (other than current month)
-        format = momentDate.format('MMM');
+        format = dayjsDate.format('MMM');
       }
       return format;
     };

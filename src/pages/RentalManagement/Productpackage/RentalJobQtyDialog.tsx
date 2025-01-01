@@ -17,13 +17,13 @@ import FormTypes from '../../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import moment from 'moment';
 import { bulkUpdate, calculatePrice, calculateRowsField, fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -341,13 +341,13 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
 
   function validate(values) {
     const errors = {};
-    let estimateStartDate = moment(values?.estimateStartDate);
-    let estimateEndDate = moment(values?.estimateEndDate);
+    let estimateStartDate = dayjs(values?.estimateStartDate);
+    let estimateEndDate = dayjs(values?.estimateEndDate);
     if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
       errors['estimateEndDate'] = 'Please enter valid estimate end date';
     }
-    let rentalManagementEstimateStartDate = moment(rentalManagementData?.estimateStartDate);
-    let rentalManagementEstimateEndDate = moment(rentalManagementData?.estimateEndDate);
+    let rentalManagementEstimateStartDate = dayjs(rentalManagementData?.estimateStartDate);
+    let rentalManagementEstimateEndDate = dayjs(rentalManagementData?.estimateEndDate);
     if (estimateStartDate.diff(rentalManagementEstimateStartDate, 'days') < 0) {
       errors['estimateStartDate'] = 'Please enter valid estimate start date';
     }

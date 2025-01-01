@@ -26,8 +26,8 @@ import { FaDiceOne } from 'react-icons/fa';
 import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import { isEqual } from 'lodash';
-import moment from 'moment';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 const ManageSublease = ({
   isClone = false,
@@ -223,13 +223,13 @@ const ManageSublease = ({
 
   function validate(values) {
     const errors = {};
-    let estimateStartDate = moment(values?.estimateStartDate);
-    let estimateEndDate = moment(values?.estimateEndDate);
+    let estimateStartDate = dayjs(values?.estimateStartDate);
+    let estimateEndDate = dayjs(values?.estimateEndDate);
     if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
       errors['estimateEndDate'] = 'Please enter valid estimate end date';
     }
-    let actualStartDate = moment(values?.actualStartDate);
-    let actualEndDate = moment(values?.actualEndDate);
+    let actualStartDate = dayjs(values?.actualStartDate);
+    let actualEndDate = dayjs(values?.actualEndDate);
     if (actualStartDate.format('YYYY-MM-DD') !== actualEndDate.format('YYYY-MM-DD')) {
       if (actualEndDate.diff(actualStartDate, 'days') <= 0) {
         errors['actualEndDate'] = 'Please enter valid actual end date';

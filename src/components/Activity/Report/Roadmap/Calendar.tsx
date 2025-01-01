@@ -1,13 +1,9 @@
 import React, { useEffect, memo } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
-moment.updateLocale('en', {
-  invalidDate: ''
-});
-
-const DaysBetweenDates = function (calendarType, startDate, endDate) {
+export const DaysBetweenDates = function (calendarType, startDate, endDate) {
   var dateList = [];
   if (calendarType === 'month' || calendarType === 'week') {
     while (endDate > startDate || startDate.format('M') === endDate.format('M')) {
@@ -16,30 +12,30 @@ const DaysBetweenDates = function (calendarType, startDate, endDate) {
     }
   } else {
     let years = [];
-    years.push(moment().year() - 1);
-    years.push(moment().year());
-    years.push(moment().year() + 1);
+    years.push(dayjs().year() - 1);
+    years.push(dayjs().year());
+    years.push(dayjs().year() + 1);
 
     for (let year of years) {
       dateList.push({
-        q_s_date: moment().year(year).month(0).startOf('month'),
-        q_e_date: moment().year(year).month(2).endOf('month'),
-        days: moment().year(year).month(2).endOf('month').diff(moment().year(year).month(0).startOf('month'), 'days') + 1
+        q_s_date: dayjs().year(year).month(0).startOf('month'),
+        q_e_date: dayjs().year(year).month(2).endOf('month'),
+        days: dayjs().year(year).month(2).endOf('month').diff(dayjs().year(year).month(0).startOf('month'), 'days') + 1
       });
       dateList.push({
-        q_s_date: moment().year(year).month(3).startOf('month'),
-        q_e_date: moment().year(year).month(5).endOf('month'),
-        days: moment().year(year).month(5).endOf('month').diff(moment().year(year).month(3).startOf('month'), 'days') + 1
+        q_s_date: dayjs().year(year).month(3).startOf('month'),
+        q_e_date: dayjs().year(year).month(5).endOf('month'),
+        days: dayjs().year(year).month(5).endOf('month').diff(dayjs().year(year).month(3).startOf('month'), 'days') + 1
       });
       dateList.push({
-        q_s_date: moment().year(year).month(6).startOf('month'),
-        q_e_date: moment().year(year).month(8).endOf('month'),
-        days: moment().year(year).month(8).endOf('month').diff(moment().year(year).month(6).startOf('month'), 'days') + 1
+        q_s_date: dayjs().year(year).month(6).startOf('month'),
+        q_e_date: dayjs().year(year).month(8).endOf('month'),
+        days: dayjs().year(year).month(8).endOf('month').diff(dayjs().year(year).month(6).startOf('month'), 'days') + 1
       });
       dateList.push({
-        q_s_date: moment().year(year).month(9).startOf('month'),
-        q_e_date: moment().year(year).month(11).endOf('month'),
-        days: moment().year(year).month(11).endOf('month').diff(moment().year(year).month(9).startOf('month'), 'days') + 1
+        q_s_date: dayjs().year(year).month(9).startOf('month'),
+        q_e_date: dayjs().year(year).month(11).endOf('month'),
+        days: dayjs().year(year).month(11).endOf('month').diff(dayjs().year(year).month(9).startOf('month'), 'days') + 1
       });
     }
   }
@@ -68,13 +64,13 @@ function Calendar({ calendarType, dayPixel, startDate, endDate }) {
         style={{ borderBottom: '1px solid var(--common-border-color)' }}
       >
         {calendarType === 'week'
-          ? Array.from(dates, (date, index) => {
+          ? Array.from(dates, (date: any, index) => {
               return (
-                <Box key={index} borderColor="var(--common-border-color)" minWidth={moment(date).daysInMonth() * dayPixel}>
+                <Box key={index} borderColor="var(--common-border-color)" minWidth={dayjs(date).daysInMonth() * dayPixel}>
                   <Typography variant="caption" color="textSecondary" display="block">
-                    {moment(date).format('MMM YYYY').toUpperCase()}
+                    {dayjs(date).format('MMM YYYY').toUpperCase()}
                   </Typography>
-                  {Array.from(Array(moment(date, 'YYYY-MM-DD').daysInMonth()), (data, index) => {
+                  {Array.from(Array(dayjs(date, 'YYYY-MM-DD').daysInMonth()), (data, index) => {
                     return (
                       <div
                         key={index}
@@ -87,10 +83,10 @@ function Calendar({ calendarType, dayPixel, startDate, endDate }) {
                         }}
                       >
                         <Typography variant="body2" color={'textSecondary'} display="block">
-                          {moment(moment(date).add(index, 'd')).format('ddd')[0]}
+                          {dayjs(dayjs(date).add(index, 'd')).format('ddd')[0]}
                         </Typography>
                         <Typography variant="caption" color={'textSecondary'} display="block">
-                          {moment(moment(date).add(index, 'd')).format('D')}
+                          {dayjs(dayjs(date).add(index, 'd')).format('D')}
                         </Typography>
                       </div>
                     );
@@ -100,19 +96,19 @@ function Calendar({ calendarType, dayPixel, startDate, endDate }) {
             })
           : null}
         {calendarType === 'month'
-          ? Array.from(dates, (date, index) => {
+          ? Array.from(dates, (date: any, index) => {
               return (
                 <Box
                   key={index}
                   p={2}
                   display="inline"
-                  minWidth={moment(date).daysInMonth() * dayPixel}
+                  minWidth={dayjs(date).daysInMonth() * dayPixel}
                   border={1}
                   borderColor="var(--common-border-color)"
                   textAlign="center"
                 >
                   <Typography variant="body2" color="textSecondary" display="block">
-                    {moment(date).format('MMM YYYY').toUpperCase()}
+                    {dayjs(date).format('MMM YYYY').toUpperCase()}
                   </Typography>
                 </Box>
               );
@@ -131,11 +127,11 @@ function Calendar({ calendarType, dayPixel, startDate, endDate }) {
               >
                 <Typography variant="body2" display="block">
                   {(
-                    moment(date.q_s_date).format('MMM') +
+                    dayjs(date.q_s_date).format('MMM') +
                     ' - ' +
-                    moment(date.q_e_date).format('MMM') +
+                    dayjs(date.q_e_date).format('MMM') +
                     ' ' +
-                    moment(date.q_s_date).format('YYYY')
+                    dayjs(date.q_s_date).format('YYYY')
                   ).toUpperCase()}
                 </Typography>
               </Box>
