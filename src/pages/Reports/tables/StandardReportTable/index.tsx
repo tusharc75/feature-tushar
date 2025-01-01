@@ -20,6 +20,7 @@ import routes from 'src/components/Helpers/Routes';
 import {
   cn,
   CustomDialogTransition,
+  displayDate,
   downloadExcel,
   formatAmountWithCurrency,
   gridLoadingTimeout,
@@ -307,13 +308,18 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
             return hasTermLength;
           })
           ?.map((d) => {
-            if (filterTerm[d?.field] === '$nin' && isArray(d?.term)) {
+            const isoDate = dayjs(d?.term);
+            const term = isoDate.isValid() ? displayDate(d?.term, 'MM/DD/YYYY') : d?.term;
+            if (filterTerm[d?.field] === '$nin' && isArray(term)) {
               return {
                 ...d,
-                term: { $nin: d?.term }
+                term: { $nin: term }
               };
             }
-            return d;
+            return {
+              ...d,
+              term
+            };
           })
       ];
     }

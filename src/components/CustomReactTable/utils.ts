@@ -6,6 +6,7 @@ import { TColType } from './TableComponents/TableHelperComponents';
 import { FilterModel } from './types';
 import { Column, Header, Table } from '@tanstack/react-table';
 import dayjs from 'dayjs';
+import { displayDate } from 'src/constants/helpers';
 
 export const childrenProperty = 'subRows';
 
@@ -631,10 +632,10 @@ export const createFilterData = (coloums, filterByIds, deepFilters) => {
       ?.map((f) => {
         if (deepFilters?.some((d) => [`from_${f?.fieldData?.fieldName}`, `to_${f?.fieldData?.fieldName}`].includes(d?.field))) {
           const fromDate = deepFilters?.find((d) => d?.field === `from_${f?.fieldData?.fieldName}`)
-            ? deepFilters?.find((d) => d?.field === `from_${f?.fieldData?.fieldName}`)?.term
+            ? displayDate(deepFilters?.find((d) => d?.field === `from_${f?.fieldData?.fieldName}`)?.term, 'MM/DD/YYYY')
             : null;
           const toDate = deepFilters?.find((d) => d?.field === `to_${f?.fieldData?.fieldName}`)
-            ? deepFilters?.find((d) => d?.field === `to_${f?.fieldData?.fieldName}`)?.term
+            ? displayDate(deepFilters?.find((d) => d?.field === `to_${f?.fieldData?.fieldName}`)?.term, 'MM/DD/YYYY')
             : null;
           filterModel.set(f?.fieldData?.fieldName, {
             filter: {
