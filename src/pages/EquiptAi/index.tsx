@@ -195,7 +195,6 @@ const EquiptAi = () => {
                     iconForMobile={<Chat fontSize={'small'} />}
                     buttonType="theme"
                     startIcon={<Chat fontSize={'small'} />}
-                    size="small"
                     onClick={() => hadleNewChat()}
                     style={{ padding: 8, minWidth: 'max-content' }}
                   >

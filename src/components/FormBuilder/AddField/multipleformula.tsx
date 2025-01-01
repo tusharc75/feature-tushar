@@ -10,7 +10,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { IconButton } from '@mui/material';
 import { FiMaximize2 } from 'react-icons/fi';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Grid2';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export const MultipleFormula = ({ fields, values, setFieldValue, _id, touched, errors }) => {

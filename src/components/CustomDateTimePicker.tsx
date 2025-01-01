@@ -32,7 +32,7 @@ const CustomDateTimePicker = (props) => {
       disablePast={disablePast}
       required={required}
       ampm={false}
-      value={dayjs.tz(new Date(value)) || null}
+      value={value ? dayjs.tz(new Date(value)) : dayjs.tz(new Date(''))}
       name={name}
       label={label}
       {...(maxDateTime ? { maxDateTime: dayjs.tz(new Date(maxDateTime)) } : {})}

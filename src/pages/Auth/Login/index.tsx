@@ -207,13 +207,11 @@ const Login = () => {
                         Forgot Password?
                       </MuiLink>
                     </Box>
-
                     <Box>
                       <ThemeButton
                         fullWidth
                         buttonType="theme"
                         type="submit"
-                        onClick={submitForm}
                         disabled={isSubmitting}
                         isLoading={isSubmitting}
                         sx={{ height: 40 }}

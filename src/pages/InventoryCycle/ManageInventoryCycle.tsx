@@ -174,7 +174,7 @@ const ManageInventoryCycle = ({ inventoryCycleId, onClose, onSuccess, isUpdateDi
               </CustomDialogContent>
               <CustomDialogFooter>
                 <ThemeButton
-buttonType="transparent"
+                  buttonType="transparent"
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);

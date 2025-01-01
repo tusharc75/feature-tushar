@@ -125,7 +125,7 @@ const DispatchMaterial = ({ handleClose, data, handleSubmit }) => {
         </ThemeButton>
         <ThemeButton
           isLoading={false}
-buttonType="theme"
+          buttonType="theme"
           onClick={() => {
             handleSubmit([
               {

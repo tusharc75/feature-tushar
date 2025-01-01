@@ -180,8 +180,8 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({
                 </ThemeButton>
                 {showSaveAndNext && (
                   <ThemeButton
-                    loading={loadingEdit}
-                    disabled={isEqual(ref?.current?.values, initialData.values) || loadingEdit}
+                    isLoading={Boolean(loadingEdit)}
+                    disabled={isEqual(ref?.current?.values, initialData.values) || Boolean(loadingEdit)}
                     buttonType="theme"
                     onClick={() => {
                       setSaveAndNext(true);
@@ -193,7 +193,7 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({
                   </ThemeButton>
                 )}
                 <ThemeButton
-                  loading={loadingEdit}
+                  isLoading={Boolean(loadingEdit)}
                   disabled={isEqual(ref?.current?.values, initialData.values)}
                   buttonType="theme"
                   onClick={() => {
