@@ -1,12 +1,12 @@
-import { Menu, MenuItem, Popover } from '@mui/material';
 import { Today } from '@mui/icons-material';
+import { Menu, MenuItem, Popover } from '@mui/material';
 import moment from 'moment';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { DateRange } from 'react-day-picker';
+import { BiChevronDown } from 'react-icons/bi';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { cn, displayDate } from 'src/constants/helpers';
 import { Calendar } from './Calendar';
-import { BiChevronDown } from 'react-icons/bi';
 
 type DateRanges = DateRange | undefined;
 
@@ -15,8 +15,6 @@ type DateRangePicerProps = {
   setDate: (date: DateRanges) => void;
   horizontal?: 'right' | 'left' | 'center';
 } & React.HTMLAttributes<HTMLDivElement>;
-
-type TimeFrame = 'custom' | '1-month' | '3-months' | '6-months' | '1-year';
 
 const timeframeList = [
   { label: 'Custom', value: 'custom' },
@@ -29,6 +27,7 @@ const timeframeList = [
 type TimeFrameList = (typeof timeframeList)[number];
 
 function DateRangePicker({ className, date, setDate, horizontal = 'center' }: DateRangePicerProps) {
+  const [internalDate, setInternalDate] = React.useState(date);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [menuAnchorEl, setMenuAnchorEl] = React.useState(null);
   const [timeFrame, setTimeFrame] = React.useState<TimeFrameList>({ label: 'Custom', value: 'custom' });
@@ -44,6 +43,14 @@ function DateRangePicker({ className, date, setDate, horizontal = 'center' }: Da
   const open = Boolean(anchorEl);
   const id = open ? 'date-range-popover' : undefined;
 
+  const handleDateChange = useCallback(
+    (date: DateRange) => {
+      setInternalDate(date);
+      setDate({ from: date.from, to: date.to });
+    },
+    [setDate]
+  );
+
   const handleTimeframe = (timeFrame: TimeFrameList) => {
     setTimeFrame(timeFrame);
     switch (timeFrame.value) {
@@ -53,7 +60,7 @@ function DateRangePicker({ className, date, setDate, horizontal = 'center' }: Da
           to: new Date()
         };
         setMonth(data.from);
-        setDate(data);
+        handleDateChange(data);
         break;
       }
       case '3-months': {
@@ -62,7 +69,7 @@ function DateRangePicker({ className, date, setDate, horizontal = 'center' }: Da
           to: new Date()
         };
         setMonth(data.from);
-        setDate(data);
+        handleDateChange(data);
         break;
       }
       case '6-months': {
@@ -71,7 +78,7 @@ function DateRangePicker({ className, date, setDate, horizontal = 'center' }: Da
           to: new Date()
         };
         setMonth(data.from);
-        setDate(data);
+        handleDateChange(data);
         break;
       }
       case '1-year': {
@@ -80,12 +87,12 @@ function DateRangePicker({ className, date, setDate, horizontal = 'center' }: Da
           to: new Date()
         };
         setMonth(data.from);
-        setDate(data);
+        handleDateChange(data);
         break;
       }
       case 'custom':
       default:
-        setDate({
+        handleDateChange({
           from: new Date(),
           to: new Date()
         });
@@ -168,8 +175,9 @@ function DateRangePicker({ className, date, setDate, horizontal = 'center' }: Da
             mode="range"
             className="rounded-l-none border-none max-sm:rounded-none"
             defaultMonth={date?.from}
-            selected={date}
-            onSelect={({ from, to }) => setDate({ from, to })}
+            disabled={timeFrame.value !== 'custom'}
+            selected={internalDate}
+            onSelect={handleDateChange}
             numberOfMonths={2}
           />
         </div>
