@@ -71,7 +71,7 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
               <Box p={2}>
                 <Grid container spacing={2}>
                   {type !== 'stop' && (
-                    <Grid size={{xs:12, sm:12}}>
+                    <Grid size={{ xs: 12, sm: 12 }}>
                       <CustomDatePicker
                         fullWidth
                         size="small"
@@ -88,7 +88,7 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
                     </Grid>
                   )}
                   {(type === 'startStop' || type === 'stop') && (
-                    <Grid size={{xs:12, sm:12}}>
+                    <Grid size={{ xs: 12, sm: 12 }}>
                       <CustomDatePicker
                         fullWidth
                         size="small"
@@ -110,18 +110,19 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
             </CustomDialogContent>
             <CustomDialogFooter>
               <ThemeButton
-                  onClick={onClose}
-                  buttonType='transparent'
-                >
-                  Close
-                </ThemeButton>
-                <ThemeButton
-                  disabled={loading}
-                  isLoading={loading}
-                  buttonType='theme'
-                >
-                  Save
-                </ThemeButton>
+                onClick={onClose}
+                buttonType='transparent'
+              >
+                Close
+              </ThemeButton>
+              <ThemeButton
+                disabled={loading}
+                isLoading={loading}
+                buttonType='theme'
+                type='submit'
+              >
+                Save
+              </ThemeButton>
             </CustomDialogFooter>
           </Form>
         )}
