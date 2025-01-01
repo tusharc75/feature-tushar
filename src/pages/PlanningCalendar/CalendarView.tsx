@@ -1,7 +1,6 @@
 import { Box, Theme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import dayjs from 'dayjs';
-import moment from 'moment';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { View, dayjsLocalizer } from 'react-big-calendar';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -43,8 +42,8 @@ const CalendarView = (props: Props) => {
   const [events, setEvents] = useState([]);
   const [range, setRange] = useState();
   const [dateRange, setDateRange] = useState({
-    estimateStartDate: moment().startOf('month').format('MM/DD/YYYY'),
-    estimateEndDate: moment().endOf('month').format('MM/DD/YYYY')
+    estimateStartDate: dayjs().startOf('month').format('MM/DD/YYYY'),
+    estimateEndDate: dayjs().endOf('month').format('MM/DD/YYYY')
   });
   const [view, setView] = useState<View>('month');
   const [converPlanning, setConvertPlanning] = useState({ open: false, data: null });
@@ -108,7 +107,7 @@ const CalendarView = (props: Props) => {
         </div>
         <div className="relative">
           <CustomCalendar
-            defaultDate={moment().toDate()}
+            defaultDate={dayjs().toDate()}
             defaultView="day"
             events={events}
             localizer={localizer}
@@ -117,8 +116,8 @@ const CalendarView = (props: Props) => {
             onNavigate={(date) => {
               // if (view === 'month') {
               //   setDateRange({
-              //     estimateStartDate: moment(date).startOf('month').format('MM/DD/YYYY'),
-              //     estimateEndDate: moment(date).endOf('month').format('MM/DD/YYYY')
+              //     estimateStartDate: dayjs(date).startOf('month').format('MM/DD/YYYY'),
+              //     estimateEndDate: dayjs(date).endOf('month').format('MM/DD/YYYY')
               //   });
               // }
             }}

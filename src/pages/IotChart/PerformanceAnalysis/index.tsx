@@ -1,6 +1,5 @@
 import { Box, FormGroup, IconButton, useMediaQuery } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -10,13 +9,14 @@ import Chart from '../Helper/Chart';
 import FilterModel from '../Helper/FilterModel';
 import TreeViewNew from './TreeView';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
+import dayjs from 'dayjs';
 
 const PerformanceAnalysis = ({ deviceTemplate = null, assetId, dataPoints = [] }) => {
   const toastConfig = useContext(CustomToastContext);
   const [isExpanded, setIsExpanded] = useState(true);
   const isMobile = useMediaQuery('(max-width:640px)');
   const [dateFilters, setDateFilters] = useState({
-    from: new Date(moment().subtract(8, 'days').startOf('day').toJSON()),
+    from: new Date(dayjs().subtract(8, 'days').startOf('day').toJSON()),
     to: new Date(),
     intervals: 'perCycle'
   });

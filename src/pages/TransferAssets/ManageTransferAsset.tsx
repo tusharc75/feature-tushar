@@ -23,8 +23,8 @@ import ConfirmCancelDialog from 'src/components/ConfirmCancelDialog';
 import { useData } from 'src/StateProvider/Provider';
 import { FaDiceOne } from 'react-icons/fa';
 import { isEqual } from 'lodash';
-import moment from 'moment';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 interface Props {
   isClone?: boolean;
@@ -270,7 +270,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
       }
     }
     if (createDateMin && allFields?.find((e) => e?.fieldName === 'createDate')) {
-      if (!moment(values['createDate']).isSameOrAfter(moment(createDateMin))) {
+      if (!dayjs(values['createDate']).isSameOrAfter(dayjs(createDateMin))) {
         errors['createDate'] = `Please select valid date`;
       }
     }

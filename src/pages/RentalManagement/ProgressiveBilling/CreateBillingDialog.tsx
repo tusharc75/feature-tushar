@@ -7,7 +7,6 @@ import { useData } from 'src/StateProvider/Provider';
 import { fetch_rental_cost_fields, fetch_rental_product_fields } from 'src/components/RentalManagment/helper';
 import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
-import moment from 'moment';
 import {
   CustomDialogTransition,
   deliveryTicket,
@@ -38,20 +37,21 @@ import { FiExternalLink } from 'react-icons/fi';
 import InvoiceDataDialog from 'src/pages/RentalManagement/ProgressiveBilling/InvoiceDataDialog';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 const calculateServiceDays = (serviceLog: any[], startDate: any, endDate: any) => {
   const uniqueDates = new Set<string>();
   const logs = [];
-  const newStartDate = moment(startDate).startOf('day');
-  const newEndDate = moment(endDate).startOf('day');
+  const newStartDate = dayjs(startDate).startOf('day');
+  const newEndDate = dayjs(endDate).startOf('day');
   serviceLog?.forEach((log) => {
-    const logStartDate = moment(log.startDate).startOf('day');
-    const logEndDate = moment(log.endDate || endDate).startOf('day');
+    const logStartDate = dayjs(log.startDate).startOf('day');
+    const logEndDate = dayjs(log.endDate || endDate).startOf('day');
     let index = 0;
     let tempStartDate;
     let tempEndDate;
     let count = 0;
-    for (const m = moment(logStartDate); m.diff(logEndDate, 'days') <= 0; m.add(1, 'days')) {
+    for (const m = dayjs(logStartDate); m.diff(logEndDate, 'days') <= 0; m.add(1, 'days')) {
       if (m.isBetween(newStartDate, newEndDate, null, '[]')) {
         uniqueDates.add(m.format('MM/DD/YYYY'));
         if (index === 0) {
@@ -610,13 +610,13 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
         const product = invoicedProducts?.material?.find((p) => p._id === element._id);
 
-        const productStartDateTime = moment(new Date(element.actualStartDate));
-        const selectedEndDateTime = moment(new Date(endDate));
+        const productStartDateTime = dayjs(new Date(element.actualStartDate));
+        const selectedEndDateTime = dayjs(new Date(endDate));
 
         if (productStartDateTime.isAfter(selectedEndDateTime)) {
           element.invalidDate = true;
         } else if (product) {
-          const productEndDateTime = moment(new Date(product?.endDate));
+          const productEndDateTime = dayjs(new Date(product?.endDate));
           if (productEndDateTime.isAfter(selectedEndDateTime)) {
             element.invalidDate = true;
           } else {
@@ -625,7 +625,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         }
 
         if (element?.manualEndDate) {
-          const productManualEndDate = moment(new Date(element?.manualEndDate));
+          const productManualEndDate = dayjs(new Date(element?.manualEndDate));
           if (selectedEndDateTime.isAfter(productManualEndDate)) {
             values.actualEndDate = element?.manualEndDate;
           }
@@ -974,7 +974,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                             ? 'Please select items to apply'
                             : selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry)
                               ? ''
-                              : !moment(endDate)?.isValid()
+                              : !dayjs(endDate)?.isValid()
                                 ? 'Please select valid date'
                                 : ''
                         }
@@ -986,7 +986,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                               isApplingDate ||
                               !Boolean(
                                 selectedRecords?.length &&
-                                ((endDate && moment(endDate)?.isValid()) || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
+                                ((endDate && dayjs(endDate)?.isValid()) || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
                               )
                             }
                             onClick={() => {

@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Box } from '@mui/material';
-import moment from 'moment';
 import FilterModel from '../Helper/FilterModel';
 import TimleineChart from '../Helper/TimelineChart';
+import dayjs from 'dayjs';
 
 const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
   const [dateFilters, setDateFilters] = useState({
-    from: new Date(moment().subtract(8, 'days').startOf('day').toJSON()),
+    from: new Date(dayjs().subtract(8, 'days').startOf('day').toJSON()),
     to: new Date(),
     intervals: 'perCycle'
   });

@@ -1,6 +1,5 @@
 import dayjs from 'dayjs';
 import { uniq } from 'lodash';
-import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { dayjsLocalizer } from 'react-big-calendar';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -32,9 +31,9 @@ const CalendarView = ({ product, warehouse, storageLocation }) => {
     let datewise = [...response?.data?.data, ...response1?.data?.data];
     let datewiseData = [];
 
-    const uniqDate = uniq(datewise?.map((e) => moment(e.date).format('MM-DD-YYYY')));
+    const uniqDate = uniq(datewise?.map((e) => dayjs(e.date).format('MM-DD-YYYY')));
     uniqDate?.forEach((e) => {
-      let dayWiseRecord = datewise.filter((item) => moment(item.date).format('MM-DD-YYYY') === e);
+      let dayWiseRecord = datewise.filter((item) => dayjs(item.date).format('MM-DD-YYYY') === e);
       let lastFinalInventory;
       if (dayWiseRecord.length) {
         lastFinalInventory = dayWiseRecord[0];
@@ -70,7 +69,7 @@ const CalendarView = ({ product, warehouse, storageLocation }) => {
   return (
     <div className="relative">
       <CustomCalendar
-        defaultDate={moment().toDate()}
+        defaultDate={dayjs().toDate()}
         defaultView="month"
         events={activities}
         localizer={localizer}

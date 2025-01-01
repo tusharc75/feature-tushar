@@ -6,10 +6,10 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { ASSET_STATUS, CustomDialogTransition, convertDateInDateTime, displayDate } from 'src/constants/helpers';
-import moment from 'moment';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 const DateDialog = ({ title, type, status, onClose, handleSubmit, loading, assets = [] }) => {
   const [minDate, setMinDate] = useState(new Date());
@@ -33,7 +33,7 @@ const DateDialog = ({ title, type, status, onClose, handleSubmit, loading, asset
 
   function validate(values) {
     const errors = {};
-    if (!moment(values['date']).isSameOrAfter(moment(minDate))) {
+    if (!dayjs(values['date']).isSameOrAfter(dayjs(minDate))) {
       errors['date'] = `Please select valid date`;
     }
     return errors;

@@ -15,9 +15,9 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { uniq, map } from 'lodash';
 import axiosInstance from 'src/axios/axiosInstance';
-import moment from 'moment';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 const ReceiveDialog = ({ handleClose, selectedRecords, handleSucess, transferInventoryData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -49,7 +49,7 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSucess, transferInv
       }
     }
     if (fromLockDate && toLockDate) {
-      if (moment(fromLockDate).diff(moment(toLockDate), 'days') > 0) {
+      if (dayjs(fromLockDate).diff(dayjs(toLockDate), 'days') > 0) {
         setLockDate(fromLockDate);
       } else {
         setLockDate(toLockDate);
@@ -91,11 +91,11 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSucess, transferInv
   const validate = (values) => {
     const errors = {};
     if (lockDate) {
-      if (!moment(values['receiveDate']).isSameOrAfter(moment(lockDate))) {
+      if (!dayjs(values['receiveDate']).isSameOrAfter(dayjs(lockDate))) {
         errors['receiveDate'] = `Date entered prior to the locked date`;
       }
     }
-    if (moment(values['receiveDate']).isAfter(moment())) {
+    if (dayjs(values['receiveDate']).isAfter(dayjs())) {
       errors['receiveDate'] = `Please select valid date`;
     }
     return errors;

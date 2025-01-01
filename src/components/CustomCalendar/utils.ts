@@ -1,4 +1,4 @@
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 type ParsedEvents<D> = {
   start: string;
@@ -9,8 +9,8 @@ export const parseEventForMobile = <D>(events: ParsedEvents<D>[]): D[] => {
   // const parsedEvents: ParsedEvents<D>[] = [];
   const parsedEventsMap: { [key: string]: ParsedEvents<D> } = {};
   events.forEach((event) => {
-    const startDate = moment(event.start);
-    const endDate = moment(event.end);
+    const startDate = dayjs(event.start);
+    const endDate = dayjs(event.end);
     for (let date = startDate.clone(); date.isSameOrBefore(endDate); date.add(1, 'days')) {
       const formattedDate = date.format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]');
       const formatOnlyDate = date.format('YYYY-MM-DD');

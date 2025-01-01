@@ -1,6 +1,5 @@
 import { Box, IconButton, Typography } from '@mui/material';
 import { Close, Map } from '@mui/icons-material';
-import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -10,6 +9,7 @@ import ActivityList from './ActivityList';
 import Calendar from './Calendar';
 import CalendarList from './CalendarList';
 import MobileRoadmap from './MobileRoadmap';
+import dayjs from 'dayjs';
 
 function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician, handleUnAssignTechnician }) {
   const scrollRef = React.useRef(null);
@@ -61,8 +61,8 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician, han
   };
 
   let height = window.innerHeight / 2;
-  let startDate = moment('2023-01-01');
-  let endDate = moment('2025-12-31');
+  let startDate = dayjs('2023-01-01');
+  let endDate = dayjs('2025-12-31');
   let totalDay = endDate.diff(startDate, 'days');
 
   var dayPixel = 0;
@@ -212,7 +212,7 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician, han
                       height={'100%'}
                       style={{
                         position: 'absolute',
-                        left: (100 * moment().diff(startDate, 'days')) / totalDay + '%',
+                        left: (100 * dayjs().diff(startDate, 'days')) / totalDay + '%',
                         width: dayPixel
                       }}
                     >

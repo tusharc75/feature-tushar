@@ -9,6 +9,10 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import advancedFormat from 'dayjs/plugin/advancedFormat';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+import quarterOfYear from "dayjs/plugin/quarterOfYear";
+import isBetween from "dayjs/plugin/isBetween";
+import duration from 'dayjs/plugin/duration';
 
 const TimezoneLocalizationProvider = ({ children }) => {
 
@@ -23,6 +27,10 @@ const TimezoneLocalizationProvider = ({ children }) => {
   dayjs.extend(isSameOrAfter);
   dayjs.extend(advancedFormat);
   dayjs.extend(localizedFormat);
+  dayjs.extend(isSameOrBefore);
+  dayjs.extend(quarterOfYear);
+  dayjs.extend(isBetween);
+  dayjs.extend(duration);
   dayjs.tz.setDefault(user?.user?.timezone || 'America/New_York');
 
   return (

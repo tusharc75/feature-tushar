@@ -15,13 +15,13 @@ import FormTypes from '../../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { uniq, map, orderBy, isEqual, uniqBy } from 'lodash';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import moment from 'moment';
 import { bulkUpdate, calculateRowsField } from 'src/components/RentalManagment/helper';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -317,8 +317,8 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
 
   function validate(values) {
     const errors = {};
-    let startDate = moment(values?.estimateStartDate);
-    let endDate = moment(values?.estimateEndDate);
+    let startDate = dayjs(values?.estimateStartDate);
+    let endDate = dayjs(values?.estimateEndDate);
     if (endDate.diff(startDate, 'days') < 0) {
       errors['endDate'] = 'Please enter valid end date';
     }

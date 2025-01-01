@@ -1,11 +1,11 @@
 import { flatMapDeep, isEmpty, snakeCase, uniqBy } from 'lodash';
-import moment from 'moment';
 import React from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import xlsx from 'xlsx-js-style';
 import { TColType } from './TableComponents/TableHelperComponents';
 import { FilterModel } from './types';
 import { Column, Header, Table } from '@tanstack/react-table';
+import dayjs from 'dayjs';
 
 export const childrenProperty = 'subRows';
 
@@ -535,7 +535,7 @@ export const createFilterModel = (formValues, coloums) => {
         break;
       case 'year':
         if (formValues[fieldName]) {
-          filterModel.set(fieldName, { filter: moment(new Date(formValues[fieldName])).format('YYYY') });
+          filterModel.set(fieldName, { filter: dayjs(new Date(formValues[fieldName])).format('YYYY') });
         }
         break;
       case 'multiSelect':
@@ -564,8 +564,8 @@ export const createFilterModel = (formValues, coloums) => {
         if (fromDate || toDate) {
           filterModel.set(fieldName, {
             filter: {
-              from: fromDate ? moment(new Date(fromDate)).format('MM/DD/YYYY') : null,
-              to: toDate ? moment(new Date(toDate)).format('MM/DD/YYYY') : null
+              from: fromDate ? dayjs(new Date(fromDate)).format('MM/DD/YYYY') : null,
+              to: toDate ? dayjs(new Date(toDate)).format('MM/DD/YYYY') : null
             }
           });
         }

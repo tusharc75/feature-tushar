@@ -1,6 +1,5 @@
 import { Box } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import moment from 'moment';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -9,6 +8,7 @@ import SearchBox from 'src/components/Helpers/SearchBox';
 import { useDebounce } from 'src/hooks';
 import FilterModel from '../Helper/FilterModel';
 import CollapsibleTree from './CollapsibleTree';
+import dayjs from 'dayjs';
 
 const group = (categories, data, searchKeyword = '') => {
   if (categories?.length === 0 || data?.length === 0 || !categories || !data) return [];
@@ -33,7 +33,7 @@ const group = (categories, data, searchKeyword = '') => {
 const Analysis = ({ assetId, dataPoints }: { assetId: string; dataPoints: any[] }) => {
   const toastConfig = useContext(CustomToastContext);
   const [dateFilters, setDateFilters] = useState({
-    from: new Date(moment().subtract(8, 'days').format('MM/DD/YYYY')),
+    from: new Date(dayjs().subtract(8, 'days').format('MM/DD/YYYY')),
     to: new Date(),
     intervals: 'perCycle'
   });
