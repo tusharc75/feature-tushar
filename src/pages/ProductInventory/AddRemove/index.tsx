@@ -18,10 +18,10 @@ import {
   sidebarResource
 } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import moment from 'moment';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomDatePicker from 'src/components/CustomDatePicker';
+import dayjs from 'dayjs';
 
 const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, storageLocation = null }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -159,7 +159,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
             : product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), serialNumberIds: serialNumberIds.map((item) => item?._id) })),
         warehouse: warehouse,
         storageLocation: values.storageLocation,
-        customDate: moment(values.customDate).format('MM/DD/YYYY'),
+        customDate: dayjs(values.customDate).format('MM/DD/YYYY'),
         comment: values.comment
       };
       axiosInstance()
@@ -186,7 +186,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
       errors['qty'] = 'Please enter valid qty';
     }
 
-    if (values.customDate === null || !moment(values.customDate).isValid()) {
+    if (values.customDate === null || !dayjs(values.customDate).isValid()) {
       errors['customDate'] = 'Please select valid date';
     }
 
@@ -228,12 +228,12 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
     }
 
     if (lockDate) {
-      if (!moment(values['customDate']).isSameOrAfter(moment(lockDate))) {
+      if (!dayjs(values['customDate']).isSameOrAfter(dayjs(lockDate))) {
         errors['customDate'] = `Date entered prior to the locked date`;
       }
     }
 
-    if (moment(values['customDate']).isAfter(moment())) {
+    if (dayjs(values['customDate']).isAfter(dayjs())) {
       errors['customDate'] = `Please select valid date`;
     }
 
@@ -439,7 +439,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                         setFieldValue('customDate', newDate);
                         if (!user?.user?.brandPolicy?.allowNegativeInventory) {
                           if (type === 'remove' && product.length === 1) {
-                            var date = moment(newDate);
+                            var date = dayjs(newDate);
                             if (date.isValid()) {
                               var api = `${productInventory.api}/inventory-at-date?date=${newDate}&warehouse=${warehouse}&product=${product[0]._id}`;
                               if (values['storageLocation']) {

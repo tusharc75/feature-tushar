@@ -3,7 +3,6 @@ import Grid from '@mui/material/Grid2';
 import Dialog from '@mui/material/Dialog';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
-import moment from 'moment';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
@@ -31,6 +30,7 @@ import {
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 const ManageRepairOrder = ({
   isClone = false,
@@ -342,7 +342,7 @@ const ManageRepairOrder = ({
                                           size="small"
                                           minDate={new Date()}
                                           maxDate={
-                                            values['expectedCompletionDate'] ? moment(values['expectedCompletionDate']) : moment().add(5, 'years')
+                                            values['expectedCompletionDate'] ? dayjs(values['expectedCompletionDate']) : dayjs().add(5, 'years')
                                           }
                                         />
                                       ) : field.fieldName === 'expectedCompletionDate' ? (

@@ -14,7 +14,6 @@ import {
 } from '@mui/material';
 import dayjs from 'dayjs';
 import { kebabCase } from 'lodash';
-import moment from 'moment';
 import { forwardRef, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { View, dayjsLocalizer } from 'react-big-calendar';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss';
@@ -47,58 +46,16 @@ function WorkOrderCalendar({ getFilterQuery, filterQuery, reference, setOpen }, 
   const [view, setView] = useState<View>(mobileView ? 'day' : 'month');
 
   const [renderCount, setRenderCount] = useState(0);
-  const defaultDate = useMemo(() => moment().toDate(), []);
+  const defaultDate = useMemo(() => dayjs().toDate(), []);
 
   const [dateRange, setDateRange] = useState({
-    estimateStartDate: moment().startOf('month').format('MM/DD/YYYY'),
-    estimateEndDate: moment().endOf('month').format('MM/DD/YYYY')
-  });
-
-  const [month, setMonth] = useState({
-    startDate: moment().startOf('month').format('MM/DD/YYYY'),
-    endDate: moment().endOf('month').format('MM/DD/YYYY')
-  });
-  const [week, setWeek] = useState({
-    startDate: moment().startOf('week').format('MM/DD/YYYY'),
-    endDate: moment().endOf('week').format('MM/DD/YYYY')
-  });
-  const [day, setDay] = useState({
-    startDate: moment().startOf('day').format('MM/DD/YYYY'),
-    endDate: moment().endOf('day').format('MM/DD/YYYY')
-  });
-
-  const [agenda, setAgenda] = useState({
-    startDate: moment().startOf('day').format('MM/DD/YYYY'),
-    endDate: moment().add(1, 'months').format('MM/DD/YYYY')
+    estimateStartDate: dayjs().startOf('month').format('MM/DD/YYYY'),
+    estimateEndDate: dayjs().endOf('month').format('MM/DD/YYYY')
   });
 
   const [isDataFetching, setIsDataFetching] = useState(false);
   const [openRepairPopup, setOpenRepairPopup] = useState({ open: false, data: null });
   const [anchor, setAnchor] = useState(null);
-
-  useEffect(() => {
-    if (view === 'month') {
-      setMonth({
-        startDate: dateRange.estimateStartDate,
-        endDate: dateRange.estimateEndDate
-      });
-    } else if (view === 'week') {
-      setWeek({
-        startDate: dateRange.estimateStartDate,
-        endDate: dateRange.estimateEndDate
-      });
-    } else if (view === 'day') {
-      setDay({
-        startDate: dateRange.estimateStartDate,
-        endDate: dateRange.estimateEndDate
-      });
-    } else if (view === 'agenda') {
-      setAgenda({
-        startDate: dateRange.estimateStartDate,
-        endDate: dateRange.estimateEndDate
-      });
-    }
-  }, [dateRange]);
 
   useEffect(() => {
     fetchData();
@@ -165,27 +122,7 @@ function WorkOrderCalendar({ getFilterQuery, filterQuery, reference, setOpen }, 
 
   useEffect(() => {
     if (renderCount !== 0) {
-      if (view === 'month') {
-        setDateRange({
-          estimateStartDate: month.startDate,
-          estimateEndDate: month.endDate
-        });
-      } else if (view === 'week') {
-        setDateRange({
-          estimateStartDate: week.startDate,
-          estimateEndDate: week.endDate
-        });
-      } else if (view === 'day') {
-        setDateRange({
-          estimateStartDate: day.startDate,
-          estimateEndDate: day.endDate
-        });
-      } else if (view === 'agenda') {
-        setDateRange({
-          estimateStartDate: agenda.startDate,
-          estimateEndDate: agenda.endDate
-        });
-      }
+      onNavigate(new Date());
     } else {
       setRenderCount(renderCount + 1);
     }
@@ -194,23 +131,23 @@ function WorkOrderCalendar({ getFilterQuery, filterQuery, reference, setOpen }, 
   const onNavigate = (date) => {
     if (view === 'month') {
       setDateRange({
-        estimateStartDate: moment(date).startOf('month').format('MM/DD/YYYY'),
-        estimateEndDate: moment(date).endOf('month').format('MM/DD/YYYY')
+        estimateStartDate: dayjs(date).startOf('month').format('MM/DD/YYYY'),
+        estimateEndDate: dayjs(date).endOf('month').format('MM/DD/YYYY')
       });
     } else if (view === 'week') {
       setDateRange({
-        estimateStartDate: moment(date).startOf('week').format('MM/DD/YYYY'),
-        estimateEndDate: moment(date).endOf('week').format('MM/DD/YYYY')
+        estimateStartDate: dayjs(date).startOf('week').format('MM/DD/YYYY'),
+        estimateEndDate: dayjs(date).endOf('week').format('MM/DD/YYYY')
       });
     } else if (view === 'day') {
       setDateRange({
-        estimateStartDate: moment(date).format('MM/DD/YYYY'),
-        estimateEndDate: moment(date).format('MM/DD/YYYY')
+        estimateStartDate: dayjs(date).format('MM/DD/YYYY'),
+        estimateEndDate: dayjs(date).format('MM/DD/YYYY')
       });
     } else if (view === 'agenda') {
       setDateRange({
-        estimateStartDate: moment(date).format('MM/DD/YYYY'),
-        estimateEndDate: moment(date).add(1, 'months').format('MM/DD/YYYY')
+        estimateStartDate: dayjs(date).format('MM/DD/YYYY'),
+        estimateEndDate: dayjs(date).add(1, 'months').format('MM/DD/YYYY')
       });
     }
   };

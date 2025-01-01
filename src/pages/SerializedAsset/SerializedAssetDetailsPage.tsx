@@ -6,7 +6,6 @@ import BuildIcon from '@mui/icons-material/Build';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import { Skeleton } from '@mui/material';
 import { round, startCase } from 'lodash';
-import moment from 'moment';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
 import { RiExchange2Line } from 'react-icons/ri';
@@ -53,6 +52,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import SendIcon from '@mui/icons-material/Send';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import EditIcon from '@mui/icons-material/Edit';
+import dayjs from 'dayjs';
 
 const SerializedAssetDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -116,14 +116,14 @@ const SerializedAssetDetailsPage = () => {
         data: { data }
       } = await axiosInstance().post(`${serializedAsset.api}/inventory-stats`, { ids: [id] });
       if (data.totalUtilization) {
-        data[`totalUtilizationHours`] = `${round(moment.duration(data?.totalUtilization).asHours())}:${Math.floor(
-          moment.duration(data?.totalUtilization).asMinutes() % 60
+        data[`totalUtilizationHours`] = `${round(dayjs.duration(data?.totalUtilization).asHours())}:${Math.floor(
+          dayjs.duration(data?.totalUtilization).asMinutes() % 60
         )}`;
         delete data?.totalUtilization;
       }
       if (data.totalInUseTimeAfterLastRepair) {
-        data[`totalInUseTimeAfterLastRepairHours`] = `${round(moment.duration(data?.totalInUseTimeAfterLastRepair).asHours())}:${Math.floor(
-          moment.duration(data?.totalInUseTimeAfterLastRepair).asMinutes() % 60
+        data[`totalInUseTimeAfterLastRepairHours`] = `${round(dayjs.duration(data?.totalInUseTimeAfterLastRepair).asHours())}:${Math.floor(
+          dayjs.duration(data?.totalInUseTimeAfterLastRepair).asMinutes() % 60
         )}`;
         delete data?.totalInUseTimeAfterLastRepair;
       }

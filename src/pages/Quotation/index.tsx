@@ -2,7 +2,6 @@ import { Box, Chip, IconButton, MenuItem } from '@mui/material';
 import { Delete, Help, Warning } from '@mui/icons-material';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
-import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -31,6 +30,7 @@ import {
 import ManageQuotationDialog from './ManageQuotationDialog';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
+import dayjs from 'dayjs';
 
 const Quotation = () => {
   const renderedFrom = camelCase(sidebarResource?.quotation);
@@ -86,7 +86,7 @@ const Quotation = () => {
             </Link>
             {row.original?.type === QUOTATION_TYPE.rentalJob && (
               <>
-                {moment(row.original?.estimateEndDate).isBefore(moment(), 'day') && (
+                {dayjs(row.original?.estimateEndDate).isBefore(dayjs(), 'day') && (
                   <Box ml={1}>
                     <HtmlTooltip title={`${resources?.quotation?.titleSingular} Expired`} enterTouchDelay={0} arrow placement="top">
                       <Warning className=" cursor-pointer text-[22px] md:text-[14px]" fontSize="small" color="error" />
@@ -148,8 +148,8 @@ const Quotation = () => {
   };
 
   const isDateWithinNext15Days = (endData) => {
-    var a = moment(endData);
-    var b = moment();
+    var a = dayjs(endData);
+    var b = dayjs();
     const days = a.diff(b, 'days');
     if (days < 15 && days >= 0) {
       return true;

@@ -25,8 +25,8 @@ import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
-import moment from 'moment';
 import InputField from 'src/components/Helpers/InputField';
+import dayjs from 'dayjs';
 
 const ManageQuotationDialog = ({
   isClone,
@@ -210,10 +210,10 @@ const ManageQuotationDialog = ({
 
   const validate = (values) => {
     const errors = {};
-    let estimateStartDate = moment(values?.estimateStartDate);
-    let estimateEndDate = moment(values?.estimateEndDate);
-    let supplierSuggestedDeliveryDate = moment(values?.supplierSuggestedDeliveryDate);
-    let expectedCustomerDeliveryDate = moment(values?.expectedCustomerDeliveryDate);
+    let estimateStartDate = dayjs(values?.estimateStartDate);
+    let estimateEndDate = dayjs(values?.estimateEndDate);
+    let supplierSuggestedDeliveryDate = dayjs(values?.supplierSuggestedDeliveryDate);
+    let expectedCustomerDeliveryDate = dayjs(values?.expectedCustomerDeliveryDate);
 
     if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
       errors['estimateEndDate'] = 'Please enter valid estimate end date';

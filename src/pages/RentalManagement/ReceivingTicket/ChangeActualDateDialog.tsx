@@ -6,7 +6,6 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import FormTypes from 'src/components/Helpers/FormTypes';
-import moment from 'moment';
 import { useData } from 'src/StateProvider/Provider';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -14,6 +13,7 @@ import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, isBulkUpdate, records, rentalId }) => {
   const {
@@ -55,15 +55,15 @@ const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, isBulkUp
   function validate(values) {
     const errors = {};
     if (data?.isAllowedStartDate && data?.isAllowedEndDate) {
-      let manualStartDate = moment(values?.manualStartDate);
-      let manualEndDate = moment(values?.manualEndDate);
+      let manualStartDate = dayjs(values?.manualStartDate);
+      let manualEndDate = dayjs(values?.manualEndDate);
       if (manualEndDate.diff(manualStartDate, 'days') < 0) {
         errors['manualEndDate'] = 'Please enter valid end date';
       }
     }
     if (minStartDate) {
-      let manualStartDate = moment(values?.manualStartDate);
-      let newMinStartDate = moment(minStartDate);
+      let manualStartDate = dayjs(values?.manualStartDate);
+      let newMinStartDate = dayjs(minStartDate);
       if (manualStartDate.diff(newMinStartDate, 'days') < 0) {
         errors['manualStartDate'] = 'Please enter valid start date';
       }

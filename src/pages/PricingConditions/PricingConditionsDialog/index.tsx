@@ -17,7 +17,7 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { isEqual, startCase } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import { useData } from '../../../StateProvider/Provider';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 const PricingConditionsDialog = ({ pricingConditionId, onClose, onSuccess, isUpdateDisabled = false, isClone = false }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -100,8 +100,8 @@ const PricingConditionsDialog = ({ pricingConditionId, onClose, onSuccess, isUpd
 
   function validate(values) {
     const errors = {};
-    let startDate = moment(values?.startDate);
-    let endDate = moment(values?.endDate);
+    let startDate = dayjs(values?.startDate);
+    let endDate = dayjs(values?.endDate);
     if (endDate.diff(startDate, 'days') < 0) {
       errors['endDate'] = 'Please enter valid end date';
     }

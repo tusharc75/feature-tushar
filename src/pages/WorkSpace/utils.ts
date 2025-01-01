@@ -1,9 +1,10 @@
-import moment from 'moment';
+import dayjs from "dayjs";
+
 
 export function formatDateWithTodayYestarday(date: Date | string, options?: { onlyMonths?: boolean; dateFormat?: string }) {
   const { onlyMonths, dateFormat } = options || { onlyMonths: false };
-  const now = moment();
-  const inputDate = moment(date, dateFormat);
+  const now = dayjs();
+  const inputDate = dayjs(date, dateFormat);
 
   if (onlyMonths) {
     if (inputDate.isSame(now, 'day')) {

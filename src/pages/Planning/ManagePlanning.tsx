@@ -15,9 +15,9 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import { useHistory } from 'react-router-dom';
-import moment from 'moment';
 import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const {
@@ -127,8 +127,8 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
 
   function validate(values) {
     const errors = {};
-    const startDate = moment(values?.startDate);
-    const endDate = moment(values?.endDate);
+    const startDate = dayjs(values?.startDate);
+    const endDate = dayjs(values?.endDate);
     if (endDate.diff(startDate, 'days') < 0) {
       errors['endDate'] = 'End Date can not be less than the Start date';
     }

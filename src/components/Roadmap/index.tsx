@@ -1,16 +1,10 @@
 import React, { useState } from 'react';
-import moment from 'moment';
-import { getDaysBetweenDates } from 'src/components/Roadmap/utils';
 
 type RoadmapProps<T> = {
   sidebarHeaderName: string | React.ReactNode;
   data: T[];
   sidebarItemRenderer: (data: T, index: number) => React.ReactNode;
   contentItemRenderer: (data: T, index: number) => React.ReactNode;
-  getContentStartDate: (data: T) => moment.Moment;
-  getContentEndDate: (data: T) => moment.Moment;
-  startDate?: moment.Moment;
-  endDate?: moment.Moment;
   sidebarItemOnClick?: (data: T, index: number) => void;
   contentItemOnClick?: (data: T, index: number) => void;
   showViewChanger?: boolean;
@@ -21,10 +15,6 @@ function Roadmap<T>({
   data,
   sidebarItemRenderer,
   contentItemRenderer,
-  getContentStartDate,
-  getContentEndDate: contentEndDate,
-  startDate = moment().startOf('year'),
-  endDate = moment().endOf('year'),
   sidebarItemOnClick,
   contentItemOnClick,
   showViewChanger

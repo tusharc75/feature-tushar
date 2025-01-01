@@ -4,7 +4,6 @@ import HistoryIcon from '@mui/icons-material/History';
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase } from 'lodash';
-import moment from 'moment';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import SearchBox from 'src/components/Helpers/SearchBox';
@@ -28,6 +27,7 @@ import CertificateHistoryDialog from './CertificateHistoryDialog';
 import IssueCertificateDialog from './IssueCertificateDialog';
 import axios, { CancelTokenSource } from 'axios';
 import CustomDatePicker from 'src/components/CustomDatePicker';
+import dayjs from 'dayjs';
 
 const renderedFrom = camelCase(CHILD_RESOURCE?.serializedAssetsCertification);
 
@@ -99,8 +99,8 @@ const SerializedAssetsCertification = () => {
       .then(({ data }) => {
         let rows = data?.data?.map((u, user) => {
           let finalObject = prepareDataForGrid(u, user);
-          const dateToQuery = moment().add(30, 'days').toDate();
-          const certificateExpiryDate = u.certificateExpiryDate ? moment(u.certificateExpiryDate).toDate() : null;
+          const dateToQuery = dayjs().add(30, 'days').toDate();
+          const certificateExpiryDate = u.certificateExpiryDate ? dayjs(u.certificateExpiryDate).toDate() : null;
           finalObject['canIssueCertificate'] = !certificateExpiryDate || certificateExpiryDate <= dateToQuery;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           return finalObject;

@@ -1,14 +1,14 @@
 import React, { useEffect, memo } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import moment from 'moment';
 import { Virtualizer } from '@tanstack/react-virtual';
+import dayjs from 'dayjs';
 
 const getAllDaysInMonthFormatted = (date: any): string[] => {
   const daysInMonth = date.daysInMonth();
   const days: string[] = [];
   for (let day = 1; day <= daysInMonth; day++) {
-    days.push(moment(date).date(day).format('D dd'));
+    days.push(dayjs(date).date(day).format('D dd'));
   }
   return days;
 };

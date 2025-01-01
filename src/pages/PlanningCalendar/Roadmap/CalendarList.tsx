@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import { SimpleTreeView, TreeItem } from '@mui/x-tree-view';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import React from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { displayDateTime } from 'src/constants/helpers';
@@ -65,8 +65,8 @@ const TreeNode = ({ obj, index, endDate, startDate, totalDay, dayPixel }) => {
     return (
       <Box key={index} width={'100%'} height={30} className="hover:bg-[var(--dark-secondary,#eef5f4)]">
         {data.map((data, i) => {
-          const left = (100 * moment(data.startDate).diff(startDate, 'days')) / totalDay;
-          const right = (100 * endDate.diff(moment(data.endDate), 'days')) / totalDay;
+          const left = (100 * dayjs(data.startDate).diff(startDate, 'days')) / totalDay;
+          const right = (100 * endDate.diff(dayjs(data.endDate), 'days')) / totalDay;
 
           return (
             <HtmlTooltip

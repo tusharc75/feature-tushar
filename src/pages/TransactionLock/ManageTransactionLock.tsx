@@ -16,9 +16,9 @@ import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import { isEqual } from 'lodash';
-import moment from 'moment';
 import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 const ManageTransactionLock = ({ isClone = false, id = null, onClose, onSuccess }) => {
   const history = useHistory();
@@ -136,8 +136,8 @@ const ManageTransactionLock = ({ isClone = false, id = null, onClose, onSuccess 
 
   function validate(values) {
     const errors = {};
-    let fromDate = moment(values?.fromDate);
-    let toDate = moment(values?.toDate);
+    let fromDate = dayjs(values?.fromDate);
+    let toDate = dayjs(values?.toDate);
     if (toDate.diff(fromDate, 'days') < 0) {
       errors['toDate'] = 'Please enter valid to date';
     }
