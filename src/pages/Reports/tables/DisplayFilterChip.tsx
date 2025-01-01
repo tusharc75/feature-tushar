@@ -86,7 +86,7 @@ const DisplayFilterChip = ({
     uniqueFilters?.forEach((d) => {
       if (d.field.startsWith('from_') || d.field.startsWith('to_')) {
         const title = d.field.replace('from_', '').replace('to_', '');
-        dateObj[title] = dateObj[title] ? `${dateObj[title]} - ${displayDate(d.term, 'MM/DD/YYYY')}` : displayDate(d.term, 'MM/DD/YYYY');
+        dateObj[title] = dateObj[title] ? `${dateObj[title]} - ${displayDate(d.term)}` : displayDate(d.term);
       } else {
         otherData.push(d);
       }

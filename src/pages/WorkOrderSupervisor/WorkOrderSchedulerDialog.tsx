@@ -128,7 +128,7 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
             validate={validate}
             onSubmit={handleSubmit}
           >
-            {({ touched, errors, values, setFieldValue }) => (
+            {({ touched, errors, values, setFieldValue, submitForm }) => (
               <Form autoComplete="off" autoCorrect="off" noValidate style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <CustomDialogHeader
                   isMinimized={!fullScreen}
@@ -229,7 +229,7 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                   <ThemeButton buttonType="transparent" onClick={() => onClose()}>
                     Cancel
                   </ThemeButton>
-                  <ThemeButton onClick={()=>{onSuccess()}} isLoading={loading}
+                  <ThemeButton onClick={submitForm} isLoading={loading}
                     buttonType="theme">
                     Save
                   </ThemeButton>
