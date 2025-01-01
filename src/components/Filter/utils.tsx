@@ -10,9 +10,9 @@ export const getLabel = (field: ColumnDefaultT, values: { field: string; term: s
       let formattedMessage = '';
       found.forEach((d) => {
         if ((d.field as string).startsWith('from_')) {
-          formattedMessage += `From: ${displayDate(d.term, 'MM/DD/YYYY')}`;
+          formattedMessage += `From: ${displayDate(d.term)}`;
         } else if ((d.field as string).startsWith('to_')) {
-          formattedMessage += `${found.length === 2 ? ', ' : ''}To: ${displayDate(d.term, 'MM/DD/YYYY')}`;
+          formattedMessage += `${found.length === 2 ? ', ' : ''}To: ${displayDate(d.term)}`;
         }
       });
       return (
