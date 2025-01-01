@@ -106,7 +106,7 @@ const AddInvoice = ({ purchaseOrderId, invoiceData = null, handleClose, handleSu
           <Fragment>
             <CustomDialogContent>
               <Grid container spacing={2}>
-                <Grid size={{xs:12, md:12, sm:12}} >
+                <Grid size={{ xs: 12, md: 12, sm: 12 }}>
                   <TextField
                     margin="dense"
                     size="small"
@@ -124,7 +124,7 @@ const AddInvoice = ({ purchaseOrderId, invoiceData = null, handleClose, handleSu
                     }}
                   />
                 </Grid>
-                <Grid size={{xs:12, md:12, sm:12}} >
+                <Grid size={{ xs: 12, md: 12, sm: 12 }}>
                   <CustomDatePicker
                     fullWidth
                     size="small"
@@ -143,7 +143,7 @@ const AddInvoice = ({ purchaseOrderId, invoiceData = null, handleClose, handleSu
             </CustomDialogContent>
             <CustomDialogFooter>
               <ThemeButton
-buttonType="transparent"
+                buttonType="transparent"
                 onClick={() => {
                   handleClose();
                 }}

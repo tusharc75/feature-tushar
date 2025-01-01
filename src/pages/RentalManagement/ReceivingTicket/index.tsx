@@ -2517,6 +2517,7 @@ const ReceivingTicket = ({
               Cancel
             </ThemeButton>
             <ThemeButton
+              onClick={handleChangeStatus}
               disabled={statusToUpdate.isUpdating}
               buttonType='theme'
               isLoading={statusToUpdate.isUpdating}

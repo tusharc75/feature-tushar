@@ -126,7 +126,6 @@ const HistorySidebar = ({
           iconForMobile={<Chat fontSize={'small'} />}
           buttonType="theme"
           startIcon={<Chat fontSize={'small'} />}
-          size="small"
           onClick={() => hadleNewChat()}
           style={{ padding: 8 }}
         >

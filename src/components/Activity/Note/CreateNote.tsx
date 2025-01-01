@@ -259,10 +259,10 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
         <CommonSkeleton lenArray={[...Array(4).keys()]} />
       </CustomDialogContent>
       <CustomDialogFooter>
-        <ThemeButton buttonType="transparent" disabled>
+        <ThemeButton buttonType="transparent" onClick={handleClose} disabled>
           Cancel
         </ThemeButton>
-        <ThemeButton buttonType="theme" disabled>
+        <ThemeButton buttonType="theme" onClick={handleSave} disabled>
           Save
         </ThemeButton>
       </CustomDialogFooter>

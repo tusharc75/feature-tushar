@@ -112,27 +112,27 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
       },
       ...(resource === sidebarResource.fieldTicket
         ? [
-          {
-            accessor: 'fieldTicketNumber',
-            Header: 'Field Ticket',
-            disabled: true,
-            Cell: ({ row }) => (
-              <div className="flex items-center gap-2">
-                <p className="text-truncate">{row.original.fieldTicketNumber}</p>
-                {permissions?.fieldTicket?.isRead && (
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      window.open(`${routes.fieldTicketDetail.path}/${row.original.fieldTicketId}`);
-                    }}
-                  >
-                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                  </IconButton>
-                )}
-              </div>
-            )
-          }
-        ]
+            {
+              accessor: 'fieldTicketNumber',
+              Header: 'Field Ticket',
+              disabled: true,
+              Cell: ({ row }) => (
+                <div className="flex items-center gap-2">
+                  <p className="text-truncate">{row.original.fieldTicketNumber}</p>
+                  {permissions?.fieldTicket?.isRead && (
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.fieldTicketDetail.path}/${row.original.fieldTicketId}`);
+                      }}
+                    >
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                    </IconButton>
+                  )}
+                </div>
+              )
+            }
+          ]
         : []),
       {
         accessor: 'detail',
@@ -432,8 +432,8 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
           <Fragment>
             {progressiveBilling && (
               <Grid container className={styles.rental_header_layout}>
-                <Grid size={{xs:12, md:6, sm:12}} className="d-flex align-items-center layout-for-tablet gap-1"></Grid>
-                <Grid size={{xs:12, md:6, sm:12}} className={styles.filter_side}>
+                <Grid size={{ xs: 12, md: 6, sm: 12 }} className="d-flex align-items-center layout-for-tablet gap-1"></Grid>
+                <Grid size={{ xs: 12, md: 6, sm: 12 }} className={styles.filter_side}>
                   <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                     <Grid style={{ display: 'flex', flex: 1, gap: '5px', alignItems: 'center' }} className={isMobile ? styles.content_box : ''}>
                       <CustomDatePicker
@@ -454,7 +454,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
                               id="dialog-apply-button"
                               isLoading={isDateApplying}
                               disabled={selectedRecords?.length && dayjs(endDate)?.isValid() ? isDateApplying : true}
-buttonType="theme"
+                              buttonType="theme"
                               onClick={() => {
                                 handleApplyDate();
                               }}
@@ -498,7 +498,7 @@ buttonType="theme"
         </CustomDialogContent>
         <CustomDialogFooter>
           <ThemeButton
-buttonType="transparent"
+            buttonType="transparent"
             onClick={() => {
               onClose();
             }}
@@ -521,7 +521,7 @@ buttonType="transparent"
                 disabled={
                   progressiveBilling ? isUpdating || !appliedDate || !rowsApplied?.length || rowsApplied.some((d) => d.invalidDate === true) : false
                 }
-buttonType="theme"
+                buttonType="theme"
                 onClick={() => {
                   if (resource === sidebarResource.fieldTicket && invoiceResourceData?.policy?.fieldTicketInvoiceFields?.length > 0) {
                     setOpenInvoiceDataDialog(true);

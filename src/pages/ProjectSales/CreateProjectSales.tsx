@@ -261,7 +261,7 @@ const CreateProjectSales = ({
               </CustomDialogContent>
               <CustomDialogFooter>
                 <ThemeButton
-buttonType="transparent"
+                  buttonType="transparent"
                   disabled={isSubmitting}
                   onClick={() => {
                     if (isEqual(initialData.values, values)) {
@@ -275,7 +275,7 @@ buttonType="transparent"
                 </ThemeButton>
                 <ThemeButton
                   isLoading={isSubmitting}
-buttonType="theme"
+                  buttonType="theme"
                   disabled={isSubmitting}
                   onClick={(e) => {
                     e.preventDefault();

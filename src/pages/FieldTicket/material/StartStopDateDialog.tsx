@@ -116,6 +116,7 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
                 Close
               </ThemeButton>
               <ThemeButton
+                onClick={handleSubmit}
                 disabled={loading}
                 isLoading={loading}
                 buttonType='theme'

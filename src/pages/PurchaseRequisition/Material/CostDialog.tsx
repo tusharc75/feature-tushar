@@ -124,7 +124,7 @@ const CostDialog = ({ onClose, purchaseRequisitionData, handleAddCost, handleUpd
               </CustomDialogContent>
               <CustomDialogFooter>
                 <ThemeButton
-buttonType="transparent"
+                  buttonType="transparent"
                   onClick={() => {
                     onClose();
                   }}
@@ -135,7 +135,7 @@ buttonType="transparent"
                   <ThemeButton
                     isLoading={loadingEdit}
                     disabled={loadingEdit}
-buttonType="theme"
+                    buttonType="theme"
                     onClick={() => {
                       setSaveAndNext(true);
                       submitForm();
@@ -148,7 +148,7 @@ buttonType="theme"
                 <ThemeButton
                   isLoading={loadingEdit}
                   disabled={loadingEdit}
-buttonType="theme"
+                  buttonType="theme"
                   onClick={() => {
                     setSaveAndNext(false);
                     submitForm();

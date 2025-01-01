@@ -146,14 +146,14 @@ function RevertQtyDialog({ referenceType, productName, product, onClose, onSucce
             </CustomDialogContent>
             <CustomDialogFooter>
               <ThemeButton
-buttonType="transparent"
+                buttonType="transparent"
                 onClick={() => {
                   onClose();
                 }}
               >
                 Cancel
               </ThemeButton>
-              <ThemeButton isLoading={loading} buttonType="theme" disabled={loading}>
+              <ThemeButton onClick={handleSubmit} isLoading={loading} buttonType="theme" disabled={loading}>
                 Revert
               </ThemeButton>
             </CustomDialogFooter>

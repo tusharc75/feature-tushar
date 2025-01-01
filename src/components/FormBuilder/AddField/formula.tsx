@@ -9,7 +9,7 @@ import FormControl from '@mui/material/FormControl';
 import { checkFormula } from '../../../constants/formulaUtility';
 import Chip from '@mui/material/Chip';
 import Autocomplete from '@mui/material/Autocomplete';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Grid2';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { IconButton } from '@mui/material';
 import { FiMaximize2 } from 'react-icons/fi';
@@ -163,7 +163,7 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
               }}
             />
             <Grid container>
-              <Grid item xs={6}>
+              <Grid size={{xs:6}}>
                 {formulaError && (
                   <Typography variant="caption" display="block">
                     {formulaError}{' '}
@@ -173,7 +173,7 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
                   Check Syntax
                 </ThemeButton>
               </Grid>
-              <Grid item xs={6}>
+              <Grid size={{xs:6}}>
                 {values['type'] === 'currencyAmount' && (
                   <FormControl fullWidth margin="dense" variant="outlined" size="small">
                     <InputLabel id="demo-simple-select-outlined-label">Formula applied on Currency</InputLabel>

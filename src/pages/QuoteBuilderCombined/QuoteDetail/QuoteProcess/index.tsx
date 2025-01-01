@@ -912,7 +912,7 @@ export default function QuoteProcess(props) {
             showRequiredLabel={false}
           />
           <CustomDialogContent isFooterPresent={false}>
-            <Grid item className="quoteHeader">
+            <Grid className="quoteHeader">
               <div className={redCard ? 'quoteBox quoteRed' : 'quoteBox quoteProfit'}>
                 <span className="quoteAmount" title={totalProfit.fullFormatAmount}>
                   {totalProfit.fullFormatAmount ? totalProfit.fullFormatAmount : defaultTotalValue}{' '}

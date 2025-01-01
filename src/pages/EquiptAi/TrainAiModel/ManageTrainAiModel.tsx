@@ -154,7 +154,7 @@ const ManageTrainAiModel = ({ trainAiModelId = null, onClose, onSuccess }) => {
               </CustomDialogContent>
               <CustomDialogFooter>
                 <ThemeButton
-buttonType="transparent"
+                  buttonType="transparent"
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
@@ -164,7 +164,7 @@ buttonType="transparent"
                 </ThemeButton>
                 <ThemeButton
                   isLoading={loading}
-buttonType="theme"
+                  buttonType="theme"
                   onClick={(e) => {
                     e.preventDefault();
                     handleScroll(errors);
@@ -178,7 +178,6 @@ buttonType="theme"
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

@@ -238,13 +238,13 @@ const StepsInOtherServices = ({ workOrderId, resource, service, allowedToEdit, o
                   borderColor={'var(--common-border-color)'}
                   className={`${classes.accordionHeading}  ${classes.white} transition-all duration-500 `}
                 >
-                  <Box sx={{ display: 'flex' }} gridGap={'8px'}>
+                  <Box sx={{ display: 'flex' }} gap={'8px'}>
                     <span className="rounded-full bg-[var(--primary)] px-[12px] py-[1px] text-[13px] text-white dark:bg-[var(--dark-primary)]">
                       {step?.order}
                     </span>
                     <Box
                       className="mr-auto flex basis-[calc(100%-56px)] flex-wrap items-center justify-between gap-[8px] sm:basis-[calc(100%-155px)]"
-                      gridGap={'8px'}
+                      gap={'8px'}
                     >
                       <Box className="flex flex-grow items-center gap-2 text-[var(--primary-text)]">
                         <div className="flex w-full items-start gap-2">

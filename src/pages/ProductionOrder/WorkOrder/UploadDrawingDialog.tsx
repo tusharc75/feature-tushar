@@ -39,36 +39,33 @@ const UploadDrawingDialog = ({ productionOrderData, handleClose }) => {
     }
   };
 
-  return (<Dialog open={true} onClose={handleClose} maxWidth="sm" TransitionComponent={CustomDialogTransition} fullWidth>
-    <CustomDialogHeader showRequiredLabel={false} title="Upload Drawings" onClose={handleClose} />
-    <CustomDialogContent>
-      <Box mt={2} mb={1}>
-        <input
-          id="zip-upload"
-          name="zip-upload"
-          type="file"
-          accept=".zip,application/zip,application/x-zip-compressed,application/pdf,.pdf,image/jpeg,image/png,image/gif,image/bmp"
-          multiple
-          onChange={handleUpload}
-          style={{ display: 'none' }}
-        />
-        <label htmlFor="zip-upload">
-          <ThemeButton
-            disabled={isUploading}
-            isLoading={isUploading}
-            buttonType='theme'
-          >
-            {isUploading ? 'Uploading...' : 'Select File *'}
-          </ThemeButton>
-        </label>
-      </Box>
-    </CustomDialogContent>
-    <CustomDialogFooter>
-      <ThemeButton buttonType='transparent' onClick={handleClose}>
-        Cancel
-      </ThemeButton>
-    </CustomDialogFooter>
-  </Dialog>
+  return (
+    <Dialog open={true} onClose={handleClose} maxWidth="sm" TransitionComponent={CustomDialogTransition} fullWidth>
+      <CustomDialogHeader showRequiredLabel={false} title="Upload Drawings" onClose={handleClose} />
+      <CustomDialogContent>
+        <Box mt={2} mb={1}>
+          <input
+            id="zip-upload"
+            name="zip-upload"
+            type="file"
+            accept=".zip,application/zip,application/x-zip-compressed,application/pdf,.pdf,image/jpeg,image/png,image/gif,image/bmp"
+            multiple
+            onChange={handleUpload}
+            style={{ display: 'none' }}
+          />
+          <label htmlFor="zip-upload">
+            <ThemeButton disabled={isUploading} isLoading={isUploading} buttonType="theme">
+              {isUploading ? 'Uploading...' : 'Select File *'}
+            </ThemeButton>
+          </label>
+        </Box>
+      </CustomDialogContent>
+      <CustomDialogFooter>
+        <ThemeButton buttonType="transparent" onClick={handleClose}>
+          Cancel
+        </ThemeButton>
+      </CustomDialogFooter>
+    </Dialog>
   );
 };
 
