@@ -3,7 +3,7 @@ import { Close } from '@mui/icons-material';
 import { camelCase, isEmpty, uniqBy } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { cn } from 'src/constants/helpers';
+import { cn, displayDate } from 'src/constants/helpers';
 import { ResourceColumn } from 'src/pages/Reports/types';
 
 type Dates = {
@@ -86,7 +86,7 @@ const DisplayFilterChip = ({
     uniqueFilters?.forEach((d) => {
       if (d.field.startsWith('from_') || d.field.startsWith('to_')) {
         const title = d.field.replace('from_', '').replace('to_', '');
-        dateObj[title] = dateObj[title] ? `${dateObj[title]} - ${d.term}` : d.term;
+        dateObj[title] = dateObj[title] ? `${dateObj[title]} - ${displayDate(d.term, 'MM/DD/YYYY')}` : displayDate(d.term, 'MM/DD/YYYY');
       } else {
         otherData.push(d);
       }
