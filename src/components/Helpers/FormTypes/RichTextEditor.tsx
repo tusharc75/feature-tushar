@@ -217,7 +217,6 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
                         startIcon={<HiOutlinePhotograph />}
                         buttonType='transparent'
                         disabled={isImageLoading}
-                        onClick={handleUploadImage}
                       >
                         Upload Image
                       </ThemeButton>

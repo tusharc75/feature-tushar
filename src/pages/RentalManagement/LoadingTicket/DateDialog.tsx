@@ -58,7 +58,7 @@ const DateDialog = ({ title, type, status, onClose, handleSubmit, loading, asset
           handleSubmit(displayDate(values.date), values?.status);
         }}
       >
-        {({ values, errors, touched, setFieldValue }) => (
+        {({ values, errors, touched, setFieldValue, submitForm }) => (
           <Form>
             <CustomDialogHeader title={title} onClose={onClose} />
             <CustomDialogContent>
@@ -117,7 +117,7 @@ const DateDialog = ({ title, type, status, onClose, handleSubmit, loading, asset
                 Close
               </ThemeButton>
               <ThemeButton
-                onClick={handleSubmit}
+                onClick={submitForm}
                 disabled={loading}
                 buttonType='theme'
                 isLoading={loading}

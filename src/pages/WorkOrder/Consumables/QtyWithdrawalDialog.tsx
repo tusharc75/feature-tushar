@@ -58,7 +58,7 @@ function QtyWithdrawalDialog({ referenceId, referenceType, onClose, data, onSucc
         validateOnMount
         validate={validate}
       >
-        {({ touched, errors, setFieldValue, values }) => (
+        {({ touched, errors, setFieldValue, values, submitForm }) => (
           <Form autoComplete="off" autoCorrect="off" noValidate>
             <CustomDialogContent>
               <TextField
@@ -91,9 +91,7 @@ function QtyWithdrawalDialog({ referenceId, referenceType, onClose, data, onSucc
               <ThemeButton
                 isLoading={loading}
                 buttonType="theme"
-                onClick={() => {
-                  onSuccess();
-                }}
+                onClick={submitForm}
                 disabled={loading}>
                 Close Request
               </ThemeButton>

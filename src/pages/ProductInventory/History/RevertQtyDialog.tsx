@@ -77,7 +77,7 @@ function RevertQtyDialog({ referenceType, productName, product, onClose, onSucce
         validateOnMount
         validate={validate}
       >
-        {({ touched, errors, setFieldValue, values }) => (
+        {({ touched, errors, setFieldValue, values, submitForm }) => (
           <Form autoComplete="off" autoCorrect="off" noValidate>
             <CustomDialogContent>
               <TextField
@@ -153,7 +153,7 @@ function RevertQtyDialog({ referenceType, productName, product, onClose, onSucce
               >
                 Cancel
               </ThemeButton>
-              <ThemeButton onClick={handleSubmit} isLoading={loading} buttonType="theme" disabled={loading}>
+              <ThemeButton onClick={submitForm} isLoading={loading} buttonType="theme" disabled={loading}>
                 Revert
               </ThemeButton>
             </CustomDialogFooter>
