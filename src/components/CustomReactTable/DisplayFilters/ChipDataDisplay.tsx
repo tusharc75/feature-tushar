@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import { Chip } from '@mui/material';
 import _ from 'lodash';
+import { displayDate } from 'src/constants/helpers';
 
 const DisplayChips = (props) => {
   const { chipData, setChipData, selectedFilter, handleFilterOpen, clearSingleFilter, clearFilterAll, setIsFilterPresent, customFilters, columns } =
@@ -16,12 +17,12 @@ const DisplayChips = (props) => {
       for (let i = 0; i < keys.length; i++) {
         const element = filterModel[keys[i]];
         const currentColumn = columns.find((col) => col.accessor === keys[i]);
-        if (currentColumn?.cellRenderer === 'dateRenderer') {
+        if (currentColumn?.type === 'date') {
           const dateValue =
             element.filter.from && element.filter.to
-              ? `${element.filter.from ? element.filter.from : null} - ${element.filter.to ? element.filter.to : null}`
+              ? `${element.filter.from ? displayDate(element.filter.from) : null} - ${element.filter.to ? displayDate(element.filter.to) : null}`
               : element.filter.from || element.filter.to
-                ? `${element.filter.from ? `${element.filter.from} (From Date)` : ''} ${element.filter.to ? `${element.filter.to} (To Date)` : ''}`
+                ? `${element.filter.from ? `${displayDate(element.filter.from)} (From Date)` : ''} ${element.filter.to ? `${displayDate(element.filter.to)} (To Date)` : ''}`
                 : null;
           const data = { title: currentColumn?.Header || _.startCase(keys[i]), value: dateValue, name: keys[i] };
           filterData.push(data);
