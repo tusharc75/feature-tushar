@@ -1,6 +1,7 @@
 import { startCase } from 'lodash';
 import { useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { displayDate } from 'src/constants/helpers';
 
 export const getLabel = (field: ColumnDefaultT, values: { field: string; term: string | any[] }[]) => {
   if (field?.type === 'date') {
@@ -9,9 +10,9 @@ export const getLabel = (field: ColumnDefaultT, values: { field: string; term: s
       let formattedMessage = '';
       found.forEach((d) => {
         if ((d.field as string).startsWith('from_')) {
-          formattedMessage += `From: ${d.term}`;
+          formattedMessage += `From: ${displayDate(d.term, 'MM/DD/YYYY')}`;
         } else if ((d.field as string).startsWith('to_')) {
-          formattedMessage += `${found.length === 2 ? ', ' : ''}To: ${d.term}`;
+          formattedMessage += `${found.length === 2 ? ', ' : ''}To: ${displayDate(d.term, 'MM/DD/YYYY')}`;
         }
       });
       return (
