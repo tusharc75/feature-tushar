@@ -320,7 +320,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
       {!loadingData && !loadingInitialData ? (
         initialData && (
           <Formik initialValues={initialData} onSubmit={handleSubmit} validateOnMount validate={validate}>
-            {({ touched, errors, setFieldValue, values }) => (
+            {({ touched, errors, setFieldValue, values, submitForm }) => (
               <Form autoComplete="off" autoCorrect="off" noValidate className="flex min-h-full flex-col">
                 <CustomDialogHeader
                   title={`${capitalize(type)} Inventory`}
@@ -552,7 +552,14 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                   <ThemeButton buttonType="transparent" onClick={handleClose}>
                     Cancel
                   </ThemeButton>
-                  <ThemeButton onClick={handleSubmit} isLoading={loading} type='submit' disabled={loading} buttonType="theme">
+                  <ThemeButton
+                    onClick={(e) => {
+                      e.preventDefault();
+                      submitForm();
+                    }}
+                    isLoading={loading}
+                    disabled={loading}
+                    buttonType="theme">
                     {capitalize(type)}
                   </ThemeButton>
                 </CustomDialogFooter>
