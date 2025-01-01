@@ -229,7 +229,7 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                   <ThemeButton buttonType="transparent" onClick={() => onClose()}>
                     Cancel
                   </ThemeButton>
-                  <ThemeButton onClick={handleSubmit} isLoading={loading}
+                  <ThemeButton onClick={()=>{onSuccess()}} isLoading={loading}
                     buttonType="theme">
                     Save
                   </ThemeButton>

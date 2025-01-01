@@ -222,7 +222,6 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
         <Box display="flex" flexDirection="column" component={'form'} onSubmit={handleSubmit}>
           <Box alignSelf={'flex-end'} mb={2}>
             <ThemeButton
-              onClick={handleSubmit}
               disabled={isSubmitting || dataWithNumber.length === 0}
               buttonType='theme'
               isLoading={isSubmitting}

@@ -224,16 +224,12 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
           </CustomDialogContent>
           <CustomDialogFooter>
             <ThemeButton
-              onClick={() => {
-                if ((Boolean(!values.name) && Boolean(!values.description)) || Boolean(!values.tier)) close();
-                else setShowConfirmDialog(true);
-              }}
               buttonType="theme"
               disabled={loading}
             >
               Cancel
             </ThemeButton>
-            <ThemeButton onClick={handleSubmit} buttonType="theme" disabled={loading}>
+            <ThemeButton buttonType="theme" disabled={loading}>
               Submit
             </ThemeButton>
           </CustomDialogFooter>

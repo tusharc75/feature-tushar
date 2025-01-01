@@ -108,10 +108,10 @@ const ManageCycleCountPInventory = ({ open, close, onSuccess }) => {
             </Grid>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <ThemeButton onClick={close} buttonType='transparent'>
+            <ThemeButton buttonType='transparent'>
               Cancel
             </ThemeButton>
-            <ThemeButton onClick={handleSubmit} buttonType='theme' disabled={loading}>
+            <ThemeButton buttonType='theme' disabled={loading}>
               Submit
             </ThemeButton>
           </CustomDialogFooter>

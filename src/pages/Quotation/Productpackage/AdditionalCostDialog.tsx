@@ -193,7 +193,7 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({
                   </ThemeButton>
                 )}
                 <ThemeButton
-                  isLoading={!loadingEdit}
+                  isLoading={Boolean(loadingEdit)}
                   disabled={isEqual(ref?.current?.values, initialData.values)}
                   buttonType="theme"
                   onClick={() => {

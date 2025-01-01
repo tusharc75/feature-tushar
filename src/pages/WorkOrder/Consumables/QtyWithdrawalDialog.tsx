@@ -91,7 +91,9 @@ function QtyWithdrawalDialog({ referenceId, referenceType, onClose, data, onSucc
               <ThemeButton
                 isLoading={loading}
                 buttonType="theme"
-                onClick={handleSubmit}
+                onClick={() => {
+                  onSuccess();
+                }}
                 disabled={loading}>
                 Close Request
               </ThemeButton>

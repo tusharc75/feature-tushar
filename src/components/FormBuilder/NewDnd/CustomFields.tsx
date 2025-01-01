@@ -105,7 +105,7 @@ const CustomFields = () => {
         </ThemeButton>
       </div>
       <div className="col-span-2">
-        <ThemeButton iconForMobile={false} onClick={handleImportFields} fullWidth>
+        <ThemeButton iconForMobile={false} fullWidth>
           <label htmlFor="importcustomField" className={`relative cursor-pointer`}>
             Import Custom Field
           </label>

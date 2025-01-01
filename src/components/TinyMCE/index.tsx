@@ -309,7 +309,7 @@ export default function TinyMCE(props) {
                 <Dialog
                   onClose={(event, reason) => {
                     if (reason !== 'backdropClick') {
-                      setIsUploadImage(false)
+                      setIsUploadImage(false);
                     }
                   }}
                   open={true}
@@ -323,7 +323,7 @@ export default function TinyMCE(props) {
                   <CustomDialogContent>
                     <div>
                       <Grid container spacing={3}>
-                        <Grid size={{xs:12}} style={{ display: 'flex' }}>
+                        <Grid size={{ xs: 12 }} style={{ display: 'flex' }}>
                           <input
                             id="avatar"
                             name="avatar"
@@ -340,11 +340,7 @@ export default function TinyMCE(props) {
 
                           <label htmlFor="avatar">
                             <IconButton title="Add picture" size="small" aria-label="upload picture" component="span">
-                              <ThemeButton
-                                buttonType="transparent"
-                                disabled={disabledEditor || isImageLoading}
-                                onClick={handleUploadImage}
-                              >
+                              <ThemeButton buttonType="transparent" disabled={disabledEditor || isImageLoading}>
                                 <HiOutlinePhotograph /> Upload Image
                               </ThemeButton>
                             </IconButton>
@@ -364,28 +360,31 @@ export default function TinyMCE(props) {
                           <Grid container>
                             {imageUrl ? (
                               <>
-                                <Grid size={{xs:10}}>
+                                <Grid size={{ xs: 10 }}>
                                   <Typography noWrap variant="body2">
                                     {imageUrl.substring(imageUrl.lastIndexOf('/') + 1)}
                                   </Typography>
                                 </Grid>
-                                <Grid size={{xs:2}}>
-                                  <ThemeButton onClick={() => setImageUrl('')}> <AiOutlineClose /> </ThemeButton>
+                                <Grid size={{ xs: 2 }}>
+                                  <ThemeButton onClick={() => setImageUrl('')}>
+                                    {' '}
+                                    <AiOutlineClose />{' '}
+                                  </ThemeButton>
                                 </Grid>
                               </>
                             ) : null}
 
                             {uploadError ? (
-                              <Grid size={{xs:12}}>
+                              <Grid size={{ xs: 12 }}>
                                 <Typography className={classes.errorText}>Please Upload Image/Photo</Typography>
                               </Grid>
                             ) : null}
                           </Grid>
                         ) : null}
-                        <Grid size={{xs:6}}>
+                        <Grid size={{ xs: 6 }}>
                           <TextField id="width" type="number" name="width" size="small" label="Width" variant="outlined" onChange={handleChange} />
                         </Grid>
-                        <Grid size={{xs:6}}>
+                        <Grid size={{ xs: 6 }}>
                           <TextField
                             id="height"
                             name="height"
@@ -397,7 +396,7 @@ export default function TinyMCE(props) {
                             onChange={handleChange}
                           />
                         </Grid>
-                        <Grid size={{xs:12}}>
+                        <Grid size={{ xs: 12 }}>
                           <TextField id="alt" name="Alternative Text" size="small" label="alt" fullWidth variant="outlined" onChange={handleChange} />
                         </Grid>
                       </Grid>
@@ -437,7 +436,6 @@ export default function TinyMCE(props) {
                         />
                         <label htmlFor={`${id}file`}>
                           <ThemeButton
-                           onClick={handleUploadFile}
                             buttonType="transparent"
                             disabled={disabledEditor || isImgUploading}
                             startIcon={<AiOutlineFileAdd />}
@@ -450,11 +448,7 @@ export default function TinyMCE(props) {
                   )}
                   <span>
                     <Box display="flex" alignItems="center">
-                      <ThemeButton
-                        buttonType="transparent"
-                        disabled={disabledEditor}
-                        onClick={() => setIsUploadImage(true)}
-                      >
+                      <ThemeButton buttonType="transparent" disabled={disabledEditor} onClick={() => setIsUploadImage(true)}>
                         <HiOutlinePhotograph /> Upload Image
                       </ThemeButton>
                     </Box>
@@ -462,12 +456,7 @@ export default function TinyMCE(props) {
                   <span>
                     {showVariableDropdown ? (
                       <>
-                        <ThemeButton
-                          buttonType="transparent"
-                          onClick={openActions}
-                          className={classes.varibalesButton}
-                          aria-controls="action-menu"
-                        >
+                        <ThemeButton buttonType="transparent" onClick={openActions} className={classes.varibalesButton} aria-controls="action-menu">
                           Variables <ExpandMore />
                         </ThemeButton>
                         <Menu

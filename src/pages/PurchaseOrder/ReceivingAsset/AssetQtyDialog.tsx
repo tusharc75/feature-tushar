@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, FC, Fragment } from 'react';
+import { useContext, useState } from 'react';
 import { Dialog, TextField, Box } from '@mui/material';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
@@ -121,7 +121,7 @@ const AssetQtyDialog = ({ onClose, onSuccess, product, purchaseOrderData }) => {
                 <ThemeButton disabled={isSubmitting} buttonType="transparent" onClick={onClose}>
                   Cancel
                 </ThemeButton>
-                <ThemeButton onClick={handleReceive} buttonType="theme">
+                <ThemeButton onClick={onSuccess} buttonType="theme">
                   Submit
                 </ThemeButton>
               </CustomDialogFooter>

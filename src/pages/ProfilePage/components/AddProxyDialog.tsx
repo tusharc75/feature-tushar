@@ -47,19 +47,15 @@ export default function AddProxyDialog({ open, onClose, onSuccess, userId }) {
 
   function validate(values) {
     const errors = {};
-
     if (!values.user) {
       errors['user'] = 'Please select user';
     }
-
     if (new Date(values.startTime).getTime() >= new Date(values.endTime).getTime()) {
       errors['endTime'] = 'End time should be different';
     }
-
     if (new Date(values.startDate).getTime() > new Date(values.endDate).getTime()) {
       errors['endDate'] = 'End date should be greater then start date';
     }
-
     return errors;
   }
 
@@ -82,16 +78,15 @@ export default function AddProxyDialog({ open, onClose, onSuccess, userId }) {
               onClose={onClose}
               fullWidth
             >
-              <CustomDialogHeader title="Add DOA Proxy" />
-
+              <CustomDialogHeader onClose={onClose} title="Add DOA Proxy" />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  <Grid container spacing={2} direction="row" justifyContent="flex-start" alignItems="center">
-                    <Grid size={{md:12, sm:12, xs:12}}>
+                  <Grid container spacing={2} >
+                    <Grid size={{ md: 12, sm: 12, xs: 12 }}>
                       <Autocomplete
                         id="combo-box-demo"
                         size="small"
-                        value={userList.filter((data) => data._id === values.user).length ? userList.find((data) => data._id === values.user) : ''}
+                        value={userList.filter((data) => data._id === values.user).length ? userList.find((data) => data._id === values.user) : null}
                         options={userList}
                         getOptionLabel={(option: any) => option.concatedName}
                         onChange={(event, newValue: any) => {
@@ -111,8 +106,7 @@ export default function AddProxyDialog({ open, onClose, onSuccess, userId }) {
                         )}
                       />
                     </Grid>
-
-                    <Grid size={{md:12, sm:12, xs:12}}>
+                    <Grid size={{ md: 12, sm: 12, xs: 12 }}>
                       <CustomDatePicker
                         size="small"
                         disablePast
@@ -129,8 +123,7 @@ export default function AddProxyDialog({ open, onClose, onSuccess, userId }) {
                         margin="dense"
                       />
                     </Grid>
-
-                    <Grid size={{md:12, sm:12, xs:12}}>
+                    <Grid size={{ md: 12, sm: 12, xs: 12 }}>
                       <CustomDatePicker
                         size="small"
                         disablePast

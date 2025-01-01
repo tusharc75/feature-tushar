@@ -348,9 +348,6 @@ const AssignSerialNumbersDialog = ({
             <span>
               <ThemeButton
                 disabled={true}
-                onClick={() => {
-                  setAddserialNumber(true);
-                }}
               >
                 Add New Serial Numbers
               </ThemeButton>
