@@ -3,7 +3,6 @@ import { MoreVert } from '@mui/icons-material';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { ToggleButton, ToggleButtonGroup } from '@mui/material';
-import moment from 'moment';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { FaRegCalendar } from 'react-icons/fa';
 import { MdViewWeek } from 'react-icons/md';
@@ -44,6 +43,7 @@ import Filter from 'src/components/Filter';
 import DisplayFilterChip from 'src/pages/Reports/tables/DisplayFilterChip';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { BiFilterAlt } from 'react-icons/bi';
+import dayjs from 'dayjs';
 
 const LIMIT = 25;
 
@@ -90,8 +90,8 @@ const WorkOrderSupervisor = () => {
   const [consumablesDialog, setConsumablesDialog] = useState(false);
 
   const [globalFilters, setGlobalFilters] = useState<DateRange>({
-    from: new Date(moment().startOf('month').format('YYYY/MM/DD')),
-    to: new Date(moment().endOf('month').format('YYYY/MM/DD'))
+    from: new Date(dayjs().startOf('month').format('YYYY/MM/DD')),
+    to: new Date(dayjs().endOf('month').format('YYYY/MM/DD'))
   });
   const [resourceType, setResourceType] = useState('workOrder');
   const [isOpen, setOpen] = useState({ open: false, id: null });
@@ -338,7 +338,7 @@ const WorkOrderSupervisor = () => {
       }
 
       if (globalFilters && selectDateFilter) {
-        deepFilter = `${deepFilter}&from=${moment(globalFilters.from).format('YYYY/MM/DD')}&to=${moment(globalFilters.to).format('YYYY/MM/DD')}`;
+        deepFilter = `${deepFilter}&from=${dayjs(globalFilters.from).format('YYYY/MM/DD')}&to=${dayjs(globalFilters.to).format('YYYY/MM/DD')}`;
       }
       return `${deepFilter}&filterType=and&filterByIdType=and`;
     },

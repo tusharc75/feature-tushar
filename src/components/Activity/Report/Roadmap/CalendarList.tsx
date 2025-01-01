@@ -1,11 +1,11 @@
 import { Box, Theme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { SimpleTreeView, TreeItem } from '@mui/x-tree-view';
-import moment from 'moment';
 import { useCallback, useMemo, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { cn, displayDate } from '../../../../constants/helpers';
 import ActivityModelHandler from '../../ActivityModelHandler';
+import dayjs from 'dayjs';
 
 const useStyles = makeStyles((theme: Theme) => ({
   label: {
@@ -41,8 +41,8 @@ export default function CalendarList(props) {
           children = getTreeNodes(data.child);
           children.push(<div></div>);
         }
-        const left = Math.abs((100 * moment(data.startDate).diff(startDate, 'days')) / totalDay);
-        const right = (100 * endDate.diff(moment(data.dueDate), 'days')) / totalDay;
+        const left = Math.abs((100 * dayjs(data.startDate).diff(startDate, 'days')) / totalDay);
+        const right = (100 * endDate.diff(dayjs(data.dueDate), 'days')) / totalDay;
         const width = 100 - (left + right);
 
         let label = (

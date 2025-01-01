@@ -4,8 +4,8 @@ import Grid from '@mui/material/Grid2';
 import { Autocomplete, Skeleton } from '@mui/material';
 import axiosInstance from 'src/axios/axiosInstance';
 import VirtualizedList from 'src/components/VirtualizedList';
-import moment from 'moment';
 import { round } from 'lodash';
+import dayjs from 'dayjs';
 
 const AssetStats = () => {
   const [selectedAssets, setSelectedAssets] = React.useState([]);
@@ -161,7 +161,7 @@ const AssetStats = () => {
                     <Box ml={1}>
                       <Typography variant="h5" component="h2">
                         {assetStats?.totalUtilization
-                          ? `${round(moment.duration(assetStats?.totalUtilization).asHours())}:${Math.floor(moment.duration(assetStats?.totalUtilization).asMinutes() % 60)}`
+                          ? `${round(dayjs.duration(assetStats?.totalUtilization).asHours())}:${Math.floor(dayjs.duration(assetStats?.totalUtilization).asMinutes() % 60)}`
                           : 0}
                       </Typography>
                     </Box>
@@ -210,7 +210,7 @@ const AssetStats = () => {
                     <Box ml={1}>
                       <Typography variant="h5" component="h2">
                         {assetStats?.totalInUseTimeAfterLastRepair
-                          ? `${round(moment.duration(assetStats?.totalInUseTimeAfterLastRepair).asHours())}:${Math.floor(moment.duration(assetStats?.totalInUseTimeAfterLastRepair).asMinutes() % 60)}`
+                          ? `${round(dayjs.duration(assetStats?.totalInUseTimeAfterLastRepair).asHours())}:${Math.floor(dayjs.duration(assetStats?.totalInUseTimeAfterLastRepair).asMinutes() % 60)}`
                           : 0}
                       </Typography>
                     </Box>

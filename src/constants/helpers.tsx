@@ -4,7 +4,6 @@ import { GoogleMapProps } from '@react-google-maps/api';
 import clsx, { ClassValue } from 'clsx';
 import { camelCase, cloneDeep, isArray, isString, lowerFirst, orderBy, uniqBy } from 'lodash';
 import mimeDb from 'mime-db';
-import moment from 'moment';
 import React from 'react';
 import { FileIcon, fileIcons } from 'src/assets/fileIcons';
 import { CompletedIcon, InProgressByOtherIcon, InProgressIcon, PendingIcon } from 'src/assets/newSvgs';
@@ -15,7 +14,7 @@ import { twMerge } from 'tailwind-merge';
 import { v4 as uuid } from 'uuid';
 import { array, boolean, number, object, string } from 'yup';
 import currencies from './currency_with_country.json';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 
 interface stepInterface extends stepIconInterface {
   name: string;
@@ -1042,11 +1041,11 @@ export const checkValue = (fields, fieldName, value1, value2) => {
         return false;
       }
     } else if (input?.type === 'year') {
-      return moment(new Date(value1)).year() == value2;
+      return dayjs(new Date(value1)).year() == value2;
     } else if (input?.type === 'date') {
-      return moment(value1).format('DD/MM/YYYY') == value2;
+      return dayjs(value1).format('DD/MM/YYYY') == value2;
     } else if (input?.type === 'dateTime') {
-      return moment(new Date(value1))?.isSame(moment(value2, 'DD/MM/YYYY HH:mm'));
+      return dayjs(new Date(value1))?.isSame(dayjs(value2, 'DD/MM/YYYY HH:mm'));
     } else if (input?.type === 'number' || input?.type === 'percent' || input?.type === 'decimal' || input?.type === 'formula') {
       if (+value2 === +value1) {
         return true;
@@ -1078,11 +1077,11 @@ const validateDateWithOperator = (date1, date2, operator, type) => {
   if (!date2) {
     return true;
   }
-  let newDate1 = moment(date1);
-  let newDate2 = moment(date2);
+  let newDate1 = dayjs(date1);
+  let newDate2 = dayjs(date2);
   if (type === 'date') {
-    newDate1 = moment(moment(date1).format('YYYY-MM-DD'), 'YYYY-MM-DD');
-    newDate2 = moment(moment(date2).format('YYYY-MM-DD'), 'YYYY-MM-DD');
+    newDate1 = dayjs(dayjs(date1).format('YYYY-MM-DD'), 'YYYY-MM-DD');
+    newDate2 = dayjs(dayjs(date2).format('YYYY-MM-DD'), 'YYYY-MM-DD');
   }
 
   if (operator === 'lessThan') {
@@ -1410,8 +1409,8 @@ export const cardDateFormat = 'MMM DD, YYYY';
 export const dateTimeFormat24Hours = `${dateFormat} HH:mm:ss`;
 
 export const dateFormatForInputControl = localStorage.getItem('dateFormatForInputControl') ?? 'MM/DD/YYYY';
-// export const dateTimeFormat = "MM/dd/yyyy hh:mm A"
-// export const cardDateFormat = "MMM,dd yyyy"
+
+export const dayNamesShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export const displayDate = (date, format = null) => {
   format = format ? format : dateFormat;
@@ -1457,12 +1456,11 @@ export const materialTableIcons: any = {
   // ViewColumn: forwardRef((props: any, ref: any) => <ViewColumn {...props} ref={ref} />)
 };
 
-export const convertDateTimToDate = (date) => {
+export const convertDateTimToDate = (date): Dayjs=> {
   if (!date) {
     return date;
   }
-  var newDate = moment(date);
-  newDate.set({ hour: 0, minute: 0, second: 0 });
+  var newDate = dayjs(date).set('hour', 0).set('minute', 0).set('second', 0);
   return newDate;
 };
 
@@ -3810,10 +3808,10 @@ export function filterDataByDateIntersection<D>(
   endAccessor: (data: D) => string = (d) => d['end']
 ): D[] {
   return data.filter((item) => {
-    const itemStart = moment(startAccessor(item));
-    const itemEnd = moment(endAccessor(item));
+    const itemStart = dayjs(startAccessor(item));
+    const itemEnd = dayjs(endAccessor(item));
     return datesList.some((date) => {
-      const currentDate = moment(date);
+      const currentDate = dayjs(date);
       return currentDate.isBetween(itemStart, itemEnd, undefined, '[]') || currentDate.isSame(itemStart, 'date');
     });
   });

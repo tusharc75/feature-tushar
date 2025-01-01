@@ -1,7 +1,6 @@
 import { Box, TextField, Typography } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import moment from 'moment';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -15,6 +14,7 @@ import { Activity } from './types';
 import { useData } from 'src/StateProvider/Provider';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 const stateDateFormat = 'YYYY-MM-DD';
 
@@ -44,8 +44,8 @@ const RoadMap = () => {
   const [day, setDay] = React.useState([]);
 
   useEffect(() => {
-    const date1 = moment(startDate, stateDateFormat);
-    const date2 = moment(endDate, stateDateFormat);
+    const date1 = dayjs(startDate, stateDateFormat);
+    const date2 = dayjs(endDate, stateDateFormat);
     const diff = date2.diff(date1, 'days');
     setTotalDay(diff);
     executeScroll();
@@ -215,7 +215,7 @@ const RoadMap = () => {
             name="startDate"
             label="Start Date"
             onChange={(date: any) => {
-              setStartDate(moment(date).format('YYYY-MM-DD'));
+              setStartDate(dayjs(date).format('YYYY-MM-DD'));
             }}
             margin="dense"
           />
@@ -226,7 +226,7 @@ const RoadMap = () => {
             name="endDate"
             label="End Date"
             onChange={(date: any) => {
-              setEndDate(moment(date).format('YYYY-MM-DD'));
+              setEndDate(dayjs(date).format('YYYY-MM-DD'));
             }}
             margin="dense"
           />
@@ -291,8 +291,8 @@ const RoadMap = () => {
                 <Calendar
                   columnVirtualizer={columnVirtualizer}
                   dayPixel={dayPixel}
-                  startDate={moment(startDate, stateDateFormat)}
-                  endDate={moment(endDate, stateDateFormat)}
+                  startDate={dayjs(startDate, stateDateFormat)}
+                  endDate={dayjs(endDate, stateDateFormat)}
                 />
                 <Box width="100%" height="100%" style={{ position: 'absolute', zIndex: 1 }}>
                   <Box style={{ position: 'absolute', width: totalDay * dayPixel }}>
@@ -303,8 +303,8 @@ const RoadMap = () => {
                       expanded={expanded}
                       selected={selected}
                       handleSelect={handleSelect}
-                      startDate={moment(startDate, stateDateFormat)}
-                      endDate={moment(endDate, stateDateFormat)}
+                      startDate={dayjs(startDate, stateDateFormat)}
+                      endDate={dayjs(endDate, stateDateFormat)}
                       totalDay={totalDay}
                       rowVirtualizer={rowVirtualizer}
                     />
@@ -338,7 +338,7 @@ const RoadMap = () => {
                       height={'100%'}
                       style={{
                         position: 'absolute',
-                        left: (100 * moment().diff(moment(startDate, stateDateFormat), 'days')) / totalDay + '%',
+                        left: (100 * dayjs().diff(dayjs(startDate, stateDateFormat), 'days')) / totalDay + '%',
                         width: dayPixel,
                         height: rowVirtualizer.getTotalSize()
                       }}

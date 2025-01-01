@@ -5,7 +5,6 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import moment from 'moment';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomDialogTransition, productInventory } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -14,6 +13,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 function SettingsDialog({ onClose, warehouse }) {
   const toastConfig = useContext(CustomToastContext);
@@ -45,7 +45,7 @@ function SettingsDialog({ onClose, warehouse }) {
 
   const handleSubmit = (values) => {
     axiosInstance()
-      .post(`${productInventory.api}/setting`, { lockDate: moment(values.lockDate).format('MM/DD/YYYY'), warehouse: warehouse })
+      .post(`${productInventory.api}/setting`, { lockDate: dayjs(values.lockDate).format('MM/DD/YYYY'), warehouse: warehouse })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -64,7 +64,7 @@ function SettingsDialog({ onClose, warehouse }) {
     if (!values['lockDate']) {
       errors['lockDate'] = 'Lock Date is Required';
     }
-    if (moment(values['lockDate']).isAfter(moment())) {
+    if (dayjs(values['lockDate']).isAfter(dayjs())) {
       errors['lockDate'] = `Please select valid date`;
     }
     return errors;

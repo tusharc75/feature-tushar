@@ -6,11 +6,11 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import { convertDateInDateTime, CustomDialogTransition, productInventory } from 'src/constants/helpers';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import moment from 'moment';
 import axiosInstance from 'src/axios/axiosInstance';
 import { useData } from 'src/StateProvider/Provider';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 const ReceiveDateDialog = ({ handleClose, handleSucess, loading, refrenceData }) => {
   const [lockDate, setLockDate] = useState(null);
@@ -37,11 +37,11 @@ const ReceiveDateDialog = ({ handleClose, handleSucess, loading, refrenceData })
   const validate = (values) => {
     const errors = {};
     if (lockDate) {
-      if (!moment(values['receiveDate']).isSameOrAfter(moment(lockDate))) {
+      if (!dayjs(values['receiveDate']).isSameOrAfter(dayjs(lockDate))) {
         errors['receiveDate'] = `Date entered prior to the locked date`;
       }
     }
-    if (moment(values['receiveDate']).isAfter(moment())) {
+    if (dayjs(values['receiveDate']).isAfter(dayjs())) {
       errors['receiveDate'] = `Please select valid date`;
     }
     return errors;

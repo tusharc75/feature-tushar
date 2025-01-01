@@ -1,7 +1,6 @@
 import { Box } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import React from 'react';
-import moment from 'moment';
 import axiosInstance from 'src/axios/axiosInstance';
 import ChartTypes from '../Dashboard/ChartTypes';
 import countriesData from 'src/constants/Country.json';
@@ -11,6 +10,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { ChartDataType } from '../Dashboard/ChartTypes';
 import FullScreenChart from '../Dashboard/FullScreenChart';
 import { periodOption } from '../DashboardBuilder/builderHelpers';
+import dayjs from 'dayjs';
 
 const Chart = () => {
   const {
@@ -25,7 +25,7 @@ const Chart = () => {
     return {
       currency: user?.user?.currency || `USD`,
       between: {
-        from: new Date(moment().subtract(1, 'year').calendar()),
+        from: new Date(dayjs().subtract(1, 'year').toDate()),
         to: new Date()
       }
     };

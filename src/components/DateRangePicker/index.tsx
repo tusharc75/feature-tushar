@@ -1,12 +1,12 @@
 import { Today } from '@mui/icons-material';
 import { Menu, MenuItem, Popover } from '@mui/material';
-import moment from 'moment';
 import React, { useCallback } from 'react';
 import { DateRange } from 'react-day-picker';
 import { BiChevronDown } from 'react-icons/bi';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { cn, displayDate } from 'src/constants/helpers';
 import { Calendar } from './Calendar';
+import dayjs from 'dayjs';
 
 type DateRanges = DateRange | undefined;
 
@@ -56,7 +56,7 @@ function DateRangePicker({ className, date, setDate, horizontal = 'center' }: Da
     switch (timeFrame.value) {
       case '1-month': {
         const data = {
-          from: new Date(moment().subtract('1', 'month').calendar()),
+          from: new Date(dayjs().subtract(1, 'month').toDate()),
           to: new Date()
         };
         setMonth(data.from);
@@ -65,7 +65,7 @@ function DateRangePicker({ className, date, setDate, horizontal = 'center' }: Da
       }
       case '3-months': {
         const data = {
-          from: new Date(moment().subtract('3', 'months').calendar()),
+          from: new Date(dayjs().subtract(3, 'months').toDate()),
           to: new Date()
         };
         setMonth(data.from);
@@ -74,7 +74,7 @@ function DateRangePicker({ className, date, setDate, horizontal = 'center' }: Da
       }
       case '6-months': {
         const data = {
-          from: new Date(moment().subtract('6', 'months').calendar()),
+          from: new Date(dayjs().subtract(6, 'months').toDate()),
           to: new Date()
         };
         setMonth(data.from);
@@ -83,7 +83,7 @@ function DateRangePicker({ className, date, setDate, horizontal = 'center' }: Da
       }
       case '1-year': {
         const data = {
-          from: new Date(moment().subtract('1', 'year').calendar()),
+          from: new Date(dayjs().subtract(1, 'year').toDate()),
           to: new Date()
         };
         setMonth(data.from);
