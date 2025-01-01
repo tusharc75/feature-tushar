@@ -97,7 +97,6 @@ const AsynImportExportMenu = ({
         <span>
           {onlyExport ? (
             <ThemeButton
-              size="small"
               onClick={() => {
                 setDialog({ open: true, type: IMPORT_EXPORT_TYPE.export });
               }}

@@ -223,10 +223,17 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
             </Grid>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <ThemeButton buttonType="theme" disabled={loading}>
+            <ThemeButton
+              onClick={() => {
+                if ((Boolean(!values.name) && Boolean(!values.description)) || Boolean(!values.tier)) close();
+                else setShowConfirmDialog(true);
+              }}
+              buttonType="theme"
+              disabled={loading}
+            >
               Cancel
             </ThemeButton>
-            <ThemeButton buttonType="theme" disabled={loading}>
+            <ThemeButton onClick={handleSubmit} buttonType="theme" disabled={loading}>
               Submit
             </ThemeButton>
           </CustomDialogFooter>
@@ -335,7 +342,7 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
           </CustomDialogContent>
           <CustomDialogFooter>
             <ThemeButton
-              buttonType='transparent'
+              buttonType="transparent"
               onClick={() => {
                 if ((Boolean(!values.name) && Boolean(!values.description)) || Boolean(!values.tier)) close();
                 else setShowConfirmDialog(true);
@@ -344,7 +351,7 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
               Cancel
             </ThemeButton>
             <ThemeButton
-              buttonType='theme'
+              buttonType="theme"
               disabled={isSubmitting || Boolean(!values.name) || Boolean(!values.description) || Boolean(!values.tier)}
               onClick={handleSubmit}
               isLoading={isSubmitting}

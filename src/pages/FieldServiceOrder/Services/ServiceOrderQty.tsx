@@ -315,7 +315,7 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = ({
               </CustomDialogContent>
               <CustomDialogFooter>
                 <ThemeButton
-buttonType="transparent"
+                  buttonType="transparent"
                   onClick={() => {
                     if (!isEqual(ref.current.values, initialData.values)) {
                       setShowConfirmDialog(true);
@@ -331,7 +331,7 @@ buttonType="transparent"
                   <ThemeButton
                     isLoading={loadingEdit}
                     disabled={isEqual(ref?.current?.values, initialData.values) || loadingEdit}
-buttonType="theme"
+                    buttonType="theme"
                     onClick={() => {
                       setSaveAndNext(true);
                       submitForm();
@@ -344,7 +344,7 @@ buttonType="theme"
                 <ThemeButton
                   isLoading={loadingEdit}
                   disabled={isEqual(ref?.current?.values, initialData.values) || loadingEdit}
-buttonType="theme"
+                  buttonType="theme"
                   onClick={() => {
                     setSaveAndNext(false);
                     submitForm();

@@ -483,6 +483,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                     disabled={!(values?.productTemplate && values?.priceTemplate)}
                     startIcon={isMobile ? null : <AiOutlineImport />}
                     iconForMobile={<AiOutlineImport />}
+                    onClick={handleImport}
                   >
                     Import File
                   </ThemeButton>

@@ -301,7 +301,7 @@ const SelectionDialog = (props) => {
                             setSelectedFile(e);
                           }}
                         />
-                        <ThemeButton className={`btn-choose`} component="span">
+                        <ThemeButton onClick={handleSubmit} className={`btn-choose`} component="span">
                           Choose Files
                         </ThemeButton>
                         {fileError && <p className="MuiFormHelperText-root Mui-error MuiFormHelperText-contained">{fileError}</p>}

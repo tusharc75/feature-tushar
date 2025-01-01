@@ -287,7 +287,7 @@ const ManageQuotationDialog = ({
               </CustomDialogContent>
               <CustomDialogFooter>
                 <ThemeButton
-buttonType="transparent"
+                  buttonType="transparent"
                   onClick={() => {
                     if (!isEqual(values, initialData.values)) {
                       setShowConfirmDialog(true);
@@ -300,7 +300,7 @@ buttonType="transparent"
                 </ThemeButton>
                 <ThemeButton
                   isLoading={loading}
-buttonType="theme"
+                  buttonType="theme"
                   onClick={(e) => {
                     e.preventDefault();
                     handleScroll(errors);

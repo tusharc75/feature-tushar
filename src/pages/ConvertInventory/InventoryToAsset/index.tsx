@@ -322,7 +322,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
                 <ThemeButton buttonType="transparent" onClick={handleClose}>
                   Cancel
                 </ThemeButton>
-                <ThemeButton isLoading={loading} disabled={loading} buttonType="theme">
+                <ThemeButton onClick={handleConvert} isLoading={loading} disabled={loading} buttonType="theme">
                   Convert
                 </ThemeButton>
               </CustomDialogFooter>

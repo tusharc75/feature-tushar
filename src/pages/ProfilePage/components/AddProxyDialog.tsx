@@ -86,7 +86,7 @@ export default function AddProxyDialog({ open, onClose, onSuccess, userId }) {
 
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  <Grid container spacing={2} direction="row" justify="flex-start" alignItems="center">
+                  <Grid container spacing={2} direction="row" justifyContent="flex-start" alignItems="center">
                     <Grid size={{md:12, sm:12, xs:12}}>
                       <Autocomplete
                         id="combo-box-demo"

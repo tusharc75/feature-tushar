@@ -96,7 +96,7 @@ export const CustomImport = ({
                 accept=".xlsx,.csv"
               />
               <label htmlFor={`customImportFile`}>
-                <ThemeButton buttonType="theme" component="span" disabled={isImgUploading} startIcon={<AiOutlineImport />}>
+                <ThemeButton buttonType="theme" onClick={handleFileImport} component="span" disabled={isImgUploading} startIcon={<AiOutlineImport />}>
                   Import File
                 </ThemeButton>
               </label>

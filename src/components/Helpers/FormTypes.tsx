@@ -2420,7 +2420,7 @@ const FormTypes = (props) => {
         <input accept="image/*" style={{ display: 'none' }} id="multiple-images-button" multiple={false} type="file" onChange={readImageFile} />
         <div className="flex items-center gap-2">
           <label htmlFor="multiple-images-button">
-            <ThemeButton disabled={readingImage} buttonType="theme">
+            <ThemeButton onClick={handleUploadImage} disabled={readingImage} buttonType="theme">
               Upload image(s)
             </ThemeButton>
           </label>
@@ -2503,7 +2503,7 @@ const FormTypes = (props) => {
           />
           <div className="flex items-center gap-2">
             <label htmlFor={name}>
-              <ThemeButton disabled={isFileUploading || !canEdit} buttonType="theme" startIcon={isFileUploading && <CircularProgress size={15} />}>
+              <ThemeButton disabled={isFileUploading || !canEdit} onClick={handleUploadFile} buttonType="theme" startIcon={isFileUploading && <CircularProgress size={15} />}>
                 {isFileUploading ? 'Uploading...' : required ? 'Upload File *' : 'Upload File'}
               </ThemeButton>
             </label>
@@ -2574,6 +2574,7 @@ const FormTypes = (props) => {
                     disabled={isFileUploading || !canEdit}
                     buttonType="theme"
                     isLoading={isFileUploading}
+                    onClick={handleUploadFile}
                   >
                     {isFileUploading ? 'Uploading File(s)' : required ? 'Upload File(s) *' : 'Upload File(s)'}
                   </ThemeButton>

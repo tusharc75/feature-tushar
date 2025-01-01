@@ -166,6 +166,7 @@ const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, isBulkUp
                   Close
                 </ThemeButton>
                 <ThemeButton
+                  onClick={handleSubmit}
                   disabled={loading}
                   buttonType='theme'
                   isLoading={loading}

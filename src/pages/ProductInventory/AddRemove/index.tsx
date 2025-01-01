@@ -552,7 +552,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                   <ThemeButton buttonType="transparent" onClick={handleClose}>
                     Cancel
                   </ThemeButton>
-                  <ThemeButton isLoading={loading} type='submit' disabled={loading} buttonType="theme">
+                  <ThemeButton onClick={handleSubmit} isLoading={loading} type='submit' disabled={loading} buttonType="theme">
                     {capitalize(type)}
                   </ThemeButton>
                 </CustomDialogFooter>

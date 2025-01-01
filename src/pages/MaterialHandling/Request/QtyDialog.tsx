@@ -124,7 +124,15 @@ function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
               >
                 Cancel
               </ThemeButton>
-              <ThemeButton isLoading={loading} buttonType="theme" disabled={loading} type="submit">
+              <ThemeButton
+                onClick={() => {
+                  onSuccess();
+                }}
+                isLoading={loading}
+                buttonType="theme"
+                disabled={loading}
+                type="submit"
+              >
                 Submit
               </ThemeButton>
             </CustomDialogFooter>

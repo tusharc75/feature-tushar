@@ -84,7 +84,7 @@ const ViewDialog = ({ onClose, resource, extraData = null, selectedView = null, 
                 <Form autoComplete="off" autoCorrect="off" noValidate>
                   <Box mt={1}>
                     <Grid container spacing={2}>
-                      <Grid size={{xs:12, sm:12, md:12, lg:12}}>
+                      <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
                         <TextField
                           fullWidth
                           value={values['name']}
@@ -102,7 +102,7 @@ const ViewDialog = ({ onClose, resource, extraData = null, selectedView = null, 
                           helperText={touched['name'] && errors['name']}
                         />
                       </Grid>
-                      <Grid size={{xs:12, sm:12, md:12, lg:12}}>
+                      <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
                         <FormControl size="small">
                           <FormLabel id="view-access-radio-button">Access</FormLabel>
                           <RadioGroup
@@ -129,7 +129,7 @@ const ViewDialog = ({ onClose, resource, extraData = null, selectedView = null, 
                 </ThemeButton>
                 <ThemeButton
                   isLoading={loading}
-buttonType="theme"
+                  buttonType="theme"
                   disabled={loading}
                   onClick={(e) => {
                     e.preventDefault();

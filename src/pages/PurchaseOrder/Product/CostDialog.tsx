@@ -175,7 +175,7 @@ const CostDialog = ({ onClose, purchaseOrderData, handleAddCost, handleUpdateCos
                                     size="small"
                                   />
                                 ) : (
-                                  <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
+                                  <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                     <Box display="flex">
                                       <Box flexGrow={1}>
                                         <FormTypes
@@ -225,7 +225,7 @@ const CostDialog = ({ onClose, purchaseOrderData, handleAddCost, handleUpdateCos
               </CustomDialogContent>
               <CustomDialogFooter>
                 <ThemeButton
-buttonType="transparent"
+                  buttonType="transparent"
                   onClick={() => {
                     onClose();
                   }}
@@ -234,9 +234,9 @@ buttonType="transparent"
                 </ThemeButton>
                 {bulkEdit === false && showSaveAndNext && (
                   <ThemeButton
-                    loading={loadingEdit}
+                    isLoading={loadingEdit}
                     disabled={loadingEdit}
-buttonType="theme"
+                    buttonType="theme"
                     onClick={() => {
                       setSaveAndNext(true);
                       submitForm();
@@ -248,9 +248,9 @@ buttonType="theme"
                 )}
                 <ThemeButton
                   id={'dialog-save-button'}
-                  loading={loadingEdit}
+                  isLoading={loadingEdit}
                   disabled={loadingEdit}
-buttonType="theme"
+                  buttonType="theme"
                   onClick={() => {
                     setSaveAndNext(false);
                     submitForm();

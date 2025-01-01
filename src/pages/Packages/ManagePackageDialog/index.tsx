@@ -213,7 +213,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
                   Cancel
                 </ThemeButton>
                 <ThemeButton
-                  loading={submitting}
+                  isLoading={submitting}
                   buttonType="theme"
                   disabled={submitting}
                   onClick={(e) => {

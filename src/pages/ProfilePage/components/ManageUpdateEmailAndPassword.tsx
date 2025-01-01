@@ -159,7 +159,7 @@ export default function ManageUpdateEmailAndPassword({
                     <Grid spacing={3} container>
                       {isUpdatePassword ? (
                         <>
-                          <Grid style={{ display: 'flex' }} size={{sm:10}}>
+                          <Grid style={{ display: 'flex' }} size={{ sm: 10 }}>
                             <TextField
                               fullWidth
                               margin="dense"
@@ -181,7 +181,7 @@ export default function ManageUpdateEmailAndPassword({
                             />
                           </Grid>
 
-                          <Grid size={{sm:10}}>
+                          <Grid size={{ sm: 10 }}>
                             <TextField
                               fullWidth
                               margin="dense"
@@ -202,7 +202,7 @@ export default function ManageUpdateEmailAndPassword({
                               helperText={errors['newPassword']}
                             />
                           </Grid>
-                          <Grid size={{sm:10}}>
+                          <Grid size={{ sm: 10 }}>
                             <TextField
                               fullWidth
                               margin="dense"
@@ -228,7 +228,7 @@ export default function ManageUpdateEmailAndPassword({
                         </>
                       ) : null}
                       {isUpdateEmail ? (
-                        <Grid size={{sm:12}}>
+                        <Grid size={{ sm: 12 }}>
                           <TextField
                             style={{ width: '400px' }}
                             fullWidth
@@ -256,7 +256,7 @@ export default function ManageUpdateEmailAndPassword({
 
               <ThemeButton
                 isLoading={loading}
-buttonType="theme"
+                buttonType="theme"
                 disabled={loading ? true : (isUpdateEmail && values.email === userData.email) || false}
                 onClick={() => {
                   if (isUpdatePassword) {

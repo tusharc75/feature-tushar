@@ -57,6 +57,7 @@ const UploadDrawingDialog = ({ productionOrderData, handleClose }) => {
             disabled={isUploading}
             isLoading={isUploading}
             buttonType='theme'
+            onClick={handleUpload}
           >
             {isUploading ? 'Uploading...' : 'Select File *'}
           </ThemeButton>
