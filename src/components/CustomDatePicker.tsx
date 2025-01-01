@@ -49,7 +49,7 @@ const CustomDatePicker = (props) => {
       slotProps={{
         textField: {
           helperText: helperText,
-          error: error,
+          error: error ? error : false,
           variant: 'outlined',
           fullWidth: fullWidth ? true : false,
           ...(margin ? { margin: margin } : {}),
