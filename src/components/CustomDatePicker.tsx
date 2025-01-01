@@ -38,7 +38,7 @@ const CustomDatePicker = (props) => {
       {...(openTo ? { openTo: openTo } : {})}
       disablePast={disablePast}
       required={required}
-      value={dayjs.tz(new Date(value) || null) || null}
+      value={value ? dayjs.tz(new Date(value)) : dayjs.tz(new Date(''))}
       name={name}
       emptyLabel={label}
       label={label}
