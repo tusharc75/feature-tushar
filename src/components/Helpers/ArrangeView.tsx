@@ -169,7 +169,6 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading, isLast =
         <ThemeButton
           isLoading={loading}
           buttonType="theme"
-          type="submit"
           onClick={(e) => {
             e.preventDefault();
             handleSubmit([...preRows, ...postRows]);

@@ -128,6 +128,7 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
                 Close
               </ThemeButton>
               <ThemeButton
+                onClick={handleSubmit}
                 disabled={loading}
                 buttonType='theme'
                 isLoading={loading}

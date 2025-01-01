@@ -172,7 +172,7 @@ export default function ManageAccount(props) {
                               <Box marginY={2}>
                                 <Grid spacing={3} container>
                                   {form.sectionFields.map((field, index2) => (
-                                    <Grid key={index2} size={{xs:12, sm:6, md:6}}>
+                                    <Grid key={index2} size={{ xs: 12, sm: 6, md: 6 }}>
                                       {field.fieldName === 'entity' ? (
                                         <FormTypes
                                           isNew={isNew}
@@ -317,7 +317,7 @@ export default function ManageAccount(props) {
                                           </HtmlTooltip>
 
                                           {field?.tooltipMessage ? (
-                                            <Grid size={{xs:1, sm:1, md:1}}>
+                                            <Grid size={{ xs: 1, sm: 1, md: 1 }}>
                                               <HtmlTooltip title={field?.tooltipMessage ?? ''}>
                                                 <InfoIcon color="disabled" />
                                               </HtmlTooltip>
@@ -325,9 +325,9 @@ export default function ManageAccount(props) {
                                           ) : null}
                                         </div>
                                       ) : field.fieldName === 'parentAccount' ? (
-                                        <Grid key={field.fieldName} size={{xs:12, sm:12, md:12}}>
+                                        <Grid key={field.fieldName} size={{ xs: 12, sm: 12, md: 12 }}>
                                           <Grid container spacing={1}>
-                                            <Grid size={{xs:permissions[accountResource]?.isCreate ? 10 : 11}}>
+                                            <Grid size={{ xs: permissions[accountResource]?.isCreate ? 10 : 11 }}>
                                               <FormTypes
                                                 isNew={isNew}
                                                 {...field}
@@ -350,7 +350,7 @@ export default function ManageAccount(props) {
                                               />
                                             </Grid>
                                             {permissions[accountResource]?.isCreate && (
-                                              <Grid size={{xs:1, sm:1, md:1}}>
+                                              <Grid size={{ xs: 1, sm: 1, md: 1 }}>
                                                 <HtmlTooltip title="Add Parent Account" className="mt-1">
                                                   <IconButton
                                                     onClick={() => {
@@ -365,7 +365,7 @@ export default function ManageAccount(props) {
                                               </Grid>
                                             )}
                                             {field?.tooltipMessage ? (
-                                              <Grid size={{xs:1, sm:1, md:1}}>
+                                              <Grid size={{ xs: 1, sm: 1, md: 1 }}>
                                                 <HtmlTooltip title={field?.tooltipMessage ?? ''}>
                                                   <InfoIcon color="disabled" />
                                                 </HtmlTooltip>
@@ -493,12 +493,12 @@ export default function ManageAccount(props) {
                         if (isEqual(accountData.initialValues, values)) onClose({});
                         else setShowConfirmDialog(true);
                       }}
-buttonType="transparent"
+                      buttonType="transparent"
                     >
                       Cancel
                     </ThemeButton>
                     <ThemeButton
-buttonType="theme"
+                      buttonType="theme"
                       isLoading={loading}
                       disabled={loading || uploadingImageOrFileProgress > 0}
                       onClick={(e) => {

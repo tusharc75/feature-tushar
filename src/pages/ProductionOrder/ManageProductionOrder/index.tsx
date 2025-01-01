@@ -223,7 +223,7 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
               </CustomDialogContent>
               <CustomDialogFooter>
                 <ThemeButton
-buttonType="transparent"
+                  buttonType="transparent"
                   onClick={() => {
                     if (isEqual(initialData.values, values)) {
                       onClose();
@@ -236,7 +236,7 @@ buttonType="transparent"
                 </ThemeButton>
                 <ThemeButton
                   isLoading={loading}
-buttonType="theme"
+                  buttonType="theme"
                   disabled={loading}
                   onClick={(e) => {
                     e.preventDefault();

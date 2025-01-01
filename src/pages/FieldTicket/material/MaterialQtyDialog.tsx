@@ -433,7 +433,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                                     size="small"
                                   />
                                 ) : rateChangeFields.includes(field.fieldName) && !isBulkedit ? (
-                                  <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
+                                  <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                     <Box display="flex">
                                       <Box flexGrow={1}>
                                         <FormTypes
@@ -517,7 +517,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                                     </Box>
                                   </Grid>
                                 ) : ['estimateStartDate', 'estimateEndDate'].includes(field.fieldName) ? (
-                                  <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
+                                  <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                     <Box display="flex">
                                       <Box flexGrow={1}>
                                         <FormTypes
@@ -546,7 +546,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                                     </Box>
                                   </Grid>
                                 ) : ['taxCode'].includes(field.fieldName) ? (
-                                  <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
+                                  <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                     <Box display="flex">
                                       <Box flexGrow={1}>
                                         <FormTypes
@@ -587,7 +587,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                                 ) : field.fieldName === 'numberOfWells' ? (
                                   <>
                                     {values?.byWellNumber && (
-                                      <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
+                                      <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                         <Box display="flex">
                                           <Box flexGrow={1}>
                                             <FormTypes
@@ -616,7 +616,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                                     )}
                                   </>
                                 ) : (
-                                  <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
+                                  <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                     <Box display="flex">
                                       <Box flexGrow={1}>
                                         <FormTypes
@@ -659,7 +659,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
               </CustomDialogContent>
               <CustomDialogFooter>
                 <ThemeButton
-buttonType="transparent"
+                  buttonType="transparent"
                   onClick={() => {
                     if (!isEqual(ref.current.values, initialData.values)) {
                       setShowConfirmDialog(true);
@@ -676,7 +676,7 @@ buttonType="transparent"
                     <ThemeButton
                       isLoading={fetchingData}
                       disabled={fetchingData}
- buttonType="theme"
+                      buttonType="theme"
                       onClick={() => {
                         setSaveAndNext(true);
                         submitForm();
@@ -688,7 +688,7 @@ buttonType="transparent"
                     <ThemeButton
                       isLoading={loading}
                       disabled={loading || isEqual(ref?.current?.values, initialData.values)}
-buttonType="theme"
+                      buttonType="theme"
                       onClick={() => {
                         setSaveAndNext(true);
                         submitForm();
@@ -702,7 +702,7 @@ buttonType="theme"
                   id="dialog-save-button"
                   isLoading={loading}
                   disabled={loading || isEqual(ref?.current?.values, initialData.values)}
-buttonType="theme"
+                  buttonType="theme"
                   onClick={() => {
                     setSaveAndNext(false);
                     submitForm();

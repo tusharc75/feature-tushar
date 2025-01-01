@@ -216,7 +216,7 @@ const ManageJobDialog = ({ isClone, jobId, jobData = null, onClose, onSuccess, o
                 </CustomDialogContent>
                 <CustomDialogFooter>
                   <ThemeButton
-buttonType="transparent"
+                    buttonType="transparent"
                     onClick={() => {
                       if (isEqual(initialData.values, values)) {
                         onClose();
@@ -229,7 +229,7 @@ buttonType="transparent"
                   </ThemeButton>
                   <ThemeButton
                     isLoading={loading}
-buttonType="theme"
+                    buttonType="theme"
                     disabled={loading}
                     onClick={(e) => {
                       e.preventDefault();

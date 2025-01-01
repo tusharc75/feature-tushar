@@ -160,7 +160,7 @@ const ServiceDialog = ({ onClose, purchaseOrderData, handleUpdateService, servic
               </CustomDialogContent>
               <CustomDialogFooter>
                 <ThemeButton
-buttonType="transparent"
+                  buttonType="transparent"
                   onClick={() => {
                     onClose();
                   }}
@@ -171,7 +171,7 @@ buttonType="transparent"
                   <ThemeButton
                     isLoading={loadingEdit}
                     disabled={loadingEdit}
-buttonType="theme"
+                    buttonType="theme"
                     onClick={() => {
                       setSaveAndNext(true);
                       submitForm();
@@ -185,7 +185,7 @@ buttonType="theme"
                   id={'dialog-save-button'}
                   isLoading={loadingEdit}
                   disabled={loadingEdit}
-buttonType="theme"
+                  buttonType="theme"
                   onClick={() => {
                     setSaveAndNext(false);
                     submitForm();

@@ -2503,7 +2503,7 @@ const FormTypes = (props) => {
           />
           <div className="flex items-center gap-2">
             <label htmlFor={name}>
-              <ThemeButton disabled={isFileUploading || !canEdit} buttonType="theme" startIcon={isFileUploading && <CircularProgress size={15} />}>
+              <ThemeButton disabled={isFileUploading || !canEdit} onClick={handleUploadFile} buttonType="theme" startIcon={isFileUploading && <CircularProgress size={15} />}>
                 {isFileUploading ? 'Uploading...' : required ? 'Upload File *' : 'Upload File'}
               </ThemeButton>
             </label>

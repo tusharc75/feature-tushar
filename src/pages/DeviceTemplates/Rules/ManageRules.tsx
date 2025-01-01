@@ -407,7 +407,7 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
                 </CustomDialogContent>
                 <CustomDialogFooter>
                   <ThemeButton
-buttonType="transparent"
+                    buttonType="transparent"
                     onClick={() => {
                       if (isEqual(initialValue, values)) {
                         onClose();
@@ -420,7 +420,7 @@ buttonType="transparent"
                   </ThemeButton>
                   <ThemeButton
                     isLoading={loading}
-buttonType="theme"
+                    buttonType="theme"
                     disabled={isEqual(initialValue, values)}
                     onClick={(e) => {
                       e.preventDefault();

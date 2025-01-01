@@ -202,7 +202,7 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
                 </CustomDialogContent>
                 <CustomDialogFooter>
                   <ThemeButton
-buttonType="transparent"
+                    buttonType="transparent"
                     onClick={() => {
                       if (isEqual(initialData.values, values)) onClose();
                       else setShowConfirmDialog(true);
@@ -212,7 +212,7 @@ buttonType="transparent"
                   </ThemeButton>
                   <ThemeButton
                     isLoading={loading}
-buttonType="theme"
+                    buttonType="theme"
                     disabled={loading}
                     onClick={(e) => {
                       e.preventDefault();

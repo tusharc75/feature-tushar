@@ -140,7 +140,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, assem
               </CustomDialogContent>
               <CustomDialogFooter>
                 <ThemeButton
-buttonType="transparent"
+                  buttonType="transparent"
                   onClick={() => {
                     if (!isEqual(ref.current.values, initialData.values)) {
                       setShowConfirmDialog(true);
@@ -154,7 +154,7 @@ buttonType="transparent"
                 <ThemeButton
                   isLoading={loading}
                   disabled={loading || isEqual(ref?.current?.values, initialData.values)}
-buttonType="theme"
+                  buttonType="theme"
                   onClick={submitForm}
                 >
                   {' '}

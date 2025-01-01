@@ -136,7 +136,7 @@ const AddDisplayTypeDialog = (props) => {
               <ThemeButton buttonType="transparent" onClick={handleClose}>
                 Cancel
               </ThemeButton>
-              <ThemeButton buttonType="theme" isLoading={loading} disabled={loading} size="small" onClick={submitForm}>
+              <ThemeButton buttonType="theme" isLoading={loading} disabled={loading} onClick={submitForm}>
                 {' '}
                 Add
               </ThemeButton>

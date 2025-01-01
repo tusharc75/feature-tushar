@@ -131,7 +131,7 @@ const AssignSerialNumbersDialog = ({
           setSerialNumberCount(0);
         }
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   useEffect(() => {
@@ -258,31 +258,32 @@ const AssignSerialNumbersDialog = ({
         <Box style={{ display: 'inline' }}>
           {products.length > 0
             ? products?.map((d) => (
-              <Box
-                m={0.5}
-                p={1}
-                border={1}
-                className={`cursor-pointer rounded-sm ${selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
+                <Box
+                  m={0.5}
+                  p={1}
+                  border={1}
+                  className={`cursor-pointer rounded-sm ${
+                    selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
                   }`}
-                borderColor="var(--common-border-color)"
-                onClick={() => {
-                  if (selectedProduct === d.id) {
-                    setSelectedProduct(null);
-                  } else {
-                    setSelectedProduct(d.id);
-                  }
-                }}
-                style={{ display: 'inline-block' }}
-              >
-                {d?.qty < 0 ? (
-                  <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                ) : d?.qty === 0 ? (
-                  <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                ) : (
-                  <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                )}
-              </Box>
-            ))
+                  borderColor="var(--common-border-color)"
+                  onClick={() => {
+                    if (selectedProduct === d.id) {
+                      setSelectedProduct(null);
+                    } else {
+                      setSelectedProduct(d.id);
+                    }
+                  }}
+                  style={{ display: 'inline-block' }}
+                >
+                  {d?.qty < 0 ? (
+                    <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                  ) : d?.qty === 0 ? (
+                    <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                  ) : (
+                    <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                  )}
+                </Box>
+              ))
             : null}
         </Box>
         {showWarehouseFilter && (
@@ -330,7 +331,7 @@ const AssignSerialNumbersDialog = ({
             setShowTransferInventoryDialog(true);
           }}
           disabled={selectedRecords?.length === 0 || products?.some((d) => d?.qty < 0)}
-          buttonType='theme'
+          buttonType="theme"
         >
           {`Transfer to ${filterByPlant?.optionLabel}`}
           {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
@@ -345,9 +346,11 @@ const AssignSerialNumbersDialog = ({
         {!selectedProduct || !selectedWarehouse ? (
           <HtmlTooltip title={'Please Select Product'}>
             <span>
-              <ThemeButton disabled={true}>
+              <ThemeButton
+                disabled={true}
+              >
                 Add New Serial Numbers
-              </ThemeButton >
+              </ThemeButton>
             </span>
           </HtmlTooltip>
         ) : serialNumberCount ? (
@@ -355,7 +358,7 @@ const AssignSerialNumbersDialog = ({
             onClick={() => {
               setAddserialNumber(true);
             }}
-            buttonType='theme'
+            buttonType="theme"
           >
             Add New Serial Numbers
           </ThemeButton>

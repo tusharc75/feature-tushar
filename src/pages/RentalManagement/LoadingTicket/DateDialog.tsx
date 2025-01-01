@@ -117,6 +117,7 @@ const DateDialog = ({ title, type, status, onClose, handleSubmit, loading, asset
                 Close
               </ThemeButton>
               <ThemeButton
+                onClick={handleSubmit}
                 disabled={loading}
                 buttonType='theme'
                 isLoading={loading}
