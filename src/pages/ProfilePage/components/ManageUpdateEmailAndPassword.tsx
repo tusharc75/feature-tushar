@@ -145,7 +145,6 @@ export default function ManageUpdateEmailAndPassword({
       />
       <Formik
         onSubmit={handleSubmit}
-        // onSubmit={() => { }}
         initialValues={isUpdateEmail ? { email: userData?.email ?? '' } : { oldPassword: '', newPassword: '', confirmPassword: '' }}
         validationSchema={isUpdateEmail ? updateEmailSchema : updatePassWordSchema}
         validate={isUpdateEmail ? null : validateForm}
@@ -159,7 +158,7 @@ export default function ManageUpdateEmailAndPassword({
                     <Grid spacing={3} container>
                       {isUpdatePassword ? (
                         <>
-                          <Grid style={{ display: 'flex' }} size={{sm:10}}>
+                          <Grid size={{ sm: 12 }}>
                             <TextField
                               fullWidth
                               margin="dense"
@@ -180,8 +179,7 @@ export default function ManageUpdateEmailAndPassword({
                               helperText={errors['oldPassword']}
                             />
                           </Grid>
-
-                          <Grid size={{sm:10}}>
+                          <Grid size={{ sm: 12 }}>
                             <TextField
                               fullWidth
                               margin="dense"
@@ -202,7 +200,7 @@ export default function ManageUpdateEmailAndPassword({
                               helperText={errors['newPassword']}
                             />
                           </Grid>
-                          <Grid size={{sm:10}}>
+                          <Grid size={{ sm: 12 }}>
                             <TextField
                               fullWidth
                               margin="dense"
@@ -228,7 +226,7 @@ export default function ManageUpdateEmailAndPassword({
                         </>
                       ) : null}
                       {isUpdateEmail ? (
-                        <Grid size={{sm:12}}>
+                        <Grid size={{ sm: 12 }}>
                           <TextField
                             style={{ width: '400px' }}
                             fullWidth
@@ -256,7 +254,7 @@ export default function ManageUpdateEmailAndPassword({
 
               <ThemeButton
                 isLoading={loading}
-buttonType="theme"
+                buttonType="theme"
                 disabled={loading ? true : (isUpdateEmail && values.email === userData.email) || false}
                 onClick={() => {
                   if (isUpdatePassword) {
