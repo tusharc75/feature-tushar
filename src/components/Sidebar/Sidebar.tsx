@@ -1,5 +1,5 @@
 import { Close } from '@mui/icons-material';
-import { Collapse, CssBaseline, IconButton, List, ListItemButton, ListItemIcon, ListItemText, Toolbar } from '@mui/material';
+import { Collapse, CssBaseline, IconButton, List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import { kebabCase, lowerCase } from 'lodash';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { GoChevronDown, GoChevronUp } from 'react-icons/go';
@@ -11,7 +11,6 @@ import { cn } from 'src/constants/helpers';
 import { setDataBySectionName } from 'src/pages/Home/helpers';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { useData } from '../../StateProvider/Provider';
-import HtmlTooltip from '../CustomTooltipTitle';
 import Header from '../Header/Header';
 import routes from '../Helpers/Routes';
 import styles from './sidebar.module.scss';
@@ -19,8 +18,7 @@ import useStyles from './style';
 import { TResource, TSidebarItem, TSidebarSection } from './type';
 import { isSectionActive, isSectionVisible, staticSidebarData } from './utils';
 
-const drawerWidth = 306;
-const closedDrawerWidth = 84;
+
 let toggleTimeout;
 
 function SideBar({ location }) {
@@ -179,9 +177,8 @@ function SideBar({ location }) {
               </div>
             </div>
             <List
-              className={`${styles.listContainer} sidebar-list max-h-[calc(100vh-80px)] ${
-                isSidebarOpen ? 'overflow-y-auto' : 'overflow-y-hidden'
-              } overflow-x-hidden`}
+              className={`${styles.listContainer} sidebar-list max-h-[calc(100vh-80px)] ${isSidebarOpen ? 'overflow-y-auto' : 'overflow-y-hidden'
+                } overflow-x-hidden`}
             >
               {listItems?.map((listItem, i) => {
                 const hasChild = Boolean(listItem.items);
@@ -189,50 +186,47 @@ function SideBar({ location }) {
 
                 return (
                   <React.Fragment key={listItem.name}>
-                    <HtmlTooltip title={!isSidebarOpen ? listItem.name : ''}>
-                      <ListItemButton
-                        className={`${styles.listItem} dropdown-items ${isItemActive && styles.activeList}`}
-                        key={listItem.name + '' + i}
-                        onClick={() => {
-                          if (isSidebarOpen) {
-                            handleCollapse(listItem.name);
-                          }
-                          if (!listItem.items?.length) {
-                            history.push(listItem.link);
-                          }
-                        }}
-                        id={`sidbar-parent-item-${listItem.name.split(' ').join('-')}`}
-                      >
-                        <span
-                          className={cn(
-                            '-z-10',
-                            isItemActive ? 'absolute bottom-2 left-[19px] right-[19px] top-2 rounded-md bg-[var(--new-theme-color)] ' : 'sr-only',
-                            isSidebarOpen ? 'left-3 right-3' : 'left-[18px] h-[40px] w-[45px]'
-                          )}
-                        ></span>
-                        <ListItemIcon className={cn(styles.listIcon, isItemActive && '!text-white')}>{listItem.icon}</ListItemIcon>
-                        <ListItemText
-                          primary={listItem.name}
-                          className={cn(
-                            `wordWrap [&>span]:!font-normal`,
-                            isItemActive ? '[&>span]:!text-white' : '[&>span]:!text-[var(--sidebar-text-color)]'
-                          )}
-                        />
-                        {hasChild && (
-                          <span className={cn('expand-icon mr-2', isItemActive ? 'text-white' : 'text-[var(--sidebar-text-color)]')}>
-                            {open[listItem.name] ? <GoChevronUp size={20} /> : <GoChevronDown size={20} />}
-                          </span>
+                    <ListItemButton
+                      className={`${styles.listItem} dropdown-items ${isItemActive && styles.activeList}`}
+                      key={listItem.name + '' + i}
+                      onClick={() => {
+                        if (isSidebarOpen) {
+                          handleCollapse(listItem.name);
+                        }
+                        if (!listItem.items?.length) {
+                          history.push(listItem.link);
+                        }
+                      }}
+                      id={`sidbar-parent-item-${listItem.name.split(' ').join('-')}`}
+                    >
+                      <span
+                        className={cn(
+                          '-z-10',
+                          isItemActive ? 'absolute bottom-2 left-[19px] right-[19px] top-2 rounded-md bg-[var(--new-theme-color)] ' : 'sr-only',
+                          isSidebarOpen ? 'left-3 right-3' : 'left-[18px] h-[40px] w-[45px]'
                         )}
-                      </ListItemButton>
-                    </HtmlTooltip>
+                      ></span>
+                      <ListItemIcon className={cn(styles.listIcon, isItemActive && '!text-white')}>{listItem.icon}</ListItemIcon>
+                      <ListItemText
+                        primary={listItem.name}
+                        className={cn(
+                          `wordWrap [&>span]:!font-normal`,
+                          isItemActive ? '[&>span]:!text-white' : '[&>span]:!text-[var(--sidebar-text-color)]'
+                        )}
+                      />
+                      {hasChild && (
+                        <span className={cn('expand-icon mr-2', isItemActive ? 'text-white' : 'text-[var(--sidebar-text-color)]')}>
+                          {open[listItem.name] ? <GoChevronUp size={20} /> : <GoChevronDown size={20} />}
+                        </span>
+                      )}
+                    </ListItemButton>
                     {hasChild && (
                       <Collapse in={open[listItem.name]} timeout="auto" unmountOnExit>
                         <List component="div" disablePadding className={`${styles.subList} ${isItemActive && styles.activeSubList}`}>
                           {listItem.items.map((item, j) => (
                             <Link
-                              className={`sub-list ${pathName === item.name.toLowerCase().split(' ').join('-') && styles.active_sub} ${
-                                itemToAddActiveClass === i && subItemToAddActiveClass === j ? 'active_sub' : ''
-                              }`}
+                              className={`sub-list ${pathName === item.name.toLowerCase().split(' ').join('-') && styles.active_sub} ${itemToAddActiveClass === i && subItemToAddActiveClass === j ? 'active_sub' : ''
+                                }`}
                               key={j}
                               onClick={() => {
                                 setItemToAddActiveClass(i);

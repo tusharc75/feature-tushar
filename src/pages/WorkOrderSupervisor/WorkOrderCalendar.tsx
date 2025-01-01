@@ -78,7 +78,7 @@ function WorkOrderCalendar({ getFilterQuery, filterQuery, reference, setOpen }, 
           setOpenRepairPopup({ open: true, data: data });
         }
       })
-      .catch((err) => {})
+      .catch((err) => { })
       .finally(() => setIsDataFetching(false));
   };
 
@@ -112,11 +112,9 @@ function WorkOrderCalendar({ getFilterQuery, filterQuery, reference, setOpen }, 
             };
           }
         });
-        console.log('rows', rows);
-
         setEvents([...rows]);
       })
-      .catch((err) => {})
+      .catch((err) => { })
       .finally(() => setIsDataFetching(false));
   };
 
@@ -225,27 +223,27 @@ function WorkOrderCalendar({ getFilterQuery, filterQuery, reference, setOpen }, 
           <Box className="max-h-[600px] space-y-2  overflow-y-auto overflow-x-hidden p-2">
             {openRepairPopup.data?.length
               ? openRepairPopup.data?.map((d) => (
-                  <Accordion key={d._id} defaultExpanded>
-                    <AccordionSummary expandIcon={<ExpandMore />}>
-                      <div className="flex items-center gap-2">
-                        <p className="text-truncate" title={d.workOrderNumber}>
-                          {d.workOrderNumber}
-                        </p>
-                        <IconButton
-                          size="small"
-                          onClick={() => {
-                            window.open(`${routes?.workOrderDetail?.path}/${d?._id}`);
-                          }}
-                        >
-                          <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                        </IconButton>
-                      </div>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <RenderTable data={d.competencies} resources={resources} />
-                    </AccordionDetails>
-                  </Accordion>
-                ))
+                <Accordion key={d._id} defaultExpanded>
+                  <AccordionSummary expandIcon={<ExpandMore />}>
+                    <div className="flex items-center gap-2">
+                      <p className="text-truncate" title={d.workOrderNumber}>
+                        {d.workOrderNumber}
+                      </p>
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          window.open(`${routes?.workOrderDetail?.path}/${d?._id}`);
+                        }}
+                      >
+                        <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                      </IconButton>
+                    </div>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <RenderTable data={d.competencies} resources={resources} />
+                  </AccordionDetails>
+                </Accordion>
+              ))
               : null}
           </Box>
         </Popover>

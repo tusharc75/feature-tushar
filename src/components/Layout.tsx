@@ -7,7 +7,7 @@ import Sidebar from './Sidebar/Sidebar';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { useStore, SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON } from 'src/StateProvider/fastContext';
 
-const Layout = ({ children, width }) => {
+const Layout = ({ children }) => {
   const [theme] = useAppTheme();
   const contentRef = useRef(null);
   const bodyRef = useRef(null);
@@ -51,9 +51,8 @@ const Layout = ({ children, width }) => {
             onClick={handleSidebarClose}
           >
             <div
-              className={`z-[1] mx-auto h-full w-[calc(100%-2%)] flex-grow  [transition:padding_195ms_cubic-bezier(0.4,_0,_0.6,_1)_0ms] max-[900px]:w-full max-[900px]:px-[13px] ${
-                isSidebarOpen && sidebarOpenedByButton ? 'min-[960px]:pl-[222px]' : ''
-              }`}
+              className={`z-[1] mx-auto h-full w-[calc(100%-2%)] flex-grow  [transition:padding_195ms_cubic-bezier(0.4,_0,_0.6,_1)_0ms] max-[900px]:w-full max-[900px]:px-[13px] ${isSidebarOpen && sidebarOpenedByButton ? 'min-[960px]:pl-[222px]' : ''
+                }`}
               ref={bodyRef}
               onScroll={onScroll}
             >
