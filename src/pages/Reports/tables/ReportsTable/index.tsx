@@ -14,6 +14,7 @@ import { cn, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, primaryField
 import { TableCommonProps } from 'src/pages/Reports/types';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import DisplayFilterChip from 'src/pages/Reports/tables/DisplayFilterChip';
+import dayjs from 'dayjs';
 
 let cancelTokenSource = null;
 
@@ -238,7 +239,6 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
       if (search) {
         filterQuery = `${filterQuery}search=${encodeURIComponent(search)}&`;
       }
-
       if (!isObjectEmpty(filters)) {
         for (let i = 0; i < deepFiltersP.length; i++) {
           const tempFilter = deepFiltersP[i];
@@ -280,7 +280,8 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
           ...deepFilter,
           ...deepFiltersP
             ?.filter((d) => {
-              const hasTermLength = d?.term?.length ? true : false;
+              const isoDate = dayjs(d?.term);
+              const hasTermLength = isoDate.isValid() ? true : d?.term?.length ? true : false;
               if (isStatusPeriod) {
                 return hasTermLength && !['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field);
               }
@@ -297,6 +298,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
             })
         ];
       }
+
       if (isStatusPeriod && deepFiltersP?.filter((d) => d?.term && ['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field))?.length) {
         deepFiltersP
           ?.filter((d) => d?.term && ['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field))
@@ -304,6 +306,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
             filterQuery = `${filterQuery}${ele?.field}=${ele?.term}&`;
           });
       }
+
       if (deepFilter && deepFilter.length > 0) {
         filterQuery = `${filterQuery}deepFilter=${encodeURIComponent(JSON.stringify(deepFilter))}&`;
       }

@@ -45,6 +45,7 @@ import {
 import SendMailMenu from 'src/pages/Reports/tables/StandardReportTable/SendMailMenu';
 import { TableCommonProps } from 'src/pages/Reports/types';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import dayjs from 'dayjs';
 
 let cancelTokenSource = null;
 
@@ -298,7 +299,8 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
         ...deepFilter,
         ...deepFiltersP
           ?.filter((d) => {
-            const hasTermLength = d?.term?.length ? true : false;
+            const isoDate = dayjs(d?.term);
+            const hasTermLength = isoDate.isValid() ? true : d?.term?.length ? true : false;
             if (isStatusPeriod) {
               return hasTermLength && !['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field);
             }
