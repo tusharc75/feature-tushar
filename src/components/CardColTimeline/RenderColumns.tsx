@@ -8,7 +8,7 @@ import CommonSkeleton from '../Helpers/CommonSkeleton';
 import ColCard from './ColCard';
 import { TActios, TInitialState, datarowInterface } from './index';
 
-export interface colDataInterface extends React.HTMLAttributes<HTMLDivElement> {
+export interface ColDataInterface extends React.HTMLAttributes<HTMLDivElement> {
   cardOnClick?: (e: React.MouseEvent, data: any) => void | null;
   passFailStatus?: boolean;
   passFailAccessor?: string;
@@ -23,6 +23,8 @@ export interface colDataInterface extends React.HTMLAttributes<HTMLDivElement> {
   fetchSingleColumn: (column: string, page: number, appendData?: boolean, filterQuery?: string) => void;
   assignOptions?: any;
   openAssignHandler?: (option: any, data: any) => void | null;
+  background?: string;
+  color?: string;
 }
 
 const HEADER_HEIGHT = 90;
@@ -61,7 +63,7 @@ const calcCardHeight = (rowDef: datarowInterface[], data) => {
   return HEADER_HEIGHT + rowsWithHeight.length * ROW_HEIGHT + rowsWithExternalLInk.length * ROW_EXTERNALliNK_HEIGHT;
 };
 
-const RenderColumns: React.FC<colDataInterface> = ({
+const RenderColumns: React.FC<ColDataInterface> = ({
   cardOnClick,
   passFailStatus,
   passFailAccessor,
@@ -146,9 +148,15 @@ const RenderColumns: React.FC<colDataInterface> = ({
 
   return (
     <>
-      <div className="col group -mx-[6px]" key={refreshDataCount}>
+      <div className="col group relative isolate -mx-[6px]" key={refreshDataCount}>
+        <div className="absolute -bottom-[2px] -top-[2px] left-[4px] right-[4px] -z-[1] rounded-md bg-gray-100 dark:bg-gray-700" />
+        {itemCount === 0 && !isInitialLoading && (
+          <div className="absolute inset-0 -z-[1] flex h-full items-center justify-center">
+            <div className="select-none text-center text-[20px] font-semibold text-gray-400">No Data Found</div>
+          </div>
+        )}
         {isInitialLoading ? (
-          <div className="grid gap-2 overflow-hidden" style={{ maxHeight: containerHeight || 600 }}>
+          <div className="grid gap-2 overflow-hidden " style={{ maxHeight: containerHeight || 600 }}>
             {Array.from(Array(10).keys()).map((item) => (
               <div
                 key={item}

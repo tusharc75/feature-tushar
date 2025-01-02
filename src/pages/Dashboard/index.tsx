@@ -15,6 +15,7 @@ import AssetStats from './AssetStats';
 import FullScreenChart from './FullScreenChart';
 import { periodOption, frequencyData } from '../DashboardBuilder/builderHelpers';
 import { camelCase, set } from 'lodash';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const Dashboard = () => {
   const {
@@ -134,7 +135,7 @@ const Dashboard = () => {
             />
             <Box pt={1}>
               {dashboardLoading ? (
-                <Loader minHeight={'100%'} height="calc(100vh - 200px)" noLoader={false} text="Loading Dashboard..." />
+                <CommonSkeleton />
               ) : dashboardList.length === 0 ? (
                 <Box
                   style={{ height: 'calc(100vh - 256px)', minHeight: '400px' }}
@@ -175,7 +176,7 @@ const Dashboard = () => {
                     />
                   ))}
                   {globalFilters.dashboardType?.includes('Asset') && (
-                    <Grid size={{xs:12}}>
+                    <Grid size={{ xs: 12 }}>
                       <AssetStats />
                     </Grid>
                   )}
