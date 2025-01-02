@@ -6,9 +6,9 @@ export type CustomToastProps = {
   open: boolean;
   message: string;
   type: AlertProps['severity'] | 'notFoundError';
+  hideDuration?: number;
 };
 type ExtraAttributes = {
-  hideDuration?: number;
   close: () => void;
 };
 

@@ -1,7 +1,6 @@
 import { Box, Menu, MenuItem } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import EditIcon from '@mui/icons-material/Edit';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -17,6 +16,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import History from './History';
 import ManageDriverMaster from './ManageDriverMaster';
+import { ExpandMore } from '@mui/icons-material';
 
 const DriverMasterDetail = () => {
   const { id } = useParams();
@@ -147,7 +147,7 @@ const DriverMasterDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {permissions?.driverMaster?.isUpdate && (
-              <ThemeButton onClick={handleClick} endIcon={<ArrowDropDownIcon />} iconForMobile={false}>
+              <ThemeButton onClick={handleClick} endIcon={<ExpandMore />} iconForMobile={false}>
                 {'Change Status'}
               </ThemeButton>
             )}

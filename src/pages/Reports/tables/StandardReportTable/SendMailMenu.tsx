@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Menu, MenuItem } from '@mui/material';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { ExpandMore } from '@mui/icons-material';
 
 const SendMailMenu = ({ exportData, isProcessing }) => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -18,18 +17,14 @@ const SendMailMenu = ({ exportData, isProcessing }) => {
 
   return (
     <>
-      <HtmlTooltip title={'Send Mail'} placement="top" arrow enterTouchDelay={0}>
-        <span>
-          <ThemeButton
-            disabled={isProcessing === 'sendMail'}
-            buttonType='theme'
-            isLoading={isProcessing}
-            onClick={(e) => handleClick(e)}
-          >
-            Send Mail
-          </ThemeButton>
-        </span>
-      </HtmlTooltip>
+      <ThemeButton
+        disabled={isProcessing === 'sendMail'}
+        isLoading={isProcessing}
+        onClick={(e) => handleClick(e)}
+        endIcon={<ExpandMore />}
+      >
+        Send Mail
+      </ThemeButton>
       <Menu
         anchorEl={anchorEl}
         open={open}
