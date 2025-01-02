@@ -952,8 +952,7 @@ function Dropdown({
                           isRedirectToDetailPage={false}
                           onSuccess={({ data }) => {
                             setLookupDialog(false);
-                            const active = data?.hasOwnProperty('active') ? data?.active : true;
-                            if (data._id && active) {
+                            if (data._id && (data?.active ?? true)) {
                               let tempNewOption = {
                                 default: true,
                                 optionLabel: data.accountName,
