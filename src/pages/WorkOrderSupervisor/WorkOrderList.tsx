@@ -281,7 +281,7 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
         deepFilter = `${deepFilter}&filterType=and`;
       }
 
-      return `${deepFilter}&filterType=and&filterByIdType=and`;
+      return `${deepFilter}`;
     };
 
     const handleAddConsumables = (rows, records = []) => {
