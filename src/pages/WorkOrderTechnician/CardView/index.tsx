@@ -1,17 +1,17 @@
+import { Info } from '@mui/icons-material';
+import DescriptionIcon from '@mui/icons-material/Description';
+import { IconButton } from '@mui/material';
+import queryString from 'query-string';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import queryString from 'query-string';
-import CardColTimeline, { useCardReducer } from 'src/components/CardColTimeline';
-import { useData } from 'src/StateProvider/Provider';
-import routes from 'src/components/Helpers/Routes';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { Info } from '@mui/icons-material';
-import { WORKORDER_SERVICE_STATUS, WORKORDER_TECHNICIAN_SERVICE_STATUS, workOrderColormap } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
-import TechnicianDialog from '../TechnicianDialog';
-import { IconButton } from '@mui/material';
-import DescriptionIcon from '@mui/icons-material/Description';
+import CardColTimeline from 'src/components/CardColTimeline';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import routes from 'src/components/Helpers/Routes';
+import { WORKORDER_SERVICE_STATUS, WORKORDER_TECHNICIAN_SERVICE_STATUS, workOrderColormap } from 'src/constants/helpers';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
+import { useData } from 'src/StateProvider/Provider';
+import TechnicianDialog from '../TechnicianDialog';
 
 const LIMIT = 25;
 
