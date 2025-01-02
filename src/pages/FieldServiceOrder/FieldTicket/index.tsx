@@ -218,8 +218,14 @@ const FieldTicket = ({
   };
 
   const handleDelete = () => {
+    let ids = [];
+    if (deleteRecord) {
+      ids.push(deleteRecord._id);
+    } else {
+      ids = selectedRecords.map((m) => m._id);
+    }
     axiosInstance()
-      .put(`${routes.fieldTicket.path}/remove`, { ids: deleteRecord })
+      .put(`${routes.fieldTicket.path}/remove`, { ids })
       .then(() => {
         fetchData();
         fetchServiceOrderData();
@@ -284,7 +290,7 @@ const FieldTicket = ({
                 size="small"
                 aria-label="Delete"
                 onClick={() => {
-                  setDeleteRecord([row?.original?._id]);
+                  setDeleteRecord(row?.original);
                   setShowDeleteConfirmBox(true);
                 }}
               >
@@ -319,7 +325,7 @@ const FieldTicket = ({
           disabled={!selectedRecords?.every((s) => s.canDelete)}
           onClick={() => {
             setShowDeleteConfirmBox(true);
-            setDeleteRecord(selectedRecords.map((d) => d._id));
+            setDeleteRecord(null);
           }}
           id={'delete-menu-item'}
         >

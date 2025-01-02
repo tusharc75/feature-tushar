@@ -53,6 +53,9 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
   const walkmeInstance = useGetWalkmeInstance();
   const isStepDataSet = useRef(false);
 
+  const [isMaterialAvailable, setIsMaterialAvailable] = useState(false);
+
+
   useEffect(() => {
     fetchFields();
   }, []);
@@ -120,6 +123,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
           rest.fieldTicketNumber = GenerateResourceLineNumber(fieldsDataForCreate);
           rest.status = FIELD_TICKET_STATUS.new;
           setCloneHeading(fieldTicketNumber);
+          setIsMaterialAvailable(!mainData?.canDelete)
           tempData = rest;
         } else {
           if (referenceData) {
@@ -307,13 +311,12 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${
-                  id
-                    ? isClone
-                      ? `Clone - ${cloneHeading}`
-                      : `Update ${initialData.values?.fieldTicketNumber ? `(${initialData.values?.fieldTicketNumber})` : ''}`
-                    : `Create ${resources?.fieldTicket?.titleSingular}`
-                }`}
+                title={`${id
+                  ? isClone
+                    ? `Clone - ${cloneHeading}`
+                    : `Update ${initialData.values?.fieldTicketNumber ? `(${initialData.values?.fieldTicketNumber})` : ''}`
+                  : `Create ${resources?.fieldTicket?.titleSingular}`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -402,7 +405,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                 </ThemeButton>
                 <ThemeButton
                   onClick={() => {
-                    if (id && isClone) {
+                    if (id && isClone && isMaterialAvailable) {
                       setShowConfirmCloneDetailsDialog(true);
                     } else {
                       submitForm();
@@ -420,7 +423,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);
-                    if (id && isClone) {
+                    if (id && isClone && isMaterialAvailable) {
                       setShowConfirmCloneDetailsDialog(true);
                     } else {
                       submitForm();
