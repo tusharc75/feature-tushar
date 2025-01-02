@@ -95,11 +95,8 @@ export const VirtualTable = forwardRef(function (
   }, [columns.length]);
 
   useEffect(() => {
-    setTimeout(() => {
-      rowVirtualizer.measure();
-    }, 300); //remeasure all rows after modal animation is complete
-    // this is only for those tables that are inside modal
-  }, []);
+    rowVirtualizer.measure();
+  }, [rows.length]);
 
   const virtualColumns = columnVirtualizer.getVirtualItems();
   const virtualrows = rowVirtualizer.getVirtualItems();
