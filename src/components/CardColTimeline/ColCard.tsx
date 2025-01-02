@@ -135,10 +135,10 @@ const ColCard: React.FC<IColCard> = ({
             return (
               <Typography key={index} className={styles.cardDetails}>
                 <span>{item.title}: </span>
-                <span className="flex min-w-0 gap-1 text-ellipsis [font-weight:400_!important]">
-                  {outsideText}
+                <span className="flex min-w-0 gap-1">
+                  <span className="min-w-0 overflow-hidden text-ellipsis [font-weight:400_!important]">{outsideText}</span>
                   <Link
-                    className={`${styles.cardDetailsLink} min-w-0 `}
+                    className={`${styles.cardDetailsLink} block min-w-0 flex-shrink-0`}
                     onClick={(e) => e.stopPropagation()}
                     target={item.target}
                     to={() => item.link(data)}
