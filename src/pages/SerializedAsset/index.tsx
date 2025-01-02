@@ -32,6 +32,7 @@ import {
   INVENTORY_OWNER_TYPE,
   gridLoadingTimeout,
   prepareDataForGrid,
+  product,
   serializedAsset,
   sidebarResource
 } from '../../constants/helpers';
@@ -45,7 +46,7 @@ const SerializedAsset = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const history = useHistory();
-  let { assetStatus, product, warehouse, currentLocation }: any = queryString.parse(history.location.search);
+  let { assetStatus, product:productP, warehouse, currentLocation }: any = queryString.parse(history.location.search);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
@@ -81,13 +82,13 @@ const SerializedAsset = () => {
   }, [permissions, selectedEntity]);
 
   useEffect(() => {
-    if (assetStatus || product || warehouse || currentLocation) {
+    if (assetStatus || productP || warehouse || currentLocation) {
       const filterVal = {};
       if (assetStatus) {
         filterVal['status'] = { filter: [assetStatus] };
       }
-      if (product) {
-        const productFilter = JSON.parse(product);
+      if (productP) {
+        const productFilter = JSON.parse(productP);
         if (isArray(productFilter)) {
           filterVal['product'] = {
             operator: 'OR',
@@ -119,7 +120,7 @@ const SerializedAsset = () => {
           };
         }
       }
-      dispatch({ type: 'filter', filters: filterVal });
+      dispatch({ type: 'filter', filters: filterVal,filterTerm:{} });
     }
   }, []);
 
@@ -164,7 +165,7 @@ const SerializedAsset = () => {
   useEffect(() => {
     if (productCategory && productCategory !== '') {
       axiosInstance()
-        .get(`${serializedAsset.api}?filterById=[{"field":"productCategory","term":"${productCategory}"}]`)
+        .get(`${product?.api}?filterById=[{"field":"productCategory","term":"${productCategory}"}]`)
         .then(({ data }) => {
           setProductFilterList(data?.data);
           setProductFilter(null);
