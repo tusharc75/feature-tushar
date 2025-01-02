@@ -30,7 +30,7 @@ const AddInvoice = ({ purchaseOrderId, invoiceData = null, handleClose, handleSu
           toastConfig.setToastConfig({
             open: true,
             message: data.message,
-            severity: 'success'
+            type: 'success'
           });
           setLoading(false);
         })
@@ -46,7 +46,7 @@ const AddInvoice = ({ purchaseOrderId, invoiceData = null, handleClose, handleSu
           toastConfig.setToastConfig({
             open: true,
             message: data.message,
-            severity: 'success'
+            type: 'success'
           });
           setLoading(false);
         })

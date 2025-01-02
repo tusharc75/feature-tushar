@@ -91,7 +91,7 @@ const FieldDialog = ({ handleClose, handleSuccess, surveyId, notEditable = false
         toastConfig.setToastConfig({
           open: true,
           message: data.message,
-          severity: 'success'
+          type: 'success'
         });
       })
       .catch((err) => {

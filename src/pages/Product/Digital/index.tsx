@@ -151,7 +151,7 @@ const Digital = ({ renderedFrom, productId }) => {
         toastConfig.setToastConfig({
           open: true,
           message: data.message,
-          severity: 'success'
+          type: 'success'
         });
         fetchDigitalData();
         setShowConfirmBox({ open: false, ids: null });

@@ -126,7 +126,7 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
           toastConfig.setToastConfig({
             open: true,
             message: data.message,
-            severity: 'success'
+            type: 'success'
           });
         })
         .catch((err) => {

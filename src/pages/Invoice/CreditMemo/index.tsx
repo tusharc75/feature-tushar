@@ -242,7 +242,7 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
       toastConfig.setToastConfig({
         open: true,
         message: data?.data?.message || 'Deleted successfully',
-        severity: 'success'
+        type: 'success'
       });
       fetchData();
     } catch (error) {
