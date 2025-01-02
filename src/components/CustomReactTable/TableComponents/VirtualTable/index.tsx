@@ -95,10 +95,8 @@ export const VirtualTable = forwardRef(function (
   }, [columns.length]);
 
   useEffect(() => {
-    setTimeout(() => {
-      rowVirtualizer.measure();
-    }, 0);
-  }, []);
+    rowVirtualizer.measure();
+  }, [rows.length]);
 
   const virtualColumns = columnVirtualizer.getVirtualItems();
   const virtualrows = rowVirtualizer.getVirtualItems();

@@ -92,11 +92,7 @@ const Logs = ({ handleClose, detail, inventoryHistory }) => {
         disableFilters: true,
         disableSortBy: true,
         Cell: ({ row }) => {
-          return row.original?.transactionDate ? (
-            <p className="text-truncate">{displayDateTime(row?.original?.transactionDate)}</p>
-          ) : (
-            <NoDataCell />
-          );
+          return row.original?.transactionDate ? <p className="text-truncate">{displayDateTime(row?.original?.transactionDate)}</p> : <NoDataCell />;
         }
       }
     ];
