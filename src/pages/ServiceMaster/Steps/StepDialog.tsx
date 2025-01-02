@@ -198,7 +198,7 @@ export default function StepDialog({
     values.listPrice = parseFloat(values.listPrice);
     setLoading(true);
     if (reference === 'workOrder') {
-      if (!workOrderId || !uniqueId) toastConfig.setToastConfig({ open: true, message: 'Something went wrong', severity: 'error' });
+      if (!workOrderId || !uniqueId) toastConfig.setToastConfig({ open: true, message: 'Something went wrong', type: 'error' });
       values.serviceId = serviceId;
       if (stepData?._id) {
         values.stepId = stepData?._id;
@@ -215,7 +215,7 @@ export default function StepDialog({
             toastConfig.setToastConfig({
               open: true,
               message: data.message,
-              severity: 'success'
+              type: 'success'
             });
             setLoading(false);
           })
@@ -232,7 +232,7 @@ export default function StepDialog({
             toastConfig.setToastConfig({
               open: true,
               message: data.message,
-              severity: 'success'
+              type: 'success'
             });
             setLoading(false);
           })
@@ -1114,7 +1114,7 @@ export default function StepDialog({
                   )}
                   <div style={{ flex: '1 0 0' }} />
                   <ThemeButton
-                    buttonType="transparent" 
+                    buttonType="transparent"
                     onClick={() => {
                       handleClose();
                     }}

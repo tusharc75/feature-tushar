@@ -650,12 +650,12 @@ const WorkOrder = ({
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = `${parent.type === MATERIAL_TYPE.service
-          ? parent?.serviceDetail?.serviceName
-          : parent.type === MATERIAL_TYPE.product
-            ? parent?.productDetail?.productName
-            : parent.type === MATERIAL_TYPE.serializedAsset
-              ? parent?.serializedAssetDetail?.assetNumber
-              : parent?.packageDetail?.packageName
+        ? parent?.serviceDetail?.serviceName
+        : parent.type === MATERIAL_TYPE.product
+          ? parent?.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.serializedAsset
+            ? parent?.serializedAssetDetail?.assetNumber
+            : parent?.packageDetail?.packageName
         }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
@@ -671,12 +671,12 @@ const WorkOrder = ({
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qty = parent.qty;
       parent.status = `${parent.type === MATERIAL_TYPE.service
-          ? parent.serviceDetail?.status
-          : parent.type === MATERIAL_TYPE.product
-            ? parent.productDetail?.status
-            : parent.type === MATERIAL_TYPE.serializedAsset
-              ? parent.serializedAssetDetail.status
-              : parent.packageDetail?.status
+        ? parent.serviceDetail?.status
+        : parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.status
+          : parent.type === MATERIAL_TYPE.serializedAsset
+            ? parent.serializedAssetDetail.status
+            : parent.packageDetail?.status
         }`;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
 
@@ -863,7 +863,7 @@ const WorkOrder = ({
         toastConfig.setToastConfig({
           open: true,
           message: data.message,
-          severity: 'success'
+          type: 'success'
         });
         setSubmitting(false);
       })
@@ -1339,7 +1339,7 @@ const WorkOrder = ({
       />
 
       <Grid container spacing={2}>
-        <Grid size={{xs:12, md:12, sm:12}}>
+        <Grid size={{ xs: 12, md: 12, sm: 12 }}>
           {columns ? (
             <Box zIndex={5} width={'100%'}>
               <CustomReactTable
@@ -1446,10 +1446,10 @@ const WorkOrder = ({
               okBtnLoading={isSubmitting}
               open={showServiceActionConfirmBox.open}
               message={`Are you sure you want to ${showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed
-                  ? 'complete'
-                  : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
-                    ? 'skip'
-                    : 'revert'
+                ? 'complete'
+                : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
+                  ? 'skip'
+                  : 'revert'
                 } this Service(s)`}
               onClose={() => {
                 setShowServiceActionConfirmBox({ open: false, action: '' });
@@ -1509,10 +1509,10 @@ const WorkOrder = ({
                   }) || []
               }
               title={`Arrange Services (${selectedRecords
-                  ?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e.workOrder._id === arrangeView.workOrderIds[arrangeView.currentIndex])
-                  ?.map((d) => {
-                    return d.serializedAssetDetail.assetNumber;
-                  })[0]
+                ?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e.workOrder._id === arrangeView.workOrderIds[arrangeView.currentIndex])
+                ?.map((d) => {
+                  return d.serializedAssetDetail.assetNumber;
+                })[0]
                 })`}
               handleClose={() => setArrangeView({ open: false, workOrderIds: [], currentIndex: 0 })}
               handleSubmit={(data) => handleArrangeUpdate(data, arrangeView.workOrderIds[arrangeView.currentIndex])}

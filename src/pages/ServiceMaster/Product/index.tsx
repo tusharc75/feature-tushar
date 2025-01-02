@@ -232,7 +232,7 @@ function Product({ id }) {
         setToastConfig({
           open: true,
           message: data.message,
-          severity: 'success'
+          type: 'success'
         });
         fetchData();
       })
@@ -259,7 +259,7 @@ function Product({ id }) {
         setToastConfig({
           open: true,
           message: data.message,
-          severity: 'success'
+          type: 'success'
         });
         setOpenAssignProductDialog(false);
         setSubmitting(false);
