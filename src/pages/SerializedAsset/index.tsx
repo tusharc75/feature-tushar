@@ -47,7 +47,7 @@ const SerializedAsset = () => {
   const history = useHistory();
   let { assetStatus, product, warehouse, currentLocation }: any = queryString.parse(history.location.search);
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { rowCount, page, limit, search, filters, filterTerm, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
   const {
@@ -368,7 +368,7 @@ const SerializedAsset = () => {
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters);
+    const { filterByIds, deepFilters } = gridFilterParser(filters, filterTerm);
 
     if (showScrapAsset) {
       deepFilter = `${deepFilter}&showScrapAsset=true`;
