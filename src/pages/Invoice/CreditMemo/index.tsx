@@ -6,11 +6,10 @@ import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { CHILD_RESOURCE, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { Add } from '@mui/icons-material';
+import { Add, ExpandMore } from '@mui/icons-material';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import ManageCreditMemo from 'src/pages/CreditMemo/ManageCreditMemo';
@@ -303,10 +302,10 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
             <ThemeButton
               disabled={selectedRecords.length === 0}
               onClick={handleClick}
-              endIcon={<ArrowDropDownIcon />}
+              endIcon={<ExpandMore />}
               mobileTooltip="Actions"
               buttonType="yellow"
-              iconForMobile={<ArrowDropDownIcon />}
+              iconForMobile={<ExpandMore />}
             >
               {'Actions'}
             </ThemeButton>

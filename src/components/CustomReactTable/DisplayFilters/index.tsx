@@ -49,13 +49,13 @@ function DisplayFilters({
     }
     setFilterTerm(filterTermP);
 
-    dispatchTable({ type: 'filter', filters: newFilters, filterTerm: filterTermP });
+    dispatchTable({ type: 'filter', filters: newFilters });
     setTempFilter(resource, { formValues: formValues || {}, filters: newFilters });
     setChipData((prev) => prev.filter((item) => item.name !== name));
   };
 
   const clearFilterAll = () => {
-    dispatchTable({ type: 'filter', filters: {}, filterTerm: {} });
+    dispatchTable({ type: 'filter', filters: {} });
     setSelectedFilter(null);
     setChipData([]);
     setCurrentFomValue({});

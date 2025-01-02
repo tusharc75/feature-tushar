@@ -59,7 +59,7 @@ const RentalManagement = () => {
   const history = useHistory();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { rowCount, page, limit, search, filters, filterTerm, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns, checkStaticField } = useColumns();
 
   const [renderCount, setRenderCount] = useState(0);
@@ -221,7 +221,7 @@ const RentalManagement = () => {
       deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters, filterTerm);
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -477,11 +477,12 @@ const RentalManagement = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord
-              ? `${resources?.rentalManagement?.titleSingular?.toLowerCase()} :
+            message={`Are you sure you want to delete ${
+              deleteRecord
+                ? `${resources?.rentalManagement?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.rentalJobName}`
-              : `selected ${resources?.rentalManagement?.titlePlural?.toLowerCase()}`
-              } ?`}
+                : `selected ${resources?.rentalManagement?.titlePlural?.toLowerCase()}`
+            } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
