@@ -38,7 +38,7 @@ function reducer(state: TInitialState, action: TActios) {
         ...state,
         loading: action.loading ?? true,
         filters: action.filters,
-        filterTerm: action.filterTerm,
+        filterTerm: action.filterTerm || state.filterTerm,
         page: 0
       };
     case 'sort':
