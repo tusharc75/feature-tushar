@@ -411,11 +411,17 @@ export const fetchFieldOptions = async ({ resource, sidebarResource, toastConfig
     if (resource === sidebarResource.serializedAsset) {
       const currentOwner: any = coloum?.find((e) => e?.fieldData?.fieldName === 'currentOwner');
       if (currentOwner) {
-        currentOwner.fieldData.lookup = true;
-        currentOwner.fieldData.option = [
-          ...(coloum?.find((e) => e?.fieldData?.lookupResource === sidebarResource.customerAccount)?.fieldData?.option || []),
-          ...(coloum?.find((e) => e?.fieldData?.lookupResource === sidebarResource.supplierAccount)?.fieldData?.option || [])
-        ];
+        const {
+          data: { data: lookupResource }
+        } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.customerAccount},${sidebarResource.supplierAccount}`);
+        if (lookupResource) {
+          currentOwner.fieldData.lookup = true;
+          currentOwner.fieldData.lookupResource = sidebarResource.customerAccount;
+          currentOwner.fieldData.customOptions = [
+            ...lookupResource?.[sidebarResource.customerAccount],
+            ...lookupResource?.[sidebarResource.supplierAccount]
+          ];
+        }
       }
     }
     return coloum;
