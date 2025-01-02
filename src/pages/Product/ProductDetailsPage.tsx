@@ -106,10 +106,7 @@ const ProductDetailsPage = () => {
   useEffect(() => {
     if (selectedWarehouse) {
       setWarehouseInventoriesLoading(true);
-      axiosInstance()
-        .get(
-          `${serializedAsset.api}?limit=6&filterById=[{"field":"warehouse","term":"${selectedWarehouse}"},{"field":"product","term":"${id}"}]&filterByIdType=and`
-        )
+      axiosInstance().get(`${serializedAsset.api}?limit=6&filterById=[{"field":"warehouse","term":"${selectedWarehouse}"},{"field":"product","term":"${id}"}]`)
         .then(({ data: { data } }) => {
           setWarehouseInventories(data);
           setWarehouseInventoriesLoading(false);

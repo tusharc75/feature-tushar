@@ -47,7 +47,7 @@ const SerializedAsset = () => {
   const history = useHistory();
   let { assetStatus, product, warehouse, currentLocation }: any = queryString.parse(history.location.search);
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { rowCount, page, limit, search, filters, filterTerm, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
   const {
@@ -164,7 +164,7 @@ const SerializedAsset = () => {
   useEffect(() => {
     if (productCategory && productCategory !== '') {
       axiosInstance()
-        .get(`${product.api}?filterById=[{"field":"productCategory","term":"${productCategory}"}]`)
+        .get(`/product?filterById=[{"field":"productCategory","term":"${productCategory}"}]`)
         .then(({ data }) => {
           setProductFilterList(data?.data);
           setProductFilter(null);
@@ -341,14 +341,14 @@ const SerializedAsset = () => {
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['canDelete'] =
             permissions?.serializedAsset?.isDelete &&
-              ![
-                ASSET_STATUS.new,
-                ASSET_STATUS.available,
-                ASSET_STATUS.lost,
-                ASSET_STATUS.customerPossession,
-                ASSET_STATUS.onPO,
-                ASSET_STATUS.scrap
-              ]?.includes(u?.status)
+            ![
+              ASSET_STATUS.new,
+              ASSET_STATUS.available,
+              ASSET_STATUS.lost,
+              ASSET_STATUS.customerPossession,
+              ASSET_STATUS.onPO,
+              ASSET_STATUS.scrap
+            ]?.includes(u?.status)
               ? false
               : true;
           return finalObject;
@@ -368,7 +368,7 @@ const SerializedAsset = () => {
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters);
+    const { filterByIds, deepFilters } = gridFilterParser(filters, filterTerm);
 
     if (showScrapAsset) {
       deepFilter = `${deepFilter}&showScrapAsset=true`;
@@ -411,7 +411,7 @@ const SerializedAsset = () => {
     if (showFilteredRecordsOnly) {
       deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
-    return `${deepFilter}&filterType=and&filterByIdType=and`;
+    return `${deepFilter}`;
   };
 
   const handleDelete = () => {
@@ -744,11 +744,12 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord
-            ? `${resources?.serializedAsset?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.serializedAsset?.titleSingular?.toLowerCase()} :
             ${deleteRecord?._id ? deleteRecord?.assetNumber : ''}`
-            : `selected ${resources?.serializedAsset?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.serializedAsset?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
