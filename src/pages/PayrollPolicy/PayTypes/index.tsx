@@ -133,7 +133,7 @@ const PayTypes = ({ payrollPolicyId }) => {
         toastConfig.setToastConfig({
           open: true,
           message: data.message,
-          severity: 'success'
+          type: 'success'
         });
         setDeleting(false);
         fetchData();

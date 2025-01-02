@@ -246,7 +246,7 @@ const Service = ({
         toastConfig.setToastConfig({
           open: true,
           message: data.message,
-          severity: 'success'
+          type: 'success'
         });
       })
       .catch((err) => {
@@ -438,7 +438,7 @@ const Service = ({
         toastConfig.setToastConfig({
           open: true,
           message: data.message,
-          severity: 'success'
+          type: 'success'
         });
         setAssignSteps(false);
       })
@@ -454,7 +454,7 @@ const Service = ({
         toastConfig.setToastConfig({
           open: true,
           message: data.message,
-          severity: 'success'
+          type: 'success'
         });
         setAssignSteps(false);
         setShowManagePurchaseOrder(false);
@@ -485,7 +485,7 @@ const Service = ({
         toastConfig.setToastConfig({
           open: true,
           message: data.message,
-          severity: 'success'
+          type: 'success'
         });
         fetchServiceData();
         setOpenProperties(false);

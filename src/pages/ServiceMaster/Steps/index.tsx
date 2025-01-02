@@ -227,7 +227,7 @@ const Steps = ({ serviceId }) => {
         toastConfig.setToastConfig({
           open: true,
           message: data.message,
-          severity: 'success'
+          type: 'success'
         });
         fetchStepsData();
         setShowConfirmBox({ open: false, ids: null });
@@ -251,7 +251,7 @@ const Steps = ({ serviceId }) => {
         toastConfig.setToastConfig({
           open: true,
           message: data.message,
-          severity: 'success'
+          type: 'success'
         });
       })
       .catch((err) => {
