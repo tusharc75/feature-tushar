@@ -171,7 +171,7 @@ const AddSerializedAsset = ({
           return { field: 'product', term: m?.id ?? '' };
         });
       }
-      queryString = `${queryString}&filterById=${JSON.stringify(updatedFilters)}&filterByIdType=or`;
+      queryString = `${queryString}&filterById=${JSON.stringify(updatedFilters)}`;
     }
     let api = '';
     if (Number(tabValue) === 2) {

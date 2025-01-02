@@ -101,22 +101,22 @@ const AddTechnicians = ({ schedularState }: SchedularComponentProps) => {
     if (sorting?.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
-    return `${deepFilter}&filterType=and&filterByIdType=and`;
+    return `${deepFilter}`;
   };
 
   return (
     <>
       <h6 className="mb-[18px] text-xl font-semibold leading-6">{tabData?.label}</h6>
       {columns ? (
-          <CustomReactTable
-            height={'calc(100vh - 393px)'}
-            columns={columns}
-            state={state}
-            dispatch={dispatch}
-            renderedFrom={renderedFrom}
-            refreshGrid={fetchData}
-            resource={sidebarResource.employeeMaster}
-          />
+        <CustomReactTable
+          height={'calc(100vh - 393px)'}
+          columns={columns}
+          state={state}
+          dispatch={dispatch}
+          renderedFrom={renderedFrom}
+          refreshGrid={fetchData}
+          resource={sidebarResource.employeeMaster}
+        />
       ) : (
         <Box p={2} className="h-[--loader-h]">
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
