@@ -47,7 +47,7 @@ const SerializedAsset = () => {
   const history = useHistory();
   let { assetStatus, product, warehouse, currentLocation }: any = queryString.parse(history.location.search);
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { rowCount, page, limit, search, filters, filterTerm, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
   const {
@@ -164,7 +164,7 @@ const SerializedAsset = () => {
   useEffect(() => {
     if (productCategory && productCategory !== '') {
       axiosInstance()
-        .get(`/product?filterById=[{"field":"productCategory","term":"${productCategory}"}]`)
+        .get(`${product.api}?filterById=[{"field":"productCategory","term":"${productCategory}"}]`)
         .then(({ data }) => {
           setProductFilterList(data?.data);
           setProductFilter(null);
@@ -368,7 +368,7 @@ const SerializedAsset = () => {
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters, filterTerm);
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (showScrapAsset) {
       deepFilter = `${deepFilter}&showScrapAsset=true`;
@@ -411,7 +411,7 @@ const SerializedAsset = () => {
     if (showFilteredRecordsOnly) {
       deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
-    return `${deepFilter}`;
+    return `${deepFilter}&filterType=and&filterByIdType=and`;
   };
 
   const handleDelete = () => {

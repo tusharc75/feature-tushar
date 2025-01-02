@@ -90,9 +90,9 @@ const GridHeader = ({
   };
 
   const handleApplyFilter = () => {
-    const filters = createFilterData(coloums, filterByIds, deepFilters);
+    const filters = createFilterData(coloums, filterByIds, deepFilters, filterTerm);
     const fromValue = filtermodelToFormValue(filters);
-    dispatch({ type: 'filter', filters, filterTerm });
+    dispatch({ type: 'filter', filters });
     setTempFilter(resource, { formValues: fromValue || {}, filters });
     setCurrentFomValue(fromValue);
     handleFilterClose();
@@ -114,7 +114,7 @@ const GridHeader = ({
           setDeepFilters(deepFilter);
           setFilterTerm(defaultFilter?.filterTerm || {});
           let deepFilterP;
-          if (defaultFilter?.filterValue) deepFilterP = createFilterData(coloums, filterById, deepFilter);
+          if (defaultFilter?.filterValue) deepFilterP = createFilterData(coloums, filterById, deepFilter, defaultFilter?.filterTerm);
           if (defaultFilter && deepFilterP) {
             dispatch({ type: 'filter', filters: deepFilterP });
             if (defaultFilter.sortBy) {

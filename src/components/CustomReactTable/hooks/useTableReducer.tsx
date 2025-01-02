@@ -38,7 +38,6 @@ function reducer(state: TInitialState, action: TActios) {
         ...state,
         loading: action.loading ?? true,
         filters: action.filters,
-        filterTerm: action.filterTerm || state.filterTerm,
         page: 0
       };
     case 'sort':
@@ -128,7 +127,6 @@ const intialState = {
   pageSizes: gridPageSizes,
   search: '',
   filters: {},
-  filterTerm: {},
   sorting: [],
   selectedRecords: [],
   currentEditingCellPosition: null,
@@ -151,7 +149,6 @@ export type TInitialState = {
   pageSizes: number[];
   search: string;
   filters: any;
-  filterTerm: any;
   sorting: any[];
   selectedRecords: any[];
   currentEditingCellPosition: { rowId: string; columnName: string } | null;
@@ -171,7 +168,7 @@ export type TActios =
   | { type: 'selection'; selectedRecords: any[] }
   | { type: 'update'; data: any[] }
   | { type: 'onlyFilter'; filters: any }
-  | { type: 'filter'; filters: any; loading?: boolean; filterTerm?: any }
+  | { type: 'filter'; filters: any; loading?: boolean }
   | { type: 'sort'; sorting: any[]; loading?: boolean }
   | { type: 'search'; search: string; loading?: boolean }
   | { type: 'pageChange'; page: number }
