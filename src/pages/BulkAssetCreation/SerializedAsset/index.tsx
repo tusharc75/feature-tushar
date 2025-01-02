@@ -88,7 +88,7 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit, s
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
-    return `${deepFilter}&filterType=and&filterByIdType=and`;
+    return `${deepFilter}&filterType=and`;
   };
 
   const handleValueUpdate = async (data, row) => {
@@ -145,7 +145,7 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit, s
           <DetailsPageHeader isActionButtonVisible={false} isAddButtonVisible={false} rightSideContents={rightSideContents()} hasXpadding />
         )}
       </Box>
-      <Grid size={{ xs:12, sm:12, md:12}}>
+      <Grid size={{ xs: 12, sm: 12, md: 12 }}>
         {columns ? (
           <CustomReactTable
             height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}

@@ -411,7 +411,7 @@ const SerializedAsset = () => {
     if (showFilteredRecordsOnly) {
       deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
-    return `${deepFilter}&filterType=and&filterByIdType=and`;
+    return `${deepFilter}`;
   };
 
   const handleDelete = () => {

@@ -125,7 +125,7 @@ const AddSerializedAssets = ({ schedularState }: SchedularComponentProps) => {
     if (sorting?.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
-    return `${deepFilter}&filterType=and&filterByIdType=and`;
+    return `${deepFilter}`;
   };
 
   return (
@@ -218,7 +218,7 @@ const AddSerializedAssets = ({ schedularState }: SchedularComponentProps) => {
       <div className="flex justify-end">
         <ThemeButton
           disabled={!selectedAssets?.length && !selectedRecords?.length}
-            buttonType="theme"
+          buttonType="theme"
           onClick={() => handleAdd()}
         >
           Save & Next
