@@ -531,7 +531,17 @@ $isAppliedBillDark: #234623;
 
   thead {
     max-height: 45px;
-    border-bottom: 1px solid var(--common-border-color);
+    th {
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0px;
+        width: 100%;
+        height: 1px;
+        background-color: var(--common-border-color, rgba(224, 224, 224, 1));
+      }
+    }
   }
   tbody tr {
     border-bottom: 1px solid var(--common-border-color);
