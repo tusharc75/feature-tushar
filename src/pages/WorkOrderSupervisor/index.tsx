@@ -99,6 +99,10 @@ const WorkOrderSupervisor = () => {
   const [filterByIds, setFilterByIds] = useState([]);
   const [filterTerm, setFilterTerm] = useState({});
 
+  useEffect(() => {
+    resetSelectedRecords();
+  }, [globalFilters]);
+
   const ref: any = useRef();
 
   const FIELD_TO_FILTER = [
