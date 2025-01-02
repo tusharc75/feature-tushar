@@ -38,7 +38,7 @@ function reducer(state: TInitialState, action: TActios) {
         ...state,
         loading: action.loading ?? true,
         filters: action.filters,
-        filterTerm: action.filterTerm,
+        filterTerm: action.filterTerm || state.filterTerm,
         page: 0
       };
     case 'sort':
@@ -171,7 +171,7 @@ export type TActios =
   | { type: 'selection'; selectedRecords: any[] }
   | { type: 'update'; data: any[] }
   | { type: 'onlyFilter'; filters: any }
-  | { type: 'filter'; filters: any; loading?: boolean; filterTerm: any }
+  | { type: 'filter'; filters: any; loading?: boolean; filterTerm?: any }
   | { type: 'sort'; sorting: any[]; loading?: boolean }
   | { type: 'search'; search: string; loading?: boolean }
   | { type: 'pageChange'; page: number }
