@@ -164,7 +164,7 @@ const SerializedAsset = () => {
   useEffect(() => {
     if (productCategory && productCategory !== '') {
       axiosInstance()
-        .get(`${product.api}?filterById=[{"field":"productCategory","term":"${productCategory}"}]`)
+        .get(`${serializedAsset.api}?filterById=[{"field":"productCategory","term":"${productCategory}"}]`)
         .then(({ data }) => {
           setProductFilterList(data?.data);
           setProductFilter(null);
