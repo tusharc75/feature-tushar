@@ -22,7 +22,7 @@ type CustomTabInterface = {
   onChange?: (event: React.ChangeEvent<{}>, newValue: number | string) => void;
 } & Omit<TabsProps, 'TabIndicatorProps' | 'TabIndicatorProps' | 'onChange'>;
 const CustomTabs: React.FC<CustomTabInterface> = ({ children, className = '', ...others }) => {
-  const borderColor = children?.[0].props?.primaryColor
+  const borderColor = children?.[0]?.props?.primaryColor
     ? '[--tab-border-color:var(--primary-color)] dark:[--tab-border-color:var(--common-border-color)]'
     : '[--tab-border-color:var(--common-border-color)]';
   return (
