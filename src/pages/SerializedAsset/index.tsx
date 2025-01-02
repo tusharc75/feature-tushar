@@ -164,7 +164,7 @@ const SerializedAsset = () => {
   useEffect(() => {
     if (productCategory && productCategory !== '') {
       axiosInstance()
-        .get(`${product.api}?filterById=[{"field":"productCategory","term":"${productCategory}"}]`)
+        .get(`/product?filterById=[{"field":"productCategory","term":"${productCategory}"}]`)
         .then(({ data }) => {
           setProductFilterList(data?.data);
           setProductFilter(null);
@@ -411,7 +411,7 @@ const SerializedAsset = () => {
     if (showFilteredRecordsOnly) {
       deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
-    return `${deepFilter}&filterType=and&filterByIdType=and`;
+    return `${deepFilter}`;
   };
 
   const handleDelete = () => {

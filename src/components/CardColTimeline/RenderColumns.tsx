@@ -148,11 +148,11 @@ const RenderColumns: React.FC<ColDataInterface> = ({
 
   return (
     <>
-      <div className="col group relative isolate -mx-[6px]" key={refreshDataCount}>
-        <div className="absolute -bottom-[2px] -top-[2px] left-[4px] right-[4px] -z-[1] rounded-md bg-gray-100 dark:bg-gray-700" />
+      <div className="col group relative isolate px-[6px]" key={refreshDataCount}>
+        <div className="absolute -top-[6px] bottom-0 left-0 right-0 -z-[1] rounded-md bg-gray-100 dark:bg-gray-700" />
         {itemCount === 0 && !isInitialLoading && (
           <div className="absolute inset-0 -z-[1] flex h-full items-center justify-center">
-            <div className="select-none text-center text-[20px] font-semibold text-gray-400">No Data Found</div>
+            <div className="select-none text-center text-[16px] font-semibold text-gray-400">No Data Found</div>
           </div>
         )}
         {isInitialLoading ? (
@@ -161,7 +161,7 @@ const RenderColumns: React.FC<ColDataInterface> = ({
               <div
                 key={item}
                 style={{ maxHeight: cardHeight, height: cardHeight }}
-                className="loader-skeleton mx-[6px] overflow-hidden rounded-[8px] border bg-[var(--dark-primary,_white)]"
+                className="loader-skeleton overflow-hidden rounded-[8px] border bg-[var(--dark-primary,_white)]"
               >
                 <div className=" overflow-hidden p-2" style={{ maxHeight: cardHeight - 16, height: cardHeight - 16 }}>
                   <Skeleton variant="text" width="100px" height="16px" />

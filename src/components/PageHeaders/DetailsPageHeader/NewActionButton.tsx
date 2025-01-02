@@ -29,7 +29,12 @@ const NewActionButton = <D,>({ items, itemsVisibleCount = 2, disabled, ...rest }
           slot={
             ((props) => (
               <HtmlTooltip title="More Actions">
-                <IconButton {...(props as IconButtonProps)} size="small" style={{ width: 32, height: 32 }} className="new-dropdown-v1">
+                <IconButton
+                  {...(props as IconButtonProps)}
+                  sx={{ width: 32, height: 32, borderRadius: '4px', ...props?.sx }}
+                  size="small"
+                  className="new-dropdown-v1"
+                >
                   <MoreVert />
                 </IconButton>
               </HtmlTooltip>

@@ -27,6 +27,8 @@ import { formatAmountWithCurrency } from 'src/constants/helpers';
 import { FunnelChart } from 'react-funnel-pipeline';
 import 'react-funnel-pipeline/dist/index.css';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import axios, { CancelTokenSource } from 'axios';
+import dayjs from 'dayjs';
 
 export interface ChartDataType extends IFormDataType {
   _id: any;
@@ -111,40 +113,39 @@ const ChartTypes = ({
       ...filterValues,
       ...globalFilters,
       between: JSON.stringify({
-        from: new Date(globalFilters.between.from).toISOString().split('T')[0],
-        to: new Date(globalFilters.between.to).toISOString().split('T')[0]
+        from: dayjs(globalFilters.between.from).format("MM/DD/YYYY"),
+        to: dayjs(globalFilters.between.to).format("MM/DD/YYYY"),
       })
     };
-
     const keys = Object.keys(params);
     keys.forEach((key) => {
       if (Array.isArray(params[key]) && params[key].length > 0) {
-        url = `${url}${key}=${JSON.stringify(params[key].map((p: any) => p.optionValue))}&`;
+        url = `${url}&${key}=${JSON.stringify(params[key].map((p: any) => p.optionValue))}`;
       }
-
       if (typeof params[key] === 'number' && params[key] > 0) {
-        url = `${url}${key}=${params[key]}&`;
+        url = `${url}&${key}=${params[key]}`;
       }
-
       if (params[key]) {
         if (key === 'between') {
-          url = `${url}${key}=${params[key]}&`;
+          url = `${url}&${key}=${params[key]}`;
         }
         if (key !== 'between' && params[key].optionValue) {
-          url = `${url}${key}=${params[key].optionValue}&`;
+          url = `${url}&${key}=${params[key].optionValue}`;
         }
       }
     });
 
     if (chart.kpi?.currencyConverter) {
-      url = `${url}currency=${globalFilters?.currency || currency}`;
+      url = `${url}&currency=${globalFilters?.currency || currency}`;
     }
+
     return url;
   };
 
   React.useEffect(() => {
-    const fetchTimeout = setTimeout(fetchData, 200);
-    return () => clearTimeout(fetchTimeout);
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [filterValues, globalFilters, selectedEntity]);
 
   const swapChartColors = React.useCallback(
@@ -175,10 +176,6 @@ const ChartTypes = ({
   );
 
   React.useEffect(() => {
-    /*
-    colors and color list name should be unique
-    first color is original ↓ color and second color ↓ is for dark theme
-    */
     const colorMap = {
       color1: ['rgba(255, 99, 132, 1)', 'rgba(255, 99, 132, 0.5)'],
       color2: ['rgba(54, 162, 235, 1)', 'rgba(54, 162, 235, 0.5)'],
@@ -187,36 +184,32 @@ const ChartTypes = ({
     const obj = swapChartColors(colorMap);
     if (!obj) return;
     setChartData(obj);
-
     return () => setChartData(null);
   }, [swapChartColors]);
 
-  const fetchData = () => {
+  const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     const urlParams = getParams();
     setLoading(true);
-    let url = `kpi/${chart.kpi.kpi}?&entity=${selectedEntity}&${urlParams}`;
-    axiosInstance()
-      .get(url)
-      .then(async ({ data: { data } }) => {
-        if (chart?.chartType === 'Funnel') {
-          const funnelData = data?.map((d: any) => {
-            return { name: `${d.name} - ${d.percentage}%`, value: d.percentage };
-          });
-          setChartData(funnelData);
+    let url = `kpi/${chart.kpi.kpi}?entity=${selectedEntity}${urlParams}`;
+    axiosInstance().get(url, { cancelToken: cancelTokenSource?.token }).then(async ({ data: { data } }) => {
+      if (chart?.chartType === 'Funnel') {
+        const funnelData = data?.map((d: any) => {
+          return { name: `${d.name} - ${d.percentage}%`, value: d.percentage };
+        });
+        setChartData(funnelData);
+      } else {
+        if (chart.kpi?.custom) {
+          const cardData = await getStaticData(chartData, data, globalFilters.currency, currency);
+          setChartData(cardData);
         } else {
-          if (chart.kpi?.custom) {
-            const cardData = await getStaticData(chartData, data, globalFilters.currency, currency);
-            setChartData(cardData);
-          } else {
-            setChartData(data);
-          }
+          setChartData(data);
         }
-        setLoading(false);
-      })
-      .catch((err: any) => {
-        setToastConfig(err);
-        setLoading(false);
-      });
+      }
+      setLoading(false);
+    }).catch((err: any) => {
+      setToastConfig(err);
+      setLoading(false);
+    });
   };
 
   const handlePinUnpin = async (type) => {

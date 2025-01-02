@@ -103,7 +103,7 @@ const CardColTimeline = <D,>({
   }, [containerRef]);
 
   return (
-    <div className={cn(`${styles.container}`, className, '-mx-[6px]')} {...others} ref={containerRef}>
+    <div className={cn(`${styles.container}`, className)} {...others} ref={containerRef}>
       <div className="flex snap-x snap-mandatory gap-[10px] overflow-auto pb-4 md:scroll-px-[24px]">
         {columns.map((col) => {
           const { background, color } = getColColors?.(col) || { background: 'bg-[var(--dark-secondary,#f1f5ff)]' };
@@ -119,7 +119,7 @@ const CardColTimeline = <D,>({
                 } as React.CSSProperties
               }
             >
-              <div className="min-h-full rounded-[8px] bg-[var(--section-bg)] px-[6px] pb-[10px] pt-[0px]">
+              <div className="min-h-full rounded-[8px] bg-[var(--section-bg)] pb-[10px] pt-[0px]">
                 <h6 className={cn(color, background, styles.colTitle, 'mb-4')}>
                   <span className="absolute left-2">
                     <Checkbox

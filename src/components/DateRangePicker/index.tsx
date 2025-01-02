@@ -44,7 +44,7 @@ function DateRangePicker({ className, date, setDate, horizontal = 'center' }: Da
   const id = open ? 'date-range-popover' : undefined;
 
   const handleDateChange = useCallback(
-    (date: DateRange, changeToCustom:Boolean = false) => {
+    (date: DateRange, changeToCustom: Boolean = false) => {
       if (changeToCustom) setTimeFrame(timeframeList[0]);
       setInternalDate(date);
       setDate({ from: date.from, to: date.to });
@@ -177,6 +177,7 @@ function DateRangePicker({ className, date, setDate, horizontal = 'center' }: Da
             className="rounded-l-none border-none max-sm:rounded-none"
             defaultMonth={date?.from}
             selected={internalDate}
+            disabled={timeFrame.value !== 'custom'}
             onSelect={(date) => handleDateChange(date, true)}
             numberOfMonths={2}
           />
