@@ -7,7 +7,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import RenderIcon from './RenderIcon';
 import { IFormDataType } from './builderHelpers';
 import { colSpans } from 'src/constants/helpers';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const useClasses = makeStyles((theme: ThemeOptions) => ({
   paper: {
@@ -69,9 +69,8 @@ const DashboardItem = ({ id, formData, handleEdit, handleRemove, selectedData, i
   return (
     <li ref={setNodeRef} {...attributes} {...listeners} className={`${colSpans[formData.column - 1]}  list-none`} style={style}>
       <Box
-        className={`${classes.paper} [border:1px_solid_var(--common-border-color)] ${
-          isEditing || isDragging ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,_white)]'
-        }`}
+        className={`${classes.paper} [border:1px_solid_var(--common-border-color)] ${isEditing || isDragging ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,_white)]'
+          }`}
       >
         <Box>
           <Typography className={classes.title}>{formData.chartTitle}</Typography>
@@ -87,12 +86,16 @@ const DashboardItem = ({ id, formData, handleEdit, handleRemove, selectedData, i
 
         {!isEditing && (
           <Box display={'flex'} justifyContent="space-between">
-            <ThemeButton iconForMobile={<EditIcon />} onClick={() => handleEdit(formData)} mobileTooltip={'Edit'}>
-              {'Edit'}
-            </ThemeButton>
-            <IconButton size="small" onClick={() => handleRemove(id)}>
-              <Delete color="error" />
-            </IconButton>
+            <HtmlTooltip title='Edit'>
+              <IconButton size="small" onClick={() => handleEdit(formData)}  >
+                <EditIcon color="primary" fontSize='small' />
+              </IconButton>
+            </HtmlTooltip>
+            <HtmlTooltip title='Delete'>
+              <IconButton size="small" onClick={() => handleRemove(id)}>
+                <Delete color="error" fontSize='small' />
+              </IconButton>
+            </HtmlTooltip>
           </Box>
         )}
       </Box>
