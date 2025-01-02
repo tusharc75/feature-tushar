@@ -271,6 +271,7 @@ const Builder = (props: Props) => {
             <RadioGroup
               aria-label="column"
               name="column"
+              row
               value={formValues.column}
               className={classes.column}
               onChange={(e) => {

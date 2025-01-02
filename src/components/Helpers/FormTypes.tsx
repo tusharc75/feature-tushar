@@ -2503,7 +2503,13 @@ const FormTypes = (props) => {
           />
           <div className="flex items-center gap-2">
             <label htmlFor={name}>
-              <ThemeButton disabled={isFileUploading || !canEdit} onClick={handleUploadFile} buttonType="theme" startIcon={isFileUploading && <CircularProgress size={15} />}>
+              <ThemeButton
+                disabled={isFileUploading || !canEdit}
+                onClick={handleUploadFile}
+                buttonType="theme"
+                component="span"
+                startIcon={isFileUploading && <CircularProgress size={15} />}
+              >
                 {isFileUploading ? 'Uploading...' : required ? 'Upload File *' : 'Upload File'}
               </ThemeButton>
             </label>
@@ -2570,11 +2576,7 @@ const FormTypes = (props) => {
               />
               <div className="flex items-center gap-2">
                 <label htmlFor={name}>
-                  <ThemeButton
-                    disabled={isFileUploading || !canEdit}
-                    buttonType="theme"
-                    isLoading={isFileUploading}
-                  >
+                  <ThemeButton component="span" disabled={isFileUploading || !canEdit} buttonType="theme" isLoading={isFileUploading}>
                     {isFileUploading ? 'Uploading File(s)' : required ? 'Upload File(s) *' : 'Upload File(s)'}
                   </ThemeButton>
                 </label>
