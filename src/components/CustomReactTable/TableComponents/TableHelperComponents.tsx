@@ -139,14 +139,14 @@ export function TempFilter({ filterValue, id, setFilters, customFilters }) {
           setIsOpen(true);
         }}
         size="small"
-        className={`${filterValue ? 'activeFilter' : ''}`}
+        className={`${typeof filterValue === 'string' && filterValue ? 'activeFilter' : ''}`}
       >
         <CgSearch />
       </IconButton>
 
       <div className={`tableFilterSearch ${isOpen ? 'open' : ''}`} ref={ref}>
         <input
-          value={filterValue || ''}
+          value={typeof filterValue === 'string' && filterValue ? filterValue || '' : ''}
           onChange={(e) => handleFilterChange(e.target.value)}
           autoComplete="off"
           placeholder="Search..."
@@ -159,11 +159,13 @@ export function TempFilter({ filterValue, id, setFilters, customFilters }) {
         <GrFormClose
           onClick={(e) => {
             e.stopPropagation();
-            if ((filterValue || '').trim() === '') {
-              setIsOpen(false);
-              return;
+            if (typeof filterValue === 'string') {
+              if ((filterValue || '') === '') {
+                setIsOpen(false);
+                return;
+              }
+              handleFilterChange('');
             }
-            handleFilterChange('');
             setIsOpen(false);
           }}
         />
