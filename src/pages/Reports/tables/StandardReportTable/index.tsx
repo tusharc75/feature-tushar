@@ -618,7 +618,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
                   permissions={permissions?.report}
                   module={selectedReport.resource}
                   api={`/report/${selectedReport.resource}`}
-                  afterImportCompleted={() => {}}
+                  afterImportCompleted={() => { }}
                   isExportCount={true}
                   exportCount={0}
                   ids={[]}
@@ -634,7 +634,6 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
                       disabled={isProcessing === 'pdf'}
                       onClick={() => exportData('pdf', 'pdf')}
                       isLoading={isProcessing === 'pdf'}
-                      buttonType="theme"
                     >
                       Export To PDF
                     </ThemeButton>
@@ -644,7 +643,6 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
                     disabled={isProcessing === 'excel'}
                     onClick={() => exportData('excel', 'excel')}
                     isLoading={isProcessing === 'excel'}
-                    buttonType="theme"
                   >
                     Export To Excel
                   </ThemeButton>
