@@ -117,7 +117,7 @@ const FieldDialog = ({ handleClose, handleSucess, serviceIds, stepIds = null, re
           toastConfig.setToastConfig({
             open: true,
             message: data.message,
-            severity: 'success'
+            type: 'success'
           });
           setSubmitting(false);
         })

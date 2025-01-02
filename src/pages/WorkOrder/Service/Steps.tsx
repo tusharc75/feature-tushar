@@ -366,7 +366,7 @@ const Steps = ({
         toastConfig.setToastConfig({
           open: true,
           message: data.message,
-          severity: 'success'
+          type: 'success'
         });
         setAddNewStep({ open: false, clone: false, cloneStepData: null });
         fetchService();
@@ -405,7 +405,7 @@ const Steps = ({
         toastConfig.setToastConfig({
           open: true,
           message: data.message,
-          severity: 'success'
+          type: 'success'
         });
       })
       .catch((err) => {
