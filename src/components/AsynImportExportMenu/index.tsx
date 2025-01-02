@@ -3,11 +3,11 @@ import { Menu, MenuItem, useMediaQuery } from '@mui/material';
 import axiosInstance from '../../axios/axiosInstance';
 import { IMPORT_EXPORT_TYPE, downloadExcel } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { MdImportExport } from 'react-icons/md';
 import HtmlTooltip from '../CustomTooltipTitle';
 import ImportExportDialog from './ImportExportDialog';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { ExpandMore } from '@mui/icons-material';
 
 const AsynImportExportMenu = ({
   ids = [],
@@ -106,7 +106,7 @@ const AsynImportExportMenu = ({
           ) : (
             <ThemeButton
               onClick={(e) => handleClick(e)}
-              endIcon={<ArrowDropDownIcon />}
+              endIcon={<ExpandMore />}
               buttonType="theme"
               aria-controls="simple-menu"
               aria-haspopup="true"

@@ -19,7 +19,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import FieldDialog from './FieldDialog';
 import StepDialog from './StepDialog';
-import { LowPriority } from '@mui/icons-material';
+import { Build, LowPriority } from '@mui/icons-material';
 
 const renderedFrom = `${camelCase(sidebarResource?.serviceMaster)}_steps`;
 

@@ -1,4 +1,3 @@
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { Box, IconButton, Menu, MenuItem, Theme, useMediaQuery } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { isEmpty } from 'lodash';
@@ -13,6 +12,7 @@ import { downloadExcel } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import SelectionDialog from './SelectionDialog';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { ExpandMore } from '@mui/icons-material';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -498,7 +498,7 @@ export default function ImportExportLinks({
       ) : (
         <ThemeButton
           onClick={(e) => handleClick(e)}
-          endIcon={<ArrowDropDownIcon />}
+          endIcon={<ExpandMore />}
           mobileTooltip='Import/Export'
           iconForMobile={<MdImportExport size={20} />}
         >

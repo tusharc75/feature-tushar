@@ -1,6 +1,6 @@
 import { IconButton, Menu, MenuItem } from '@mui/material';
 import Box from '@mui/material/Box/Box';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import ExpandMore from '@mui/icons-material/ArrowDropDown';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import HelpIcon from '@mui/icons-material/Help';
@@ -403,10 +403,9 @@ const SerializedAsset = ({
         {allowedToEdit && alloweOperation && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
           <Fragment>
             <ThemeButton
-              buttonType="transparent"
               disabled={selectedRecords.length === 0 || !allowUpdateStatus}
               onClick={handleClick}
-              endIcon={<ArrowDropDownIcon />}
+              endIcon={<ExpandMore />}
             >
               Change Status
             </ThemeButton>

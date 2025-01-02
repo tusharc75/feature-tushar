@@ -1,11 +1,11 @@
 import { useContext, useState } from 'react';
-import { Menu, MenuItem, useMediaQuery } from '@mui/material';
+import { Menu, MenuItem } from '@mui/material';
 import axiosInstance from '../../axios/axiosInstance';
 import { downloadExcel } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { MdImportExport } from 'react-icons/md';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { ExpandMore } from '@mui/icons-material';
 
 const ImportExportMenu = ({
   ids = [],
@@ -167,7 +167,7 @@ const ImportExportMenu = ({
     <>
       <ThemeButton
         onClick={(e) => handleClick(e)}
-        endIcon={<ArrowDropDownIcon />}
+        endIcon={<ExpandMore />}
         mobileTooltip={`Import/Export ${title}`}
         iconForMobile={<MdImportExport size={20} />}
       >
