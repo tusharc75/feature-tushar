@@ -43,7 +43,6 @@ const MyCalendar = ({ activities, setActivityData, loading }: Props) => {
             border: 'none',
             padding: '8px 16px'
           };
-
           return {
             style: newStyles
           };

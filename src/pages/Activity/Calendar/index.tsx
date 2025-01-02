@@ -17,7 +17,6 @@ import { CreateEvent } from '../../../components/Activity/Event/CreateEvent';
 import { CreateTask } from '../../../components/Activity/Task/CreateTask';
 import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
 import CustomContainer from '../../../components/CustomContainer';
-import routes from '../../../components/Helpers/Routes';
 import { SearchFilter } from '../../../components/SearchFilter';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import MyCalendar from './MyCalendar';
@@ -71,7 +70,7 @@ const BigCalendar = () => {
         .then(({ data: { data } }) => {
           setFilter([{ _id: referenceId, type: referenceType, name: data.name }]);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     } else {
       setFilter([]);
     }
@@ -89,14 +88,14 @@ const BigCalendar = () => {
           const newData = allActivities.map((d) => ({
             ...d,
             title: d.name,
-            start: d.startDate,
-            end: d.dueDate,
+            start: new Date(d.startDate),
+            end: new Date(d.dueDate),
             allDay: true,
             type: d.type
           }));
           setActivities({ activities: newData, loading: false });
         })
-        .catch(() => {});
+        .catch(() => { });
     },
     [type, filter]
   );
