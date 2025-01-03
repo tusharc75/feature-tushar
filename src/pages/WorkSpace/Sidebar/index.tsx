@@ -211,7 +211,7 @@ export const ChannelActions = ({
       >
         <span onClick={handleMenuClose}>
           <MenuItem onClick={() => setManageChannelDialog({ open: true, _id: selectedChannel?._id })} disabled={!selectedChannel?.isOwner}>
-            Edit Details
+            Edit
           </MenuItem>
           <MenuItem onClick={() => setShowConfirmBox(true)} disabled={!selectedChannel?.isOwner}>
             Delete

@@ -1,11 +1,14 @@
-import { CircularProgress, TextField } from '@mui/material';
+import { CircularProgress, Dialog, TextField } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import { debounce, uniqBy } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
-import DashboardModal from 'src/components/DashboardModal';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
@@ -16,6 +19,7 @@ const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const [inputValue, setInputValue] = useState('');
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const fetchOptions = debounce(async (searchKey: string = '', page: number = 0) => {
     setLoading(true);
@@ -64,19 +68,88 @@ const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
     fetchOptions();
   }, []);
 
-  return (
-    <DashboardModal
-      handleClose={onClose}
+  return (<>
+    <Dialog
+      maxWidth="sm"
+      fullScreen={fullScreen || isMobile || isTablet}
+      TransitionComponent={CustomDialogTransition}
+      aria-labelledby="customized-dialog-title"
       open={true}
-      dialogProps={{
-        fullScreen: isMobile || isTablet,
-        maxWidth: 'xs'
-      }}
-      modalHead={{
-        title: `Add Members`,
-        fullScreenOption: true
-      }}
-      footer={
+      fullWidth
+      onClose={onClose}
+    >
+      <CustomDialogHeader
+        onClose={onClose}
+        title={'Add Members'}
+        isMinimized={!fullScreen}
+        onMinimizeMaximize={() => {
+          setFullScreen((prevState) => !prevState);
+        }}
+        showManimizeMaximize={true}
+        showRequiredLabel={false}
+      />
+      <CustomDialogContent >
+        <Autocomplete
+          multiple={true}
+          fullWidth
+          onOpen={() => {
+            fetchOptions('', 0);
+          }}
+          inputValue={inputValue}
+          onInputChange={(event, value, reason) => {
+            if (reason === 'input') {
+              setInputValue(value);
+              fetchOptions(value);
+            }
+          }}
+          loading={loading || !options}
+          options={options}
+          autoHighlight
+          value={selectedUsers?.map((userId) => options?.find((option) => option?.optionValue === userId) || { optionLabel: '', optionValue: userId })}
+          getOptionLabel={(option) => option.optionLabel || ''}
+          isOptionEqualToValue={(option, val) => option.optionValue === val.optionValue}
+          onChange={(event, newValue) => {
+            setSelectedUsers(newValue.map((user) => user.optionValue));
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label={'Select Users'}
+              name={'users'}
+              autoFocus
+              required={true}
+              slotProps={{
+                input: {
+                  ...params.InputProps,
+                  endAdornment: (
+                    <>
+                      {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                      {params.InputProps.endAdornment}
+                    </>
+                  )
+                }
+              }}
+              margin="none"
+              size={'small'}
+              variant="outlined"
+            />
+          )}
+          ListboxProps={{
+            onScroll: (e: any) => {
+              if (e.target.scrollTop + e.target.clientHeight >= e.target.scrollHeight - 1) {
+                fetchOptions('', currentPage + 1);
+              }
+            }
+          }}
+        />
+      </CustomDialogContent>
+      <CustomDialogFooter>
+        <ThemeButton
+          buttonType="transparent"
+          onClick={onClose}
+        >
+          Cancel
+        </ThemeButton>
         <ThemeButton
           buttonType="theme"
           disabled={selectedUsers.length === 0}
@@ -88,63 +161,9 @@ const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
         >
           Add
         </ThemeButton>
-      }
-    >
-      <Autocomplete
-        multiple={true}
-        fullWidth
-        onOpen={() => {
-          fetchOptions('', 0);
-        }}
-        inputValue={inputValue} 
-        onInputChange={(event, value, reason) => {
-          if (reason === 'input') {
-            setInputValue(value);
-            fetchOptions(value);
-          }
-        }}
-        loading={loading || !options}
-        options={options}
-        autoHighlight
-        value={selectedUsers?.map((userId) => options?.find((option) => option?.optionValue === userId) || { optionLabel: '', optionValue: userId })}
-        getOptionLabel={(option) => option.optionLabel || ''}
-        isOptionEqualToValue={(option, val) => option.optionValue === val.optionValue}
-        onChange={(event, newValue) => {
-          setSelectedUsers(newValue.map((user) => user.optionValue));
-        }}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label={'Select Members'}
-            name={'members'}
-            autoFocus
-            required={true}
-            slotProps={{
-              input: {
-                ...params.InputProps,
-                endAdornment: (
-                  <>
-                    {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                    {params.InputProps.endAdornment}
-                  </>
-                )
-              }
-            }}
-            margin="none"
-            size={'small'}
-            variant="outlined"
-          />
-        )}
-        ListboxProps={{
-          onScroll: (e: any) => {
-            if (e.target.scrollTop + e.target.clientHeight >= e.target.scrollHeight - 1) {
-              fetchOptions('', currentPage + 1);
-            }
-          }
-        }}
-      />
-    </DashboardModal>
-  );
+      </CustomDialogFooter>
+    </Dialog>
+  </>);
 };
 
 export default AddMemberDialog;
