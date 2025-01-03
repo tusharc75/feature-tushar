@@ -98,12 +98,6 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
     if (values.service.length === 0) {
       errors['service'] = 'Please select service';
     }
-    if (values.technician.length === 0) {
-      errors['technician'] = 'Please select Technician';
-    }
-    if (values.workStation.length === 0) {
-      errors['workStation'] = `Please select ${resources?.workStations?.titlePlural}`;
-    }
     if (!values.date || !dayjs(values.date).isValid()) {
       errors['date'] = 'Please select date';
     } else if (dayjs(values.date).isBefore(dayjs(), 'day')) {
@@ -235,7 +229,6 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                               {...params}
                               label="Technician"
                               variant="outlined"
-                              required
                               error={Boolean(errors.technician && touched.technician)}
                               helperText={touched.technician && errors.technician}
                             />
@@ -260,7 +253,6 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                               {...params}
                               label={resources?.workStations?.titlePlural}
                               variant="outlined"
-                              required
                               error={Boolean(errors.workStation && touched.workStation)}
                               helperText={touched.workStation && errors.workStation}
                             />
