@@ -30,11 +30,17 @@ const DisplayChips = (props) => {
           const data = {
             title: currentColumn?.Header || _.startCase(keys[i]),
             value: element?.condition1?.filter?.map((e) => e?.optionLabel)?.toString(),
-            name: keys[i]
+            name: keys[i],
+            ['$nin']: element?.condition1?.['$nin'] === true ? true : false
           };
           filterData.push(data);
         } else {
-          const data = { title: currentColumn?.Header || _.startCase(keys[i]), value: element.filter, name: keys[i] };
+          const data = {
+            title: currentColumn?.Header || _.startCase(keys[i]),
+            value: element.filter,
+            name: keys[i],
+            ['$nin']: element?.['$nin'] === true ? true : false
+          };
           filterData.push(data);
         }
       }
@@ -100,8 +106,8 @@ const DisplayChips = (props) => {
                     onClick={handleFilterOpen}
                     className={'filter-chip'}
                     deleteIcon={<CloseIcon />}
-                    label={`${filter?.title}=${filterValue}`}
-                    title={`${filter?.title}=${filterValue}`}
+                    label={`${filter?.title}${filter?.['$nin'] ? '≠' : '='}${filterValue}`}
+                    title={`${filter?.title}${filter?.['$nin'] ? '≠' : '='}${filterValue}`}
                     onDelete={() => clearSingleFilter(filter.name)}
                   />
                 );
