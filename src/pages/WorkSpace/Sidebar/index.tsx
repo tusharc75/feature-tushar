@@ -1,5 +1,5 @@
-import { Add, ArrowDropDown, ArrowDropUp, Delete } from '@mui/icons-material';
-import { Collapse, IconButton, List, ListItem, ListItemText } from '@mui/material';
+import { Add, ArrowDropDown, ArrowDropUp, MoreVert } from '@mui/icons-material';
+import { Collapse, IconButton, List, ListItem, ListItemText, Menu, MenuItem } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { VscLayoutSidebarLeft } from 'react-icons/vsc';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -14,7 +14,7 @@ type SidebarProps = {
   channels: TChannel[];
   selectedChannel: TChannel | null;
   setSelectedChannel: React.Dispatch<React.SetStateAction<TChannel>>;
-  setCreateChannelDialog: React.Dispatch<React.SetStateAction<boolean>>;
+  setManageChannelDialog: React.Dispatch<React.SetStateAction<{ open: boolean; _id: string }>>;
   handleDeleteChannels: (ids: string[]) => void;
   mobScreen: boolean;
   isSidebarCollapsed: boolean;
@@ -26,7 +26,7 @@ const Sidebar = ({
   channels,
   selectedChannel,
   setSelectedChannel,
-  setCreateChannelDialog,
+  setManageChannelDialog,
   handleDeleteChannels,
   mobScreen,
   setChannels,
@@ -34,9 +34,10 @@ const Sidebar = ({
   toggleSidebar
 }: SidebarProps) => {
   const [isExpanded, setIsExpanded] = useState(true);
-  const [channelMenuData, setChannelMenuData] = React.useState<{ selected: TChannel; openConfirmDialog: boolean } | null>(null);
   const [filteredChannels, setFilteredChannels] = useState(channels);
   const [searchValue, setSearchValue] = useState('');
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedChannelAction, setSelectedChannelAction] = useState<TChannel>(null);
 
   useEffect(() => {
     setFilteredChannels(channels);
@@ -51,6 +52,17 @@ const Sidebar = ({
     setFilteredChannels(filtered);
   };
 
+
+  const handleMenuClick = (event, channel: TChannel) => {
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+    setSelectedChannelAction(channel);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
   return (
     <>
       <div
@@ -63,7 +75,7 @@ const Sidebar = ({
         <div className="flex items-center justify-between gap-2">
           <ThemeButton
             buttonType="theme"
-            onClick={() => setCreateChannelDialog(true)}
+            onClick={() => setManageChannelDialog({ open: true, _id: null })}
             iconForMobile={<Add />}
             mobileTooltip="New Channel"
             startIcon={<Add />}
@@ -130,18 +142,16 @@ const Sidebar = ({
                             : '[background-image:linear-gradient(270deg,_#f5f5f5_66%,_transparent_100%)] dark:[background-image:linear-gradient(270deg,_#212134_60%,_transparent_100%)]'
                         )}
                       >
-                        {c?.isOwner && (
+                        <HtmlTooltip title="Actions">
                           <IconButton
-                            edge="end"
-                            aria-label="delete"
-                            size="small"
                             onClick={(e) => {
-                              setChannelMenuData({ selected: c, openConfirmDialog: true });
+                              handleMenuClick(e, c);
                             }}
+                            size="small"
                           >
-                            <Delete fontSize="small" color="error" />
+                            <MoreVert />
                           </IconButton>
-                        )}
+                        </HtmlTooltip>
                       </div>
                     </ListItem>
                   </>
@@ -160,21 +170,67 @@ const Sidebar = ({
           )}
         </div>
       </div>
-      {channelMenuData?.openConfirmDialog && (
+      <ChannelActions
+        anchorEl={anchorEl}
+        handleMenuClose={handleMenuClose}
+        selectedChannel={selectedChannelAction}
+        setManageChannelDialog={setManageChannelDialog}
+        handleDeleteChannels={handleDeleteChannels}
+      />
+    </>
+  );
+};
+
+export default Sidebar;
+
+
+export const ChannelActions = ({
+  anchorEl,
+  handleMenuClose,
+  selectedChannel,
+  setManageChannelDialog,
+  handleDeleteChannels,
+}) => {
+
+  const [showConfirmBox, setShowConfirmBox] = useState<boolean>(false);
+
+  return (
+    <>
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left'
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left'
+        }}
+      >
+        <span onClick={handleMenuClose}>
+          <MenuItem onClick={() => setManageChannelDialog({ open: true, _id: selectedChannel?._id })} disabled={!selectedChannel?.isOwner}>
+            Edit Details
+          </MenuItem>
+          <MenuItem onClick={() => setShowConfirmBox(true)} disabled={!selectedChannel?.isOwner}>
+            Delete
+          </MenuItem>
+        </span>
+      </Menu>
+      {showConfirmBox && (
         <ConfirmationDialog
-          open={channelMenuData?.openConfirmDialog}
-          message={`Are you sure you want to delete ${channelMenuData?.selected?.title} Channel?`}
+          open={showConfirmBox}
+          message={`Are you sure you want to delete ${selectedChannel?.title} Channel?`}
           onClose={() => {
-            setChannelMenuData(null);
+            setShowConfirmBox(false);
           }}
           onOk={() => {
-            handleDeleteChannels([channelMenuData?.selected?._id]);
-            setChannelMenuData(null);
+            setShowConfirmBox(false);
+            handleDeleteChannels([selectedChannel?._id]);
           }}
         />
       )}
     </>
   );
 };
-
-export default Sidebar;
