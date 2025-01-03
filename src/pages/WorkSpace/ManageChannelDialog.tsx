@@ -2,7 +2,7 @@ import { Box, FormControlLabel, FormLabel, Radio, RadioGroup, TextField } from '
 import Grid from '@mui/material/Grid2';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
-import { Fragment, useContext, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import DashboardModal from 'src/components/DashboardModal';
 import { object, string } from 'yup';
@@ -12,7 +12,7 @@ import { CustomDialogTransition } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const ManageChannel = ({ onClose, onSuccess }) => {
+const ManageChannel = ({ onClose, onSuccess, _id }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const validationSchema = object().shape({
@@ -21,11 +21,30 @@ const ManageChannel = ({ onClose, onSuccess }) => {
     access: string().required('Please select access type')
   });
 
-  const initialValues = {
+  const [initialValues, setInitialValues] = useState({
     title: '',
     description: '',
     access: 'public'
-  };
+  });
+
+  useEffect(() => {
+    if (_id) {
+      axiosInstance()
+        .get(`/work-space/channel/${_id}`)
+        .then(({ data }) => {
+          setInitialValues({
+            title: data?.data?.title,
+            description: data?.data?.description,
+            access: data?.data?.access
+          });
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+
+  }, [_id]);
+
 
   const [loading, setLoading] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -35,6 +54,10 @@ const ManageChannel = ({ onClose, onSuccess }) => {
   const handleSubmit = async (values) => {
     setSubmitting(true);
     let updatedValues = { ...values };
+
+    if (_id) {
+      updatedValues = { ...values, _id };
+    }
 
     await axiosInstance()
       .post('/work-space/channel', updatedValues)
@@ -70,7 +93,7 @@ const ManageChannel = ({ onClose, onSuccess }) => {
 
   return (
     <>
-      <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
+      <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit} enableReinitialize>
         {({ values, errors, setFieldValue, touched, submitForm }) => (
           <DashboardModal
             handleClose={() => {
