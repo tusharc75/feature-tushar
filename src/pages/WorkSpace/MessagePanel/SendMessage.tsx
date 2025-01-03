@@ -266,7 +266,18 @@ const SendMessage = ({
                 'help',
               ],
               toolbar: `undo redo | blocks | bold italic link | bullist numlist| removeformat | help`,
-              content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+              content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+              setup: (editor) => {
+                editor.on('BeforeSetContent', (e) => {
+                  // Adding 'link' class to <a> tags
+                  if (e?.content) {
+                    e.content = e.content.replace(
+                      /<a(?![^>]*\bclass\b)([^>]*)>/g,
+                      '<a class="link"$1>'
+                    );
+                  }
+                });
+              },
             }}
           />
         </div>
