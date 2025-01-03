@@ -75,22 +75,7 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel, toggleSi
                 <h5 className={cn('line-clamp-1 text-[18px] font-bold transition-all', isSidebarCollapsed && 'pl-[30px] ')}>
                   {selectedChannel.title}
                 </h5>
-
-                <HtmlTooltip
-                  title={
-                    <span className="block w-[200px] py-2 text-center">
-                      <span className="mx-auto block max-w-[150px] pb-2 text-sm font-semibold">View all members of this channel</span>
-                      {channelData && (
-                        <span className="block  text-[12px] text-gray-400">
-                          {[...channelData.members]
-                            .slice(0, 3)
-                            .map((d) => d.optionLabel)
-                            .join(', ')}
-                        </span>
-                      )}
-                    </span>
-                  }
-                >
+                <HtmlTooltip title={'View all members'}   >
                   <IconButton
                     size={'small'}
                     style={{ border: '', borderRadius: 8, padding: '0px', minHeight: 30, minWidth: 55 }}
