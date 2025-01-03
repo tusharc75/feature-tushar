@@ -15,7 +15,7 @@ import { useData } from 'src/StateProvider/Provider';
 const Workspace = () => {
   const [channels, setChannels] = useState<TChannel[]>(null);
   const [selectedChannel, setSelectedChannel] = useState<TChannel>(null);
-  const [createChannelDialog, setCreateChannelDialog] = useState(false);
+  const [manageChannelDialog, setManageChannelDialog] = useState({open: true, _id: null});
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const mobScreen = useMediaQuery('(max-width:768px)');
   const [socket, setSocket] = useState<Socket>(null);
@@ -109,7 +109,7 @@ const Workspace = () => {
               channels={channels}
               selectedChannel={selectedChannel}
               setSelectedChannel={setSelectedChannel}
-              setCreateChannelDialog={setCreateChannelDialog}
+              setManageChannelDialog={setManageChannelDialog}
               handleDeleteChannels={handleDeleteChannels}
               mobScreen={mobScreen}
               setChannels={setChannels}
@@ -124,13 +124,14 @@ const Workspace = () => {
             />
           </div>
         </CustomContainer>
-        {createChannelDialog && (
+        {manageChannelDialog.open && (
           <ManageChannel
-            onClose={() => setCreateChannelDialog(false)}
+            onClose={() => setManageChannelDialog({open: false, _id: null})}
             onSuccess={() => {
               fetchChannels();
-              setCreateChannelDialog(false);
+              setManageChannelDialog({open: false, _id: null});
             }}
+            _id={manageChannelDialog._id}
           />
         )}
       </div>
