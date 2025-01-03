@@ -4,7 +4,6 @@ import { Paper, Box, useTheme, useMediaQuery, Typography, Badge, IconButton } fr
 import Grid from '@mui/material/Grid2';
 import { ImportExport, TableChart, Timeline } from '@mui/icons-material';
 import { BsFilter, BsFillPinFill } from 'react-icons/bs';
-import { FiMaximize2 } from 'react-icons/fi';
 import { Skeleton } from '@mui/material';
 import { TbPinnedOff } from 'react-icons/tb';
 import FiltersDropdown from './FiltersDropdown';
@@ -15,7 +14,7 @@ import { GlobalFiltersType } from './GlobalFilter';
 import Loader from 'src/components/Loader';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import { camelCase, isEmpty, isObject, startCase } from 'lodash';
+import { camelCase, isEmpty, isObject } from 'lodash';
 import MapView from './MapView';
 import { IFormDataType } from '../DashboardBuilder/builderHelpers';
 import getStaticData from './getStaticData';
@@ -29,7 +28,7 @@ import 'react-funnel-pipeline/dist/index.css';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import axios, { CancelTokenSource } from 'axios';
 import dayjs from 'dayjs';
-
+import OpenInFullIcon from '@mui/icons-material/OpenInFull';
 export interface ChartDataType extends IFormDataType {
   _id: any;
   horizontalChart?: string;
@@ -278,6 +277,7 @@ const ChartTypes = ({
                     disabled={loading}
                     style={{ marginRight: chart.hasTableView ? 10 : 0 }}
                     onClick={handleOpenExport}
+                    buttonType='transparent'
                     startIcon={<ImportExport />}
                   >
                     Export to
@@ -290,6 +290,7 @@ const ChartTypes = ({
                     onClick={() => {
                       setTableView(!tableView);
                     }}
+                    buttonType='transparent'
                     startIcon={!tableView ? <TableChart /> : <Timeline />}
                   >
                     {!tableView ? 'Table' : 'Chart'} View
@@ -335,13 +336,13 @@ const ChartTypes = ({
                     }}
                     style={{ marginRight: 10 }}
                   >
-                    <RefreshIcon style={{ fontSize: '20px' }} />
+                    <RefreshIcon fontSize='small' />
                   </IconButton>
                 </HtmlTooltip>
                 {setSelectedChart && (
                   <HtmlTooltip title="Full Screen">
                     <IconButton size="small" color="primary" onClick={() => setSelectedChart(chart)}>
-                      <FiMaximize2 fontSize="18px" />
+                      <OpenInFullIcon fontSize='small' />
                     </IconButton>
                   </HtmlTooltip>
                 )}
@@ -352,8 +353,8 @@ const ChartTypes = ({
               <Typography component="div" align="center" color="textPrimary">
                 <h4>
                   {chart.chartTitle.includes('CUR')
-                    ? startCase(chart.chartTitle.replace(/CUR/gi, globalFilters.currency || currency))
-                    : startCase(chart.chartTitle.replace(/statusType/gi, filterValues?.status?.optionLabel || 'Open'))}
+                    ? chart.chartTitle.replace(/CUR/gi, globalFilters.currency || currency)
+                    : chart.chartTitle.replace(/statusType/gi, filterValues?.status?.optionLabel || 'Open')}
                 </h4>
               </Typography>
             )}
