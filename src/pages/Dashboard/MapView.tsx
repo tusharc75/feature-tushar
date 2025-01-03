@@ -155,7 +155,7 @@ const MapView = (props: MapViewProps) => {
   if (!data || !Array.isArray(data) || data.length === 0) return <div>No data</div>;
 
   return (
-    <Box height={height} borderRadius={4} overflow="hidden" className="google-map-chart">
+    <Box height={height} overflow="hidden" className="google-map-chart">
       <GoogleMap
         key={themeColor}
         onClick={() => {
@@ -177,22 +177,22 @@ const MapView = (props: MapViewProps) => {
           {(clusterer) =>
             data.length > 0
               ? data.map(
-                  (asset: locationType) =>
-                    asset?._id && (
-                      <Marker
-                        key={asset._id}
-                        label={{
-                          text: asset.count.toLocaleString(),
-                          fontWeight: 'bold',
-                          color: 'black',
-                          fontSize: '14px'
-                        }}
-                        onClick={() => handleMarkerClick(asset)}
-                        position={new google.maps.LatLng(asset?.location?.latitude, asset?.location?.longitude)}
-                        clusterer={clusterer}
-                      />
-                    )
-                )
+                (asset: locationType) =>
+                  asset?._id && (
+                    <Marker
+                      key={asset._id}
+                      label={{
+                        text: asset.count.toLocaleString(),
+                        fontWeight: 'bold',
+                        color: 'black',
+                        fontSize: '14px'
+                      }}
+                      onClick={() => handleMarkerClick(asset)}
+                      position={new google.maps.LatLng(asset?.location?.latitude, asset?.location?.longitude)}
+                      clusterer={clusterer}
+                    />
+                  )
+              )
               : null
           }
         </MarkerClusterer>
