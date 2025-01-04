@@ -51,7 +51,7 @@ const calculateServiceDays = (serviceLog: any[], startDate: any, endDate: any) =
     let tempStartDate;
     let tempEndDate;
     let count = 0;
-    for (const m = dayjs(logStartDate); m.diff(logEndDate, 'days') <= 0; m.add(1, 'days')) {
+    for (let m = dayjs(logStartDate); m.diff(logEndDate, 'day') <= 0;) {
       if (m.isBetween(newStartDate, newEndDate, null, '[]')) {
         uniqueDates.add(m.format('MM/DD/YYYY'));
         if (index === 0) {
@@ -61,6 +61,7 @@ const calculateServiceDays = (serviceLog: any[], startDate: any, endDate: any) =
         count++;
         index++;
       }
+      m = m.add(1, 'day')
     }
     if (count) {
       logs.push({ startDate: tempStartDate, endDate: tempEndDate, actualJobDuration: count });
@@ -938,8 +939,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         <CustomDialogContent>
           <Fragment>
             <Grid container className={styles.rental_header_layout}>
-              <Grid size={{xs:12, md:6, sm:12}} className="d-flex align-items-center layout-for-tablet gap-1"></Grid>
-              <Grid size={{xs:12, md:6, sm:12}} className={styles.filter_side}>
+              <Grid size={{ xs: 12, md: 6, sm: 12 }} className="d-flex align-items-center layout-for-tablet gap-1"></Grid>
+              <Grid size={{ xs: 12, md: 6, sm: 12 }} className={styles.filter_side}>
                 <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                   <Grid style={{ display: 'flex', flex: 1, gap: '5px', alignItems: 'center' }} className={isMobile ? styles.content_box : ''}>
                     <div>

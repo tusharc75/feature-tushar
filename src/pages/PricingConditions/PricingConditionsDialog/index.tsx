@@ -102,7 +102,7 @@ const PricingConditionsDialog = ({ pricingConditionId, onClose, onSuccess, isUpd
     const errors = {};
     let startDate = dayjs(values?.startDate);
     let endDate = dayjs(values?.endDate);
-    if (endDate.diff(startDate, 'days') < 0) {
+    if (endDate.diff(startDate, 'day') < 0) {
       errors['endDate'] = 'Please enter valid end date';
     }
     return errors;

@@ -29,7 +29,7 @@ export const getColorFromPriority = (priority): string => {
 
 export const getPositionOfDate = (taskStartDate, taskEndDate, startDate, endDate, totalDay): React.CSSProperties => {
   return {
-    left: (100 * dayjs(taskStartDate).diff(startDate, 'days')) / totalDay + '%',
-    right: (100 * endDate.diff(dayjs(taskEndDate), 'days')) / totalDay + '%'
+    left: (100 * dayjs(taskStartDate).diff(startDate, 'day')) / totalDay + '%',
+    right: (100 * endDate.diff(dayjs(taskEndDate), 'day')) / totalDay + '%'
   } as React.CSSProperties;
 };

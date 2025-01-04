@@ -33,7 +33,7 @@ const group = (categories, data, searchKeyword = '') => {
 const Analysis = ({ assetId, dataPoints }: { assetId: string; dataPoints: any[] }) => {
   const toastConfig = useContext(CustomToastContext);
   const [dateFilters, setDateFilters] = useState({
-    from: new Date(dayjs().subtract(8, 'days').format('MM/DD/YYYY')),
+    from: new Date(dayjs().subtract(8, 'day').format('MM/DD/YYYY')),
     to: new Date(),
     intervals: 'perCycle'
   });
