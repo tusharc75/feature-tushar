@@ -423,7 +423,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                         value={values.rejectDate}
                         minDate={
                           lockDate
-                            ? dayjs(lockDate).diff(dayjs(purchaseOrderData?.purchaseOrderDate), 'days') > 0
+                            ? dayjs(lockDate).diff(dayjs(purchaseOrderData?.purchaseOrderDate), 'day') > 0
                               ? lockDate
                               : purchaseOrderData?.purchaseOrderDate
                             : purchaseOrderData?.purchaseOrderDate

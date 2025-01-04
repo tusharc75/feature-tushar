@@ -24,7 +24,7 @@ const getQuarterDetails = (date: Dayjs): string => {
   return `${startMonth} - ${endMonth} ${year}`;
 };
 
-const getDifference = (startDate: Dayjs, endDate: Dayjs, type: 'quarters' | 'weeks' | 'months') => {
+const getDifference = (startDate: Dayjs, endDate: Dayjs, type: 'quarter' | 'week' | 'month') => {
   const diff = endDate.diff(startDate, type);
   return diff;
 };
@@ -34,34 +34,34 @@ export const getDaysBetweenDates = (
   startDate: Dayjs,
   endDate: Dayjs
 ): GetDaysBetweenDatesOutput[] => {
-  const months: string[] = [];
-  const week: { [key: string]: string[] }[] = [];
-  const quarters: string[] = [];
+  const monthList: string[] = [];
+  const weekList: { [key: string]: string[] }[] = [];
+  const quarterList: string[] = [];
 
   switch (view) {
     case 'month': {
-      const totalMonths = endDate.diff(startDate, 'months');
+      const totalMonths = endDate.diff(startDate, 'month');
       for (let i = 0; i <= totalMonths; i++) {
-        months.push(startDate.clone().add(i, 'months').format('MMM YYYY'));
+        monthList.push(startDate.clone().add(i, 'month').format('MMM YYYY'));
       }
-      return months;
+      return monthList;
     }
     case 'week': {
-      const totalMonths = endDate.diff(startDate, 'months');
+      const totalMonths = endDate.diff(startDate, 'month');
       for (let i = 0; i <= totalMonths; i++) {
-        const date = startDate.clone().add(i, 'months');
+        const date = startDate.clone().add(i, 'month');
         const result = date.format('MMM YYYY');
         const obj = { [result]: getAllDaysInMonthFormatted(date) };
-        week.push(obj);
+        weekList.push(obj);
       }
-      return week;
+      return weekList;
     }
     case 'quarter': {
-      const totalQuarters = endDate.diff(startDate, 'quarters');
+      const totalQuarters = endDate.diff(startDate, 'quarter');
       for (let i = 0; i <= totalQuarters; i++) {
-        quarters.push(getQuarterDetails(startDate.clone().add(i, 'quarters')));
+        quarterList.push(getQuarterDetails(startDate.clone().add(i, 'quarter')));
       }
-      return quarters;
+      return quarterList;
     }
     default:
       throw new Error('Invalid view type');
@@ -79,12 +79,12 @@ export function getTableRow<T>(
   index: number
 ) {
   const days = getDaysBetweenDates(view, startDate, endDate);
-  let difference = getDifference(startDate, endDate, 'weeks');
+  let difference = getDifference(startDate, endDate, 'week');
   if (view === 'month') {
-    difference = getDifference(startDate, endDate, 'months');
+    difference = getDifference(startDate, endDate, 'month');
   }
   if (view === 'quarter') {
-    difference = getDifference(startDate, endDate, 'quarters');
+    difference = getDifference(startDate, endDate, 'quarter');
   }
 
   const row: React.ReactNode[] = [];

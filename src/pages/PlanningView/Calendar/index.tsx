@@ -45,57 +45,57 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const FILTERS = [
     ...(permissions?.warehouse?.isRead
       ? [
-          {
-            label: resources?.warehouse?.titlePlural,
-            value: 'Warehouse',
-            key: 'warehouse'
-          }
-        ]
+        {
+          label: resources?.warehouse?.titlePlural,
+          value: 'Warehouse',
+          key: 'warehouse'
+        }
+      ]
       : []),
     ...(permissions?.product?.isRead
       ? [
-          {
-            label: resources?.product?.titlePlural,
-            value: 'Product',
-            key: 'product'
-          }
-        ]
+        {
+          label: resources?.product?.titlePlural,
+          value: 'Product',
+          key: 'product'
+        }
+      ]
       : []),
     ...(permissions?.serializedAsset?.isRead
       ? [
-          {
-            label: resources?.serializedAsset?.titlePlural,
-            value: 'Serialized Asset',
-            key: 'asset'
-          }
-        ]
+        {
+          label: resources?.serializedAsset?.titlePlural,
+          value: 'Serialized Asset',
+          key: 'asset'
+        }
+      ]
       : []),
     ...(permissions?.serviceMaster?.isRead
       ? [
-          {
-            label: resources?.serviceMaster?.titlePlural,
-            value: 'Service Master',
-            key: 'service'
-          }
-        ]
+        {
+          label: resources?.serviceMaster?.titlePlural,
+          value: 'Service Master',
+          key: 'service'
+        }
+      ]
       : []),
     ...(permissions?.customerAccount?.isRead
       ? [
-          {
-            label: resources?.customerAccount?.titlePlural,
-            value: 'Customer Account',
-            key: 'customerAccount'
-          }
-        ]
+        {
+          label: resources?.customerAccount?.titlePlural,
+          value: 'Customer Account',
+          key: 'customerAccount'
+        }
+      ]
       : []),
     ...(permissions?.competencies?.isRead
       ? [
-          {
-            label: resources?.competencies?.titlePlural,
-            value: 'Competencies',
-            key: 'competencies'
-          }
-        ]
+        {
+          label: resources?.competencies?.titlePlural,
+          value: 'Competencies',
+          key: 'competencies'
+        }
+      ]
       : [])
   ];
 
@@ -565,7 +565,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     } else if (view === 'agenda') {
       setDateRange({
         estimateStartDate: dayjs(date).format('MM/DD/YYYY'),
-        estimateEndDate: dayjs(date).add(1, 'months').format('MM/DD/YYYY')
+        estimateEndDate: dayjs(date).add(1, 'month').format('MM/DD/YYYY')
       });
     }
   };

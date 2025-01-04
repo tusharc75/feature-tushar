@@ -65,8 +65,8 @@ const TreeNode = ({ obj, index, endDate, startDate, totalDay, dayPixel }) => {
     return (
       <Box key={index} width={'100%'} height={30} className="hover:bg-[var(--dark-secondary,#eef5f4)]">
         {data.map((data, i) => {
-          const left = (100 * dayjs(data.startDate).diff(startDate, 'days')) / totalDay;
-          const right = (100 * endDate.diff(dayjs(data.endDate), 'days')) / totalDay;
+          const left = (100 * dayjs(data.startDate).diff(startDate, 'day')) / totalDay;
+          const right = (100 * endDate.diff(dayjs(data.endDate), 'day')) / totalDay;
 
           return (
             <HtmlTooltip

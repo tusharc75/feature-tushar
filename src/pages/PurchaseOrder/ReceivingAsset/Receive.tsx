@@ -526,7 +526,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
                           value={values.receiveDate}
                           minDate={
                             lockDate
-                              ? dayjs(lockDate).diff(dayjs(purchaseOrderData?.purchaseOrderDate), 'days') > 0
+                              ? dayjs(lockDate).diff(dayjs(purchaseOrderData?.purchaseOrderDate), 'day') > 0
                                 ? lockDate
                                 : purchaseOrderData?.purchaseOrderDate
                               : purchaseOrderData?.purchaseOrderDate

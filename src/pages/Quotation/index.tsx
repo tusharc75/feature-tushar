@@ -150,7 +150,7 @@ const Quotation = () => {
   const isDateWithinNext15Days = (endData) => {
     var a = dayjs(endData);
     var b = dayjs();
-    const days = a.diff(b, 'days');
+    const days = a.diff(b, 'day');
     if (days < 15 && days >= 0) {
       return true;
     } else if (days < 0) {
@@ -395,12 +395,11 @@ const Quotation = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${
-              deleteRecord
-                ? `${resources?.quotation?.titleSingular?.toLowerCase()} :
+            message={`Are you sure you want to delete ${deleteRecord
+              ? `${resources?.quotation?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.quotationNumber}`
-                : `selected ${resources?.quotation?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.quotation?.titlePlural?.toLowerCase()}`
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

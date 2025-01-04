@@ -11,7 +11,7 @@ function Calendar({ calendarType, dayPixel, startDate, endDate }) {
 
   useEffect(() => {
     setCalType(calendarType);
-    setTotalDay(endDate.diff(startDate, 'days') + 1);
+    setTotalDay(endDate.diff(startDate, 'day') + 1);
     setDates(DaysBetweenDates(calendarType, startDate, endDate));
   }, [calendarType, startDate, endDate]);
 

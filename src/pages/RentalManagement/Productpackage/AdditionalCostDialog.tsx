@@ -78,7 +78,7 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({
     const errors = {};
     let actualStartDate = dayjs(values?.actualStartDate);
     let actualEndDate = dayjs(values?.actualEndDate);
-    if (actualEndDate.diff(actualStartDate, 'days') < 0) {
+    if (actualEndDate.diff(actualStartDate, 'day') < 0) {
       errors['actualEndDate'] = 'Please enter valid actual end date';
     }
     return errors;
