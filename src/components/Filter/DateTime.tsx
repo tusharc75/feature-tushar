@@ -64,8 +64,8 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required =
     const fromDate = dayjs(deepFilters?.find((item) => item.field === `from_${fieldData?.fieldName}`)?.term);
     const toDate = dayjs(deepFilters?.find((item) => item.field === `to_${fieldData?.fieldName}`)?.term);
     if (fromDate && toDate) {
-      const differenceInMonths = toDate.diff(fromDate, 'months');
-      const differenceInDays = toDate.diff(fromDate, 'days');
+      const differenceInMonths = toDate.diff(fromDate, 'month');
+      const differenceInDays = toDate.diff(fromDate, 'day');
       if (differenceInMonths === 1 && [28, 29, 30, 31]?.includes(differenceInDays)) {
         setTimeFrame('1-month');
       } else if (differenceInMonths === 3 && [88, 89, 90, 91, 92]?.includes(differenceInDays)) {

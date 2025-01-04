@@ -46,7 +46,7 @@ const RoadMap = () => {
   useEffect(() => {
     const date1 = dayjs(startDate, stateDateFormat);
     const date2 = dayjs(endDate, stateDateFormat);
-    const diff = date2.diff(date1, 'days');
+    const diff = date2.diff(date1, 'day');
     setTotalDay(diff);
     executeScroll();
   }, [startDate, endDate]);
@@ -338,7 +338,7 @@ const RoadMap = () => {
                       height={'100%'}
                       style={{
                         position: 'absolute',
-                        left: (100 * dayjs().diff(dayjs(startDate, stateDateFormat), 'days')) / totalDay + '%',
+                        left: (100 * dayjs().diff(dayjs(startDate, stateDateFormat), 'day')) / totalDay + '%',
                         width: dayPixel,
                         height: rowVirtualizer.getTotalSize()
                       }}

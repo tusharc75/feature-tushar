@@ -99,7 +99,7 @@ const SerializedAssetsCertification = () => {
       .then(({ data }) => {
         let rows = data?.data?.map((u, user) => {
           let finalObject = prepareDataForGrid(u, user);
-          const dateToQuery = dayjs().add(30, 'days').toDate();
+          const dateToQuery = dayjs().add(30, 'day').toDate();
           const certificateExpiryDate = u.certificateExpiryDate ? dayjs(u.certificateExpiryDate).toDate() : null;
           finalObject['canIssueCertificate'] = !certificateExpiryDate || certificateExpiryDate <= dateToQuery;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
@@ -227,7 +227,7 @@ const SerializedAssetsCertification = () => {
   return (
     <Fragment>
       <Grid container className="headerbox">
-        <Grid size={{md:4, sm:11, xs:10}}>
+        <Grid size={{ md: 4, sm: 11, xs: 10 }}>
           <CustomBreadCrumbs routes={[{ ...routes.serializedAssetsCertification, title: resources?.serializedAssetsCertification?.titlePlural }]} />
         </Grid>
       </Grid>

@@ -206,13 +206,13 @@ const ManageRentalManagementDialog = ({
     const errors = {};
     let estimateStartDate = dayjs(values?.estimateStartDate);
     let estimateEndDate = dayjs(values?.estimateEndDate);
-    if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
+    if (estimateEndDate.diff(estimateStartDate, 'day') < 0) {
       errors['estimateEndDate'] = 'Please enter valid estimate end date';
     }
     let actualStartDate = dayjs(values?.actualStartDate);
     let actualEndDate = dayjs(values?.actualEndDate);
     if (actualStartDate.format('YYYY-MM-DD') !== actualEndDate.format('YYYY-MM-DD')) {
-      if (actualEndDate.diff(actualStartDate, 'days') <= 0) {
+      if (actualEndDate.diff(actualStartDate, 'day') <= 0) {
         errors['actualEndDate'] = 'Please enter valid actual end date';
       }
     }

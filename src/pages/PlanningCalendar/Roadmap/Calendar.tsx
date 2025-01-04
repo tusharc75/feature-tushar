@@ -16,9 +16,9 @@ const getAllDaysInMonthFormatted = (date: any): string[] => {
 const DaysBetweenDates = (startDate: any, endDate: any) => {
   const week: { month: string; dates: string[] }[] = [];
   const allDates: string[] = [];
-  const totalMonths = endDate.diff(startDate, 'months');
+  const totalMonths = endDate.diff(startDate, 'month');
   for (let i = 0; i <= totalMonths; i++) {
-    const date = startDate.clone().add(i, 'months');
+    const date = startDate.clone().add(i, 'month');
     const result = date.format('MMM YYYY');
     const dates = getAllDaysInMonthFormatted(date);
     const obj: { month: string; dates: string[] } = { month: result, dates };

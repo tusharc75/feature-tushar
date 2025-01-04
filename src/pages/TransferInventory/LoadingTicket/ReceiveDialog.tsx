@@ -49,7 +49,7 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSucess, transferInv
       }
     }
     if (fromLockDate && toLockDate) {
-      if (dayjs(fromLockDate).diff(dayjs(toLockDate), 'days') > 0) {
+      if (dayjs(fromLockDate).diff(dayjs(toLockDate), 'day') > 0) {
         setLockDate(fromLockDate);
       } else {
         setLockDate(toLockDate);

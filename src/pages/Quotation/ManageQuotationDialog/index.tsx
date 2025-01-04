@@ -215,11 +215,11 @@ const ManageQuotationDialog = ({
     let supplierSuggestedDeliveryDate = dayjs(values?.supplierSuggestedDeliveryDate);
     let expectedCustomerDeliveryDate = dayjs(values?.expectedCustomerDeliveryDate);
 
-    if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
+    if (estimateEndDate.diff(estimateStartDate, 'day') < 0) {
       errors['estimateEndDate'] = 'Please enter valid estimate end date';
     }
 
-    if (expectedCustomerDeliveryDate.diff(supplierSuggestedDeliveryDate, 'days') < 0) {
+    if (expectedCustomerDeliveryDate.diff(supplierSuggestedDeliveryDate, 'day') < 0) {
       errors['expectedCustomerDeliveryDate'] = 'Please enter valid expected customer delivery date';
     }
 
