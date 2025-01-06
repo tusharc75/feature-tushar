@@ -18,7 +18,6 @@ import useStyles from './style';
 import { TResource, TSidebarItem, TSidebarSection } from './type';
 import { isSectionActive, isSectionVisible, staticSidebarData } from './utils';
 
-
 let toggleTimeout;
 
 function SideBar({ location }) {
@@ -145,12 +144,12 @@ function SideBar({ location }) {
             }, 500);
         }}
         className={cn(
-          'main-sidebar fixed left-0 top-0 z-[1200] h-full overflow-hidden bg-[--sidebar-bg] [&_.MuiListItemButton-root]:min-h-[56px] [&_.MuiListItemButton-root]:py-[12px] [&_.MuiListItemButton-root]:pl-[30px] [&_.MuiListItemButton-root]:pr-[16px]',
+          'main-sidebar fixed left-0 top-0 z-[1200] h-full overflow-hidden border-r bg-[--sidebar-bg] [&_.MuiListItemButton-root]:min-h-[56px] [&_.MuiListItemButton-root]:py-[12px] [&_.MuiListItemButton-root]:pl-[30px] [&_.MuiListItemButton-root]:pr-[16px]',
           sidebarOpen ? 'w-[306px]' : 'max-[959px]:w-0 min-[960px]:w-[84px] [&_.MuiListItemText-root]:truncate'
         )}
         style={{ transition: 'width 195ms cubic-bezier(0.4, 0, 0.6, 1) 0ms' }}
       >
-        <div className={`flex min-h-[64px] items-center justify-center border-b border-r max-[768px]:pr-[50px]`}>
+        <div className={`flex min-h-[64px] items-center justify-center border-b max-[768px]:pr-[50px]`}>
           <img
             className={` ${isSidebarOpen ? 'block' : 'hidden'} mx-auto max-h-[33px]`}
             src={user?.brandLogo || SVG('LogoNew')}
@@ -177,8 +176,9 @@ function SideBar({ location }) {
               </div>
             </div>
             <List
-              className={`${styles.listContainer} sidebar-list max-h-[calc(100vh-80px)] ${isSidebarOpen ? 'overflow-y-auto' : 'overflow-y-hidden'
-                } overflow-x-hidden`}
+              className={`${styles.listContainer} sidebar-list max-h-[calc(100vh-80px)] ${
+                isSidebarOpen ? 'overflow-y-auto' : 'overflow-y-hidden'
+              } overflow-x-hidden`}
             >
               {listItems?.map((listItem, i) => {
                 const hasChild = Boolean(listItem.items);
@@ -225,8 +225,9 @@ function SideBar({ location }) {
                         <List component="div" disablePadding className={`${styles.subList} ${isItemActive && styles.activeSubList}`}>
                           {listItem.items.map((item, j) => (
                             <Link
-                              className={`sub-list ${pathName === item.name.toLowerCase().split(' ').join('-') && styles.active_sub} ${itemToAddActiveClass === i && subItemToAddActiveClass === j ? 'active_sub' : ''
-                                }`}
+                              className={`sub-list ${pathName === item.name.toLowerCase().split(' ').join('-') && styles.active_sub} ${
+                                itemToAddActiveClass === i && subItemToAddActiveClass === j ? 'active_sub' : ''
+                              }`}
                               key={j}
                               onClick={() => {
                                 setItemToAddActiveClass(i);
