@@ -66,7 +66,7 @@ function DateRangePicker({ className, date, setDate, horizontal = 'center' }: Da
       }
       case '3-months': {
         const data = {
-          from: new Date(dayjs().subtract(3, 'months').toDate()),
+          from: new Date(dayjs().subtract(3, 'month').toDate()),
           to: new Date()
         };
         setMonth(data.from);
@@ -75,7 +75,7 @@ function DateRangePicker({ className, date, setDate, horizontal = 'center' }: Da
       }
       case '6-months': {
         const data = {
-          from: new Date(dayjs().subtract(6, 'months').toDate()),
+          from: new Date(dayjs().subtract(6, 'month').toDate()),
           to: new Date()
         };
         setMonth(data.from);

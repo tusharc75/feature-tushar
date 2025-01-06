@@ -318,7 +318,7 @@ const ManageRepairOrder = ({
                               <Box marginY={2}>
                                 <Grid spacing={3} container>
                                   {form.sectionFields.map((field) => (
-                                    <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
+                                    <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                       {field.fieldName === 'startDate' ? (
                                         <FormTypes
                                           repairOrderId={repairOrderId}
@@ -342,7 +342,7 @@ const ManageRepairOrder = ({
                                           size="small"
                                           minDate={new Date()}
                                           maxDate={
-                                            values['expectedCompletionDate'] ? dayjs(values['expectedCompletionDate']) : dayjs().add(5, 'years')
+                                            values['expectedCompletionDate'] ? dayjs(values['expectedCompletionDate']) : dayjs().add(5, 'year')
                                           }
                                         />
                                       ) : field.fieldName === 'expectedCompletionDate' ? (
@@ -431,8 +431,8 @@ const ManageRepairOrder = ({
                                           imageOrFileUploadCompletePercentage={
                                             ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                               ? (completePercentage) => {
-                                                  setUploadingImageOrFileProgress(completePercentage);
-                                                }
+                                                setUploadingImageOrFileProgress(completePercentage);
+                                              }
                                               : null
                                           }
                                         />
@@ -460,7 +460,7 @@ const ManageRepairOrder = ({
                   </ThemeButton>
                   <ThemeButton
                     isLoading={loading}
-                    buttonType="transparent"
+                    buttonType="theme"
                     id="dialog-save-button"
                     disabled={uploadingImageOrFileProgress > 0 || loading}
                     onClick={(e) => {

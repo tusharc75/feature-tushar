@@ -15,7 +15,7 @@ import { useData } from 'src/StateProvider/Provider';
 const Workspace = () => {
   const [channels, setChannels] = useState<TChannel[]>(null);
   const [selectedChannel, setSelectedChannel] = useState<TChannel>(null);
-  const [createChannelDialog, setCreateChannelDialog] = useState(false);
+  const [manageChannelDialog, setManageChannelDialog] = useState({ open: false, _id: null });
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const mobScreen = useMediaQuery('(max-width:768px)');
   const [socket, setSocket] = useState<Socket>(null);
@@ -39,7 +39,14 @@ const Workspace = () => {
   const fetchChannels = async () => {
     const { data } = await axiosInstance().get('/work-space/channel');
     setChannels(data.data || []);
-    if (data?.data?.length) setSelectedChannel(data?.data[0]);
+    const queryParam = new URLSearchParams(window.location.search)
+    const channelId = queryParam.get("channelId");
+    if (channelId) {
+      const channel = data?.data?.find((channel) => channel?._id === channelId);
+      setSelectedChannel(channel);
+    } else if (data?.data?.length) {
+      setSelectedChannel(data?.data[0]);
+    }
   };
 
   const handleDeleteChannels = async (channelIds: string[]) => {
@@ -109,7 +116,7 @@ const Workspace = () => {
               channels={channels}
               selectedChannel={selectedChannel}
               setSelectedChannel={setSelectedChannel}
-              setCreateChannelDialog={setCreateChannelDialog}
+              setManageChannelDialog={setManageChannelDialog}
               handleDeleteChannels={handleDeleteChannels}
               mobScreen={mobScreen}
               setChannels={setChannels}
@@ -124,13 +131,14 @@ const Workspace = () => {
             />
           </div>
         </CustomContainer>
-        {createChannelDialog && (
+        {manageChannelDialog.open && (
           <ManageChannel
-            onClose={() => setCreateChannelDialog(false)}
+            onClose={() => setManageChannelDialog({ open: false, _id: null })}
             onSuccess={() => {
               fetchChannels();
-              setCreateChannelDialog(false);
+              setManageChannelDialog({ open: false, _id: null });
             }}
+            _id={manageChannelDialog._id}
           />
         )}
       </div>

@@ -54,7 +54,7 @@ const WorkOrderPlanning = () => {
         const getBackgroundColor = (row) => {
           const today = dayjs();
           const dueDate = dayjs(row?.original?.dueDate);
-          const days = dueDate.diff(today, 'days');
+          const days = dueDate.diff(today, 'day');
           let color = '';
           if (row?.original?.status === 'Pending') {
             if (days <= 1) {

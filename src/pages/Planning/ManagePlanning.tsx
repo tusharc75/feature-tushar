@@ -129,7 +129,7 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
     const errors = {};
     const startDate = dayjs(values?.startDate);
     const endDate = dayjs(values?.endDate);
-    if (endDate.diff(startDate, 'days') < 0) {
+    if (endDate.diff(startDate, 'day') < 0) {
       errors['endDate'] = 'End Date can not be less than the Start date';
     }
     return errors;
@@ -164,13 +164,12 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${
-                  id
-                    ? isClone
-                      ? `Clone - ${cloneHeading}`
-                      : `Update ${initialData.values?.planningNumber ? `(${initialData.values?.planningNumber})` : ''}`
-                    : `Create ${resources?.planning?.titleSingular}`
-                }`}
+                title={`${id
+                  ? isClone
+                    ? `Clone - ${cloneHeading}`
+                    : `Update ${initialData.values?.planningNumber ? `(${initialData.values?.planningNumber})` : ''}`
+                  : `Create ${resources?.planning?.titleSingular}`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);

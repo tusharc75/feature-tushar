@@ -50,10 +50,10 @@ const GetDays = function (month, year) {
   let blank_days = [];
 
   let preMonth = dayjs(year + '-' + month + '-01')
-    .subtract(1, 'months')
+    .subtract(1, 'month')
     .format('MM');
   let nextMonth = dayjs(year + '-' + month + '-01')
-    .subtract(1, 'months')
+    .subtract(1, 'month')
     .format('MM');
   let blankDay = parseInt(
     dayjs(year + '-' + month + '-01')

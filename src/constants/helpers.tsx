@@ -1,3 +1,4 @@
+import { CalendarMonth, CheckCircleOutline, PushPin, Sync } from '@mui/icons-material';
 import { Fade } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
 import { GoogleMapProps } from '@react-google-maps/api';
@@ -7,7 +8,6 @@ import { camelCase, cloneDeep, isArray, isString, lowerFirst, orderBy, uniqBy } 
 import mimeDb from 'mime-db';
 import React from 'react';
 import { FileIcon, fileIcons } from 'src/assets/fileIcons';
-import { CompletedIcon, InProgressByOtherIcon, InProgressIcon, PendingIcon } from 'src/assets/newSvgs';
 import { LOGIC, OPERATOR } from 'src/components/FormBuilder/helper';
 import { stepIconInterface } from 'src/components/Steps/icons';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
@@ -2892,6 +2892,7 @@ export const WORKORDER_SERVICE_COLOR = {
 };
 
 export const WORKORDER_SERVICE_STATUS = {
+  planned: 'Planned',
   pending: 'Pending',
   backlog: 'Backlog',
   inProgress: 'In-Progress',
@@ -3819,33 +3820,44 @@ export function filterDataByDateIntersection<D>(
   });
 }
 export const workOrderColormap = {
+  [WORKORDER_SERVICE_STATUS.planned]: {
+    color: 'dark:text-white text-orange-700',
+    background: 'dark:bg-orange-600 bg-orange-100',
+    indicatorBackground: 'bg-orange-700 dark:bg-orange-700',
+    indicatorColor: 'text-orange-700'
+  },
   [WORKORDER_SERVICE_STATUS.pending]: {
     color: 'dark:text-white text-[#B66A11]',
     background: 'dark:bg-[#fba84a] bg-[#FFF1E0]',
-    indicator: 'bg-[#B66A11] dark:bg-[#fba84a] '
+    indicatorBackground: 'bg-[#B66A11] dark:bg-[#fba84a] ',
+    indicatorColor: 'text-[#B66A11]'
   },
   [WORKORDER_SERVICE_STATUS.inProgress]: {
     color: 'dark:text-white text-[#0273FF]',
     background: 'dark:bg-[#0c68e9] bg-[#D6F1FF]',
-    indicator: 'bg-[#0273FF] dark:bg-[#0c68e9]'
+    indicatorBackground: 'bg-[#0273FF] dark:bg-[#0c68e9]',
+    indicatorColor: 'text-[#0273FF]'
   },
   [WORKORDER_SERVICE_STATUS.completed]: {
     color: 'dark:text-white text-[#0A983E]',
     background: 'bg-[#E2FDEC] dark:bg-[#2fa959]',
-    indicator: 'bg-[#0A983E] dark:bg-[#2fa959]'
+    indicatorBackground: 'bg-[#0A983E] dark:bg-[#2fa959]',
+    indicatorColor: 'text-[#0A983E]'
   },
   [WORKORDER_SERVICE_STATUS.inProgressByOther]: {
-    color: 'dark:text-white text-[#6D29F6]',
-    background: 'dark:bg-[#6055df] bg-[#D6F1FF]',
-    indicator: 'bg-[#6D29F6] dark:bg-[#6055df]'
+    color: 'dark:text-white text-cyan-700',
+    background: 'dark:bg-cyan-600 bg-cyan-100',
+    indicatorBackground: 'bg-cyan-700 dark:bg-cyan-700',
+    indicatorColor: 'text-cyan-700'
   }
 };
 
 export const workOrderIconMap = {
-  [WORKORDER_SERVICE_STATUS.pending]: <PendingIcon className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.pending].color}`} />,
-  [WORKORDER_SERVICE_STATUS.inProgress]: <InProgressIcon className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.inProgress].color}`} />,
-  [WORKORDER_SERVICE_STATUS.completed]: <CompletedIcon className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.completed].color}`} />,
+  [WORKORDER_SERVICE_STATUS.planned]: <CalendarMonth className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.pending].indicatorColor}`} />,
+  [WORKORDER_SERVICE_STATUS.pending]: <Sync className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.pending].indicatorColor}`} />,
+  [WORKORDER_SERVICE_STATUS.inProgress]: <PushPin className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.inProgress].indicatorColor}`} />,
+  [WORKORDER_SERVICE_STATUS.completed]: <CheckCircleOutline className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.completed].indicatorColor}`} />,
   [WORKORDER_SERVICE_STATUS.inProgressByOther]: (
-    <InProgressByOtherIcon className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.inProgressByOther].color}`} />
+    <PushPin className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.inProgressByOther].indicatorColor}`} />
   )
 };

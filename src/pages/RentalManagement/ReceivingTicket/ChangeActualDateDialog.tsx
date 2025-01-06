@@ -57,14 +57,14 @@ const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, isBulkUp
     if (data?.isAllowedStartDate && data?.isAllowedEndDate) {
       let manualStartDate = dayjs(values?.manualStartDate);
       let manualEndDate = dayjs(values?.manualEndDate);
-      if (manualEndDate.diff(manualStartDate, 'days') < 0) {
+      if (manualEndDate.diff(manualStartDate, 'day') < 0) {
         errors['manualEndDate'] = 'Please enter valid end date';
       }
     }
     if (minStartDate) {
       let manualStartDate = dayjs(values?.manualStartDate);
       let newMinStartDate = dayjs(minStartDate);
-      if (manualStartDate.diff(newMinStartDate, 'days') < 0) {
+      if (manualStartDate.diff(newMinStartDate, 'day') < 0) {
         errors['manualStartDate'] = 'Please enter valid start date';
       }
     }
