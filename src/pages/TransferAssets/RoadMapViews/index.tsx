@@ -190,7 +190,7 @@ const TransferAssetViews = (props) => {
 
   return (
     <ContentFullScreen fullScreen={fullDialogueOpen} setFullScreen={setFullDialogueOpen}>
-      <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
+      <Box display="flex" flexDirection="column">
         <Box>
           <ThemeButton
             onClick={() => {
@@ -231,7 +231,7 @@ const TransferAssetViews = (props) => {
           </Box>
         )}
       </Box>
-      <div style={fullDialogueOpen ? { height: '95vh' } : { height: '68vh' }}>
+      <div style={fullDialogueOpen ? { height: '95vh' } : { height: '75vh' }}>
         {!loading ? (
           flowData.length ? (
             <Fragment>

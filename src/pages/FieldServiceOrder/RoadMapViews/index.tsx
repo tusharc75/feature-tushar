@@ -233,7 +233,7 @@ function ServiceOrderViews({ serviceData }) {
 
   return (
     <ContentFullScreen fullScreen={fullDialogueOpen} setFullScreen={setFullDialogueOpen}>
-      <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
+      <Box display="flex" flexDirection="column">
         <Box>
           <ThemeButton
             onClick={() => {
@@ -273,7 +273,7 @@ function ServiceOrderViews({ serviceData }) {
           </Box>
         )}
       </Box>
-      <div style={fullDialogueOpen ? { height: '92vh' } : { height: '65vh' }}>
+      <div style={fullDialogueOpen ? { height: '92vh' } : { height: '75vh' }}>
         {!loading ? (
           flowData.length ? (
             <Fragment>

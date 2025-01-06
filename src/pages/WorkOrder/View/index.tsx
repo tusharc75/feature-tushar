@@ -1,6 +1,5 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
 import ReactFlow, { ControlButton, Controls, ReactFlowProvider } from 'react-flow-renderer';
-import { useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { COLOUR_MASTER, WORKORDER_SERVICE_STEP_STATUS, WORK_ORDER_STATUS } from 'src/constants/helpers';
@@ -57,7 +56,6 @@ const WorkOrderViews = (props) => {
 
   const [flowData, setFlowData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const [fullScreenOpen, setFullScreenOpen] = useState(false);
   const [colorInfo, setColorInfo] = useState(false);
@@ -253,7 +251,7 @@ const WorkOrderViews = (props) => {
 
   return (
     <ContentFullScreen fullScreen={fullScreenOpen} setFullScreen={setFullScreenOpen}>
-      <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
+      <Box display="flex" flexDirection="column">
         <Box>
           <ThemeButton
             onClick={() => {
@@ -293,7 +291,7 @@ const WorkOrderViews = (props) => {
           </Box>
         )}
       </Box>
-      <div style={fullScreenOpen ? { height: '95vh' } : { height: '68vh' }}>
+      <div style={fullScreenOpen ? { height: '95vh' } : { height: '75vh' }}>
         {!loading ? (
           flowData.length ? (
             <Fragment>

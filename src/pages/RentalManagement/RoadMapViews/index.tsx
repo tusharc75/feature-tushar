@@ -4,7 +4,6 @@ import ReactFlow, { Controls, ControlButton, ReactFlowProvider } from 'react-flo
 import axiosInstance from '../../../axios/axiosInstance';
 import { DELIVERY_TICKET_TYPE, ASSET_STATUS, rentalManagement, RENTAL_STATUS, COLOUR_MASTER, MATERIAL_TYPE } from '../../../constants/helpers';
 import routes from '../../../components/Helpers/Routes';
-import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { MdZoomOutMap } from 'react-icons/md';
