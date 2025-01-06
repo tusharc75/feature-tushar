@@ -98,7 +98,7 @@ const AddServices = ({ schedularState }: SchedularComponentProps) => {
     if (sorting?.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
-    return `${deepFilter}&filterType=and&filterByIdType=and`;
+    return `${deepFilter}`;
   };
 
   return (

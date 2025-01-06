@@ -634,7 +634,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
         toastConfig.setToastConfig({
           open: true,
           message: data.message,
-          severity: 'success'
+          type: 'success'
         });
       })
       .catch((err) => {
@@ -995,8 +995,8 @@ const ActionButtonMenuItems = ({
         }}
         disabled={
           selectedRecords?.length &&
-          selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || checkParentProduct([d], d?.parentId)) &&
-          selectedRecords?.every((d) => d.workOrderId === selectedRecords[0]?.workOrderId)
+            selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || checkParentProduct([d], d?.parentId)) &&
+            selectedRecords?.every((d) => d.workOrderId === selectedRecords[0]?.workOrderId)
             ? false
             : true
         }
@@ -1015,8 +1015,8 @@ const ActionButtonMenuItems = ({
       <MenuItem
         disabled={
           checkUniqWorkOrder() &&
-          (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
-            selectedRecords?.filter((e) => checkParentProduct([e], e?.parentId))?.length === 1)
+            (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
+              selectedRecords?.filter((e) => checkParentProduct([e], e?.parentId))?.length === 1)
             ? false
             : true
         }

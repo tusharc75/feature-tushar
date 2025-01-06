@@ -592,7 +592,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         toastConfig.setToastConfig({
           open: true,
           message: data.message,
-          severity: 'success'
+          type: 'success'
         });
       })
       .catch((err) => {
@@ -995,13 +995,12 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         <ConfirmationDialog
           okBtnLoading={isSubmitting}
           open={showServiceActionConfirmBox.open}
-          message={`Are you sure you want to ${
-            showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed
+          message={`Are you sure you want to ${showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed
               ? 'complete'
               : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
                 ? 'skip'
                 : 'revert'
-          } this Service(s)`}
+            } this Service(s)`}
           onClose={() => {
             setShowServiceActionConfirmBox({ open: false, action: '' });
           }}
@@ -1190,8 +1189,8 @@ const ActionButtonMenuItems = ({
         }}
         disabled={
           selectedRecords?.length &&
-          selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || (d.type === MATERIAL_TYPE.product && !d?.parentId)) &&
-          selectedRecords?.every((d) => d.workOrder?._id === selectedRecords[0]?.workOrder?._id)
+            selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || (d.type === MATERIAL_TYPE.product && !d?.parentId)) &&
+            selectedRecords?.every((d) => d.workOrder?._id === selectedRecords[0]?.workOrder?._id)
             ? false
             : true
         }
@@ -1210,8 +1209,8 @@ const ActionButtonMenuItems = ({
       <MenuItem
         disabled={
           checkUniqWorkOrder() &&
-          (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
-            selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length === 1)
+            (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
+              selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length === 1)
             ? false
             : true
         }

@@ -16,7 +16,10 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DateRangePicker, { DateRange } from 'src/components/DateRangePicker';
 import IconButtonTabs from 'src/components/IconButtonTabs';
 import {
+  ASSET_STATUS,
+  INVENTORY_OWNER_TYPE,
   MATERIAL_SUB_TYPE,
+  REPAIR_ORDER_TYPE,
   WORKORDER_SERVICE_STATUS,
   cn,
   sidebarResource,
@@ -33,7 +36,7 @@ import routes from '../../components/Helpers/Routes';
 import AssignUserDialog from '../WorkOrder/Service/AssignUserDialog';
 import AssignWorkStationDialog from '../WorkOrder/Service/AssignWorkStationDialog';
 
-import { camelCase, uniqBy } from 'lodash';
+import { camelCase, map, uniq, uniqBy } from 'lodash';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import { useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
@@ -44,12 +47,14 @@ import DisplayFilterChip from 'src/pages/Reports/tables/DisplayFilterChip';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { BiFilterAlt } from 'react-icons/bi';
 import dayjs from 'dayjs';
+import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
 
 const LIMIT = 25;
 
 type ViewType = 'card-view' | 'table-view' | 'calendar-view';
 
 type TableViewStatus =
+  | typeof WORKORDER_SERVICE_STATUS.planned
   | typeof WORKORDER_SERVICE_STATUS.pending
   | typeof WORKORDER_SERVICE_STATUS.inProgress
   | typeof WORKORDER_SERVICE_STATUS.completed;
@@ -63,6 +68,9 @@ const WorkOrderSupervisor = () => {
   const { selectedRecords: tableSelectedRecords } = tableState;
 
   const selectedRecords = useMemo(() => [...cardSelectedRecords, ...tableSelectedRecords], [cardSelectedRecords, tableSelectedRecords]);
+
+  const selectedRecordsP = useMemo(() => [...selectedRecords?.filter((r) => r?.status === WORKORDER_SERVICE_STATUS.planned)], [selectedRecords]);
+  const selectedRecordsS: any = useMemo(() => [...selectedRecords?.filter((r) => r?.status != WORKORDER_SERVICE_STATUS.planned)], [selectedRecords]);
 
   const resetSelectedRecords = () => {
     dispatch({ type: 'selection', selectedRecords: [] });
@@ -88,6 +96,7 @@ const WorkOrderSupervisor = () => {
     return (localStorage.getItem(`${renderedFrom}_view`) as ViewType) || 'card-view';
   });
   const [consumablesDialog, setConsumablesDialog] = useState(false);
+  const [repairOrderDialog, setRepairOrderDialog] = useState(false);
 
   const [globalFilters, setGlobalFilters] = useState<DateRange>({
     from: new Date(dayjs().startOf('month').format('YYYY/MM/DD')),
@@ -224,7 +233,10 @@ const WorkOrderSupervisor = () => {
         accessor: 'workOrderNumber',
         title: 'Work Order',
         type: 'title',
-        link: (data) => `${routes?.workOrderDetail?.path}/${data?.workOrder}`,
+        link: (data) =>
+          data?.status === WORKORDER_SERVICE_STATUS.planned
+            ? `${routes?.serializedAssetDetail?.path}/${data?.serializedAssetId}`
+            : `${routes?.workOrderDetail?.path}/${data?.workOrder}`,
         target: '_blank'
       },
       {
@@ -263,7 +275,12 @@ const WorkOrderSupervisor = () => {
       type: 'initialize',
       columnOrder: Object.values(WORKORDER_SERVICE_STATUS),
       rowDef: cardDataRows,
-      visibleColumns: [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.completed],
+      visibleColumns: [
+        WORKORDER_SERVICE_STATUS.planned,
+        WORKORDER_SERVICE_STATUS.pending,
+        WORKORDER_SERVICE_STATUS.inProgress,
+        WORKORDER_SERVICE_STATUS.completed
+      ],
       limit: LIMIT
     });
     localStorage.setItem(`${renderedFrom}_view`, viewType);
@@ -272,12 +289,14 @@ const WorkOrderSupervisor = () => {
       dispatch({
         type: 'reset'
       });
-  }, [viewType]);
+  }, [viewType, tableViewStatus]);
 
   const openAssignHandler = (value: any, data: any) => {
     setSelectedServiceData(data);
     if (value === 'assignTechnician') {
       setAssignTechnicianDialog({ open: true, multiple: false });
+    } else if (value === 'createRepairOrder') {
+      setRepairOrderDialog(true);
     } else {
       setWorkStationAssignDialog({ open: true, multiple: false });
     }
@@ -286,20 +305,54 @@ const WorkOrderSupervisor = () => {
   const fetchSingleColumn = useCallback(
     (column: string, page = 0, appendData = true, filterQuery) => {
       let api = `${workOrderSupervisor.api}/work-order-service?page=${page}&status=${column}&limit=${limit}${filterQuery}`;
+      if (column === WORKORDER_SERVICE_STATUS.planned) {
+        api = `${workOrder.api}/work-order-planning?page=${page}&limit=${limit}&deepFilter=${encodeURIComponent(
+          JSON.stringify([
+            {
+              field: 'autoCreateWorkOrder',
+              term: 'Yes'
+            }
+          ])
+        )}`;
+      }
       dispatch({ type: 'loading', loading: (prev) => ({ ...prev, [column]: true }) });
       axiosInstance()
         .get(api)
         .then(({ data: { data, count } }) => {
+          let countC = count;
           const setData = (prev: { [key: string]: any[] }, appendData: boolean) => {
-            const rows = data.map((item) => {
-              const newObj = { ...item };
-              newObj['productionOrderNumber'] = newObj?.productionOrder?.optionLabel;
-              newObj['repairOrderNumber'] = newObj?.repairOrder?.optionLabel;
-              newObj['serviceName'] = newObj?.service?.optionLabel;
-              newObj['assignedUser'] = newObj?.assignedUsers?.map((e) => e?.optionLabel)?.toString();
-              newObj['workStation'] = newObj?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString();
-              return newObj;
-            });
+            let rows: any = [];
+            if (column === WORKORDER_SERVICE_STATUS.planned) {
+              const { data: dataD, count } = data;
+              countC = count;
+              rows = dataD?.map((item) => {
+                const newObj = { ...item };
+                newObj['workOrderNumber'] = newObj?.asset?.assetNumber;
+                newObj['serializedAsset'] = newObj?.asset?.assetNumber;
+                newObj['serializedAssetId'] = newObj?.asset?._id;
+                newObj['repairOrderNumber'] = newObj?.repairOrder?.optionLabel;
+                newObj['warehouse'] = newObj?.asset?.warehouse || '';
+                newObj['warehouseId'] = newObj?.asset?.warehouseId || '';
+                newObj['assetStatus'] = newObj?.asset?.status;
+                newObj['currentOwnerType'] = newObj?.asset?.currentOwnerType;
+                newObj['ownerType'] = newObj?.asset?.ownerType;
+                newObj['serviceName'] = newObj?.service?.optionLabel;
+                newObj['assignedUser'] = newObj?.assignedUsers?.map((e) => e?.optionLabel)?.toString();
+                newObj['workStation'] = newObj?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString();
+                newObj['status'] = WORKORDER_SERVICE_STATUS.planned;
+                return newObj;
+              });
+            } else {
+              rows = data.map((item) => {
+                const newObj = { ...item };
+                newObj['productionOrderNumber'] = newObj?.productionOrder?.optionLabel;
+                newObj['repairOrderNumber'] = newObj?.repairOrder?.optionLabel;
+                newObj['serviceName'] = newObj?.service?.optionLabel;
+                newObj['assignedUser'] = newObj?.assignedUsers?.map((e) => e?.optionLabel)?.toString();
+                newObj['workStation'] = newObj?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString();
+                return newObj;
+              });
+            }
             const newData = prev;
             if (!appendData) {
               newData[column] = rows;
@@ -312,7 +365,7 @@ const WorkOrderSupervisor = () => {
             }
             return newData;
           };
-          dispatch({ type: 'setData', setData: (prev) => setData(prev, appendData), setCount: (prevCount) => ({ ...prevCount, [column]: count }) });
+          dispatch({ type: 'setData', setData: (prev) => setData(prev, appendData), setCount: (prevCount) => ({ ...prevCount, [column]: countC }) });
           dispatch({ type: 'page', setPage: (prev) => ({ ...prev, [column]: page }) });
         })
         .catch((err) => {
@@ -344,7 +397,7 @@ const WorkOrderSupervisor = () => {
       if (globalFilters && selectDateFilter) {
         deepFilter = `${deepFilter}&from=${dayjs(globalFilters.from).format('YYYY/MM/DD')}&to=${dayjs(globalFilters.to).format('YYYY/MM/DD')}`;
       }
-      return `${deepFilter}&filterType=and&filterByIdType=and`;
+      return `${deepFilter}`;
     },
     [globalFilters, showFilter]
   );
@@ -405,49 +458,125 @@ const WorkOrderSupervisor = () => {
       });
   };
 
+  const handleAddAssets = async (row, records) => {
+    axiosInstance()
+      .post(`${workOrder.api}/work-order-planning/material`, {
+        repairOrderId: row?._id,
+        _ids: records?.map((e) => e?._id)
+      })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchSingleColumn(WORKORDER_SERVICE_STATUS.planned, 0, false, filterQuery);
+        setRepairOrderDialog(false);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const assignTechnicianButton = {
+    label: 'Assign Technician',
+    disabled: selectedRecordsS?.some((r) => r?.status === WORKORDER_SERVICE_STATUS.completed) || selectedRecordsS?.length === 0,
+    onClick: () => {
+      if (viewType === 'table-view') {
+        workOrderListRef.current?.setAssignTechnicianDialog(true);
+      } else {
+        setAssignTechnicianDialog({ open: true, multiple: true });
+      }
+    }
+  };
+
+  const assignWorkStationButton = {
+    label: `Assign ${resources?.workStations?.titlePlural}`,
+    disabled: selectedRecordsS?.some((r) => r?.status === WORKORDER_SERVICE_STATUS.completed) || selectedRecordsS?.length === 0,
+    onClick: () => {
+      if (viewType === 'table-view') {
+        workOrderListRef.current?.setWorkStationAssignDialog(true);
+      } else {
+        setWorkStationAssignDialog({ open: true, multiple: true });
+      }
+    }
+  };
+
+  const addProductConsumablesButton = {
+    disabled: selectedRecordsS?.length === 0,
+    label: 'Add Products/Consumables',
+    onClick: () => setConsumablesDialog(true)
+  };
+
+  const checkUniqWarehouse = (selectedRecords) => {
+    if (selectedRecords.length === 0) {
+      return false;
+    } else if (uniq(map(selectedRecords, 'warehouseId')).length === 1) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  const isCreateRepairOrderDisabled = (selectedRecords) => {
+    return (
+      selectedRecords?.length === 0 ||
+      selectedRecords.some((r) => r?.repairOrderId) ||
+      selectedRecords?.some(
+        (r) =>
+          ![
+            ASSET_STATUS.new,
+            ASSET_STATUS.available,
+            ASSET_STATUS.scrap,
+            ASSET_STATUS.underReview,
+            ASSET_STATUS.needRepair,
+            ASSET_STATUS.needRecert,
+            ASSET_STATUS.customerPossession
+          ].includes(r?.assetStatus)
+      ) ||
+      selectedRecords.some((r) => r?.currentOwnerType != INVENTORY_OWNER_TYPE.brand) ||
+      !checkUniqWarehouse(selectedRecords)
+    );
+  };
+
+  const createRepairOrderButton = {
+    disabled: viewType === 'table-view' ? isCreateRepairOrderDisabled(selectedRecords) : isCreateRepairOrderDisabled(selectedRecordsP),
+    label: `Create ${resources?.repairOrder?.titleSingular}`,
+    onClick: () => {
+      setRepairOrderDialog(true);
+    }
+  };
+
   const newActionButtonProps: NewActionButtonProps<string> = useMemo(() => {
     const data: NewActionButtonProps<string> = {
       disabled: selectedRecords?.length === 0,
       horizontal: 'right',
-      items: [
-        {
-          label: 'Assign Technician',
-          disabled: selectedRecords?.some((r) => r?.status === WORKORDER_SERVICE_STATUS.completed) || selectedRecords?.length === 0,
-          onClick: () => {
-            if (viewType === 'table-view') {
-              workOrderListRef.current?.setAssignTechnicianDialog(true);
-            } else {
-              setAssignTechnicianDialog({ open: true, multiple: true });
-            }
-          }
-        },
-        {
-          label: `Assign ${resources?.workStations?.titlePlural}`,
-          disabled: selectedRecords?.some((r) => r?.status === WORKORDER_SERVICE_STATUS.completed) || selectedRecords?.length === 0,
-          onClick: () => {
-            if (viewType === 'table-view') {
-              workOrderListRef.current?.setWorkStationAssignDialog(true);
-            } else {
-              setWorkStationAssignDialog({ open: true, multiple: true });
-            }
-          }
-        },
-        ...(['table-view', 'card-view']?.includes(viewType)
-          ? [
-              {
-                disabled: selectedRecords?.length === 0,
-                label: 'Add Products/Consumables',
-                onClick: () => setConsumablesDialog(true)
-              }
-            ]
-          : [])
-      ]
+      items:
+        viewType === 'table-view'
+          ? tableViewStatus === WORKORDER_SERVICE_STATUS.planned
+            ? [createRepairOrderButton]
+            : [assignTechnicianButton, assignWorkStationButton, addProductConsumablesButton]
+          : selectedRecords?.every((r) => r?.status === WORKORDER_SERVICE_STATUS.planned)
+            ? [...(viewType === 'card-view' ? [createRepairOrderButton] : [])]
+            : selectedRecords?.every((r) => r?.status != WORKORDER_SERVICE_STATUS.planned)
+              ? [assignTechnicianButton, assignWorkStationButton, ...(viewType === 'card-view' ? [addProductConsumablesButton] : [])]
+              : [
+                  assignTechnicianButton,
+                  assignWorkStationButton,
+                  ...(viewType === 'card-view' ? [addProductConsumablesButton, createRepairOrderButton] : [])
+                ]
     };
     return data;
-  }, [resources?.workStations?.titlePlural, selectedRecords, viewType]);
+  }, [resources?.workStations?.titlePlural, selectedRecords, selectedRecordsS, selectedRecordsP, viewType, tableViewStatus]);
 
   const statusMenuItems = useMemo(() => {
     return [
+      {
+        label: WORKORDER_SERVICE_STATUS.planned,
+        selected: tableViewStatus === WORKORDER_SERVICE_STATUS.planned,
+        value: WORKORDER_SERVICE_STATUS.planned,
+        startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.planned]
+      },
       {
         label: WORKORDER_SERVICE_STATUS.pending,
         selected: tableViewStatus === WORKORDER_SERVICE_STATUS.pending,
@@ -684,6 +813,8 @@ const WorkOrderSupervisor = () => {
               status={tableViewStatus}
               consumablesDialog={consumablesDialog}
               setConsumablesDialog={setConsumablesDialog}
+              repairOrderDialog={repairOrderDialog}
+              setRepairOrderDialog={setRepairOrderDialog}
               tableHead={
                 <DetailsPageHeader
                   isAddButtonVisible={false}
@@ -726,10 +857,10 @@ const WorkOrderSupervisor = () => {
       </div>
       {assignTechnicianDialog.open && (
         <AssignUserDialog
-          warehouse={assignTechnicianDialog.multiple ? selectedRecords[0]?.warehouse?.optionValue : selectedServiceData?.warehouse}
+          warehouse={assignTechnicianDialog.multiple ? selectedRecordsS[0]?.warehouse?.optionValue : selectedServiceData?.warehouse}
           workOrderData={
             assignTechnicianDialog.multiple
-              ? selectedRecords?.map((r) => ({
+              ? selectedRecordsS?.map((r) => ({
                   uniqueId: r?.uniqueId,
                   workOrderId: r?.workOrder
                 }))
@@ -742,8 +873,8 @@ const WorkOrderSupervisor = () => {
           }
           assignedUsers={
             assignTechnicianDialog.multiple
-              ? selectedRecords?.length === 1
-                ? selectedRecords[0]?.assignedUsers
+              ? selectedRecordsS?.length === 1
+                ? selectedRecordsS[0]?.assignedUsers
                 : []
               : selectedServiceData?.assignedUsers
           }
@@ -755,15 +886,15 @@ const WorkOrderSupervisor = () => {
             setAssignTechnicianDialog({ open: false, multiple: false });
             dispatch({ type: 'refreshData' });
           }}
-          competencies={assignTechnicianDialog.multiple ? selectedRecords[0]?.competencies : selectedServiceData?.competencies}
+          competencies={assignTechnicianDialog.multiple ? selectedRecordsS[0]?.competencies : selectedServiceData?.competencies}
         />
       )}
       {workStationAssignDialog.open && (
         <AssignWorkStationDialog
-          warehouse={workStationAssignDialog.open ? selectedRecords[0]?.warehouse?.optionValue : selectedServiceData?.warehouse}
+          warehouse={workStationAssignDialog.open ? selectedRecordsS[0]?.warehouse?.optionValue : selectedServiceData?.warehouse}
           workOrderData={
             workStationAssignDialog.multiple
-              ? selectedRecords?.map((r) => ({
+              ? selectedRecordsS?.map((r) => ({
                   uniqueId: r?.uniqueId,
                   workOrderId: r?.workOrder
                 }))
@@ -774,7 +905,7 @@ const WorkOrderSupervisor = () => {
                   }
                 ]
           }
-          workStations={workStationAssignDialog.multiple ? selectedRecords[0]?.assignedWorkStations : selectedServiceData?.assignedWorkStations}
+          workStations={workStationAssignDialog.multiple ? selectedRecordsS[0]?.assignedWorkStations : selectedServiceData?.assignedWorkStations}
           handleClose={() => {
             setWorkStationAssignDialog({ open: false, multiple: false });
           }}
@@ -808,7 +939,7 @@ const WorkOrderSupervisor = () => {
           ids={[]}
           onSuccess={(rows) => {
             if (viewType === 'card-view') {
-              handleAddConsumables(rows, selectedRecords);
+              handleAddConsumables(rows, selectedRecordsS);
             } else {
               workOrderListRef.current?.handleAddConsumables(rows, selectedRecords);
             }
@@ -816,6 +947,25 @@ const WorkOrderSupervisor = () => {
           serialized={false}
           isSubmitting={workOrderListRef.current?.submitting}
           extraDeepFilter={[{ field: 'expenseItem', term: 'No' }]}
+        />
+      )}
+      {repairOrderDialog && (
+        <ManageRepairOrder
+          onClose={() => {
+            setRepairOrderDialog(false);
+          }}
+          onSuccess={(data) => {
+            if (viewType === 'card-view') {
+              handleAddAssets(data, selectedServiceData ? [selectedServiceData] : selectedRecordsP);
+            } else {
+              workOrderListRef.current?.handleAddConsumables(data, selectedRecords);
+            }
+          }}
+          referenceType={sidebarResource.workOrderPlanning}
+          referenceData={{
+            warehouse: selectedServiceData ? selectedServiceData?.warehouseId : selectedRecords[0]?.warehouseId,
+            type: REPAIR_ORDER_TYPE.internal
+          }}
         />
       )}
       {showFilter && (
@@ -867,23 +1017,36 @@ const RenderAssignOptions = ({ openAssignHandler, data, permissions, resources }
       </IconButton>
       {anchorEl && (
         <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
-          <MenuItem
-            onClick={() => {
-              openAssignHandler('assignTechnician', data);
-              setAnchorEl(null);
-            }}
-          >
-            {'Assign Technician'}
-          </MenuItem>
-          {permissions?.workStations?.isRead && (
+          {data?.status === WORKORDER_SERVICE_STATUS.planned ? (
             <MenuItem
               onClick={() => {
-                openAssignHandler('assignWorkStations', data);
+                openAssignHandler('createRepairOrder', data);
                 setAnchorEl(null);
               }}
             >
-              {`Assign ${resources?.workStations?.titlePlural}`}
+              {`Create ${resources?.repairOrder?.titleSingular}`}
             </MenuItem>
+          ) : (
+            <>
+              <MenuItem
+                onClick={() => {
+                  openAssignHandler('assignTechnician', data);
+                  setAnchorEl(null);
+                }}
+              >
+                {'Assign Technician'}
+              </MenuItem>
+              {permissions?.workStations?.isRead && (
+                <MenuItem
+                  onClick={() => {
+                    openAssignHandler('assignWorkStations', data);
+                    setAnchorEl(null);
+                  }}
+                >
+                  {`Assign ${resources?.workStations?.titlePlural}`}
+                </MenuItem>
+              )}
+            </>
           )}
         </Menu>
       )}

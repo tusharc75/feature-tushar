@@ -15,8 +15,10 @@ import {
   gridLoadingTimeout,
   MATERIAL_SUB_TYPE,
   prepareDataForGrid,
+  REPAIR_ORDER_TYPE,
   sidebarResource,
   workOrder,
+  WORKORDER_SERVICE_STATUS,
   workOrderSupervisor
 } from 'src/constants/helpers';
 import AssignUserDialog from 'src/pages/WorkOrder/Service/AssignUserDialog';
@@ -24,6 +26,7 @@ import AssignWorkStationDialog from 'src/pages/WorkOrder/Service/AssignWorkStati
 import WorkOrderDetailDialog from 'src/pages/WorkOrderSupervisor/WorkOrderDetailDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
+import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
 
 type Props = {
   filterQuery: any;
@@ -33,6 +36,8 @@ type Props = {
   dispatch: Dispatch<TActios>;
   consumablesDialog: boolean;
   setConsumablesDialog: (value: boolean) => void;
+  repairOrderDialog: boolean;
+  setRepairOrderDialog: (value: boolean) => void;
   tableHead?: React.ReactNode;
 };
 
@@ -45,7 +50,7 @@ export type WorkOrderListRef = {
 };
 
 const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
-  ({ filterQuery, status, renderedFrom, state, dispatch, consumablesDialog, setConsumablesDialog, tableHead = null }, ref) => {
+  ({ filterQuery, status, renderedFrom, state, dispatch, consumablesDialog, setConsumablesDialog, setRepairOrderDialog, tableHead = null }, ref) => {
     const toastConfig = useContext(CustomToastContext);
     const {
       state: { user, permissions, resources }
@@ -55,6 +60,7 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
 
     const { generateColumns } = useColumns();
 
+    const [allColumns, setAllColumns] = useState(null);
     const [columns, setColumns] = useState(null);
     const [serviceOpen, setServiceOpen] = useState({ open: false, id: null });
     const [assignTechnicianDialog, setAssignTechnicianDialog] = useState(false);
@@ -74,145 +80,10 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
       return () => cancelToken.cancel();
     }, [page, limit, sorting, status, filterQuery, filters]);
 
-    const fetchGridColumns = async (cancelToken?: CancelTokenSource) => {
-      let data;
-      const response = await axiosInstance().get(`/field?resource=${sidebarResource['workOrder']}&view=true`, { cancelToken: cancelToken?.token });
-      data = response?.data?.data?.filter((f) =>
-        [
-          'workOrderNumber',
-          'spoolNumber',
-          'status',
-          'competencies',
-          'productionOrder',
-          'repairOrder',
-          'expectedCompletionDate',
-          'warehouse',
-          'type'
-        ]?.includes(f?.fieldData?.fieldName)
-      );
-      const newColumns = generateColumns(renderedFrom, data, routes?.workOrderDetail.path);
-      const columns = newColumns.filter((ele) => ele.accessor != 'workOrderNumber');
-
-      columns.forEach((c) => {
-        if (c?.accessor === 'status') {
-          c.disableFilters = true;
-          c.disableSortBy = true;
-        }
-      });
-
-      const extraColumns = [
-        {
-          accessor: 'service',
-          Header: 'Service',
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) => (
-            <>
-              {row?.original?.service ? (
-                <div>
-                  <h5
-                    className="link text-truncate"
-                    onClick={() => {
-                      setServiceOpen({ open: true, id: row?.original?.workOrder });
-                    }}
-                  >
-                    {row.original.service}
-                  </h5>
-                  <Box ml={1}>
-                    {row?.original?.canPerformInfo ? (
-                      <HtmlTooltip title={row?.original?.canPerformInfo} arrow placement="top" enterTouchDelay={0}>
-                        <Info className="text-red-500 [font-size:20px_!important]" />
-                      </HtmlTooltip>
-                    ) : null}
-                  </Box>
-                </div>
-              ) : (
-                <NoDataCell />
-              )}
-            </>
-          )
-        },
-        {
-          accessor: 'workOrderNumber',
-          Header: 'Work Order Number',
-          Cell: ({ row }) =>
-            row.original['workOrderNumber'] ? (
-              <div className="flex items-center gap-1">
-                <h5 className=" text-truncate">{row.original.workOrderNumber}</h5>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes?.workOrderDetail?.path}/${row.original.workOrder}`);
-                  }}
-                >
-                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                </IconButton>
-              </div>
-            ) : (
-              <NoDataCell />
-            )
-        },
-        {
-          accessor: 'assignedWorkStations',
-          Header: 'Work Stations',
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) =>
-            row.original['assignedWorkStations'] ? (
-              <DropdownCell
-                permissions={permissions}
-                permissionForLinks={{}}
-                field={{
-                  fieldName: 'assignedWorkStations',
-                  lookupResource: sidebarResource.workStations
-                }}
-                original={row?.original}
-              />
-            ) : (
-              <NoDataCell />
-            )
-        },
-        {
-          accessor: 'assignedUsers',
-          Header: 'Technician',
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) =>
-            row?.original['assignedUsers'] ? (
-              <DropdownCell
-                permissions={permissions}
-                permissionForLinks={{}}
-                field={{
-                  fieldName: 'assignedUsers',
-                  lookupResource: sidebarResource.user
-                }}
-                original={row?.original}
-              />
-            ) : (
-              <NoDataCell />
-            )
-        },
-        {
-          accessor: 'rentalJob',
-          Header: resources?.rentalManagement?.titleSingular,
-          Cell: ({ row }) =>
-            row?.original['rentalJob'] ? (
-              <div className="flex items-center gap-1">
-                <h5 className=" text-truncate">{row.original.rentalJob}</h5>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes?.rentalManagementDetail?.path}/${row.original.rentalJobId}`);
-                  }}
-                >
-                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                </IconButton>
-              </div>
-            ) : (
-              <NoDataCell />
-            )
-        },
-        {
+    const createColumns = (newColumns) => {
+      if (newColumns && newColumns?.length) {
+        setColumns(null);
+        const serializedAssetColumn = {
           accessor: 'serializedAsset',
           Header: resources?.serializedAsset?.titleSingular,
           Cell: ({ row }) =>
@@ -231,33 +102,214 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
             ) : (
               <NoDataCell />
             )
-        }
-      ];
-      const finalColumns = [...extraColumns.slice(0, 2), ...columns, ...extraColumns.slice(2)];
-      setColumns(finalColumns);
+        };
+
+        const extraColumns = [
+          ...(status === WORKORDER_SERVICE_STATUS.planned
+            ? [serializedAssetColumn]
+            : [
+                {
+                  accessor: 'workOrderNumber',
+                  Header: 'Work Order Number',
+                  Cell: ({ row }) =>
+                    row?.original?.workOrderNumber && row.original.workOrder ? (
+                      <div>
+                        <h5
+                          className="link text-truncate"
+                          onClick={() => {
+                            setServiceOpen({ open: true, id: row?.original?.workOrder });
+                          }}
+                        >
+                          {row.original.workOrderNumber}
+                        </h5>
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            window.open(`${routes?.workOrderDetail?.path}/${row.original.workOrder}`);
+                          }}
+                        >
+                          <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                        </IconButton>
+                        <Box ml={1}>
+                          {row?.original?.canPerformInfo ? (
+                            <HtmlTooltip title={row?.original?.canPerformInfo} arrow placement="top" enterTouchDelay={0}>
+                              <Info className="text-red-500 [font-size:20px_!important]" />
+                            </HtmlTooltip>
+                          ) : null}
+                        </Box>
+                      </div>
+                    ) : (
+                      <NoDataCell />
+                    )
+                }
+              ]),
+          {
+            accessor: 'service',
+            Header: 'Service',
+            disableFilters: true,
+            disableSortBy: true,
+            Cell: ({ row }) =>
+              row.original['service'] && row.original.serviceId ? (
+                <div className="flex items-center gap-1">
+                  <h5 className="text-truncate">{row.original.service}</h5>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes?.serviceMasterDetail?.path}/${row.original.serviceId}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                </div>
+              ) : (
+                <NoDataCell />
+              )
+          },
+          {
+            accessor: 'assignedWorkStations',
+            Header: 'Work Stations',
+            disableFilters: true,
+            disableSortBy: true,
+            Cell: ({ row }) =>
+              row.original['assignedWorkStations'] ? (
+                <DropdownCell
+                  permissions={permissions}
+                  permissionForLinks={{}}
+                  field={{
+                    fieldName: 'assignedWorkStations',
+                    lookupResource: sidebarResource.workStations
+                  }}
+                  original={row?.original}
+                />
+              ) : (
+                <NoDataCell />
+              )
+          },
+          {
+            accessor: 'assignedUsers',
+            Header: 'Technician',
+            disableFilters: true,
+            disableSortBy: true,
+            Cell: ({ row }) =>
+              row?.original['assignedUsers'] ? (
+                <DropdownCell
+                  permissions={permissions}
+                  permissionForLinks={{}}
+                  field={{
+                    fieldName: 'assignedUsers',
+                    lookupResource: sidebarResource.user
+                  }}
+                  original={row?.original}
+                />
+              ) : (
+                <NoDataCell />
+              )
+          },
+          ...(status === WORKORDER_SERVICE_STATUS.planned
+            ? []
+            : [
+                {
+                  accessor: 'rentalJob',
+                  Header: resources?.rentalManagement?.titleSingular,
+                  Cell: ({ row }) =>
+                    row?.original['rentalJob'] ? (
+                      <div className="flex items-center gap-1">
+                        <h5 className=" text-truncate">{row.original.rentalJob}</h5>
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            window.open(`${routes?.rentalManagementDetail?.path}/${row.original.rentalJobId}`);
+                          }}
+                        >
+                          <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                        </IconButton>
+                      </div>
+                    ) : (
+                      <NoDataCell />
+                    )
+                },
+                serializedAssetColumn
+              ])
+        ];
+        const finalColumns = [
+          ...extraColumns.slice(0, 2),
+          ...(status === WORKORDER_SERVICE_STATUS.planned
+            ? newColumns?.filter((c) => ['status', 'repairOrder', 'warehouse']?.includes(c?.accessor))
+            : newColumns),
+          ...extraColumns.slice(2)
+        ];
+        setColumns(finalColumns);
+      }
     };
+
+    const fetchGridColumns = async (cancelToken?: CancelTokenSource) => {
+      let data;
+      const response = await axiosInstance().get(`/field?resource=${sidebarResource['workOrder']}&view=true`, { cancelToken: cancelToken?.token });
+      data = response?.data?.data?.filter((f) =>
+        ['spoolNumber', 'status', 'competencies', 'productionOrder', 'repairOrder', 'expectedCompletionDate', 'warehouse', 'type']?.includes(
+          f?.fieldData?.fieldName
+        )
+      );
+      const newColumns = generateColumns(renderedFrom, data, routes?.workOrderDetail.path);
+
+      newColumns?.forEach((c) => {
+        if (c?.accessor === 'status') {
+          c.disableFilters = true;
+          c.disableSortBy = true;
+        }
+      });
+      setColumns([]);
+      setAllColumns(newColumns);
+      createColumns(newColumns);
+    };
+
+    useEffect(() => {
+      createColumns(allColumns);
+    }, [status]);
 
     const fetchData = (cancelToken?: CancelTokenSource) => {
       dispatch({ type: 'selection', selectedRecords: [] });
       dispatch({ type: 'loading', loading: true });
       const queryString = getQueryString();
+      let api = `${workOrderSupervisor.api}/work-order-service${queryString}`;
+      if (status === WORKORDER_SERVICE_STATUS.planned) {
+        api = `${workOrder.api}/work-order-planning${queryString}`;
+      }
       axiosInstance()
-        .get(`${workOrderSupervisor.api}/work-order-service${queryString}`, { cancelToken: cancelToken?.token })
+        .get(api, { cancelToken: cancelToken?.token })
         .then(({ data: { data, count } }) => {
-          let rows = data.map((u) => {
-            let finalObject: any = prepareDataForGrid(u, user);
-            const type = u?.repairOrder
-              ? sidebarResource.repairOrder
-              : u?.productionOrder
-                ? sidebarResource.productionOrder
-                : u?.assemblyOrder
-                  ? sidebarResource.assemblyOrder
-                  : '';
+          let rows: any = [];
+          let countC = count;
+          if (status === WORKORDER_SERVICE_STATUS.planned) {
+            const { data: dataD, count } = data;
+            countC = count;
+            rows = dataD?.map((u) => {
+              let finalObject: any = prepareDataForGrid(u, user);
+              finalObject['serializedAsset'] = u?.asset?.assetNumber || '';
+              finalObject['serializedAssetId'] = u?.asset?._id || '';
+              finalObject['warehouse'] = u?.asset?.warehouse || '';
+              finalObject['warehouseId'] = u?.asset?.warehouseId || '';
+              finalObject['assetStatus'] = u?.asset?.status;
+              finalObject['currentOwnerType'] = u?.asset?.currentOwnerType;
+              finalObject['ownerType'] = u?.asset?.ownerType;
+              return finalObject;
+            });
+          } else {
+            rows = data.map((u) => {
+              let finalObject: any = prepareDataForGrid(u, user);
+              const type = u?.repairOrder
+                ? sidebarResource.repairOrder
+                : u?.productionOrder
+                  ? sidebarResource.productionOrder
+                  : u?.assemblyOrder
+                    ? sidebarResource.assemblyOrder
+                    : '';
 
-            finalObject.type = type;
-            return finalObject;
-          });
-          dispatch({ type: 'initialize', data: rows, count: count });
+              finalObject.type = type;
+              return finalObject;
+            });
+          }
+          dispatch({ type: 'initialize', data: rows, count: countC });
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -269,19 +321,41 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
         });
     };
 
-    const getQueryString = () => {
-      let deepFilter = `?page=${page}&limit=${limit}&status=${status}${filterQuery}`;
+    const queryStringPlanned = (queryString) => {
+      // const queryParams = queryString.startsWith('&') ? queryString.slice(1).split('&') : queryString.split('&');
+      // const params = queryParams.reduce((acc, pair) => {
+      //   const [key, value] = pair.split('=');
+      //   acc[key] = value;
+      //   return acc;
+      // }, {});
+    };
 
+    const getQueryString = () => {
+      let deepFilter = `?page=${page}&limit=${limit}`;
+
+      if (status === WORKORDER_SERVICE_STATUS.planned) {
+        deepFilter = `${deepFilter}`;
+        queryStringPlanned(filterQuery);
+      } else {
+        deepFilter = `${deepFilter}&status=${status}${filterQuery}`;
+      }
       const { deepFilters } = gridFilterParser(filters);
+
+      if (status === WORKORDER_SERVICE_STATUS.planned) {
+        deepFilters.push({
+          field: 'autoCreateWorkOrder',
+          term: 'Yes'
+        });
+      }
 
       if (deepFilters?.length) {
         deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
       }
-      if (deepFilters?.length) {
+      if (deepFilters?.length || filterQuery) {
         deepFilter = `${deepFilter}&filterType=and`;
       }
 
-      return `${deepFilter}&filterType=and&filterByIdType=and`;
+      return `${deepFilter}`;
     };
 
     const handleAddConsumables = (rows, records = []) => {
@@ -322,12 +396,35 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
         });
     };
 
+    const handleAddAssets = async (row, records) => {
+      axiosInstance()
+        .post(`${workOrder.api}/work-order-planning/material`, {
+          repairOrderId: row?._id,
+          _ids: records?.map((e) => e?._id)
+        })
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          fetchData();
+          setRepairOrderDialog(false);
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
+    };
+
     useImperativeHandle(ref, () => ({
       refreshGrid() {
         fetchData();
       },
       handleAddConsumables(rows, records = []) {
         handleAddConsumables(rows, records);
+      },
+      handleAddAssets(row, records = []) {
+        handleAddAssets(row, records);
       },
       submitting,
       setAssignTechnicianDialog,

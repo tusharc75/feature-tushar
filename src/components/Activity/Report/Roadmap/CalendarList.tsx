@@ -41,8 +41,8 @@ export default function CalendarList(props) {
           children = getTreeNodes(data.child);
           children.push(<div></div>);
         }
-        const left = Math.abs((100 * dayjs(data.startDate).diff(startDate, 'days')) / totalDay);
-        const right = (100 * endDate.diff(dayjs(data.dueDate), 'days')) / totalDay;
+        const left = Math.abs((100 * dayjs(data.startDate).diff(startDate, 'day')) / totalDay);
+        const right = (100 * endDate.diff(dayjs(data.dueDate), 'day')) / totalDay;
         const width = 100 - (left + right);
 
         let label = (

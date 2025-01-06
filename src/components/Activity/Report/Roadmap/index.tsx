@@ -48,7 +48,7 @@ function Roadmap({ type, filter }) {
   let height = window.innerHeight - 250;
   let startDate = dayjs('2023-01-01', 'YYYY-MM-DD');
   let endDate = dayjs('2025-12-31', 'YYYY-MM-DD');
-  let totalDay = endDate.diff(startDate, 'days');
+  let totalDay = endDate.diff(startDate, 'day');
 
   var dayPixel = 0;
   if (calendarType === 'month') {
@@ -142,7 +142,7 @@ function Roadmap({ type, filter }) {
                   ref={dayLiner}
                   style={{
                     position: 'absolute',
-                    left: (100 * dayjs().diff(startDate, 'days')) / totalDay + '%',
+                    left: (100 * dayjs().diff(startDate, 'day')) / totalDay + '%',
                     width: dayPixel
                   }}
                   className="h-full"

@@ -263,7 +263,7 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
         showRequiredLabel={false}
       />
       <CustomDialogContent>
-        <Box pt={2} />
+        <Box pt={1} />
         {type === 'Import' ? (
           <label htmlFor="importFromExcelMenu" style={{ cursor: 'pointer' }}>
             <ThemeButton buttonType="transparent" startIcon={<AiOutlineImport />}>
@@ -272,7 +272,7 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
             </ThemeButton>
           </label>
         ) : (
-          <ThemeButton buttonType="transparent" onClick={handleExport} startIcon={<AiOutlineExport />}>
+          <ThemeButton onClick={handleExport} startIcon={<AiOutlineExport />}>
             Export to Excel
           </ThemeButton>
         )}

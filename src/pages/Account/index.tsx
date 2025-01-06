@@ -4,7 +4,6 @@ import ClickAwayListener from '@mui/material/ClickAwayListener';
 import Grow from '@mui/material/Grow';
 import Paper from '@mui/material/Paper';
 import Popper from '@mui/material/Popper';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';
@@ -42,6 +41,7 @@ import ManageAccountDialog from './ManageAccount/index';
 import WarhouseList from './Warehouse/WarhouseList';
 import axios, { CancelTokenSource } from 'axios';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { ExpandMore } from '@mui/icons-material';
 
 const options = ['All', 'Approved', 'Disapproved'];
 
@@ -517,24 +517,23 @@ export default function Account(props) {
           extraImportExportLinks={[
             ...(accountResource === 'supplierAccount' && user?.user?.brandPolicy?.serializedAssetCertification
               ? [
-                  {
-                    title: 'Supplier View Template',
-                    api: `${accountApi}/items/unknown/template`,
-                    type: 'download'
-                  },
-                  {
-                    title: 'Supplier View Export',
-                    api: `${accountApi}/items/unknown/template?export=true${
-                      selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
+                {
+                  title: 'Supplier View Template',
+                  api: `${accountApi}/items/unknown/template`,
+                  type: 'download'
+                },
+                {
+                  title: 'Supplier View Export',
+                  api: `${accountApi}/items/unknown/template?export=true${selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
                     }`,
-                    type: 'export'
-                  },
-                  {
-                    title: 'Supplier View Import',
-                    api: `${accountApi}/items/unknown/import`,
-                    type: 'import'
-                  }
-                ]
+                  type: 'export'
+                },
+                {
+                  title: 'Supplier View Import',
+                  api: `${accountApi}/items/unknown/import`,
+                  type: 'import'
+                }
+              ]
               : [])
           ]}
         />
@@ -604,11 +603,10 @@ export default function Account(props) {
         {showDeleteConfirmBox ? (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${
-              deleteRecord
-                ? `${resources?.[accountResource]?.titleSingular?.toLowerCase()} : ${deleteRecord?.accountName}`
-                : `selected ${resources?.[accountResource]?.titlePlural?.toLowerCase()}`
-            } ?`}
+            message={`Are you sure you want to delete ${deleteRecord
+              ? `${resources?.[accountResource]?.titleSingular?.toLowerCase()} : ${deleteRecord?.accountName}`
+              : `selected ${resources?.[accountResource]?.titlePlural?.toLowerCase()}`
+              } ?`}
             onClose={() => {
               setShowDeleteConfirmBox(false);
               setDeleteRecord(null);
@@ -620,9 +618,8 @@ export default function Account(props) {
         {singleApproveDisapproveAccount.show ? (
           <ConfirmationDialog
             open={singleApproveDisapproveAccount.show}
-            message={`Are you sure you want to ${singleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} account: ${
-              singleApproveDisapproveAccount.accountName
-            } ? `}
+            message={`Are you sure you want to ${singleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} account: ${singleApproveDisapproveAccount.accountName
+              } ? `}
             onClose={() =>
               setSingleApproveDisapproveAccount({
                 id: null,
@@ -637,9 +634,8 @@ export default function Account(props) {
         {multipleApproveDisapproveAccount.show ? (
           <ConfirmationDialog
             open={multipleApproveDisapproveAccount.show}
-            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${
-              multipleApproveDisapproveAccount.selectedRecords
-            } account(s) ? `}
+            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${multipleApproveDisapproveAccount.selectedRecords
+              } account(s) ? `}
             onClose={() =>
               setMultipleApproveDisapproveAccount({
                 show: false,
@@ -752,7 +748,7 @@ const LeftSideContents = ({ selectedIndex, setSelectedIndex, menuOptionSelection
           onClick={handleToggle}
           className="all-button"
         >
-          <ArrowDropDownIcon className="all-button-sub-icon" />
+          <ExpandMore className="all-button-sub-icon" />
         </Button>
       </ButtonGroup>
       <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal style={{ zIndex: 1111111 }}>

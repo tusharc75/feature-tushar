@@ -171,7 +171,7 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
                   fullWidth
                   options={filterOptions[filter?.key] || []}
                   autoHighlight
-                  value={values[filter?.key] ? values[filter?.key] : filter?.multiple ? [] : {}}
+                  value={values[filter?.key] ? values[filter?.key] : filter?.multiple ? [] : null}
                   getOptionLabel={(option: any) => option?.optionLabel}
                   isOptionEqualToValue={(option, val) => option?.optionValue === val?.optionValue}
                   onChange={(_, val) => {

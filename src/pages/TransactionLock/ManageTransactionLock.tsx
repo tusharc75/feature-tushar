@@ -138,7 +138,7 @@ const ManageTransactionLock = ({ isClone = false, id = null, onClose, onSuccess 
     const errors = {};
     let fromDate = dayjs(values?.fromDate);
     let toDate = dayjs(values?.toDate);
-    if (toDate.diff(fromDate, 'days') < 0) {
+    if (toDate.diff(fromDate, 'day') < 0) {
       errors['toDate'] = 'Please enter valid to date';
     }
     return errors;

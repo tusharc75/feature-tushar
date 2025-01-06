@@ -112,7 +112,7 @@ const ConfigureFields = ({ serviceId, handleClose, handleSucess, reference = '',
           toastConfig.setToastConfig({
             open: true,
             message: data.message,
-            severity: 'success'
+            type: 'success'
           });
         })
         .catch((err) => {

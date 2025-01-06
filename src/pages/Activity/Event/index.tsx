@@ -51,8 +51,8 @@ const Event = () => {
           const newData = data.map((d) => ({
             ...d,
             title: d.name,
-            start: d.startDate ? new Date(d.startDate) : dayjs().toDate(),
-            end: d.dueDate ? new Date(d.dueDate) : dayjs().add(20, 'days').toDate()
+            start: d.startDate ? dayjs(d.startDate) : dayjs(),
+            end: d.dueDate ? dayjs(d.dueDate) : dayjs().add(20, 'day')
           }));
 
           setEvents(newData);

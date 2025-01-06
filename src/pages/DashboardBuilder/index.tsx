@@ -99,7 +99,7 @@ const DashBoards = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" />
+              <DeleteIcon color="error" fontSize='small' />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -209,12 +209,11 @@ const DashBoards = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
-              ? `${resources?.dashboardMaster?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${deleteRecord
+            ? `${resources?.dashboardMaster?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.name}`
-              : `selected ${resources?.dashboardMaster?.titlePlural?.toLowerCase()}`
-          } ?`}
+            : `selected ${resources?.dashboardMaster?.titlePlural?.toLowerCase()}`
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

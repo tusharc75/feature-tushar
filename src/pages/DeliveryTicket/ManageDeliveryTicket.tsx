@@ -557,7 +557,7 @@ const ManageDeliveryTicket = ({
     if (initialData?.fields?.find((e) => e?.fieldName === 'pickUpDate') && initialData?.fields?.find((e) => e?.fieldName === 'deliveryDate')) {
       let pickUpDate = dayjs(values?.pickUpDate);
       let deliveryDate = dayjs(values?.deliveryDate);
-      if (deliveryDate.diff(pickUpDate, 'days') < 0) {
+      if (deliveryDate.diff(pickUpDate, 'day') < 0) {
         errors['pickUpDate'] = 'Please enter valid pick-Up date';
       }
     }

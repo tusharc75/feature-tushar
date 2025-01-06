@@ -145,7 +145,7 @@ function WorkOrderCalendar({ getFilterQuery, filterQuery, reference, setOpen }, 
     } else if (view === 'agenda') {
       setDateRange({
         estimateStartDate: dayjs(date).format('MM/DD/YYYY'),
-        estimateEndDate: dayjs(date).add(1, 'months').format('MM/DD/YYYY')
+        estimateEndDate: dayjs(date).add(1, 'month').format('MM/DD/YYYY')
       });
     }
   };

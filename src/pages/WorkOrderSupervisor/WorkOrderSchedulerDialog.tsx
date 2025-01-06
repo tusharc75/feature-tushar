@@ -1,12 +1,6 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
-import {
-  ASSET_STATUS,
-  CustomDialogTransition,
-  serializedAsset,
-  sidebarResource,
-  workOrder
-} from '../../constants/helpers';
-import { Dialog, TextField, Box } from '@mui/material';
+import { ASSET_STATUS, CustomDialogTransition, serializedAsset, sidebarResource, workOrder, workOrderSupervisor } from '../../constants/helpers';
+import { Dialog, TextField, Box, FormControlLabel, Checkbox } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
@@ -27,8 +21,9 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
   const [productOptions, setProductOptions] = useState([]);
   const [assetOptions, setAssetOptions] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [servicesOptions, setServicesOptions] = useState([]);
+  const [options, setOptions] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [assetLoading, setAssetLoading] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const {
@@ -46,7 +41,7 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
   }, []);
 
   useEffect(() => {
-    setLoading(true);
+    setAssetLoading(true);
     const deepFilter = [
       {
         field: 'status',
@@ -61,29 +56,35 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
         let serializedAssets = lookupSerializedAssets['Serialized Asset'] || [];
         const filteredAssets = serializedAssets?.filter((asset) => asset?.product === selectedProduct);
         setAssetOptions(filteredAssets || []);
-        setLoading(false);
+        setAssetLoading(false);
       })
       .catch((err) => {
+        setAssetLoading(false);
         toastConfig.setToastConfig(err);
       });
   }, [selectedProduct]);
 
   useEffect(() => {
     axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=Service Master`)
+      .get(`/sa-formbuilder/lookup?lookupResource=Service Master,Employee Master,Work Stations`)
       .then(({ data: { data } }) => {
-        setServicesOptions(data['Service Master'] || []);
+        setOptions(data);
       });
   }, []);
 
   const handleSubmit = (values) => {
+    setLoading(true);
     axiosInstance()
-      .post(`${workOrder.api}/work-order-scheduler/scheduler`, values)
+      .post(`${workOrderSupervisor.api}/work-order-scheduler`, values)
       .then(({ data }) => {
+        setLoading(false);
         onSuccess();
         toastConfig.setToastConfig({ open: true, type: 'success', message: data.message });
       })
-      .catch((error) => toastConfig.setToastConfig(error));
+      .catch((error) => {
+        setLoading(false);
+        toastConfig.setToastConfig(error);
+      });
   };
 
   function validate(values) {
@@ -122,7 +123,10 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
               product: '',
               asset: '',
               service: [],
-              date: new Date()
+              technician: [],
+              workStation: [],
+              date: new Date(),
+              autoCreateWorkOrder: false
             }}
             validateOnMount
             validate={validate}
@@ -166,7 +170,7 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                         <Autocomplete
                           size="small"
                           options={assetOptions}
-                          loading={loading}
+                          loading={assetLoading}
                           value={assetOptions.find((data) => data.optionValue === values.asset) || null}
                           getOptionLabel={(option) => option?.optionLabel || ''}
                           onChange={(e, val) => setFieldValue('asset', val?.optionValue || '')}
@@ -186,8 +190,8 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                         <Autocomplete
                           multiple
                           size="small"
-                          options={servicesOptions}
-                          value={servicesOptions.filter((option) => values.service.includes(option.optionValue))}
+                          options={options['Service Master'] || []}
+                          value={(options['Service Master'] || [])?.filter((option) => values.service.includes(option.optionValue))}
                           getOptionLabel={(option) => option?.optionLabel || ''}
                           onChange={(e, val) =>
                             setFieldValue(
@@ -208,18 +212,79 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                         />
                       </Grid>
                       <Grid size={{ xs: 12 }}>
+                        <Autocomplete
+                          multiple
+                          size="small"
+                          options={options['Employee Master'] || []}
+                          value={(options['Employee Master'] || []).filter((option) => values.technician.includes(option.optionValue))}
+                          getOptionLabel={(option) => option?.optionLabel || ''}
+                          onChange={(e, val) =>
+                            setFieldValue(
+                              'technician',
+                              val.map((item) => item.optionValue)
+                            )
+                          }
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              label="Technician"
+                              variant="outlined"
+                              error={Boolean(errors.technician && touched.technician)}
+                              helperText={touched.technician && errors.technician}
+                            />
+                          )}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12 }}>
+                        <Autocomplete
+                          multiple
+                          size="small"
+                          options={options['Work Stations'] || []}
+                          value={(options['Work Stations'] || []).filter((option) => values.workStation.includes(option.optionValue))}
+                          getOptionLabel={(option) => option?.optionLabel || ''}
+                          onChange={(e, val) =>
+                            setFieldValue(
+                              'workStation',
+                              val.map((item) => item.optionValue)
+                            )
+                          }
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              label={resources?.workStations?.titlePlural}
+                              variant="outlined"
+                              error={Boolean(errors.workStation && touched.workStation)}
+                              helperText={touched.workStation && errors.workStation}
+                            />
+                          )}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12 }}>
                         <CustomDatePicker
                           fullWidth
                           size="small"
                           margin="dense"
                           required
-                          value={values.customDate}
+                          value={values.date}
                           name="Date"
                           label="Date"
                           minDate={new Date()}
-                          error={touched['customDate'] && Boolean(errors['customDate'])}
-                          helperText={touched['customDate'] && errors['customDate']}
+                          error={touched['date'] && Boolean(errors['date'])}
+                          helperText={touched['date'] && errors['date']}
                           onChange={(date) => setFieldValue('date', date)}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12 }}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              name={'autoCreateWorkOrder'}
+                              checked={values?.autoCreateWorkOrder}
+                              onChange={(e) => setFieldValue('autoCreateWorkOrder', e?.target?.checked)}
+                              size="small"
+                            />
+                          }
+                          label={'Auto Create Work Order'}
                         />
                       </Grid>
                     </Grid>
@@ -229,8 +294,7 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                   <ThemeButton buttonType="transparent" onClick={() => onClose()}>
                     Cancel
                   </ThemeButton>
-                  <ThemeButton onClick={submitForm} isLoading={loading}
-                    buttonType="theme">
+                  <ThemeButton onClick={submitForm} isLoading={loading} buttonType="theme">
                     Save
                   </ThemeButton>
                 </CustomDialogFooter>

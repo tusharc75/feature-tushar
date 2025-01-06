@@ -232,7 +232,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
     const errors = {};
     let startDate = dayjs(values?.estimateStartDate);
     let endDate = dayjs(values?.estimateEndDate);
-    if (endDate.diff(startDate, 'days') < 0) {
+    if (endDate.diff(startDate, 'day') < 0) {
       errors['endDate'] = 'Please enter valid end date';
     }
     if (rowData && rowData.hideSelection) {
@@ -316,7 +316,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
                                     size="small"
                                   />
                                 ) : rateChangeFields.includes(field.fieldName) && !isBulkedit ? (
-                                  <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
+                                  <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                     <Box display="flex">
                                       <Box flexGrow={1}>
                                         <FormTypes
@@ -400,7 +400,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
                                     </Box>
                                   </Grid>
                                 ) : (
-                                  <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
+                                  <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                     <Box display="flex">
                                       <Box flexGrow={1}>
                                         <FormTypes
@@ -450,7 +450,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
                 {isBulkedit === false && showSaveAndNext && (
                   <ThemeButton
                     isLoading={Boolean(loadingEdit)}
-                    disabled={Boolean(isEqual(ref?.current?.values, initialData.values))|| Boolean(loadingEdit)}
+                    disabled={Boolean(isEqual(ref?.current?.values, initialData.values)) || Boolean(loadingEdit)}
                     buttonType="theme"
                     onClick={() => {
                       setSaveAndNext(true);

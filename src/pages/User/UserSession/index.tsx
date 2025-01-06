@@ -41,7 +41,7 @@ const UserSession = ({ id }) => {
     const day = 1000 * 60 * 60 * 24;
     // const month = 1000 * 60 * 60 * 24 * 30
     // const year = 1000 * 60 * 60 * 24 * 30 * 12
-    const dateDiff = dayjs(to).diff(dayjs(from), 'days');
+    const dateDiff = dayjs(to).diff(dayjs(from), 'day');
     const time = dateDiff > 90 ? day : hour;
     axiosInstance()
       .get(`/user-activity/${id}/${parsedFromTime}/${parsedToTime}`)

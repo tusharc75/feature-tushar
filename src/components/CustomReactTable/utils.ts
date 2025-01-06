@@ -4,24 +4,25 @@ import axiosInstance from 'src/axios/axiosInstance';
 import xlsx from 'xlsx-js-style';
 import { TColType } from './TableComponents/TableHelperComponents';
 import { FilterModel } from './types';
-import { Column, Header, Table } from '@tanstack/react-table';
+import { Column, Header } from '@tanstack/react-table';
 import dayjs from 'dayjs';
 import { displayDate } from 'src/constants/helpers';
 
 export const childrenProperty = 'subRows';
 
-export const gridFilterParser = (filters, filterTerm = {}) => {
+export const gridFilterParser = (filters) => {
   const filterByIds: any = [];
   const deepFilters: any = [];
   if (!isEmpty(filters)) {
     Object.keys(filters).forEach((field) => {
-      const term = filterTerm[field] === '$nin' ? '$nin' : '$in';
       if (filters[field].operator && filters[field].condition1) {
+        const term = filters[field].condition1?.['$nin'] === true ? '$nin' : '$in';
         filterByIds.push({
           field: field,
           term: { [term]: filters[field].condition1?.filter?.map((e) => e.optionValue) }
         });
       } else {
+        const term = filters[field]?.['$nin'] === true ? '$nin' : '$in';
         if (term === '$nin') {
           deepFilters.push({
             field: field,
@@ -411,11 +412,17 @@ export const fetchFieldOptions = async ({ resource, sidebarResource, toastConfig
     if (resource === sidebarResource.serializedAsset) {
       const currentOwner: any = coloum?.find((e) => e?.fieldData?.fieldName === 'currentOwner');
       if (currentOwner) {
-        currentOwner.fieldData.lookup = true;
-        currentOwner.fieldData.option = [
-          ...(coloum?.find((e) => e?.fieldData?.lookupResource === sidebarResource.customerAccount)?.fieldData?.option || []),
-          ...(coloum?.find((e) => e?.fieldData?.lookupResource === sidebarResource.supplierAccount)?.fieldData?.option || [])
-        ];
+        const {
+          data: { data: lookupResource }
+        } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.customerAccount},${sidebarResource.supplierAccount}`);
+        if (lookupResource) {
+          currentOwner.fieldData.lookup = true;
+          currentOwner.fieldData.lookupResource = sidebarResource.customerAccount;
+          currentOwner.fieldData.customOptions = [
+            ...lookupResource?.[sidebarResource.customerAccount],
+            ...lookupResource?.[sidebarResource.supplierAccount]
+          ];
+        }
       }
     }
     return coloum;
@@ -590,7 +597,7 @@ export const createFilterModel = (formValues, coloums) => {
   return Object.fromEntries(filterModel);
 };
 
-export const createFilterData = (coloums, filterByIds, deepFilters) => {
+export const createFilterData = (coloums, filterByIds, deepFilters, filterTerm) => {
   const filterModel = new Map();
 
   const dateFields: any = [];
@@ -608,7 +615,8 @@ export const createFilterData = (coloums, filterByIds, deepFilters) => {
         filterModel.set(f?.field, {
           operator: 'OR',
           condition1: {
-            filter: f?.term ?? []
+            filter: f?.term ?? [],
+            ['$nin']: filterTerm[f?.field] === '$nin' ? true : false
           }
         });
       });
@@ -624,7 +632,7 @@ export const createFilterData = (coloums, filterByIds, deepFilters) => {
         return hasTermLength;
       })
       ?.map((d) => {
-        filterModel.set(d?.field, { filter: d?.term });
+        filterModel.set(d?.field, { filter: d?.term, ['$nin']: filterTerm[d?.field] === '$nin' ? true : false });
       });
 
     coloums

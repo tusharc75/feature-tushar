@@ -63,7 +63,7 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician, han
   let height = window.innerHeight / 2;
   let startDate = dayjs('2023-01-01');
   let endDate = dayjs('2025-12-31');
-  let totalDay = endDate.diff(startDate, 'days');
+  let totalDay = endDate.diff(startDate, 'day');
 
   var dayPixel = 0;
   if (calendarType === 'month') {
@@ -117,8 +117,8 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician, han
           activity={
             selectedRecords?.length === 1
               ? activity.filter(
-                  (item) => !selectedRecords[0]?.competencyType || selectedRecords[0]?.competencyType === item?.competencyType?.optionLabel
-                )
+                (item) => !selectedRecords[0]?.competencyType || selectedRecords[0]?.competencyType === item?.competencyType?.optionLabel
+              )
               : activity
           }
           expanded={expanded}
@@ -159,8 +159,8 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician, han
                     activity={
                       selectedRecords?.length === 1
                         ? activity.filter(
-                            (item) => !selectedRecords[0]?.competencyType || selectedRecords[0]?.competencyType === item?.competencyType?.optionLabel
-                          )
+                          (item) => !selectedRecords[0]?.competencyType || selectedRecords[0]?.competencyType === item?.competencyType?.optionLabel
+                        )
                         : activity
                     }
                     treeList={treeList}
@@ -190,9 +190,9 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician, han
                       activity={
                         selectedRecords?.length === 1
                           ? activity.filter(
-                              (item) =>
-                                !selectedRecords[0]?.competencyType || selectedRecords[0]?.competencyType === item?.competencyType?.optionLabel
-                            )
+                            (item) =>
+                              !selectedRecords[0]?.competencyType || selectedRecords[0]?.competencyType === item?.competencyType?.optionLabel
+                          )
                           : activity
                       }
                       expanded={expanded}
@@ -212,7 +212,7 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician, han
                       height={'100%'}
                       style={{
                         position: 'absolute',
-                        left: (100 * dayjs().diff(startDate, 'days')) / totalDay + '%',
+                        left: (100 * dayjs().diff(startDate, 'day')) / totalDay + '%',
                         width: dayPixel
                       }}
                     >

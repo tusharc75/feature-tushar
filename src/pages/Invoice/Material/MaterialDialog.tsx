@@ -295,7 +295,7 @@ const MaterialDialog: FC<EditDialogProps> = ({
     const errors = {};
     let startDate = dayjs(values?.estimateStartDate);
     let endDate = dayjs(values?.estimateEndDate);
-    if (endDate.diff(startDate, 'days') < 0) {
+    if (endDate.diff(startDate, 'day') < 0) {
       errors['endDate'] = 'Please enter valid end date';
     }
     if (rowData && rowData.hideSelection) {

@@ -225,13 +225,13 @@ const ManageSublease = ({
     const errors = {};
     let estimateStartDate = dayjs(values?.estimateStartDate);
     let estimateEndDate = dayjs(values?.estimateEndDate);
-    if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
+    if (estimateEndDate.diff(estimateStartDate, 'day') < 0) {
       errors['estimateEndDate'] = 'Please enter valid estimate end date';
     }
     let actualStartDate = dayjs(values?.actualStartDate);
     let actualEndDate = dayjs(values?.actualEndDate);
     if (actualStartDate.format('YYYY-MM-DD') !== actualEndDate.format('YYYY-MM-DD')) {
-      if (actualEndDate.diff(actualStartDate, 'days') <= 0) {
+      if (actualEndDate.diff(actualStartDate, 'day') <= 0) {
         errors['actualEndDate'] = 'Please enter valid actual end date';
       }
     }
@@ -320,7 +320,7 @@ const ManageSublease = ({
                         <Box marginY={2}>
                           <Grid spacing={3} container>
                             {form.sectionFields.map((field, index2) => (
-                              <Grid key={index2} size={{xs:12, sm:6, md:6}}>
+                              <Grid key={index2} size={{ xs: 12, sm: 6, md: 6 }}>
                                 {field.fieldName === 'estimateStartDate' ? (
                                   <FormTypes
                                     {...field}
@@ -441,7 +441,7 @@ const ManageSublease = ({
                 <ThemeButton
                   isLoading={loading}
                   id="dialog-save-button"
-                   buttonType="theme"
+                  buttonType="theme"
                   onClick={(e) => {
                     e.preventDefault();
                     handleScroll(errors);

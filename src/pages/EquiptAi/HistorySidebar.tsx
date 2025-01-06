@@ -83,25 +83,20 @@ const HistorySidebar = ({
   }, []);
 
   function customSort(items) {
-    // Separate items into three arrays: Previous 30 days, months, and years
-    const months = [];
-    const years = [];
+    const monthList = [];
+    const yearList = [];
     const monthArray = ['Dec', 'Nov', 'Oct', 'Sep', 'Aug', 'Jul', 'Jun', 'May', 'Apr', 'Mar', 'Feb', 'Jan'];
-
     for (const item of items) {
       if (item === 'Previous 30 days') {
       } else if (monthArray.includes(item)) {
-        months.push(item);
+        monthList.push(item);
       } else {
-        years.push(item);
+        yearList.push(item);
       }
     }
-    // Sort months in reverse order
-    months.sort((a, b) => monthArray.findIndex((d) => d === a) - monthArray.findIndex((d) => d === b));
-    // Sort years in reverse order
-    years.sort((a, b) => b.localeCompare(a));
-    // Combine the arrays in the desired order
-    return ['Previous 30 days', ...months, ...years];
+    monthList.sort((a, b) => monthArray.findIndex((d) => d === a) - monthArray.findIndex((d) => d === b));
+    yearList.sort((a, b) => b.localeCompare(a));
+    return ['Previous 30 days', ...monthList, ...yearList];
   }
 
   useEffect(() => {
