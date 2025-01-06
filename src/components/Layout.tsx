@@ -37,8 +37,6 @@ const Layout = ({ children }) => {
     }
   };
 
-  console.log(pathName);
-
   return (
     <>
       <Sidebar />
