@@ -298,6 +298,7 @@ const PurchaseOrderDetailsPage = () => {
                       purchaseOrderData={purchaseOrderData}
                       setNextStep={setNextStep}
                       renderedFrom={`${renderedFrom}_grid-1`}
+                      stepFullScreen={stepFullScreen}
                       allowedToEdit={allowedToEdit}
                       checkReceivedProduct={checkReceivedProduct}
                     />
