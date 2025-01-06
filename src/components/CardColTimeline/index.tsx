@@ -27,7 +27,8 @@ type CardColInterface = {
 type Colors = {
   color: string;
   background: string;
-  indicator: string;
+  indicatorBackground: string;
+  indicatorColor: string;
 };
 
 export type datarowInterface = TDate | TDateTime | TText | TTimer | TLink | TTitle | TLinkTitle | TTooltip;
