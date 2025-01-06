@@ -4,7 +4,6 @@ import ReactFlow, { Controls, ControlButton, ReactFlowProvider } from 'react-flo
 import axiosInstance from '../../../axios/axiosInstance';
 import { quotation, QUOTATION_STATUS } from '../../../constants/helpers';
 import routes from '../../../components/Helpers/Routes';
-import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { MdZoomOutMap } from 'react-icons/md';
@@ -20,7 +19,6 @@ const QuotationViews = (props) => {
   const { quoteName, quoteId, status, versionId } = props;
   const [loading, setLoading] = useState(false);
   const [flowData, setFlowData] = useState([]);
-  const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const [fullDialogueOpen, setFullDialogueOpen] = useState(false);
   const [colorInfo, setColorInfo] = useState(false);
@@ -281,7 +279,7 @@ const QuotationViews = (props) => {
 
   return (
     <ContentFullScreen fullScreen={fullDialogueOpen} setFullScreen={setFullDialogueOpen}>
-      <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
+      <Box display="flex" flexDirection="column">
         <Box>
           <ThemeButton
             onClick={() => {
@@ -321,7 +319,7 @@ const QuotationViews = (props) => {
           </Box>
         )}
       </Box>
-      <div style={fullDialogueOpen ? { height: '95vh' } : { height: '68vh' }}>
+      <div style={fullDialogueOpen ? { height: '95vh' } : { height: '75vh' }}>
         {!loading ? (
           flowData.length ? (
             <Fragment>

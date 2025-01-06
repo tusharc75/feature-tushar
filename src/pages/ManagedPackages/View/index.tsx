@@ -202,7 +202,7 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
 
   return (
     <ContentFullScreen fullScreen={fullScreenOpen} setFullScreen={setFullScreenOpen}>
-      <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
+      <Box display="flex" flexDirection="column">
         <Box>
           <ThemeButton
             onClick={() => {
@@ -242,7 +242,7 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
           </Box>
         )}
       </Box>
-      <div style={fullScreenOpen ? { height: '95vh' } : { height: '68vh' }}>
+      <div style={fullScreenOpen ? { height: '95vh' } : { height: '75vh' }}>
         {!loading ? (
           flowData.length ? (
             <Fragment>
