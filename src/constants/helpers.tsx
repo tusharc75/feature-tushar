@@ -2892,6 +2892,7 @@ export const WORKORDER_SERVICE_COLOR = {
 };
 
 export const WORKORDER_SERVICE_STATUS = {
+  planned: 'Planned',
   pending: 'Pending',
   backlog: 'Backlog',
   inProgress: 'In-Progress',

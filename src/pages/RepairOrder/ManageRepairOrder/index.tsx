@@ -460,7 +460,7 @@ const ManageRepairOrder = ({
                   </ThemeButton>
                   <ThemeButton
                     isLoading={loading}
-                    buttonType="transparent"
+                    buttonType="theme"
                     id="dialog-save-button"
                     disabled={uploadingImageOrFileProgress > 0 || loading}
                     onClick={(e) => {
