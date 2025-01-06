@@ -792,7 +792,9 @@ const WorkOrderSupervisor = () => {
               passFailStatus={true}
               passFailAccessor="serviceStatus"
               cardOnClick={(e, data) => {
-                setOpen({ open: true, id: data.workOrder });
+                if (data?.status != WORKORDER_SERVICE_STATUS.planned) {
+                  setOpen({ open: true, id: data.workOrder });
+                }
               }}
             />
           </div>
