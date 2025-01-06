@@ -1,7 +1,6 @@
 import { Box, Paper, Typography } from '@mui/material';
 import { Fragment, useEffect, useState } from 'react';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import { useHistory } from 'react-router-dom';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import ReactFlow, { ControlButton, Controls, ReactFlowProvider } from 'react-flow-renderer';
 import { MdZoomOutMap } from 'react-icons/md';
@@ -35,7 +34,6 @@ const IrtTicketView = ({ subcontractAssemblyData }) => {
   const [colorInfo, setColorInfo] = useState(false);
   const [flowData, setFlowData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const history = useHistory();
 
   useEffect(() => {
     fetchData();
@@ -244,7 +242,7 @@ const IrtTicketView = ({ subcontractAssemblyData }) => {
 
   return (
     <ContentFullScreen fullScreen={fullScreenOpen} setFullScreen={setFullScreenOpen}>
-      <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
+      <Box display="flex" flexDirection="column">
         <Box>
           <ThemeButton
             onClick={() => {
@@ -284,7 +282,7 @@ const IrtTicketView = ({ subcontractAssemblyData }) => {
           </Box>
         )}
       </Box>
-      <div style={fullScreenOpen ? { height: '95vh' } : { height: '68vh' }}>
+      <div style={fullScreenOpen ? { height: '95vh' } : { height: '75vh' }}>
         {!loading ? (
           flowData.length ? (
             <Fragment>
