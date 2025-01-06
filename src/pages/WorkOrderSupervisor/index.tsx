@@ -48,6 +48,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { BiFilterAlt } from 'react-icons/bi';
 import dayjs from 'dayjs';
 import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
+import { queryStringPlanned } from 'src/pages/WorkOrderSupervisor/helper';
 
 const LIMIT = 25;
 
@@ -264,6 +265,7 @@ const WorkOrderSupervisor = () => {
       { accessor: 'assignedUser', title: 'Technician', type: 'text' },
       { accessor: 'workStation', title: resources?.workStations?.titleSingular, type: 'text' },
       { accessor: 'expectedCompletionDate', title: 'Due Date', type: 'date' },
+      { accessor: 'dueDate', title: 'Due Date', type: 'date' },
       {
         type: 'tooltip',
         accessor: 'tooltip',
@@ -289,7 +291,7 @@ const WorkOrderSupervisor = () => {
       dispatch({
         type: 'reset'
       });
-  }, [viewType, tableViewStatus]);
+  }, [viewType]);
 
   const openAssignHandler = (value: any, data: any) => {
     setSelectedServiceData(data);
@@ -306,14 +308,18 @@ const WorkOrderSupervisor = () => {
     (column: string, page = 0, appendData = true, filterQuery) => {
       let api = `${workOrderSupervisor.api}/work-order-service?page=${page}&status=${column}&limit=${limit}${filterQuery}`;
       if (column === WORKORDER_SERVICE_STATUS.planned) {
+        const filterByIds = queryStringPlanned(filterQuery);
         api = `${workOrder.api}/work-order-planning?page=${page}&limit=${limit}&deepFilter=${encodeURIComponent(
           JSON.stringify([
             {
-              field: 'autoCreateWorkOrder',
-              term: 'Yes'
+              field: 'status',
+              term: WORKORDER_SERVICE_STATUS.pending
             }
           ])
         )}`;
+        if (filterByIds?.length) {
+          api = `${api}&filterById=${JSON.stringify(filterByIds)}&filterType=and`;
+        }
       }
       dispatch({ type: 'loading', loading: (prev) => ({ ...prev, [column]: true }) });
       axiosInstance()
@@ -686,6 +692,7 @@ const WorkOrderSupervisor = () => {
                       showChevron={true}
                       items={statusMenuItems}
                       onItemClick={(e, item) => {
+                        tableDispatch({ type: 'pageChange', page: 0 });
                         setTableViewStatus(item.value as TableViewStatus);
                       }}
                     >
@@ -960,7 +967,7 @@ const WorkOrderSupervisor = () => {
             if (viewType === 'card-view') {
               handleAddAssets(data, selectedServiceData ? [selectedServiceData] : selectedRecordsP);
             } else {
-              workOrderListRef.current?.handleAddConsumables(data, selectedRecords);
+              workOrderListRef.current?.handleAddAssets(data, selectedRecords);
             }
           }}
           referenceType={sidebarResource.workOrderPlanning}
