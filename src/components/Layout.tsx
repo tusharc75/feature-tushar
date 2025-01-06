@@ -6,8 +6,11 @@ import GlobalUserChat from './GlobalUserChat';
 import Sidebar from './Sidebar/Sidebar';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { useStore, SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON } from 'src/StateProvider/fastContext';
+import { usePathname } from 'src/hooks';
+import { cn } from 'src/constants/helpers';
 
 const Layout = ({ children }) => {
+  const pathName = usePathname();
   const [theme] = useAppTheme();
   const contentRef = useRef(null);
   const bodyRef = useRef(null);
@@ -34,6 +37,8 @@ const Layout = ({ children }) => {
     }
   };
 
+  console.log(pathName);
+
   return (
     <>
       <Sidebar />
@@ -46,13 +51,17 @@ const Layout = ({ children }) => {
             initial={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
             exit={{ opacity: 0 }}
-            className={`f-full min-h-[calc(100vh-64px)] flex-grow overflow-hidden max-[768px]:min-h-[calc(100vh-108px)]`}
-            style={{ backgroundColor: theme === 'light' ? '#f1f5ff' : 'var(--dark-secondary)' }}
+            className={cn(
+              `f-full min-h-[calc(100vh-64px)] flex-grow overflow-hidden max-[768px]:min-h-[calc(100vh-108px)]`,
+              pathName !== '/' ? 'bg-[--dark-primary,white]' : 'bg-[--dark-secondary,#f1f5ff]'
+            )}
+            // style={{ backgroundColor: theme === 'light' ? '#f1f5ff' : 'var(--dark-secondary)' }}
             onClick={handleSidebarClose}
           >
             <div
-              className={`z-[1] mx-auto h-full w-[calc(100%-2%)] flex-grow  [transition:padding_195ms_cubic-bezier(0.4,_0,_0.6,_1)_0ms] max-[900px]:w-full max-[900px]:px-[13px] ${isSidebarOpen && sidebarOpenedByButton ? 'min-[960px]:pl-[222px]' : ''
-                }`}
+              className={`z-[1] mx-auto h-full w-[calc(100%-2%)] flex-grow  [transition:padding_195ms_cubic-bezier(0.4,_0,_0.6,_1)_0ms] max-[900px]:w-full max-[900px]:px-[13px] ${
+                isSidebarOpen && sidebarOpenedByButton ? 'min-[960px]:pl-[222px]' : ''
+              }`}
               ref={bodyRef}
               onScroll={onScroll}
             >

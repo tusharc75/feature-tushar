@@ -945,19 +945,11 @@ body::-webkit-scrollbar-thumb {
   overflow: auto;
   z-index: 1;
   margin-block-end: 10px;
-  background: white;
   border-radius: 6px 6px 0 0;
-  box-shadow: 0px 3.90676px 39.0676px rgba(0, 0, 0, 0.08);
   overflow-y: hidden;
-
-  [data-mode='dark'] & {
-    background-color: var(--dark-primary);
-  }
-
-  padding: 25px;
+  padding-block: 10px;
 
   @media all and (max-width: 768px) {
-    padding: 15px;
     min-height: max(600px, calc(100vh - 99px));
   }
 }
@@ -2858,7 +2850,7 @@ svg.MuiSvgIcon-root {
   padding: var(--padding, 7px 10px);
 
   background: #ffffff;
-  border: 1px solid #e2e2e2;
+  border: 1px solid var(--common-border-color);
   box-shadow: 0px 5.44444px 27.2222px rgba(0, 0, 0, 0.06);
   border-radius: 3.62963px;
   margin-right: 8px;
@@ -2878,8 +2870,7 @@ svg.MuiSvgIcon-root {
 
   [data-mode='dark'] & {
     color: #fff;
-    background-color: var(--dark-primary);
-    border: 0px solid var(--common-border-color) !important;
+    background-color: var(--dark-secondary);
   }
 
   &:last-of-type {
@@ -2980,21 +2971,12 @@ svg.MuiSvgIcon-root {
   .detail-container-v1 {
     position: relative;
     // padding: var(--container-padding, 20px 15px);
-    padding: 25px;
-    background: #ffffff;
-    box-shadow: 0px 3.90676px 39.0676px rgba(0, 0, 0, 0.08);
+    padding-block: 15px;
     border-radius: 10px;
     min-height: 700px;
     isolation: isolate;
 
-    [data-mode='dark'] & {
-      background-color: var(--dark-primary);
-    }
-
     // height: calc(100vh - 136px);
-    @media all and (max-width: 768px) {
-      padding: 15px;
-    }
   }
 
   .control-buttons-v1 {
@@ -3168,7 +3150,7 @@ svg.MuiSvgIcon-root {
 .new-tab-container-v1 {
   min-height: unset !important;
   width: 100%;
-  margin-bottom: 30px;
+  margin-bottom: 10px;
   border-bottom: 1px solid var(--tab-border-color);
 
   [data-mode='dark'] & {
