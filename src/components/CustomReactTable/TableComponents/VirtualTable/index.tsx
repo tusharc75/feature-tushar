@@ -232,7 +232,7 @@ export const VirtualTable = forwardRef(function (
                               <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingRight }} />
                             ) : null}
                             <th
-                              className={`sticky bottom-0 bg-[var(--dark-primary,_white)]`}
+                              className={`sticky bottom-0 bg-[var(--dark-primary,_white)] text-[13px]`}
                               style={{
                                 ...style,
                                 position: 'sticky',
