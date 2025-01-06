@@ -96,13 +96,8 @@ const TableComponent = forwardRef(function (
   const excludedColumns = ['action', 'selection', 'expander'];
 
   const footerRowFound = table?.getFooterGroups()[0].headers.some((h) => h.column.columnDef.footer);
-
   const tableRowsLengthGreterThanZero = table.getRowModel().rows.length > 0;
-
-  const isFooterVisible = useMemo(
-    () => isClientSideGrid && footerRowFound && tableRowsLengthGreterThanZero,
-    [footerRowFound, isClientSideGrid, tableRowsLengthGreterThanZero]
-  );
+  const isFooterVisible = isClientSideGrid && footerRowFound && tableRowsLengthGreterThanZero;
 
   const handleChangeCurrentEditingCellPosition = (rowid: string, columnId: string) => {
     dispatch({
