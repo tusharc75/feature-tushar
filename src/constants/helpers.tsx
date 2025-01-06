@@ -1,3 +1,4 @@
+import { CalendarMonth, CheckCircleOutline, PushPin, Sync } from '@mui/icons-material';
 import { Fade } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
 import { GoogleMapProps } from '@react-google-maps/api';
@@ -7,7 +8,6 @@ import { camelCase, cloneDeep, isArray, isString, lowerFirst, orderBy, uniqBy } 
 import mimeDb from 'mime-db';
 import React from 'react';
 import { FileIcon, fileIcons } from 'src/assets/fileIcons';
-import { CompletedIcon, InProgressByOtherIcon, InProgressIcon, PendingIcon } from 'src/assets/newSvgs';
 import { LOGIC, OPERATOR } from 'src/components/FormBuilder/helper';
 import { stepIconInterface } from 'src/components/Steps/icons';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
@@ -1147,7 +1147,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
 
       validation = (...args) => {
         let validate = false;
-        for (let i = 0; i < validationFields?.length; ) {
+        for (let i = 0; i < validationFields?.length;) {
           const field = validationFields[i];
           const condition =
             field?.type === 'section'
@@ -1179,78 +1179,78 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: string().required(message),
-                otherwise: string()
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().required(message),
+              otherwise: string()
+            }
+          )
           : string().required(message)
         : string();
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: string().matches(nameRegex, "Numbers aren't allowed").required(message),
-                otherwise: string().matches(nameRegex, "Numbers aren't allowed")
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().matches(nameRegex, "Numbers aren't allowed").required(message),
+              otherwise: string().matches(nameRegex, "Numbers aren't allowed")
+            }
+          )
           : string().matches(nameRegex, "Numbers aren't allowed").required(message)
         : string().matches(nameRegex, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: string().matches(urlRegex, 'Enter valid URL').required(message),
-                otherwise: string().matches(urlRegex, 'Enter valid URL')
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().matches(urlRegex, 'Enter valid URL').required(message),
+              otherwise: string().matches(urlRegex, 'Enter valid URL')
+            }
+          )
           : string().matches(urlRegex, 'Enter valid URL').required(message)
         : string().matches(urlRegex, 'Enter valid URL');
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: string().min(10, 'Mobile number is too short').required(message),
-                otherwise: string().min(10, 'Mobile number is too short')
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().min(10, 'Mobile number is too short').required(message),
+              otherwise: string().min(10, 'Mobile number is too short')
+            }
+          )
           : string().min(10, 'Mobile number is too short').required(message)
         : string().min(10, 'Mobile number is too short');
     } else if (input.type === 'multiSelect' || input?.type === 'freeStyleMultiSelect') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? array().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: array().min(1, message),
-                otherwise: array()
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: array().min(1, message),
+              otherwise: array()
+            }
+          )
           : array().min(1, message)
         : array();
     } else if (input.type === 'percent' || input.type === 'number' || input.type === 'decimal' || input.type === 'formula') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? number().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: number().required(message).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable(),
-                otherwise: number().nullable()
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: number().required(message).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable(),
+              otherwise: number().nullable()
+            }
+          )
           : number().required(message).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable()
         : number().nullable();
     } else if (input.type === 'email') {
@@ -1258,26 +1258,26 @@ export const yupSchema = (fields: any[], validEmail = true) => {
         input.required && validEmail
           ? validationFields?.length && validation
             ? string().when(
-                validationFields?.map((f) => f?.fieldName),
-                {
-                  is: validation,
-                  then: string().email().required(message),
-                  otherwise: string().email(`${input.fieldLabel} must be a valid email`)
-                }
-              )
+              validationFields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: string().email().required(message),
+                otherwise: string().email(`${input.fieldLabel} must be a valid email`)
+              }
+            )
             : string().email().required(message)
           : string().email(`${input.fieldLabel} must be a valid email`);
     } else if (input.type === 'switch' || input.type === 'checkBox') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? boolean().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: boolean().required(message),
-                otherwise: boolean()
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: boolean().required(message),
+              otherwise: boolean()
+            }
+          )
           : boolean().required(message)
         : boolean();
     } else if (input.type !== 'currencyAmount' && (input.type === 'converter' || input.isConverter === true)) {
@@ -1306,13 +1306,13 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: string().required(`${input.fieldLabel} is required`).nullable(),
-                otherwise: string().nullable()
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().required(`${input.fieldLabel} is required`).nullable(),
+              otherwise: string().nullable()
+            }
+          )
           : dateValidation
         : dateValidation;
     } else if (input.type === 'colorPicker') {
@@ -1333,13 +1333,13 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: string().required(message),
-                otherwise: string()
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().required(message),
+              otherwise: string()
+            }
+          )
           : string().required(message)
         : string();
     }
@@ -3616,8 +3616,8 @@ function fallbackCopyTextToClipboard(text: string, callBack: (text: string) => v
   document.body.removeChild(textArea);
 }
 
-export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => {}) {
-  if (typeof callBack !== 'function') callBack = (text) => {};
+export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => { }) {
+  if (typeof callBack !== 'function') callBack = (text) => { };
 
   if (!navigator.clipboard) {
     fallbackCopyTextToClipboard(text, callBack);
@@ -3820,33 +3820,42 @@ export function filterDataByDateIntersection<D>(
   });
 }
 export const workOrderColormap = {
+  [WORKORDER_SERVICE_STATUS.planned]: {
+    color: 'dark:text-white text-orange-700',
+    background: 'dark:bg-orange-600 bg-orange-100',
+    indicatorBackground: 'bg-orange-700 dark:bg-orange-700',
+    indicatorColor: 'text-orange-700'
+  },
   [WORKORDER_SERVICE_STATUS.pending]: {
     color: 'dark:text-white text-[#B66A11]',
     background: 'dark:bg-[#fba84a] bg-[#FFF1E0]',
-    indicator: 'bg-[#B66A11] dark:bg-[#fba84a] '
+    indicatorBackground: 'bg-[#B66A11] dark:bg-[#fba84a] ',
+    indicatorColor: 'text-[#B66A11]'
   },
   [WORKORDER_SERVICE_STATUS.inProgress]: {
     color: 'dark:text-white text-[#0273FF]',
     background: 'dark:bg-[#0c68e9] bg-[#D6F1FF]',
-    indicator: 'bg-[#0273FF] dark:bg-[#0c68e9]'
+    indicatorBackground: 'bg-[#0273FF] dark:bg-[#0c68e9]',
+    indicatorColor: 'text-[#0273FF]'
   },
   [WORKORDER_SERVICE_STATUS.completed]: {
     color: 'dark:text-white text-[#0A983E]',
     background: 'bg-[#E2FDEC] dark:bg-[#2fa959]',
-    indicator: 'bg-[#0A983E] dark:bg-[#2fa959]'
+    indicatorBackground: 'bg-[#0A983E] dark:bg-[#2fa959]',
+    indicatorColor: 'text-[#0A983E]'
   },
   [WORKORDER_SERVICE_STATUS.inProgressByOther]: {
-    color: 'dark:text-white text-[#6D29F6]',
-    background: 'dark:bg-[#6055df] bg-[#D6F1FF]',
-    indicator: 'bg-[#6D29F6] dark:bg-[#6055df]'
+    color: 'dark:text-white text-cyan-700',
+    background: 'dark:bg-cyan-600 bg-cyan-100',
+    indicatorBackground: 'bg-cyan-700 dark:bg-cyan-700',
+    indicatorColor: 'text-cyan-700'
   }
 };
 
 export const workOrderIconMap = {
-  [WORKORDER_SERVICE_STATUS.pending]: <PendingIcon className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.pending].color}`} />,
-  [WORKORDER_SERVICE_STATUS.inProgress]: <InProgressIcon className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.inProgress].color}`} />,
-  [WORKORDER_SERVICE_STATUS.completed]: <CompletedIcon className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.completed].color}`} />,
-  [WORKORDER_SERVICE_STATUS.inProgressByOther]: (
-    <InProgressByOtherIcon className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.inProgressByOther].color}`} />
-  )
+  [WORKORDER_SERVICE_STATUS.planned]: <CalendarMonth fontSize='small' className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.pending].indicatorColor}`} />,
+  [WORKORDER_SERVICE_STATUS.pending]: <Sync fontSize='small' className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.pending].indicatorColor}`} />,
+  [WORKORDER_SERVICE_STATUS.inProgress]: <PushPin fontSize='small' className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.inProgress].indicatorColor}`} />,
+  [WORKORDER_SERVICE_STATUS.completed]: <CheckCircleOutline fontSize='small' className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.completed].indicatorColor}`} />,
+  [WORKORDER_SERVICE_STATUS.inProgressByOther]: (<PushPin fontSize='small' className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.inProgressByOther].indicatorColor}`} />)
 };

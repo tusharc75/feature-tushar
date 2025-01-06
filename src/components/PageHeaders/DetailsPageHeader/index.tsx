@@ -84,7 +84,7 @@ const DetailsPageHeader = ({
     <div
       className={cn(
         `details-page-header flex flex-wrap items-center justify-between gap-2`,
-        hasXpadding ? 'px-2' : '',
+        hasXpadding ? '' : '',
         hasYpadding ? 'py-2' : '',
         className
       )}

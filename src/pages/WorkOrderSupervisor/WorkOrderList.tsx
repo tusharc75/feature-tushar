@@ -12,6 +12,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import {
+  displayDate,
   gridLoadingTimeout,
   MATERIAL_SUB_TYPE,
   prepareDataForGrid,
@@ -26,7 +27,7 @@ import AssignWorkStationDialog from 'src/pages/WorkOrder/Service/AssignWorkStati
 import WorkOrderDetailDialog from 'src/pages/WorkOrderSupervisor/WorkOrderDetailDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
+import { queryStringPlanned } from 'src/pages/WorkOrderSupervisor/helper';
 
 type Props = {
   filterQuery: any;
@@ -44,6 +45,7 @@ type Props = {
 export type WorkOrderListRef = {
   refreshGrid: () => void;
   handleAddConsumables: (rows: any, records: any[]) => void;
+  handleAddAssets: (row: any, records: any[]) => void;
   submitting: boolean;
   setAssignTechnicianDialog: (value: boolean) => void;
   setWorkStationAssignDialog: (value: boolean) => void;
@@ -165,6 +167,41 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
                 <NoDataCell />
               )
           },
+          ...(status === WORKORDER_SERVICE_STATUS.planned
+            ? [
+                {
+                  accessor: 'product',
+                  Header: resources?.product?.titleSingular,
+                  disableFilters: true,
+                  disableSortBy: true,
+                  Cell: ({ row }) =>
+                    row.original['product'] && row.original.productId ? (
+                      <div className="flex items-center gap-1">
+                        <h5 className="text-truncate">{row.original.product}</h5>
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            window.open(`${routes?.productDetail?.path}/${row.original.productId}`);
+                          }}
+                        >
+                          <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                        </IconButton>
+                      </div>
+                    ) : (
+                      <NoDataCell />
+                    )
+                },
+                {
+                  accessor: 'dueDate',
+                  Header: 'Due Date',
+                  disableFilters: true,
+                  disableSortBy: true,
+                  Cell: ({ row }) =>
+                    row.original['dueDate'] ? <h5 className="text-truncate">{displayDate(row.original.dueDate)}</h5> : <NoDataCell />
+                }
+              ]
+            : []),
+
           {
             accessor: 'assignedWorkStations',
             Header: 'Work Stations',
@@ -321,21 +358,14 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
         });
     };
 
-    const queryStringPlanned = (queryString) => {
-      // const queryParams = queryString.startsWith('&') ? queryString.slice(1).split('&') : queryString.split('&');
-      // const params = queryParams.reduce((acc, pair) => {
-      //   const [key, value] = pair.split('=');
-      //   acc[key] = value;
-      //   return acc;
-      // }, {});
-    };
-
     const getQueryString = () => {
       let deepFilter = `?page=${page}&limit=${limit}`;
 
       if (status === WORKORDER_SERVICE_STATUS.planned) {
-        deepFilter = `${deepFilter}`;
-        queryStringPlanned(filterQuery);
+        const filterByIds = queryStringPlanned(filterQuery);
+        if (filterByIds?.length) {
+          deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+        }
       } else {
         deepFilter = `${deepFilter}&status=${status}${filterQuery}`;
       }
@@ -343,8 +373,8 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
 
       if (status === WORKORDER_SERVICE_STATUS.planned) {
         deepFilters.push({
-          field: 'autoCreateWorkOrder',
-          term: 'Yes'
+          field: 'status',
+          term: WORKORDER_SERVICE_STATUS.pending
         });
       }
 
