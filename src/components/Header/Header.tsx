@@ -458,6 +458,7 @@ const Header = () => {
       </span>
       <AppBar
         position="relative"
+        elevation={0}
         className={` ${scrollPos?.scrolled ? styles.fixedAppBar : ''} ${styles.toolbar}  border-b `}
         style={{ zIndex: 1200 }}
       >
