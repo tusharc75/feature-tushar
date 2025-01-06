@@ -456,7 +456,11 @@ const Header = () => {
           {isSidebarOpen ? <GoChevronLeft /> : <GoChevronRight className=" align-middle" />}
         </IconButton>
       </span>
-      <AppBar position="relative" className={` ${scrollPos?.scrolled ? styles.fixedAppBar : ''} ${styles.toolbar}`} style={{ zIndex: 1200 }}>
+      <AppBar
+        position="relative"
+        className={` ${scrollPos?.scrolled ? styles.fixedAppBar : ''} ${styles.toolbar}  border-b `}
+        style={{ zIndex: 1200 }}
+      >
         <Toolbar className={`bg-[--dark-primary,white] ${styles.mainConainer}`} style={{ color: themeColor === 'light' ? '#3d3d3d' : '#fff' }}>
           <Box
             component="div"

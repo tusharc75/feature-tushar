@@ -192,7 +192,7 @@ const getChildren = ({
 const ThemeButton = React.forwardRef<HTMLButtonElement, ThemeButtonProps>(
   (
     {
-      mode = 'dark',
+      mode = 'light',
       iconForMobile,
       tooltip = '',
       mobileTooltip = '',

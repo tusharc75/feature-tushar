@@ -7,6 +7,10 @@ export type CustomToastProps = {
   message: string;
   type: AlertProps['severity'] | 'notFoundError';
   hideDuration?: number;
+  anchorOrigin?: {
+    vertical: 'top' | 'bottom';
+    horizontal: 'left' | 'center' | 'right';
+  };
 };
 type ExtraAttributes = {
   close: () => void;

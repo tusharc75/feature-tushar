@@ -543,8 +543,13 @@ $isAppliedBillDark: #234623;
       }
     }
   }
-  tbody tr {
+  tbody:not(.with-footer) tr {
     border-bottom: 1px solid var(--common-border-color);
+  }
+  tbody.with-footer {
+    & div.tr:not(:last-child) tr {
+      border-bottom: 1px solid var(--common-border-color);
+    }
   }
   .MuiTableCell-root {
     border-bottom: unset;
