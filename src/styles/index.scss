@@ -4639,3 +4639,10 @@ td.google-visualization-orgchart-node {
 .rbc-agenda-empty {
   display: none;
 }
+.sticky {
+  position: -webkit-sticky;
+  position: -moz-sticky;
+  position: -ms-sticky;
+  position: -o-sticky;
+  position: sticky;
+}
