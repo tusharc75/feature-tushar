@@ -98,7 +98,6 @@ const RentalManagementViews = (props) => {
   const { rentalName, rentalId, status } = props;
   const [loading, setLoading] = useState(false);
   const [flowData, setFlowData] = useState([]);
-  const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const [fullDialogueOpen, setFullDialogueOpen] = useState(false);
   const [colorInfo, setColorInfo] = useState(false);
@@ -902,7 +901,7 @@ const RentalManagementViews = (props) => {
 
   return (
     <ContentFullScreen fullScreen={fullDialogueOpen} setFullScreen={setFullDialogueOpen}>
-      <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
+      <Box display="flex" flexDirection="column">
         <Box>
           <ThemeButton
             onClick={() => {
@@ -942,7 +941,7 @@ const RentalManagementViews = (props) => {
           </Box>
         )}
       </Box>
-      <div style={fullDialogueOpen ? { height: '95vh' } : { height: '68vh' }}>
+      <div style={fullDialogueOpen ? { height: '95vh' } : { height: '75vh' }}>
         {!loading ? (
           flowData.length ? (
             <Fragment>
