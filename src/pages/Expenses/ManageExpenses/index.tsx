@@ -8,12 +8,10 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import { isMobile, isTablet } from 'react-device-detect';
 import {
   CustomDialogTransition,
-  getObjKeys,
   getObjKeysWithValues,
   expenses,
   yupSchema,
   sidebarResource,
-  GenerateResourceLineNumber,
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@mui/material/Dialog';
@@ -23,7 +21,6 @@ import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
 import { isEqual } from 'lodash';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
@@ -62,12 +59,12 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess,
 
         // data = data.filter((obj) => !hideFields?.includes(obj?.fieldData?.fieldName));
 
-        data?.forEach((e) => {
-          if (e?.fieldData?.fieldName === 'chartOfAccount' && e?.fieldData?.isDefaultValue && e?.fieldData?.defaultValue) {
-            const filteredOption = e.fieldData?.option?.filter((obj) => obj?.optionValue === e?.fieldData?.defaultValue) || [];
-            e.fieldData.option = filteredOption;
-          }
-        });
+        // data?.forEach((e) => {
+        //   if (e?.fieldData?.fieldName === 'chartOfAccount' && e?.fieldData?.isDefaultValue && e?.fieldData?.defaultValue) {
+        //     const filteredOption = e.fieldData?.option?.filter((obj) => obj?.optionValue === e?.fieldData?.defaultValue) || [];
+        //     e.fieldData.option = filteredOption;
+        //   }
+        // });
 
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
@@ -77,7 +74,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess,
             .get(`${expenses.api}/` + expenseId)
             .then(({ data: { data } }) => {
               if (isClone) {
-                const { _id, brand, createdBy, history, repairJobName, actualEndDate, updatedBy, ...rest } = data;
+                const { _id, brand, createdBy, history, expensesNumber, updatedBy, ...rest } = data;
                 setTitle(`Clone - ${expenses}`);
                 // rest.repairJobName = GenerateResourceLineNumber(fieldsDataForCreate);
                 // rest.status = REPAIR_JOB_STATUS.new;
@@ -90,14 +87,14 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess,
                 axiosInstance()
                   .get(`${expenses.api}/${expenseId}/assets`)
                   .then(({ data: { data: assetData } }) => {
-                    if (assetData.length) {
-                      fieldsDataForUpdate?.forEach((e) => {
-                        if (['supplierAccount', 'warehouse']?.includes(e?.fieldName)) {
-                          e.disableOnEdit = true;
-                          e.isUneditable = true;
-                        }
-                      });
-                    }
+                    // if (assetData.length) {
+                    //   fieldsDataForUpdate?.forEach((e) => {
+                    //     if (['supplierAccount', 'warehouse']?.includes(e?.fieldName)) {
+                    //       e.disableOnEdit = true;
+                    //       e.isUneditable = true;
+                    //     }
+                    //   });
+                    // }
                     setTitle(`Editing - [${data.expensesNumber}]`);
                     setInitialData({
                       fields: fieldsDataForUpdate,
@@ -180,7 +177,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess,
           toastConfig.setToastConfig(error);
         });
     } else {
-      const { productInventory, ...rest } = values;
+      const { expensesData, ...rest } = values;
       axiosInstance()
         .post(`${expenses.api}`, rest)
         .then(({ data: { data, message } }) => {
