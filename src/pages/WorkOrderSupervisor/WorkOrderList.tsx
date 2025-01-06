@@ -12,6 +12,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import {
+  displayDate,
   gridLoadingTimeout,
   MATERIAL_SUB_TYPE,
   prepareDataForGrid,
@@ -165,6 +166,41 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
                 <NoDataCell />
               )
           },
+          ...(status === WORKORDER_SERVICE_STATUS.planned
+            ? [
+                {
+                  accessor: 'product',
+                  Header: resources?.product?.titleSingular,
+                  disableFilters: true,
+                  disableSortBy: true,
+                  Cell: ({ row }) =>
+                    row.original['product'] && row.original.productId ? (
+                      <div className="flex items-center gap-1">
+                        <h5 className="text-truncate">{row.original.product}</h5>
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            window.open(`${routes?.productDetail?.path}/${row.original.productId}`);
+                          }}
+                        >
+                          <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                        </IconButton>
+                      </div>
+                    ) : (
+                      <NoDataCell />
+                    )
+                },
+                {
+                  accessor: 'dueDate',
+                  Header: 'Due Date',
+                  disableFilters: true,
+                  disableSortBy: true,
+                  Cell: ({ row }) =>
+                    row.original['dueDate'] ? <h5 className="text-truncate">{displayDate(row.original.dueDate)}</h5> : <NoDataCell />
+                }
+              ]
+            : []),
+
           {
             accessor: 'assignedWorkStations',
             Header: 'Work Stations',
