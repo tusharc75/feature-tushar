@@ -689,7 +689,7 @@ const WorkOrderSupervisor = () => {
                         setTableViewStatus(item.value as TableViewStatus);
                       }}
                     >
-                      <span className="flex items-center gap-2">
+                      <span className="flex items-center gap-2 [&_svg]:text-[18px]">
                         {workOrderIconMap[tableViewStatus]}
                         Status: {tableViewStatus}
                       </span>
