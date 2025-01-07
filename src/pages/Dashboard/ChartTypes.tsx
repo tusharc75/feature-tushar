@@ -435,7 +435,7 @@ const ChartTypes = ({
                         })
                       },
                       onClick: (event, elements) => {
-                        if (elements.length > 0) {
+                        if (elements.length > 0 && chartData.datasets[0].label === 'Asset Count') {
                           const dataIndex = elements[0].index; 
                           const clickedLabel = chartData.labels[dataIndex];
                           window.open(

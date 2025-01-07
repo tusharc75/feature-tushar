@@ -1,7 +1,9 @@
-import { TableBody, Table, TableCell, TableContainer, TableHead, TableRow, Box } from '@mui/material';
+import { TableBody, Table, TableCell, TableContainer, TableHead, TableRow, Box, IconButton } from '@mui/material';
 import { startCase } from 'lodash';
 import { useEffect, useState } from 'react';
 import { formatAmountWithCurrency } from '../../constants/helpers';
+import routes from 'src/components/Helpers/Routes';
+import { FiExternalLink } from 'react-icons/fi';
 
 interface Props {
   id: string;
@@ -45,6 +47,13 @@ const TableView = ({ id, chartData, chart, currency }: Props) => {
     );
   }
 
+  const handleRowClick = (key: any) => {
+    if (chart?.kpi?.name !== 'Asset Status Count') return;
+    const assetStatus = tableData[key].status;
+    const url = `${routes.serializedAsset.path}?assetStatus=${encodeURIComponent(assetStatus)}`;
+    window.open(url, '_blank');
+  };
+
   return (
     <TableContainer id={id} style={{ height: '100%', width: 'auto' }}>
       <Table stickyHeader id={'table_' + id} aria-label="simple table">
@@ -73,6 +82,17 @@ const TableView = ({ id, chartData, chart, currency }: Props) => {
                           : data[key]}
                 </TableCell>
               ))}
+              {chart?.kpi?.name === 'Asset Status Count' && (
+                <IconButton
+                  size="small"
+                  color="primary"
+                  onClick={() => {
+                    handleRowClick(index);
+                  }}
+                >
+                  <FiExternalLink size={16} className="mt-3 text-gray-500 dark:text-gray-300" />
+                </IconButton>
+              )}
             </TableRow>
           ))}
         </TableBody>
