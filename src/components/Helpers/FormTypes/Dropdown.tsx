@@ -649,10 +649,12 @@ function Dropdown({
                                   data[fieldData.lookupDependentOn] === values[fieldData.lookupDependentOn] ||
                                   data[fieldData.lookupDependentOn]?.includes(values[fieldData.lookupDependentOn])
                                 ) {
-                                  handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                                  const newValue = type === 'multiSelect' ? [...[...(values[name] || [])], tempNewOption.optionValue] : (tempNewOption?.optionValue || '');
+                                  handleChange(name, newValue);
                                 }
                               } else {
-                                handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                                const newValue = type === 'multiSelect' ? [...[...(values[name] || [])], tempNewOption.optionValue] : (tempNewOption?.optionValue || '');
+                                handleChange(name, newValue);
                               }
 
                               const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
