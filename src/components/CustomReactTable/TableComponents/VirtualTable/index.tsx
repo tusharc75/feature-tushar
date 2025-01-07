@@ -58,10 +58,14 @@ export const VirtualTable = forwardRef(function (
   },
   ref: ForwardedRef<HTMLTableElement>
 ) {
+  // console.count('virtual');
+  // virtualization
   const parentRef = React.useRef();
 
+  // if footer present then + 2 for header and footer height
+  // else + 1 for only header height
   const rowVirtualizer = useVirtualizer({
-    count: rows.length,
+    count: isFooterVisible ? rows.length + 2 : rows.length + 1,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 45,
     overscan: 2,
@@ -125,7 +129,7 @@ export const VirtualTable = forwardRef(function (
           maxHeight: height ?? '100%',
           height: isFooterVisible && !pagination ? 'unset' : height || '100%'
         }}
-        className="isolate z-10 overscroll-contain border bg-[var(--dark-primary,_white)] max-[900px]:min-h-[500px]"
+        className="isolate z-10 border bg-[var(--dark-primary,_white)] max-[900px]:min-h-[500px]"
         ref={parentRef}
       >
         {!loading && !error && rows.length === 0 && initialDataLoaded && (
@@ -154,107 +158,110 @@ export const VirtualTable = forwardRef(function (
             </div>
           </Box>
         )}
-        <div aria-describedby="table-container">
-          <MaUTable ref={tableRef} size="small" className="tableWrap table" style={{ width: `max(${totalColumnSize}px, 100%)` }}>
-            <VirtualTableHead
+
+        <MaUTable
+          ref={tableRef}
+          size="small"
+          className="tableWrap sticky table"
+          style={{ height: `${rowVirtualizer.getTotalSize()}px`, width: `max(${totalColumnSize}px, 100%)` }}
+        >
+          <VirtualTableHead
+            table={table}
+            virtualColumns={virtualColumns}
+            right={right}
+            left={left}
+            virtualization={virtualization}
+            customFilters={customFilters}
+            dispatch={dispatch}
+            isClientSideGrid={isClientSideGrid}
+            resource={resource}
+            vtableData={vtableData}
+            virtualPaddingLeft={virtualPaddingLeft}
+            virtualPaddingRight={virtualPaddingRight}
+          />
+          <TableBody
+            style={{
+              overflow: 'hidden'
+            }}
+            className={`body relative ${isClientSideGrid && footerRowFound ? 'with-footer' : ''}`}
+          >
+            <VirtualTableBody
+              onRowClick={onRowClick}
+              rows={rows}
+              virtualization={virtualization}
+              state={state}
+              setWholeRowsCellColor={setWholeRowsCellColor}
               table={table}
+              handleChangeCurrentEditingCellPosition={handleChangeCurrentEditingCellPosition}
+              setCellValue={setCellValue}
+              submitInput={submitInput}
+              cellValue={cellValue}
+              resetField={resetField}
+              virtualrows={virtualrows}
               virtualColumns={virtualColumns}
               right={right}
               left={left}
-              virtualization={virtualization}
-              customFilters={customFilters}
-              dispatch={dispatch}
-              isClientSideGrid={isClientSideGrid}
-              resource={resource}
               vtableData={vtableData}
               virtualPaddingLeft={virtualPaddingLeft}
               virtualPaddingRight={virtualPaddingRight}
+              rowVirtualizer={rowVirtualizer}
+              expanderWithCustomContent={expanderWithCustomContent}
+              customContentHeight={customContentHeight}
+              customContent={customContent}
             />
-            <TableBody
-              style={{
-                overflow: 'hidden',
-                height: `${rowVirtualizer.getTotalSize()}px`
-              }}
-              className={`body relative ${isClientSideGrid && footerRowFound ? 'with-footer' : ''}`}
-            >
-              <VirtualTableBody
-                onRowClick={onRowClick}
-                rows={rows}
-                virtualization={virtualization}
-                state={state}
-                setWholeRowsCellColor={setWholeRowsCellColor}
-                table={table}
-                handleChangeCurrentEditingCellPosition={handleChangeCurrentEditingCellPosition}
-                setCellValue={setCellValue}
-                submitInput={submitInput}
-                cellValue={cellValue}
-                resetField={resetField}
-                virtualrows={virtualrows}
-                virtualColumns={virtualColumns}
-                right={right}
-                left={left}
-                vtableData={vtableData}
-                virtualPaddingLeft={virtualPaddingLeft}
-                virtualPaddingRight={virtualPaddingRight}
-                rowVirtualizer={rowVirtualizer}
-                expanderWithCustomContent={expanderWithCustomContent}
-                customContentHeight={customContentHeight}
-                customContent={customContent}
-              />
-            </TableBody>
-            {isFooterVisible && (
-              <>
-                <tfoot className={'sticky bottom-0 block'} style={{ position: 'sticky', bottom: '0px' }}>
-                  {table?.getFooterGroups().map((footerGroup) => {
-                    return (
-                      <tr key={footerGroup.id} className="!flex ">
-                        {virtualPaddingLeft && left.length === 0 ? (
-                          <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingLeft }} />
-                        ) : null}
-                        {virtualColumns.map((vc) => {
-                          const header = footerGroup.headers[vc?.index];
-                          if (!header) return null;
-                          if (exportTableView && excludedColumns.includes(header.column.columnDef.id)) return null;
-                          const columnDef = header.column.columnDef as TColType;
-                          const { style } = vtableData && vtableData[vc.index] ? vtableData[vc.index] : getStickyPosition(columnDef, vc.index, table);
-                          const colSize = header.getSize();
-                          return (
-                            <Fragment key={vc.index}>
-                              {right.length && header.id === right[0] && virtualPaddingRight ? (
-                                <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingRight }} />
-                              ) : null}
-                              <th
-                                className={`bg-[var(--dark-primary,_white)] text-[13px]`}
-                                style={{
-                                  ...style,
-                                  position: 'sticky',
-                                  zIndex: columnDef.sticky === 'left' || columnDef.sticky === 'right' ? 12 : 'unset',
-                                  minWidth: colSize,
-                                  maxWidth: colSize,
-                                  display: 'flex',
-                                  alignItems: 'center'
-                                }}
-                                key={header.id}
-                              >
-                                {header?.isPlaceholder ? null : flexRender(header.column.columnDef.footer, header.getContext())}
-                              </th>
-                              {left.length && header.id === left[left.length - 1] && virtualPaddingLeft ? (
-                                <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingLeft }} />
-                              ) : null}
-                            </Fragment>
-                          );
-                        })}
-                        {virtualPaddingRight && right.length === 0 ? (
-                          <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingRight }} />
-                        ) : null}
-                      </tr>
-                    );
-                  })}
-                </tfoot>
-              </>
-            )}
-          </MaUTable>
-        </div>
+          </TableBody>
+          {isFooterVisible && (
+            <>
+              <tfoot className="sticky bottom-0">
+                {table?.getFooterGroups().map((footerGroup) => {
+                  return (
+                    <tr key={footerGroup.id} className="!flex ">
+                      {virtualPaddingLeft && left.length === 0 ? (
+                        <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingLeft }} />
+                      ) : null}
+                      {virtualColumns.map((vc) => {
+                        const header = footerGroup.headers[vc?.index];
+                        if (!header) return null;
+                        if (exportTableView && excludedColumns.includes(header.column.columnDef.id)) return null;
+                        const columnDef = header.column.columnDef as TColType;
+                        const { style } = vtableData && vtableData[vc.index] ? vtableData[vc.index] : getStickyPosition(columnDef, vc.index, table);
+                        const colSize = header.getSize();
+                        return (
+                          <Fragment key={vc.index}>
+                            {right.length && header.id === right[0] && virtualPaddingRight ? (
+                              <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingRight }} />
+                            ) : null}
+                            <th
+                              className={`sticky bottom-0 bg-[var(--dark-primary,_white)] text-[13px]`}
+                              style={{
+                                ...style,
+                                position: 'sticky',
+                                zIndex: columnDef.sticky === 'left' || columnDef.sticky === 'right' ? 12 : 'unset',
+                                minWidth: colSize,
+                                maxWidth: colSize,
+                                display: 'flex',
+                                alignItems: 'center'
+                              }}
+                              key={header.id}
+                            >
+                              {header?.isPlaceholder ? null : flexRender(header.column.columnDef.footer, header.getContext())}
+                            </th>
+                            {left.length && header.id === left[left.length - 1] && virtualPaddingLeft ? (
+                              <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingLeft }} />
+                            ) : null}
+                          </Fragment>
+                        );
+                      })}
+                      {virtualPaddingRight && right.length === 0 ? (
+                        <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingRight }} />
+                      ) : null}
+                    </tr>
+                  );
+                })}
+              </tfoot>
+            </>
+          )}
+        </MaUTable>
       </div>
     </>
   );
