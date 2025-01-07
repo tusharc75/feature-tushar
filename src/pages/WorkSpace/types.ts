@@ -20,10 +20,10 @@ export type ChannelData = {
   brand: string;
   title: string;
   description: string;
-  access: string;
+  access?: string;
   members: Member[];
   createdBy: CreatedBy;
-  updatedBy: CreatedBy;
+  updatedBy?: CreatedBy;
 };
 
 export type User = {
