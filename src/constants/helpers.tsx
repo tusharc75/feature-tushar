@@ -290,6 +290,7 @@ export const sidebarResource = {
   deliveryTicket: 'Delivery Ticket',
   pricingCondition: 'Pricing Condition',
   repairJob: 'Repair Job',
+  expenses: 'Expenses',
   salesOrder: 'Sales Order',
   invoice: 'Invoice',
   eCommercePolicy: 'e-Commerce Policy',
@@ -505,6 +506,11 @@ export const deliveryTicket = {
 export const repairJob = {
   resource: 'repairJob',
   api: '/repair-job'
+};
+
+export const expenses = {
+  resource: 'expenses',
+  api: '/expenses'
 };
 
 export const repairOrder = {
