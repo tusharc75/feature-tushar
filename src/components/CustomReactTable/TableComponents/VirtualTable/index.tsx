@@ -162,7 +162,7 @@ export const VirtualTable = forwardRef(function (
         <MaUTable
           ref={tableRef}
           size="small"
-          className="tableWrap table"
+          className="tableWrap sticky table"
           style={{ height: `${rowVirtualizer.getTotalSize()}px`, width: `max(${totalColumnSize}px, 100%)` }}
         >
           <VirtualTableHead
@@ -212,7 +212,7 @@ export const VirtualTable = forwardRef(function (
           </TableBody>
           {isFooterVisible && (
             <>
-              <tfoot className={'sticky bottom-0'}>
+              <tfoot className="sticky bottom-0">
                 {table?.getFooterGroups().map((footerGroup) => {
                   return (
                     <tr key={footerGroup.id} className="!flex ">
