@@ -25,8 +25,14 @@ import {
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
+import { RenderPassFailChip } from 'src/pages/WorkOrder/Service/Steps';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import ControlPointIcon from '@mui/icons-material/ControlPoint';
+import SettingsIcon from '@mui/icons-material/Settings';
+import styles from './StepFieldsDialog.module.scss';
 
 const useStyles = makeStyles(() => ({
   stepTags: {
