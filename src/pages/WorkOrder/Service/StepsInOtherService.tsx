@@ -337,7 +337,7 @@ const StepsInOtherServices = ({ workOrderId, resource, service, allowedToEdit, o
         {showDeleteConfirmBox.open && (
           <ConfirmationDialog
             open={showDeleteConfirmBox.open}
-            message={`Are you sure you want to delete ${showDeleteConfirmBox.steps.map((item) => item.stepName).join(', ')}?`}
+            message={`Are you sure you want to delete the selected steps?`}
             onClose={() => {
               setShowDeleteConfirmBox({ open: false, loading: false, steps: [] });
             }}
