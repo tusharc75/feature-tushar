@@ -31,7 +31,6 @@ import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineCo
 import { findAll, findOne, insertUpdate, objectStore, setUpindexDB } from 'src/constants/indexdbhelper';
 import { fieldServiceOrderAddOffline, fieldServiceOrderClearOffline } from '../FieldServiceOrder/Services/OfflineHelper';
 import axios, { CancelTokenSource } from 'axios';
-import { Apps, FormatListNumbered } from '@mui/icons-material';
 import FieldTicket from '../FieldServiceOrder/FieldTicket';
 import { useHistory } from 'react-router-dom';
 import IconButtonTabs from 'src/components/IconButtonTabs';
@@ -98,7 +97,6 @@ const FieldServiceTechnician = () => {
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = camelCase(sidebarResource.fieldServiceTechnician);
   const [view, setView] = useState('table');
-  const [selectedData, setSelectedData] = useState(null);
   const [colData, setColData] = useState(null);
   const {
     state: { user, permissions, resources }
@@ -117,6 +115,7 @@ const FieldServiceTechnician = () => {
   const { isOffline } = useContext(CustomOfflineContext);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [selectedData, setSelectedData] = useState(null);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const history = useHistory();
 
@@ -152,7 +151,7 @@ const FieldServiceTechnician = () => {
       if (isOfflineRef.current) return;
       axiosInstance()
         .patch(`${routes?.fieldServiceOrder?.path}/status/${fieldServiceOrderId}`, { status: status })
-        .then(() => {})
+        .then(() => { })
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
@@ -222,7 +221,7 @@ const FieldServiceTechnician = () => {
           });
       }
     },
-    [handleChangeFieldServiceOrderStatus, history, toastConfig, user.user?.brandCurrency]
+    [handleChangeFieldServiceOrderStatus, history, toastConfig]
   );
 
   useEffect(() => {
@@ -287,6 +286,8 @@ const FieldServiceTechnician = () => {
   };
 
   const handleSearch = (e) => {
+    setSelectedData(null);
+    setAllowedToEdit(false)
     dispatch({ type: 'search', search: e.target.value });
   };
 
@@ -323,12 +324,9 @@ const FieldServiceTechnician = () => {
       setSelectedData(row);
       setAllowedToEdit(
         permissions?.fieldTicket?.isUpdate &&
-          checkIsAllowedToEdit(user, sidebarResource.fieldTicket, row?.originaData) &&
-          ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status)
+        checkIsAllowedToEdit(user, sidebarResource.fieldTicket, row?.originaData) &&
+        ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status)
       );
-    } else {
-      setSelectedData(null);
-      setAllowedToEdit(false);
     }
   };
 
@@ -349,6 +347,7 @@ const FieldServiceTechnician = () => {
       handleViewChange('table');
     }
   }, [isMobileView, view, handleViewChange]);
+
 
   return (
     <section className="main-container-v1">
@@ -392,12 +391,12 @@ const FieldServiceTechnician = () => {
                 {selectedData ? (
                   <FieldTicket
                     serviceOrderData={selectedData?.orignalData}
-                    setNextStep={() => {}}
+                    setNextStep={() => { }}
                     allowedToEdit={allowedToEdit}
-                    handleChangeStatus={() => {}}
+                    handleChangeStatus={() => { }}
                     resource={sidebarResource.fieldServiceTechnician}
                     enableGlobalSearch={false}
-                    fetchServiceOrderData={() => {}}
+                    fetchServiceOrderData={() => { }}
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center">

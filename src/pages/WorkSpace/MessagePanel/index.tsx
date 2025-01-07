@@ -11,14 +11,17 @@ import { getAvatarColor } from 'src/pages/WorkSpace/utils';
 import ViewMembers from 'src/pages/WorkSpace/MessagePanel/ViewMembers';
 import { ChannelData, Message, TChannel } from 'src/pages/WorkSpace/types';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import AddMemberDialog from './AddMembersDialog';
+import { Add } from '@mui/icons-material';
+import { useData } from 'src/StateProvider/Provider';
 
 type MessagePanelProps = {
   selectedChannel: TChannel | null;
-  mobScreen: boolean;
-  setSelectedChannel: React.Dispatch<React.SetStateAction<TChannel>>;
   toggleSidebar: () => void;
   isSidebarCollapsed: boolean;
   socket: Socket;
+  newChat: boolean;
+  setNewChat: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 // const avaterPette = ['!bg-[#eeba6c] !dark:bg-[#a17e49]', '!bg-[#3772ff] !dark:bg-[#264fb2]', '!bg-[#0ed290] dark:!bg-[#08855b]'];
@@ -27,12 +30,20 @@ type MessagePanelProps = {
 //   return avaterPette[index % avaterPette.length];
 // };
 
-const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel, toggleSidebar, isSidebarCollapsed, socket }: MessagePanelProps) => {
+const MessagePanel = ({ selectedChannel, toggleSidebar, isSidebarCollapsed, socket, newChat, setNewChat }: MessagePanelProps) => {
   const toastConfig = useContext(CustomToastContext);
   const [channelData, setChannelData] = useState<ChannelData>(null);
   const [isMemberDialogOpen, setIsMemberDialogOpen] = useState(false);
   const [threadDialogOpen, setThreadDialogOpen] = useState<{ open: boolean; message: Message }>({ open: false, message: null });
   const [themeColor] = useAppTheme();
+  const [selectMemberDialog, setSelectMemberDialog] = useState(false);
+  const [selectedUsers, setSelectedUsers] = useState([]);
+
+    const {
+      state: {
+        user: { user },
+      }
+    } = useData();
 
   const fetchChannelData = useCallback(async () => {
     try {
@@ -49,6 +60,11 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel, toggleSi
     }
     return () => setChannelData(null);
   }, [selectedChannel, fetchChannelData]);
+
+  const refreshNewChat = () => {
+    setNewChat(false);
+    setSelectedUsers([]);
+  }
 
   return (
     <>
@@ -68,56 +84,70 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel, toggleSi
             </HtmlTooltip>
           </div>
         )}
-        {selectedChannel && (
+        {(selectedChannel || newChat) ? (
           <div className="flex h-[var(--h)] flex-col">
             <div className={cn('p-[7px_15px] [border-bottom:1px_solid_var(--common-border-color)]')}>
               <div className="mb-1 flex items-center justify-between gap-2">
                 <h5 className={cn('line-clamp-1 text-[18px] font-bold transition-all', isSidebarCollapsed && 'pl-[30px] ')}>
-                  {selectedChannel.title}
+                  {newChat ? 'New Chat' : selectedChannel?.title}
+                  {newChat && <span className="text-sm text-gray-500"> To: {selectedUsers?.map((s: any) => s?.optionLabel)?.join(', ')}</span>}
                 </h5>
-                <HtmlTooltip title={'View all members'}   >
-                  <IconButton
-                    size={'small'}
-                    style={{ border: '', borderRadius: 8, padding: '0px', minHeight: 30, minWidth: 55 }}
-                    onClick={() => setIsMemberDialogOpen(true)}
-                  >
-                    <span className="flex flex-row-reverse">
-                      {channelData?.members ? (
-                        channelData?.members.map((d, i) => {
-                          if (i > 2) return null;
-                          return (
-                            <Avatar
-                              style={{
-                                width: 28,
-                                height: 28,
-                                borderRadius: 999,
-                                fontSize: 11,
-                                marginRight: i !== 0 ? '-10px' : '5px',
-                                outline: '1px solid var(--common-border-color)',
-                                color: 'white',
-                                ...getAvatarColor(d?.optionLabel || '', themeColor)
-                              }}
-                              variant="rounded"
-                              className={cn('my-[2px] uppercase')}
-                              src={d.avatar}
-                            >
-                              {d?.optionLabel.match(/(\b\S)?/g).join('')}
-                            </Avatar>
-                          );
-                        })
-                      ) : (
-                        <div className={cn(' h-[28px] w-[28px] animate-pulse rounded-full bg-gray-400 dark:bg-gray-500')}></div>
-                      )}
-                    </span>
-                    {channelData?.members.length - 3 > 0 ? (
-                      <span className="-ml-[15px] h-[28px] w-[28px] rounded-full bg-[#F0F0F0] text-center text-[11px] leading-[28px] text-[#777575] [outline:1px_solid_#777575] dark:bg-gray-500 dark:text-gray-200 dark:[outline:1px_solid_var(--common-border-color)]">
-                        +{channelData?.members.length - 3}
+                {!newChat && (
+                  <HtmlTooltip title={'View all members'}   >
+                    <IconButton
+                      size={'small'}
+                      style={{ border: '', borderRadius: 8, padding: '0px', minHeight: 30, minWidth: 55 }}
+                      onClick={() => setIsMemberDialogOpen(true)}
+                    >
+                      <span className="flex flex-row-reverse">
+                        {channelData?.members ? (
+                          channelData?.members?.map((d, i) => {
+                            if (i > 2) return null;
+                            return (
+                              <Avatar
+                                style={{
+                                  width: 28,
+                                  height: 28,
+                                  borderRadius: 999,
+                                  fontSize: 11,
+                                  marginRight: i !== 0 ? '-10px' : '5px',
+                                  outline: '1px solid var(--common-border-color)',
+                                  color: 'white',
+                                  ...getAvatarColor(d?.optionLabel || '', themeColor)
+                                }}
+                                variant="rounded"
+                                className={cn('my-[2px] uppercase')}
+                                src={d.avatar}
+                              >
+                                {d?.optionLabel?.match(/(\b\S)?/g).join('')}
+                              </Avatar>
+                            );
+                          })
+                        ) : (
+                          <div className={cn(' h-[28px] w-[28px] animate-pulse rounded-full bg-gray-400 dark:bg-gray-500')}></div>
+                        )}
                       </span>
-                    ) : null}
-                  </IconButton>
-                </HtmlTooltip>
+                      {channelData?.members?.length - 3 > 0 ? (
+                        <span className="-ml-[15px] h-[28px] w-[28px] rounded-full bg-[#F0F0F0] text-center text-[11px] leading-[28px] text-[#777575] [outline:1px_solid_#777575] dark:bg-gray-500 dark:text-gray-200 dark:[outline:1px_solid_var(--common-border-color)]">
+                          +{channelData?.members?.length - 3}
+                        </span>
+                      ) : null}
+                    </IconButton>
+                  </HtmlTooltip>
+                )}
+                {newChat && (
+                  <HtmlTooltip title={`Select Users`}>
+                    <IconButton
+                      size="small"
+                      style={{ border: '1px solid var(--common-border-color)', padding: 6 }}
+                      onClick={() => setSelectMemberDialog(true)}
+                    >
+                      <Add />
+                    </IconButton>
+                  </HtmlTooltip>
+                )}
               </div>
-              <p className="line-clamp-2 text-sm text-gray-500">{selectedChannel.description}</p>
+              <p className="line-clamp-2 text-sm text-gray-500">{selectedChannel?.description}</p>
             </div>
 
             <Messages
@@ -126,7 +156,14 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel, toggleSi
               threadDialogOpen={threadDialogOpen}
               setThreadDialogOpen={setThreadDialogOpen}
               channelData={channelData}
+              newChat={newChat}
+              toUsers={selectedUsers}
+              refreshNewChat={refreshNewChat}
             />
+          </div>
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-gray-500">Select a channel/chat to start conversation</p>
           </div>
         )}
       </div>
@@ -137,6 +174,19 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel, toggleSi
           fetchChannelData={fetchChannelData}
           selectedChannel={selectedChannel}
           handleClose={() => setIsMemberDialogOpen(false)}
+        />
+      )}
+      {selectMemberDialog && (
+        <AddMemberDialog
+          onClose={() => {
+            setSelectMemberDialog(false);
+          }}
+          onSuccess={(users) => {
+            setSelectedUsers(users);
+          }}
+          ignoreIds={[user?._id]}
+          newChat={newChat}
+          users={selectedUsers}
         />
       )}
     </>

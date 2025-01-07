@@ -25,13 +25,16 @@ type MessagesProps = {
   threadDialogOpen: { open: boolean; message: Message };
   setThreadDialogOpen: React.Dispatch<React.SetStateAction<{ open: boolean; message: Message }>>;
   channelData: ChannelData;
+  newChat: boolean;
+  toUsers: string[];
+  refreshNewChat: () => void;
 };
 
 export const groupByDate = (messages: Message[]) => {
   return groupBy(messages, (message) => displayDate(message.date));
 };
 
-const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, channelData }: MessagesProps) => {
+const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, channelData, newChat, toUsers, refreshNewChat }: MessagesProps) => {
   const [messages, setMessages] = useState<{ [key: string]: Message[] }>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [lastMessageSeen, setLastMessageSeen] = useState(null);
@@ -136,8 +139,13 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, ch
   }, [socket, channelId]);
 
   useEffect(() => {
-    fetchMessages();
-  }, [channelId]);
+    if (newChat) {
+      setMessages({});
+      setIsLoading(false);
+    } else {
+      fetchMessages();
+    }
+  }, [channelId, newChat]);
 
   const deleteMessage = async (_id) => {
     try {
@@ -208,7 +216,7 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, ch
           </div>
         )}
       </div>
-      <SendMessage channelId={channelId} socket={socket} channelData={channelData} disabled={isLoading} messageId={lastMessageSeen} />
+      <SendMessage channelId={channelId} socket={socket} channelData={channelData} disabled={isLoading || (newChat && toUsers?.length === 0)} messageId={lastMessageSeen} newChat={newChat} toUsers={toUsers} refreshNewChat={refreshNewChat}/>
       <MoreMenuAndDeleteConfirmDialog
         anchorEl={anchorEl}
         handleMenuClose={handleMenuClose}
