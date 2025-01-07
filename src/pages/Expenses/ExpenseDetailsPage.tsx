@@ -3,10 +3,8 @@ import Grid from '@mui/material/Grid2';
 import { Edit } from '@mui/icons-material';
 import queryString from 'query-string';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import ActivityButton from 'src/components/Activity/ActivityButton';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
@@ -22,7 +20,6 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import {
-  ACTIVITY_RESOURCE,
   SERVICE_ORDER_STATUS,
   checkIsAllowedToDelete,
   checkIsAllowedToEdit,
@@ -30,14 +27,11 @@ import {
   serviceOrderSteps,
   sidebarResource
 } from '../../constants/helpers';
-import { findOne, objectStore } from '../../constants/indexdbhelper';
 import Step from '../DynamicForm/Step';
-import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
 
 const ServiceOrderDetailsPage = () => {
-  const walkmeInstance = useGetWalkmeInstance();
   const toastConfig = useContext(CustomToastContext);
 
   const { id } = useParams();
@@ -62,7 +56,6 @@ const ServiceOrderDetailsPage = () => {
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [nextStep, setNextStep] = useState(false);
   const [currentStep, setCurrentStep] = useState(null);
-  const [statusOptions, setStatusOptions] = useState([]);
 
   const [steps, setSteps] = useState(serviceOrderSteps);
   const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
@@ -79,11 +72,9 @@ const ServiceOrderDetailsPage = () => {
       if (history.action === 'POP') {
         if (locationKeys[1] === location.key) {
           setLocationKeys(([_, ...keys]) => keys);
-          // Handle forward event
           setTabValue(tab ? parseInt(tab) : 0);
         } else {
           setLocationKeys((keys) => [location.key, ...keys]);
-          // Handle back event
           setTabValue(tab ? parseInt(tab) : 0);
         }
       }
@@ -106,12 +97,8 @@ const ServiceOrderDetailsPage = () => {
   const fetchData = async () => {
     try {
       let data;
-      if (isOffline) {
-        data = await findOne(objectStore.expenses, id);
-      } else {
-        const response: any = await axiosInstance().get(`${expenses.api}/${id}`);
-        data = response?.data?.data;
-      }
+      const response: any = await axiosInstance().get(`${expenses.api}/${id}`);
+      data = response?.data?.data;
       setLoadingDetails(false);
 
       setAllowedToEdit(
@@ -147,12 +134,8 @@ const ServiceOrderDetailsPage = () => {
   const getFields = async () => {
     try {
       let data: any;
-      if (isOffline) {
-        data = await findOne(objectStore.resource, sidebarResource.expenses);
-      } else {
-        const response = await axiosInstance().get(`/field/field-policy?resource=${sidebarResource.expenses}`);
-        data = response?.data?.data?.field;
-      }
+      const response = await axiosInstance().get(`/field/field-policy?resource=${sidebarResource.expenses}`);
+      data = response?.data?.data?.field;
       setServiceOrderFields(data);
     } catch (error) {
       toastConfig.setToastConfig(error);

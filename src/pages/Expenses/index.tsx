@@ -18,13 +18,11 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import {
   checkIsAllowedToDelete,
-  customerAccount,
   getDefaultMyRecordType,
   gridLoadingTimeout,
   prepareDataForGrid,
   expenses,
   sidebarResource,
-  supplierAccount,
 } from '../../constants/helpers';
 import { findAll, findOne, insertUpdate, objectStore } from '../../constants/indexdbhelper';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
@@ -80,10 +78,7 @@ const Expenses = () => {
   }, []);
 
   const fetchGridColumns = async () => {
-    let data;
-    if (isOffline) {
-      data = await findOne(objectStore.resource, sidebarResource.expenses);
-    } else {
+    let data; 
       const response = await axiosInstance().get(`/field?resource=${sidebarResource.expenses}`);
       data = response?.data?.data;
       try {
@@ -91,7 +86,6 @@ const Expenses = () => {
       } catch (e) {
         toastConfig.setToastConfig(e);
       }
-    }
     const newColumns = generateColumns(renderedFrom, data, routes?.expensesDetail?.path, true);
     let staticFields = getStaticFields();
     staticFields.forEach((field) => {
@@ -172,23 +166,6 @@ const Expenses = () => {
     }
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    // if (accountDetails.accountId) {
-    //   if (accountDetails.resource === customerAccount.accountResource) {
-    //     filterByIds.push({
-    //       field: 'customerAccount',
-    //       term: accountDetails.accountId
-    //     });
-    //   } else if (accountDetails.resource === supplierAccount.accountResource) {
-    //     filterByIds.push({
-    //       field: 'supplierAccountName',
-    //       term: { $in: [accountDetails.accountId] }
-    //     });
-    //   }
-    // }
-    // if (referenceId) {
-    //   filterByIds.push({ field: 'rentalJob', term: referenceId });
-    // }
-
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
@@ -217,15 +194,7 @@ const Expenses = () => {
     const queryString = getQueryString();
     try {
       let data: any = [],
-        count;
-      if (!isOffline) {
-        const response: any = await axiosInstance().get(`${expenses.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
-        data = response?.data?.data;
-        count = response?.data?.count;
-      } else {
-        data = await findAll(objectStore.expenses);
-        count = data?.length || 0;
-      }
+      count;
       let rows = data.map((u) => {
         let finalObject: any = prepareDataForGrid(u, user);
         finalObject['isChecked'] = false;
