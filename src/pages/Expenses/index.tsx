@@ -282,7 +282,7 @@ const Expenses = () => {
             }}
           />
         ) : null}
-        {referenceType ? <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} /> : null}
+        {referenceType ? <Chip className="ml-3" color="primary" label={`Expenses : ${referenceType}`} onDelete={updateQueryParams} /> : null}
       </>
     );
   };
