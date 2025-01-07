@@ -11,11 +11,11 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
-  const [selectedUsers, setSelectedUsers] = useState([]);
+const AddMemberDialog = ({ onClose, channelId = null, onSuccess, ignoreIds = [], newChat = false, users= [] }) => {
+  const [selectedUsers, setSelectedUsers] = useState(users?.length > 0 ? users : []);
   const toastConfig = useContext(CustomToastContext);
 
-  const [options, setOptions] = useState([]);
+  const [options, setOptions] = useState(users?.length > 0 ? users : []);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const [inputValue, setInputValue] = useState('');
@@ -36,7 +36,7 @@ const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
       }));
 
       setOptions((currentOptions) => {
-        let alreadySelectedOptions: any = currentOptions?.filter((option) => selectedUsers?.includes(option?.optionValue)) || [];
+        let alreadySelectedOptions: any = currentOptions?.filter((option) => selectedUsers?.map(s => s?.optionValue)?.includes(option?.optionValue)) || [];
         optionsData = uniqBy([...alreadySelectedOptions, ...optionsData], 'optionValue');
         return page === 0 ? optionsData : [...currentOptions, ...optionsData];
       });
@@ -52,7 +52,7 @@ const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
 
   const handleAddMembers = async () => {
     try {
-      const { data } = await axiosInstance().put(`/work-space/channel/${channelId}`, { userIds: selectedUsers });
+      const { data } = await axiosInstance().put(`/work-space/channel/${channelId}`, { userIds: selectedUsers?.map(s => s?.optionValue) });
       onSuccess();
       toastConfig.setToastConfig({
         open: true,
@@ -105,12 +105,10 @@ const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
           loading={loading || !options}
           options={options}
           autoHighlight
-          value={selectedUsers?.map((userId) => options?.find((option) => option?.optionValue === userId) || { optionLabel: '', optionValue: userId })}
+          value={selectedUsers?.map((user) => options?.find((option) => option?.optionValue === user?.optionValue) || { optionLabel: '', optionValue: user?.optionValue })}
           getOptionLabel={(option) => option.optionLabel || ''}
           isOptionEqualToValue={(option, val) => option.optionValue === val.optionValue}
-          onChange={(event, newValue) => {
-            setSelectedUsers(newValue.map((user) => user.optionValue));
-          }}
+          onChange={(event, newValue) => { setSelectedUsers(newValue) }}
           renderInput={(params) => (
             <TextField
               {...params}
@@ -152,10 +150,14 @@ const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
         </ThemeButton>
         <ThemeButton
           buttonType="theme"
-          disabled={selectedUsers.length === 0}
+          disabled={selectedUsers?.length === 0}
           onClick={(e) => {
             e.preventDefault();
-            handleAddMembers();
+            if (newChat) {
+              onSuccess(selectedUsers);
+            } else {
+              handleAddMembers();
+            }
             onClose();
           }}
         >

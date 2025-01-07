@@ -22,6 +22,9 @@ type SendMessageProps = {
   channelData?: ChannelData;
   disabled?: boolean;
   parentMessageId?: string | null;
+  newChat?: boolean;
+  toUsers?: any[];
+  refreshNewChat?: () => void;
 };
 
 const SendMessage = ({
@@ -34,6 +37,9 @@ const SendMessage = ({
   channelData,
   disabled = false,
   parentMessageId = null,
+  newChat = false,
+  toUsers = [],
+  refreshNewChat = () => { },
 }: SendMessageProps) => {
   const toastConfig = useContext(CustomToastContext);
   const [themeColor] = useAppTheme();
@@ -76,11 +82,19 @@ const SendMessage = ({
         files.forEach((file) => {
           formData.append('files', file);
         });
-        formData.append('channelId', channelId);
-        if (parentMessageId) formData.append('parentId', parentMessageId);
-        await axiosInstance().post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(() => {
-          socket.emit('newMessagePosted', { channelId, messageId });
-        });
+        if (newChat && toUsers.length > 0) {
+          formData.append('toUsers', JSON.stringify(toUsers?.map((user) => user?.optionValue)));
+          await axiosInstance().post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(() => {
+            socket.emit('newChat', { channelId: 'directMessaging' });
+            refreshNewChat();
+          });
+        } else {
+          formData.append('channelId', channelId);
+          if (parentMessageId) formData.append('parentId', parentMessageId);
+          await axiosInstance().post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(() => {
+            socket.emit('newMessagePosted', { channelId, messageId });
+          });
+        }
       }
       setMessage('');
       setFiles([]);
@@ -238,7 +252,7 @@ const SendMessage = ({
               }
             }}
             initialValue=""
-            disabled={!channelId || disabled}
+            disabled={!(channelId || newChat) || disabled}
             init={{
               skin: themeColor === 'dark' ? 'oxide-dark' : 'oxide',
               content_css: themeColor === 'dark' ? 'dark' : 'default',
@@ -324,7 +338,7 @@ const SendMessage = ({
           )}
         </div>
       </div>
-      {mentionInitialPosition && (
+      {mentionInitialPosition && !newChat && (
         <Mention
           editor={editorRef.current}
           mentionInitialPosition={mentionInitialPosition}

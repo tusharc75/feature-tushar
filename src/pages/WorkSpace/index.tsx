@@ -19,6 +19,7 @@ const Workspace = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const mobScreen = useMediaQuery('(max-width:768px)');
   const [socket, setSocket] = useState<Socket>(null);
+  const [newChat, setNewChat] = useState(false);
   const {
     state: {
       user: { user },
@@ -38,14 +39,18 @@ const Workspace = () => {
 
   const fetchChannels = async () => {
     const { data } = await axiosInstance().get('/work-space/channel');
+    data?.data?.forEach((d: any) => {
+      if (d?.type === 'chat') {
+        d.title = (d?.members?.filter(m => m?.optionValue !== user?._id) || d?.members)?.map((m) => m?.optionLabel)?.join(', ');
+        d.description = 'Direct Messaging';
+      }
+    })
     setChannels(data.data || []);
     const queryParam = new URLSearchParams(window.location.search)
     const channelId = queryParam.get("channelId");
     if (channelId) {
       const channel = data?.data?.find((channel) => channel?._id === channelId);
       setSelectedChannel(channel);
-    } else if (data?.data?.length) {
-      setSelectedChannel(data?.data[0]);
     }
   };
 
@@ -55,10 +60,11 @@ const Workspace = () => {
   };
 
   useEffect(() => {
-    if (socket && channels?.length) {
-      channels.forEach((channel) => {
+    if (socket) {
+      channels?.forEach((channel) => {
         socket.emit('joinChannel', channel?._id);
       });
+      socket.off('notification');
       socket.on('notification', (channel, userId) => {
         if (user?._id !== userId && selectedChannel?._id !== channel) {
           setChannels((prev) => {
@@ -75,12 +81,18 @@ const Workspace = () => {
           });
         }
       });
+      socket.emit('joinChannel', 'directMessaging');
+      socket.off('refreshChannels');
+      socket.on('refreshChannels', fetchChannels);
     }
     return () => {
-      if (socket && channels?.length) {
-        channels.forEach((channel) => {
+      if (socket) {
+        channels?.forEach((channel) => {
           socket.emit('leaveChannel', channel?._id);
         });
+        socket.emit('leaveChannel', 'directMessaging');
+        socket.off('notification');
+        socket.off('refreshChannels');
       }
     };
   }, [socket, channels]);
@@ -120,14 +132,15 @@ const Workspace = () => {
               handleDeleteChannels={handleDeleteChannels}
               mobScreen={mobScreen}
               setChannels={setChannels}
+              setNewChat={setNewChat}
             />
             <MessagePanel
               isSidebarCollapsed={isSidebarCollapsed}
               toggleSidebar={toggleSidebar}
-              setSelectedChannel={setSelectedChannel}
               selectedChannel={selectedChannel}
-              mobScreen={mobScreen}
               socket={socket}
+              newChat={newChat}
+              setNewChat={setNewChat}
             />
           </div>
         </CustomContainer>
