@@ -257,6 +257,12 @@ const routes = {
   repairJobDetail: {
     path: '/repair-job/detail'
   },
+  expenses:{
+    path:'/expenses'
+  },
+  expensesDetail:{
+    path:'/expenses/detail'
+  },
   salesOrder: {
     path: '/sales-order'
   },
