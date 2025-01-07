@@ -14,7 +14,7 @@ import { GlobalFiltersType } from './GlobalFilter';
 import Loader from 'src/components/Loader';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import { camelCase, filter, isEmpty, isObject } from 'lodash';
+import { camelCase, isEmpty, isObject } from 'lodash';
 import MapView from './MapView';
 import { IFormDataType } from '../DashboardBuilder/builderHelpers';
 import getStaticData from './getStaticData';
@@ -29,7 +29,6 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import axios, { CancelTokenSource } from 'axios';
 import dayjs from 'dayjs';
 import OpenInFullIcon from '@mui/icons-material/OpenInFull';
-import { useHistory } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
 export interface ChartDataType extends IFormDataType {
   _id: any;
@@ -67,7 +66,6 @@ const ChartTypes = ({
   const {
     state: { selectedEntity, user }
   } = useData();
-  const history = useHistory();
 
   const getDefaultFilter = (filters) => {
     const defaultFilters = filters?.filter((f) => f.default);
