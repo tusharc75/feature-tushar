@@ -42,7 +42,7 @@ const ReportsCenter = () => {
             {permissions?.scheduleReport?.isRead && (
               <Link to={`/schedule-report`}>
                 <ThemeButton iconForMobile={<DateRangeIcon />} startIcon={<DateRangeIcon />} mobileTooltip={`Schedule Report`}>
-                  Custom Report
+                  Schedule Report
                 </ThemeButton>
               </Link>
             )}
