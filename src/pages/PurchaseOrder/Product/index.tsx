@@ -38,7 +38,7 @@ import {
   generateDeleteStep
 } from '../walkmeSteps';
 
-const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: hasPermission, checkReceivedProduct }) => {
+const Product = ({ purchaseOrderData, setNextStep, renderedFrom,stepFullScreen, allowedToEdit: hasPermission, checkReceivedProduct }) => {
   const toastConfig = useContext(CustomToastContext);
   const { setWalkmeData } = useSetWalkmeData();
   const walkmeInstance = useGetWalkmeInstance();
@@ -742,7 +742,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       {columns ? (
         <Box zIndex={5}>
           <CustomReactTable
-            height={'calc(100vh - 393px)'}
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}
