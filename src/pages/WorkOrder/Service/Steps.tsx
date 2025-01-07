@@ -1751,7 +1751,11 @@ const Steps = ({
             {showDeleteConfirmBox.open && (
               <ConfirmationDialog
                 open={showDeleteConfirmBox.open}
-                message={`Are you sure you want to delete ${showDeleteConfirmBox.steps.map((item) => item.stepName).join(', ')}?`}
+                message={
+                  showDeleteConfirmBox.steps.length === 1
+                    ? `Are you sure you want to delete ${showDeleteConfirmBox.steps[0].stepName}?`
+                    : "Are you sure you want to delete the selected steps?"
+                }
                 onClose={() => {
                   setShowDeleteConfirmBox({ open: false, loading: false, steps: [] });
                 }}
