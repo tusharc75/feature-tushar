@@ -58,14 +58,9 @@ export const VirtualTable = forwardRef(function (
   },
   ref: ForwardedRef<HTMLTableElement>
 ) {
-  // console.count('virtual');
-  // virtualization
   const parentRef = React.useRef();
-
-  // if footer present then + 2 for header and footer height
-  // else + 1 for only header height
   const rowVirtualizer = useVirtualizer({
-    count: isFooterVisible ? rows.length + 2 : rows.length + 1,
+    count: rows.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 45,
     overscan: 2,
@@ -74,7 +69,6 @@ export const VirtualTable = forwardRef(function (
         ? (element) => element?.getBoundingClientRect().height
         : undefined
   });
-
   const columnVirtualizer = useVirtualizer({
     count: columns?.length || 1,
     estimateSize: (index) => sizes[index] || 200,
@@ -93,7 +87,6 @@ export const VirtualTable = forwardRef(function (
   useEffect(() => {
     columnVirtualizer.measure();
   }, [columns.length]);
-
   useEffect(() => {
     rowVirtualizer.measure();
   }, [rows.length]);
@@ -159,12 +152,7 @@ export const VirtualTable = forwardRef(function (
           </Box>
         )}
 
-        <MaUTable
-          ref={tableRef}
-          size="small"
-          className="tableWrap sticky table"
-          style={{ height: `${rowVirtualizer.getTotalSize()}px`, width: `max(${totalColumnSize}px, 100%)` }}
-        >
+        <MaUTable ref={tableRef} size="small" className="tableWrap sticky table" style={{ width: `max(${totalColumnSize}px, 100%)` }}>
           <VirtualTableHead
             table={table}
             virtualColumns={virtualColumns}
@@ -181,7 +169,8 @@ export const VirtualTable = forwardRef(function (
           />
           <TableBody
             style={{
-              overflow: 'hidden'
+              display: 'block',
+              height: `${rowVirtualizer.getTotalSize()}px`
             }}
             className={`body relative ${isClientSideGrid && footerRowFound ? 'with-footer' : ''}`}
           >
