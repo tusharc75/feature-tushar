@@ -14,7 +14,7 @@ import { GlobalFiltersType } from './GlobalFilter';
 import Loader from 'src/components/Loader';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import { camelCase, isEmpty, isObject } from 'lodash';
+import { camelCase, filter, isEmpty, isObject } from 'lodash';
 import MapView from './MapView';
 import { IFormDataType } from '../DashboardBuilder/builderHelpers';
 import getStaticData from './getStaticData';
@@ -29,6 +29,8 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import axios, { CancelTokenSource } from 'axios';
 import dayjs from 'dayjs';
 import OpenInFullIcon from '@mui/icons-material/OpenInFull';
+import { useHistory } from 'react-router-dom';
+import routes from 'src/components/Helpers/Routes';
 export interface ChartDataType extends IFormDataType {
   _id: any;
   horizontalChart?: string;
@@ -65,6 +67,7 @@ const ChartTypes = ({
   const {
     state: { selectedEntity, user }
   } = useData();
+  const history = useHistory();
 
   const getDefaultFilter = (filters) => {
     const defaultFilters = filters?.filter((f) => f.default);
@@ -431,6 +434,16 @@ const ChartTypes = ({
                           }
                         })
                       },
+                      onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                          const dataIndex = elements[0].index; 
+                          const clickedLabel = chartData.labels[dataIndex];
+                          window.open(
+                            `${routes.serializedAsset.path}?assetStatus=${clickedLabel}`,
+                            '_blank'
+                          )
+                        }
+                      },                      
                       maintainAspectRatio: false,
                       indexAxis: chart?.kpi?.horizontalBar ? 'y' : 'x',
                       scales: {
