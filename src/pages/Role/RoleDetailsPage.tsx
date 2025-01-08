@@ -547,7 +547,7 @@ const RoleDetailsPage = () => {
                   {permissions?.role.isUpdate && isEdit && (
                     <ThemeButton
                       disabled={isUpdating || checkError() || !isEdit}
-                      buttonType='theme'
+                      buttonType="theme"
                       isLoading={isUpdating}
                       onClick={handleUpdateRole}
                     >
@@ -572,10 +572,10 @@ const RoleDetailsPage = () => {
         </Box>
         <Box className={`detail-container-v1`}>
           <Grid container spacing={3}>
-            <Grid size={{xs:12, sm:12, md:8, lg:8}}>
+            <Grid size={{ xs: 12, sm: 12, md: 8, lg: 8 }}>
               <div className="mb-4">
                 <Grid container spacing={1}>
-                  <Grid size={{lg:5, md:5, sm:12, xs:12}}>
+                  <Grid size={{ lg: 5, md: 5, sm: 12, xs: 12 }}>
                     <TextField
                       disabled={roleData?.type && roleData?.permission ? true : !permissions?.role?.isUpdate || !isEdit}
                       required
@@ -587,7 +587,7 @@ const RoleDetailsPage = () => {
                       onChange={(e) => setValues({ ...values, name: e.target.value.trimStart() })}
                     />
                   </Grid>
-                  <Grid size={{lg:5, md:5, sm:12, xs:12}}>
+                  <Grid size={{ lg: 5, md: 5, sm: 12, xs: 12 }}>
                     <TextField
                       disabled={roleData?.type && roleData?.permission ? true : !permissions?.role?.isUpdate || !isEdit}
                       required
@@ -599,7 +599,7 @@ const RoleDetailsPage = () => {
                       onChange={(e) => setValues({ ...values, description: e.target.value.trimStart() })}
                     />
                   </Grid>
-                  <Grid size={{lg:2, md:2, sm:12, xs:12}}>
+                  <Grid size={{ lg: 2, md: 2, sm: 12, xs: 12 }}>
                     <Autocomplete
                       id={`roleTier`}
                       disabled={roleData?.type && roleData?.permission ? true : !permissions?.role?.isUpdate || !isEdit}
@@ -727,7 +727,7 @@ const RoleDetailsPage = () => {
               </div>
               <Box marginY={2} />
             </Grid>
-            <Grid size={{xs:12, sm:12, md:4, lg:4}}>
+            <Grid size={{ xs: 12, sm: 12, md: 4, lg: 4 }}>
               <Box className="single-form-v1 ">
                 <Box className="form-head-v1">
                   <Typography component={'h3'}>Assigned Users ({roleUsers.length || 0})</Typography>
@@ -768,7 +768,7 @@ const RoleDetailsPage = () => {
                             <>
                               <Box marginY={2} />
                               <ThemeButton
-                                buttonType="transparent" 
+                                buttonType="transparent"
                                 className="accordion-outlined-button"
                                 onClick={() =>
                                   history.push(`/user`, {
