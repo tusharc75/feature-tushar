@@ -216,7 +216,7 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, ch
           </div>
         )}
       </div>
-      <SendMessage channelId={channelId} socket={socket} channelData={channelData} disabled={isLoading || (newChat && toUsers?.length === 0)} messageId={lastMessageSeen} newChat={newChat} toUsers={toUsers} refreshNewChat={refreshNewChat}/>
+      <SendMessage channelId={channelId} socket={socket} channelData={channelData} disabled={isLoading || (newChat && toUsers?.length === 0)} messageId={lastMessageSeen} newChat={newChat} toUsers={toUsers} refreshNewChat={refreshNewChat} />
       <MoreMenuAndDeleteConfirmDialog
         anchorEl={anchorEl}
         handleMenuClose={handleMenuClose}
@@ -510,7 +510,7 @@ export const DisplaySingleMessage = ({
                             </Avatar>
                           );
                         })}
-                        <span className="link ml-1 line-clamp-1">{message.replies.length} replies</span>
+                        <span className="link ml-1 line-clamp-1">{message.replies.length} {message.replies.length > 1 ? 'replies' : 'reply'}</span>
                         <div className="relative ml-1 text-[13px] font-normal">
                           <span className="absolute line-clamp-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100">View Thread</span>
                           <span className="line-clamp-1 opacity-100 transition-opacity duration-200 group-hover:opacity-0">
