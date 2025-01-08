@@ -20,6 +20,8 @@ const Workspace = () => {
   const mobScreen = useMediaQuery('(max-width:768px)');
   const [socket, setSocket] = useState<Socket>(null);
   const [newChat, setNewChat] = useState(false);
+  const [newChatUsers, setNewChatUsers] = useState([]);
+  const [newChatAddMemberDialog, setNewChatAddMemberDialog] = useState<boolean>(false);
   const {
     state: {
       user: { user },
@@ -115,7 +117,7 @@ const Workspace = () => {
         <div className="headerbox-v1">
           <CustomBreadCrumbs routes={[{ title: resources?.workSpace?.titlePlural }]} />
         </div>
-        <CustomContainer className="!min-h-[var(--container-height)] !p-0 [--container-height:calc(100vh-150px)] [--h:max(500px,_var(--container-height))] [--sidebar-width:270px] max-[768px]:[--container-height:calc(100vh-179px)]">
+        <CustomContainer className="border !min-h-[var(--container-height)] !p-0 [--container-height:calc(100vh-150px)] [--h:max(500px,_var(--container-height))] [--sidebar-width:270px] max-[768px]:[--container-height:calc(100vh-179px)]">
           <div
             className={cn(
               'relative flex min-h-[var(--h)] overflow-hidden rounded-lg transition-[margin]',
@@ -133,6 +135,8 @@ const Workspace = () => {
               mobScreen={mobScreen}
               setChannels={setChannels}
               setNewChat={setNewChat}
+              setNewChatUsers={setNewChatUsers}
+              setNewChatAddMemberDialog={setNewChatAddMemberDialog}
             />
             <MessagePanel
               isSidebarCollapsed={isSidebarCollapsed}
@@ -141,6 +145,10 @@ const Workspace = () => {
               socket={socket}
               newChat={newChat}
               setNewChat={setNewChat}
+              newChatUsers={newChatUsers}
+              setNewChatUsers={setNewChatUsers}
+              newChatAddMemberDialog={newChatAddMemberDialog}
+              setNewChatAddMemberDialog={setNewChatAddMemberDialog}
             />
           </div>
         </CustomContainer>

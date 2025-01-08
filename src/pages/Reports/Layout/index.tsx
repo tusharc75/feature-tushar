@@ -8,7 +8,7 @@ const Layout = ({ sidebarContent, children, sidebarHead }) => {
   const { isSidebarOpen, isMobile, toggleSidebar } = state;
 
   return (
-    <div className="detail-container-v1 flex h-[--max-h] p-0 [--max-h:calc(100vh-100px)]">
+    <div className="border detail-container-v1 flex h-[--max-h] p-0 [--max-h:calc(100vh-100px)]">
       <div
         onClick={toggleSidebar}
         title={isMobile && isSidebarOpen ? 'Close Sidebar' : ''}
