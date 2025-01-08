@@ -155,10 +155,6 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
       } = await axiosInstance().get(`/report/${selectedReport.resource}/column`);
       let newColumns = generateColumns(selectedReport.resource, columnFields);
       newColumns?.forEach((o) => {
-        if (o?.type === 'number') {
-          o.disableFilters = true;
-          o.disableSortBy = true;
-        }
         if (resourceCamelCase === 'inventoryHistory') {
           if (o?.accessor === 'type') {
             o.cell = ({ row }) => CreditDebitTypeRenderer(row);
