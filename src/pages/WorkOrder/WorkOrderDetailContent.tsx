@@ -594,9 +594,9 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
             {workOrderData && workOrderFields.length ? (
               <DetailsPage data={workOrderData} fields={workOrderFields} />
             ) : (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
+              <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
-              </Grid>
+              </div>
             )}
             {workOrderCostFields?.length && workOrderData?.workOrderCost ? (
               <Box pt={2}>

@@ -200,9 +200,9 @@ const BulkAssetCreationDetailsPage = () => {
         <TabPanel value={tabValue} index={0}>
           <Box>
             {loadingBulkAssetCreation || !bulkAssetCreationFields.length ? (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
+              <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
-              </Grid>
+              </div>
             ) : (
               <DetailsPage data={bulkAssetCreationData} fields={bulkAssetCreationFields} />
             )}
@@ -212,9 +212,9 @@ const BulkAssetCreationDetailsPage = () => {
         <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
           <TabPanel value={tabValue} index={1}>
             {!bulkAssetCreationData || !bulkAssetCreationFields.length ? (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
+              <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
-              </Grid>
+              </div>
             ) : (
               <>
                 <Steps

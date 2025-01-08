@@ -1,6 +1,7 @@
 import { Box } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import EditIcon from '@mui/icons-material/Edit'; import queryString from 'query-string';
+import EditIcon from '@mui/icons-material/Edit';
+import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -166,9 +167,9 @@ const SupportTicketDetail = () => {
         <TabPanel value={tabValue} index={0}>
           <Box>
             {loading || !fields?.length ? (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
+              <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
-              </Grid>
+              </div>
             ) : (
               <>
                 <DetailsPage data={supportTicketData} fields={fields} />

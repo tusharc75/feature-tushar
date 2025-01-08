@@ -395,9 +395,9 @@ const RepairOrderDetails = () => {
             {repairOrderData && repairOrderFields.length ? (
               <DetailsPage data={repairOrderData} fields={repairOrderFields} />
             ) : (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
+              <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
-              </Grid>
+              </div>
             )}
           </Box>
         </TabPanel>
@@ -415,13 +415,13 @@ const RepairOrderDetails = () => {
               setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
               handlePrev={
                 stepNames[currentStep] === 'Quotation' &&
-                  allowedToEdit &&
-                  [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                    quotationVersionData?.status
-                  )
+                allowedToEdit &&
+                [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                  quotationVersionData?.status
+                )
                   ? () => {
-                    setShowQuotationConfirmBox(true);
-                  }
+                      setShowQuotationConfirmBox(true);
+                    }
                   : null
               }
               updateStatus={(step: number) => {
@@ -459,8 +459,8 @@ const RepairOrderDetails = () => {
                   currentStep === 3
                     ? allowedToEdit
                     : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                      quotationVersionData?.status
-                    )
+                          quotationVersionData?.status
+                        )
                       ? false
                       : allowedToEdit
                 }

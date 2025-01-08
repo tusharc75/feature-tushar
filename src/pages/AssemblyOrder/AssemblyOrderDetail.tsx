@@ -139,8 +139,8 @@ const AssemblyOrderDetail = () => {
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.assemblyOrder, data));
         setAllowedToDelete(
           permissions?.assemblyOrder?.isDelete &&
-          checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
-          data?.canDelete
+            checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
+            data?.canDelete
         );
         setAssemblyOrderData({ ...data });
       })
@@ -212,9 +212,9 @@ const AssemblyOrderDetail = () => {
             {assemblyOrderData && allFields.length ? (
               <DetailsPage data={assemblyOrderData} fields={allFields} />
             ) : (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
+              <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
-              </Grid>
+              </div>
             )}
           </Box>
         </TabPanel>
@@ -231,10 +231,10 @@ const AssemblyOrderDetail = () => {
               setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
               handleNext={
                 assemblyOrderProcessStepsNames[currentStep] === 'Work Order' &&
-                  !assemblyOrderData?.material?.filter((m) => m?.type === MATERIAL_TYPE.package && !m?.parentId)?.every((m) => m?.managedPackage)
+                !assemblyOrderData?.material?.filter((m) => m?.type === MATERIAL_TYPE.package && !m?.parentId)?.every((m) => m?.managedPackage)
                   ? () => {
-                    setOpenManagedPackageDialog(true);
-                  }
+                      setOpenManagedPackageDialog(true);
+                    }
                   : null
               }
               updateStatus={(step: number) => {

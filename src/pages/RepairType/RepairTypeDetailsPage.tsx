@@ -93,20 +93,20 @@ const RepairTypeDetailsPage = () => {
       </Box>
       <Box className="detail-container-v1">
         <Grid container spacing={1}>
-          <Grid size={{xs:12, sm:12, md:8, lg:8}}>
+          <Grid size={{ xs: 12, sm: 12, md: 8, lg: 8 }}>
             <div style={{ height: '650px' }}>
               <Box>
                 {repairTypeData && fields.length ? (
                   <DetailsPage data={repairTypeData} fields={fields} />
                 ) : (
-                  <Grid container spacing={2} style={{ padding: '8px' }}>
+                  <div className="p-2">
                     <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                  </Grid>
+                  </div>
                 )}
               </Box>
             </div>
           </Grid>
-          <Grid size={{xs:12, sm:12, md:4, lg:4}}>
+          <Grid size={{ xs: 12, sm: 12, md: 4, lg: 4 }}>
             <div className="single-form-v1">
               <Box className="form-head-v1">
                 <Typography component={'h3'}>Repair Steps</Typography>
@@ -116,10 +116,10 @@ const RepairTypeDetailsPage = () => {
                   <>
                     <Box key={index} p={1} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
                       <Grid container>
-                        <Grid size={{xs:2, sm:2, md:2, lg:2}}>
+                        <Grid size={{ xs: 2, sm: 2, md: 2, lg: 2 }}>
                           <Typography variant="body2">{steps.order}</Typography>
                         </Grid>
-                        <Grid size={{xs:10, sm:10, md:10, lg:10}}>
+                        <Grid size={{ xs: 10, sm: 10, md: 10, lg: 10 }}>
                           <Typography variant="body2">{steps.name}</Typography>
                         </Grid>
                       </Grid>

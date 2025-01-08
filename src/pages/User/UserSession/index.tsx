@@ -85,9 +85,9 @@ const UserSession = ({ id }) => {
         <DurationFilter label={''} defaultTimeFrame="1-year" duration={trackingTime} setDuration={setTrackingTime} showAll={true} />
         <Typography className="subtitle1 m-2">
           {userTrackingDataLoading ? (
-            <Grid container spacing={2} style={{ padding: '8px' }}>
+            <div className="p-2">
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Grid>
+            </div>
           ) : userTrackingData.labels.length === 0 ? (
             <h3>No activity found in the selected date range</h3>
           ) : (

@@ -136,9 +136,9 @@ const WorkFlowReportDetail = () => {
           {workFlowData && workFlowData?.tabs?.length > 0 && workFlowData?.tabs?.map((tab, i) => <CustomTab value={i}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         {loading || !workFlowReportData || !workFlowData ? (
-          <Grid container spacing={2} style={{ padding: '8px' }}>
+          <div className="p-2">
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Grid>
+          </div>
         ) : (
           workFlowData &&
           workFlowData?.tabs?.length > 0 &&
