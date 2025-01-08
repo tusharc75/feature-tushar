@@ -29,6 +29,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import axios, { CancelTokenSource } from 'axios';
 import dayjs from 'dayjs';
 import OpenInFullIcon from '@mui/icons-material/OpenInFull';
+import routes from 'src/components/Helpers/Routes';
 export interface ChartDataType extends IFormDataType {
   _id: any;
   horizontalChart?: string;
@@ -431,6 +432,16 @@ const ChartTypes = ({
                           }
                         })
                       },
+                      onClick: (event, elements) => {
+                        if (elements.length > 0 && chartData.datasets[0].label === 'Asset Count') {
+                          const dataIndex = elements[0].index; 
+                          const clickedLabel = chartData.labels[dataIndex];
+                          window.open(
+                            `${routes.serializedAsset.path}?assetStatus=${clickedLabel}`,
+                            '_blank'
+                          )
+                        }
+                      },                      
                       maintainAspectRatio: false,
                       indexAxis: chart?.kpi?.horizontalBar ? 'y' : 'x',
                       scales: {
