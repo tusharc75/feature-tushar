@@ -220,7 +220,6 @@
 
   // Rich text
   .tox {
-
     .tox-menubar,
     .tox-toolbar__primary {
       background-color: var(--dark-primary);
@@ -303,7 +302,7 @@ body {
   }
 }
 
-body>iframe {
+body > iframe {
   z-index: -1 !important;
 }
 
@@ -800,12 +799,12 @@ body::-webkit-scrollbar-thumb {
 
 .header-panel {
   color: var(--secondary);
-  padding: var(--padding, 0 0 15px);
+  padding: var(--padding, 0 0 7px);
   border-radius: 6px 6px 0 0;
   row-gap: 5px;
 
   @media all and (min-width: 600px) {
-    --padding: 0 0 18px;
+    --padding: 0 0 7px;
   }
 
   & .MuiButton-outlinedSizeSmall {
@@ -844,7 +843,7 @@ body::-webkit-scrollbar-thumb {
   & .listingHeader {
     display: none;
 
-    &~svg {
+    & ~ svg {
       display: none;
     }
   }
@@ -852,7 +851,7 @@ body::-webkit-scrollbar-thumb {
   & .headerLogo {
     display: none;
 
-    &~span {
+    & ~ span {
       display: none;
     }
   }
@@ -948,7 +947,7 @@ body::-webkit-scrollbar-thumb {
   margin-block-end: 10px;
   border-radius: 6px 6px 0 0;
   overflow-y: hidden;
-  padding-block: 10px;
+  padding-bottom: 10px;
 
   @media all and (max-width: 768px) {
     min-height: max(600px, calc(100vh - 99px));
@@ -1437,7 +1436,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 @supports (not (gap: 0.25rem)) and (not (-webkit-gap: 0.25rem)) {
-  .quoteHeader>*:not(:nth-child(1)) {
+  .quoteHeader > *:not(:nth-child(1)) {
     margin-left: 0.25rem !important;
   }
 }
@@ -1684,7 +1683,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 /* Style your items */
-.my-masonry-grid_column>div {
+.my-masonry-grid_column > div {
   /* change div to reference your elements you put in <Masonry> */
   margin-bottom: 30px;
 }
@@ -2137,11 +2136,11 @@ svg.MuiSvgIcon-root {
   align-items: center;
   position: relative;
 
-  div[role='tablist']>button:first-child {
+  div[role='tablist'] > button:first-child {
     margin-left: 0;
   }
 
-  div[role='tablist']>button {
+  div[role='tablist'] > button {
     min-width: 189px;
     padding: 15px 10px;
     position: relative;
@@ -2327,7 +2326,7 @@ svg.MuiSvgIcon-root {
       right: 50px;
     }
 
-    div[role='tablist']>button {
+    div[role='tablist'] > button {
       min-width: 169px;
       padding: 9px 6px;
     }
@@ -2373,7 +2372,7 @@ svg.MuiSvgIcon-root {
       pointer-events: none;
     }
 
-    div[role='tablist']>button {
+    div[role='tablist'] > button {
       margin: 0 5px 15px;
     }
   }
@@ -2399,7 +2398,7 @@ svg.MuiSvgIcon-root {
     border-right: 0;
     border-bottom: 0;
 
-    &>div {
+    & > div {
       padding: 10px 0 0px;
     }
   }
@@ -2928,7 +2927,7 @@ svg.MuiSvgIcon-root {
   .new-content-head-v1 {
     max-width: 100%;
 
-    &> :is(h1, h2, h3, h4, h5, h6) {
+    & > :is(h1, h2, h3, h4, h5, h6) {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -2950,7 +2949,8 @@ svg.MuiSvgIcon-root {
     gap: 8px;
     align-items: center;
     justify-content: space-between;
-    margin-block: 10px;
+    margin-top: 10px;
+    margin-bottom: 15px;
     min-height: 32px;
 
     .primaryButton {
@@ -2970,7 +2970,7 @@ svg.MuiSvgIcon-root {
   .detail-container-v1 {
     position: relative;
     // padding: var(--container-padding, 20px 15px);
-    padding-block: 15px;
+    padding-bottom: 15px;
     border-radius: 10px;
     min-height: 700px;
     isolation: isolate;
@@ -2989,7 +2989,7 @@ svg.MuiSvgIcon-root {
     }
 
     button {
-      &>span {
+      & > span {
         line-height: 16px;
       }
     }
@@ -3062,7 +3062,7 @@ svg.MuiSvgIcon-root {
   }
 
   .spacing-vertical-v1 {
-    &>div {
+    & > div {
       @media all and (min-width: 960px) {
         padding-right: 20px;
       }
@@ -3074,7 +3074,7 @@ svg.MuiSvgIcon-root {
   }
 
   .details-full-height-v1 {
-    &>div:only-child {
+    & > div:only-child {
       min-height: 500px;
       border: 1px solid #f7f7f7;
       box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.03);
@@ -3084,7 +3084,7 @@ svg.MuiSvgIcon-root {
         height: calc(100vh + 34px);
       }
 
-      &>div:last-of-type {
+      & > div:last-of-type {
         border: 0px;
         box-shadow: unset;
         border-radius: unset;
@@ -3273,7 +3273,7 @@ body {
     background: #282845;
   }
 
-  &> :is(h1, h2, h3, h4, h5, h6) {
+  & > :is(h1, h2, h3, h4, h5, h6) {
     font-weight: 600;
     font-size: 14px;
     line-height: 1.05;
@@ -3340,7 +3340,7 @@ body {
     padding: 0;
   }
 
-  & a>* {
+  & a > * {
     color: var(--link) !important;
 
     [data-mode='dark'] & {
@@ -3399,7 +3399,7 @@ body {
     background-color: transparent !important;
   }
 
-  &>div {
+  & > div {
     padding: 30px 0 14px;
   }
 
@@ -3487,7 +3487,6 @@ body {
   }
 
   &.vertical-center {
-
     .td,
     td,
     .th,
@@ -3496,7 +3495,7 @@ body {
       align-items: center;
       min-height: 45px;
 
-      &>*:not(button) {
+      & > *:not(button) {
         flex-grow: 1;
         max-width: 100%;
       }
@@ -3514,7 +3513,7 @@ body {
   th,
   .ag-header-cell-label,
   .th {
-    &>* {
+    & > * {
       font-weight: 600 !important;
       font-size: 13px !important;
       line-height: 18px !important;
@@ -3533,7 +3532,7 @@ body {
   td,
   .ag-cell,
   td {
-    &>*:not(.MuiChip-root) {
+    & > *:not(.MuiChip-root) {
       font-weight: 400 !important;
       font-size: 13px !important;
       color: #2a3547;
@@ -3604,7 +3603,6 @@ body {
 }
 
 .formdata-v1 {
-
   .table-data-v1,
   .table-head-v1 {
     border: 1px solid var(--dark-mode-border-color, #e2e2e2);
@@ -3645,22 +3643,20 @@ body {
 }
 
 .attachment {
-
   .MuiTreeItem-label:hover,
-  .MuiTreeItem-root.Mui-selected>.MuiTreeItem-content .MuiTreeItem-label:hover,
-  .MuiTreeItem-root.Mui-selected:focus>.MuiTreeItem-content .MuiTreeItem-label,
-  .MuiTreeItem-root.Mui-selected>.MuiTreeItem-content .MuiTreeItem-label {
+  .MuiTreeItem-root.Mui-selected > .MuiTreeItem-content .MuiTreeItem-label:hover,
+  .MuiTreeItem-root.Mui-selected:focus > .MuiTreeItem-content .MuiTreeItem-label,
+  .MuiTreeItem-root.Mui-selected > .MuiTreeItem-content .MuiTreeItem-label {
     background-color: var(--dark-secondary, white);
   }
 }
 
 .custom-react-table-v1.custom-react-table {
-
   th,
   .th {
     height: 45px;
 
-    &>* {
+    & > * {
       height: 100%;
     }
   }
@@ -3725,7 +3721,7 @@ $isAppliedBillDark: #234623;
       .MuiTreeItem-iconContainer {
         display: none;
 
-        &+div {
+        & + div {
           padding-left: 0;
         }
       }
@@ -3923,7 +3919,7 @@ $isAppliedBillDark: #234623;
     overflow: hidden;
     flex-grow: 1;
 
-    &>div {
+    & > div {
       margin-left: 8px;
 
       &:first-of-type {
@@ -4027,10 +4023,6 @@ $isAppliedBillDark: #234623;
   }
 }
 
-.MuiCheckbox-root {
-  color: var(--dark-primary-text, #2a3042) !important;
-}
-
 .mobileIconButton {
   color: var(--primary-text) !important;
   width: 26px;
@@ -4054,7 +4046,7 @@ $isAppliedBillDark: #234623;
   flex-wrap: wrap;
   gap: 8px;
 
-  &>button {
+  & > button {
     margin: 0 !important;
   }
 }
@@ -4135,13 +4127,13 @@ $isAppliedBillDark: #234623;
     border-color: var(--common-border-color) !important;
   }
 
-  .Mui-checked+.MuiSwitch-track {
+  .Mui-checked + .MuiSwitch-track {
     [data-mode='dark'] & {
       background-color: white !important;
     }
   }
 
-  .Mui-disabled+.MuiSwitch-track {
+  .Mui-disabled + .MuiSwitch-track {
     [data-mode='dark'] & {
       background-color: white !important;
     }
@@ -4170,13 +4162,12 @@ body {
 }
 
 .ag-react-container {
-  &>* {
+  & > * {
     max-width: 100%;
   }
 }
 
 .custom-react-table-v1 {
-
   th,
   td {
     &[data-sticky-first-right-td='true'] {
@@ -4227,7 +4218,7 @@ body .btn-outline-red-v1 {
     width: 34px;
   }
 
-  &>span {
+  & > span {
     line-height: 16px;
     padding: 0;
   }
@@ -4378,7 +4369,6 @@ body .btn-outline-red-v1 {
 }
 
 .has-mobile-step {
-
   .detail-container-v1,
   .detail-container {
     margin-bottom: 50px;
@@ -4389,7 +4379,7 @@ body .btn-outline-red-v1 {
   div[role='dialog'] {
     background-color: var(--dark-primary, white);
 
-    &+div::after {
+    & + div::after {
       background-color: var(--dark-primary, white);
     }
   }
@@ -4405,7 +4395,7 @@ body .btn-outline-red-v1 {
       background-color: var(--dark-primary, white) !important;
       color: var(--primary-text) !important;
 
-      &+div[aria-hidden='true'] {
+      & + div[aria-hidden='true'] {
         border-color: var(--common-border-color) !important;
       }
     }
@@ -4453,7 +4443,6 @@ div[role='tooltip'] {
 }
 
 div[role='presentation'].MuiAutocomplete-popper {
-
   ul,
   li {
     list-style: none;

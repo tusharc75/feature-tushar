@@ -442,9 +442,9 @@ const UserDetailsPage = () => {
           <Box>
             <Box style={{ padding: '8px', minHeight: '450px' }}>
               {loading || !userFields.length || !userData ? (
-                <Grid container spacing={2} style={{ padding: '8px' }}>
+                <div className="p-2">
                   <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                </Grid>
+                </div>
               ) : (
                 <>
                   <CustomTabs value={tabValue} onChange={handleMainTabChange}>

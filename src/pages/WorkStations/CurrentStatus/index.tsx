@@ -154,8 +154,7 @@ const CurrentStatus = ({ id }) => {
         Header: 'Estimate Complete Date',
         disableFilters: true,
         disableSortBy: true,
-        Cell: ({ row }) =>
-          row?.original?.estimateCompleteDate ? <div> {displayDate(row?.original?.estimateCompleteDate)} </div> : <NoDataCell />
+        Cell: ({ row }) => (row?.original?.estimateCompleteDate ? <div> {displayDate(row?.original?.estimateCompleteDate)} </div> : <NoDataCell />)
       },
       {
         accessor: 'status',
@@ -183,9 +182,9 @@ const CurrentStatus = ({ id }) => {
           hideSelection={true}
         />
       ) : (
-        <Grid container spacing={2} style={{ padding: '8px' }}>
+        <div className="p-2">
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Grid>
+        </div>
       )}
     </Box>
   );

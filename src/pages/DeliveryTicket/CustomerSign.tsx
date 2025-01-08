@@ -179,7 +179,7 @@ const CustomerSign = () => {
   return (
     <>
       <Grid container className={classes.header}>
-        <Grid size={{ xs: 12, md: 1, sm: 2 }} >
+        <Grid size={{ xs: 12, md: 1, sm: 2 }}>
           <img className={classes.logo} src={SVG('LogoNew')} alt="equip logo" title="eQuipt Logo" />
         </Grid>
       </Grid>
@@ -215,9 +215,9 @@ const CustomerSign = () => {
               )}
               <Box>
                 {loading || !deliveryTicketFields.length || !deliveryTicketData ? (
-                  <Grid container spacing={2} style={{ padding: '8px' }}>
+                  <div className="p-2">
                     <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                  </Grid>
+                  </div>
                 ) : (
                   <DetailsPage data={deliveryTicketData} fields={deliveryTicketFields} />
                 )}
@@ -228,7 +228,7 @@ const CustomerSign = () => {
               {deliveryTicketData?.signatures?.length === 4 && (
                 <ThemeButton
                   iconForMobile={<FaFileSignature size={18} />}
-                  mobileTooltip='Customer Signature'
+                  mobileTooltip="Customer Signature"
                   disabled={loading}
                   onClick={() => setOpenSignatureDialog(true)}
                 >

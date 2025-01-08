@@ -58,9 +58,9 @@ const DataListDetail = () => {
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading ? (
-            <Grid container spacing={2} style={{ padding: '8px' }}>
+            <div className="p-2">
               <CommonSkeleton lenArray={[...Array(13).keys()]} />
-            </Grid>
+            </div>
           ) : (
             <DataListItems dataListId={id} />
           )}

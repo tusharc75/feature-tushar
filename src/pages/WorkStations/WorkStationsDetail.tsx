@@ -125,9 +125,9 @@ const WorkStationsDetail = () => {
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
-            <Grid container spacing={2} style={{ padding: '8px' }}>
+            <div className="p-2">
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Grid>
+            </div>
           ) : (
             <DetailsPage data={workStationsData} fields={fields} />
           )}

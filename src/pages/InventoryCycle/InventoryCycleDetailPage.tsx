@@ -116,9 +116,9 @@ const InventoryCycleDetailPage = () => {
           <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }} spacing={2}>
             <Box>
               {loading || !formsData.length ? (
-                <Grid container spacing={2} style={{ padding: '8px' }}>
+                <div className="p-2">
                   <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                </Grid>
+                </div>
               ) : (
                 <DetailsPage data={inventoryCycleData} fields={formsData} />
               )}

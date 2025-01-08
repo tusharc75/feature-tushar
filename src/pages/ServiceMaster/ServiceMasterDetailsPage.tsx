@@ -163,9 +163,9 @@ const ServiceMasterDetailsPage = () => {
         <TabPanel value={tabValue} index={0}>
           <Box className="form-v1">
             {loading || (!fields.length && serviceMasterDetailData != null) ? (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
+              <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
-              </Grid>
+              </div>
             ) : (
               <>
                 <DetailsPage data={serviceMasterDetailData} fields={fields} />
