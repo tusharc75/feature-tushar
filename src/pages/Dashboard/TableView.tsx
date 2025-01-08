@@ -48,7 +48,6 @@ const TableView = ({ id, chartData, chart, currency }: Props) => {
   }
 
   const handleRowClick = (key: any) => {
-    if (chart?.kpi?.name !== 'Asset Status Count') return;
     const assetStatus = tableData[key].status;
     const url = `${routes.serializedAsset.path}?assetStatus=${encodeURIComponent(assetStatus)}`;
     window.open(url, '_blank');
