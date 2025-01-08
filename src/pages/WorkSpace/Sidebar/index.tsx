@@ -1,5 +1,5 @@
 import { Add, ArrowDropDown, ArrowDropUp, MoreVert } from '@mui/icons-material';
-import { Collapse, IconButton, List, ListItem, ListItemText, Menu, MenuItem } from '@mui/material';
+import { Collapse, IconButton, List, ListItem, ListItemButton, ListItemText, Menu, MenuItem } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { VscLayoutSidebarLeft } from 'react-icons/vsc';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -101,18 +101,20 @@ const Sidebar = ({
           setChannels={setChannels}
           handleMenuClick={handleMenuClick}
         />
-        <ThemeButton
-          buttonType="theme"
-          onClick={() => {
-            setSelectedChannel(null);
-            setNewChat(true);
-          }}
-          iconForMobile={<Add />}
-          mobileTooltip="New Chat"
-          startIcon={<Add />}
-        >
-          New Chat
-        </ThemeButton>
+        <div className="pt-2">
+          <ThemeButton
+            buttonType="theme"
+            onClick={() => {
+              setSelectedChannel(null);
+              setNewChat(true);
+            }}
+            iconForMobile={<Add />}
+            mobileTooltip="New Chat"
+            startIcon={<Add />}
+          >
+            New Chat
+          </ThemeButton>
+        </div>
         <ChannelAndChats
           type="chat"
           channels={channels?.filter((f: any) => f.type === 'chat')}
@@ -178,7 +180,7 @@ const ChannelActions = ({
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${selectedChannel?.type=== 'chat' ? 'this Chat' : `${selectedChannel?.title} Channel`} ?`}
+          message={`Are you sure you want to delete ${selectedChannel?.type === 'chat' ? 'this Chat' : `${selectedChannel?.title} Channel`} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
@@ -223,8 +225,7 @@ const ChannelAndChats = ({
             {filteredChannels?.map((c, index) => (
               <>
                 {mobScreen && <span className="block [border-bottom:1px_solid_var(--common-border-color)]"></span>}
-                <ListItem
-                  button
+                <ListItemButton
                   key={c._id}
                   style={{ borderRadius: '6px' }}
                   selected={selectedChannel?._id === c._id}
@@ -237,7 +238,6 @@ const ChannelAndChats = ({
                       return [...prev];
                     });
                   }}
-                  className="group"
                 >
                   <ListItemText
                     id={`channel-${index}`}
@@ -252,7 +252,6 @@ const ChannelAndChats = ({
                       </span>
                     }
                   />
-
                   <div
                     className={cn(
                       'absolute right-2 pl-6 opacity-0 group-hover:opacity-100  ',
@@ -272,7 +271,7 @@ const ChannelAndChats = ({
                       </IconButton>
                     </HtmlTooltip>
                   </div>
-                </ListItem>
+                </ListItemButton>
               </>
             ))}
           </List>
