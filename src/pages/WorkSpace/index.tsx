@@ -115,7 +115,7 @@ const Workspace = () => {
         <div className="headerbox-v1">
           <CustomBreadCrumbs routes={[{ title: resources?.workSpace?.titlePlural }]} />
         </div>
-        <CustomContainer className="!min-h-[var(--container-height)] !p-0 [--container-height:calc(100vh-150px)] [--h:max(500px,_var(--container-height))] [--sidebar-width:270px] max-[768px]:[--container-height:calc(100vh-179px)]">
+        <CustomContainer className="border !min-h-[var(--container-height)] !p-0 [--container-height:calc(100vh-150px)] [--h:max(500px,_var(--container-height))] [--sidebar-width:270px] max-[768px]:[--container-height:calc(100vh-179px)]">
           <div
             className={cn(
               'relative flex min-h-[var(--h)] overflow-hidden rounded-lg transition-[margin]',
