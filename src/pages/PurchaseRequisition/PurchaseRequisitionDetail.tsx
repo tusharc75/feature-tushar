@@ -237,9 +237,9 @@ const PurchaseRequisitionDetail = () => {
         <TabPanel value={tabValue} index={0}>
           <Box>
             {loading || !fields?.length ? (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
+              <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
-              </Grid>
+              </div>
             ) : (
               <DetailsPage data={purchaseRequisitionData} fields={fields} />
             )}
@@ -249,9 +249,9 @@ const PurchaseRequisitionDetail = () => {
           <TabPanel value={tabValue} index={1}>
             <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
               {!purchaseRequisitionData ? (
-                <Grid container spacing={2} style={{ padding: '8px' }}>
+                <div className="p-2">
                   <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                </Grid>
+                </div>
               ) : (
                 <>
                   {stepList[currentStep]?.name === 'DOA' && (

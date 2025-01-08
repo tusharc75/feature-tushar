@@ -244,9 +244,9 @@ const RepairJobDetails = () => {
             {repairJobData && repairJobFields.length ? (
               <DetailsPage data={repairJobData} fields={repairJobFields} />
             ) : (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
+              <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
-              </Grid>
+              </div>
             )}
           </Box>
         </TabPanel>
@@ -294,7 +294,7 @@ const RepairJobDetails = () => {
           </TabPanel>
         </ContentFullScreen>
         <TabPanel value={tabValue} index={2}>
-          <Grid size={{xs:12, sm:12, md:12, lg:12}}>
+          <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
             {repairJobData && <Tickets repairJobData={repairJobData} renderedFrom={`${renderedFrom}_grid-3`} />}
           </Grid>
         </TabPanel>

@@ -290,9 +290,9 @@ const EntityDetailsPage = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-        id: user._id,
-        name: `${user.firstName} ${user.lastName}`
-      }))
+          id: user._id,
+          name: `${user.firstName} ${user.lastName}`
+        }))
       : [];
 
     setUserList(rows);
@@ -328,9 +328,9 @@ const EntityDetailsPage = () => {
           <Grid size={{ xs: 12, sm: 12, md: 8, lg: 8 }} spacing={2}>
             <Box>
               {loading || !entityFields.length ? (
-                <Grid container spacing={2} style={{ padding: '8px' }}>
+                <div className="p-2">
                   <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                </Grid>
+                </div>
               ) : (
                 <DetailsPage data={entityData} fields={fieldsToShowInDetailPage} />
               )}

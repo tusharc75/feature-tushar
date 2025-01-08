@@ -263,9 +263,9 @@ const PurchaseOrderDetailsPage = () => {
         <TabPanel value={tabValue} index={0}>
           <Box>
             {loadingPurchaseOrder || !purchaseOrderFields.length ? (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
+              <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
-              </Grid>
+              </div>
             ) : (
               <DetailsPage data={purchaseOrderData} fields={purchaseOrderFields} />
             )}
@@ -275,9 +275,9 @@ const PurchaseOrderDetailsPage = () => {
           <TabPanel value={tabValue} index={1}>
             <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
               {!purchaseOrderData || !purchaseOrderFields.length ? (
-                <Grid container spacing={2} style={{ padding: '8px' }}>
+                <div className="p-2">
                   <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                </Grid>
+                </div>
               ) : (
                 <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
                   <Steps

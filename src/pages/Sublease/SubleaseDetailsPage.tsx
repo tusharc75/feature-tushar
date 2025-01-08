@@ -234,18 +234,18 @@ const SubleaseDetailsPage = () => {
                 }
               />
             ) : (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
+              <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
-              </Grid>
+              </div>
             )}
           </Box>
           <Grid container spacing={2}></Grid>
         </TabPanel>
         <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
           <TabPanel value={tabValue} index={1}>
-            <Grid size={{xs:12, sm:12, md:12, lg:12}}>
+            <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
               {subleaseData ? (
-                <Grid size={{xs:12, sm:12, md:12, lg:12}}>
+                <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
                   <Steps
                     isNextStep={false}
                     nextStep={nextStep}
@@ -337,33 +337,33 @@ const SubleaseDetailsPage = () => {
                   )}
                 </Grid>
               ) : (
-                <Grid container spacing={2} style={{ padding: '8px' }}>
+                <div className="p-2">
                   <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                </Grid>
+                </div>
               )}
             </Grid>
           </TabPanel>
         </ContentFullScreen>
 
         <TabPanel value={tabValue} index={2}>
-          <Grid size={{xs:12, sm:12, md:12, lg:12}}>
+          <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
             {subleaseData ? (
               <Tickets subleaseId={id} renderedFrom={`${renderedFrom}_grid-3`} />
             ) : (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
+              <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
-              </Grid>
+              </div>
             )}
           </Grid>
         </TabPanel>
         <TabPanel value={tabValue} index={3}>
-          <Grid size={{xs:12, sm:12, md:12, lg:12}}>
+          <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
             {subleaseData ? (
               <Invoices resourceId={id} resource={sidebarResource.sublease} invoiceFieldName="sublease" />
             ) : (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
+              <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
-              </Grid>
+              </div>
             )}
           </Grid>
         </TabPanel>

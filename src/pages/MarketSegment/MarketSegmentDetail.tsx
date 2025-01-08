@@ -113,9 +113,9 @@ const MarketSegmentDetail = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         {loading || !fields?.length ? (
-          <Grid container spacing={2} style={{ padding: '8px' }}>
+          <div className="p-2">
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Grid>
+          </div>
         ) : (
           <DetailsPage data={marketSegmentData} fields={fields} />
         )}

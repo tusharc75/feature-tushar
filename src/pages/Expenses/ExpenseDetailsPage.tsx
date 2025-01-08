@@ -101,14 +101,8 @@ const ServiceOrderDetailsPage = () => {
       data = response?.data?.data;
       setLoadingDetails(false);
 
-      setAllowedToEdit(
-        permissions?.expenses?.isUpdate &&
-          checkIsAllowedToEdit(user, sidebarResource.expenses, data)
-      );
-      setAllowedToDelete(
-        permissions?.expenses?.isDelete &&
-          checkIsAllowedToDelete(user, sidebarResource.expenses, data.owner.optionValue)
-      );
+      setAllowedToEdit(permissions?.expenses?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.expenses, data));
+      setAllowedToDelete(permissions?.expenses?.isDelete && checkIsAllowedToDelete(user, sidebarResource.expenses, data.owner.optionValue));
       setExpensesData(data);
     } catch (error) {
       setLoadingDetails(false);
@@ -220,9 +214,9 @@ const ServiceOrderDetailsPage = () => {
             {!loadingDetails && expensesData && serviceOrderFields.length > 0 ? (
               <DetailsPage data={expensesData} fields={serviceOrderFields} />
             ) : (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
+              <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
-              </Grid>
+              </div>
             )}
           </Box>
         </TabPanel>

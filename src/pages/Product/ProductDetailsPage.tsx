@@ -106,7 +106,8 @@ const ProductDetailsPage = () => {
   useEffect(() => {
     if (selectedWarehouse) {
       setWarehouseInventoriesLoading(true);
-      axiosInstance().get(`${serializedAsset.api}?limit=6&filterById=[{"field":"warehouse","term":"${selectedWarehouse}"},{"field":"product","term":"${id}"}]`)
+      axiosInstance()
+        .get(`${serializedAsset.api}?limit=6&filterById=[{"field":"warehouse","term":"${selectedWarehouse}"},{"field":"product","term":"${id}"}]`)
         .then(({ data: { data } }) => {
           setWarehouseInventories(data);
           setWarehouseInventoriesLoading(false);
@@ -275,9 +276,9 @@ const ProductDetailsPage = () => {
         <TabPanel value={tabValue} index={0}>
           <Box>
             {loading || !productFields.length ? (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
+              <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
-              </Grid>
+              </div>
             ) : (
               <div className="pb-3">
                 <DetailsPage data={productData} fields={productFields} fullHeight={false} />
