@@ -357,7 +357,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
         {dataRows &&
           dataRows?.length > 0 &&
           permissions?.invoice?.isDelete &&
-          checkIsAllowedToDelete(user, sidebarResource.invoice, invoiceData?.owner?.optionValue) &&
+          (checkIsAllowedToDelete(user, sidebarResource.invoice, invoiceData?.owner?.optionValue) || allowedToEdit) &&
           [sidebarResource.fieldTicket, sidebarResource.repairOrder, sidebarResource.salesOrder]?.includes(resource) &&
           ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled]?.includes(invoiceData?.status) && (
             <ThemeButton
