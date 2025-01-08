@@ -12,7 +12,6 @@ import ViewMembers from 'src/pages/WorkSpace/MessagePanel/ViewMembers';
 import { ChannelData, Message, TChannel } from 'src/pages/WorkSpace/types';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AddMemberDialog from './AddMembersDialog';
-import { Add } from '@mui/icons-material';
 import { useData } from 'src/StateProvider/Provider';
 
 type MessagePanelProps = {
@@ -22,6 +21,10 @@ type MessagePanelProps = {
   socket: Socket;
   newChat: boolean;
   setNewChat: React.Dispatch<React.SetStateAction<boolean>>;
+  newChatUsers: string[];
+  setNewChatUsers: React.Dispatch<React.SetStateAction<string[]>>;
+  newChatAddMemberDialog: boolean;
+  setNewChatAddMemberDialog: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 // const avaterPette = ['!bg-[#eeba6c] !dark:bg-[#a17e49]', '!bg-[#3772ff] !dark:bg-[#264fb2]', '!bg-[#0ed290] dark:!bg-[#08855b]'];
@@ -30,20 +33,29 @@ type MessagePanelProps = {
 //   return avaterPette[index % avaterPette.length];
 // };
 
-const MessagePanel = ({ selectedChannel, toggleSidebar, isSidebarCollapsed, socket, newChat, setNewChat }: MessagePanelProps) => {
+const MessagePanel = ({
+  selectedChannel,
+  toggleSidebar,
+  isSidebarCollapsed,
+  socket,
+  newChat,
+  setNewChat,
+  newChatUsers,
+  setNewChatUsers,
+  newChatAddMemberDialog,
+  setNewChatAddMemberDialog
+}: MessagePanelProps) => {
   const toastConfig = useContext(CustomToastContext);
   const [channelData, setChannelData] = useState<ChannelData>(null);
   const [isMemberDialogOpen, setIsMemberDialogOpen] = useState(false);
   const [threadDialogOpen, setThreadDialogOpen] = useState<{ open: boolean; message: Message }>({ open: false, message: null });
   const [themeColor] = useAppTheme();
-  const [selectMemberDialog, setSelectMemberDialog] = useState(false);
-  const [selectedUsers, setSelectedUsers] = useState([]);
 
-    const {
-      state: {
-        user: { user },
-      }
-    } = useData();
+  const {
+    state: {
+      user: { user }
+    }
+  } = useData();
 
   const fetchChannelData = useCallback(async () => {
     try {
@@ -63,8 +75,8 @@ const MessagePanel = ({ selectedChannel, toggleSidebar, isSidebarCollapsed, sock
 
   const refreshNewChat = () => {
     setNewChat(false);
-    setSelectedUsers([]);
-  }
+    setNewChatUsers([]);
+  };
 
   return (
     <>
@@ -84,16 +96,16 @@ const MessagePanel = ({ selectedChannel, toggleSidebar, isSidebarCollapsed, sock
             </HtmlTooltip>
           </div>
         )}
-        {(selectedChannel || newChat) ? (
+        {selectedChannel || newChat ? (
           <div className="flex h-[var(--h)] flex-col">
             <div className={cn('p-[7px_15px] [border-bottom:1px_solid_var(--common-border-color)]')}>
               <div className="mb-1 flex items-center justify-between gap-2">
                 <h5 className={cn('line-clamp-1 text-[18px] font-bold transition-all', isSidebarCollapsed && 'pl-[30px] ')}>
                   {newChat ? 'New Chat' : selectedChannel?.title}
-                  {newChat && <span className="text-sm text-gray-500"> To: {selectedUsers?.map((s: any) => s?.optionLabel)?.join(', ')}</span>}
+                  {newChat && <span className="text-sm text-gray-500"> To: {newChatUsers?.map((s: any) => s?.optionLabel)?.join(', ')}</span>}
                 </h5>
                 {!newChat && (
-                  <HtmlTooltip title={'View all members'}   >
+                  <HtmlTooltip title={'View all members'}>
                     <IconButton
                       size={'small'}
                       style={{ border: '', borderRadius: 8, padding: '0px', minHeight: 30, minWidth: 55 }}
@@ -135,17 +147,6 @@ const MessagePanel = ({ selectedChannel, toggleSidebar, isSidebarCollapsed, sock
                     </IconButton>
                   </HtmlTooltip>
                 )}
-                {newChat && (
-                  <HtmlTooltip title={`Select Users`}>
-                    <IconButton
-                      size="small"
-                      style={{ border: '1px solid var(--common-border-color)', padding: 6 }}
-                      onClick={() => setSelectMemberDialog(true)}
-                    >
-                      <Add />
-                    </IconButton>
-                  </HtmlTooltip>
-                )}
               </div>
               <p className="line-clamp-2 text-sm text-gray-500">{selectedChannel?.description}</p>
             </div>
@@ -157,12 +158,12 @@ const MessagePanel = ({ selectedChannel, toggleSidebar, isSidebarCollapsed, sock
               setThreadDialogOpen={setThreadDialogOpen}
               channelData={channelData}
               newChat={newChat}
-              toUsers={selectedUsers}
+              toUsers={newChatUsers}
               refreshNewChat={refreshNewChat}
             />
           </div>
         ) : (
-          <div className="flex items-center justify-center h-full">
+          <div className="flex h-full items-center justify-center">
             <p className="text-gray-500">Select a channel/chat to start conversation</p>
           </div>
         )}
@@ -176,17 +177,17 @@ const MessagePanel = ({ selectedChannel, toggleSidebar, isSidebarCollapsed, sock
           handleClose={() => setIsMemberDialogOpen(false)}
         />
       )}
-      {selectMemberDialog && (
+      {newChatAddMemberDialog && (
         <AddMemberDialog
           onClose={() => {
-            setSelectMemberDialog(false);
+            setNewChatAddMemberDialog(false);
           }}
           onSuccess={(users) => {
-            setSelectedUsers(users);
+            setNewChatUsers(users);
           }}
           ignoreIds={[user?._id]}
           newChat={newChat}
-          users={selectedUsers}
+          users={newChatUsers}
         />
       )}
     </>

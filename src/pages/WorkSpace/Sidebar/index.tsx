@@ -21,6 +21,8 @@ type SidebarProps = {
   toggleSidebar: () => void;
   setChannels: React.Dispatch<React.SetStateAction<TChannel[]>>;
   setNewChat: React.Dispatch<React.SetStateAction<boolean>>;
+  setNewChatUsers: React.Dispatch<React.SetStateAction<string[]>>;
+  setNewChatAddMemberDialog: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const Sidebar = ({
@@ -34,6 +36,8 @@ const Sidebar = ({
   isSidebarCollapsed,
   toggleSidebar,
   setNewChat,
+  setNewChatUsers,
+  setNewChatAddMemberDialog,
 }: SidebarProps) => {
   const [filteredChannels, setFilteredChannels] = useState(channels);
   const [searchValue, setSearchValue] = useState('');
@@ -107,6 +111,8 @@ const Sidebar = ({
             onClick={() => {
               setSelectedChannel(null);
               setNewChat(true);
+              setNewChatUsers([]);
+              setNewChatAddMemberDialog(true);
             }}
             iconForMobile={<Add />}
             mobileTooltip="New Chat"
