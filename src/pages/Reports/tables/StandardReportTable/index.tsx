@@ -155,6 +155,10 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
       } = await axiosInstance().get(`/report/${selectedReport.resource}/column`);
       let newColumns = generateColumns(selectedReport.resource, columnFields);
       newColumns?.forEach((o) => {
+        if (o?.type === 'number') {
+          o.disableFilters = true;
+          o.disableSortBy = true;
+        }
         if (resourceCamelCase === 'inventoryHistory') {
           if (o?.accessor === 'type') {
             o.cell = ({ row }) => CreditDebitTypeRenderer(row);
@@ -618,7 +622,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
                   permissions={permissions?.report}
                   module={selectedReport.resource}
                   api={`/report/${selectedReport.resource}`}
-                  afterImportCompleted={() => { }}
+                  afterImportCompleted={() => {}}
                   isExportCount={true}
                   exportCount={0}
                   ids={[]}
