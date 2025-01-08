@@ -20,6 +20,8 @@ const Workspace = () => {
   const mobScreen = useMediaQuery('(max-width:768px)');
   const [socket, setSocket] = useState<Socket>(null);
   const [newChat, setNewChat] = useState(false);
+  const [newChatUsers, setNewChatUsers] = useState([]);
+  const [newChatAddMemberDialog, setNewChatAddMemberDialog] = useState<boolean>(false);
   const {
     state: {
       user: { user },
@@ -133,6 +135,8 @@ const Workspace = () => {
               mobScreen={mobScreen}
               setChannels={setChannels}
               setNewChat={setNewChat}
+              setNewChatUsers={setNewChatUsers}
+              setNewChatAddMemberDialog={setNewChatAddMemberDialog}
             />
             <MessagePanel
               isSidebarCollapsed={isSidebarCollapsed}
@@ -141,6 +145,10 @@ const Workspace = () => {
               socket={socket}
               newChat={newChat}
               setNewChat={setNewChat}
+              newChatUsers={newChatUsers}
+              setNewChatUsers={setNewChatUsers}
+              newChatAddMemberDialog={newChatAddMemberDialog}
+              setNewChatAddMemberDialog={setNewChatAddMemberDialog}
             />
           </div>
         </CustomContainer>
