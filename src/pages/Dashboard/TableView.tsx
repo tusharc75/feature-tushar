@@ -82,15 +82,17 @@ const TableView = ({ id, chartData, chart, currency }: Props) => {
                 </TableCell>
               ))}
               {chart?.kpi?.name === 'Asset Status Count' && (
-                <IconButton
-                  size="small"
-                  color="primary"
-                  onClick={() => {
-                    handleRowClick(index);
-                  }}
-                >
-                  <FiExternalLink size={16} className="mt-3 text-gray-500 dark:text-gray-300" />
-                </IconButton>
+                <div className='pt-3'>
+                  <IconButton
+                    size="small"
+                    color="primary"
+                    onClick={() => {
+                      handleRowClick(index);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                </div>
               )}
             </TableRow>
           ))}
