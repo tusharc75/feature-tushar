@@ -16,6 +16,7 @@ import FullScreenChart from './FullScreenChart';
 import { periodOption, frequencyData } from '../DashboardBuilder/builderHelpers';
 import { camelCase, set } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import CustomContainer from 'src/components/CustomContainer';
 
 const Dashboard = () => {
   const {
@@ -124,7 +125,7 @@ const Dashboard = () => {
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ title: 'Dashboard' }]} />
       </div>
-      <div className="detail-container-v1">
+      <CustomContainer>
         {!userLoading ? (
           <React.Fragment>
             <GlobalFilter
@@ -144,7 +145,6 @@ const Dashboard = () => {
                   flexDirection="column"
                   justifyContent={'center'}
                   alignItems={'center'}
-                  className="asdfkasjhdfkjsdh"
                 >
                   <img width={400} height={340} src={placeholder_img} alt="dashboard" />
                   <Typography color="textSecondary" variant="h5">
@@ -187,7 +187,7 @@ const Dashboard = () => {
         ) : (
           <Loader minHeight="100%" noLoader={false} text="Loading Data..." />
         )}
-      </div>
+      </CustomContainer>
       {openFullScreenChart && (
         <FullScreenChart
           chart={selectedChart}

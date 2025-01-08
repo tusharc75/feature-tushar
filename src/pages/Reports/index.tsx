@@ -49,7 +49,6 @@ const ReportsCenter = () => {
           </Box>
         </Box>
       </Box>
-
       <Layout sidebarHead={<SidebarHead state={state} />} sidebarContent={<SidebarContent state={state} />}>
         {({ isSidebarOpen, isMobile }) => <ReportsContent state={state} isSidebarOpen={isSidebarOpen} isMobile={isMobile} />}
       </Layout>

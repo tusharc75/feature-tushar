@@ -232,7 +232,7 @@ const ChartTypes = ({
   };
 
   return (
-    <Grid size={{ xs: 12, md: 12 }} >
+    <Grid size={{ xs: 12, md: chart?.column || 12 }} >
       {chart.graphType === 'Custom' ? (
         <Grid container spacing={1}>
           {loading ? (
@@ -249,14 +249,7 @@ const ChartTypes = ({
           )}
         </Grid>
       ) : (
-        <Box
-          m={'8px'}
-          height={'100%'}
-          display="flex"
-          flexDirection="column"
-          justifyContent="space-between"
-          sx={{ border: '1px solid var(--common-border-color)', boxShadow: '0px 20.3165px 40.6331px rgba(0, 0, 0, 0.03)' }}
-        >
+        <Box height={'100%'} flexDirection="column" justifyContent="space-between" sx={{ border: '1px solid var(--common-border-color)' }}   >
           <Box style={{ padding: '15px 10px' }}>
             <div className="flex items-center justify-between">
               <div>
@@ -360,7 +353,6 @@ const ChartTypes = ({
               </Typography>
             )}
           </Box>
-
           <Box minHeight={fullScreen ? window.innerHeight - 200 : isScreenSmall ? 350 : chart.column <= 6 ? 400 : 500}>
             {loading ? (
               <Loader noLoader={false} text="" style={{ minHeight: '100%' }} />
@@ -433,15 +425,12 @@ const ChartTypes = ({
                         })
                       },
                       onClick: (event, elements) => {
-                        if (elements.length > 0 && chartData.datasets[0].label === 'Asset Count') {
-                          const dataIndex = elements[0].index; 
+                        if (elements.length > 0 && chartData.datasets[0].label === 'Asset Status Count') {
+                          const dataIndex = elements[0].index;
                           const clickedLabel = chartData.labels[dataIndex];
-                          window.open(
-                            `${routes.serializedAsset.path}?assetStatus=${clickedLabel}`,
-                            '_blank'
-                          )
+                          window.open(`${routes.serializedAsset.path}?assetStatus=${clickedLabel}`, '_blank')
                         }
-                      },                      
+                      },
                       maintainAspectRatio: false,
                       indexAxis: chart?.kpi?.horizontalBar ? 'y' : 'x',
                       scales: {
