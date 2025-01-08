@@ -1235,7 +1235,6 @@ const Steps = ({
                               (stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start && !user?.brandPolicy?.workOrderTimer ? null : (
                                 <ThemeButton
                                   className={classes.stepButtons}
-                                  buttonType="transparent"
                                   disabled={!allowedToEdit}
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -1259,7 +1258,6 @@ const Steps = ({
                             {step?.isAllowToPerform && isStepsAllowToPerform ? (
                               !stepData?.startDate ? (
                                 <ThemeButton
-                                  buttonType="transparent"
                                   className={classes.stepButtons}
                                   disabled={!allowedToEdit}
                                   onClick={(e) => {
@@ -1279,7 +1277,6 @@ const Steps = ({
                                 step?.isPassFail ? (
                                   <>
                                     <ThemeButton
-                                      buttonType="transparent"
                                       disabled={!allowedToEdit}
                                       className={`${classes.stepButtons} ${classes.passButton}`}
                                       onClick={(e) => {
@@ -1290,7 +1287,6 @@ const Steps = ({
                                       Pass
                                     </ThemeButton>
                                     <ThemeButton
-                                      buttonType="transparent"
                                       className={`${classes.stepButtons} ${classes.failButton}`}
                                       disabled={!allowedToEdit}
                                       onClick={(e) => {
@@ -1304,9 +1300,8 @@ const Steps = ({
                                 ) : (
                                   <>
                                     <ThemeButton
-                                      buttonType="transparent"
                                       disabled={!allowedToEdit}
-                                      className={classes.stepButtons}
+                                      className={`${classes.stepButtons} ${classes.passButton}`}
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         handlePassFail(WORKORDER_SERVICE_STEP_STATUS.completed, step);

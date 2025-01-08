@@ -1,4 +1,5 @@
 import { ArrowBackIos, ArrowForwardIos, DeleteOutline, FormatQuote, Message, MoreHoriz, People } from '@mui/icons-material';
+import ApartmentIcon from '@mui/icons-material/Apartment';
 import { Chip, IconButton } from '@mui/material';
 import React, { useState } from 'react';
 import { MdKeyboardDoubleArrowUp } from 'react-icons/md';
@@ -100,9 +101,8 @@ const RenderService = ({
                   if (!visible) return null;
                   return (
                     <span
-                      className={`absolute -right-[5.5px] rounded-full bg-[var(--dark-secondary,_white)] ${
-                        isMobileSlideOpen ? 'opacity-100' : 'sr-only opacity-0'
-                      }`}
+                      className={`absolute -right-[5.5px] rounded-full bg-[var(--dark-secondary,_white)] ${isMobileSlideOpen ? 'opacity-100' : 'sr-only opacity-0'
+                        }`}
                       style={{ top: isMobileSlideOpen ? `-${(index + 1) * 32 + (index + 1) * 8}px` : '-24px', transition: `top 0.${index + 2}s` }}
                     >
                       <ThemeButton key={id} {...rest} className={`${isColapsed ? 'hidden' : ''} round`}>
@@ -229,9 +229,8 @@ const RenderServices = ({
         return (
           <div
             key={data.uniqueId}
-            className={`transition-all duration-300 ${
-              isMobile ? 'rounded-md p-2' : 'px-3 py-[14px] first-of-type:[border-radius:5px_5px_0_0] last-of-type:[border-radius:0_0_5px_5px]'
-            } min-w-[var(--tab-size)] max-w-[var(--tab-size)]`}
+            className={`transition-all duration-300 ${isMobile ? 'rounded-md p-2' : 'px-3 py-[14px] first-of-type:[border-radius:5px_5px_0_0] last-of-type:[border-radius:0_0_5px_5px]'
+              } min-w-[var(--tab-size)] max-w-[var(--tab-size)]`}
             style={{
               ...style
             }}
@@ -282,25 +281,17 @@ const RenderServices = ({
                   </>
                 )}
                 {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
-                  <HtmlTooltip arrow enterTouchDelay={0} title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
-                    <span>
-                      <People style={{ fontSize: 20 }} />
-                    </span>
+                  <HtmlTooltip title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
+                    <People fontSize='small' />
                   </HtmlTooltip>
                 )}
                 {data?.type === 'service' && data?.assignedWorkStations?.length > 0 && (
-                  <HtmlTooltip
-                    arrow
-                    enterTouchDelay={0}
-                    title={`Work Stations-${data?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString()}`}
-                  >
-                    <span>
-                      <WorkStations className="align-text-top" size={15} />
-                    </span>
+                  <HtmlTooltip title={`Work Stations-${data?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString()}`}  >
+                    <ApartmentIcon fontSize='small' />
                   </HtmlTooltip>
                 )}
                 {data?.comment && (
-                  <HtmlTooltip arrow enterTouchDelay={0} title={data?.comment}>
+                  <HtmlTooltip title={data?.comment}>
                     <span>
                       <Message style={{ fontSize: 18 }} />
                     </span>
