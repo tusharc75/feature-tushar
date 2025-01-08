@@ -547,9 +547,9 @@ const QuotationDetails = () => {
         <TabPanel value={tabValue} index={0}>
           <Box>
             {loading || !quotationFields.length ? (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
+              <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
-              </Grid>
+              </div>
             ) : (
               <>
                 <DetailsPage data={quotationData} fields={getQuotationFields} />
