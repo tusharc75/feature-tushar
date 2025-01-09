@@ -341,7 +341,10 @@ export default function StepDialog({
                           limitTags={2}
                           value={values['currency']}
                           name={'currency'}
+                          variant="outlined"
                           fullWidth={true}
+                          size="small"
+                          margin='none'
                           onChange={(event, newValue) => {
                             setFieldValue('currency', newValue && newValue.currencyCode ? newValue.currencyCode : '');
                           }}
@@ -418,8 +421,9 @@ export default function StepDialog({
                               )
                             },
                           }}
-                          // margin="dense"
                           type="number"
+                          margin='none'
+                          size="small"
                           onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                           label="List Price"
                           name="listPrice"
