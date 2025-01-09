@@ -134,7 +134,7 @@ const SurveysDetail = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <CustomTabs className="new-tab-container-v1" value={tabValue} onChange={handleMainTabChange} textColor="primary">
+        <CustomTabs value={tabValue} onChange={handleMainTabChange} textColor="primary">
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
         </CustomTabs>

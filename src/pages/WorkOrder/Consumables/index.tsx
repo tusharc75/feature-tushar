@@ -99,7 +99,7 @@ const Consumables = ({
     fetchColumns();
     fetchData();
     fetchRepairOrderData();
-  }, [allowedToEdit, workOrderId, consumeRequest]);
+  }, [allowedToEdit, workOrderId]);
 
   const handleUpdate = async (row: any) => {
     setUpdating(true);
@@ -146,8 +146,8 @@ const Consumables = ({
             return row.original[e?.fieldName] ? (
               <div className="flex items-center gap-2">
                 {hasChildFields &&
-                allowedToEdit &&
-                ![MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(row?.original?.type) ? (
+                  allowedToEdit &&
+                  ![MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(row?.original?.type) ? (
                   <p
                     className={'link text-truncate'}
                     onClick={() => {
@@ -249,24 +249,24 @@ const Consumables = ({
       },
       ...(user?.user?.brandPolicy?.workOrderConsumableRequest && !user?.user?.brandPolicy?.workOrderConsumableConsumeHide
         ? [
-            {
-              accessor: 'requestedQty',
-              Header: 'Requested Qty',
-              width: 150,
-              Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
-            }
-          ]
+          {
+            accessor: 'requestedQty',
+            Header: 'Requested Qty',
+            width: 150,
+            Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
+          }
+        ]
         : []),
       ...(!user?.user?.brandPolicy?.workOrderConsumableConsumeHide
         ? [
-            {
-              accessor: 'consumedQty',
-              Header: 'Consumed Qty',
-              primaryField: true,
-              width: 150,
-              Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
-            }
-          ]
+          {
+            accessor: 'consumedQty',
+            Header: 'Consumed Qty',
+            primaryField: true,
+            width: 150,
+            Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
+          }
+        ]
         : [])
     ];
     extracolumns.push({
@@ -467,7 +467,7 @@ const Consumables = ({
   const createNewVersionQuote = async (quoteId, quoteVersionId) => {
     axiosInstance()
       .post(`/quotation/clone-version/${quoteId}/${quoteVersionId}`)
-      .then(() => {})
+      .then(() => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -555,7 +555,7 @@ const Consumables = ({
       {allowedToEdit && (
         <Box className="mb-3 flex flex-wrap justify-between gap-2">
           {isCreate && permissions?.product?.isRead && (
-            <ThemeButton  buttonType="theme" onClick={() => setConsumablesDialog(true)}>
+            <ThemeButton buttonType="theme" onClick={() => setConsumablesDialog(true)}>
               {materialSubType === MATERIAL_SUB_TYPE.bom ? `Add BOM` : `Add Products/Consumables`}
             </ThemeButton>
           )}
@@ -577,7 +577,7 @@ const Consumables = ({
               <ThemeButton
                 disabled={
                   selectedRecords?.length &&
-                  selectedRecords?.every((r) => !r?.serializedProduct && !r?.hideSelection && r?.type === MATERIAL_TYPE.product)
+                    selectedRecords?.every((r) => !r?.serializedProduct && !r?.hideSelection && r?.type === MATERIAL_TYPE.product)
                     ? false
                     : true
                 }
