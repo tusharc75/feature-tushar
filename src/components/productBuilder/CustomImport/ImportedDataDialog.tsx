@@ -1,4 +1,5 @@
-import { Box, CircularProgress, Dialog, TextField } from '@mui/material';
+import { Delete } from '@mui/icons-material';
+import { Box, CircularProgress, Dialog, IconButton, TextField } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Fragment, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -12,19 +13,25 @@ const cellClassName =
   'w-[220px] max-w-[220px] p-[10px] text-left [border-bottom:1px_solid_var(--common-border-color)] [border-right:1px_solid_var(--common-border-color)]';
 const indexStickyClassName = 'sticky sm:left-0 z-10 w-[var(--index-col-size)] bg-[var(--dark-primary,white)]';
 const descriptionStickyClassName = 'sticky sm:left-[var(--index-col-size)] z-10 bg-[var(--dark-primary,white)]';
+const actionStickyClassName = 'sticky right-0 z-10 bg-[var(--dark-primary,white)]';
 
 const ImportedDataDialog = ({ handleClose, data, productCategory, productTemplate, onSuccess }) => {
   const [rows, setRows] = useState([]);
   const [products, setProducts] = useState(null);
 
   useEffect(() => {
-    let query = `/product`
+    let query = `/product`;
     if (productCategory) {
-      query += `?filterById=${JSON.stringify([{ field: 'productCategory', term: productCategory }, { field: 'productTemplate', term: productTemplate }])}&filterType="and"`
+      query += `?filterById=${JSON.stringify([
+        { field: 'productCategory', term: productCategory },
+        { field: 'productTemplate', term: productTemplate }
+      ])}&filterType="and"`;
     }
-    axiosInstance().get(query).then(({ data: { data } }) => {
-      setProducts(data?.map((d) => d?.productName));
-    });
+    axiosInstance()
+      .get(query)
+      .then(({ data: { data } }) => {
+        setProducts(data?.map((d) => d?.productName));
+      });
   }, []);
 
   useEffect(() => {
@@ -58,15 +65,16 @@ const ImportedDataDialog = ({ handleClose, data, productCategory, productTemplat
                     </th>
                   );
                 })}
+                <th className={cn(cellClassName, ' top-0 min-w-0 max-w-[var(--index-col-size)]', actionStickyClassName)}>Action</th>
               </tr>
               {rows?.map((row, index) => (
                 <tr key={index}>
-                  <td className={cn(cellClassName, indexStickyClassName)} style={{ minWidth: '100px' }}>
+                  <td className={cn(cellClassName, `sticky left-0 z-[1] bg-[--dark-secondary,white]`)} style={{ minWidth: '100px' }}>
                     {index + 1}
                   </td>
                   {row?.map((r, i) => {
                     return i === 0 ? (
-                      <td className={cn(cellClassName, 'min-w-[350px] p-[0_10px]', descriptionStickyClassName)}>
+                      <td className={cn(cellClassName, `min-w-[350px] p-[0_10px]`, descriptionStickyClassName, 'z-[1]')}>
                         <Autocomplete
                           id="custom-import-product-description"
                           size="small"
@@ -83,23 +91,25 @@ const ImportedDataDialog = ({ handleClose, data, productCategory, productTemplat
                               })
                             );
                           }}
-                          renderInput={(params) => <TextField
-                            {...params}
-                            margin="dense"
-                            variant="outlined"
-                            size="small"
-                            slotProps={{
-                              input: {
-                                ...params.InputProps,
-                                endAdornment: (
-                                  <Fragment>
-                                    {!products ? <CircularProgress color="inherit" size={20} /> : null}
-                                    {params.InputProps.endAdornment}
-                                  </Fragment>
-                                ),
-                              },
-                            }}
-                          />}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              margin="dense"
+                              variant="outlined"
+                              size="small"
+                              slotProps={{
+                                input: {
+                                  ...params.InputProps,
+                                  endAdornment: (
+                                    <Fragment>
+                                      {!products ? <CircularProgress color="inherit" size={20} /> : null}
+                                      {params.InputProps.endAdornment}
+                                    </Fragment>
+                                  )
+                                }
+                              }}
+                            />
+                          )}
                         />
                       </td>
                     ) : (
@@ -108,6 +118,19 @@ const ImportedDataDialog = ({ handleClose, data, productCategory, productTemplat
                       </td>
                     );
                   })}
+                  <td className={cn(cellClassName, actionStickyClassName, 'z-[1]')} style={{ minWidth: '100px' }}>
+                    <IconButton
+                      size="small"
+                      aria-label="delete"
+                      onClick={() => {
+                        const _rows = [...rows];
+                        _rows.splice(index, 1);
+                        setRows([..._rows]);
+                      }}
+                    >
+                      <Delete fontSize="small" color="error" />
+                    </IconButton>
+                  </td>
                 </tr>
               ))}
             </table>

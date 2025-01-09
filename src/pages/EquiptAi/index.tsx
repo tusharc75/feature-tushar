@@ -164,7 +164,7 @@ const EquiptAi = () => {
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ title: 'Equipt Genie' }]} />
       </div>
-      <CustomContainer className="!min-h-[var(--container-height)] !p-0 [--container-height:calc(100vh-150px)] max-[768px]:[--container-height:calc(100vh-179px)]">
+      <CustomContainer className="border !min-h-[var(--container-height)] !p-0 [--container-height:calc(100vh-150px)] max-[768px]:[--container-height:calc(100vh-179px)]">
         <div className="relative flex h-[var(--container-height)] min-h-[400px] gap-3 overflow-hidden [--head-h:56px] [--sidebar-w:280px]">
           <HistorySidebar
             chatHistory={chatHistory}

@@ -51,6 +51,7 @@ export type Message = {
   lastModified?: Date;
   attachments?: any[];
   reactions?: any[];
+  pinned?: boolean;
 };
 
 export type MessageUser = {
