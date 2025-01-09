@@ -22,6 +22,7 @@ const ImportExportMenu = ({
   additionalParams = null,
   isDownloadExcel = true,
   title = '',
+  disabled = false,
   ...others
 }) => {
 
@@ -170,6 +171,7 @@ const ImportExportMenu = ({
         endIcon={<ExpandMore />}
         mobileTooltip={`Import/Export ${title}`}
         iconForMobile={<MdImportExport size={20} />}
+        disabled={disabled}
       >
         {`Import/Export ${title}`}
       </ThemeButton>

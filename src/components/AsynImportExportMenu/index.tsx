@@ -107,7 +107,7 @@ const AsynImportExportMenu = ({
             <ThemeButton
               onClick={(e) => handleClick(e)}
               endIcon={<ExpandMore />}
-              buttonType="theme"
+              buttonType="default"
               aria-controls="simple-menu"
               aria-haspopup="true"
             >

@@ -996,10 +996,10 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           okBtnLoading={isSubmitting}
           open={showServiceActionConfirmBox.open}
           message={`Are you sure you want to ${showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed
-              ? 'complete'
-              : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
-                ? 'skip'
-                : 'revert'
+            ? 'complete'
+            : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
+              ? 'skip'
+              : 'revert'
             } this Service(s)`}
           onClose={() => {
             setShowServiceActionConfirmBox({ open: false, action: '' });
