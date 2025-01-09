@@ -233,6 +233,7 @@ const ChannelAndChats = ({
                 {mobScreen && <span className="block [border-bottom:1px_solid_var(--common-border-color)]"></span>}
                 <ListItemButton
                   key={c._id}
+                  className="group"
                   style={{ borderRadius: '6px' }}
                   selected={selectedChannel?._id === c._id}
                   onClick={() => {
