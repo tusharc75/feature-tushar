@@ -217,7 +217,7 @@ const CustomIntro = () => {
             ]}
           >
             <span ref={setArrowRef}>
-              <ArrowDropUp ref={arrowRef} fontSize="small" className=" text-[--dark-secondary,white]" />
+              <ArrowDropUp fontSize="small" className=" text-[--dark-secondary,white]" />
             </span>
 
             <div className="relative z-[1302] mt-3 min-w-[300px] max-w-[300px] rounded-md bg-[var(--dark-secondary,white)] p-2 shadow-md">
