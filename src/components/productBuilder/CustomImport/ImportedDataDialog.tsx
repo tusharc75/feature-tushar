@@ -1,6 +1,6 @@
-import { Box, Dialog, TextField } from '@mui/material';
+import { Box, CircularProgress, Dialog, TextField } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -15,19 +15,16 @@ const descriptionStickyClassName = 'sticky sm:left-[var(--index-col-size)] z-10 
 
 const ImportedDataDialog = ({ handleClose, data, productCategory, productTemplate, onSuccess }) => {
   const [rows, setRows] = useState([]);
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState(null);
 
   useEffect(() => {
-    axiosInstance()
-      .get(
-        `/product?filterById=${JSON.stringify([
-          { field: 'productCategory', term: productCategory },
-          { field: 'productTemplate', term: productTemplate }
-        ])}&filterType='and`
-      )
-      .then(({ data: { data } }) => {
-        setProducts(data?.map((d) => d?.productName));
-      });
+    let query = `/product`
+    if (productCategory) {
+      query += `?filterById=${JSON.stringify([{ field: 'productCategory', term: productCategory }, { field: 'productTemplate', term: productTemplate }])}&filterType="and"`
+    }
+    axiosInstance().get(query).then(({ data: { data } }) => {
+      setProducts(data?.map((d) => d?.productName));
+    });
   }, []);
 
   useEffect(() => {
@@ -74,7 +71,7 @@ const ImportedDataDialog = ({ handleClose, data, productCategory, productTemplat
                           id="custom-import-product-description"
                           size="small"
                           fullWidth
-                          options={products}
+                          options={products || []}
                           value={r}
                           onChange={(e, val) => {
                             setRows(
@@ -86,7 +83,23 @@ const ImportedDataDialog = ({ handleClose, data, productCategory, productTemplat
                               })
                             );
                           }}
-                          renderInput={(params) => <TextField {...params} margin="dense" variant="outlined" size="small" />}
+                          renderInput={(params) => <TextField
+                            {...params}
+                            margin="dense"
+                            variant="outlined"
+                            size="small"
+                            slotProps={{
+                              input: {
+                                ...params.InputProps,
+                                endAdornment: (
+                                  <Fragment>
+                                    {!products ? <CircularProgress color="inherit" size={20} /> : null}
+                                    {params.InputProps.endAdornment}
+                                  </Fragment>
+                                ),
+                              },
+                            }}
+                          />}
                         />
                       </td>
                     ) : (
