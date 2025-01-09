@@ -1,5 +1,5 @@
-import { Dialog, IconButton, Popper, TextField, useMediaQuery } from '@mui/material';
-import { Close } from '@mui/icons-material';
+import { Dialog, IconButton, Popover, Popper, TextField, useMediaQuery } from '@mui/material';
+import { ArrowDropUp, Close } from '@mui/icons-material';
 import { KeyboardEvent, ReactNode, useRef, useState } from 'react';
 import { cn, CustomDialogTransition } from 'src/constants/helpers';
 
@@ -95,7 +95,7 @@ const CustomIntro = () => {
   let handleSteps = useRef<HandleSteps | null>(null);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
-  const arrowRef = useRef(null);
+  const [arrowRef, setArrowRef] = React.useState(null);
 
   const open = Boolean(anchorEl);
 
@@ -216,6 +216,10 @@ const CustomIntro = () => {
               }
             ]}
           >
+            <span ref={setArrowRef}>
+              <ArrowDropUp ref={arrowRef} fontSize="small" className=" text-[--dark-secondary,white]" />
+            </span>
+
             <div className="relative z-[1302] mt-3 min-w-[300px] max-w-[300px] rounded-md bg-[var(--dark-secondary,white)] p-2 shadow-md">
               <div className="mb-2 flex items-center justify-between gap-2 pb-1 [border-bottom:1px_solid_var(--common-border-color)]">
                 {currentStepData.title && <p className=" truncate text-[16px] font-semibold ">{currentStepData.title}</p>}
