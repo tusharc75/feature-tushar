@@ -39,7 +39,7 @@ const Workspace = () => {
     setIsSidebarCollapsed((prev) => !prev);
   };
 
-  const fetchChannels = async () => {
+  const fetchChannels = async (selectLatestChat= false) => {
     const { data } = await axiosInstance().get('/work-space/channel');
     data?.data?.forEach((d: any) => {
       if (d?.type === 'chat') {
@@ -52,6 +52,9 @@ const Workspace = () => {
     const channelId = queryParam.get("channelId");
     if (channelId) {
       const channel = data?.data?.find((channel) => channel?._id === channelId);
+      setSelectedChannel(channel);
+    } else if (selectLatestChat) {
+      const channel = data?.data?.findLast((channel) => channel?.type === 'chat');
       setSelectedChannel(channel);
     }
   };
@@ -85,7 +88,9 @@ const Workspace = () => {
       });
       socket.emit('joinChannel', 'directMessaging');
       socket.off('refreshChannels');
-      socket.on('refreshChannels', fetchChannels);
+      socket.on('refreshChannels', () => {
+        fetchChannels(true)
+;      });
     }
     return () => {
       if (socket) {
