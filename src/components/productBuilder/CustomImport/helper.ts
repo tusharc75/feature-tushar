@@ -13,8 +13,9 @@ const getDataHeaderRowWise = (headerRow = 1, header: any, fromCol = 0, toCol = 0
   if (headerRow === 1) {
     header?.forEach((h, i) => {
       if (i >= fromCol && i <= toCol) {
+        const cleanedString = h?.replace(/\r\n/, '');
         newHeaders.push({
-          header: h,
+          header: cleanedString,
           column: i
         });
       }
