@@ -336,7 +336,7 @@ export default function StepDialog({
                           }}
                         />
                       </Grid>
-                      <Grid size={{ xs: 12, md: 4, sm: 4 }}>
+                      <Grid size={{ xs: 12, md: 6, sm: 6 }}>
                         <CurrencyAutocomplete
                           limitTags={2}
                           value={values['currency']}
@@ -408,7 +408,7 @@ export default function StepDialog({
                           }}
                         /> */}
                       </Grid>
-                      <Grid size={{ xs: 12, md: 4, sm: 4 }}>
+                      <Grid size={{ xs: 10, md: 6, sm: 6 }}>
                         <TextField
                           slotProps={{
                             input: {
@@ -418,7 +418,7 @@ export default function StepDialog({
                               )
                             },
                           }}
-                          margin="dense"
+                          // margin="dense"
                           type="number"
                           onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                           label="List Price"
