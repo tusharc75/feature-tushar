@@ -2156,7 +2156,7 @@ const FormTypes = (props) => {
               name={name}
               checked={values[name]}
               onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.checked)}
-              color="secondary"
+              color="primary"
             />
           }
           label={label}

@@ -70,7 +70,7 @@ const FormTypes = (props) => {
           endAdornment: '% ',
           inputProps: { min: 0 },
           readOnly: fieldData && fieldData?.isUneditable ? true : false
-        },
+        }
       }}
       margin="dense"
       size="small"
@@ -93,7 +93,7 @@ const FormTypes = (props) => {
           startAdornment: (
             <InputAdornment position="start">{getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative}</InputAdornment>
           )
-        },
+        }
       }}
       margin="dense"
       size="small"
@@ -147,7 +147,7 @@ const FormTypes = (props) => {
         input: {
           inputProps: { min: 0 },
           readOnly: fieldData && fieldData?.isUneditable ? true : false
-        },
+        }
       }}
       {...others}
     />
@@ -159,14 +159,14 @@ const FormTypes = (props) => {
           name={`${fieldData?.fieldName}`}
           checked={values[fieldData?.fieldName]}
           onChange={(e) => onChange(fieldData?.fieldName, e.target.value)}
-          color="secondary"
+          color="primary"
         />
       }
       label={fieldData?.label}
       {...others}
     />
   ) : fieldData?.type === 'date' ? (
-    <Box className='pr-1'>
+    <Box className="pr-1">
       <CustomDatePicker
         disabled={fieldData?.isUneditable}
         required={fieldData?.required}
@@ -181,7 +181,7 @@ const FormTypes = (props) => {
       />
     </Box>
   ) : fieldData?.type === 'dateTime' ? (
-    <Box className='pr-1'>
+    <Box className="pr-1">
       <CustomDateTimePicker
         required={fieldData?.required}
         value={values[fieldData?.fieldName]}
