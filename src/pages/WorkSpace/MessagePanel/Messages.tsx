@@ -72,9 +72,12 @@ const Messages = ({
       setMessages((prevMessages) => {
         let newMessages = data?.data || [];
         if (updateMessage) {
-          const updatedMessages: Message[] = Object?.values(prevMessages)?.flat();
+          let updatedMessages: Message[] = Object?.values(prevMessages)?.flat();
           const index: number = updatedMessages?.findIndex((message) => message._id === messageId);
           updatedMessages[index] = data?.data;
+          if (type === 'pins' && !data?.data?.pinned) {
+            updatedMessages = updatedMessages?.filter((message) => message._id !== data?.data?._id);
+          }
           return groupByDate(updatedMessages);
         } else if (!updateMessage && messageId) {
           return groupByDate([...Object?.values(prevMessages)?.flat()?.slice(0, -1), ...newMessages]);
@@ -662,7 +665,7 @@ export const MoreMenuAndDeleteConfirmDialog = ({
 
   const pinMessage = async () => {
     try {
-      await axiosInstance().post(`/work-space/channel/message/pin/${selectedMessage?._id}`);
+      await axiosInstance().post(`/work-space/channel/message/pin-unpin/${selectedMessage?._id}`);
       socket.emit('messageUpdated', { channelId: selectedMessage?.channel, messageId: selectedMessage?._id });
     } catch (error) {
       toastConfig.setToastConfig(error);
