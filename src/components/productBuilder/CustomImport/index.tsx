@@ -64,7 +64,6 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
   const [excelMappingExtraData, setExcelMappingExtraData] = useState(null);
   const [selectedView, setSelectedView] = useState(null);
 
-
   const [isSubmittig, setIsSubmittig] = useState(false);
 
   useEffect(() => {
@@ -133,6 +132,14 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
     let _keyValue = [];
     if (selectedView) {
       _keyValue = selectedView && selectedView?.column ? selectedView?.column : [];
+    } else if (keyValue?.length > 0) {
+      customImportHeader?.forEach((_value) => {
+        const __k = keyValue?.find((k) => k?.importedColumn === _value?.value);
+        const __v = templateImportHeader?.find((t) => t?.value === __k?.systemColumn);
+        if (__k && __v) {
+          _keyValue = [..._keyValue, { systemColumn: __v?.value, importedColumn: _value?.value }];
+        }
+      });
     } else {
       customImportHeader?.forEach((_value) => {
         if (templateImportHeader?.find((templateImportHeader) => templateImportHeader?.value === _value?.value) ? true : false) {
@@ -271,7 +278,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
         message: 'Please Upload File'
       });
     } else {
-      setIsSubmittig(true)
+      setIsSubmittig(true);
       const reader = new FileReader();
       reader.onload = (e) => {
         const data = e.target.result;
@@ -327,7 +334,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
             }
           });
           setShowImportedData({ open: true, data: updatedData });
-          setIsSubmittig(false)
+          setIsSubmittig(false);
         }
       };
       reader.readAsArrayBuffer(file);
@@ -623,15 +630,15 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                                   {...params}
                                   label=""
                                   variant="outlined"
-                                // error={
-                                //   _key?.value === field?.fieldLabel?.toUpperCase() &&
-                                //   !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader)
-                                // }
-                                // helperText={
-                                //   _key?.value === field?.fieldLabel?.toUpperCase() &&
-                                //   !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader) &&
-                                //   'Required field'
-                                // }
+                                  // error={
+                                  //   _key?.value === field?.fieldLabel?.toUpperCase() &&
+                                  //   !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader)
+                                  // }
+                                  // helperText={
+                                  //   _key?.value === field?.fieldLabel?.toUpperCase() &&
+                                  //   !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader) &&
+                                  //   'Required field'
+                                  // }
                                 />
                               )}
                             />
