@@ -411,7 +411,7 @@ export default function StepDialog({
                           }}
                         /> */}
                       </Grid>
-                      <Grid size={{ xs: 10, md: 6, sm: 6 }}>
+                      <Grid size={{ xs: 12, md: 6, sm: 6 }}>
                         <TextField
                           slotProps={{
                             input: {
