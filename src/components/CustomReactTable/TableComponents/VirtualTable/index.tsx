@@ -58,7 +58,7 @@ export const VirtualTable = forwardRef(function (
   },
   ref: ForwardedRef<HTMLTableElement>
 ) {
-  const parentRef = React.useRef();
+  const parentRef = React.useRef<HTMLDivElement>(null);
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => parentRef.current,
@@ -69,6 +69,7 @@ export const VirtualTable = forwardRef(function (
         ? (element) => element?.getBoundingClientRect().height
         : undefined
   });
+
   const columnVirtualizer = useVirtualizer({
     count: columns?.length || 1,
     estimateSize: (index) => sizes[index] || 200,
