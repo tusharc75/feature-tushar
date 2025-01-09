@@ -72,12 +72,9 @@ const Messages = ({
       setMessages((prevMessages) => {
         let newMessages = data?.data || [];
         if (updateMessage) {
-          let updatedMessages: Message[] = Object?.values(prevMessages)?.flat();
+          const updatedMessages: Message[] = Object?.values(prevMessages)?.flat();
           const index: number = updatedMessages?.findIndex((message) => message._id === messageId);
           updatedMessages[index] = data?.data;
-          if (type === 'pins' && !data?.data?.pinned) {
-            updatedMessages = updatedMessages?.filter((message) => message._id !== data?.data?._id);
-          }
           return groupByDate(updatedMessages);
         } else if (!updateMessage && messageId) {
           return groupByDate([...Object?.values(prevMessages)?.flat()?.slice(0, -1), ...newMessages]);
