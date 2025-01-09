@@ -3860,7 +3860,7 @@ export const workOrderColormap = {
 
 export const workOrderIconMap = {
   [WORKORDER_SERVICE_STATUS.planned]: (
-    <CalendarMonth fontSize="small" className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.pending].indicatorColor}`} />
+    <CalendarMonth fontSize="small" className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.planned].indicatorColor}`} />
   ),
   [WORKORDER_SERVICE_STATUS.pending]: <Sync fontSize="small" className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.pending].indicatorColor}`} />,
   [WORKORDER_SERVICE_STATUS.inProgress]: (
