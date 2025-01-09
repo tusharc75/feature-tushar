@@ -154,13 +154,15 @@ const FormTypes = (props) => {
   ) : fieldData?.type === 'checkBox' ? (
     <FormControlLabel
       control={
-        <Checkbox
-          required={fieldData?.required}
-          name={`${fieldData?.fieldName}`}
-          checked={values[fieldData?.fieldName]}
-          onChange={(e) => onChange(fieldData?.fieldName, e.target.value)}
-          color="primary"
-        />
+        <>
+          <Checkbox
+            required={fieldData?.required}
+            name={`${fieldData?.fieldName}`}
+            checked={values[fieldData?.fieldName]}
+            onChange={(e) => onChange(fieldData?.fieldName, e.target.value)}
+            className="!text-[--new-theme-color] "
+          />
+        </>
       }
       label={fieldData?.label}
       {...others}
