@@ -157,7 +157,7 @@ function Product({ id }) {
     column.push({
       accessor: 'action',
       Header: 'Actions',
-      width: 70,
+      width: 100,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -173,7 +173,7 @@ function Product({ id }) {
                   setShowConfirmBox({ open: true, data: [row.original] });
                 }}
               >
-                <DeleteIcon color="error" />
+                <DeleteIcon fontSize='small' color="error" />
               </IconButton>
             </HtmlTooltip>
           )}
