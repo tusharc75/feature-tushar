@@ -25,7 +25,6 @@ const Thread = ({ message, onClose, socket, channelId, open, channelData }) => {
 
   const handleMenuClose = () => {
     setAnchorEl(null);
-    setSelectedMessage(null);
   };
 
   const handleEdit = () => {
