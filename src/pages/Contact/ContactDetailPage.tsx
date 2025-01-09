@@ -587,7 +587,6 @@ const ContactDetailsPage = (props) => {
           ) : (
             <>
               <CustomTabs
-                className="new-tab-container-v1"
                 value={currentTabIndex}
                 onChange={(index, newValue) => {
                   setCurrentTabIndex(newValue);
