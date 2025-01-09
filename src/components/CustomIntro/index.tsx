@@ -1,5 +1,5 @@
+import { ArrowDropUp, Close } from '@mui/icons-material';
 import { Dialog, IconButton, Popper, TextField, useMediaQuery } from '@mui/material';
-import { Close } from '@mui/icons-material';
 import { KeyboardEvent, ReactNode, useRef, useState } from 'react';
 import { cn, CustomDialogTransition } from 'src/constants/helpers';
 
@@ -10,8 +10,8 @@ import { HandleSteps } from 'src/components/CustomIntro/HandleStep';
 import { getCurrentUrl } from 'src/components/CustomIntro/helper';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { useStore, WALK_ME_INSTANCE, WALK_ME_STEPS } from 'src/StateProvider/fastContext';
 import { AI_AGENT } from 'src/config';
+import { useStore, WALK_ME_INSTANCE, WALK_ME_STEPS } from 'src/StateProvider/fastContext';
 export * from 'src/components/CustomIntro/CustomIntroWrapper';
 export * from 'src/components/CustomIntro/helper';
 export * from 'src/components/CustomIntro/useSetWalkmeSteps';
@@ -95,7 +95,7 @@ const CustomIntro = () => {
   let handleSteps = useRef<HandleSteps | null>(null);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
-  const arrowRef = useRef(null);
+  const [arrowRef, setArrowRef] = React.useState(null);
 
   const open = Boolean(anchorEl);
 
@@ -216,6 +216,10 @@ const CustomIntro = () => {
               }
             ]}
           >
+            <span ref={setArrowRef}>
+              <ArrowDropUp fontSize="small" className=" text-[--dark-secondary,white]" />
+            </span>
+
             <div className="relative z-[1302] mt-3 min-w-[300px] max-w-[300px] rounded-md bg-[var(--dark-secondary,white)] p-2 shadow-md">
               <div className="mb-2 flex items-center justify-between gap-2 pb-1 [border-bottom:1px_solid_var(--common-border-color)]">
                 {currentStepData.title && <p className=" truncate text-[16px] font-semibold ">{currentStepData.title}</p>}

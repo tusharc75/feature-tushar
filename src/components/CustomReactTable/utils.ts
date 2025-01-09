@@ -1,12 +1,12 @@
+import { Column, Header } from '@tanstack/react-table';
+import dayjs from 'dayjs';
 import { flatMapDeep, isEmpty, snakeCase, uniqBy } from 'lodash';
 import React from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
+import { displayDate } from 'src/constants/helpers';
 import xlsx from 'xlsx-js-style';
 import { TColType } from './TableComponents/TableHelperComponents';
 import { FilterModel } from './types';
-import { Column, Header } from '@tanstack/react-table';
-import dayjs from 'dayjs';
-import { displayDate } from 'src/constants/helpers';
 
 export const childrenProperty = 'subRows';
 
@@ -79,6 +79,11 @@ export const getStickyPosition = (columnDef: TColType, index, table) => {
   return obj;
 };
 
+const marginMap = {
+  left: {},
+  right: { marginLeft: 'auto' }
+};
+
 export const getStickyPosition2 = (columnDef: TColType, index, colSizes) => {
   const obj = {
     className: columnDef.sticky ? `sticky-cell-${columnDef.sticky}` : '',
@@ -110,7 +115,7 @@ export const getStickyPosition2 = (columnDef: TColType, index, colSizes) => {
 
   if (['left', 'right'].includes(columnDef.sticky)) {
     const offset = addSizes(index);
-    obj.style = { position: 'sticky', [columnDef.sticky]: offset } as React.CSSProperties;
+    obj.style = { position: 'sticky', [columnDef.sticky]: offset, ...marginMap[columnDef.sticky] } as React.CSSProperties;
   }
 
   return obj;
