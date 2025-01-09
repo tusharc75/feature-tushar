@@ -383,10 +383,10 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
       type: 'menuItem',
       isVisible:
         permissions?.repairJob?.isCreate &&
-        allowedToEdit &&
-        workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
-        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-        !workOrderData?.currentRepairJob
+          allowedToEdit &&
+          workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
+          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+          !workOrderData?.currentRepairJob
           ? true
           : false,
       children: `Create ${resources?.repairJob?.titleSingular}`,
@@ -478,10 +478,9 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
       children: 'Create Version Without Existing Data',
       isVisible: Boolean(
         allowedToEdit &&
-          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-          !workOrderData?.currentRepairJob &&
-          !workOrderData?.deleted &&
-          workOrderData?.canCreateWorkOrderVersion
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+        !workOrderData?.currentRepairJob &&
+        workOrderData?.canCreateWorkOrderVersion
       )
     },
     {
@@ -494,10 +493,9 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
       },
       isVisible: Boolean(
         allowedToEdit &&
-          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-          !workOrderData?.currentRepairJob &&
-          !workOrderData?.deleted &&
-          workOrderData?.canCreateWorkOrderVersion
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+        !workOrderData?.currentRepairJob &&
+        workOrderData?.canCreateWorkOrderVersion
       ),
       disabled: false
     },
@@ -528,7 +526,7 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
       id: 'Edit',
       type: 'menuItem',
       tooltip: 'Edit Work Order',
-      isVisible: Boolean(allowedToEdit && !workOrderData?.deleted && !completed),
+      isVisible: Boolean(allowedToEdit && !completed),
       children: 'Edit',
       onClick: () => setOpenUpdateDialog(true)
     },
@@ -540,8 +538,7 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
         permissions?.workOrder?.isDelete &&
         allowedToEdit &&
         workOrderData?.canDelete &&
-        checkIsAllowedToDelete(user, sidebarResource.workOrder, workOrderData.owner.optionValue) &&
-        !workOrderData?.deleted,
+        checkIsAllowedToDelete(user, sidebarResource.workOrder, workOrderData.owner.optionValue),
       children: 'Delete'
     }
   ] as const;
@@ -560,7 +557,7 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
           <Box className="control-buttons-v1 items-center">
             {workOrderData ? (
               <>
-                <RenderHeaderButtons buttonOptions={toolbarButtons} />
+                {!workOrderData?.deleted && <RenderHeaderButtons buttonOptions={toolbarButtons} />}
               </>
             ) : (
               <Skeleton variant="text" width="150px" height="40px" />
@@ -869,7 +866,7 @@ const RenderHeaderButtons = ({ buttonOptions }: { buttonOptions: ToolbarComponen
   const renderComponent = (componentOptions: ToolbarComponents<ThemeButtonProps | MenuItemProps>) => {
     if (componentOptions.isVisible === false) return null;
     if (componentOptions.type === 'menuItem') {
-      const { children, type, id, button, ...rest } = componentOptions;
+      const { children, type, id, ...rest } = componentOptions;
       return componentOptions.isVisible ? (
         <HtmlTooltip title={componentOptions.tooltip || ''} placement="top" arrow enterTouchDelay={0}>
           <span>

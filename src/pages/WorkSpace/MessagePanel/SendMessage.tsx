@@ -11,6 +11,7 @@ import Mention from 'src/pages/WorkSpace/MessagePanel/Mention';
 import { ChannelData } from 'src/pages/WorkSpace/types';
 import { fileToBase64, isImageFile } from 'src/pages/WorkSpace/utils';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 type SendMessageProps = {
   channelId: string;
@@ -278,8 +279,9 @@ const SendMessage = ({
                 'code',
                 'wordcount',
                 'help',
+                'emoticons',
               ],
-              toolbar: `undo redo | blocks | bold italic link | bullist numlist| removeformat | help`,
+              toolbar: `undo redo | blocks | bold italic link | bullist numlist| removeformat | emoticons | help`,
               content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
               setup: (editor) => {
                 editor.on('BeforeSetContent', (e) => {
@@ -307,9 +309,11 @@ const SendMessage = ({
                 onChange={handleFileChange}
               />
               <label htmlFor="file-upload">
-                <IconButton color="primary" aria-label="upload" component="span" style={{ padding: 5, borderRadius: 0 }}>
-                  <AttachFile />
-                </IconButton>
+                <HtmlTooltip title="Attach file(s)" placement="top">
+                  <IconButton color="primary" aria-label="upload" component="span" style={{ padding: 5, borderRadius: 0 }} disabled={disabled}>
+                    <AttachFile />
+                  </IconButton>
+                </HtmlTooltip>
               </label>
               <IconButton
                 style={{ padding: 5 }}
