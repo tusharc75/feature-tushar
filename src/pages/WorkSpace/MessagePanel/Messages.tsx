@@ -28,18 +28,28 @@ type MessagesProps = {
   newChat: boolean;
   toUsers: string[];
   refreshNewChat: () => void;
+  type: 'messages' | 'pins';
 };
 
 export const groupByDate = (messages: Message[]) => {
   return groupBy(messages, (message) => displayDate(message.date));
 };
 
-const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, channelData, newChat, toUsers, refreshNewChat }: MessagesProps) => {
+const Messages = ({
+  channelId,
+  socket,
+  threadDialogOpen,
+  setThreadDialogOpen,
+  channelData,
+  newChat,
+  toUsers,
+  refreshNewChat,
+  type
+}: MessagesProps) => {
   const [messages, setMessages] = useState<{ [key: string]: Message[] }>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [lastMessageSeen, setLastMessageSeen] = useState(null);
   const toastConfig = useContext(CustomToastContext);
-  const [showConfirmBox, setShowConfirmBox] = useState({ open: false, _id: null });
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedMessage, setSelectedMessage] = useState<Message>(null);
   const [editingMessage, setEditingMessage] = useState(null);
@@ -51,8 +61,9 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, ch
       if (updateMessage && messageId) {
         api += `/${messageId}`;
       } else if (messageId) {
-        api += `?after=${messageId}`;
+        api += `?after=${messageId}${type === 'pins' ? '&type=pins' : ''}`;
       } else {
+        api += `${type === 'pins' ? '?type=pins' : ''}`;
         setIsLoading(true);
       }
 
@@ -145,16 +156,7 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, ch
     } else {
       fetchMessages();
     }
-  }, [channelId, newChat]);
-
-  const deleteMessage = async (_id) => {
-    try {
-      await axiosInstance().delete(`/work-space/channel/message`, { data: { _id } });
-      socket.emit('messageDeleted', { channelId });
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
-  };
+  }, [channelId, newChat, type]);
 
   const handleMenuClick = (event, message: Message) => {
     setAnchorEl(event.currentTarget);
@@ -216,16 +218,23 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, ch
           </div>
         )}
       </div>
-      <SendMessage channelId={channelId} socket={socket} channelData={channelData} disabled={isLoading || (newChat && toUsers?.length === 0)} messageId={lastMessageSeen} newChat={newChat} toUsers={toUsers} refreshNewChat={refreshNewChat} />
+      <SendMessage
+        channelId={channelId}
+        socket={socket}
+        channelData={channelData}
+        disabled={isLoading || (newChat && toUsers?.length === 0) || type === 'pins'}
+        messageId={lastMessageSeen}
+        newChat={newChat}
+        toUsers={toUsers}
+        refreshNewChat={refreshNewChat}
+      />
       <MoreMenuAndDeleteConfirmDialog
         anchorEl={anchorEl}
         handleMenuClose={handleMenuClose}
         setThreadDialogOpen={setThreadDialogOpen}
         selectedMessage={selectedMessage}
         handleEdit={handleEdit}
-        setShowConfirmBox={setShowConfirmBox}
-        showConfirmBox={showConfirmBox}
-        deleteMessage={deleteMessage}
+        socket={socket}
       />
       <Thread
         message={threadDialogOpen.message}
@@ -233,7 +242,6 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, ch
         onClose={() => setThreadDialogOpen({ open: false, message: null })}
         socket={socket}
         channelId={channelId}
-        deleteMessage={deleteMessage}
         channelData={channelData}
       />
     </>
@@ -399,12 +407,18 @@ export const DisplaySingleMessage = ({
                        [&_span:last-child]:text-gray-400`,
                       isSelf
                         ? 'ml-auto bg-[#0DA0A840] text-[#777575] dark:bg-[#0DA0A840] dark:text-[white]'
-                        : 'bg-[#F4F4F4] text-[#777575] dark:bg-[hsla(0deg,0%,37.27%,0.5)] dark:text-white'
+                        : 'bg-[#F4F4F4] text-[#777575] dark:bg-[hsla(0deg,0%,37.27%,0.5)] dark:text-white',
+                      message?.pinned ? 'relative border-l-4 border-[#cdbb54]' : ''
                     )}
                     dangerouslySetInnerHTML={{
                       __html: `${message.message} <span className=''>${message?.lastModified ? '(edited)' : ''}</span>`
                     }}
                   ></span>
+                  {message?.pinned && (
+                    <span className="absolute right-11 top-7 text-[15px]" title="Pinned">
+                      📌
+                    </span>
+                  )}
                   <div className={cn('max-w-fit', isSelf ? 'ml-auto text-right' : '')}>
                     {groupedReactions?.length > 0 && (
                       <div className={cn('reactions mt-2 flex gap-1', isSelf ? ' justify-end' : '')}>
@@ -488,7 +502,7 @@ export const DisplaySingleMessage = ({
                         })}
                       </div>
                     )}
-                    {replies.length > 0 && setThreadDialogOpen && (
+                    {replies.length > 0 && setThreadDialogOpen && !message?.pinned && (
                       <div
                         onClick={() => setThreadDialogOpen({ open: true, message })}
                         className="group flex cursor-pointer items-center gap-1 rounded-md bg-[var(--dark-primary,white)] p-1 transition-all duration-200 [outline:1px_solid_transparent] hover:shadow-md hover:[outline:1px_solid_var(--common-border-color)]"
@@ -510,7 +524,9 @@ export const DisplaySingleMessage = ({
                             </Avatar>
                           );
                         })}
-                        <span className="link ml-1 line-clamp-1">{message.replies.length} {message.replies.length > 1 ? 'replies' : 'reply'}</span>
+                        <span className="link ml-1 line-clamp-1">
+                          {message.replies.length} {message.replies.length > 1 ? 'replies' : 'reply'}
+                        </span>
                         <div className="relative ml-1 text-[13px] font-normal">
                           <span className="absolute line-clamp-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100">View Thread</span>
                           <span className="line-clamp-1 opacity-100 transition-opacity duration-200 group-hover:opacity-0">
@@ -535,7 +551,7 @@ export const DisplaySingleMessage = ({
                       </span>
                     </IconButton>
                   </HtmlTooltip>
-                  {setThreadDialogOpen && (
+                  {setThreadDialogOpen && !message?.pinned && (
                     <HtmlTooltip title="Reply in thread">
                       <IconButton size="small" onClick={() => setThreadDialogOpen({ open: true, message })}>
                         <span className="flex h-6 w-6 items-center justify-center">
@@ -614,9 +630,7 @@ type MoreMenuAndDeleteConfirmDialogProps = {
   setThreadDialogOpen?: React.Dispatch<React.SetStateAction<{ open: boolean; message: Message }>>;
   selectedMessage: Message;
   handleEdit: () => void;
-  setShowConfirmBox: React.Dispatch<React.SetStateAction<{ open: boolean; _id: string }>>;
-  showConfirmBox: { open: boolean; _id: string };
-  deleteMessage: (id: string) => void;
+  socket: Socket;
 };
 
 export const MoreMenuAndDeleteConfirmDialog = ({
@@ -625,15 +639,35 @@ export const MoreMenuAndDeleteConfirmDialog = ({
   setThreadDialogOpen,
   selectedMessage,
   handleEdit,
-  setShowConfirmBox,
-  showConfirmBox,
-  deleteMessage
+  socket
 }: MoreMenuAndDeleteConfirmDialogProps) => {
   const {
     state: {
       user: { user }
     }
   } = useData();
+
+  const toastConfig = useContext(CustomToastContext);
+
+  const [showConfirmBox, setShowConfirmBox] = useState<boolean>(false);
+
+  const deleteMessage = async () => {
+    try {
+      await axiosInstance().delete(`/work-space/channel/message`, { data: { _id: selectedMessage?._id } });
+      socket.emit('messageDeleted', { channelId: selectedMessage?.channel });
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const pinMessage = async () => {
+    try {
+      await axiosInstance().post(`/work-space/channel/message/pin/${selectedMessage?._id}`);
+      socket.emit('messageUpdated', { channelId: selectedMessage?.channel, messageId: selectedMessage?._id });
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   return (
     <>
@@ -651,10 +685,9 @@ export const MoreMenuAndDeleteConfirmDialog = ({
         }}
       >
         <span onClick={handleMenuClose}>
-          <MenuItem button>Mark unread</MenuItem>
-          {setThreadDialogOpen && (
+          <MenuItem onClick={pinMessage}>{selectedMessage?.pinned ? 'Unpin' : 'Pin'}</MenuItem>
+          {setThreadDialogOpen && !selectedMessage?.pinned && (
             <MenuItem
-              button
               onClick={() => {
                 handleMenuClose();
                 setThreadDialogOpen({ open: true, message: selectedMessage });
@@ -663,28 +696,20 @@ export const MoreMenuAndDeleteConfirmDialog = ({
               Reply
             </MenuItem>
           )}
-          {selectedMessage?.user?.optionValue === user?._id && (
-            <MenuItem button onClick={() => handleEdit()}>
-              Edit
-            </MenuItem>
-          )}
-          {selectedMessage?.user?.optionValue === user?._id && (
-            <MenuItem button onClick={() => setShowConfirmBox({ open: true, _id: selectedMessage?._id })}>
-              Delete
-            </MenuItem>
-          )}
+          {selectedMessage?.user?.optionValue === user?._id && <MenuItem onClick={() => handleEdit()}>Edit</MenuItem>}
+          {selectedMessage?.user?.optionValue === user?._id && <MenuItem onClick={() => setShowConfirmBox(true)}>Delete</MenuItem>}
         </span>
       </Menu>
-      {showConfirmBox.open && (
+      {showConfirmBox && (
         <ConfirmationDialog
-          open={showConfirmBox.open}
+          open={showConfirmBox}
           message={`Are you sure you want to delete Message?`}
           onClose={() => {
-            setShowConfirmBox({ open: false, _id: null });
+            setShowConfirmBox(false);
           }}
           onOk={() => {
-            deleteMessage(showConfirmBox._id);
-            setShowConfirmBox({ open: false, _id: null });
+            deleteMessage();
+            setShowConfirmBox(false);
           }}
         />
       )}

@@ -8,15 +8,11 @@ import { Message } from 'src/pages/WorkSpace/types';
 import { formatDateWithTodayYestarday } from 'src/pages/WorkSpace/utils';
 import { DisplaySingleMessage, MoreMenuAndDeleteConfirmDialog } from './Messages';
 
-const Thread = ({ message, onClose, socket, channelId, deleteMessage, open, channelData }) => {
+const Thread = ({ message, onClose, socket, channelId, open, channelData }) => {
   const [messages, setMessages] = useState(null);
-  const [showConfirmBox, setShowConfirmBox] = useState({ open: false, _id: null });
-
-  //
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedMessage, setSelectedMessage] = useState<Message>(null);
   const [editingMessage, setEditingMessage] = useState(null);
-  //
 
   useEffect(() => {
     setMessages(message?.replies);
@@ -115,9 +111,7 @@ const Thread = ({ message, onClose, socket, channelId, deleteMessage, open, chan
           handleMenuClose={handleMenuClose}
           selectedMessage={selectedMessage}
           handleEdit={handleEdit}
-          setShowConfirmBox={setShowConfirmBox}
-          showConfirmBox={showConfirmBox}
-          deleteMessage={deleteMessage}
+          socket={socket}
         />
       </div>
     </>
