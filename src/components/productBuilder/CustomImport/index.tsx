@@ -31,7 +31,7 @@ import { AddColumnDialog } from 'src/components/productBuilder/CustomImport/AddC
 import { Add, Delete } from '@mui/icons-material';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import RowNumberDialog from 'src/components/productBuilder/CustomImport/RowNumberDialog';
-import ImportedDataDialog from 'src/components/productBuilder/CustomImport/ImpoetedDataDialog';
+import ImportedDataDialog from 'src/components/productBuilder/CustomImport/ImportedDataDialog';
 import ViewDialog from 'src/components/productBuilder/CustomImport/ViewDialog';
 import { handleFileImport } from 'src/components/productBuilder/CustomImport/helper';
 import ShowMissedOrExtraColumn from 'src/components/productBuilder/CustomImport/ShowMissedOrExtraColumn';
@@ -43,7 +43,6 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
   const toastConfig = useContext(CustomToastContext);
   const isMobile = useMediaQuery('(max-width:600px)');
   const [fields, setFields] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [values, setValues] = useState({ productCategory: '', productTemplate: '', priceTemplate: '' });
   const [productCategory, setProductCategory] = useState([]);
   const [productTemplate, setProductTemplate] = useState([]);
@@ -64,6 +63,9 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
   const [showViewDialog, setShowViewDialog] = useState(false);
   const [excelMappingExtraData, setExcelMappingExtraData] = useState(null);
   const [selectedView, setSelectedView] = useState(null);
+
+
+  const [isSubmittig, setIsSubmittig] = useState(false);
 
   useEffect(() => {
     axiosInstance()
@@ -269,6 +271,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
         message: 'Please Upload File'
       });
     } else {
+      setIsSubmittig(true)
       const reader = new FileReader();
       reader.onload = (e) => {
         const data = e.target.result;
@@ -324,6 +327,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
             }
           });
           setShowImportedData({ open: true, data: updatedData });
+          setIsSubmittig(false)
         }
       };
       reader.readAsArrayBuffer(file);
@@ -345,7 +349,6 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
   };
 
   const handleSave = (file) => {
-    setLoading(true);
     toastConfig.setToastConfig({
       open: true,
       type: 'info',
@@ -375,7 +378,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
             message: 'All Records Added Successfully'
           });
           onSuccess();
-          setLoading(false);
+          setIsSubmittig(false);
         } else {
           const fileName = response.headers['content-disposition'].split('filename=')[1];
           downloadExcel(response.data, fileName);
@@ -384,11 +387,11 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
             type: 'error',
             message: `Found some issue(s) while importing builder`
           });
-          setLoading(false);
+          setIsSubmittig(false);
         }
       })
       .catch((error) => {
-        setLoading(false);
+        setIsSubmittig(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -649,14 +652,13 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
               onClick={handleCustomImport}
               buttonType="theme"
               disabled={
-                loading ||
-                // !values?.productCategory ||
+                isSubmittig ||
                 !values?.productTemplate ||
                 !values?.priceTemplate ||
                 templateImportHeader?.length === 0 ||
                 customImportHeader?.length === 0
               }
-              isLoading={loading}
+              isLoading={isSubmittig}
             >
               Submit
             </ThemeButton>
