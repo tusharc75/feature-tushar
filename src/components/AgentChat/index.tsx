@@ -6,7 +6,7 @@ import Chatbox, { useChatboxReducer } from 'src/components/AiChatbox';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import routes from 'src/components/Helpers/Routes';
 import { AI_AGENT } from 'src/config';
-import genieImage from 'src/assets/dashboard_images/sidebar/genie.png';
+import genieImage from 'src/assets/dashboard_images/sidebar/genie.svg';
 
 const excludedPaths = ['/', routes.equiptAi.path, '/user-manual'];
 
@@ -32,7 +32,11 @@ const AgentChat = () => {
       {AI_AGENT && localStorage.getItem('token') && (
         <HtmlTooltip title={isChatboxOpen ? '' : 'Equipt Genie'} className="block">
           <div className="rounded-full bg-[var(--dark-primary,white)]">
-            <Button onClick={toggleChatbox} variant="outlined" style={{ borderRadius: 999, width: 40, height: 40, minWidth: 'unset', padding: 8 }}>
+            <Button
+              onClick={toggleChatbox}
+              variant="outlined"
+              sx={{ borderRadius: 999, width: 40, height: 40, minWidth: 'unset', padding: '4px', borderColor: 'var(--common-border-color)' }}
+            >
               {isChatboxOpen ? <Close /> : <img src={genieImage} className="max-w-full" alt="" />}
             </Button>
           </div>
