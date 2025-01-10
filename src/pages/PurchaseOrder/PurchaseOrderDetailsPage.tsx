@@ -174,6 +174,8 @@ const PurchaseOrderDetailsPage = () => {
       var isPartialReceived = data?.some((e) => e?.actualReceived);
       if (data?.filter((e) => e?.qty - ((e?.actualReceived || 0) + (e?.rejectQuantity || 0)) > 0).length > 0) {
         isCompleteReceived = false;
+      } else if (data?.every((d) => !d?.actualReceived && d?.qty - (d?.rejectQuantity || 0) === 0)) {
+        isCompleteReceived = false;
       } else {
         isCompleteReceived = true;
       }

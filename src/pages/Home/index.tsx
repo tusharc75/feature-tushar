@@ -11,7 +11,7 @@ import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineCo
 import Chart from './Chart';
 import { assignIconAndText, getAllData, groupByKey } from './helpers';
 import SideCard from 'src/pages/Home/SideCard';
-import equiptGenieImage from 'src/assets/dashboard_images/sidebar/genie.png';
+import equiptGenieImage from 'src/assets/dashboard_images/sidebar/genie.svg';
 import dynamicFormImage from 'src/assets/dashboard_images/sidebar/dynamic-form.png';
 import WorkspaceCard from 'src/pages/Home/WorkspaceCard';
 
@@ -60,7 +60,7 @@ function Dashboard() {
             <div className={'grid gap-5 max-[900px]:grid-cols-2 max-[600px]:grid-cols-1'}>
               {aiPermission && (
                 <SideCard
-                  heading={"Equipt Genie"}
+                  heading={'Equipt Genie'}
                   href={routes.equiptAi.path}
                   icon={
                     <div className="max-w-[60px]">
