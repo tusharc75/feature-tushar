@@ -1,7 +1,6 @@
 import { Collapse } from '@mui/material';
 import Box from '@mui/material/Box';
 import Dialog from '@mui/material/Dialog';
-import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
 import ControlPointIcon from '@mui/icons-material/ControlPoint';
 import ExpandLess from '@mui/icons-material/ExpandLess';
@@ -27,6 +26,7 @@ import { AddField } from '../FormBuilder/AddField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import FormTypes from '../Helpers/FormTypes';
 import { CustomDialogTransition } from './../../constants/helpers';
+import Grid from '@mui/material/Grid2';
 
 var levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
@@ -351,11 +351,11 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                                         label={
                                           field.isUneditable
                                             ? `${replaceUnit(
-                                                field.fieldLabel,
-                                                values?.unit,
-                                                values?.secondaryUnit,
-                                                values?.tertiaryUnit
-                                              )} (Auto Calculated Field)`
+                                              field.fieldLabel,
+                                              values?.unit,
+                                              values?.secondaryUnit,
+                                              values?.tertiaryUnit
+                                            )} (Auto Calculated Field)`
                                             : replaceUnit(field.fieldLabel, values?.unit, values?.secondaryUnit, values?.tertiaryUnit)
                                         }
                                         name={field.fieldName}
@@ -383,7 +383,7 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                                         }
                                       />
                                     ) : (
-                                      <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                      <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }} >
                                         <Box display="flex">
                                           <Box flexGrow={1}>
                                             <FormTypes
@@ -399,11 +399,11 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                                               label={
                                                 field.isUneditable
                                                   ? `${replaceUnit(
-                                                      field.fieldLabel,
-                                                      values?.unit,
-                                                      values?.secondaryUnit,
-                                                      values?.tertiaryUnit
-                                                    )} (Auto Calculated Field)`
+                                                    field.fieldLabel,
+                                                    values?.unit,
+                                                    values?.secondaryUnit,
+                                                    values?.tertiaryUnit
+                                                  )} (Auto Calculated Field)`
                                                   : replaceUnit(field.fieldLabel, values?.unit, values?.secondaryUnit, values?.tertiaryUnit)
                                               }
                                               name={field.fieldName}
@@ -429,8 +429,8 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                                               imageOrFileUploadCompletePercentage={
                                                 ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                                   ? (completePercentage) => {
-                                                      setUploadingImageOrFileProgress(completePercentage);
-                                                    }
+                                                    setUploadingImageOrFileProgress(completePercentage);
+                                                  }
                                                   : null
                                               }
                                               setValues={setValues}
@@ -480,7 +480,6 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                   }}
                   disabled={uploadingImageOrFileProgress > 0}
                 >
-                  {' '}
                   Save
                 </ThemeButton>
               </CustomDialogFooter>
@@ -506,9 +505,14 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
         </Box>
       )}
       {isAddField && (
-        <AddField refrence="formAdd" fieldData={null} handleClose={handleCloseAddField} handleAddField={handleAddField} fields={initialData.fields} />
+        <AddField
+          refrence="formAdd"
+          fieldData={null}
+          handleClose={handleCloseAddField}
+          handleAddField={handleAddField}
+          fields={initialData.fields} />
       )}
-    </Dialog>
+    </Dialog >
   );
 };
 
