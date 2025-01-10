@@ -12,6 +12,8 @@ import {
   expenses,
   yupSchema,
   sidebarResource,
+  getObjKeys,
+  GenerateResourceLineNumber,
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@mui/material/Dialog';
@@ -24,7 +26,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess, referenceType = null, referenceData = null }) => {
+const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -32,7 +34,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess,
   }: any = useData();
 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
-
+  const [expensesData, setExpensesData] = useState();
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -52,27 +54,22 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess,
           axiosInstance()
             .get(`${expenses.api}/` + expenseId)
             .then(({ data: { data } }) => {
+              setExpensesData(data);
               if (isClone) {
-                const { _id, brand, createdBy, history, expensesNumber, updatedBy, ...rest } = data;
+                const { _id, brand, createdBy, history, expenseNumber, updatedBy, ...rest } = data;
                 setTitle(`Clone - ${expenses}`);
+                rest.expenseNumber = GenerateResourceLineNumber(fieldsDataForCreate);
                 setInitialData({
                   fields: fieldsDataForCreate,
-                  values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user), expectedCompletionDate: null }
+                  values: {...getObjKeysWithValues(rest, fieldsDataForCreate, true, user)}
                 });
                 setLoading(false);
               } else {
-                axiosInstance()
-                  .get(`${expenses.api}/${expenseId}/assets`)
-                  .then(({ data: { data: assetData } }) => {
-                    setTitle(`Editing - [${data.expensesNumber}]`);
+                    setTitle(`Editing - [${data.expenseNumber}]`);
                     setInitialData({
                       fields: fieldsDataForUpdate,
                       values: getObjKeysWithValues(data, fieldsDataForUpdate)
                     });
-                  })
-                  .catch((error) => {
-                    toastConfig.setToastConfig(error);
-                  });
                 setLoading(false);
               }
             })
@@ -80,6 +77,16 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess,
               toastConfig.setToastConfig(error);
             });
         } 
+        else {
+          setTitle(`Create ${resources?.expenses?.titleSingular}`);
+          let initialData = { ...getObjKeys('', fieldsDataForCreate) };
+          initialData['expenseNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
+          setInitialData({
+            fields: fieldsDataForCreate,
+            values: initialData
+          });
+          setLoading(false);
+        }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -110,9 +117,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess,
       axiosInstance()
         .post(`${expenses.api}`, rest)
         .then(({ data: { data, message } }) => {
-          if (!referenceType) {
             history.push(`${routes.expensesDetail.path}/${data._id}`);
-          }
           setSubmitting(false);
           onSuccess(data);
           toastConfig.setToastConfig({

@@ -16,7 +16,7 @@ const MaterialDialog = ({ creditMemoDetail, handleClose, allowedToEdit }) => {
           showRequiredLabel={false}
         />
         <CustomDialogContent isFooterPresent={false}>
-          <CreditMemoMaterial creditMemoData={creditMemoDetail} allowedToEdit={allowedToEdit} />
+          <CreditMemoMaterial creditMemoData={creditMemoDetail} allowedToEdit={allowedToEdit} fetchCreditMemoData={() => { }} />
         </CustomDialogContent>
       </Dialog>
     </>
