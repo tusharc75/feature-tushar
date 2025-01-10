@@ -205,7 +205,10 @@ const ProductBuilder = (props) => {
             setNextStep(true);
           }
         } else if (processStatus === QUOTE_PROCESS_STATUS.priceBuilder) {
-          if (rows?.find((ele) => (ele[`totalSalesPrice_${currency?.toLowerCase()}`] || 0) === 0 || (ele[`qty`] || 0) === 0)) {
+          if (!rows?.length) {
+            setNextStep(false);
+          }
+          else if (rows?.find((ele) => (ele[`totalSalesPrice_${currency?.toLowerCase()}`] || 0) === 0 || (ele[`qty`] || 0) === 0)) {
             setNextStep(false);
           } else {
             setNextStep(true);
@@ -829,18 +832,6 @@ const ProductBuilder = (props) => {
           open={showConfirmDialog}
           onSave={() => {
             setShowConfirmDialog(false);
-            // e.preventDefault();
-            // const err = Object.keys(errors);
-            // if (err.length) {
-            // const input = document.querySelector(
-            //   `input[name=${err[0]}]`,
-            // );
-
-            // input.scrollIntoView({
-            //   behavior: 'smooth',
-            //   block: 'center',
-            //   inline: 'start',
-            // });
           }}
           onClose={() => {
             setShowConfirmDialog(false);

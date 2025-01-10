@@ -34,7 +34,6 @@ import {
   termsAndCondition,
   displayCardDate
 } from '../../../constants/helpers';
-import contactClass from '../../Contact/contact.module.scss';
 import DOAReasonDialog from '../../DOA/DOAReasonDialog';
 import AllVersionStatus from '../AllVersionStatus';
 import ManageQuoteDialog from '../ManageQuote/ManageQuoteDialog';

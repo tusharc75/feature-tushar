@@ -69,7 +69,7 @@ export const AddAllColumnDialog = (props) => {
   function validate(values) {
     const errors = {};
     if (!values.sectionName) {
-      errors['sectionName'] = 'Please select SectionName';
+      errors['sectionName'] = 'Please select Section Name';
     }
     if (values?.columns?.length <= 0) {
       errors['columns'] = 'Please select atleast one column';

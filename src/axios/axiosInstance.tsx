@@ -1,19 +1,8 @@
 import axios from 'axios';
 import { backendApi } from './../config';
 
-const ERROR_CODE = {
-    permissionError: '1001',
-    forbiddenError: '1002',
-    // authorizationError: '1003',
-    // invalidUserError: '1004'
-};
+const ERROR_CODE = { permissionError: '1001', forbiddenError: '1002' };
 Object.freeze(ERROR_CODE);
-
-const generateFakeResponse: any = () => {
-    return new Promise((resolve, reject) => {
-        resolve({ data: {}, status: 200, message: "Api call stopped on offline mode" });
-    })
-}
 
 export default (history = null, passedHeaders = null) => {
     let headers: any = passedHeaders ? passedHeaders : {};
@@ -34,40 +23,11 @@ export default (history = null, passedHeaders = null) => {
 
     function clearTokenAndRedirectToHome() {
         localStorage.removeItem('token');
-
         if (history) {
             history.push("/");
             history.push("/login");
         }
-        // else {
-        //     // history.push('/');
-        //     //@ts-ignore
-        //     window.location = "/";
-        // }
     }
-
-    axiosInstance.interceptors.request.use((request) => {
-        if (navigator) {
-            //@ts-ignore
-            let bandwidth = navigator["connection"]?.downlink //in mb/s
-            let maxSlowSpeed = 400 // in kb/s
-            if (bandwidth * 1000 <= maxSlowSpeed) {
-                if (localStorage.getItem("slowInternetConnection") !== "true") {
-                    localStorage.setItem("slowInternetConnection", "true")
-                }
-            }
-            else if (localStorage.getItem("slowInternetConnection") === "true") {
-                localStorage.setItem("slowInternetConnection", "false")
-            }
-        }
-        // const splittedUrl = request.url.split("?");
-        // if (splittedUrl.length > 1) {
-        //     request.url = `${splittedUrl[0]}?${encodeURIComponent(splittedUrl[1])}`
-        // }
-        return request;
-    }, error => {
-        return Promise.reject(error);
-    });
 
     axiosInstance.interceptors.response.use((response) =>
         new Promise((resolve, reject) => {
@@ -93,14 +53,6 @@ export default (history = null, passedHeaders = null) => {
                 const err = JSON.parse(data);
                 return new Promise((resolve, reject) => reject({ open: true, type: "error", message: err.error, }));
             }
-
-            // if (error.message == "Network Error") {
-            //     if (navigator.onLine) {
-            //         return new Promise((resolve, reject) => {
-            //             reject({ open: true, type: "error", message: "Api Not Working" });
-            //         })
-            //     }
-            // }
 
             if (!error.response) {
                 return new Promise((resolve, reject) => {
@@ -140,19 +92,9 @@ export default (history = null, passedHeaders = null) => {
                     })
                 }
             }
-            // reject(error);
         }
     );
 
-    // if (!navigator.onLine) {
-    //     return {
-    //         get: () => generateFakeResponse(),
-    //         delete: () => generateFakeResponse(),
-    //         post: () => generateFakeResponse(),
-    //         put: () => generateFakeResponse(),
-    //         patch: () => generateFakeResponse(),
-    //     }
-    // }
 
     return axiosInstance;
 }
