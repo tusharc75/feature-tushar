@@ -130,11 +130,9 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
       filterOptions = data;
       setResourceColumns(data);
     }
-    setFilterOptions([
-      { fieldLabel: 'All', fieldName: 'all', _id: '0' },
-      ...filterOptions
-        ?.filter((d) => d?.isRead && ['dropDown', 'multiSelect', 'date', 'checkBox', 'singleLine']?.includes(d?.fieldData?.type))
-        ?.map((f) => f?.fieldData)
+    setFilterOptions([...filterOptions
+      ?.filter((d) => d?.isRead && ['dropDown', 'multiSelect', 'date', 'checkBox', 'singleLine']?.includes(d?.fieldData?.type))
+      ?.map((f) => f?.fieldData)
     ]);
   };
 
