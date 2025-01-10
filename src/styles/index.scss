@@ -799,12 +799,12 @@ body::-webkit-scrollbar-thumb {
 
 .header-panel {
   color: var(--secondary);
-  padding: var(--padding, 0 0 7px);
+  padding: var(--padding, 5px 0 7px);
   border-radius: 6px 6px 0 0;
   row-gap: 5px;
 
   @media all and (min-width: 600px) {
-    --padding: 0 0 7px;
+    --padding: 8px 0 7px;
   }
 
   & .MuiButton-outlinedSizeSmall {
@@ -2950,7 +2950,7 @@ svg.MuiSvgIcon-root {
     align-items: center;
     justify-content: space-between;
     margin-top: 10px;
-    margin-bottom: 15px;
+    margin-bottom: 7px;
     min-height: 32px;
 
     .primaryButton {
