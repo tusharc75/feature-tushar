@@ -147,7 +147,7 @@ const Messages = ({
         socket.off('removeReaction');
       }
     };
-  }, [socket, channelId]);
+  }, [socket, channelId, type]);
 
   useEffect(() => {
     if (newChat) {
@@ -165,7 +165,6 @@ const Messages = ({
 
   const handleMenuClose = () => {
     setAnchorEl(null);
-    setSelectedMessage(null);
   };
 
   const handleEdit = () => {
@@ -261,6 +260,7 @@ type DisplaySingleMessageProps = {
   handleMenuClick: (event: React.MouseEvent<HTMLButtonElement>, message: Message) => void;
   messageTimeFormatter?: (string) => string;
   channelData: ChannelData;
+  type?: 'messages' | 'pins';
 };
 
 export const DisplaySingleMessage = ({
@@ -273,7 +273,8 @@ export const DisplaySingleMessage = ({
   setThreadDialogOpen,
   handleMenuClick,
   messageTimeFormatter = (date) => displayDateTime(date, 'hh:mm A'),
-  channelData
+  channelData,
+  type = 'messages'
 }: DisplaySingleMessageProps) => {
   const [theme] = useAppTheme();
   const [emojiPanleAnchor, setEmojiPanelAnchor] = useState<HTMLElement>(null);
@@ -502,7 +503,7 @@ export const DisplaySingleMessage = ({
                         })}
                       </div>
                     )}
-                    {replies.length > 0 && setThreadDialogOpen && !message?.pinned && (
+                    {replies.length > 0 && setThreadDialogOpen && type !== 'pins' && (
                       <div
                         onClick={() => setThreadDialogOpen({ open: true, message })}
                         className="group flex cursor-pointer items-center gap-1 rounded-md bg-[var(--dark-primary,white)] p-1 transition-all duration-200 [outline:1px_solid_transparent] hover:shadow-md hover:[outline:1px_solid_var(--common-border-color)]"
@@ -540,8 +541,7 @@ export const DisplaySingleMessage = ({
 
                 <div
                   className={cn(
-                    'floating-controls absolute -top-[10px] right-2 z-[10] flex items-center gap-[2px] rounded-md bg-[var(--dark-primary,_white)] p-1 opacity-0 [border:1px_solid_var(--common-border-color)] group-hover:opacity-100',
-                    selectedMessage?._id === message._id && 'opacity-100'
+                    'floating-controls absolute -top-[10px] right-2 z-[10] flex items-center gap-[2px] rounded-md bg-[var(--dark-primary,_white)] p-1 opacity-0 [border:1px_solid_var(--common-border-color)] group-hover:opacity-100'
                   )}
                 >
                   <HtmlTooltip title="Find reaction">
@@ -551,7 +551,7 @@ export const DisplaySingleMessage = ({
                       </span>
                     </IconButton>
                   </HtmlTooltip>
-                  {setThreadDialogOpen && !message?.pinned && (
+                  {setThreadDialogOpen && type !== 'pins' && (
                     <HtmlTooltip title="Reply in thread">
                       <IconButton size="small" onClick={() => setThreadDialogOpen({ open: true, message })}>
                         <span className="flex h-6 w-6 items-center justify-center">
@@ -631,6 +631,7 @@ type MoreMenuAndDeleteConfirmDialogProps = {
   selectedMessage: Message;
   handleEdit: () => void;
   socket: Socket;
+  type?: 'messages' | 'pins';
 };
 
 export const MoreMenuAndDeleteConfirmDialog = ({
@@ -639,7 +640,8 @@ export const MoreMenuAndDeleteConfirmDialog = ({
   setThreadDialogOpen,
   selectedMessage,
   handleEdit,
-  socket
+  socket,
+  type = 'messages'
 }: MoreMenuAndDeleteConfirmDialogProps) => {
   const {
     state: {
@@ -686,7 +688,7 @@ export const MoreMenuAndDeleteConfirmDialog = ({
       >
         <span onClick={handleMenuClose}>
           <MenuItem onClick={pinMessage}>{selectedMessage?.pinned ? 'Unpin' : 'Pin'}</MenuItem>
-          {setThreadDialogOpen && !selectedMessage?.pinned && (
+          {setThreadDialogOpen && type !== 'pins' && (
             <MenuItem
               onClick={() => {
                 handleMenuClose();
