@@ -1,5 +1,5 @@
 import { IconButton } from '@mui/material';
-import { AttachFile, Close, Send } from '@mui/icons-material';
+import { AttachFile, Send, Mic, MicOff, Cancel } from '@mui/icons-material';
 import { Editor } from '@tinymce/tinymce-react';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { Socket } from 'socket.io-client';
@@ -60,11 +60,17 @@ const SendMessage = ({
   const [selectedIndex, setSelectedIndex] = useState(0);
   const applySelectedRef = useRef(null);
 
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioBlobs, setAudioBlobs] = useState([]);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const chunks = useRef<Blob[]>([]);
+
   useEffect(() => {
     numberOfMentions.current = 0;
     if (!initialMessage) {
       setMessage('');
       setFiles([]);
+      setAudioBlobs([]);
       setFilesWithUrl([]);
     }
   }, [channelId]);
@@ -83,6 +89,9 @@ const SendMessage = ({
         files.forEach((file) => {
           formData.append('files', file);
         });
+        audioBlobs?.forEach((audioBlob, index) => {
+          formData.append('files', new File([audioBlob], `recording-${index}.webm`, { type: 'audio/webm' }));
+        });
         if (newChat && toUsers.length > 0) {
           formData.append('toUsers', JSON.stringify(toUsers?.map((user) => user?.optionValue)));
           await axiosInstance().post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(() => {
@@ -99,6 +108,7 @@ const SendMessage = ({
       }
       setMessage('');
       setFiles([]);
+      setAudioBlobs([]);
     } catch (error) {
       toastConfig.setToastConfig(error);
     } finally {
@@ -189,6 +199,36 @@ const SendMessage = ({
     }
   };
 
+  const getAudio = async () => {
+    if (isRecording) {
+      recorderRef.current?.stop();
+      setIsRecording(false);
+    } else {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const recorder = new MediaRecorder(stream);
+
+        recorderRef.current = recorder;
+        chunks.current = [];
+
+        recorder.ondataavailable = (e: BlobEvent) => {
+          chunks.current.push(e.data);
+        };
+
+        recorder.onstop = () => {
+          const blob = new Blob(chunks.current, { type: 'audio/webm' });
+          setAudioBlobs((prev) => [...prev, blob]);
+          stream.getTracks().forEach((track) => track.stop());
+        };
+
+        recorder.start();
+        setIsRecording(true);
+      } catch (e) {
+        toastConfig.setToastConfig({ open: true, type: 'error', message: 'Error accessing microphone' });
+      }
+    }
+  };
+
   return (
     <div className={`send-message bg-[var(--dark-primary,white)] p-3`}>
       <div className="editor overflow-hidden rounded-lg [border:1px_solid_var(--common-border-color)]">
@@ -234,7 +274,25 @@ const SendMessage = ({
             })}
           </div>
         )}
-
+        <div className="flex flex-wrap gap-1">
+          {audioBlobs?.map((audioBlob, index) => (
+            <div key={index} className='relative'>
+                <audio controls src={URL.createObjectURL(audioBlob)} style={{ width: '200px' }}>
+                </audio>
+              <HtmlTooltip title="Remove" placement="top" className='absolute top-0 right-0'>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    setAudioBlobs((prev) => prev.filter((_, i) => i !== index));
+                  }}
+                  style={{ padding: 4 }}
+                >
+                  <Cancel fontSize="small" />
+                </IconButton>
+              </HtmlTooltip>
+            </div>
+          ))}
+        </div>
         <div className="editor" key={themeColor}>
           <Editor
             key={themeColor}
@@ -315,6 +373,11 @@ const SendMessage = ({
                   </IconButton>
                 </HtmlTooltip>
               </label>
+              <HtmlTooltip title="Audio Record" placement="top">
+                <IconButton color="primary" aria-label="upload-audio" component="span" style={{ padding: 5, borderRadius: 0 }} disabled={disabled} onClick={getAudio}>
+                  {isRecording ? <MicOff /> : <Mic />}
+                </IconButton>
+              </HtmlTooltip>
               <IconButton
                 style={{ padding: 5 }}
                 disabled={!message || isLoading}
