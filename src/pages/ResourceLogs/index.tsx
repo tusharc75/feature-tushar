@@ -85,7 +85,7 @@ const ResourceLogs = () => {
       </div>
       <CustomContainer>
         <div className="header-panel">
-          <div className="grid grid-cols-1 gap-[8px] sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-[8px] pt-2 sm:grid-cols-2 lg:grid-cols-4">
             <Autocomplete
               fullWidth
               options={resourceOptions}
