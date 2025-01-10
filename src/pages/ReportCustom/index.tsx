@@ -55,14 +55,16 @@ const CustomReport = () => {
         width: 120,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
-          <p
-            className="text-truncate link"
-            onClick={() => {
-              setShowManageDialog({ open: true, id: row?.original?._id });
-            }}
-          >
-            {row.original.customReportName}
-          </p>
+          <div>
+            <p
+              className="text-truncate link"
+              onClick={() => {
+                setShowManageDialog({ open: true, id: row?.original?._id });
+              }}
+            >
+              {row.original.customReportName}
+            </p>
+          </div>
         )
       },
       {
@@ -143,25 +145,22 @@ const CustomReport = () => {
     } else {
       ids = selectedRecords?.map((d) => d._id);
     }
-    axiosInstance()
-      .put(`custom-report/remove`, { ids: ids })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          type: 'success',
-          message: data.message,
-          open: true
-        });
-        dispatch({ type: 'selection', selectedRecords: [] });
-        fetchData();
-        setShowDeleteConfirmBox(false);
-        setDeleteRecord(null);
-        setAnchorEl(null);
-        setIsSubmitting(false);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setIsSubmitting(false);
+    axiosInstance().put(`custom-report/remove`, { ids: ids }).then(({ data }) => {
+      toastConfig.setToastConfig({
+        type: 'success',
+        message: data.message,
+        open: true
       });
+      dispatch({ type: 'selection', selectedRecords: [] });
+      fetchData();
+      setShowDeleteConfirmBox(false);
+      setDeleteRecord(null);
+      setAnchorEl(null);
+      setIsSubmitting(false);
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+      setIsSubmitting(false);
+    });
   };
 
   const openActions = (event) => {
@@ -220,7 +219,6 @@ const CustomReport = () => {
                   onClose={closeActions}
                 >
                   <MenuItem
-                    disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
                     onClick={() => {
                       if (selectedRecords.length === 1) {
                         setDeleteRecord(selectedRecords[0]);
