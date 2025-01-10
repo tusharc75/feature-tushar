@@ -7,6 +7,9 @@
       min-width: 0px !important;
     }
   }
+  .MuiTable-root {
+    --mui-palette-TableCell-border: var(--common-border-color);
+  }
   @media all and (max-width: 768px) {
     .MuiButtonBase-root.MuiListItem-root.list-item.MuiListItem-gutters.MuiListItem-button.Mui-selected {
       margin-top: 106px;
