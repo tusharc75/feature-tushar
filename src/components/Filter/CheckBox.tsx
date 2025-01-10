@@ -24,7 +24,6 @@ const CheckBox = ({ fieldData, deepFilters, setDeepFilters, sidebarIcon = null }
                     setDeepFilters([...deepFilters?.filter((d) => d?.field !== fieldData?.fieldName)]);
                   }
                 }}
-                className="!text-[--new-theme-color] dark:!text-gray-200"
               />
             }
             label={<span className="!text-[14px] !font-medium !leading-[17px] !text-[#6C757D] dark:!text-gray-200">Yes</span>}
@@ -44,7 +43,6 @@ const CheckBox = ({ fieldData, deepFilters, setDeepFilters, sidebarIcon = null }
                   }
                 }}
                 size="small"
-                className="!text-[--new-theme-color] dark:!text-gray-200"
               />
             }
             label={<span className="!text-[14px] !font-medium !leading-[17px] !text-[#6C757D] dark:!text-gray-200">No</span>}

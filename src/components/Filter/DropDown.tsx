@@ -219,7 +219,6 @@ const DropDown = ({
                             }
                           }
                         }}
-                        className="!text-[--new-theme-color] dark:!text-gray-200"
                       />
                     }
                     label={
@@ -251,7 +250,6 @@ const DropDown = ({
                       checked={filterFromDeepFilter?.term?.length === fieldData?.option?.length && fieldData?.option?.length > 0}
                       indeterminate={filterFromDeepFilter?.term?.length > 0 && filterFromDeepFilter?.term?.length < fieldData?.option?.length}
                       onChange={handleToggleSelectAllNonLookup}
-                      className="!text-[--new-theme-color] dark:!text-gray-200"
                     />
                   }
                   label={
