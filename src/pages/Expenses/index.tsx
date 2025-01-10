@@ -1,8 +1,7 @@
-import { Box, Chip, IconButton, MenuItem } from '@mui/material';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
-import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -24,7 +23,6 @@ import {
   expenses,
   sidebarResource,
 } from '../../constants/helpers';
-import { findAll, findOne, insertUpdate, objectStore } from '../../constants/indexdbhelper';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
@@ -40,32 +38,14 @@ const Expenses = () => {
   const history = useHistory();
   const {
     state: { user, permissions, selectedEntity, resources }
-  }: any = useData();
+  }: any = useData();                
 
-  const types = [
-    {
-      key: `My ${resources?.expenses?.titlePlural}`,
-      value: 1
-    },
-    {
-      key: `All ${resources?.expenses?.titlePlural}`,
-      value: 2
-    }
-  ];
-
-  let { referenceId, referenceType }: any = queryString.parse(history.location.search);
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.expenses));
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [showManageExpensesDialog, setShowManageExpensesDialog] = useState({ open: false, isClone: false, idToClone: null });
-
-  const [accountDetails, setAccountDetails] = useState({
-    accountId: history.location?.state?.accountId,
-    accountName: history.location?.state?.accountName,
-    resource: history.location?.state?.resource
-  });
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { isOffline } = useContext(CustomOfflineContext);
@@ -79,13 +59,8 @@ const Expenses = () => {
 
   const fetchGridColumns = async () => {
     let data; 
-      const response = await axiosInstance().get(`/field?resource=${sidebarResource.expenses}`);
-      data = response?.data?.data;
-      try {
-        insertUpdate(objectStore.resource, sidebarResource.expenses, data);
-      } catch (e) {
-        toastConfig.setToastConfig(e);
-      }
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource.expenses}`);
+    data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, routes?.expensesDetail?.path, true);
     let staticFields = getStaticFields();
     staticFields.forEach((field) => {
@@ -110,7 +85,7 @@ const Expenses = () => {
       fetchData(cancelTokenSource);
       return () => cancelTokenSource.cancel();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, showFilteredRecordsOnly]);
+  }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const ActionsRenderer = {
     accessor: 'action',
@@ -195,6 +170,9 @@ const Expenses = () => {
     try {
       let data: any = [],
       count;
+      const response: any = await axiosInstance().get(`${expenses.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
+      data = response?.data?.data;
+      count = response?.data?.count;
       let rows = data.map((u) => {
         let finalObject: any = prepareDataForGrid(u, user);
         finalObject['isChecked'] = false;
@@ -249,44 +227,6 @@ const Expenses = () => {
     }
   };
 
-  const updateQueryParams = () => {
-    const queryParams = new URLSearchParams(history.location.search);
-    queryParams.delete('referenceId');
-    queryParams.delete('referenceType');
-    referenceId = queryParams.get('referenceId');
-    referenceType = queryParams.get('referenceType');
-    history.replace({
-      search: queryParams.toString()
-    });
-    fetchData();
-  };
-
-  const onTypeChange = (event, type) => {
-    dispatch({ type: 'pageChange', page: 0 });
-  };
-
-  const LeftSideContent = () => {
-    return (
-      <>
-        {accountDetails.accountId ? (
-          <Chip
-            className="ml-3"
-            color="primary"
-            label={`Account: ${accountDetails.accountName}`}
-            onDelete={() => {
-              setAccountDetails({
-                accountId: null,
-                accountName: null,
-                resource: null
-              });
-            }}
-          />
-        ) : null}
-        {referenceType ? <Chip className="ml-3" color="primary" label={`Expenses : ${referenceType}`} onDelete={updateQueryParams} /> : null}
-      </>
-    );
-  };
-
   const ActionMenuItems = () => {
     return (
       <MenuItem
@@ -328,18 +268,13 @@ const Expenses = () => {
       </div>
       <CustomContainer>
         <ListingPageHeader
-          toggleButtonList={types}
-          onToggle={onTypeChange}
           selectedType={selectedType}
           setSelectedType={setSelectedType}
-          leftSideContents={<LeftSideContent />}
           searchValue={search}
           onSearch={handleSearch}
-          // rightSideContents
           isActionButtonVisible={true}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
-          // addButtonProps
           addButtonOnclick={() => {
             setShowManageExpensesDialog({ open: true, isClone: false, idToClone: null });
           }}
