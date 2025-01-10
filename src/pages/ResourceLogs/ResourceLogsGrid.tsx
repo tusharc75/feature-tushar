@@ -95,7 +95,11 @@ const ResourceLogsGrid = ({ selectedResource, selectedOption = '', selectedActio
         accessor: 'changeString',
         Header: 'Changes',
         width: 300,
-        Cell: ({ row }) => <div className="text-truncate">{row?.original?.changeString}</div>
+        disableFilters: hideResourceField ? false : true,
+        disableSortBy: hideResourceField ? false : true,
+        Cell: ({ row }) => <div>
+          <p className="text-truncate">{row?.original?.changeString}</p>
+        </div>
       },
       {
         accessor: 'action',
@@ -130,7 +134,12 @@ const ResourceLogsGrid = ({ selectedResource, selectedOption = '', selectedActio
 
   const getQueryString = () => {
     let query = null;
-    query = `page=${page}&limit=${limit}&resource=${selectedResource?.optionValue || selectedResource}`;
+    if (hideResourceField) {
+      query = `resource=${selectedResource?.optionValue || selectedResource}`;
+    }
+    else {
+      query = `page=${page}&limit=${limit}&resource=${selectedResource?.optionValue || selectedResource}`;
+    }
     if (selectedOption) {
       query = `${query}&referenceId=${selectedOption}`;
     }
@@ -246,6 +255,7 @@ const ResourceLogsGrid = ({ selectedResource, selectedOption = '', selectedActio
           renderedFrom={renderedFrom}
           refreshGrid={fetchData}
           hideSelection={true}
+          isClientSideGrid={hideResourceField ? true : false}
         />
       ) : (
         <Box p={2} height={500}>

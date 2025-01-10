@@ -35,7 +35,7 @@ const AgentChat = () => {
             <Button
               onClick={toggleChatbox}
               variant="outlined"
-              sx={{ borderRadius: 999, width: 40, height: 40, minWidth: 'unset', padding: '4px', borderColor: 'var(--common-border-color)' }}
+              sx={{ borderRadius: 999, width: 40, height: 40, minWidth: 'unset', padding: '4px', borderColor: 'transparent' }}
             >
               {isChatboxOpen ? <Close /> : <img src={genieImage} className="max-w-full" alt="" />}
             </Button>
