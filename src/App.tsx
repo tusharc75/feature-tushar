@@ -316,22 +316,6 @@ function App() {
     }
   };
 
-  history.listen(() => {
-    let isSlowInternetConnection = localStorage.getItem('slowInternetConnection');
-    if (isSlowInternetConnection === 'true') {
-      toast.setToastConfig({
-        open: true,
-        type: 'error',
-        message: 'Slow or no internet connection.',
-        anchorOrigin: {
-          vertical: 'bottom',
-          horizontal: 'right'
-        }
-      });
-      localStorage.setItem('slowInternetConnection', 'false');
-    }
-  });
-
   useEffect(() => {
     try {
       if (!isOffline) {
