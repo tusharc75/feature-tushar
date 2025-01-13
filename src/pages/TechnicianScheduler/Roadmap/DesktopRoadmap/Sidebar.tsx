@@ -12,7 +12,7 @@ type SidebarProps = {
 const Sidebar = ({ activity, handleSelect }: SidebarProps) => {
   return (
     <aside className="sticky left-0 z-[3] border-r bg-[white] dark:bg-[--dark-primary]">
-      <div className="sticky top-0 z-[4] flex h-[--header-h] items-center gap-2 border-b bg-[--dark-secondary,white] p-4">
+      <div className="sticky top-0 z-[4] flex h-[--header-h] items-center gap-2 border-b bg-[--dark-primary,white] p-4">
         <Map />
         <Typography variant="body1" display="block">
           Technician

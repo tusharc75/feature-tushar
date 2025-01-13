@@ -16,12 +16,14 @@ type CalendarProps = {
   container: HTMLDivElement;
 };
 
+const sidebarWidth = 300;
+
 const Calendar = ({ dayPixel, endDate, startDate, activity, handleSelect, selected, totalDay, container }: CalendarProps) => {
   const lineRef = React.useRef<HTMLDivElement>(null);
 
   const executeScroll = useCallback(() => {
     if (lineRef.current && container) {
-      const scrollLeft = lineRef.current.offsetLeft - container.offsetLeft - container.clientWidth * 0.5;
+      const scrollLeft = lineRef.current.offsetLeft - container.offsetLeft - container.clientWidth * 0.5 + sidebarWidth;
       container.scrollLeft = scrollLeft;
     }
   }, [container]);

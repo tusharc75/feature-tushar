@@ -20,7 +20,7 @@ function CalendarHead({ dayPixel, startDate, endDate }: CalendarHeadProps) {
   return (
     dates && (
       <ul
-        className="sticky top-0 z-[2] flex h-[--header-h] overflow-hidden bg-[--dark-secondary,white]"
+        className="sticky top-0 z-[2] flex h-[--header-h] overflow-hidden bg-[--dark-primary,white]"
         style={{
           minWidth: totalDay * dayPixel,
           maxWidth: totalDay * dayPixel
