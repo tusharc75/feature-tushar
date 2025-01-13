@@ -127,10 +127,14 @@
 .rbc-show-more {
   background-color: #32324f;
   color: white;
-  margin: 9px 1px 20px;
+  margin: 5px;
+  width: calc(100% - 10px);
   border-radius: 5px;
   [data-mode='dark'] & {
     background-color: #32324f;
+  }
+  &:hover {
+    color: white;
   }
 }
 .rbc-ellipsis,
