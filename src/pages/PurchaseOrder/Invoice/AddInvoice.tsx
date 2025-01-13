@@ -1,4 +1,4 @@
-import { useState, useContext, Fragment } from 'react';
+import { useState, useContext, Fragment, useRef, useEffect } from 'react';
 import Dialog from '@mui/material/Dialog';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
@@ -15,7 +15,6 @@ import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const AddInvoice = ({ purchaseOrderId, invoiceData = null, handleClose, handleSucess }) => {
   const toastConfig = useContext(CustomToastContext);
-
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
 
@@ -108,6 +107,7 @@ const AddInvoice = ({ purchaseOrderId, invoiceData = null, handleClose, handleSu
               <Grid container spacing={2}>
                 <Grid size={{ xs: 12, md: 12, sm: 12 }}>
                   <TextField
+                    id={'enter-invoice-number'}
                     margin="dense"
                     size="small"
                     type="text"
@@ -150,7 +150,7 @@ const AddInvoice = ({ purchaseOrderId, invoiceData = null, handleClose, handleSu
               >
                 Cancel
               </ThemeButton>
-              <ThemeButton isLoading={loading} disabled={loading} buttonType="theme" onClick={submitForm}>
+              <ThemeButton id={'dialog-save-button'} isLoading={loading} disabled={loading} buttonType="theme" onClick={submitForm}>
                 Save
               </ThemeButton>
             </CustomDialogFooter>
