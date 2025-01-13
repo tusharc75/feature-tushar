@@ -74,7 +74,8 @@ export const statuses = {
   'asset/customer-in-rental': openCloseStatus,
   'asset/bar-chart-customer-in-rental': openCloseStatus,
   'quote/quote-customer-account': quotesStatus,
-  'quote/sales-rep': quotesStatus
+  'quote/sales-rep': quotesStatus,
+  'asset/day-wise-assets-status-count': RentalStatus
 };
 
 export interface IFormDataType {
