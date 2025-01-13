@@ -242,6 +242,7 @@ export const generateReceiveProduct = (addStorageLocation = false, index: number
       {
         target: '#dialog-save-button',
         title: 'Save',
+        isPreviousButtonDisabled : !addStorageLocation,
         waitForStepInsertion: false
       }
     ]
@@ -272,8 +273,9 @@ export const generateRejectProduct = (addStorageLocation = false, index: number 
         }
       ] : []),
       {
-        target: '#dialog-submit-button',
-        title: 'Submit',
+        target: '#dialog-save-button',
+        title: 'Save',
+        isPreviousButtonDisabled : !addStorageLocation,
         waitForStepInsertion: false
       }
     ]
