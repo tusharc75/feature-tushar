@@ -12,6 +12,8 @@ import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import {  useSetWalkmeData } from 'src/components/CustomIntro';
+import { generateAddInvoice } from '../walkmeSteps';
 
 const renderedFrom = `po_invoice`;
 
@@ -23,9 +25,11 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
   const [addOpen, setAddOpen] = useState({ open: false, invoiceData: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteData, setDeleteData] = useState(null);
+  const { setWalkmeData } = useSetWalkmeData();
 
   useEffect(() => {
     fetchData();
+    setWalkmeData([generateAddInvoice()]);
   }, [purchaseOrderData]);
 
   const columns = [
@@ -140,6 +144,7 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
     return (
       <>
         <MenuItem
+         id={'add-invoice-button'}
           onClick={() => {
             setAddOpen({ open: true, invoiceData: null });
           }}

@@ -281,6 +281,40 @@ export const generateRejectProduct = (addStorageLocation = false, index: number 
   return data;
 };
 
+export const generateAddInvoice = (waitForStepInsertion: boolean = false): WalkmeData => {
+
+  const data: WalkmeData = {
+    name: 'Add Invoices',
+    url: '/purchase-order/detail/:id',
+    steps: [
+      {
+        target: '#main-tab-2',
+        title: 'Details',
+        content: 'Navigate to Invoice page'
+      },
+      {
+        target: '#add-menu-button',
+        title: 'Add Invoice'
+      },
+      {
+        target: `#add-invoice-button`,
+        title: 'Click here to Add Invoice',
+      },
+      {
+        target: `#enter-invoice-number`,
+        title: 'Enter Invoice Number',
+        isPreviousButtonDisabled : true
+      },
+      {
+        target: '#dialog-save-button',
+        title: 'Save',
+        waitForStepInsertion: waitForStepInsertion
+      }
+    ]
+  };
+  return data;
+};
+
 export const generateDeleteStep = (waitForStepInsertion: boolean = false, index: number = 0, type: string): WalkmeData => {
 
   const data: WalkmeData = {
