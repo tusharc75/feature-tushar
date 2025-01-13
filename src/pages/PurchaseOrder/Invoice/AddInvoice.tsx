@@ -1,4 +1,4 @@
-import { useState, useContext, Fragment, useRef, useEffect } from 'react';
+import { useState, useContext, Fragment } from 'react';
 import Dialog from '@mui/material/Dialog';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
