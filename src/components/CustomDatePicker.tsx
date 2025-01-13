@@ -4,7 +4,6 @@ import dayjs from 'dayjs';
 import { isEmpty } from 'lodash';
 
 const CustomDatePicker = (props) => {
-
   const {
     value,
     name,
@@ -27,9 +26,9 @@ const CustomDatePicker = (props) => {
     views,
     openTo,
     InputProps,
+    id,
     ...rest
   } = props;
-
 
   return (
     <DatePicker
@@ -48,6 +47,7 @@ const CustomDatePicker = (props) => {
       onError={onError ? onError : console.error}
       slotProps={{
         textField: {
+          id: id,
           helperText: helperText,
           error: error ? error : false,
           variant: 'outlined',
@@ -61,6 +61,6 @@ const CustomDatePicker = (props) => {
       format={inputFormat ? inputFormat : dateFormatForInputControl}
     />
   );
-}
+};
 
 export default CustomDatePicker;
