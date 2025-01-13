@@ -88,7 +88,7 @@ export const createRepairOrderFlow = (fields: any): WalkmeData => {
   const ignoreField = ['currency', 'owner'];
 
   const data: WalkmeData = {
-    name: `Add ${sidebarResource?.repairOrder}`,
+    name: `Create ${sidebarResource?.repairOrder}`,
     url: `${routes?.repairOrder?.path}`,
     type: 'flow',
     steps: [
