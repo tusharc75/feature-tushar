@@ -70,7 +70,6 @@ const ProductDetailsPage = () => {
 
   const ignoreField = ['priceTemplate', 'brand'];
 
-  const [showConfirmBoxConvert, setShowConfirmBoxConvert] = useState(false);
   const [productInventoryData, setProductInventoryData] = useState([]);
   const [productInventoryLoading, setProductInventoryLoading] = useState(false);
   const [resourceData, setResourceData] = useState(null);
@@ -259,7 +258,7 @@ const ProductDetailsPage = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange} aria-label="Product Details Tab" variant="scrollable" scrollButtons="auto">
-          <CustomTab value={0} className={'tabLayout'} label={'Details'} />
+          <CustomTab value={0} label={'Details'} />
           {(permissions?.serializedAsset || permissions?.productionOrder) && <CustomTab value={1} label={'Child Products'} />}
           {permissions?.serviceMaster && <CustomTab value={2} label={'Services/Consumables'} />}
           {permissions?.serviceMaster && <CustomTab value={3} label={'Service Packages'} />}

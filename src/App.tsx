@@ -295,7 +295,7 @@ function App() {
 
   const { isOffline } = useContext(CustomOfflineContext);
   const {
-    state: { user, resources },
+    state: { user, permissions, resources },
     dispatch
   }: any = useData();
 
@@ -1217,7 +1217,7 @@ function App() {
           <ScreenOrientationOverlay displayOn="portrait" device="tablet" />
           <ScreenOrientationOverlay displayOn="landscape" device="mobile" />
           <CustomIntro />
-          <AgentChat />
+          {permissions?.equiptAi?.isRead && <AgentChat />}
         </ErrorBoundaryComponent>
       </AnimatePresence>
       {isUpdateModalOpen.open && <ForceUpdatePopup data={isUpdateModalOpen.data} onClose={handleCloseUpdateModal} />}
