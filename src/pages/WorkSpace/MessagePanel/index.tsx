@@ -1,4 +1,4 @@
-import { Avatar, IconButton } from '@mui/material';
+import { Avatar, Chip, IconButton } from '@mui/material';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { VscLayoutSidebarLeft } from 'react-icons/vsc';
 import { Socket } from 'socket.io-client';
@@ -13,7 +13,6 @@ import { ChannelData, Message, TChannel } from 'src/pages/WorkSpace/types';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AddMemberDialog from './AddMembersDialog';
 import { useData } from 'src/StateProvider/Provider';
-import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 
 type MessagePanelProps = {
   selectedChannel: TChannel | null;
@@ -51,7 +50,7 @@ const MessagePanel = ({
   const [isMemberDialogOpen, setIsMemberDialogOpen] = useState(false);
   const [threadDialogOpen, setThreadDialogOpen] = useState<{ open: boolean; message: Message }>({ open: false, message: null });
   const [themeColor] = useAppTheme();
-  const [tabValue, setTabValue] = useState(0);
+  const [msgType, setMsgType] = useState<'messages' | 'pins'>('messages');
 
   const {
     state: {
@@ -151,10 +150,20 @@ const MessagePanel = ({
                 )}
               </div>
               <p className="line-clamp-2 text-sm text-gray-500">{selectedChannel?.description}</p>
-              <CustomTabs value={tabValue} onChange={(_, newValue: number) => setTabValue(newValue)}>
-                <CustomTab value={0}>Messages</CustomTab>
-                <CustomTab value={1}>Pins</CustomTab>
-              </CustomTabs>
+              <div className="flex gap-2 p-2">
+                <Chip
+                  label="Messages"
+                  clickable
+                  color={msgType === 'messages' ? 'primary' : 'default'}
+                  onClick={() => setMsgType('messages')}
+                />
+                <Chip
+                  label="Pins"
+                  clickable
+                  color={msgType === 'pins' ? 'primary' : 'default'}
+                  onClick={() => setMsgType('pins')}
+                />
+              </div>
             </div>
 
             <Messages
@@ -166,7 +175,7 @@ const MessagePanel = ({
               newChat={newChat}
               toUsers={newChatUsers}
               refreshNewChat={refreshNewChat}
-              type={tabValue === 0 ? 'messages' : 'pins'}
+              type={msgType}
             />
           </div>
         ) : (
