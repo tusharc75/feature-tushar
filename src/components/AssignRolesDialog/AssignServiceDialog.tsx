@@ -310,7 +310,7 @@ const AssignServiceDialog = ({
           <Box>
             <CustomTabs value={tabValue} onChange={handleMainTabChange}>
               <CustomTab value={0} label={`${resources?.pricingCondition?.titleSingular} Services`} />
-              <CustomTab value={1} className={'tabLayout'} label={'All Services'} />
+              <CustomTab value={1} label={'All Services'} />
             </CustomTabs>
           </Box>
         )}
