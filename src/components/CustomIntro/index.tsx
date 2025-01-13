@@ -110,7 +110,6 @@ const CustomIntro = () => {
   };
 
   const handleNext = (checkForStepInsertion = true) => {
-    console.log(handleSteps.current);
     clearTimeout(timeout);
     if (checkForStepInsertion) {
       if (currentStepData?.element.tagName === 'IFRAME') {
