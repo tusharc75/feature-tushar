@@ -9,15 +9,12 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import {
-  checkIsAllowedToDelete,
-  getDefaultMyRecordType,
   gridLoadingTimeout,
   prepareDataForGrid,
   expenses,
@@ -34,21 +31,18 @@ let expensesTimeout;
 const Expenses = () => {
   const renderedFrom = camelCase(sidebarResource?.expenses);
 
-  const toastConfig = useContext(CustomToastContext); 
+  const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
     state: { user, permissions, selectedEntity, resources }
-  }: any = useData();                
+  }: any = useData();
 
-  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.expenses));
-  const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [showManageExpensesDialog, setShowManageExpensesDialog] = useState({ open: false, isClone: false, idToClone: null });
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { isOffline } = useContext(CustomOfflineContext);
   const [columns, setColumns] = useState(null);
 
   const { generateColumns, checkStaticField } = useColumns();
@@ -58,7 +52,7 @@ const Expenses = () => {
   }, []);
 
   const fetchGridColumns = async () => {
-    let data; 
+    let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.expenses}`);
     data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, routes?.expensesDetail?.path, true);
@@ -80,12 +74,10 @@ const Expenses = () => {
   }, [search]);
 
   useEffect(() => {
-    if (renderCount > 0) {
-      const cancelTokenSource = axios.CancelToken.source();
-      fetchData(cancelTokenSource);
-      return () => cancelTokenSource.cancel();
-    } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
+  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const ActionsRenderer = {
     accessor: 'action',
@@ -133,9 +125,6 @@ const Expenses = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (selectedType === 1) {
-      deepFilter = deepFilter + `&myRecords=1`;
-    }
     if (isExport) {
       deepFilter = `?`;
     }
@@ -168,16 +157,14 @@ const Expenses = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     try {
-      let data: any = [],
-      count;
+      let data: any = [], count;
       const response: any = await axiosInstance().get(`${expenses.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
       data = response?.data?.data;
       count = response?.data?.count;
       let rows = data.map((u) => {
         let finalObject: any = prepareDataForGrid(u, user);
         finalObject['isChecked'] = false;
-        finalObject['canDelete'] =
-          permissions?.expenses?.isDelete && checkIsAllowedToDelete(user, sidebarResource.expenses, finalObject?.ownerId) && u?.canDelete;
+        finalObject['canDelete'] = permissions?.expenses?.isDelete;
         return finalObject;
       });
       dispatch({ type: 'initialize', data: rows, count: count });
@@ -268,8 +255,6 @@ const Expenses = () => {
       </div>
       <CustomContainer>
         <ListingPageHeader
-          selectedType={selectedType}
-          setSelectedType={setSelectedType}
           searchValue={search}
           onSearch={handleSearch}
           isActionButtonVisible={true}
@@ -280,7 +265,6 @@ const Expenses = () => {
           }}
           isAddButtonVisible={permissions?.expenses?.isCreate}
         />
-
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
@@ -290,7 +274,6 @@ const Expenses = () => {
             renderedFrom={renderedFrom}
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
-            showFilters={!isOffline}
             resource={sidebarResource.expenses}
           />
         ) : (
@@ -301,12 +284,11 @@ const Expenses = () => {
         {showDeleteConfirmBox ? (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${
-              deleteRecord
-                ? `${resources?.expenses?.titleSingular?.toLowerCase()} :
+            message={`Are you sure you want to delete ${deleteRecord
+              ? `${resources?.expenses?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.expensesNumber}`
-                : `selected ${resources?.expenses?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.expenses?.titlePlural?.toLowerCase()}`
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
