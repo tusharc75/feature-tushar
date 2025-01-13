@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, useRef } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Formik, Form } from 'formik';
 import { Box } from '@mui/material';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -34,102 +34,82 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
   }: any = useData();
 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
-  const [expensesData, setExpensesData] = useState();
-  const [loading, setLoading] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [title, setTitle] = useState('');
 
   useEffect(() => {
-    setLoading(true);
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.expenses}`)
-      .then(({ data: { data } }) => {
+    axiosInstance().get(`/field?resource=${sidebarResource.expenses}`).then(({ data: { data } }) => {
 
-        const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-        const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+      const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
-        if (expenseId) {
-          axiosInstance()
-            .get(`${expenses.api}/` + expenseId)
-            .then(({ data: { data } }) => {
-              setExpensesData(data);
-              if (isClone) {
-                const { _id, brand, createdBy, history, expenseNumber, updatedBy, ...rest } = data;
-                setTitle(`Clone - ${expenses}`);
-                rest.expenseNumber = GenerateResourceLineNumber(fieldsDataForCreate);
-                setInitialData({
-                  fields: fieldsDataForCreate,
-                  values: {...getObjKeysWithValues(rest, fieldsDataForCreate, true, user)}
-                });
-                setLoading(false);
-              } else {
-                    setTitle(`Editing - [${data.expenseNumber}]`);
-                    setInitialData({
-                      fields: fieldsDataForUpdate,
-                      values: getObjKeysWithValues(data, fieldsDataForUpdate)
-                    });
-                setLoading(false);
-              }
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
+      if (expenseId) {
+        axiosInstance().get(`${expenses.api}/` + expenseId).then(({ data: { data } }) => {
+          if (isClone) {
+            const { _id, brand, createdBy, history, expenseNumber, updatedBy, ...rest } = data;
+            setTitle(`Clone - ${expenseNumber}`);
+            rest.expenseNumber = GenerateResourceLineNumber(fieldsDataForCreate);
+            setInitialData({
+              fields: fieldsDataForCreate,
+              values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
             });
-        } 
-        else {
-          setTitle(`Create ${resources?.expenses?.titleSingular}`);
-          let initialData = { ...getObjKeys('', fieldsDataForCreate) };
-          initialData['expenseNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
-          setInitialData({
-            fields: fieldsDataForCreate,
-            values: initialData
-          });
-          setLoading(false);
-        }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  }, [expenseId]);
+          } else {
+            setTitle(`Edit - ${data.expenseNumber}`);
+            setInitialData({
+              fields: fieldsDataForUpdate,
+              values: getObjKeysWithValues(data, fieldsDataForUpdate)
+            });
+          }
+        }).catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+      }
+      else {
+        setTitle(`Create ${resources?.expenses?.titleSingular}`);
+        let initialData = getObjKeys('', fieldsDataForCreate);
+        initialData['expenseNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
+        setInitialData({
+          fields: fieldsDataForCreate,
+          values: initialData
+        });
+      }
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
+  }, []);
 
   const handleSubmit = (values) => {
-    setSubmitting(true);
+    setIsSubmitting(true);
     if (expenseId && isClone === false) {
       values._id = expenseId;
-      axiosInstance()
-        .put(`${expenses.api}`, values)
-        .then(({ data }) => {
-          setSubmitting(false);
-          onSuccess();
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-        })
-        .catch((error) => {
-          setSubmitting(false);
-          toastConfig.setToastConfig(error);
+      axiosInstance().put(`${expenses.api}`, values).then(({ data }) => {
+        setIsSubmitting(false);
+        onSuccess();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
         });
+      }).catch((error) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
     } else {
-      const { expensesData, ...rest } = values;
-      axiosInstance()
-        .post(`${expenses.api}`, rest)
-        .then(({ data: { data, message } }) => {
-            history.push(`${routes.expensesDetail.path}/${data._id}`);
-          setSubmitting(false);
-          onSuccess(data);
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: message
-          });
-        })
-        .catch((error) => {
-          setSubmitting(false);
-          toastConfig.setToastConfig(error);
+      axiosInstance().post(`${expenses.api}`, values).then(({ data: { data, message } }) => {
+        history.push(`${routes.expensesDetail.path}/${data._id}`);
+        setIsSubmitting(false);
+        onSuccess(data);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: message
         });
+      }).catch((error) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
     }
   };
 
@@ -195,7 +175,6 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
               </CustomDialogContent>
               <CustomDialogFooter>
                 <ThemeButton
-                  disabled={submitting}
                   buttonType="transparent"
                   id="dialog-cancel-button"
                   onClick={() => {
@@ -209,10 +188,10 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
                   Cancel
                 </ThemeButton>
                 <ThemeButton
-                  isLoading={loading}
+                  isLoading={isSubmitting}
                   buttonType="theme"
                   id="dialog-save-button"
-                  disabled={submitting}
+                  disabled={isSubmitting}
                   onClick={(e) => {
                     submitForm();
                   }}
