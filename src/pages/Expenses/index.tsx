@@ -286,7 +286,7 @@ const Expenses = () => {
             open={showDeleteConfirmBox}
             message={`Are you sure you want to delete ${deleteRecord
               ? `${resources?.expenses?.titleSingular?.toLowerCase()} :
-              ${deleteRecord?.expensesNumber}`
+              ${deleteRecord?.expenseNumber}`
               : `selected ${resources?.expenses?.titlePlural?.toLowerCase()}`
               } ?`}
             onClose={() => {
