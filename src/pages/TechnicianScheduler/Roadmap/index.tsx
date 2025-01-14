@@ -1,28 +1,26 @@
-import { Box, IconButton, Typography } from '@mui/material';
-import { Close, Map } from '@mui/icons-material';
+import { Box, useMediaQuery } from '@mui/material';
+import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import MapView from '../Map';
-import ActivityList from './ActivityList';
-import Calendar from './Calendar';
-import CalendarList from './CalendarList';
+import DesktopRoadmap from 'src/pages/TechnicianScheduler/Roadmap/DesktopRoadmap';
+import { TActivity } from 'src/pages/TechnicianScheduler/Roadmap/types';
 import MobileRoadmap from './MobileRoadmap';
-import dayjs from 'dayjs';
+
+const dayPixel = 35;
+const height = window.innerHeight / 2;
+const startDate = dayjs('2023-01-01');
+const endDate = dayjs('2025-12-31');
+const totalDay = endDate.diff(startDate, 'day');
+
+export type HandleSelect = (event: React.SyntheticEvent, data: TActivity, type: 'technician' | 'map' | '') => void;
 
 function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician, handleUnAssignTechnician }) {
-  const scrollRef = React.useRef(null);
-  const executeScroll = () => {
-    var pageElement = document.getElementById('dayLiner');
-    var LeftPos = pageElement.offsetLeft;
-    document.getElementById('scrollDayLiner').scrollLeft = LeftPos - 200;
-  };
-
-  const [calendarType, setCalendarType] = useState('week');
+  const isMobile = useMediaQuery('(max-width: 768px)');
   const [activity, setActivity] = useState([]);
-  const [treeList, setTreeList] = useState([]);
   const [loadingRoadmap, setLoadingRoadmap] = useState(false);
+  const [expanded, setExpanded] = React.useState([]);
+  const [selected, setSelected] = React.useState<string | null>(null);
 
   useEffect(() => {
     filter.view === 'Technician View' && fetchRoadmap();
@@ -38,7 +36,6 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician, han
       .get(`/technician-scheduler/service-order?serviceOrders=${orderId}`)
       .then(({ data }) => {
         setActivity(data?.data);
-        setTreeList(data?.data);
         setLoadingRoadmap(false);
       })
       .catch((err) => {
@@ -53,40 +50,11 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician, han
       .then(({ data: { data } }) => {
         setActivity(data);
         setLoadingRoadmap(false);
-        executeScroll();
       })
       .catch((err) => {
         setLoadingRoadmap(false);
       });
   };
-
-  let height = window.innerHeight / 2;
-  let startDate = dayjs('2023-01-01');
-  let endDate = dayjs('2025-12-31');
-  let totalDay = endDate.diff(startDate, 'day');
-
-  var dayPixel = 0;
-  if (calendarType === 'month') {
-    dayPixel = 8.5;
-  } else if (calendarType === 'week') {
-    dayPixel = 35;
-  } else {
-    dayPixel = 3;
-  }
-
-  const handelChangeCalendarType = async (type) => {
-    setCalendarType(type);
-    setTimeout(() => executeScroll(), 500);
-  };
-
-  const taskScroolRef = React.useRef(null);
-  const onscroll = (event) => {
-    var target = event.nativeEvent.target;
-    taskScroolRef.current.scrollTop = target.scrollTop;
-  };
-
-  const [expanded, setExpanded] = React.useState([]);
-  const [selected, setSelected] = React.useState(null);
 
   const handleToggle = (event, nodeIds) => {
     setExpanded(nodeIds);
@@ -112,13 +80,13 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician, han
 
   return (
     <Box bgcolor="var(--dark-secondary, white)">
-      {isMobile && !isTablet ? (
+      {isMobile ? (
         <MobileRoadmap
           activity={
             selectedRecords?.length === 1
               ? activity.filter(
-                (item) => !selectedRecords[0]?.competencyType || selectedRecords[0]?.competencyType === item?.competencyType?.optionLabel
-              )
+                  (item) => !selectedRecords[0]?.competencyType || selectedRecords[0]?.competencyType === item?.competencyType?.optionLabel
+                )
               : activity
           }
           expanded={expanded}
@@ -128,126 +96,7 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician, han
           setSelected={setSelected}
         />
       ) : (
-        <Box border={1} borderColor="var(--common-border-color)" display="flex" height={height} style={{ position: 'relative' }}>
-          <Box display="flex" width="100%" height="100%" style={{ position: 'absolute' }}>
-            <Box
-              minWidth={isMobile && !isTablet ? 300 : 300}
-              border={1}
-              borderColor="var(--common-border-color)"
-              style={{ position: 'relative', overflow: 'hidden' }}
-            >
-              <Box height={60} bgcolor="var(--dark-secondary, grey.200)" display="flex" style={{ position: 'sticky', top: 0, zIndex: 1 }}>
-                <Box p={2} display="flex" alignItems="center">
-                  <Map />
-                  <Box mr={1} />
-                  <Typography variant="body1" display="block">
-                    Technician
-                  </Typography>
-                </Box>
-              </Box>
-              <div
-                ref={taskScroolRef}
-                style={{
-                  position: 'relative',
-                  width: '100%',
-                  height: '100%',
-                  overflow: 'hidden'
-                }}
-              >
-                <Box>
-                  <ActivityList
-                    activity={
-                      selectedRecords?.length === 1
-                        ? activity.filter(
-                          (item) => !selectedRecords[0]?.competencyType || selectedRecords[0]?.competencyType === item?.competencyType?.optionLabel
-                        )
-                        : activity
-                    }
-                    treeList={treeList}
-                    expanded={expanded}
-                    selected={selected}
-                    handleToggle={handleToggle}
-                    handleSelect={handleSelect}
-                  />
-                  <Box height={70}></Box>
-                </Box>
-              </div>
-            </Box>
-
-            {!selected ? (
-              <Box
-                id="scrollDayLiner"
-                onScroll={onscroll}
-                border={1}
-                borderColor="var(--common-border-color)"
-                style={{ position: 'relative', overflow: 'auto' }}
-              >
-                <Calendar calendarType={calendarType} dayPixel={dayPixel} startDate={startDate} endDate={endDate} />
-                <Box width="100%" height="100%" style={{ position: 'absolute', zIndex: 1 }}>
-                  <Box style={{ position: 'absolute', width: totalDay * dayPixel }}>
-                    <CalendarList
-                      fetchRoadmap={fetchRoadmap}
-                      activity={
-                        selectedRecords?.length === 1
-                          ? activity.filter(
-                            (item) =>
-                              !selectedRecords[0]?.competencyType || selectedRecords[0]?.competencyType === item?.competencyType?.optionLabel
-                          )
-                          : activity
-                      }
-                      expanded={expanded}
-                      selected={selected}
-                      handleSelect={handleSelect}
-                      startDate={startDate}
-                      endDate={endDate}
-                      totalDay={totalDay}
-                      calendarType={calendarType}
-                    />
-                  </Box>
-                </Box>
-                <Box width={totalDay * dayPixel} height={'100%'} style={{ position: 'sticky', top: 0, bottom: 0 }}>
-                  <div ref={scrollRef}>
-                    <Box
-                      id="dayLiner"
-                      height={'100%'}
-                      style={{
-                        position: 'absolute',
-                        left: (100 * dayjs().diff(startDate, 'day')) / totalDay + '%',
-                        width: dayPixel
-                      }}
-                    >
-                      <Box style={{ margin: 'auto' }} width={2} border={2} borderColor="secondary.main" height={'100%'}></Box>
-                    </Box>
-                  </div>
-                </Box>
-              </Box>
-            ) : (
-              <Box
-                border={1}
-                width={'100%'}
-                height={'100%'}
-                borderColor="var(--common-border-color)"
-                style={{ position: 'relative', overflow: 'auto' }}
-              >
-                <MapView technician={selected} />
-                <IconButton
-                  onClick={() => {
-                    setSelected(null);
-                    setTimeout(() => executeScroll(), 500);
-                  }}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    right: 0,
-                    zIndex: 1
-                  }}
-                >
-                  <Close />
-                </IconButton>
-              </Box>
-            )}
-          </Box>
-        </Box>
+        <DesktopRoadmap activity={activity} handleSelect={handleSelect} selected={selected} setSelected={setSelected} />
       )}
     </Box>
   );

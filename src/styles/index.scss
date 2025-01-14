@@ -2951,7 +2951,7 @@ svg.MuiSvgIcon-root {
     justify-content: space-between;
     margin-top: 10px;
     margin-bottom: 7px;
-    min-height: 32px;
+    min-height: 36px;
 
     .primaryButton {
       background: var(--new_theme_color);
@@ -2974,6 +2974,7 @@ svg.MuiSvgIcon-root {
     border-radius: 10px;
     min-height: 700px;
     isolation: isolate;
+    padding-top: 8px;
 
     // height: calc(100vh - 136px);
   }
