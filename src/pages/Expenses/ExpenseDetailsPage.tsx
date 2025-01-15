@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { Edit } from '@mui/icons-material';
 import queryString from 'query-string';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
@@ -13,10 +13,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import {
-  expenses,
-  sidebarResource
-} from '../../constants/helpers';
+import { expenses, sidebarResource } from '../../constants/helpers';
 import Step from '../DynamicForm/Step';
 import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
 
@@ -45,7 +42,6 @@ const ExpenseDetailsPage = () => {
   const [resourceData, setResourceData] = useState(null);
   const [fields, setFields] = useState(null);
 
-
   useEffect(() => {
     return history.listen((location) => {
       const { tab }: any = queryString.parse(history.location.search);
@@ -71,37 +67,43 @@ const ExpenseDetailsPage = () => {
 
   useEffect(() => {
     if (id) {
-      fetchFields()
+      fetchFields();
       fetchData();
       fetchPolicy();
     }
   }, [id]);
 
-
   const fetchFields = async () => {
-    axiosInstance().get(`/field?resource=${sidebarResource?.expenses}`).then(({ data }) => {
-      setFields(data.data?.filter((field) => field.isRead));
-    }).catch((err) => {
-      toastConfig.setToastConfig(err);
-    });
+    axiosInstance()
+      .get(`/field?resource=${sidebarResource?.expenses}`)
+      .then(({ data }) => {
+        setFields(data.data?.filter((field) => field.isRead));
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
   };
 
   const fetchData = async () => {
     setLoadingDetails(true);
-    axiosInstance().get(`${expenses.api}/${id}`).then(({ data: { data } }) => {
-      setLoadingDetails(false);
-      setAllowedToEdit(permissions?.expenses?.isUpdate);
-      setAllowedToDelete(permissions?.expenses?.isDelete);
-      setExpensesData(data);
-    }).catch((err) => {
-      setLoadingDetails(false);
-      toastConfig.setToastConfig(err);
-    });
+    axiosInstance()
+      .get(`${expenses.api}/${id}`)
+      .then(({ data: { data } }) => {
+        setLoadingDetails(false);
+        setAllowedToEdit(permissions?.expenses?.isUpdate);
+        setAllowedToDelete(permissions?.expenses?.isDelete);
+        setExpensesData(data);
+      })
+      .catch((err) => {
+        setLoadingDetails(false);
+        toastConfig.setToastConfig(err);
+      });
   };
 
   const fetchPolicy = async () => {
     try {
-      const { data: { data }
+      const {
+        data: { data }
       } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.expenses}`);
       if (data) {
         setResourceData(data);
@@ -111,17 +113,18 @@ const ExpenseDetailsPage = () => {
     }
   };
 
-
   const handleDelete = () => {
-    axiosInstance().put(`${expenses.api}/remove`, { ids: [expensesData._id] }).then(() => {
-      setShowConfirmBox(false);
-      history.push(`${routes?.expenses?.path}`);
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-      setShowConfirmBox(false);
-    });
+    axiosInstance()
+      .put(`${expenses.api}/remove`, { ids: [expensesData._id] })
+      .then(() => {
+        setShowConfirmBox(false);
+        history.push(`${routes?.expenses?.path}`);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setShowConfirmBox(false);
+      });
   };
-
 
   return (
     <Box className="main-container-v1">
@@ -130,14 +133,21 @@ const ExpenseDetailsPage = () => {
           <CustomBreadCrumbs
             routes={[
               { ...routes?.expenses, title: resources?.expenses?.titlePlural },
-              { title: `${expensesData ? expensesData?.expensesNumber : ''}` }
+              { title: `${expensesData ? expensesData?.expenseNumber : ''}` }
             ]}
           />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <Fragment>
-              <ThemeButton iconForMobile={<Edit />} disabled={!allowedToEdit} onClick={() => { setOpenUpdateDialog(true); }}>
+              <ThemeButton
+                iconForMobile={<Edit />}
+                disabled={!allowedToEdit}
+                onClick={() => {
+                  setOpenUpdateDialog(true);
+                }}
+                mobileTooltip={'Edit'}
+              >
                 Edit
               </ThemeButton>
             </Fragment>
@@ -159,6 +169,30 @@ const ExpenseDetailsPage = () => {
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </div>
             )}
+            <div className='mt-2'>
+              <TableContainer component={Paper}>
+                <Table sx={{ minWidth: 700 }} aria-label="spanning table">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Description</TableCell>
+                      <TableCell align="right">Amount</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {expensesData?.lineItems?.map((row) => (
+                      <TableRow key={row.id}>
+                        <TableCell>{row.description}</TableCell>
+                        <TableCell align="right">{row.amount}</TableCell>
+                      </TableRow>
+                    ))}
+                    <TableRow className='bg-slate-100'>
+                      <TableCell>Total Amount</TableCell>
+                      <TableCell align="right">$ {expensesData?.totalAmount}</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </div>
           </Box>
         </TabPanel>
         {resourceData &&
@@ -181,7 +215,7 @@ const ExpenseDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.expenses?.titleSingular?.toLowerCase()} : ${expensesData?.expensesNumber} ?`}
+          message={`Are you sure you want to delete ${resources?.expenses?.titleSingular?.toLowerCase()} : ${expensesData?.expenseNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

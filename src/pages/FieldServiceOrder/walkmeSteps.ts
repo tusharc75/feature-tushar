@@ -41,7 +41,7 @@ export const createFieldServiceOrderFlow = (fields: any): WalkmeData => {
   const ignoreField = ['currency', 'owner', 'pdfTemplate'];
 
   const data: WalkmeData = {
-    name: `Add ${sidebarResource?.fieldServiceOrder}`,
+    name: `Create ${sidebarResource?.fieldServiceOrder}`,
     url: '/field-service-order',
     type: 'flow',
     steps: [
