@@ -392,24 +392,26 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
   };
 
   useEffect(() => {
-    if (customReportData && customReportData?.filters?.length > 0 && selectedReport?.type === 'custom-report') {
-      const filterById: any = [];
-      const deepFilter: any = [];
-      customReportData?.filters?.forEach((f) => {
-        if (f?.lookup) {
-          filterById.push({
-            field: f?.term,
-            term: f?.value
-          });
-        } else {
-          deepFilter.push({
-            field: f?.term,
-            term: f?.value
-          });
-        }
-      });
-      setFilterByIds(filterById);
-      setDeepFilters(deepFilter);
+    if (customReportData && selectedReport?.type === 'custom-report') {
+      if (customReportData?.filters?.length > 0) {
+        const filterById: any = [];
+        const deepFilter: any = [];
+        customReportData?.filters?.forEach((f) => {
+          if (f?.lookup) {
+            filterById.push({
+              field: f?.term,
+              term: f?.value
+            });
+          } else {
+            deepFilter.push({
+              field: f?.term,
+              term: f?.value
+            });
+          }
+        });
+        setFilterByIds(filterById);
+        setDeepFilters(deepFilter);
+      }
       setShowGrid(true);
     }
   }, []);

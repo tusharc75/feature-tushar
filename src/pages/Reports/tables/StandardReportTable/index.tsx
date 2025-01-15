@@ -92,24 +92,26 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
   const [fullScreen, setFullScreen] = React.useState(isMobile || isTablet);
 
   useEffect(() => {
-    if (customReportData && customReportData?.filters?.length > 0 && selectedReport?.type === 'custom-report') {
-      const filterById: any = [];
-      const deepFilter: any = [];
-      customReportData?.filters?.forEach((f) => {
-        if (f?.lookup) {
-          filterById.push({
-            field: f?.term,
-            term: f?.value
-          });
-        } else {
-          deepFilter.push({
-            field: f?.term,
-            term: f?.value
-          });
-        }
-      });
-      setFilterByIds(filterById);
-      setDeepFilters(deepFilter);
+    if (customReportData && selectedReport?.type === 'custom-report') {
+      if (customReportData?.filters?.length > 0) {
+        const filterById: any = [];
+        const deepFilter: any = [];
+        customReportData?.filters?.forEach((f) => {
+          if (f?.lookup) {
+            filterById.push({
+              field: f?.term,
+              term: f?.value
+            });
+          } else {
+            deepFilter.push({
+              field: f?.term,
+              term: f?.value
+            });
+          }
+        });
+        setFilterByIds(filterById);
+        setDeepFilters(deepFilter);
+      }
       setShowGrid(true);
     }
   }, []);
@@ -656,7 +658,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
                   permissions={permissions?.report}
                   module={selectedReport.resource}
                   api={`/report/${selectedReport.resource}`}
-                  afterImportCompleted={() => { }}
+                  afterImportCompleted={() => {}}
                   isExportCount={true}
                   exportCount={0}
                   ids={[]}
