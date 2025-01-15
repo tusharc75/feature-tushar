@@ -40,7 +40,7 @@ const ColCard: React.FC<IColCard> = ({
   let paddingLeft = 0;
   if (passFailStatus) paddingRight += 29;
   if (Boolean(tooltip)) paddingRight += 29;
-  if (Boolean(cardOnSelect)) paddingLeft += 29;
+  if (Boolean(cardOnSelect)) paddingLeft += 24;
 
   const clickTimeout = useRef(null);
 
@@ -67,8 +67,14 @@ const ColCard: React.FC<IColCard> = ({
     <Box className={cn(styles.singleCard, isSelected ? (background && color ? `${background} ${color}` : 'bg-[#d5d2f7] dark:bg-neutral-800') : '')}>
       <div onClick={handleClick} style={{ cursor: cardOnClick ? 'pointer' : 'default' }}>
         {cardOnSelect && (
-          <span className="absolute left-[2px] top-[5px]">
-            <Checkbox icon={<RadioButtonUnchecked />} checkedIcon={<CheckCircle />} checked={isSelected} onClick={(e) => handleSelect(e)} />
+          <span className="absolute left-[2px] top-[8px]">
+            <Checkbox
+              size="small"
+              icon={<RadioButtonUnchecked />}
+              checkedIcon={<CheckCircle />}
+              checked={isSelected}
+              onClick={(e) => handleSelect(e)}
+            />
           </span>
         )}
         {rowDef.map((item, index) => {
