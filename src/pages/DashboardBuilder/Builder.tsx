@@ -38,11 +38,6 @@ const Builder = (props: Props) => {
     }
   }, [selectedData]);
 
-  React.useEffect(() => {
-    if (!formValues.kpi?.kpi && !formValues.filters.map((k) => k.key).includes('status')) return;
-    setFormValues((prevState) => ({ ...prevState, statusOptions: statuses[formValues.kpi?.kpi] }));
-  }, [formValues.kpi, formValues.filters]);
-
   const fetchKpis = () => {
     axiosInstance()
       .get(`dashboard-master/kpi-list`)

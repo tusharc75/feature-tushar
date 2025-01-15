@@ -122,7 +122,6 @@ const DashboardBuilder = () => {
               hasFilters: false,
               hasTableView: false,
               hasExport: false,
-              statusOptions: [],
               filters: []
             }
           ]
