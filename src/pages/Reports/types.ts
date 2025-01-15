@@ -45,6 +45,7 @@ export type SelectedReport = {
   route: string;
   type: ReportType;
   resource: string;
+  customReportData?: any;
 };
 
 export type ReportState = {

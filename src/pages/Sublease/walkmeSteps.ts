@@ -102,7 +102,7 @@ export const generateAddExistingProduct = (waitForStepInsertion = false): Walkme
 export const createSubleaseFlow = (fields: any, path: any): WalkmeData => {
   const includeFields = ['fromWarehouse', 'toWarehouse', 'warehouse'];
   const data: WalkmeData = {
-    name: `Add ${path}`,
+    name: `Create ${path}`,
     url: routes.sublease.path,
     type: 'flow',
     steps: [
