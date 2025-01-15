@@ -438,6 +438,8 @@ const RentalManagement = () => {
             fetchData();
           }}
           additionalParams={getQueryString(true)}
+          asyncExport={true}
+          resource={sidebarResource.rentalManagement}
         />
       </div>
       <CustomContainer>

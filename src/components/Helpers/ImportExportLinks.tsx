@@ -4,9 +4,10 @@ import { useContext, useMemo, useState } from 'react';
 import { IoIosArrowDropdown } from 'react-icons/io';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
-import { downloadExcel } from '../../constants/helpers';
+import { downloadExcel, IMPORT_EXPORT_TYPE } from '../../constants/helpers';
 
 import { DownloadIcon, ExportIcon, ImportIcon, MobileDownloadIcon, MobileExportIcon, MobileImportIcon } from 'src/assets/svg/svgIcons';
+import ImportExportDialog from 'src/components/AsynImportExportMenu/ImportExportDialog';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -37,7 +38,7 @@ export default function ImportExportLinks({
   exportSelectedRecords = null,
   isExportAllOrSomeFeature = false,
   onlyExport = false,
-  onExportToExcelSuccess = () => { },
+  onExportToExcelSuccess = () => {},
   total = 0,
   additionalParams = null,
   isDownloadExcel = true,
@@ -48,13 +49,17 @@ export default function ImportExportLinks({
   headers = null,
   hideDefaultImportExport = false,
   small = false,
-  visibleColumns = {}
+  visibleColumns = {},
+  asyncExport = false,
+  resource = null
 }) {
   const classes = useStyles();
   const isMobile = useMediaQuery('(max-width: 960px)');
 
   const toastConfig = useContext(CustomToastContext);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [openAsyncImpExpDialog, setOpenAsyncImpExpDialog] = useState({ open: false, type: null });
+  const [refresh, setRefresh] = useState(false);
   const open = Boolean(anchorEl);
   const [imptExptDnldMenuDta, setImptExptDnldMenuDta] = useState({ anchorEl: null, action: null, open: false });
 
@@ -171,6 +176,7 @@ export default function ImportExportLinks({
 
       exportApi = exportApi + `&ids=${JSON.stringify(ids)}`;
     }
+
     axiosInstance()
       .get(exportApi, {
         responseType: 'arraybuffer',
@@ -179,17 +185,26 @@ export default function ImportExportLinks({
         }
       })
       .then((response) => {
-        const fileName = response.headers['content-disposition'].split('filename=')[1];
-        downloadExcel(response.data, fileName);
+        if (asyncExport && resource) {
+          setRefresh(!refresh);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: 'Export to excel added in queue successfully.'
+          });
+        } else {
+          const fileName = response.headers['content-disposition'].split('filename=')[1];
+          downloadExcel(response.data, fileName);
 
-        if (recordsToExport > 0) {
-          onExportToExcelSuccess();
+          if (recordsToExport > 0) {
+            onExportToExcelSuccess();
+          }
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: 'Exported to excel successfully.'
+          });
         }
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: 'Exported to excel successfully.'
-        });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -418,7 +433,7 @@ export default function ImportExportLinks({
               if (extraImportExportLinks.length > 0) {
                 handleOpenMenu(e, 'export');
               } else {
-                exportToExcel();
+                asyncExport && resource ? setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.export }) : exportToExcel();
               }
             }}
             className={`new-headerbox-button-v1 ${small ? 'small' : ''}`}
@@ -492,6 +507,24 @@ export default function ImportExportLinks({
         </>
       )}
       {imptExptDnldMenuDta.open && <RenderButtonMenu />}
+      {openAsyncImpExpDialog.open && (
+        <ImportExportDialog
+          handleClose={() => {
+            setOpenAsyncImpExpDialog({ open: false, type: null });
+            setAnchorEl(null);
+          }}
+          type={openAsyncImpExpDialog.type}
+          resource={resource}
+          subResource={null}
+          referenceId={null}
+          handleExport={()=>{
+            exportToExcel();
+          }}
+          refresh={refresh}
+          api={api}
+          additionalParams={additionalParams}
+        />
+      )}
     </div>
   );
 }
