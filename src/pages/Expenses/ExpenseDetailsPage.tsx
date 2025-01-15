@@ -77,7 +77,6 @@ const ExpenseDetailsPage = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource?.expenses}`)
       .then(({ data }) => {
-        console.log(data);
         setFields(data.data?.filter((field) => field.isRead));
       })
       .catch((err) => {
@@ -90,7 +89,6 @@ const ExpenseDetailsPage = () => {
     axiosInstance()
       .get(`${expenses.api}/${id}`)
       .then(({ data: { data } }) => {
-        console.log(data);
         setLoadingDetails(false);
         setAllowedToEdit(permissions?.expenses?.isUpdate);
         setAllowedToDelete(permissions?.expenses?.isDelete);
