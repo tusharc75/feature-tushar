@@ -44,6 +44,7 @@ const ManagePurchaseOrder = ({
   const [purchaseOrderData, setPurchaseOrderData] = useState(null);
   const [cloneHeading, setCloneHeading] = useState('head');
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [requiredCustomerAndProject, setRequiredCustomerAndProject] = useState(false);
   const walkmeInstance = useGetWalkmeInstance();
   const isStepDataSet = useRef(false);
 
@@ -184,6 +185,21 @@ const ManagePurchaseOrder = ({
     }
   };
 
+  function validate(values) {
+    const errors = {};
+    if (requiredCustomerAndProject) {
+      const customerAccountField = initialData.fields?.find((e) => e.fieldName === 'customerAccount');
+      if (requiredCustomerAndProject && !values.customerAccount) {
+        errors['customerAccount'] = `${customerAccountField?.fieldLabel} is required`;
+      }
+      const projectField = initialData.fields?.find((e) => e.fieldName === 'project');
+      if (!values.project) {
+        errors['project'] = `${projectField?.fieldLabel} is required`;
+      }
+    }
+    return errors;
+  }
+
   return (
     <Dialog
       maxWidth="md"
@@ -200,6 +216,7 @@ const ManagePurchaseOrder = ({
     >
       {initialData && initialData.fields.length ? (
         <Formik
+          validate={validate}
           initialValues={initialData.values}
           validationSchema={yupSchema(initialData.fields)}
           validateOnMount
@@ -232,6 +249,17 @@ const ManagePurchaseOrder = ({
                     values={values}
                     setFieldValue={(name, value) => {
                       setFieldValue(name, value);
+                      if (name === 'chartOfAccount') {
+                        const chartOfAccountField = initialData.fields?.find((e) => e.fieldName === 'chartOfAccount');
+                        if (chartOfAccountField) {
+                          const chartOfAccount = chartOfAccountField?.option?.filter((e) => value?.includes(e.optionValue));
+                          if (chartOfAccount?.find((e) => e?.optionLabel.includes('55050'))) {
+                            setRequiredCustomerAndProject(true);
+                          } else {
+                            setRequiredCustomerAndProject(false);
+                          }
+                        }
+                      }
                     }}
                     touched={touched}
                     fieldsData={initialData.fields}
