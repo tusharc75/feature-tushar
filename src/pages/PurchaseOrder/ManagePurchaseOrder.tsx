@@ -17,7 +17,7 @@ import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
-import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
+import { generateStepsFormfieldData, StepDefination, useGetWalkmeInstance } from 'src/components/CustomIntro';
 
 const ManagePurchaseOrder = ({
   isClone = false,
@@ -254,6 +254,24 @@ const ManagePurchaseOrder = ({
                         if (chartOfAccountField) {
                           const chartOfAccount = chartOfAccountField?.option?.filter((e) => value?.includes(e.optionValue));
                           if (chartOfAccount?.find((e) => e?.optionLabel.includes('55050'))) {
+                            const extractedFields = initialData.fields?.filter(
+                              (e) => e.fieldName === 'customerAccount' || e.fieldName === 'project'
+                            );                            
+                            let fieldsSteps: StepDefination[] = [];
+                            extractedFields?.forEach((e) => {
+                            {
+                              fieldsSteps.push({
+                                title: `Select ${e?.fieldLabel}`,
+                                target: `#field-${e?.fieldLabel?.toLowerCase()?.split(' ').join('-')}`,
+                                content: '',
+                                nextOnValueChange: true,
+                                skipIfValueExist: true,
+                                fieldType: e.type,
+                                checkForRequired: true,
+                                isPreviousButtonDisabled: false
+                              });
+                            }});
+                            walkmeInstance.instance.insertAtCurrentIndex([...fieldsSteps]);
                             setRequiredCustomerAndProject(true);
                           } else {
                             setRequiredCustomerAndProject(false);
