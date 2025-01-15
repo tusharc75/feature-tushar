@@ -93,6 +93,11 @@ export function useColumns() {
           decimalPlaces: field?.decimalPlaces || 0
         };
 
+        if (field?.defaultDisableFilters) {
+          commonFieldData['disableFilters'] = true;
+          commonFieldData['disableSortBy'] = true;
+        }
+
         if (field?.stopHideColumn || field?.primaryField) {
           commonFieldData['disabled'] = true;
         }
