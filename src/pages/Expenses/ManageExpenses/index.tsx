@@ -43,11 +43,10 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
   const [value, setValue] = useState('');
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [title, setTitle] = useState('');
-
   const [textFields, setTextFields] = useState([]);
 
   const addTextField = () => {
-    setTextFields([...textFields, { description: '', amount: '' }]);
+    setTextFields([...textFields, { id:textFields.length, description: '', amount: '' }]);
   };
 
   const handleInputChange = (index, field, event) => {
@@ -93,13 +92,13 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
                   values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
                 });
               } else {
-                console.log(data.totalAmount);
+                setValue(data.totalAmount);
+                setTextFields(data.lineItems);
                 setTitle(`Edit - ${data.expenseNumber}`);
                 setInitialData({
                   fields: fieldsDataForUpdate,
                   values: {...getObjKeysWithValues(data, fieldsDataForUpdate)}
                 });
-                console.log(initialData)
               }
             })
             .catch((error) => {
@@ -127,12 +126,11 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
       totalAmount: value,
       lineItems: textFields
     };
-    payload._id = expenseId;
     if (expenseId && isClone === false) {
+      payload._id = expenseId;
       axiosInstance()
         .put(`${expenses.api}`, payload)
         .then(({ data }) => {
-          console.log(data);
           setIsSubmitting(false);
           onSuccess();
           toastConfig.setToastConfig({
