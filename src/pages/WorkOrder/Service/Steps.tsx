@@ -996,10 +996,10 @@ const Steps = ({
       <>
         <MenuItem
           disabled={
-            allowedToEdit &&
+            (allowedToEdit &&
             serviceDetails?.steps?.filter((d) => selectedSteps?.includes(d?._id))?.every((element) => element?.isAllowToCheck === true)
               ? false
-              : true
+              : true) || selectedSteps.length === 0
           }
           onClick={() => {
             setShowDeleteConfirmBox((prev) => ({
