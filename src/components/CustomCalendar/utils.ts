@@ -11,12 +11,12 @@ export const parseEventForMobile = <D>(events: ParsedEvents<D>[]): D[] => {
   events.forEach((event) => {
     const startDate = dayjs(event.start);
     const endDate = dayjs(event.end);
-    for (let date = startDate.clone(); date.isSameOrBefore(endDate);) {
-      const formattedDate = date.format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]');
+    for (let date = startDate.clone(); date.isSameOrBefore(endDate); ) {
+      const formattedDate = new Date(date.format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]'));
       const formatOnlyDate = date.format('YYYY-MM-DD');
       const newEvent = { ...event, start: formattedDate, end: formattedDate };
       parsedEventsMap[formatOnlyDate] = newEvent;
-      date = date.add(1, 'day')
+      date = date.add(1, 'day');
     }
   });
   return Object.values(parsedEventsMap);

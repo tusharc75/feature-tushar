@@ -1,13 +1,11 @@
-import { Button, CircularProgress, Popover, useMediaQuery } from '@mui/material';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { CircularProgress, useMediaQuery } from '@mui/material';
+import { useEffect, useMemo, useState } from 'react';
 import { Calendar, CalendarProps } from 'react-big-calendar';
+import withDragAndDrop, { withDragAndDropProps } from 'react-big-calendar/lib/addons/dragAndDrop';
 import { isMobile, isTablet } from 'react-device-detect';
 import MobileDayView from 'src/components/CustomCalendar/MobileDayView';
 import { parseEventForMobile } from 'src/components/CustomCalendar/utils';
 import { cn, filterDataByDateIntersection } from 'src/constants/helpers';
-import withDragAndDrop, { withDragAndDropProps } from 'react-big-calendar/lib/addons/dragAndDrop';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
-import dayjs from 'dayjs';
 
 interface DragAndDropCalendarProps<TEvent extends object = Event, TResource extends object = object>
   extends Omit<CalendarProps<TEvent, TResource>, 'views'>,
