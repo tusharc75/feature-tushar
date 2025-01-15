@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { Formik, Form } from 'formik';
-import { Box, TextField } from '@mui/material';
+import { Box, InputAdornment, TextField } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import { useHistory } from 'react-router-dom';
 import { isEqual } from 'lodash';
@@ -21,7 +21,8 @@ import {
   yupSchema,
   sidebarResource,
   getObjKeys,
-  GenerateResourceLineNumber
+  GenerateResourceLineNumber,
+  getUniqueCurrencies
 } from '../../../constants/helpers';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
@@ -30,7 +31,9 @@ import ItemizeExpenses from 'src/pages/Expenses/ItemizeExpenses';
 const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const { state: { user, resources } }: any = useData();
+  const {
+    state: { user, resources }
+  }: any = useData();
 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -40,6 +43,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [title, setTitle] = useState('');
   const [textFields, setTextFields] = useState([]);
+  const [currencySymbol, setCurrencySymbol] = useState(null);
 
   const addTextField = () => {
     setTextFields([...textFields, { id: textFields.length, description: '', amount: '' }]);
@@ -90,6 +94,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
               } else {
                 setValue(data.totalAmount);
                 setTextFields(data.lineItems);
+                setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data.currency)?.symbolNative);
                 setTitle(`Edit - ${data.expenseNumber}`);
                 setInitialData({
                   fields: fieldsDataForUpdate,
@@ -102,6 +107,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
             });
         } else {
           setTitle(`Create ${resources?.expenses?.titleSingular}`);
+          setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data.currency)?.symbolNative);
           let initialData = getObjKeys('', fieldsDataForCreate);
           initialData['expenseNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
           setInitialData({
@@ -217,26 +223,32 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
                     resource={sidebarResource.expenses}
                     referenceId={expenseId || null}
                   />
-                  <TextField
-                    id="outlined-required"
-                    label="Total Amount"
-                    required
-                    type="number"
-                    size="small"
-                    value={showItemizeDialog ? calculateTotal() : value}
-                    onChange={handleChange}
-                  />
-                  <ThemeButton
-                    className="m-2"
-                    buttonType="transparent"
-                    onClick={() => {
-                      setShowItemizeDialog(true);
-                    }}
-                  >
-                    Itemize
-                  </ThemeButton>
+                  <Box sx={{ width: '100%', mb: 2 }}>
+                    <TextField
+                      id="outlined-required"
+                      label="Total Amount"
+                      required
+                      type="number"
+                      size="small"
+                      disabled={textFields.length > 0}
+                      value={showItemizeDialog ? calculateTotal() : value}
+                      onChange={handleChange}
+                      fullWidth
+                      slotProps={{
+                        input: {
+                          startAdornment: <InputAdornment position="start">{currencySymbol}</InputAdornment>
+                        }
+                      }}
+                    />
+                  </Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <ThemeButton buttonType="transparent" onClick={() => setShowItemizeDialog(true)}>
+                      Itemize
+                    </ThemeButton>
+                  </Box>
                 </Form>
               </CustomDialogContent>
+
               <CustomDialogFooter>
                 <ThemeButton
                   buttonType="transparent"
@@ -284,6 +296,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
                   textFields={textFields}
                   value={value}
                   addTextField={addTextField}
+                  currencySymbol={currencySymbol}
                   removeTextField={removeTextField}
                   handleInputChange={handleInputChange}
                   fullScreen={fullScreen}

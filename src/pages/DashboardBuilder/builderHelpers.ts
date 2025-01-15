@@ -90,7 +90,6 @@ export interface IFormDataType {
   axis?: string;
   filters?: IFilterType[];
   kpi: KPIListType;
-  statusOptions?: { optionValue: string; optionLabel: string }[];
   currency?: boolean;
   percentage?: boolean;
   stack?: boolean;
@@ -106,7 +105,6 @@ export const defaultFormConfigs: IFormDataType = {
   hasFilters: false,
   hasTableView: false,
   hasExport: false,
-  statusOptions: [],
   filters: [],
   currency: false,
   percentage: false
