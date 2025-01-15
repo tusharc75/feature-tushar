@@ -276,7 +276,6 @@ const DropDown = ({
                           onChange={(e) => {
                             handleCheckNonLookup(e, o);
                           }}
-                          className="!text-[--new-theme-color] dark:!text-gray-200"
                         />
                       }
                       label={
