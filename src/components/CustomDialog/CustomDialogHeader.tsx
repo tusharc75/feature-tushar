@@ -46,7 +46,7 @@ function CustomDialogHeader({
     <React.Fragment>
       <DialogTitle component={'div'} className={`flex min-h-[54px] items-center justify-between bg-[#1c1c31] px-4 py-2 text-white dark:bg-[#1a1a26]`}>
         <h2
-          className={` title-layout text-truncate text-xl font-semibold leading-[1.6]`}
+          className={` title-layout text-truncate flex items-center gap-2 text-xl font-semibold leading-[1.6]`}
           style={{ ...style, maxWidth: `calc(100% - ${maxWidth}px)` }}
         >
           {title}
