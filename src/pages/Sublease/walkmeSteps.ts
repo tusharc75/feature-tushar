@@ -107,7 +107,7 @@ export const createSubleaseFlow = (fields: any, path: any): WalkmeData => {
     type: 'flow',
     steps: [
       {
-        title: `Add`,
+        title: `Create`,
         target: '#add-button'
       },
       ...generateFormFieldSteps(fields, [], includeFields),

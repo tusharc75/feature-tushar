@@ -10,7 +10,7 @@ export const createFieldTicketFlow = (fieldTicketTitle): WalkmeData => {
     type: 'flow',
     steps: [
       {
-        title: `Add`,
+        title: `Create`,
         target: '#add-button',
         waitForStepInsertion: true
       },
