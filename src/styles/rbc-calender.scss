@@ -134,7 +134,7 @@
   [data-mode='dark'] & {
     background-color: #32324f;
   }
-  &:hover {
+  &:is(:hover, :focus) {
     color: white;
   }
 }
