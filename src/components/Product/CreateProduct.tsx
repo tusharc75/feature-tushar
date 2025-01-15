@@ -1,4 +1,5 @@
-import { Box, Collapse, Grid, InputAdornment } from '@mui/material';
+import { Box, Collapse, InputAdornment } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import Dialog from '@mui/material/Dialog';
 import IconButton from '@mui/material/IconButton';
 import AddIcon from '@mui/icons-material/AddCircle';
@@ -589,14 +590,9 @@ const CreateProduct = (props) => {
                                 {section.sectionFields &&
                                   section.sectionFields.map((field) =>
                                     field.fieldName === 'productCategory' ? (
-                                      <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                      <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                         <Grid container spacing={1}>
-                                          <Grid
-                                            item
-                                            xs={permissions.productCategory?.isCreate ? 11 : 11}
-                                            sm={permissions.productCategory?.isCreate ? 11 : 11}
-                                            md={permissions.productCategory?.isCreate ? 11 : 11}
-                                          >
+                                          <Grid size={{ xs: 11, sm: 11, md: 11 }}>
                                             <FormTypes
                                               disabled={(Boolean(productId) && field.disableOnEdit) || productCategoryID}
                                               fields={initialData.fields}
@@ -648,7 +644,7 @@ const CreateProduct = (props) => {
                                             />
                                           </Grid>
                                           {permissions.productCategory?.isCreate && (
-                                            <Grid item xs={1} sm={1} md={1}>
+                                            <Grid size={{ xs: 1, sm: 1, md: 1 }}>
                                               <HtmlTooltip title="Add Product Category" className="mt-1">
                                                 <IconButton
                                                   onClick={() => {
@@ -665,7 +661,7 @@ const CreateProduct = (props) => {
                                             </Grid>
                                           )}
                                           {field?.tooltipMessage ? (
-                                            <Grid item xs={1} sm={1} md={1}>
+                                            <Grid size={{ xs: 1, sm: 1, md: 1 }}>
                                               <HtmlTooltip title={field?.tooltipMessage ?? ''}>
                                                 <InfoIcon color="disabled" />
                                               </HtmlTooltip>
@@ -674,7 +670,7 @@ const CreateProduct = (props) => {
                                         </Grid>
                                       </Grid>
                                     ) : field.fieldName === 'currency' ? (
-                                      <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                      <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                         <FormTypes
                                           disabled={Boolean(productId) && field.disableOnEdit}
                                           // {...rest}
@@ -705,7 +701,7 @@ const CreateProduct = (props) => {
                                         />
                                       </Grid>
                                     ) : field.fieldName === 'mrp' ? (
-                                      <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                      <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                         <FormTypes
                                           disabled={Boolean(productId) && field.disableOnEdit}
                                           // {...rest}
@@ -729,7 +725,7 @@ const CreateProduct = (props) => {
                                         />
                                       </Grid>
                                     ) : field.fieldName === 'entity' ? (
-                                      <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                      <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                         <FormTypes
                                           disabled={Boolean(productId) && field.disableOnEdit}
                                           {...field}
@@ -762,7 +758,7 @@ const CreateProduct = (props) => {
                                         />
                                       </Grid>
                                     ) : field.fieldName === 'productTemplate' ? (
-                                      <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                      <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                         <FormTypes
                                           disabled={Boolean(productId) && field.disableOnEdit}
                                           fields={initialData.fields}
@@ -790,7 +786,7 @@ const CreateProduct = (props) => {
                                         />
                                       </Grid>
                                     ) : field.fieldName === 'priceTemplate' ? (
-                                      <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                      <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                         <FormTypes
                                           disabled={Boolean(productId) && field.disableOnEdit}
                                           fields={initialData.fields}
@@ -841,7 +837,7 @@ const CreateProduct = (props) => {
                                         handleRemoveField={handleRemoveField}
                                       />
                                     ) : (
-                                      <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                      <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                         <Box display="flex">
                                           <Box flexGrow={1}>
                                             <FormTypes
