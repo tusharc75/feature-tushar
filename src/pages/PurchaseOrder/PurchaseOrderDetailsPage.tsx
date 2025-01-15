@@ -37,7 +37,8 @@ import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { generateAddExistingProduct } from '../RentalManagement/walkmeSteps';
+
+import { generateAddExistingProduct, generateAddExistingService } from './walkmeSteps';
 
 const PurchaseOrderDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -86,6 +87,7 @@ const PurchaseOrderDetailsPage = () => {
     }
     if (walkmeInstance && walkmeInstance.type === 'flow') {
       walkmeInstance.instance.push(generateAddExistingProduct(true).steps);
+      console.log(walkmeInstance.instance);
       // immediately start next step
       walkmeInstance.handleNext();
     }
