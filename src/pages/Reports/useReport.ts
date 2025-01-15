@@ -103,14 +103,14 @@ const useReport = () => {
   );
 
   const setSelectedReport = useCallback(
-    (payload: { title: string; route: string }) => {
+    async (payload: { title: string; route: string }) => {
       setColumns(null);
       setResourceColumns(null);
       if (selectedReport?.route === payload.route) {
         dispatch({ type: 'setSelectedReport', payload: null });
         navigateToMainPage();
       } else {
-        const data = handleGetRoute(payload);
+        const data = await handleGetRoute(payload);
         dispatch({ type: 'setSelectedReport', payload: data });
         setIsColumnsLoading(true);
         history.push(payload.route);
@@ -222,23 +222,46 @@ const useReport = () => {
   }, [searchQuery, filterValues]);
 
   // to sync with route
+  // useEffect(() => {
+  //   (async () => {
+  //     if (selectedReport?.route !== pathname) {
+  //       setColumns(null);
+  //       setResourceColumns(null);
+  //       const currentRouteData = [...reportList, ...customReports].find((d) => d.route === pathname);
+  //       if (currentRouteData) {
+  //         const data = await handleGetRoute({ route: currentRouteData.route, title: currentRouteData.label });
+  //         dispatch({ type: 'setSelectedReport', payload: data });
+  //         setIsColumnsLoading(true);
+  //       }
+  //     }
+  //     if (pathname === routes.reports.path) {
+  //       setColumns(null);
+  //       setResourceColumns(null);
+  //       dispatch({ type: 'setSelectedReport', payload: null });
+  //     }
+  //   })();
+  // }, [customReports, pathname, reportList, selectedReport?.route, setColumns, setIsColumnsLoading, setResourceColumns]);
+
   useEffect(() => {
-    if (selectedReport?.route !== pathname) {
-      setColumns(null);
-      setResourceColumns(null);
-      const currentRouteData = [...reportList, ...customReports].find((d) => d.route === pathname);
-      if (currentRouteData) {
-        const data = handleGetRoute({ route: currentRouteData.route, title: currentRouteData.label });
-        dispatch({ type: 'setSelectedReport', payload: data });
-        setIsColumnsLoading(true);
-      }
-    }
     if (pathname === routes.reports.path) {
       setColumns(null);
       setResourceColumns(null);
       dispatch({ type: 'setSelectedReport', payload: null });
     }
-  }, [customReports, pathname, reportList, selectedReport?.route, setColumns, setIsColumnsLoading, setResourceColumns]);
+  }, [pathname, setColumns, setResourceColumns]);
+
+  useEffect(() => {
+    (async () => {
+      setColumns(null);
+      setResourceColumns(null);
+      const currentRouteData = [...reportList, ...customReports].find((d) => d.route === pathname);
+      if (currentRouteData) {
+        const data = await handleGetRoute({ route: currentRouteData.route, title: currentRouteData.label });
+        dispatch({ type: 'setSelectedReport', payload: data });
+        setIsColumnsLoading(true);
+      }
+    })();
+  }, [customReports, reportList, setIsColumnsLoading, setColumns, setResourceColumns]);
 
   return {
     ...state,
