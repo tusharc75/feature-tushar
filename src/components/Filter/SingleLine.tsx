@@ -90,7 +90,7 @@ const SingleLine = ({ fieldData, allFields, deepFilters, setDeepFilters, filterT
 
   return (
     <div>
-      <div className="sticky top-0 z-10 flex items-center justify-between bg-[var(--dark-primary,white)] py-[--py,_16px] max-md:flex-wrap">
+      <div className="sticky top-0 z-10 flex min-h-[64px] items-center justify-between bg-[var(--dark-primary,white)] py-[--py,_16px] max-md:flex-wrap">
         <div className="flex items-center gap-2">
           {sidebarIcon}
           <p className="text-[16px] font-medium leading-[19px]">{fieldData?.fieldLabel}</p>
