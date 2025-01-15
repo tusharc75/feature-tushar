@@ -161,7 +161,7 @@ const DropDown = ({
           {fieldData?.lookup}
         </div>
         <div className="flex items-center justify-between">
-          <InNin filterTerm={filterTerm} setFilterTerm={setFilterTerm} fieldName={fieldData?.fieldName} />
+          {filterTerm && setFilterTerm && <InNin filterTerm={filterTerm} setFilterTerm={setFilterTerm} fieldName={fieldData?.fieldName} />}
           {fieldData?.lookup && fieldData?.lookupResource && !fieldData?.customOptions?.length && (
             <SearchBox
               onChange={(e) => {

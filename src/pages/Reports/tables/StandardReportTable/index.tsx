@@ -66,6 +66,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
     navigateToMainPage
   } = reportState;
 
+  const customReportData = selectedReport?.customReportData ? selectedReport?.customReportData : null;
   const resourceCamelCase = camelCase(selectedReport.resource);
   const resourceStartCase = startCase(selectedReport.resource);
   const renderedFrom = `${selectedReport.resource}_report_new`;
@@ -88,6 +89,29 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
   const [isSendMail, setIsSendMail] = React.useState(false);
   const [htmlContent, setHtmlContent] = React.useState(null);
   const [fullScreen, setFullScreen] = React.useState(isMobile || isTablet);
+
+  useEffect(() => {
+    if (customReportData && customReportData?.filters?.length > 0 && selectedReport?.type === 'custom-report') {
+      const filterById: any = [];
+      const deepFilter: any = [];
+      customReportData?.filters?.forEach((f) => {
+        if (f?.lookup) {
+          filterById.push({
+            field: f?.term,
+            term: f?.value
+          });
+        } else {
+          deepFilter.push({
+            field: f?.term,
+            term: f?.value
+          });
+        }
+      });
+      setFilterByIds(filterById);
+      setDeepFilters(deepFilter);
+      setShowGrid(true);
+    }
+  }, []);
 
   useEffect(() => {
     fetchGridColumns();
@@ -294,7 +318,6 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
 
     const isStatusPeriod =
       resourceStartCase === sidebarResource.serializedAsset && resourceColumns?.some((r) => r?.fieldData?.fieldName === 'status');
-
     if (deepFiltersP?.length > 0) {
       deepFilter = [
         ...deepFilter,
@@ -341,7 +364,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
     }
 
     if (isExport) {
-      let newColumns = columns.map((col) => col.accessor);
+      let newColumns = columns?.map((col) => col.accessor);
       if (!isEmpty(visibleColumns) && isObject(visibleColumns)) {
         newColumns = [];
         for (const [key, value] of Object.entries(visibleColumns)) {
@@ -599,16 +622,20 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
       {showGrid && (
         <div className={cn('inline-flex justify-between gap-2', !isSidebarOpen ? 'w-[calc(100%-40px)]' : 'w-full')}>
           <>
-            <ThemeButton
-              iconForMobile={<MdFilterList />}
-              onClick={() => {
-                setShowGrid(false);
-                dispatch({ type: 'onlyFilter', filters: {} });
-              }}
-              startIcon={<MdFilterList />}
-            >
-              Show Filters
-            </ThemeButton>
+            {selectedReport?.type === 'custom-report' && customReportData ? (
+              <div></div>
+            ) : (
+              <ThemeButton
+                iconForMobile={<MdFilterList />}
+                onClick={() => {
+                  setShowGrid(false);
+                  dispatch({ type: 'onlyFilter', filters: {} });
+                }}
+                startIcon={<MdFilterList />}
+              >
+                Show Filters
+              </ThemeButton>
+            )}
             <span id="importExportLinks" className="space-x-2">
               {['inUsedSerializedAsset', 'lostAssets'].includes(resourceCamelCase) ? (
                 <AsynImportExportMenu
@@ -664,6 +691,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
                 fetchResourceData={fetchResourceData}
                 setDeepFilters={setDeepFilters}
                 setFilterByIds={setFilterByIds}
+                disableClear={customReportData && selectedReport?.type === 'custom-report' ? true : false}
               />
             }
             height={'calc(100vh - 270px)'}
@@ -683,7 +711,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </div>
       )}
-      {!showGrid && (
+      {!showGrid && !customReportData && selectedReport?.type != 'custom-report' && (
         <Filter
           onClose={() => {
             setShowGrid(true);

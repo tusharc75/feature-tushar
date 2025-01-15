@@ -28,7 +28,7 @@ const CustomReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: Tab
     isColumnsLoading,
     selectedEntity
   } = reportState;
-  const id = selectedReport.resource;
+  const id = selectedReport?.customReportData?._id;
   const renderedFrom = `custom-report_${id}`;
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
