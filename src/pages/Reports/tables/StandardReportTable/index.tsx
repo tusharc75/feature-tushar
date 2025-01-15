@@ -579,6 +579,9 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
       }
       return tempColumn;
     }
+    if (selectedReport?.type === 'custom-report' && customReportData && customReportData?.column?.length > 0) {
+      return tempColumn?.filter((t) => customReportData?.column?.includes(t?.accessor));
+    }
     return column;
   };
 

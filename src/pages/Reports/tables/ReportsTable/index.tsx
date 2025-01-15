@@ -470,7 +470,11 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
             />
           }
           height={'calc(100vh - 270px)'}
-          columns={columns}
+          columns={
+            selectedReport?.type === 'custom-report' && customReportData && customReportData?.column?.length > 0
+              ? columns?.filter((t) => customReportData?.column?.includes(t?.accessor))
+              : columns
+          }
           state={state}
           dispatch={dispatch}
           renderedFrom={renderedFrom}
