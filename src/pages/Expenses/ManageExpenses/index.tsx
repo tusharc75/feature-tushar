@@ -225,12 +225,13 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
                     id="outlined-required"
                     label="Total Amount"
                     required
-                    type="singleLine"
+                    type="number"
+                    size='small'
                     value={showItemizeDialog ? calculateTotal() : value}
                     onChange={handleChange}
                   />
                   <ThemeButton
-                    className="m-5"
+                    className="m-2"
                     buttonType="transparent"
                     onClick={() => {
                       setShowItemizeDialog(true);
@@ -312,6 +313,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
                           <Grid size={{ xs: 5 }}>
                             <TextField
                               label="Description"
+                              size='small'
                               value={field.description}
                               onChange={(event) => handleInputChange(index, 'description', event)}
                               fullWidth
@@ -320,6 +322,8 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
                           <Grid size={{ xs: 5 }}>
                             <TextField
                               label="Amount"
+                              type="number"
+                              size='small'
                               value={field.amount}
                               onChange={(event) => handleInputChange(index, 'amount', event)}
                               fullWidth
@@ -327,7 +331,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
                           </Grid>
                           <Grid size={{ xs: 2 }}>
                             <IconButton onClick={() => removeTextField(field.id)} aria-label="delete">
-                              <DeleteIcon color="error" />
+                              <DeleteIcon color="error" fontSize='small'/>
                             </IconButton>
                           </Grid>
                         </Grid>
