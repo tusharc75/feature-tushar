@@ -154,7 +154,7 @@ const DropDown = ({
 
   return (
     <>
-      <div className="sticky top-0 z-10 flex items-center justify-between bg-[var(--dark-primary,white)] py-[--py,_16px] max-md:flex-wrap">
+      <div className="sticky top-0 z-10 flex min-h-[64px] items-center justify-between bg-[var(--dark-primary,white)] py-[--py,_16px] max-md:flex-wrap">
         <div className="flex items-center gap-2">
           {sidebarIcon}
           <p className="line-clamp-1 text-[16px] font-medium leading-[19px]">{fieldData?.fieldLabel}</p>
@@ -172,7 +172,7 @@ const DropDown = ({
           )}
         </div>
       </div>
-      <div>
+      <nav>
         {fieldData?.lookup && fieldData?.lookupResource ? (
           <>
             {options?.map((o, i) => {
@@ -261,33 +261,34 @@ const DropDown = ({
               </div>
             )}
 
-            {fieldData?.option?.map((o, i) => {
-              return (
-                <div key={i} className="">
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        size="small"
-                        name={o?.optionLabel || ''}
-                        checked={
-                          multiple ? (filterFromDeepFilter?.term || [])?.includes(o?.optionValue) : filterFromDeepFilter?.term === o?.optionValue
-                        }
-                        onChange={(e) => {
-                          handleCheckNonLookup(e, o);
-                        }}
-                        className="!text-[--new-theme-color] dark:!text-gray-200"
-                      />
-                    }
-                    label={
-                      <span className="!text-[14px] !font-medium !leading-[17px] !text-[#6C757D] dark:!text-gray-200">{o?.optionLabel || ''}</span>
-                    }
-                  />
-                </div>
-              );
-            })}
+            <ul>
+              {fieldData?.option?.map((o, i) => {
+                return (
+                  <li key={i} className="list-none">
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          size="small"
+                          name={o?.optionLabel || ''}
+                          checked={
+                            multiple ? (filterFromDeepFilter?.term || [])?.includes(o?.optionValue) : filterFromDeepFilter?.term === o?.optionValue
+                          }
+                          onChange={(e) => {
+                            handleCheckNonLookup(e, o);
+                          }}
+                        />
+                      }
+                      label={
+                        <span className="!text-[14px] !font-medium !leading-[17px] !text-[#6C757D] dark:!text-gray-200">{o?.optionLabel || ''}</span>
+                      }
+                    />
+                  </li>
+                );
+              })}
+            </ul>
           </>
         )}
-      </div>
+      </nav>
     </>
   );
 };
