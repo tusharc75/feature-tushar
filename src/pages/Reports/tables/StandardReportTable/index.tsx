@@ -36,6 +36,7 @@ import PadData from 'src/pages/Reports/tables/PadData';
 import {
   CreditDebitRenderer,
   CreditDebitTypeRenderer,
+  InvoiceNumberRenderer,
   PackageRenderer,
   ProductRenderer,
   SerializedAssetRenderer,
@@ -243,6 +244,13 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
           if (['productId', 'productNumber', 'productDescription', 'serviceName', 'serviceDescription', 'description']?.includes(e.accessor)) {
             e.disableFilters = true;
             e.disableSortBy = true;
+          }
+        });
+        columns = [...newColumns];
+      } else if (resourceCamelCase === 'invoiceDetails') {
+        newColumns?.forEach((e) => {
+          if (e.accessor === 'invoiceNumber') {
+            e.cell = ({ row }) => InvoiceNumberRenderer(row);
           }
         });
         columns = [...newColumns];
@@ -579,6 +587,9 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
       }
       return tempColumn;
     }
+    if (selectedReport?.type === 'custom-report' && customReportData && customReportData?.column?.length > 0) {
+      return tempColumn?.filter((t) => customReportData?.column?.includes(t?.accessor));
+    }
     return column;
   };
 
@@ -645,7 +656,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
                   permissions={permissions?.report}
                   module={selectedReport.resource}
                   api={`/report/${selectedReport.resource}`}
-                  afterImportCompleted={() => {}}
+                  afterImportCompleted={() => { }}
                   isExportCount={true}
                   exportCount={0}
                   ids={[]}

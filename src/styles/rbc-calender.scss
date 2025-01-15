@@ -127,7 +127,8 @@
 .rbc-show-more {
   background-color: #32324f;
   color: white;
-  margin: 5px;
+  margin-inline: auto;
+  margin-block: 2px;
   width: calc(100% - 10px);
   border-radius: 5px;
   [data-mode='dark'] & {

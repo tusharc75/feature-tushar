@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material';
+import { Box, Checkbox, Typography } from '@mui/material';
 import React, { useRef } from 'react';
 import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
 import { FaCheckCircle } from 'react-icons/fa';
@@ -9,6 +9,7 @@ import { datarowInterface } from '.';
 import HtmlTooltip from '../CustomTooltipTitle';
 import TimerComponent, { getFieldsWithOtherDetails } from './TimerComponent';
 import styles from './index.module.scss';
+import { CheckCircle, RadioButtonUnchecked } from '@mui/icons-material';
 
 type IColCard = {
   data: any[];
@@ -36,14 +37,16 @@ const ColCard: React.FC<IColCard> = ({
   const tooltip = rowDef.find((item) => item.type === 'tooltip');
   const isSelected = selectedRecords?.map((r) => r?._id)?.includes(data['_id']);
   let paddingRight = 0;
-  let marginLeft = 0;
+  let paddingLeft = 0;
   if (passFailStatus) paddingRight += 29;
   if (Boolean(tooltip)) paddingRight += 29;
-  if (isSelected) marginLeft += 25;
+  if (Boolean(cardOnSelect)) paddingLeft += 24;
 
   const clickTimeout = useRef(null);
 
-  const handleClick = (e) => {
+  const handleSelect = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.stopPropagation();
+    e.preventDefault();
     clearTimeout(clickTimeout.current);
 
     clickTimeout.current = setTimeout(() => {
@@ -53,7 +56,7 @@ const ColCard: React.FC<IColCard> = ({
     }, 250);
   };
 
-  const handleDoubleClick = (e) => {
+  const handleClick = (e) => {
     clearTimeout(clickTimeout.current);
     if (cardOnClick) {
       cardOnClick(e, data);
@@ -62,12 +65,18 @@ const ColCard: React.FC<IColCard> = ({
 
   return (
     <Box className={cn(styles.singleCard, isSelected ? (background && color ? `${background} ${color}` : 'bg-[#d5d2f7] dark:bg-neutral-800') : '')}>
-      {isSelected && (
-        <Box className={`${styles.checkBox}`}>
-          <FaCheckCircle size={18} color="green" />
-        </Box>
-      )}
-      <div onClick={handleClick} onDoubleClick={handleDoubleClick} style={{ cursor: cardOnClick ? 'pointer' : 'default' }}>
+      <div onClick={handleClick} style={{ cursor: cardOnClick ? 'pointer' : 'default' }}>
+        {cardOnSelect && (
+          <span className="absolute left-[2px] top-[8px]">
+            <Checkbox
+              size="small"
+              icon={<RadioButtonUnchecked />}
+              checkedIcon={<CheckCircle />}
+              checked={isSelected}
+              onClick={(e) => handleSelect(e)}
+            />
+          </span>
+        )}
         {rowDef.map((item, index) => {
           if (item.type === 'tooltip') return null;
           if (item.type === 'title') {
@@ -79,7 +88,7 @@ const ColCard: React.FC<IColCard> = ({
               );
             return (
               <div className={`${styles.cardTitle}`}>
-                <h5 key={index} className={` line-clamp-1  `} style={{ paddingRight, marginLeft }} title={data[item.accessor] || '--'}>
+                <h5 key={index} className={` line-clamp-1  `} style={{ paddingRight, paddingLeft }} title={data[item.accessor] || '--'}>
                   <span>{data[item.accessor] || '--'}</span>
                   {item?.link && (
                     <span style={{ marginLeft: '10px' }}>

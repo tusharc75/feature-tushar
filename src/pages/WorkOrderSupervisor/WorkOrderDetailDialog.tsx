@@ -43,7 +43,7 @@ const WorkOrderDetailDialog = ({ workOrderId, handleClose }) => {
             onClose={handleClose}
             additionalTitle={
               workOrderData?.serializedAsset?.optionLabel && (
-                <Box ml={2} title={workOrderData?.serializedAsset?.optionLabel}>
+                <Box title={workOrderData?.serializedAsset?.optionLabel}>
                   <Typography variant="h6" className={`title-layout text-truncate`}>
                     {`Asset : `}
                     {permissions?.serializedAsset?.isRead ? (

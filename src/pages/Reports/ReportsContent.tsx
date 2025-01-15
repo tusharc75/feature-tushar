@@ -2,7 +2,6 @@ import React, { useMemo } from 'react';
 import { ReportType, UseReport } from 'src/pages/Reports/types';
 import analytics from 'src/assets/newSvgs/analytics.svg';
 import ReportsTable from 'src/pages/Reports/tables/ReportsTable';
-import CustomReportsTable from 'src/pages/Reports/tables/CustomReportsTable';
 import StandardReportsTable from 'src/pages/Reports/tables/StandardReportTable';
 import { REPORT_LIST } from 'src/constants/helpers';
 import { startCase } from 'lodash';
