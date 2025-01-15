@@ -3,7 +3,7 @@ import { Dialog, Box, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Form, Formik, FormikProps } from 'formik';
-import { CustomDialogTransition, REPORT_LIST, sidebarResource } from 'src/constants/helpers';
+import { cn, CustomDialogTransition, REPORT_LIST, sidebarResource } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -295,12 +295,14 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
     }
   };
 
+  const isFullScreen = fullScreen || isMobile || isTablet;
+
   return (
     <Dialog
       open
       maxWidth="md"
       TransitionComponent={CustomDialogTransition}
-      fullScreen={fullScreen || isMobile || isTablet}
+      fullScreen={isFullScreen}
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {
           handleClose();
@@ -387,7 +389,14 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
                   </Box>
                   {values?.resource ? (
                     filterColumns?.length > 0 ? (
-                      <div className="relative mt-2 !px-[--px] !py-[--py] !pt-0 [--container-max-h:300px] [--content-max-h:230px] [--sidebar-width:285px]">
+                      <div
+                        className={cn(
+                          'relative mt-2 !px-[--px] !py-[--py] !pt-0  [--sidebar-width:285px]',
+                          isFullScreen
+                            ? '[--container-max-h:calc(100vh-300px)] [--content-max-h:calc(100vh-380px)]'
+                            : '[--container-max-h:300px] [--content-max-h:230px]'
+                        )}
+                      >
                         <Filters
                           columns={filterColumns}
                           deepFilters={deepFilters}
@@ -439,9 +448,11 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
             </Fragment>
           )}
         </Formik>
-      ) : <Box p={2} height={500}>
-        <CommonSkeleton lenArray={[...Array(10).keys()]} />
-      </Box>}
+      ) : (
+        <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
     </Dialog>
   );
 };
