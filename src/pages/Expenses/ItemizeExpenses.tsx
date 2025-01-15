@@ -1,0 +1,102 @@
+import { Dialog, IconButton, Typography, TextField } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import Grid from '@mui/material/Grid2';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { isMobile, isTablet } from 'react-device-detect';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import { CustomDialogTransition } from 'src/constants/helpers';
+import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+
+const ItemizeExpenses = ({
+  open,
+  onClose,
+  textFields,
+  value,
+  addTextField,
+  removeTextField,
+  handleInputChange,
+  fullScreen,
+  setFullScreen,
+  isSubmitting
+}) => {
+  return (
+    <Dialog
+      maxWidth="md"
+      fullWidth
+      fullScreen={fullScreen || isMobile || isTablet}
+      TransitionComponent={CustomDialogTransition}
+      aria-labelledby="customized-dialog-title"
+      onClose={(e, reason) => {
+        if (reason !== 'backdropClick') {
+          onClose();
+        }
+      }}
+      open={open}
+    >
+      <CustomDialogHeader
+        title="Itemize your Expense"
+        onClose={onClose}
+        isMinimized={!fullScreen}
+        onMinimizeMaximize={() => {
+          setFullScreen((prevState) => !prevState);
+        }}
+        showManimizeMaximize={true}
+      />
+      <CustomDialogContent>
+        <div>
+          {textFields.map((field, index) => (
+            <Grid container spacing={2} key={field.id} sx={{ alignItems: 'center', marginBottom: 2 }}>
+              <Grid size={{ xs: 5 }}>
+                <TextField
+                  label="Description"
+                  size="small"
+                  value={field.description}
+                  onChange={(event) => handleInputChange(index, 'description', event)}
+                  fullWidth
+                />
+              </Grid>
+              <Grid size={{ xs: 5 }}>
+                <TextField
+                  label="Amount"
+                  type="number"
+                  size="small"
+                  value={field.amount}
+                  onChange={(event) => handleInputChange(index, 'amount', event)}
+                  fullWidth
+                />
+              </Grid>
+              <Grid size={{ xs: 2 }}>
+                <IconButton onClick={() => removeTextField(field.id)} aria-label="delete">
+                  <DeleteIcon color="error" fontSize="small" />
+                </IconButton>
+              </Grid>
+            </Grid>
+          ))}
+          <Typography variant="h6" sx={{ marginTop: 2 }}>
+            Total Amount: ${value}
+          </Typography>
+          <ThemeButton buttonType="theme" onClick={addTextField}>
+            Add Expense
+          </ThemeButton>
+        </div>
+      </CustomDialogContent>
+      <CustomDialogFooter>
+        <ThemeButton buttonType="transparent" id="dialog-cancel-button" onClick={onClose}>
+          Cancel
+        </ThemeButton>
+        <ThemeButton
+          isLoading={isSubmitting}
+          buttonType="theme"
+          id="dialog-save-button"
+          disabled={isSubmitting}
+          onClick={onClose}
+        >
+          Save
+        </ThemeButton>
+      </CustomDialogFooter>
+    </Dialog>
+  );
+};
+
+export default ItemizeExpenses;

@@ -1,11 +1,13 @@
-import { CircularProgress, useMediaQuery } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { Button, CircularProgress, Popover, useMediaQuery } from '@mui/material';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Calendar, CalendarProps } from 'react-big-calendar';
 import { isMobile, isTablet } from 'react-device-detect';
 import MobileDayView from 'src/components/CustomCalendar/MobileDayView';
 import { parseEventForMobile } from 'src/components/CustomCalendar/utils';
 import { cn, filterDataByDateIntersection } from 'src/constants/helpers';
 import withDragAndDrop, { withDragAndDropProps } from 'react-big-calendar/lib/addons/dragAndDrop';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 interface DragAndDropCalendarProps<TEvent extends object = Event, TResource extends object = object>
   extends Omit<CalendarProps<TEvent, TResource>, 'views'>,
@@ -76,7 +78,41 @@ const CustomCalendar = ({
     setMobileViewData({ open: false, date: '' });
   };
 
-  const Component = (dragAndDrop && !mobileView ? DragAndDropCalendar : Calendar) as any;
+  const Component = useMemo(() => (dragAndDrop && !mobileView ? DragAndDropCalendar : Calendar) as any, [dragAndDrop, mobileView]);
+
+  const components = useMemo(
+    () => ({
+      month: {
+        header: (props: any) => {
+          const { label } = props;
+          return (
+            <div>
+              <span className="sr-only max-md:not-sr-only">{label[0]}</span>
+              <span className="not-sr-only max-md:sr-only">{label}</span>
+            </div>
+          );
+        },
+        ...(mobileView
+          ? {
+              event: (props) => {
+                const { event } = props;
+                return (
+                  <div className="flex min-h-2 flex-col rounded-md ">
+                    <span
+                      className={cn('text-sm ', stateView === 'month' ? 'max-md:sr-only' : '')}
+                      {...rest.eventPropGetter(event, event.start, event.end, undefined)}
+                    >
+                      {event.title}
+                    </span>
+                  </div>
+                );
+              }
+            }
+          : {})
+      }
+    }),
+    [mobileView, rest, stateView]
+  );
 
   return (
     <div className="relative min-h-[300px] [&_.rbc-agenda-empty]:hidden">
@@ -86,39 +122,11 @@ const CustomCalendar = ({
         onView={handleView}
         onRangeChange={handleRangeChange}
         views={views}
-        components={{
-          month: {
-            header: (props: any) => {
-              const { label } = props;
-              return (
-                <div>
-                  <span className="sr-only max-md:not-sr-only">{label[0]}</span>
-                  <span className="not-sr-only max-md:sr-only">{label}</span>
-                </div>
-              );
-            },
-            ...(mobileView
-              ? {
-                  event: (props) => {
-                    const { event } = props;
-                    return (
-                      <div className="flex min-h-2 flex-col rounded-md ">
-                        <span
-                          className={cn('text-sm ', stateView === 'month' ? 'max-md:sr-only' : '')}
-                          {...rest.eventPropGetter(event, event.start, event.end, undefined)}
-                        >
-                          {event.title}
-                        </span>
-                      </div>
-                    );
-                  }
-                }
-              : {})
-          }
-        }}
+        components={components}
         onSelectEvent={(event, data) => (mobileView && stateView === 'month' ? handleOpenMobileDayView(event) : onSelectEvent(event, data))}
         {...rest}
       />
+
       {!isDataPresent && (
         <div className="absolute left-1/2 top-1/2 select-none text-center text-gray-500 [transform:translate(-50%,-50%)]">
           No data available for the selected date range.

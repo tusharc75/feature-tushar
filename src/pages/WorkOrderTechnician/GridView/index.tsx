@@ -96,18 +96,18 @@ const GridView = React.forwardRef<GridViewRef, any>(({ renderedFrom, state, disp
         Cell: ({ row }) => (
           <div className="flex items-center gap-1">
             <p title={row?.original?.workOrderNumber}>{row?.original?.workOrderNumber}</p>
-              { row.original['workOrderNumber'] ? (
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes.workOrderDetail.path}/${row?.original?.workOrderId}`);
-                  }}
-                >
-                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                </IconButton>
-                ):(
-                  <NoDataCell/>
-              )}   
+            {row.original['workOrderNumber'] ? (
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.workOrderDetail.path}/${row?.original?.workOrderId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            ) : (
+              <NoDataCell />
+            )}
           </div>
         )
       },
@@ -239,7 +239,7 @@ const GridView = React.forwardRef<GridViewRef, any>(({ renderedFrom, state, disp
       <div className="[&_.table-container-v1>div]:mt-0">
         {columns ? (
           <CustomReactTable
-            height={'calc(100vh - 300px)'}
+            height={'calc(100vh - 270px)'}
             columns={columns}
             topLeftSlot={tableHead}
             state={state}
