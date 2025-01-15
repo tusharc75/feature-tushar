@@ -22,6 +22,7 @@ type CardColInterface = {
   assignOptions?: any;
   openAssignHandler?: (option: any, data: any) => void;
   getColColors?: (col: any) => Colors;
+  height?: string | number;
 } & BoxProps;
 
 type Colors = {
@@ -84,6 +85,7 @@ const CardColTimeline = <D,>({
   dispatch,
   fetchSingleColumn,
   getColColors,
+  height = 'max(calc(100vh - 170px), 600px)',
   ...others
 }: CardColInterface) => {
   const containerRef = React.useRef<HTMLDivElement | null>(null);
@@ -104,7 +106,7 @@ const CardColTimeline = <D,>({
   }, [containerRef]);
 
   return (
-    <div className={cn(`${styles.container}`, className)} {...others} ref={containerRef}>
+    <div className={cn(`${styles.container}`, className)} style={{ height, ...others.style }} {...others} ref={containerRef}>
       <div className="flex snap-x snap-mandatory gap-[10px] overflow-auto pb-4 md:scroll-px-[24px]">
         {columns.map((col) => {
           const { background, color } = getColColors?.(col) || { background: 'bg-[var(--dark-secondary,#f1f5ff)]' };
