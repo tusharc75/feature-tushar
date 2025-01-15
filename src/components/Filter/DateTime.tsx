@@ -4,7 +4,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import dayjs from 'dayjs';
 
-const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required = false, sidebarIcon = null }) => {
+const DateTime = ({ fieldData, deepFilters, setDeepFilters, required = false, sidebarIcon = null }) => {
   const [timeFrame, setTimeFrame] = useState<any>('custom');
 
   const handleDuration = useCallback(
@@ -70,7 +70,7 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required =
         setTimeFrame('1-month');
       } else if (differenceInMonths === 3 && [88, 89, 90, 91, 92]?.includes(differenceInDays)) {
         setTimeFrame('3-months');
-      } else if (differenceInMonths === 6 && [178, 179, 180, 181, 182, 183]?.includes(differenceInDays)) {
+      } else if (differenceInMonths === 6 && [178, 179, 180, 181, 182, 183, 184]?.includes(differenceInDays)) {
         setTimeFrame('6-months');
       } else if (differenceInMonths === 12 && [365, 366]?.includes(differenceInDays)) {
         setTimeFrame('1-year');

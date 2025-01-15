@@ -32,6 +32,8 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
     isColumnsLoading,
     navigateToMainPage
   } = reportState;
+
+  const customReportData = selectedReport?.customReportData ? selectedReport?.customReportData : null;
   const resourceCamelCase = camelCase(selectedReport.resource);
   const resourceStartCase = startCase(selectedReport.resource);
   const renderedFrom = `${selectedReport.resource}_report_new`;
@@ -390,6 +392,29 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
   };
 
   useEffect(() => {
+    if (customReportData && customReportData?.filters?.length > 0 && selectedReport?.type === 'custom-report') {
+      const filterById: any = [];
+      const deepFilter: any = [];
+      customReportData?.filters?.forEach((f) => {
+        if (f?.lookup) {
+          filterById.push({
+            field: f?.term,
+            term: f?.value
+          });
+        } else {
+          deepFilter.push({
+            field: f?.term,
+            term: f?.value
+          });
+        }
+      });
+      setFilterByIds(filterById);
+      setDeepFilters(deepFilter);
+      setShowGrid(true);
+    }
+  }, []);
+
+  useEffect(() => {
     fetchGridColumns();
   }, []);
 
@@ -404,16 +429,20 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
       <div className={cn('inline-flex justify-between gap-2', !isSidebarOpen ? 'w-[calc(100%-40px)]' : 'w-full')}>
         {showGrid && (
           <>
-            <ThemeButton
-              iconForMobile={<MdFilterList />}
-              onClick={() => {
-                setShowGrid(false);
-                dispatch({ type: 'onlyFilter', filters: {} });
-              }}
-              startIcon={<MdFilterList />}
-            >
-              Show Filters
-            </ThemeButton>
+            {selectedReport?.type === 'custom-report' && customReportData ? (
+              <div></div>
+            ) : (
+              <ThemeButton
+                iconForMobile={<MdFilterList />}
+                onClick={() => {
+                  setShowGrid(false);
+                  dispatch({ type: 'onlyFilter', filters: {} });
+                }}
+                startIcon={<MdFilterList />}
+              >
+                Show Filters
+              </ThemeButton>
+            )}
             <AsynImportExportMenu
               resource={sidebarResource[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
               subResource={'report'}
@@ -437,6 +466,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
               fetchResourceData={fetchResourceData}
               setDeepFilters={setDeepFilters}
               setFilterByIds={setFilterByIds}
+              disableClear={customReportData && selectedReport?.type === 'custom-report' ? true : false}
             />
           }
           height={'calc(100vh - 270px)'}
@@ -454,7 +484,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </div>
       )}
-      {!showGrid && (
+      {!showGrid && !customReportData && selectedReport?.type != 'custom-report' && (
         <Filter
           onClose={() => {
             dispatch({ type: 'onlyFilter', filters: {} });

@@ -4,6 +4,8 @@ import analytics from 'src/assets/newSvgs/analytics.svg';
 import ReportsTable from 'src/pages/Reports/tables/ReportsTable';
 import CustomReportsTable from 'src/pages/Reports/tables/CustomReportsTable';
 import StandardReportsTable from 'src/pages/Reports/tables/StandardReportTable';
+import { REPORT_LIST } from 'src/constants/helpers';
+import { startCase } from 'lodash';
 
 type ReportsContentProps = {
   state: UseReport;
@@ -11,14 +13,27 @@ type ReportsContentProps = {
   isMobile: boolean;
 };
 
-const getTableComponent = (type: ReportType | undefined) => {
+const getTableComponent = (selectedReport) => {
+  const type: ReportType | undefined = selectedReport?.type;
+  const isStanderdCustomReport =
+    selectedReport?.type === 'custom-report' &&
+    selectedReport?.customReportData &&
+    REPORT_LIST?.some((c) => c?.title === startCase(selectedReport?.customReportData?.resource) && c?.key === 'standardReport')
+      ? true
+      : false;
+
   switch (type) {
     case 'report':
       return ReportsTable;
     case 'standard-report':
       return StandardReportsTable;
     case 'custom-report':
-      return CustomReportsTable;
+      switch (isStanderdCustomReport) {
+        case true:
+          return StandardReportsTable;
+        default:
+          return ReportsTable;
+      }
     default:
       return ReportsTable;
   }
@@ -26,7 +41,7 @@ const getTableComponent = (type: ReportType | undefined) => {
 
 const ReportsContent = ({ state, isSidebarOpen, isMobile }: ReportsContentProps) => {
   const { selectedReport } = state;
-  let TableComponent = useMemo(() => getTableComponent(selectedReport?.type), [selectedReport?.type]);
+  let TableComponent = useMemo(() => getTableComponent(selectedReport), [selectedReport]);
 
   return (
     <>
