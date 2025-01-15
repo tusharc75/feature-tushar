@@ -164,12 +164,12 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
                   fieldName={''}
                   required={false}
                 />
-              ) : filter?.key in filterOptions ? (
+              ) : (filter?.key in filterOptions || filter?.options?.length > 0) ? (
                 <Autocomplete
                   size="small"
                   multiple={filter?.multiple}
                   fullWidth
-                  options={filterOptions[filter?.key] || []}
+                  options={(filter?.key in filterOptions ? (filterOptions[filter?.key] || []) : (filter?.options || []))}
                   autoHighlight
                   value={values[filter?.key] ? values[filter?.key] : filter?.multiple ? [] : null}
                   getOptionLabel={(option: any) => option?.optionLabel}
