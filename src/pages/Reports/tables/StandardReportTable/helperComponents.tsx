@@ -147,3 +147,26 @@ export const SerializedAssetRenderer = (row) => {
     </div>
   );
 };
+
+export const InvoiceNumberRenderer = (row) => {
+  return (
+    <div>
+      {row?.original?.invoiceNumber ? (
+        <div className="flex items-center gap-1">
+          <p>{row?.original?.invoiceNumber}</p>
+          <IconButton
+            size="small"
+            onClick={() => {
+              window.open(`${routes.invoiceDetail.path}/${row?.original?.invoiceId}`);
+            }}
+          >
+            <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+          </IconButton>
+        </div>
+      ) : (
+        <NoDataCell />
+      )}
+    </div>
+  );
+};
+

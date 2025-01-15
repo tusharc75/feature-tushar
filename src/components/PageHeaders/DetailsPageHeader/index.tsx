@@ -1,5 +1,5 @@
-import { ButtonProps, Menu, useMediaQuery } from '@mui/material';
-import { Add, ExpandMore } from '@mui/icons-material';
+import { ButtonProps, IconButton, Menu, useMediaQuery } from '@mui/material';
+import { Add, ExpandMore, MoreVert } from '@mui/icons-material';
 import { ReactNode, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import PreviewDownload from 'src/components/PreviewDownload';
@@ -32,6 +32,7 @@ type DetailsPageHeaderProps = {
   newActionButtonProps?: NewActionButtonProps<any>;
   hasYpadding?: boolean;
   className?: string;
+  actionButtonType?: 'button' | 'iconButton';
 };
 
 const DetailsPageHeader = ({
@@ -48,7 +49,8 @@ const DetailsPageHeader = ({
   isNewActionButtonVisible = false,
   newActionButtonProps,
   hasYpadding = true,
-  className = ''
+  className = '',
+  actionButtonType = 'button'
 }: DetailsPageHeaderProps) => {
   const walkmeInstance = useGetWalkmeInstance();
   const { tooltip: actionButtonTooltip, onClick: actionButtonOnClick, ...restOfActionButtonProps } = actionButtonProps || {};
@@ -149,20 +151,35 @@ const DetailsPageHeader = ({
         {isNewActionButtonVisible && <NewActionButton {...newActionButtonProps} />}
         {isActionButtonVisible ? (
           <>
-            <ThemeButton
-              variant={'outlined'}
-              tooltip={actionButtonTooltip ?? ''}
-              id={'details-page-action-button'}
-              size="small"
-              onClick={ActionClick}
-              aria-controls="action-menu"
-              buttonType="yellow"
-              {...restOfActionButtonProps}
-              iconForMobile={<FaCircleChevronDown size={16} className="" />}
-              endIcon={<ExpandMore fontSize="small" />}
-            >
-              Actions
-            </ThemeButton>
+            {actionButtonType === 'iconButton' ? (
+              <HtmlTooltip title={actionButtonTooltip ?? 'Actions'}>
+                <IconButton
+                  id={'details-page-action-button'}
+                  onClick={ActionClick}
+                  aria-controls="action-menu"
+                  sx={{ width: 32, height: 32, borderRadius: '4px' }}
+                  size="small"
+                  className="new-dropdown-v1"
+                >
+                  <MoreVert />
+                </IconButton>
+              </HtmlTooltip>
+            ) : (
+              <ThemeButton
+                variant={'outlined'}
+                tooltip={actionButtonTooltip ?? ''}
+                id={'details-page-action-button'}
+                size="small"
+                onClick={ActionClick}
+                aria-controls="action-menu"
+                buttonType="yellow"
+                {...restOfActionButtonProps}
+                iconForMobile={<FaCircleChevronDown size={16} className="" />}
+                endIcon={<ExpandMore fontSize="small" />}
+              >
+                Actions
+              </ThemeButton>
+            )}
             <Menu
               anchorEl={actionAnchorEl}
               keepMounted

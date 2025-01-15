@@ -284,57 +284,39 @@ const WorkOrderTechnician = () => {
         <Box className="nav-v1">
           <CustomBreadCrumbs routes={[{ ...routes.workOrderTechnician, title: resources?.workOrderTechnician?.titlePlural }]} />
         </Box>
+        <div className="ml-auto flex items-center gap-2">
+          {viewType === 'card-view' && (
+            <StatusSelector selectedServiceStatus={selectedServiceStatus} setSelectedServiceStatus={setSelectedServiceStatus} />
+          )}
+          <IconButtonTabs
+            onItemClick={resetSelectedRecords}
+            items={
+              [
+                {
+                  value: 'card-view',
+                  icon: <MdViewWeek />,
+                  tooltip: 'Card View'
+                },
+                {
+                  value: 'table-view',
+                  icon: <TfiLayoutListThumbAlt />,
+                  tooltip: 'Table View'
+                }
+              ] as const
+            }
+            setValue={setViewType}
+            value={viewType}
+          />
+          <HtmlTooltip title={'Refresh'}>
+            <IconButton size="small" onClick={onClickRefreshIcon} style={{ width: 32, height: 32 }}>
+              <RefreshIcon fontSize="small" />
+            </IconButton>
+          </HtmlTooltip>
+        </div>
       </Box>
       <Box className={`detail-container-v1`}>
-        <div className="header-panel pb-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex gap-2">
-              {viewType === 'table-view' && (
-                <ButtonMenu
-                  showChevron={true}
-                  items={statusMenuItems}
-                  onItemClick={(e, item) => {
-                    setTableViewStatus(item.value);
-                  }}
-                >
-                  <span className="flex items-center gap-2  [&_svg]:text-[18px]">
-                    {workOrderIconMap[tableViewStatus]}
-                    Status: {tableViewStatus}
-                  </span>
-                </ButtonMenu>
-              )}
-            </div>
-            <div className="ml-auto flex items-center gap-2">
-              {viewType === 'card-view' && (
-                <StatusSelector selectedServiceStatus={selectedServiceStatus} setSelectedServiceStatus={setSelectedServiceStatus} />
-              )}
-              <IconButtonTabs
-                onItemClick={resetSelectedRecords}
-                items={
-                  [
-                    {
-                      value: 'card-view',
-                      icon: <MdViewWeek />,
-                      tooltip: 'Card View'
-                    },
-                    {
-                      value: 'table-view',
-                      icon: <TfiLayoutListThumbAlt />,
-                      tooltip: 'Table View'
-                    }
-                  ] as const
-                }
-                setValue={setViewType}
-                value={viewType}
-              />
-              <HtmlTooltip title={'Refresh'}>
-                <IconButton size="small" onClick={onClickRefreshIcon} style={{ width: 32, height: 32 }}>
-                  <RefreshIcon fontSize="small" />
-                </IconButton>
-              </HtmlTooltip>
-            </div>
-          </div>
-          {viewType === 'card-view' && (
+        {viewType === 'card-view' && (
+          <div className="header-panel pb-0 pt-0">
             <DetailsPageHeader
               isAddButtonVisible={false}
               isActionButtonVisible={false}
@@ -368,10 +350,9 @@ const WorkOrderTechnician = () => {
               }
               hasXpadding={false}
               hasYpadding={false}
-              className="pt-4"
             />
-          )}
-        </div>
+          </div>
+        )}
 
         {viewType === 'card-view' && (
           <div className="pt-2">
@@ -379,7 +360,7 @@ const WorkOrderTechnician = () => {
           </div>
         )}
         {viewType === 'table-view' && (
-          <div className="pt-4">
+          <div className="">
             <GridView
               renderedFrom={renderedFrom}
               state={tableState}
@@ -392,6 +373,18 @@ const WorkOrderTechnician = () => {
                   actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
                   leftSideContents={
                     <div className="flex items-center gap-2">
+                      <ButtonMenu
+                        showChevron={true}
+                        items={statusMenuItems}
+                        onItemClick={(e, item) => {
+                          setTableViewStatus(item.value);
+                        }}
+                      >
+                        <span className="flex items-center gap-2  [&_svg]:text-[18px]">
+                          {workOrderIconMap[tableViewStatus]}
+                          Status: {tableViewStatus}
+                        </span>
+                      </ButtonMenu>
                       <ThemeButton
                         mobileTooltip="Apply Filters"
                         startIcon={<BiFilterAlt className="-ml-1 mr-1 mt-[1px]" />}

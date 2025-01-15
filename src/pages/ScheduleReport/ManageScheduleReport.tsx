@@ -1,5 +1,5 @@
-import { useEffect, useState, useContext, useRef } from 'react';
-import { Dialog, Box, TextField, Typography, CircularProgress } from '@mui/material';
+import { useEffect, useState, useContext, useRef, Fragment } from 'react';
+import { Dialog, Box, TextField, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Autocomplete, ToggleButtonGroup, ToggleButton } from '@mui/material';
 import { Form, Formik, FormikProps } from 'formik';
@@ -11,12 +11,12 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
-import Loader from 'src/components/Loader';
 import { useData } from '../../StateProvider/Provider';
 import { kebabCase } from 'lodash';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Filters from 'src/components/Filter/Filters';
 import dayjs from 'dayjs';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 type ValueTypes = {
   scheduleName: string;
@@ -425,21 +425,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
       }}
       fullWidth
     >
-      <CustomDialogHeader
-        title={`${id ? 'Edit' : 'Add'} Schedule Report`}
-        isMinimized={!fullScreen}
-        onMinimizeMaximize={() => {
-          setFullScreen((prevState) => !prevState);
-        }}
-        showManimizeMaximize={true}
-        onClose={handleClose}
-      />
-      {!formData && (
-        <CustomDialogContent>
-          <Loader minHeight={350} />
-        </CustomDialogContent>
-      )}
-      {formData && (
+      {formData ? (
         <Formik
           innerRef={(ref) => {
             if (ref) {
@@ -452,9 +438,18 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
           validateOnMount
         >
           {({ values, errors, submitForm, setFieldValue, setValues, touched }) => (
-            <>
-              <Form autoComplete="off" autoCorrect="off" noValidate>
-                <CustomDialogContent>
+            <Fragment>
+              <CustomDialogHeader
+                title={`${id ? 'Edit' : 'Add'} Schedule Report`}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                  setFullScreen((prevState) => !prevState);
+                }}
+                showManimizeMaximize={true}
+                onClose={handleClose}
+              />
+              <CustomDialogContent>
+                <Form autoComplete="off" autoCorrect="off" noValidate>
                   <div className={'detail-box-content'}>
                     <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
                     <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Schedule Information</h2>
@@ -525,9 +520,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                     ) : (
                       <div className="m-2">Loading ..</div>
                     )
-                  ) : (
-                    <div className="m-2">Select Report</div>
-                  )}
+                  ) : null}
                   <Box my={2}>
                     <Grid container spacing={2}>
                       <Grid size={{ xs: 12, sm: 6 }}>
@@ -765,20 +758,22 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                       </Grid>
                     </Grid>
                   </Box>
-                </CustomDialogContent>
-                <CustomDialogFooter>
-                  <ThemeButton buttonType="transparent" onClick={handleClose}>
-                    Cancel
-                  </ThemeButton>
-                  <ThemeButton buttonType="theme" disabled={isSubmitting} onClick={submitForm} isLoading={isSubmitting}>
-                    {id ? 'Update' : 'Save'}
-                  </ThemeButton>
-                </CustomDialogFooter>
-              </Form>
-            </>
+                </Form>
+              </CustomDialogContent>
+              <CustomDialogFooter>
+                <ThemeButton buttonType="transparent" onClick={handleClose}>
+                  Cancel
+                </ThemeButton>
+                <ThemeButton buttonType="theme" disabled={isSubmitting} onClick={submitForm} isLoading={isSubmitting}>
+                  {'Save'}
+                </ThemeButton>
+              </CustomDialogFooter>
+            </Fragment>
           )}
         </Formik>
-      )}
+      ) : <Box p={2} height={500}>
+        <CommonSkeleton lenArray={[...Array(10).keys()]} />
+      </Box>}
     </Dialog>
   );
 };
