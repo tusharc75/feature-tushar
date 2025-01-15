@@ -1,11 +1,18 @@
 import { useState, useEffect, useContext } from 'react';
 import { Formik, Form } from 'formik';
-import Grid from '@mui/material/Grid2';
-import { Box, IconButton, Typography } from '@mui/material';
+import { Box, TextField } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
+import { useHistory } from 'react-router-dom';
+import { isEqual } from 'lodash';
+import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
+import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
+import InputField from 'src/components/Helpers/InputField';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { isMobile, isTablet } from 'react-device-detect';
 import {
   CustomDialogTransition,
@@ -16,25 +23,14 @@ import {
   getObjKeys,
   GenerateResourceLineNumber
 } from '../../../constants/helpers';
-import axiosInstance from '../../../axios/axiosInstance';
-import Dialog from '@mui/material/Dialog';
-import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
-import { useData } from '../../../StateProvider/Provider';
-import { isEqual } from 'lodash';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import InputField from 'src/components/Helpers/InputField';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
-import TextField from '@mui/material/TextField';
-import DeleteIcon from '@mui/icons-material/Delete';
+import ItemizeExpenses from 'src/pages/Expenses/ItemizeExpenses';
 
 const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { user, resources }
-  }: any = useData();
+  const { state: { user, resources } }: any = useData();
 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,7 +42,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
   const [textFields, setTextFields] = useState([]);
 
   const addTextField = () => {
-    setTextFields([...textFields, { id:textFields.length, description: '', amount: '' }]);
+    setTextFields([...textFields, { id: textFields.length, description: '', amount: '' }]);
   };
 
   const handleInputChange = (index, field, event) => {
@@ -97,7 +93,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
                 setTitle(`Edit - ${data.expenseNumber}`);
                 setInitialData({
                   fields: fieldsDataForUpdate,
-                  values: {...getObjKeysWithValues(data, fieldsDataForUpdate)}
+                  values: { ...getObjKeysWithValues(data, fieldsDataForUpdate) }
                 });
               }
             })
@@ -226,7 +222,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
                     label="Total Amount"
                     required
                     type="number"
-                    size='small'
+                    size="small"
                     value={showItemizeDialog ? calculateTotal() : value}
                     onChange={handleChange}
                   />
@@ -282,85 +278,18 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
                 />
               )}
               {showItemizeDialog && (
-                <Dialog
-                  maxWidth="md"
-                  fullWidth
-                  fullScreen={fullScreen || isMobile || isTablet}
-                  TransitionComponent={CustomDialogTransition}
-                  aria-labelledby="customized-dialog-title"
-                  onClose={(e, reason) => {
-                    if (reason !== 'backdropClick') {
-                      setShowItemizeDialog(true);
-                    }
-                  }}
-                  open={true}
-                >
-                  <CustomDialogHeader
-                    title="Itemize your Expense"
-                    onClose={() => {
-                      setShowItemizeDialog(false);
-                    }}
-                    isMinimized={!fullScreen}
-                    onMinimizeMaximize={() => {
-                      setFullScreen((prevState) => !prevState);
-                    }}
-                    showManimizeMaximize={true}
-                  />
-                  <CustomDialogContent>
-                    <div>
-                      {textFields.map((field, index) => (
-                        <Grid container spacing={2} key={field.id} sx={{ alignItems: 'center', marginBottom: 2 }}>
-                          <Grid size={{ xs: 5 }}>
-                            <TextField
-                              label="Description"
-                              size='small'
-                              value={field.description}
-                              onChange={(event) => handleInputChange(index, 'description', event)}
-                              fullWidth
-                            />
-                          </Grid>
-                          <Grid size={{ xs: 5 }}>
-                            <TextField
-                              label="Amount"
-                              type="number"
-                              size='small'
-                              value={field.amount}
-                              onChange={(event) => handleInputChange(index, 'amount', event)}
-                              fullWidth
-                            />
-                          </Grid>
-                          <Grid size={{ xs: 2 }}>
-                            <IconButton onClick={() => removeTextField(field.id)} aria-label="delete">
-                              <DeleteIcon color="error" fontSize='small'/>
-                            </IconButton>
-                          </Grid>
-                        </Grid>
-                      ))}
-                      <Typography variant="h6" sx={{ marginTop: 2 }}>
-                        Total Amount: ${value}
-                      </Typography>
-                      <ThemeButton buttonType="theme" onClick={addTextField}>
-                        Add Expense
-                      </ThemeButton>
-                    </div>
-                  </CustomDialogContent>
-                  <CustomDialogFooter>
-                    <ThemeButton buttonType="transparent" id="dialog-cancel-button" onClick={() => setShowItemizeDialog(false)}>
-                      Cancel
-                    </ThemeButton>
-                    <ThemeButton
-                      isLoading={isSubmitting}
-                      buttonType="theme"
-                      id="dialog-save-button"
-                      disabled={isSubmitting}
-                      onClick={(e) => {
-                        setShowItemizeDialog(false)
-                      }}
-                    >
-                      Save
-                    </ThemeButton>
-                  </CustomDialogFooter>
-                </Dialog>
+                <ItemizeExpenses
+                  open={showItemizeDialog}
+                  onClose={() => setShowItemizeDialog(false)}
+                  textFields={textFields}
+                  value={value}
+                  addTextField={addTextField}
+                  removeTextField={removeTextField}
+                  handleInputChange={handleInputChange}
+                  fullScreen={fullScreen}
+                  setFullScreen={setFullScreen}
+                  isSubmitting={isSubmitting}
+                />
               )}
             </>
           )}
