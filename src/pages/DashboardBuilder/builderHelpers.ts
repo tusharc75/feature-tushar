@@ -1,7 +1,7 @@
 import { GridSize } from '@mui/material';
 import { ASSET_STATUS } from 'src/constants/helpers';
 
-const RentalStatus = Object.keys(ASSET_STATUS).map((key) => ({
+const AssetStatus = Object.keys(ASSET_STATUS).map((key) => ({
   optionValue: ASSET_STATUS[key],
   optionLabel: ASSET_STATUS[key]
 }));
@@ -70,11 +70,12 @@ export type KPIListType = {
 };
 
 export const statuses = {
-  'asset/location-base-assets': RentalStatus,
+  'asset/location-base-assets': AssetStatus,
   'asset/customer-in-rental': openCloseStatus,
   'asset/bar-chart-customer-in-rental': openCloseStatus,
   'quote/quote-customer-account': quotesStatus,
-  'quote/sales-rep': quotesStatus
+  'quote/sales-rep': quotesStatus,
+  'asset/day-wise-assets-status-count': AssetStatus
 };
 
 export interface IFormDataType {

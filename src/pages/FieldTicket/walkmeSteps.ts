@@ -5,7 +5,7 @@ import { nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
 export const createFieldTicketFlow = (fieldTicketTitle): WalkmeData => {
 
   const data: WalkmeData = {
-    name: `Add ${fieldTicketTitle}`,
+    name: `Create ${fieldTicketTitle}`,
     url: '/field-ticket',
     type: 'flow',
     steps: [

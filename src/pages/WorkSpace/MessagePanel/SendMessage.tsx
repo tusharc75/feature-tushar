@@ -373,7 +373,7 @@ const SendMessage = ({
                   </IconButton>
                 </HtmlTooltip>
               </label>
-              <HtmlTooltip title="Audio Record" placement="top">
+              <HtmlTooltip title={isRecording ? "Stop Recording Audio" : "Record Audio"} placement="top">
                 <IconButton color="primary" aria-label="upload-audio" component="span" style={{ padding: 5, borderRadius: 0 }} disabled={disabled} onClick={getAudio}>
                   {isRecording ? <MicOff /> : <Mic />}
                 </IconButton>

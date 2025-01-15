@@ -3,7 +3,7 @@ import { WalkmeData } from 'src/components/CustomIntro';
 
 export const createPurchaseOrderFlow = (resource: any): WalkmeData => {
   const data: WalkmeData = {
-    name: `Add ${resource}`,
+    name: `Create ${resource}`,
     url: '/purchase-order',
     type: 'flow',
     steps: [
