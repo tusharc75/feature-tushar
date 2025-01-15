@@ -510,10 +510,7 @@ const ChartTypes = ({
           values={filterValues}
           setValues={setFilterValues}
           isCRM={globalFilters.dashboardType?.includes('CRM')}
-          filterOptions={{
-            ...filterData,
-            status: chart.statusOptions
-          }}
+          filterOptions={filterData}
           kpi={camelCase(chart.kpi.name)}
           kpiFilters={kpiFilters}
           fetchKpiFilters={fetchKpiFilters}
