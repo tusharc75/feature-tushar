@@ -36,8 +36,9 @@ import PurchaseOrderViews from './RoadMapViews';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
-import { generateAddManualEntry } from 'src/pages/PurchaseOrder/walkmeSteps';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+
+import { generateAddExistingProduct} from './walkmeSteps';
 
 const PurchaseOrderDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -85,8 +86,7 @@ const PurchaseOrderDetailsPage = () => {
       fetchPolicy();
     }
     if (walkmeInstance && walkmeInstance.type === 'flow') {
-      walkmeInstance.instance.push(generateAddManualEntry(true).steps);
-      // immediately start next step
+      walkmeInstance.instance.push(generateAddExistingProduct(true).steps);
       walkmeInstance.handleNext();
     }
   }, [id]);

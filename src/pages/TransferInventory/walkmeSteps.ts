@@ -93,7 +93,7 @@ export const createTransferInventoryFlow = (fields: any, resource: any): WalkmeD
     type: 'flow',
     steps: [
       {
-        title: `Add`,
+        title: `Create`,
         target: '#add-button'
       },
       ...generateFormFieldSteps(fields, [], includeFields),
