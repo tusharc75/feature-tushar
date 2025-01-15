@@ -74,8 +74,7 @@ export const generateAddExistingProduct = (waitForStepInsertion: boolean = false
       {
         target: '#add-existing-product-menu-item',
         title: 'Add Existing Product',
-        content: 'Click here to add existing product.',
-        waitForStepInsertion: true
+        content: 'Click here to add existing product.'
       },
       {
         target: `#Product-table-checkbox-0`,
