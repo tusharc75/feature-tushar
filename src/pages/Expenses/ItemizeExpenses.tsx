@@ -1,4 +1,6 @@
-import { Dialog, IconButton, Typography, TextField } from '@mui/material';
+import { useState } from 'react';
+import { Dialog, IconButton, Typography, TextField, InputAdornment } from '@mui/material';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Grid from '@mui/material/Grid2';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
@@ -14,12 +16,26 @@ const ItemizeExpenses = ({
   textFields,
   value,
   addTextField,
+  currencySymbol,
   removeTextField,
   handleInputChange,
   fullScreen,
   setFullScreen,
   isSubmitting
 }) => {
+  const [touchedFields, setTouchedFields] = useState({});
+
+  const handleBlur = (index, field) => {
+    setTouchedFields((prev) => ({
+      ...prev,
+      [index]: { ...prev[index], [field]: true }
+    }));
+  };
+
+  const isFormValid = () => {
+    return textFields.every((field) => field.description.trim() !== '' && field.amount > 0);
+  };
+
   return (
     <Dialog
       maxWidth="md"
@@ -53,7 +69,10 @@ const ItemizeExpenses = ({
                   size="small"
                   value={field.description}
                   onChange={(event) => handleInputChange(index, 'description', event)}
+                  onBlur={() => handleBlur(index, 'description')}
                   fullWidth
+                  error={touchedFields[index]?.description && field.description.trim() === ''}
+                  helperText={touchedFields[index]?.description && field.description.trim() === '' ? 'Description is required' : ''}
                 />
               </Grid>
               <Grid size={{ xs: 5 }}>
@@ -63,7 +82,15 @@ const ItemizeExpenses = ({
                   size="small"
                   value={field.amount}
                   onChange={(event) => handleInputChange(index, 'amount', event)}
+                  onBlur={() => handleBlur(index, 'amount')}
                   fullWidth
+                  error={touchedFields[index]?.amount && field.amount <= 0}
+                  helperText={touchedFields[index]?.amount && field.amount <= 0 ? 'Amount is Required' : ''}
+                  slotProps={{
+                    input: {
+                      startAdornment: <InputAdornment position="start">{currencySymbol}</InputAdornment>
+                    }
+                  }}
                 />
               </Grid>
               <Grid size={{ xs: 2 }}>
@@ -73,25 +100,24 @@ const ItemizeExpenses = ({
               </Grid>
             </Grid>
           ))}
-          <Typography variant="h6" sx={{ marginTop: 2 }}>
-            Total Amount: ${value}
-          </Typography>
-          <ThemeButton buttonType="theme" onClick={addTextField}>
-            Add Expense
-          </ThemeButton>
+          <Grid container spacing={2} sx={{ alignItems: 'center', marginTop: 2 }}>
+            <Grid size={{ xs: 8 }} sx={{ display: 'flex', alignItems: 'center' }}>
+              <IconButton onClick={addTextField} color="primary" size="small" sx={{ marginRight: 0.5 }} aria-label="add">
+                <AddCircleOutlineIcon fontSize="small" />
+              </IconButton>
+              Add
+            </Grid>
+            <Grid size={{ xs: 4 }} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Typography variant="h6">Total Amount: {currencySymbol} {value}</Typography>
+            </Grid>
+          </Grid>
         </div>
       </CustomDialogContent>
       <CustomDialogFooter>
         <ThemeButton buttonType="transparent" id="dialog-cancel-button" onClick={onClose}>
           Cancel
         </ThemeButton>
-        <ThemeButton
-          isLoading={isSubmitting}
-          buttonType="theme"
-          id="dialog-save-button"
-          disabled={isSubmitting}
-          onClick={onClose}
-        >
+        <ThemeButton isLoading={isSubmitting} buttonType="theme" id="dialog-save-button" disabled={!isFormValid() || isSubmitting} onClick={onClose}>
           Save
         </ThemeButton>
       </CustomDialogFooter>
