@@ -13,7 +13,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { expenses, sidebarResource } from '../../constants/helpers';
+import { expenses, getUniqueCurrencies, sidebarResource } from '../../constants/helpers';
 import Step from '../DynamicForm/Step';
 import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
 
@@ -30,7 +30,7 @@ const ExpenseDetailsPage = () => {
   }: any = useData();
   const [loadingDetails, setLoadingDetails] = useState(true);
   const [expensesData, setExpensesData] = useState(null);
-
+  const [currencySymbol, setCurrencySymbol] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
@@ -89,6 +89,7 @@ const ExpenseDetailsPage = () => {
     axiosInstance()
       .get(`${expenses.api}/${id}`)
       .then(({ data: { data } }) => {
+        setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data.currency)?.symbolNative);
         setLoadingDetails(false);
         setAllowedToEdit(permissions?.expenses?.isUpdate);
         setAllowedToDelete(permissions?.expenses?.isDelete);
@@ -182,12 +183,12 @@ const ExpenseDetailsPage = () => {
                     {expensesData?.lineItems?.map((row) => (
                       <TableRow key={row.id}>
                         <TableCell>{row.description}</TableCell>
-                        <TableCell align="right">{row.amount}</TableCell>
+                        <TableCell align="right">{currencySymbol} {row.amount}</TableCell>
                       </TableRow>
                     ))}
                     <TableRow className='bg-slate-100'>
                       <TableCell>Total Amount</TableCell>
-                      <TableCell align="right">$ {expensesData?.totalAmount}</TableCell>
+                      <TableCell align="right">{currencySymbol} {expensesData?.totalAmount}</TableCell>
                     </TableRow>
                   </TableBody>
                 </Table>
