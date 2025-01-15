@@ -1,6 +1,8 @@
+import { kebabCase } from 'lodash';
+import axiosInstance from 'src/axios/axiosInstance';
 import { CustomReport, SelectedReport, Report, isCustomReport, isReport, FavouriteReport } from 'src/pages/Reports/types';
 
-export const handleGetRoute = ({ route, title }: { route: string; title: string }): SelectedReport => {
+export const handleGetRoute = async ({ route, title }: { route: string; title: string }): Promise<SelectedReport> => {
   const data: SelectedReport = {
     route: route,
     type: 'report',
@@ -17,8 +19,13 @@ export const handleGetRoute = ({ route, title }: { route: string; title: string 
     return data;
   }
   if (isCustomReport) {
+    const {
+      data: { data: customData }
+    } = await axiosInstance().get(`custom-report/${routeArr[3]}`);
+
     data.type = 'custom-report';
-    data.resource = routeArr[3];
+    data.resource = kebabCase(customData?.resource);
+    data.customReportData = { ...customData };
     return data;
   }
   data.resource = routeArr[2];

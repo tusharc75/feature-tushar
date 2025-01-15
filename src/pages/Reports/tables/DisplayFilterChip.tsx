@@ -42,6 +42,7 @@ type DisplayFilterChipProps = {
   setFilterByIds: React.Dispatch<React.SetStateAction<any[]>>;
   fetchResourceData: (deepFilters?: Filter[], filterByIds?: Filter[]) => void;
   filterTerm: FilterTerm;
+  disableClear?: boolean;
 };
 
 const textClassName = 'text-[12px] font-medium leading-[14px] text-[--primary] line-clamp-1';
@@ -66,7 +67,8 @@ const DisplayFilterChip = ({
   filterTerm = {},
   fetchResourceData,
   setDeepFilters,
-  setFilterByIds
+  setFilterByIds,
+  disableClear = false
 }: DisplayFilterChipProps) => {
   const uniqueFilters = useMemo(() => uniqBy([...deepFilters, ...filterByIds], (d) => d.field), [deepFilters, filterByIds]);
   const [filters, setFilters] = useState<{ dates: Dates[]; otherData: Filter[] }>({ dates: [], otherData: [] });
@@ -116,7 +118,16 @@ const DisplayFilterChip = ({
       {filters.otherData?.map((d) => {
         const sign = ['checkBox'].includes(colTypeMap[d.field]) ? ':' : filterTerm[d.field] === '$nin' ? '≠' : '=';
         if (typeof d.term === 'string') {
-          return <RenderSringType sign={sign} colNameMap={colNameMap} key={d.field} data={d as Dates} handleClearFilter={handleClearFilter} />;
+          return (
+            <RenderSringType
+              sign={sign}
+              colNameMap={colNameMap}
+              key={d.field}
+              data={d as Dates}
+              handleClearFilter={handleClearFilter}
+              disableClear={disableClear}
+            />
+          );
         }
         if (Array.isArray(d.term) && typeof d.term[0] === 'string') {
           return (
@@ -126,6 +137,7 @@ const DisplayFilterChip = ({
               key={d.field}
               data={d as FilterStringArray}
               handleClearFilter={handleClearFilter}
+              disableClear={disableClear}
             />
           );
         }
@@ -137,15 +149,25 @@ const DisplayFilterChip = ({
               key={d.field}
               data={d as unknown as FilterObject}
               handleClearFilter={handleClearFilter}
+              disableClear={disableClear}
             />
           );
         }
         return (
-          <RenderObjectArray sign={sign} colNameMap={colNameMap} key={d.field} data={d as FilterObjectArray} handleClearFilter={handleClearFilter} />
+          <RenderObjectArray
+            sign={sign}
+            colNameMap={colNameMap}
+            key={d.field}
+            data={d as FilterObjectArray}
+            handleClearFilter={handleClearFilter}
+            disableClear={disableClear}
+          />
         );
       })}
       {filters.dates?.map((d) => {
-        return <RenderDates sign={':'} colNameMap={colNameMap} key={d.field} data={d} handleClearFilter={handleClearFilter} />;
+        return (
+          <RenderDates sign={':'} colNameMap={colNameMap} key={d.field} data={d} handleClearFilter={handleClearFilter} disableClear={disableClear} />
+        );
       })}
     </div>
   );
@@ -153,9 +175,15 @@ const DisplayFilterChip = ({
 
 export default DisplayFilterChip;
 
-type ChipProps<D> = { data: D; handleClearFilter: (keys: string[]) => void; colNameMap: { [key: string]: string }; sign: React.ReactNode };
+type ChipProps<D> = {
+  data: D;
+  handleClearFilter: (keys: string[]) => void;
+  colNameMap: { [key: string]: string };
+  sign: React.ReactNode;
+  disableClear: boolean;
+};
 
-const RenderSringType = <D extends Dates>({ data, handleClearFilter, colNameMap, sign }: ChipProps<D>) => {
+const RenderSringType = <D extends Dates>({ data, handleClearFilter, colNameMap, sign, disableClear }: ChipProps<D>) => {
   if (!data?.term) return null;
   return (
     <Tooltip sign={sign as any} label={colNameMap[data.field]} value={data.term}>
@@ -163,14 +191,16 @@ const RenderSringType = <D extends Dates>({ data, handleClearFilter, colNameMap,
         <span className={cn(textClassName)}>
           {colNameMap[data.field]}&nbsp;{sign}&nbsp;{data.term}
         </span>
-        <IconButton size="small" style={buttonStyle} onClick={() => handleClearFilter([data.field])}>
-          <Close fontSize="inherit" />
-        </IconButton>
+        {!disableClear && (
+          <IconButton size="small" style={buttonStyle} onClick={() => handleClearFilter([data.field])}>
+            <Close fontSize="inherit" />
+          </IconButton>
+        )}
       </div>
     </Tooltip>
   );
 };
-const RenderDates = <D extends Dates>({ data, handleClearFilter, colNameMap, sign }: ChipProps<D>) => {
+const RenderDates = <D extends Dates>({ data, handleClearFilter, colNameMap, sign, disableClear }: ChipProps<D>) => {
   if (!data?.term) return null;
 
   return (
@@ -180,18 +210,20 @@ const RenderDates = <D extends Dates>({ data, handleClearFilter, colNameMap, sig
           {colNameMap[data.field]}&nbsp;{sign}&nbsp;
           {data.term}
         </span>
-        <IconButton
-          size="small"
-          style={buttonStyle}
-          onClick={() => handleClearFilter([`from_${camelCase(data.field)}`, `to_${camelCase(data.field)}`])}
-        >
-          <Close fontSize="inherit" />
-        </IconButton>
+        {!disableClear && (
+          <IconButton
+            size="small"
+            style={buttonStyle}
+            onClick={() => handleClearFilter([`from_${camelCase(data.field)}`, `to_${camelCase(data.field)}`])}
+          >
+            <Close fontSize="inherit" />
+          </IconButton>
+        )}
       </div>
     </Tooltip>
   );
 };
-const RenderStringArray = <D extends FilterStringArray>({ data, handleClearFilter, colNameMap, sign }: ChipProps<D>) => {
+const RenderStringArray = <D extends FilterStringArray>({ data, handleClearFilter, colNameMap, sign, disableClear }: ChipProps<D>) => {
   if (data?.term?.length === 0) return null;
   return (
     <Tooltip sign={sign as any} label={colNameMap[data.field]} value={data.term.join(SPLIT_SIGN)}>
@@ -200,14 +232,16 @@ const RenderStringArray = <D extends FilterStringArray>({ data, handleClearFilte
           {colNameMap[data.field]}&nbsp;{sign}&nbsp;
           {data.term.join(', ')}
         </span>
-        <IconButton size="small" style={buttonStyle} onClick={() => handleClearFilter([data.field])}>
-          <Close fontSize="inherit" />
-        </IconButton>
+        {!disableClear && (
+          <IconButton size="small" style={buttonStyle} onClick={() => handleClearFilter([data.field])}>
+            <Close fontSize="inherit" />
+          </IconButton>
+        )}
       </div>
     </Tooltip>
   );
 };
-const RenderObject = <D extends FilterObject>({ data, handleClearFilter, colNameMap, sign }: ChipProps<D>) => {
+const RenderObject = <D extends FilterObject>({ data, handleClearFilter, colNameMap, sign, disableClear }: ChipProps<D>) => {
   if (isEmpty(data?.term)) return null;
   return (
     <Tooltip sign={sign as any} label={colNameMap[data.field]} value={data.term?.optionLabel || ''}>
@@ -216,14 +250,16 @@ const RenderObject = <D extends FilterObject>({ data, handleClearFilter, colName
           {colNameMap[data.field]}&nbsp;{sign}&nbsp;
           {data.term?.optionLabel || ''}
         </span>
-        <IconButton size="small" style={buttonStyle} onClick={() => handleClearFilter([data.field])}>
-          <Close fontSize="inherit" />
-        </IconButton>
+        {!disableClear && (
+          <IconButton size="small" style={buttonStyle} onClick={() => handleClearFilter([data.field])}>
+            <Close fontSize="inherit" />
+          </IconButton>
+        )}
       </div>
     </Tooltip>
   );
 };
-const RenderObjectArray = <D extends FilterObjectArray>({ data, handleClearFilter, colNameMap, sign }: ChipProps<D>) => {
+const RenderObjectArray = <D extends FilterObjectArray>({ data, handleClearFilter, colNameMap, sign, disableClear }: ChipProps<D>) => {
   if (data?.term?.length === 0) return null;
   return (
     <Tooltip sign={sign as any} label={colNameMap[data.field]} value={data.term?.map?.((d) => d?.optionLabel).join(SPLIT_SIGN) || ''}>
@@ -232,9 +268,11 @@ const RenderObjectArray = <D extends FilterObjectArray>({ data, handleClearFilte
           {colNameMap[data.field]}&nbsp;{sign}&nbsp;
           {data.term?.map?.((d) => d?.optionLabel).join(', ') || ''}
         </span>
-        <IconButton size="small" style={buttonStyle} onClick={() => handleClearFilter([data.field])}>
-          <Close fontSize="inherit" />
-        </IconButton>
+        {!disableClear && (
+          <IconButton size="small" style={buttonStyle} onClick={() => handleClearFilter([data.field])}>
+            <Close fontSize="inherit" />
+          </IconButton>
+        )}
       </div>
     </Tooltip>
   );
