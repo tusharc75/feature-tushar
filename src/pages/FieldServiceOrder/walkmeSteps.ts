@@ -46,7 +46,7 @@ export const createFieldServiceOrderFlow = (fields: any): WalkmeData => {
     type: 'flow',
     steps: [
       {
-        title: `Add`,
+        title: `Create`,
         target: '#add-button'
       },
       ...generateFormFieldSteps(fields, ignoreField),
