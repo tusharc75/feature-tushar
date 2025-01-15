@@ -276,6 +276,7 @@ import UserManual from './pages/UserManual';
 import ScheduleAndDispatch from 'src/pages/ScheduleAndDispatch';
 import ReportsCenter from 'src/pages/Reports';
 import Expenses from 'src/pages/Expenses';
+import ExpenseDetailsPage from 'src/pages/Expenses/ExpenseDetailsPage';
 
 var notificationInterval: any = null;
 
@@ -295,7 +296,7 @@ function App() {
 
   const { isOffline } = useContext(CustomOfflineContext);
   const {
-    state: { user, resources },
+    state: { user, permissions, resources },
     dispatch
   }: any = useData();
 
@@ -315,22 +316,6 @@ function App() {
       setIsUpdateModalOpen({ open: true, data: data });
     }
   };
-
-  history.listen(() => {
-    let isSlowInternetConnection = localStorage.getItem('slowInternetConnection');
-    if (isSlowInternetConnection === 'true') {
-      toast.setToastConfig({
-        open: true,
-        type: 'error',
-        message: 'Slow or no internet connection.',
-        anchorOrigin: {
-          vertical: 'bottom',
-          horizontal: 'right'
-        }
-      });
-      localStorage.setItem('slowInternetConnection', 'false');
-    }
-  });
 
   useEffect(() => {
     try {
@@ -943,11 +928,14 @@ function App() {
             <PrivateRoute exact path={`${routes.demandOrderDetail.path}/:id`}>
               <DemandOrderDetails />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.employeeMaster.path}>
-              <EmployeeMaster />
-            </PrivateRoute>
             <PrivateRoute exact path={`${routes.expenses.path}`}>
               <Expenses />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.expensesDetail.path}/:id`}>
+              <ExpenseDetailsPage />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.employeeMaster.path}>
+              <EmployeeMaster />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.employeeMasterDetail.path}/:id`}>
               <EmployeeMasterDetail />
@@ -1233,7 +1221,7 @@ function App() {
           <ScreenOrientationOverlay displayOn="portrait" device="tablet" />
           <ScreenOrientationOverlay displayOn="landscape" device="mobile" />
           <CustomIntro />
-          <AgentChat />
+          {permissions?.equiptAi?.isRead && <AgentChat />}
         </ErrorBoundaryComponent>
       </AnimatePresence>
       {isUpdateModalOpen.open && <ForceUpdatePopup data={isUpdateModalOpen.data} onClose={handleCloseUpdateModal} />}

@@ -16,7 +16,7 @@ import {
 import Autocomplete from '@mui/material/Autocomplete';
 import dayjs from 'dayjs';
 import { camelCase, groupBy } from 'lodash';
-import { forwardRef, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import { forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { View, dayjsLocalizer } from 'react-big-calendar';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -32,6 +32,8 @@ import { useAppTheme } from 'src/constants/AppConfig';
 import { cn, displayDate, sidebarResource } from 'src/constants/helpers';
 import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
 import './calendarView.scss';
+import RenderFilter from 'src/pages/PlanningView/Calendar/RenderFilter';
+import axios, { CancelToken } from 'axios';
 
 const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
@@ -45,57 +47,57 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const FILTERS = [
     ...(permissions?.warehouse?.isRead
       ? [
-        {
-          label: resources?.warehouse?.titlePlural,
-          value: 'Warehouse',
-          key: 'warehouse'
-        }
-      ]
+          {
+            label: resources?.warehouse?.titlePlural,
+            value: 'Warehouse',
+            key: 'warehouse'
+          }
+        ]
       : []),
     ...(permissions?.product?.isRead
       ? [
-        {
-          label: resources?.product?.titlePlural,
-          value: 'Product',
-          key: 'product'
-        }
-      ]
+          {
+            label: resources?.product?.titlePlural,
+            value: 'Product',
+            key: 'product'
+          }
+        ]
       : []),
     ...(permissions?.serializedAsset?.isRead
       ? [
-        {
-          label: resources?.serializedAsset?.titlePlural,
-          value: 'Serialized Asset',
-          key: 'asset'
-        }
-      ]
+          {
+            label: resources?.serializedAsset?.titlePlural,
+            value: 'Serialized Asset',
+            key: 'asset'
+          }
+        ]
       : []),
     ...(permissions?.serviceMaster?.isRead
       ? [
-        {
-          label: resources?.serviceMaster?.titlePlural,
-          value: 'Service Master',
-          key: 'service'
-        }
-      ]
+          {
+            label: resources?.serviceMaster?.titlePlural,
+            value: 'Service Master',
+            key: 'service'
+          }
+        ]
       : []),
     ...(permissions?.customerAccount?.isRead
       ? [
-        {
-          label: resources?.customerAccount?.titlePlural,
-          value: 'Customer Account',
-          key: 'customerAccount'
-        }
-      ]
+          {
+            label: resources?.customerAccount?.titlePlural,
+            value: 'Customer Account',
+            key: 'customerAccount'
+          }
+        ]
       : []),
     ...(permissions?.competencies?.isRead
       ? [
-        {
-          label: resources?.competencies?.titlePlural,
-          value: 'Competencies',
-          key: 'competencies'
-        }
-      ]
+          {
+            label: resources?.competencies?.titlePlural,
+            value: 'Competencies',
+            key: 'competencies'
+          }
+        ]
       : [])
   ];
 
@@ -225,11 +227,16 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   }, [selectedResource]);
 
   useEffect(() => {
+    const cancelTokenSource = axios.CancelToken.source();
+    const cancelToken = cancelTokenSource.token;
     if (selectedResource) {
-      fetchData();
+      fetchData(cancelToken);
     } else {
       setEvents([]);
     }
+    return () => {
+      cancelTokenSource.cancel('Operation canceled due to new request.');
+    };
   }, [selectedResource, selectedLookUpResourceData, dateRange]);
 
   const getQueryString = () => {
@@ -247,12 +254,12 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     return query;
   };
 
-  const fetchData = () => {
+  const fetchData = (cancelToken: CancelToken) => {
     setIsDataFetching(true);
     const queryString = getQueryString();
     setQueryString(queryString);
     axiosInstance()
-      .get(`/planning-view${queryString}`)
+      .get(`/planning-view${queryString}`, { cancelToken })
       .then(({ data: { data } }) => {
         const otherData = [];
         const rows = data?.map((d: any) => {
@@ -618,49 +625,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     };
   };
 
-  const renderFilter = (filtered) => {
-    return (
-      <Autocomplete
-        options={lookupResource ? lookupResource[filtered?.value] : []}
-        multiple
-        disableCloseOnSelect
-        style={{ width: '300px' }}
-        getOptionLabel={(option: any) => option?.optionLabel}
-        value={selectedLookUpResourceData && selectedLookUpResourceData[filtered.key] ? selectedLookUpResourceData[filtered.key] : []}
-        onChange={(event, newValue) => {
-          if (newValue?.length > 0) {
-            setSelectedLookUpResourceData((preVal) => ({
-              ...preVal,
-              [filtered.key]: newValue
-            }));
-          } else {
-            const { [filtered.key]: _, ...remainObj } = selectedLookUpResourceData;
-            setSelectedLookUpResourceData(remainObj);
-          }
-        }}
-        size="small"
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label={`Select ${filtered?.label}`}
-            variant="outlined"
-            slotProps={{
-              input: {
-                ...params.InputProps,
-                endAdornment: (
-                  <>
-                    {lookupLoading ? <CircularProgress color="inherit" size={20} /> : null}
-                    {params.InputProps.endAdornment}
-                  </>
-                )
-              }
-            }}
-          />
-        )}
-      />
-    );
-  };
-
   const mapObjectToList = (obj: { [key: string]: OnSelectDataType[] }) => {
     const data: { items: OnSelectDataType[]; key: string; heading: string }[] = [];
     for (const key in obj) {
@@ -725,13 +689,29 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             )}
             {[sidebarResource.serializedAsset, sidebarResource.product].includes(selectedResource?.resource) &&
               selectedFilters?.map((filtered) => {
-                return renderFilter(filtered);
+                return (
+                  <RenderFilter
+                    filtered={filtered}
+                    lookupResource={lookupResource}
+                    selectedLookUpResourceData={selectedLookUpResourceData}
+                    setSelectedLookUpResourceData={setSelectedLookUpResourceData}
+                    lookupLoading={lookupLoading}
+                  />
+                );
               })}
           </div>
           <Box display="flex" flexDirection="row" className="gap-1" ml={1} mt={2}>
             {![sidebarResource.serializedAsset, sidebarResource.product].includes(selectedResource?.resource) &&
               selectedFilters?.map((filtered) => {
-                return renderFilter(filtered);
+                return (
+                  <RenderFilter
+                    filtered={filtered}
+                    lookupResource={lookupResource}
+                    selectedLookUpResourceData={selectedLookUpResourceData}
+                    setSelectedLookUpResourceData={setSelectedLookUpResourceData}
+                    lookupLoading={lookupLoading}
+                  />
+                );
               })}
           </Box>
         </Box>

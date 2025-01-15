@@ -41,25 +41,25 @@ export const AddField = (props) => {
     fieldData
       ? fieldData
       : {
-          sectionName: '',
-          type: 'singleLine',
-          fieldLabel: '',
-          required: false,
-          isTooltip: false,
-          tooltipMessage: '',
-          returnType: 'decimal',
-          decimalPlaces: 2,
-          inputFields: [],
-          option: [{ optionLabel: 'Option 1', optionValue: 'Option 1' }],
-          formula: 'return ',
-          isvlookupReverse: false,
-          units: [],
-          displayUnits: [],
-          isConverter: false,
-          isFormula: false,
-          isMulitFormula: false,
-          displayCurrency: refrence !== 'formAdd' ? ['CUR'] : ['USD']
-        }
+        sectionName: '',
+        type: 'singleLine',
+        fieldLabel: '',
+        required: false,
+        isTooltip: false,
+        tooltipMessage: '',
+        returnType: 'decimal',
+        decimalPlaces: 2,
+        inputFields: [],
+        option: [{ optionLabel: 'Option 1', optionValue: 'Option 1' }],
+        formula: 'return ',
+        isvlookupReverse: false,
+        units: [],
+        displayUnits: [],
+        isConverter: false,
+        isFormula: false,
+        isMulitFormula: false,
+        displayCurrency: refrence !== 'formAdd' ? ['CUR'] : ['USD']
+      }
   );
 
   let new_fields = [];
@@ -172,7 +172,7 @@ export const AddField = (props) => {
           data.currencyoption = result.data.data.option;
           handleAddField(data);
         })
-        .catch((error) => {});
+        .catch((error) => { });
     } else {
       handleAddField(data);
     }
@@ -239,7 +239,7 @@ export const AddField = (props) => {
 
     if (refrence === 'formAddInlineEdit') {
       if (!values.sectionName) {
-        errors['sectionName'] = 'Please select SectionName';
+        errors['sectionName'] = 'Please select Section Name';
       }
     }
 
@@ -501,7 +501,6 @@ export const AddField = (props) => {
             </CustomDialogFooter>
             {showConfirmDialog ? (
               <ConfirmCancelDialog
-                close={() => setShowConfirmDialog(false)}
                 open={showConfirmDialog}
                 onSave={() => {
                   setShowConfirmDialog(false);

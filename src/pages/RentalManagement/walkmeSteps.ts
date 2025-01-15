@@ -263,7 +263,7 @@ export const createRentalJobsFlow = (fields: any, resources: any): WalkmeData =>
   const ignoreField = ['currency', 'owner', 'pdfTemplate'];
 
   const data: WalkmeData = {
-    name: `Add ${resources?.rentalManagement?.titleSingular}`,
+    name: `Create ${resources?.rentalManagement?.titleSingular}`,
     url: '/rental-management',
     type: 'flow',
     steps: [

@@ -88,7 +88,7 @@ export const generateAddExistingProduct = (waitForStepInsertion = false, resourc
 export const createTransferInventoryFlow = (fields: any, resource: any): WalkmeData => {
   const includeFields = [];
   const data: WalkmeData = {
-    name: `Add ${resource}`,
+    name: `Create ${resource}`,
     url: routes.transferInventory.path,
     type: 'flow',
     steps: [

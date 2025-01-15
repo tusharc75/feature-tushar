@@ -13,8 +13,8 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
   return (
     <div className="p-3">
       {changes?.length ? (
-        <TableContainer component={Paper} elevation={0} className="">
-          <Table aria-label="customized table" className="mb-3 [border:1px_solid_var(--common-border-color)]">
+        <TableContainer component={Paper} elevation={0} className="border">
+          <Table aria-label="customized table">
             <TableHead>
               <TableRow>
                 <TableCell scope="col" component={'th'} className="min-w-[200px]">
@@ -147,7 +147,7 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
         </TableContainer>
       ) : null}
       {operations?.length ? (
-        <TableContainer component={Paper}>
+        <TableContainer component={Paper} elevation={0} className="border">
           <Table aria-label="customized table">
             <TableHead>
               <TableRow>
@@ -164,7 +164,7 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                     <TableCell>{`${o?.label} (${UnCamelCase(o?.referenceType)})`}</TableCell>
                     <TableCell>
                       {o?.changes?.length ? (
-                        <TableContainer component={Paper}>
+                        <TableContainer component={Paper} elevation={0} className="border">
                           <Table aria-label="customized table">
                             <TableHead>
                               <TableRow>

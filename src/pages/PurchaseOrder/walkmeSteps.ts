@@ -1,10 +1,9 @@
 import { camelCase, startCase } from 'lodash';
 import { WalkmeData } from 'src/components/CustomIntro';
 
-export const createPurchaseOrderFlow = (resource:any): WalkmeData => {
-
+export const createPurchaseOrderFlow = (resource: any): WalkmeData => {
   const data: WalkmeData = {
-    name: `Add ${resource}`,
+    name: `Create ${resource}`,
     url: '/purchase-order',
     type: 'flow',
     steps: [
@@ -25,7 +24,6 @@ export const createPurchaseOrderFlow = (resource:any): WalkmeData => {
 };
 
 export const generateAddExistingService = (waitForStepInsertion: boolean = false): WalkmeData => {
-
   const data: WalkmeData = {
     name: 'Add Existing Service',
     url: '/purchase-order/detail/:id',
@@ -42,11 +40,12 @@ export const generateAddExistingService = (waitForStepInsertion: boolean = false
       {
         target: '#add-existing-service-menu-item',
         title: 'Add Existing Service',
-        content: 'Click here to add existing service.',
+        content: 'Click here to add existing service.'
       },
       {
         target: `#Service-Master-table-checkbox-0`,
-        title: 'Select a Service'
+        title: 'Select a Service',
+        isPreviousButtonDisabled: true
       },
       {
         target: '#dialog-add-button',
@@ -59,7 +58,6 @@ export const generateAddExistingService = (waitForStepInsertion: boolean = false
 };
 
 export const generateAddExistingProduct = (waitForStepInsertion: boolean = false): WalkmeData => {
-
   const data: WalkmeData = {
     name: 'Add Existing Product',
     url: '/purchase-order/detail/:id',
@@ -76,11 +74,12 @@ export const generateAddExistingProduct = (waitForStepInsertion: boolean = false
       {
         target: '#add-existing-product-menu-item',
         title: 'Add Existing Product',
-        content: 'Click here to add existing product.',
+        content: 'Click here to add existing product.'
       },
       {
         target: `#Product-table-checkbox-0`,
-        title: 'Select a Product'
+        title: 'Select a Product',
+        isPreviousButtonDisabled: true
       },
       {
         target: '#dialog-add-button',
@@ -93,7 +92,6 @@ export const generateAddExistingProduct = (waitForStepInsertion: boolean = false
 };
 
 export const generateAddManualEntry = (waitForStepInsertion: boolean = false): WalkmeData => {
-
   const data: WalkmeData = {
     name: 'Add Manual Entry',
     url: '/purchase-order/detail/:id',
@@ -111,7 +109,7 @@ export const generateAddManualEntry = (waitForStepInsertion: boolean = false): W
         target: '#add-manual-entry-menu-item',
         title: 'Add Manual Entry',
         content: 'Click here to add manual entry.',
-        waitForStepInsertion: true,
+        waitForStepInsertion: true
       },
       {
         target: '#dialog-save-button',
@@ -124,7 +122,6 @@ export const generateAddManualEntry = (waitForStepInsertion: boolean = false): W
 };
 
 export const generateAddNewService = (waitForStepInsertion: boolean = false): WalkmeData => {
-
   const data: WalkmeData = {
     name: 'Add New Service',
     url: '/purchase-order/detail/:id',
@@ -142,7 +139,7 @@ export const generateAddNewService = (waitForStepInsertion: boolean = false): Wa
         target: '#add-new-service-menu-item',
         title: 'Add New Service',
         content: 'Click here to add new service.',
-        waitForStepInsertion: true,
+        waitForStepInsertion: true
       },
       {
         target: '#dialog-save-button',
@@ -155,7 +152,6 @@ export const generateAddNewService = (waitForStepInsertion: boolean = false): Wa
 };
 
 export const generateEditService = (waitForStepInsertion: boolean = false, index: number): WalkmeData => {
-
   const data: WalkmeData = {
     name: 'Edit Service',
     url: '/purchase-order/detail/:id',
@@ -163,7 +159,7 @@ export const generateEditService = (waitForStepInsertion: boolean = false, index
       {
         target: `#edit-service-button-${index}`,
         title: 'Edit Service',
-        waitForStepInsertion: true,
+        waitForStepInsertion: true
       },
       {
         target: '#dialog-save-button',
@@ -176,7 +172,6 @@ export const generateEditService = (waitForStepInsertion: boolean = false, index
 };
 
 export const generateEditProduct = (waitForStepInsertion: boolean = false, index: number): WalkmeData => {
-
   const data: WalkmeData = {
     name: 'Edit Product',
     url: '/purchase-order/detail/:id',
@@ -184,7 +179,7 @@ export const generateEditProduct = (waitForStepInsertion: boolean = false, index
       {
         target: `#edit-product-button-${index}`,
         title: 'Edit Product',
-        waitForStepInsertion: true,
+        waitForStepInsertion: true
       },
       {
         target: '#dialog-save-button',
@@ -197,7 +192,6 @@ export const generateEditProduct = (waitForStepInsertion: boolean = false, index
 };
 
 export const generateEditManualEntry = (waitForStepInsertion: boolean = false, index: number): WalkmeData => {
-
   const data: WalkmeData = {
     name: 'Edit Manual Entry',
     url: '/purchase-order/detail/:id',
@@ -205,7 +199,7 @@ export const generateEditManualEntry = (waitForStepInsertion: boolean = false, i
       {
         target: `#edit-manualEntry-button-${index}`,
         title: 'Edit Manual Entry',
-        waitForStepInsertion: true,
+        waitForStepInsertion: true
       },
       {
         target: '#dialog-save-button',
@@ -217,31 +211,34 @@ export const generateEditManualEntry = (waitForStepInsertion: boolean = false, i
   return data;
 };
 
-export const generateReceiveProduct = (addStorageLocation = false, index: number = 0, resource:any): WalkmeData => {
-
+export const generateReceiveProduct = (addStorageLocation = false, index: number = 0, resource: any): WalkmeData => {
   const data: WalkmeData = {
     name: 'Receive',
     url: '/purchase-order/detail/:id',
     steps: [
       {
         target: `#${camelCase(resource)}_grid-4-table-checkbox-${index}`,
-        title: 'Receive'
+        title: 'Receive',
+        isPreviousButtonDisabled: true
       },
       {
         target: '#receive-button',
         title: 'Receive',
         willOpenDialog: true
       },
-      ...(addStorageLocation ? [
-        {
-          target: '#select-storage-location',
-          title: 'Select Storage Location',
-          nextOnValueChange: true
-        }
-      ] : []),
+      ...(addStorageLocation
+        ? [
+            {
+              target: '#select-storage-location',
+              title: 'Select Storage Location',
+              nextOnValueChange: true
+            }
+          ]
+        : []),
       {
         target: '#dialog-save-button',
         title: 'Save',
+        isPreviousButtonDisabled : !addStorageLocation,
         waitForStepInsertion: false
       }
     ]
@@ -250,30 +247,33 @@ export const generateReceiveProduct = (addStorageLocation = false, index: number
 };
 
 export const generateRejectProduct = (addStorageLocation = false, index: number = 0, resource): WalkmeData => {
-
   const data: WalkmeData = {
     name: 'Reject',
     url: '/purchase-order/detail/:id',
     steps: [
       {
         target: `#${camelCase(resource)}_grid-4-table-checkbox-${index}`,
-        title: 'Reject'
+        title: 'Reject',
+        isPreviousButtonDisabled: true
       },
       {
         target: '#reject-button',
         title: 'Reject',
         willOpenDialog: true
       },
-      ...(addStorageLocation ? [
-        {
-          target: '#select-storage-location',
-          title: 'Select Storage Location',
-          nextOnValueChange: true
-        }
-      ] : []),
+      ...(addStorageLocation
+        ? [
+            {
+              target: '#select-storage-location',
+              title: 'Select Storage Location',
+              nextOnValueChange: true
+            }
+          ]
+        : []),
       {
-        target: '#dialog-submit-button',
-        title: 'Submit',
+        target: '#dialog-save-button',
+        title: 'Save',
+        isPreviousButtonDisabled : !addStorageLocation,
         waitForStepInsertion: false
       }
     ]
@@ -281,8 +281,41 @@ export const generateRejectProduct = (addStorageLocation = false, index: number 
   return data;
 };
 
-export const generateDeleteStep = (waitForStepInsertion: boolean = false, index: number = 0, type: string): WalkmeData => {
+export const generateAddInvoice = (waitForStepInsertion: boolean = false): WalkmeData => {
 
+  const data: WalkmeData = {
+    name: 'Add Invoices',
+    url: '/purchase-order/detail/:id',
+    steps: [
+      {
+        target: '#main-tab-2',
+        title: 'Details',
+        content: 'Navigate to Invoice page'
+      },
+      {
+        target: '#add-menu-button',
+        title: 'Add Invoice'
+      },
+      {
+        target: `#add-invoice-button`,
+        title: 'Click here to Add Invoice',
+      },
+      {
+        target: `#enter-invoice-number`,
+        title: 'Enter Invoice Number',
+        isPreviousButtonDisabled : true
+      },
+      {
+        target: '#dialog-save-button',
+        title: 'Save',
+        waitForStepInsertion: waitForStepInsertion
+      }
+    ]
+  };
+  return data;
+};
+
+export const generateDeleteStep = (waitForStepInsertion: boolean = false, index: number = 0, type: string): WalkmeData => {
   const data: WalkmeData = {
     name: `Delete ${startCase(type)}`,
     url: '/purchase-order/detail/:id',
@@ -290,7 +323,7 @@ export const generateDeleteStep = (waitForStepInsertion: boolean = false, index:
       {
         target: `#delete-${type}-button-${index}`,
         title: `Delete ${startCase(type)}`,
-        willOpenDialog: true,
+        willOpenDialog: true
       },
       {
         target: '#confirmation-dialog-confirm-button',

@@ -143,13 +143,13 @@ const SelectionDialog = (props) => {
       axiosInstance()
         .get(
           `${api}/template?productCategory=` +
-            values.productCategory +
-            '&productTemplate=' +
-            values.productTemplate +
-            '&priceTemplate=' +
-            values.priceTemplate +
-            '&refrenceId=' +
-            refrenceId,
+          values.productCategory +
+          '&productTemplate=' +
+          values.productTemplate +
+          '&priceTemplate=' +
+          values.priceTemplate +
+          '&refrenceId=' +
+          refrenceId,
           { responseType: 'arraybuffer' }
         )
         .then((response) => {
@@ -189,7 +189,7 @@ const SelectionDialog = (props) => {
 
   return (
     <Dialog
-      maxWidth="xs"
+      maxWidth="sm"
       fullScreen={isMobile || isTablet}
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
@@ -202,13 +202,14 @@ const SelectionDialog = (props) => {
             <CustomDialogHeader title="Select Category & Template" onClose={handleClose}></CustomDialogHeader>
             <CustomDialogContent>
               <Form autoComplete="off" autoCorrect="off" noValidate>
-                <Box p={1}>
+                <div className='p-1'>
                   <Grid container spacing={1}>
                     <Grid
                       size={{
-                      xs:permissions.productCategory.isCreate ? 11 : 12,
-                      sm:permissions.productCategory.isCreate ? 11 : 12,
-                      md:permissions.productCategory.isCreate ? 11 : 12}}
+                        xs: permissions.productCategory.isCreate ? 11 : 12,
+                        sm: permissions.productCategory.isCreate ? 11 : 12,
+                        md: permissions.productCategory.isCreate ? 11 : 12
+                      }}
                     >
                       <FormTypes
                         errors={errors}
@@ -232,7 +233,7 @@ const SelectionDialog = (props) => {
                       />
                     </Grid>
                     {permissions.productCategory.isCreate && (
-                      <Grid size={{xs:1, sm:1, md:1}}>
+                      <Grid size={{ xs: 1, sm: 1, md: 1 }}>
                         <HtmlTooltip title="Add Product Category" className="mt-1">
                           <IconButton
                             onClick={() => {
@@ -247,7 +248,7 @@ const SelectionDialog = (props) => {
                     )}
                   </Grid>
                   {isProductTemplate && (
-                    <Box mt={1}>
+                    <Box mt={2}>
                       <FormTypes
                         values={values}
                         errors={errors}
@@ -268,7 +269,7 @@ const SelectionDialog = (props) => {
                     </Box>
                   )}
                   {isProductTemplate && api !== 'product' && (
-                    <Box mt={1}>
+                    <Box mt={2}>
                       <FormTypes
                         values={values}
                         errors={errors}
@@ -288,7 +289,7 @@ const SelectionDialog = (props) => {
                     </Box>
                   )}
                   {isUpload && (
-                    <Box mt={1}>
+                    <Box mt={2}>
                       <label htmlFor="btn-upload">
                         <input
                           id="btn-upload"
@@ -311,7 +312,7 @@ const SelectionDialog = (props) => {
                       </label>
                     </Box>
                   )}
-                </Box>
+                </div>
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>

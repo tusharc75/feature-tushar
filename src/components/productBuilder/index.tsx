@@ -30,6 +30,7 @@ import BulkEditDialog from './BulkEditDialog';
 import ProductDialog from './ProductDialog';
 import SupplierAskPrice from './SupplierAskPrice';
 import ViewSupplierPriceDialog from './ViewSupplierPriceDialog';
+import { FiExternalLink } from 'react-icons/fi';
 
 let levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
@@ -170,6 +171,25 @@ const ProductBuilder = (props) => {
           }
         });
         let newColumns = generateColumns(renderedFrom, fields, routes.productDetail.path, false, currency);
+        newColumns?.forEach((e) => {
+          if (e.accessor === 'productName') {
+            e.cell = ({ row }) => (
+              <div className="flex items-center gap-1">
+                <p className='text-truncate' title={row?.original?.productName}> {row?.original?.productName}</p>
+                {row?.original?.productId &&
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.productDetail.path}/${row.original.productId}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                }
+              </div>
+            );
+          }
+        })
         columns = [...columns, ...newColumns];
 
         if (stage && stage === 'product') {
@@ -205,7 +225,10 @@ const ProductBuilder = (props) => {
             setNextStep(true);
           }
         } else if (processStatus === QUOTE_PROCESS_STATUS.priceBuilder) {
-          if (rows?.find((ele) => (ele[`totalSalesPrice_${currency?.toLowerCase()}`] || 0) === 0 || (ele[`qty`] || 0) === 0)) {
+          if (!rows?.length) {
+            setNextStep(false);
+          }
+          else if (rows?.find((ele) => (ele[`totalSalesPrice_${currency?.toLowerCase()}`] || 0) === 0 || (ele[`qty`] || 0) === 0)) {
             setNextStep(false);
           } else {
             setNextStep(true);
@@ -829,18 +852,6 @@ const ProductBuilder = (props) => {
           open={showConfirmDialog}
           onSave={() => {
             setShowConfirmDialog(false);
-            // e.preventDefault();
-            // const err = Object.keys(errors);
-            // if (err.length) {
-            // const input = document.querySelector(
-            //   `input[name=${err[0]}]`,
-            // );
-
-            // input.scrollIntoView({
-            //   behavior: 'smooth',
-            //   block: 'center',
-            //   inline: 'start',
-            // });
           }}
           onClose={() => {
             setShowConfirmDialog(false);
