@@ -76,14 +76,14 @@ const SurveysData = ({ surveyId }) => {
               setShowConfirmBox({ open: true, ids: [row?.original?._id] });
             }}
           >
-            <DeleteIcon color="error" />
+            <DeleteIcon color="error" fontSize='small' />
           </IconButton>
         </HtmlTooltip>
       </>
     )
   };
 
-  const handleDelete = () => {};
+  const handleDelete = () => { };
 
   return (
     <div>

@@ -98,7 +98,7 @@ const StorageLocation = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" />
+              <DeleteIcon color="error" fontSize='small' />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -261,12 +261,11 @@ const StorageLocation = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
-              ? `${resources?.storageLocation?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${deleteRecord
+            ? `${resources?.storageLocation?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.storageLocationName || ''}`
-              : `selected ${resources?.storageLocation?.titlePlural?.toLowerCase()}`
-          } ?`}
+            : `selected ${resources?.storageLocation?.titlePlural?.toLowerCase()}`
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

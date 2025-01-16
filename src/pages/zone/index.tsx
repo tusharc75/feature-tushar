@@ -109,7 +109,7 @@ const Zone = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" />
+              <DeleteIcon color="error" fontSize='small' />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -282,12 +282,11 @@ const Zone = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
-              ? `${resources?.zone?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${deleteRecord
+            ? `${resources?.zone?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.name || ''}`
-              : `selected ${resources?.zone?.titlePlural?.toLowerCase()}`
-          } ?`}
+            : `selected ${resources?.zone?.titlePlural?.toLowerCase()}`
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

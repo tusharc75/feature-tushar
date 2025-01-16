@@ -89,7 +89,7 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
               setShowDeleteConfirmBox(true);
             }}
           >
-            <DeleteIcon color="error" />
+            <DeleteIcon color="error" fontSize='small' />
           </IconButton>
         </HtmlTooltip>
       </>
