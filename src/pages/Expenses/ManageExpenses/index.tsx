@@ -65,7 +65,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
     // const selectedCurrency = event.target.value;
     // const symbol = getUniqueCurrencies().find((d) => d.currencyCode === selectedCurrency)?.symbolNative;
     // setCurrencySymbol(symbol);
-  }
+  };
 
   const removeTextField = (id) => {
     setTextFields(textFields.filter((field) => field.id !== id));
@@ -227,7 +227,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
                     errors={errors}
                     values={values}
                     setFieldValue={setFieldValue}
-                    onChange={() => {handleCurrencyChange(values.currency)}}
+                    onChange={setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === values.currency)?.symbolNative)}
                     touched={touched}
                     fieldsData={initialData.fields}
                     size="small"
@@ -254,11 +254,11 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
                         }}
                       />
                     </Grid>
-                  <Grid size={{xs: 6, sm: 6, md: 4, lg: 6}} sx={{ display: 'flex'}}>
-                    <ThemeButton buttonType="transparent" onClick={() => setShowItemizeDialog(true)}>
-                      Itemize
-                    </ThemeButton>
-                  </Grid>
+                    <Grid size={{ xs: 6, sm: 6, md: 4, lg: 6 }} sx={{ display: 'flex' }}>
+                      <ThemeButton buttonType="transparent" onClick={() => setShowItemizeDialog(true)}>
+                        Itemize
+                      </ThemeButton>
+                    </Grid>
                   </Grid>
                 </Form>
               </CustomDialogContent>
