@@ -95,7 +95,7 @@ const ChartOfAccount = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" />
+              <DeleteIcon color="error" fontSize='small' />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -259,12 +259,11 @@ const ChartOfAccount = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
-              ? `${resources?.chartOfAccount?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${deleteRecord
+            ? `${resources?.chartOfAccount?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.accountNumber || ''}`
-              : `selected ${resources?.chartOfAccount?.titlePlural?.toLowerCase()}`
-          } ?`}
+            : `selected ${resources?.chartOfAccount?.titlePlural?.toLowerCase()}`
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

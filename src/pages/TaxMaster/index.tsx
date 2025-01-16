@@ -97,7 +97,7 @@ const TaxMaster = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" />
+              <DeleteIcon color="error" fontSize='small' />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -262,12 +262,11 @@ const TaxMaster = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
+          message={`Are you sure you want to delete ${deleteRecord
               ? `${resources?.taxMaster?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.taxCode || ''}`
               : `selected ${resources?.taxMaster?.titlePlural?.toLowerCase()}`
-          } ?`}
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

@@ -97,7 +97,7 @@ const Blog = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" />
+              <DeleteIcon color="error" fontSize='small' />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -260,12 +260,11 @@ const Blog = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
-              ? `${resources?.blog?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${deleteRecord
+            ? `${resources?.blog?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.title || ''}`
-              : `selected ${resources?.blog?.titlePlural?.toLowerCase()}`
-          } ?`}
+            : `selected ${resources?.blog?.titlePlural?.toLowerCase()}`
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

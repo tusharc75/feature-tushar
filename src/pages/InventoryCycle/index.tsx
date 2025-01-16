@@ -98,7 +98,7 @@ const InventoryCycle = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" />
+              <DeleteIcon color="error" fontSize='small' />
             </IconButton>
           </HtmlTooltip>
         )}

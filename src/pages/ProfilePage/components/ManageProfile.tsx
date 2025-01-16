@@ -485,7 +485,7 @@ export default function ManageProfile(props) {
                                 setIsDeleteProxy(true);
                               }}
                             >
-                              <DeleteIcon color="error" />
+                              <DeleteIcon color="error" fontSize='small' />
                             </IconButton>
                           </TableCell>
                         </TableRow>

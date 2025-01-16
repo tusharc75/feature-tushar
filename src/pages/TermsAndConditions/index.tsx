@@ -96,7 +96,7 @@ const TermsAndCondition = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" />
+              <DeleteIcon color="error" fontSize='small' />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -246,12 +246,11 @@ const TermsAndCondition = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
-              ? `${resources?.termsAndConditions?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${deleteRecord
+            ? `${resources?.termsAndConditions?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.name || ''}`
-              : `selected ${resources?.termsAndConditions?.titlePlural?.toLowerCase()}`
-          } ?`}
+            : `selected ${resources?.termsAndConditions?.titlePlural?.toLowerCase()}`
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
