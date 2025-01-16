@@ -24,7 +24,8 @@ export const generateAddExistingSerializedAsset = (
     },
     {
       target: `#${sidebarResource.serializedAsset.split(' ').join('-')}-table-checkbox-0`,
-      title: 'Add a Product'
+      title: 'Add a Product',
+      isPreviousButtonDisabled : true
     },
     {
       target: '#dialog-add-button',
