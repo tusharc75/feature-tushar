@@ -14,6 +14,7 @@ function DisplayFilters({
   currentFomValue,
   setCurrentFomValue,
   resource,
+  renderedFrom,
   filterByIds,
   setFilterByIds,
   deepFilters,
@@ -50,7 +51,7 @@ function DisplayFilters({
     setFilterTerm(filterTermP);
 
     dispatchTable({ type: 'filter', filters: newFilters });
-    setTempFilter(resource, { formValues: formValues || {}, filters: newFilters });
+    setTempFilter(renderedFrom, { formValues: formValues || {}, filters: newFilters });
     setChipData((prev) => prev.filter((item) => item.name !== name));
   };
 
