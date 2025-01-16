@@ -47,7 +47,8 @@ export const generateAddExistingService= (waitForStepInsertion: boolean = false)
       },
       {
         target: `#Service-Master-table-checkbox-0`,
-        title: 'Select a Service'
+        title: 'Select a Service',
+        isPreviousButtonDisabled : true
       },
       {
         target: '#dialog-add-button',
@@ -190,7 +191,8 @@ export const generateAddProductConsumable= (waitForStepInsertion: boolean = fals
       },
       {
         target: `#Product-table-checkbox-0`,
-        title: 'Select a Product/Consumable'
+        title: 'Select a Product/Consumable',
+        isPreviousButtonDisabled : true
       },
       {
         target: '#dialog-add-button',

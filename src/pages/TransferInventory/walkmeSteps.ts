@@ -75,7 +75,8 @@ export const generateAddExistingProduct = (waitForStepInsertion = false, resourc
     },
     {
       target: `#${camelCase(resource)}_grid-1_sub-1-table-checkbox-0`,
-      title: 'Add a Product'
+      title: 'Add a Product',
+      isPreviousButtonDisabled : true
     },
     {
       target: '#dialog-add-button',

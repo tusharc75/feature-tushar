@@ -44,7 +44,9 @@ export const generateAddExistingSerialisedAsset = (waitForStepInsertion: boolean
       },
       {
         target: `#serializedAssets_assign-table-checkbox-0`,
-        title: 'Select a SerialisedAsset'
+        title: 'Select a SerialisedAsset',
+        isPreviousButtonDisabled : true
+
       },
       {
         target: '#dialog-add-button',
