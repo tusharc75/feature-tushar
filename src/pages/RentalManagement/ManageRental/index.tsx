@@ -208,13 +208,13 @@ const ManageRentalManagementDialog = ({
     if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
       errors['estimateEndDate'] = 'Please enter valid estimate end date';
     }
-    let actualStartDate = moment(values?.actualStartDate);
-    let actualEndDate = moment(values?.actualEndDate);
-    if (actualStartDate.format('YYYY-MM-DD') !== actualEndDate.format('YYYY-MM-DD')) {
-      if (actualEndDate.diff(actualStartDate, 'days') <= 0) {
-        errors['actualEndDate'] = 'Please enter valid actual end date';
-      }
-    }
+    // let actualStartDate = moment(values?.actualStartDate);
+    // let actualEndDate = moment(values?.actualEndDate);
+    // if (actualStartDate.format('YYYY-MM-DD') !== actualEndDate.format('YYYY-MM-DD')) {
+    //   if (actualEndDate.diff(actualStartDate, 'days') <= 0) {
+    //     errors['actualEndDate'] = 'Please enter valid actual end date';
+    //   }
+    // }
     return errors;
   }
 
@@ -394,8 +394,8 @@ const ManageRentalManagementDialog = ({
                                         imageOrFileUploadCompletePercentage={
                                           ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                             ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(completePercentage);
-                                              }
+                                              setUploadingImageOrFileProgress(completePercentage);
+                                            }
                                             : null
                                         }
                                         fields={rentalData.fields}
