@@ -478,6 +478,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
               : columns
           }
           state={state}
+          resource={sidebarResource[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
           dispatch={dispatch}
           renderedFrom={renderedFrom}
           refreshGrid={fetchResourceData}

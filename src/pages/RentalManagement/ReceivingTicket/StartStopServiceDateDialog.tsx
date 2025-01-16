@@ -27,14 +27,6 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
     }
   }, [data, type]);
 
-  const onSubmit = (values) => {
-    handleSubmit({
-      ...values,
-      startDate: dayjs(values.startDate).format('MM/DD/YYYY'),
-      ...(values.endDate && { endDate: dayjs(values.endDate).format('MM/DD/YYYY') })
-    });
-  };
-
   const validate = (values) => {
     const errors = {};
     if (values?.endDate && normalizeDate(values?.startDate) > normalizeDate(values.endDate)) {
@@ -64,7 +56,7 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
       <Formik
         initialValues={initialValues}
         onSubmit={(val) => {
-          onSubmit(val);
+          handleSubmit(val);
         }}
         enableReinitialize={true}
         validate={validate}
