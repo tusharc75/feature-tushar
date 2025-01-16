@@ -13,11 +13,11 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { expenses, getUniqueCurrencies, sidebarResource } from '../../constants/helpers';
+import { expenseReport, getUniqueCurrencies, sidebarResource } from '../../constants/helpers';
 import Step from '../DynamicForm/Step';
-import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
+import ManageExpenseReports from 'src/pages/ExpensesReport/ManageExpenseReports';
 
-const ExpenseDetailsPage = () => {
+const ExpenseReportDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const { id } = useParams();
@@ -29,7 +29,7 @@ const ExpenseDetailsPage = () => {
     state: { user, permissions, resources }
   }: any = useData();
   const [loadingDetails, setLoadingDetails] = useState(true);
-  const [expensesData, setExpensesData] = useState(null);
+  const [expenseReportData, setExpenseReportData] = useState(null);
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -75,7 +75,7 @@ const ExpenseDetailsPage = () => {
 
   const fetchFields = async () => {
     axiosInstance()
-      .get(`/field?resource=${sidebarResource?.expenses}`)
+      .get(`/field?resource=${sidebarResource?.expenseReport}`)
       .then(({ data }) => {
         setFields(data.data?.filter((field) => field.isRead));
       })
@@ -87,13 +87,13 @@ const ExpenseDetailsPage = () => {
   const fetchData = async () => {
     setLoadingDetails(true);
     axiosInstance()
-      .get(`${expenses.api}/${id}`)
+      .get(`${expenseReport.api}/${id}`)
       .then(({ data: { data } }) => {
         setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data.currency)?.symbolNative);
         setLoadingDetails(false);
-        setAllowedToEdit(permissions?.expenses?.isUpdate);
-        setAllowedToDelete(permissions?.expenses?.isDelete);
-        setExpensesData(data);
+        setAllowedToEdit(permissions?.expenseReport?.isUpdate);
+        setAllowedToDelete(permissions?.expenseReport?.isDelete);
+        setExpenseReportData(data);
       })
       .catch((err) => {
         setLoadingDetails(false);
@@ -116,10 +116,10 @@ const ExpenseDetailsPage = () => {
 
   const handleDelete = () => {
     axiosInstance()
-      .put(`${expenses.api}/remove`, { ids: [expensesData._id] })
+      .put(`${expenseReport.api}/remove`, { ids: [expenseReportData._id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.push(`${routes?.expenses?.path}`);
+        history.push(`${routes?.expenseReport?.path}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -133,8 +133,8 @@ const ExpenseDetailsPage = () => {
         <Box className="nav-v1">
           <CustomBreadCrumbs
             routes={[
-              { ...routes?.expenses, title: resources?.expenses?.titlePlural },
-              { title: `${expensesData ? expensesData?.expenseNumber : ''}` }
+              { ...routes?.expenseReport, title: resources?.expenseReport?.titlePlural },
+              { title: `${expenseReportData ? expenseReportData?.reportTitle : ''}` }
             ]}
           />
         </Box>
@@ -163,37 +163,13 @@ const ExpenseDetailsPage = () => {
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
-            {!loadingDetails && expensesData && fields ? (
-              <DetailsPage data={expensesData} fields={fields} />
+            {!loadingDetails && expenseReportData && fields ? (
+              <DetailsPage data={expenseReportData} fields={fields} />
             ) : (
               <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </div>
             )}
-            <div className='mt-2'>
-              <TableContainer component={Paper}>
-                <Table sx={{ minWidth: 700 }} aria-label="spanning table">
-                  {expensesData?.lineItems?.length>0 && (<TableHead>
-                    <TableRow>
-                      <TableCell>Description</TableCell>
-                      <TableCell align="right">Amount</TableCell>
-                    </TableRow>
-                  </TableHead>)}
-                  <TableBody>
-                    {expensesData?.lineItems?.map((row) => (
-                      <TableRow key={row.id}>
-                        <TableCell>{row.description}</TableCell>
-                        <TableCell align="right">{currencySymbol} {row.amount}</TableCell>
-                      </TableRow>
-                    ))}
-                    <TableRow>
-                      <TableCell>Total Amount</TableCell>
-                      <TableCell align="right">{currencySymbol} {expensesData?.totalAmount}</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </div>
           </Box>
         </TabPanel>
         {resourceData &&
@@ -205,9 +181,9 @@ const ExpenseDetailsPage = () => {
                   tab={tab}
                   resourcePolicyId={resourceData?._id}
                   resourceId={id}
-                  resource={sidebarResource.expenses}
-                  data={expensesData}
-                  allowedToEdit={permissions?.expenses?.isUpdate}
+                  resource={sidebarResource.expenseReport}
+                  data={expenseReportData}
+                  allowedToEdit={permissions?.expenseReport?.isUpdate}
                 />
               </TabPanel>
             );
@@ -216,7 +192,7 @@ const ExpenseDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.expenses?.titleSingular?.toLowerCase()} : ${expensesData?.expenseNumber} ?`}
+          message={`Are you sure you want to delete ${resources?.expenseReport?.titleSingular?.toLowerCase()} : ${expenseReportData?.reportTitle} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
@@ -224,9 +200,9 @@ const ExpenseDetailsPage = () => {
         />
       )}
       {openUpdateDialog && (
-        <ManageExpenses
+        <ManageExpenseReports
           isClone={false}
-          expenseId={id}
+          expenseReportId={id}
           onClose={() => setOpenUpdateDialog(false)}
           onSuccess={() => {
             setOpenUpdateDialog(false);
@@ -238,4 +214,4 @@ const ExpenseDetailsPage = () => {
   );
 };
 
-export default ExpenseDetailsPage;
+export default ExpenseReportDetailsPage;

@@ -263,6 +263,12 @@ const routes = {
   expensesDetail:{
     path:'/expenses/detail'
   },
+  expenseReport:{
+    path:'/expense-report'
+  },
+  expenseReportDetail:{
+    path:'/expense-report/detail'
+  },
   salesOrder: {
     path: '/sales-order'
   },
