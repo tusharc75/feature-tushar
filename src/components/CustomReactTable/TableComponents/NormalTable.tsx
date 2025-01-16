@@ -34,7 +34,8 @@ export const NormalTable = forwardRef(function (
     tableRef,
     excludedColumns,
     footerRowFound,
-    stickyColumns
+    stickyColumns,
+    renderedFrom = ''
   }: RnderTableProps,
   ref: ForwardedRef<HTMLTableElement>
 ) {
@@ -100,6 +101,7 @@ export const NormalTable = forwardRef(function (
                         key={header.id}
                         resource={resource}
                         virtualTable={false}
+                        renderedFrom={renderedFrom}
                       />
                     );
                   })}

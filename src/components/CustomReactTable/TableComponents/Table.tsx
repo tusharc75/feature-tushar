@@ -31,6 +31,7 @@ type TTableProps = {
   expanderWithCustomContent: boolean;
   customContentHeight: number;
   customContent: ({ row }: { row: any }) => React.ReactNode;
+  renderedFrom: string;
 };
 
 const TableComponent = forwardRef(function (
@@ -56,7 +57,8 @@ const TableComponent = forwardRef(function (
     hideSelection,
     expanderWithCustomContent,
     customContentHeight,
-    customContent
+    customContent,
+    renderedFrom
   }: TTableProps,
   ref: ForwardedRef<HTMLTableElement>
 ) {
@@ -139,6 +141,7 @@ const TableComponent = forwardRef(function (
             excludedColumns={excludedColumns}
             footerRowFound={footerRowFound}
             stickyColumns={stickyColumns}
+            renderedFrom={renderedFrom}
           />
         </>
       ) : (
@@ -176,6 +179,7 @@ const TableComponent = forwardRef(function (
             expanderWithCustomContent={expanderWithCustomContent}
             customContentHeight={customContentHeight}
             customContent={customContent}
+            renderedFrom={renderedFrom}
           />
         </>
       )}
@@ -209,6 +213,7 @@ export type RnderTableProps = {
   excludedColumns: string[];
   footerRowFound: boolean;
   stickyColumns: StickyColumns;
+  renderedFrom: string;
 };
 
 export default TableComponent;
