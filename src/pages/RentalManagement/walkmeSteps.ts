@@ -74,7 +74,8 @@ export const generateAddChildProduct = (index: number, waitForStepInsertion = fa
     },
     {
       target: `#${sidebarResource.product}-table-checkbox-0`,
-      title: 'Add a Product'
+      title: 'Add a Product',
+      isPreviousButtonDisabled : true
     },
     {
       target: '#dialog-add-button',

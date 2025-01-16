@@ -42,7 +42,7 @@ export const generateReceiveStepReceive = (index: number, waitForStepInsertion =
       title: 'Receive',
       willOpenDialog: true
     },
-    { target: '#receive-dialog-save-button', title: 'Save', willOpenDialog: true },
+    { target: '#receive-dialog-save-button', title: 'Save', willOpenDialog: true , isPreviousButtonDisabled : true},
     { target: '#receive-dialog-submit-button', title: 'Submit', checkForRequired: true, waitForStepInsertion }
   ]
 });
@@ -56,7 +56,7 @@ export const generateAddStepEditProduct = (index: number, waitForStepInsertion =
       title: 'Edit',
       willOpenDialog: true
     },
-    { target: '#field-qty', title: 'Select Quantity', nextOnValueChange: true, skipIfValueExist: true },
+    { target: '#field-qty', title: 'Select Quantity', nextOnValueChange: true, skipIfValueExist: true ,isPreviousButtonDisabled : true},
     { target: '#field-unit', title: 'Select Unit', nextOnValueChange: true, skipIfValueExist: true },
     { target: '#field-pricing-method', title: 'Select Pricing Method', nextOnValueChange: true, skipIfValueExist: true },
     { target: '#field-price', title: 'Change Price', nextOnValueChange: true },
