@@ -168,7 +168,7 @@ const Competencies = ({ competencyType }) => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" />
+              <DeleteIcon color="error" fontSize='small' />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -240,12 +240,11 @@ const Competencies = ({ competencyType }) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
-              ? `${resources?.competencies?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${deleteRecord
+            ? `${resources?.competencies?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.competencyName || ''}`
-              : `selected ${resources?.competencies?.titlePlural?.toLowerCase()}`
-          } ?`}
+            : `selected ${resources?.competencies?.titlePlural?.toLowerCase()}`
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

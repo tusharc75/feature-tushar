@@ -251,13 +251,13 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                               }}
                               style={{ paddingBottom: 3, width: 30, height: 30 }}
                             >
-                              {<DeleteIcon color="error" />}
+                              {<DeleteIcon color="error" fontSize='small' />}
                             </IconButton>
                           </HtmlTooltip>
                         ) : (
                           <HtmlTooltip className="cursor-stop" title={"You don't have permissions to delete attachment"} enterTouchDelay={0}>
                             <IconButton size={'small'} style={{ paddingBottom: 3, width: 30, height: 30 }}>
-                              <DeleteIcon color="disabled" />
+                              <DeleteIcon color="disabled" fontSize='small' />
                             </IconButton>
                           </HtmlTooltip>
                         )}

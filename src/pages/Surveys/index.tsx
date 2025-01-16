@@ -97,7 +97,7 @@ const Survey = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" />
+              <DeleteIcon color="error" fontSize='small' />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -260,12 +260,11 @@ const Survey = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
-              ? `${resources?.surveys?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${deleteRecord
+            ? `${resources?.surveys?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.surveyName || ''}`
-              : `selected ${resources?.surveys?.titlePlural?.toLowerCase()}`
-          } ?`}
+            : `selected ${resources?.surveys?.titlePlural?.toLowerCase()}`
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
