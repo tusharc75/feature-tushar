@@ -215,7 +215,7 @@ const ServiceMaster = (props: Props) => {
             row?.original?.type === 'Service' &&
             serviceColumns &&
             serviceColumns?.some((column) => column?.fieldData?.fieldName === 'frequency') && (
-              <HtmlTooltip title="Edit Frequency">
+              <HtmlTooltip title="Edit">
                 <IconButton
                   size="small"
                   aria-label="Edit"
@@ -291,7 +291,7 @@ const ServiceMaster = (props: Props) => {
                   setShowDeleteConfirmBox(true);
                 }}
               >
-                <DeleteIcon color="error" />
+                <DeleteIcon fontSize="small" color="error" />
               </IconButton>
             </HtmlTooltip>
           )}

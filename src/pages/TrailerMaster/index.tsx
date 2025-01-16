@@ -101,7 +101,7 @@ const TrailerMaster = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" />
+              <DeleteIcon color="error" fontSize='small' />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -311,12 +311,11 @@ const TrailerMaster = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
-              ? `${resources?.trailerMaster?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${deleteRecord
+            ? `${resources?.trailerMaster?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.trailerName || ''}`
-              : `selected ${resources?.trailerMaster?.titlePlural?.toLowerCase()}`
-          } ?`}
+            : `selected ${resources?.trailerMaster?.titlePlural?.toLowerCase()}`
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

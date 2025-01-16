@@ -101,7 +101,7 @@ const ServiceMaster = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" />
+              <DeleteIcon color="error" fontSize='small' />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -310,9 +310,9 @@ const ServiceMaster = () => {
         <ConfirmationDialog
           open={showDeleteConfirmBox}
           message={`Are you sure you want to delete ${deleteRecord
-              ? `${resources?.serviceMaster?.titleSingular?.toLowerCase()} :
+            ? `${resources?.serviceMaster?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.serviceName || ''}`
-              : `selected ${resources?.serviceMaster?.titlePlural?.toLowerCase()}`
+            : `selected ${resources?.serviceMaster?.titlePlural?.toLowerCase()}`
             } ?`}
           onClose={() => {
             setDeleteRecord(null);

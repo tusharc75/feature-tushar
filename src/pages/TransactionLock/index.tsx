@@ -98,7 +98,7 @@ const TransactionLock = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" />
+              <DeleteIcon color="error" fontSize='small' />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -261,12 +261,11 @@ const TransactionLock = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
-              ? `${resources?.transactionLock?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${deleteRecord
+            ? `${resources?.transactionLock?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.lockNumber || ''}`
-              : `selected ${resources?.transactionLock?.titlePlural?.toLowerCase()}`
-          } ?`}
+            : `selected ${resources?.transactionLock?.titlePlural?.toLowerCase()}`
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

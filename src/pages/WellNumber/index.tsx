@@ -97,7 +97,7 @@ const WellNumber = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" />
+              <DeleteIcon color="error" fontSize='small' />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -260,12 +260,11 @@ const WellNumber = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
-              ? `${resources?.wellNumber?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${deleteRecord
+            ? `${resources?.wellNumber?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.wellNumber || ''}`
-              : `selected ${resources?.wellNumber?.titlePlural?.toLowerCase()}`
-          } ?`}
+            : `selected ${resources?.wellNumber?.titlePlural?.toLowerCase()}`
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

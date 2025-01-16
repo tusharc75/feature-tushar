@@ -97,7 +97,7 @@ const WellMaster = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" />
+              <DeleteIcon color="error" fontSize='small' />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -260,12 +260,11 @@ const WellMaster = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
-              ? `${resources?.wellMaster?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${deleteRecord
+            ? `${resources?.wellMaster?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.wellName || ''}`
-              : `selected ${resources?.wellMaster?.titlePlural?.toLowerCase()}`
-          } ?`}
+            : `selected ${resources?.wellMaster?.titlePlural?.toLowerCase()}`
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
