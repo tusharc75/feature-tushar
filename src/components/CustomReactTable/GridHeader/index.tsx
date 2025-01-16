@@ -74,12 +74,12 @@ const GridHeader = ({
   const [filterTerm, setFilterTerm] = useState({});
 
   useEffect(() => {
-    const filters = getTempFilter(resource);
+    const filters = getTempFilter(renderedFrom);
     if (filters) {
       if (filters.formValues) setCurrentFomValue(filters.formValues);
       if (filters.filters) dispatch({ type: 'filter', filters: filters.filters });
     }
-  }, [dispatch, resource]);
+  }, [dispatch, renderedFrom]);
 
   const handleFilterOpen = () => {
     setIsFilterOpen(true);
@@ -93,14 +93,14 @@ const GridHeader = ({
     const filters = createFilterData(coloums, filterByIds, deepFilters, filterTerm);
     const fromValue = filtermodelToFormValue(filters);
     dispatch({ type: 'filter', filters });
-    setTempFilter(resource, { formValues: fromValue || {}, filters });
+    setTempFilter(renderedFrom, { formValues: fromValue || {}, filters });
     setCurrentFomValue(fromValue);
     handleFilterClose();
   };
 
   useEffect(() => {
     if (!resource || !showFilters) return;
-    const filters = getTempFilter(resource);
+    const filters = getTempFilter(renderedFrom);
     const applyDefaultFilter = async () => {
       try {
         const responce: any = await axiosInstance().get(`/user-resource-filter?resource=${resource}`);
@@ -150,6 +150,7 @@ const GridHeader = ({
           )}
           {topLeftSlot}
           <DisplayFilters
+            renderedFrom={renderedFrom}
             columns={newColumns}
             customColumns={coloums}
             customFilters={customFilters}

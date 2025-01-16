@@ -278,6 +278,7 @@ interface DraggableHeaderProps {
   overlayMode?: boolean;
   virtualTable?: boolean;
   className?: string;
+  renderedFrom: string;
 }
 export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
   header,
@@ -290,7 +291,8 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
   overlayMode,
   virtualTable = true,
   className = '',
-  vtableData
+  vtableData,
+  renderedFrom
 }: any) => {
   const { column, index } = header;
   const columnDef = column.columnDef as TColType;
@@ -338,14 +340,14 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
           }
         });
         dispatch({ type: 'filter', filters: tempResult });
-        const data = getTempFilter(resource) || {};
-        setTempFilter(resource, { ...data, filters: tempResult });
+        const data = getTempFilter(renderedFrom) || {};
+        setTempFilter(renderedFrom, { ...data, filters: tempResult });
       }
     }, MINIMUM_SEARCH_DELAY);
 
     // Clear the timer when the component unmounts or when filters change
     return () => clearTimeout(searchTimer);
-  }, [filters, isClientSideGrid]);
+  }, [filters, isClientSideGrid, renderedFrom]);
 
   const colSize = header.getSize();
 
