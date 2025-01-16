@@ -406,8 +406,9 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
       })
       .then(({ data: { data, count, columns } }) => {
         if (resourceCamelCase === 'userSession') {
+          setColumns([]);
           setIsColumnsLoading(true);
-          columns = columns?.map((e) => {
+          const newColumns = columns?.map((e) => {
             return {
               accessor: e.fieldName,
               Header: e.fieldLabel,
@@ -439,7 +440,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
               }
             };
           });
-          setColumns(columns);
+          setColumns([...newColumns]);
           setIsColumnsLoading(false);
         }
         if (resourceCamelCase === 'iotDataPoints') {
