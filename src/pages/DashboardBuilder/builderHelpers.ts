@@ -67,6 +67,7 @@ export type KPIListType = {
   horizontalBar?: false;
   currencyConverter?: boolean;
   filters: IFilterType[];
+  redirectField?: string;
 };
 
 export const statuses = {
