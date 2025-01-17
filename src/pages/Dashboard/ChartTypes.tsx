@@ -30,6 +30,8 @@ import axios, { CancelTokenSource } from 'axios';
 import dayjs from 'dayjs';
 import OpenInFullIcon from '@mui/icons-material/OpenInFull';
 import routes from 'src/components/Helpers/Routes';
+import queryString from 'query-string';
+
 export interface ChartDataType extends IFormDataType {
   _id: any;
   horizontalChart?: string;
@@ -366,6 +368,7 @@ const ChartTypes = ({
                   chart={chart}
                   chartData={chartData?.tableData}
                   currency={globalFilters.currency || currency}
+                  filters={filterValues}
                 />
               ) : chart.graphType === 'Map' ? (
                 <MapView height={fullScreen ? window.innerHeight - 200 : isScreenSmall ? 350 : chart.column <= 6 ? 400 : 500} data={chartData} />
@@ -425,10 +428,20 @@ const ChartTypes = ({
                         })
                       },
                       onClick: (event, elements) => {
-                        if (elements.length > 0 && chartData.datasets[0].label === 'Asset Status Count') {
+                        if (elements.length > 0 && chart?.kpi?.redirectField && chart?.kpi?.resource) {
                           const dataIndex = elements[0].index;
-                          const clickedLabel = chartData.labels[dataIndex];
-                          window.open(`${routes.serializedAsset.path}?assetStatus=${clickedLabel}`, '_blank')
+                          const resourcePath = routes[camelCase(chart.kpi.resource)]?.path;
+                          const queryObj = {};
+                          queryObj[chart.kpi.redirectField] = chartData.labels[dataIndex];
+                          Object.keys(filterValues).forEach((key) => {
+                            const value = filterValues[key];
+                            if (Array.isArray(value) && value?.length > 0) {
+                              queryObj[key] = JSON.stringify(value);
+                            } else if (!Array.isArray(value) && value) {
+                              queryObj[key] = JSON.stringify(value);
+                            }
+                          });
+                          window.open(`${resourcePath}?${queryString.stringify(queryObj)}`, '_blank')
                         }
                       },
                       maintainAspectRatio: false,
@@ -496,6 +509,7 @@ const ChartTypes = ({
                 chartData={chartData?.tableData}
                 chart={chart}
                 currency={globalFilters.currency || currency}
+                filters={filterValues}
               />
             )}
           </Box>
