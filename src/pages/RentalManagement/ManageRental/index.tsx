@@ -209,13 +209,13 @@ const ManageRentalManagementDialog = ({
     if (estimateEndDate.diff(estimateStartDate, 'day') < 0) {
       errors['estimateEndDate'] = 'Please enter valid estimate end date';
     }
-    let actualStartDate = dayjs(values?.actualStartDate);
-    let actualEndDate = dayjs(values?.actualEndDate);
-    if (actualStartDate.format('YYYY-MM-DD') !== actualEndDate.format('YYYY-MM-DD')) {
-      if (actualEndDate.diff(actualStartDate, 'day') <= 0) {
-        errors['actualEndDate'] = 'Please enter valid actual end date';
-      }
-    }
+    // let actualStartDate = dayjs(values?.actualStartDate);
+    // let actualEndDate = dayjs(values?.actualEndDate);
+    // if (actualStartDate.format('YYYY-MM-DD') !== actualEndDate.format('YYYY-MM-DD')) {
+    //   if (actualEndDate.diff(actualStartDate, 'day') <= 0) {
+    //     errors['actualEndDate'] = 'Please enter valid actual end date';
+    //   }
+    // }
     return errors;
   }
 

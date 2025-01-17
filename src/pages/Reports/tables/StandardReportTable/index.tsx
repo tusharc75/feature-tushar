@@ -709,6 +709,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
               />
             }
             height={'calc(100vh - 270px)'}
+            resource={sidebarResource[resourceCamelCase]}
             columns={getFilteredColumn(columns)}
             state={state}
             dispatch={dispatch}

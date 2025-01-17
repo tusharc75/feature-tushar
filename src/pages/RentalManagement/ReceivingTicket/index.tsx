@@ -1897,11 +1897,11 @@ const ReceivingTicket = ({
       ids: ids,
       asset: asset
     };
-    if (values.manualStartDate) {
-      data.startDate = displayDate(values.manualStartDate);
+    if (values?.manualStartDate) {
+      data.startDate = values.manualStartDate;
     }
-    if (values.manualEndDate) {
-      data.endDate = displayDate(values.manualEndDate);
+    if (values?.manualEndDate) {
+      data.endDate = values.manualEndDate
     }
     axiosInstance()
       .put(`${rentalManagement.api}/${rentalManagementData?._id}/start-end-date`, data)

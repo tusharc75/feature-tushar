@@ -541,12 +541,20 @@ const ContactDetailsPage = (props) => {
               contactResource === customerContact.contactResource &&
               contactPermissions?.isUpdate &&
               allowedToEdit && (
-                <ThemeButton iconForMobile={<HiShoppingCart />} onClick={handleEcommerceAccess} mobileTooltip={'E-Commerce Access'}>
+                <ThemeButton
+                  disabled={contactData.relatedUser?.eCommerceAccess}
+                  iconForMobile={<HiShoppingCart />}
+                  onClick={handleEcommerceAccess}
+                  mobileTooltip={'E-Commerce Access'}>
                   {'E-Commerce Access'}
                 </ThemeButton>
               )}
             {contactPermissions?.isUpdate && allowedToEdit && (
-              <ThemeButton iconForMobile={<RiLayoutFill />} onClick={handlePortalAccess} mobileTooltip={'Give Portal Access'}>
+              <ThemeButton
+                disabled={contactData?.isUserExist}
+                iconForMobile={<RiLayoutFill />}
+                onClick={handlePortalAccess}
+                mobileTooltip={'Give Portal Access'}>
                 {'Give Portal Access'}
               </ThemeButton>
             )}

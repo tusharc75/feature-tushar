@@ -46,7 +46,8 @@ export const VirtualTable = forwardRef(function (
     vtableData,
     expanderWithCustomContent = false,
     customContentHeight = 300,
-    customContent = () => null
+    customContent = () => null,
+    renderedFrom = ''
   }: RnderTableProps & {
     columns: Column<any, unknown>[];
     sizes: number[];
@@ -167,6 +168,7 @@ export const VirtualTable = forwardRef(function (
             vtableData={vtableData}
             virtualPaddingLeft={virtualPaddingLeft}
             virtualPaddingRight={virtualPaddingRight}
+            renderedFrom={renderedFrom}
           />
           <TableBody
             style={{

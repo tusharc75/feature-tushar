@@ -1,41 +1,21 @@
 import { Box, CircularProgress } from '@mui/material';
-import { makeStyles } from '@mui/styles';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { MobileExportIcon, MobileImportIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import routes from 'src/components/Helpers/Routes';
 import { addItemAtIndex, changeItemIndex } from 'src/constants/helpers';
 import { v4 as uuid } from 'uuid';
-
-import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import DropContainer, { SingleSection } from './DropContainer';
 import Sidebar, { SidebarItem } from './Sidebar';
 import { useDndSensors } from 'src/hooks';
 import { useData } from 'src/StateProvider/Provider';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-
-const useClasses = makeStyles(() => ({
-  root: {
-    height: 'calc(80vh + 20px)'
-  },
-  gridBox_layout: {
-    height: 'calc(85vh-194px)',
-    overflow: 'auto'
-  },
-  column: {
-    flexDirection: 'row'
-  },
-  screenHeightAuto: {
-    height: 'calc(100vh - 200px)',
-    overflow: 'auto'
-  }
-}));
+import CustomContainer from 'src/components/CustomContainer';
 
 const EcommerceHome = () => {
-  const classes = useClasses();
   const [formData, setFormData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -178,53 +158,48 @@ const EcommerceHome = () => {
   };
 
   return (
-    <Box className="main-container-v1">
-      <Box className="headerbox-v1">
-        <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ title: resources?.eCommerceHome?.titlePlural }]} />
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[{ title: resources?.eCommerceHome?.titlePlural }]} />
+        <Box display="flex" justifyContent="flex-end">
+          <label
+            className={`new-headerbox-button-v1 ${isMobile && !isTablet ? 'h-[26px] w-[26px] p-1' : ''}`}
+            onClick={handleExportField}
+            style={{ cursor: 'pointer' }}
+          >
+            {isMobile && !isTablet ? <MobileExportIcon size={18} color={'var(--primary-text)'} /> : 'Export'}
+          </label>
+          <input
+            onClick={(e: any) => (e.target.value = null)}
+            accept="application/json"
+            style={{
+              opacity: '0',
+              position: 'absolute',
+              zIndex: -1
+            }}
+            onChange={handleImport}
+            id="import-file"
+            multiple={false}
+            type="file"
+          />
+          <label
+            htmlFor="import-file"
+            className={`new-headerbox-button-v1 ${isMobile && !isTablet ? 'h-[26px] w-[26px] p-1' : ''}`}
+            style={{ marginRight: '8px', cursor: 'pointer' }}
+          >
+            {isMobile && !isTablet ? <MobileImportIcon size={18} color={'var(--primary-text)'} /> : 'Import'}
+          </label>
+          <ThemeButton
+            disabled={isSubmitting || loading}
+            onClick={handleClickSave}
+            isLoading={isSubmitting}
+            buttonType='theme'
+          >
+            Save
+          </ThemeButton>
         </Box>
-        <Box className="controls-v1">
-          <Box sx={{ display: 'flex' }}>
-            <label
-              className={`new-headerbox-button-v1 ${isMobile && !isTablet ? 'h-[26px] w-[26px] p-1' : ''}`}
-              onClick={handleExportField}
-              style={{ cursor: 'pointer' }}
-            >
-              {isMobile && !isTablet ? <MobileExportIcon size={18} color={'var(--primary-text)'} /> : 'Export'}
-            </label>
-            <input
-              onClick={(e: any) => (e.target.value = null)}
-              accept="application/json"
-              style={{
-                opacity: '0',
-                position: 'absolute',
-                zIndex: -1
-              }}
-              onChange={handleImport}
-              id="import-file"
-              multiple={false}
-              type="file"
-            />
-            <label
-              htmlFor="import-file"
-              className={`new-headerbox-button-v1 ${isMobile && !isTablet ? 'h-[26px] w-[26px] p-1' : ''}`}
-              style={{ marginRight: '8px', cursor: 'pointer' }}
-            >
-              {isMobile && !isTablet ? <MobileImportIcon size={18} color={'var(--primary-text)'} /> : 'Import'}
-            </label>
-
-            <ThemeButton
-              disabled={isSubmitting || loading}
-              onClick={handleClickSave}
-              isLoading={isSubmitting}
-              buttonType='theme'
-            >
-              Save
-            </ThemeButton>
-          </Box>
-        </Box>
-      </Box>
-      <Box className={`detail-container-v1`}>
+      </div>
+      <CustomContainer>
         <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
           <div className="grid grid-cols-1 gap-2 md:grid-cols-[250px_1fr] lg:grid-cols-[300px_1fr]">
             <Sidebar />
@@ -243,8 +218,8 @@ const EcommerceHome = () => {
             <DragOverlay>{activeSection && <SingleSection {...activeSection} />}</DragOverlay>
           </span>
         </DndContext>
-      </Box>
-    </Box>
+      </CustomContainer>
+    </section>
   );
 };
 
