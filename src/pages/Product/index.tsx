@@ -28,7 +28,7 @@ import axios, { CancelTokenSource } from 'axios';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createResourceFlow } from 'src/components/CustomIntro/walkmeSteps';
 import ScheduledMaintenance from 'src/pages/Product/ScheduledMaintenance';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
+import HandymanIcon from '@mui/icons-material/Handyman';
 
 const ignoreField = ['qty', 'priceTemplate'];
 
@@ -349,8 +349,7 @@ const Product = () => {
     <section className="main-container-v1">
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ title: resources?.product?.titlePlural }]} />
-        <div className="flex gap-2">
-          <ThemeButton onClick={() => setOpenScheduledMaintenance(true)}>Schedule Maintenance</ThemeButton>
+        <div className="flex items-center gap-2">
           <ImportExportLinks
             module={resources?.product?.titlePlural}
             permission={permissions.product}
@@ -421,6 +420,11 @@ const Product = () => {
               }
             ]}
           />
+          <HtmlTooltip title={'Schedule Maintenance'}>
+            <IconButton size="small" aria-label="Schedule Maintenance" onClick={() => setOpenScheduledMaintenance(true)}>
+              <HandymanIcon fontSize="small" color={'primary'} />
+            </IconButton>
+          </HtmlTooltip>
         </div>
       </div>
       <CustomContainer>
