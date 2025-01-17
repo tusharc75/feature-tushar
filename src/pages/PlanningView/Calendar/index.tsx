@@ -165,11 +165,15 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         value: 'Rental Management',
         key: 'rentalJob'
       },
-      {
-        label: resources?.padMaster?.titlePlural,
-        value: 'Pad Master',
-        key: 'padMaster'
-      }
+      ...(resources?.padMaster
+        ? [
+            {
+              label: resources?.padMaster?.titlePlural,
+              value: 'Pad Master',
+              key: 'padMaster'
+            }
+          ]
+        : [])
     ],
     [resources?.padMaster?.titlePlural, resources?.rentalManagement?.titlePlural]
   );
