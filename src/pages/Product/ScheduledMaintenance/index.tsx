@@ -1,15 +1,13 @@
-import { Delete } from '@mui/icons-material';
+import { Delete, Edit } from '@mui/icons-material';
 import { Box, Dialog, IconButton, MenuItem } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
-import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile } from 'react-device-detect';
 import { FiExternalLink } from 'react-icons/fi';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
@@ -32,7 +30,7 @@ const ScheduledMaintenance = ({ onClose }) => {
 
   const [columns, setColumns] = useState(null);
   const [openAssignProductDialog, setOpenAssignProductDialog] = useState(false);
-  const [openCustomDataDialog, setOpenCustomDataDialog] = useState(false);
+  const [openCustomDataDialog, setOpenCustomDataDialog] = useState({ open: false, data: null });
   const [rowsToAdd, setRowsToAdd] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, data: null });
@@ -51,15 +49,7 @@ const ScheduledMaintenance = ({ onClose }) => {
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.product}&view=true`);
     const fields = response?.data?.data?.map((e) => e?.fieldData);
 
-    let coloum: any = [
-      {
-        accessor: 'index',
-        Header: 'Index',
-        width: 70,
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
-      }
-    ];
+    let coloum: any = [];
 
     fields
       ?.filter((e) => ['productName']?.includes(e.fieldName))
@@ -69,15 +59,13 @@ const ScheduledMaintenance = ({ onClose }) => {
             accessor: 'productName',
             Header: ele?.fieldLabel,
             width: 200,
-            disableFilters: true,
-            disableSortBy: true,
             Cell: ({ row }) => (
               <div className="flex items-center gap-2">
                 <p className="text-truncate">{row.original.productName}</p>
                 <IconButton
                   size="small"
                   onClick={() => {
-                    window.open(`${routes.productDetail.path}/${row.original.product}`);
+                    window.open(`${routes.productDetail.path}/${row?.original?.productId}`);
                   }}
                 >
                   <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
@@ -107,8 +95,6 @@ const ScheduledMaintenance = ({ onClose }) => {
         accessor: 'duration',
         Header: 'Duration',
         width: 200,
-        disableFilters: true,
-        disableSortBy: true,
         Cell: ({ row }) => (row.original?.duration ? <p>{row.original?.duration}</p> : <NoDataCell />)
       }
     ];
@@ -123,20 +109,34 @@ const ScheduledMaintenance = ({ onClose }) => {
       canDrag: false,
       Cell: ({ row }) => (
         <>
+          <HtmlTooltip title="Edit">
+            <span>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  setOpenCustomDataDialog({ open: true, data: row?.original });
+                }}
+              >
+                <Edit fontSize="small" color="primary" />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
           <HtmlTooltip title="Delete">
-            <IconButton
-              size="small"
-              onClick={() => {
-                setShowConfirmBox({ open: true, data: [row.original] });
-              }}
-            >
-              <Delete fontSize="small" color="error" />
-            </IconButton>
+            <span>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  setShowConfirmBox({ open: true, data: [row.original] });
+                }}
+              >
+                <Delete fontSize="small" color="error" />
+              </IconButton>
+            </span>
           </HtmlTooltip>
         </>
       )
     });
-    setColumns(coloum);
+    setColumns([...coloum, ...getStaticFields()]);
   };
 
   useEffect(() => {
@@ -160,10 +160,10 @@ const ScheduledMaintenance = ({ onClose }) => {
             let res: any = {
               ...prepareDataForGrid(u)
             };
-            res.productName = u?.productDetail?.productName || '';
+            res.productName = u?.productDetail?.optionLabel || '';
+            res.productId = u?.productDetail?.optionValue || '';
             res.productDescription = u?.productDetail?.productDescription || '';
             res.productNumber = u?.productDetail?.productNumber || '';
-            res.index = index + 1;
             return res;
           });
           dispatch({ type: 'initialize', data: rows, count: count });
@@ -179,8 +179,24 @@ const ScheduledMaintenance = ({ onClose }) => {
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
 
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+
+    if (showFilteredRecordsOnly) {
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(selectedRecords.map((m) => m._id))}`;
     }
 
     return deepFilter;
@@ -198,7 +214,26 @@ const ScheduledMaintenance = ({ onClose }) => {
         .then(({ data }) => {
           fetchData();
           setIsSubmitting(false);
-          setOpenCustomDataDialog(false);
+          setOpenCustomDataDialog({ open: false, data: null });
+          setOpenAssignProductDialog(false);
+          setRowsToAdd([]);
+        })
+        .catch((error) => {
+          setIsSubmitting(false);
+          setToastConfig(error);
+        });
+    } else if (_data && openCustomDataDialog?.data?._id) {
+      setIsSubmitting(true);
+      axiosInstance()
+        .put(`${product.api}/scheduledMaintenance`, {
+          _id: openCustomDataDialog?.data?._id,
+          effectiveDate: _data?.effectiveDate,
+          duration: _data?.duration
+        })
+        .then(({ data }) => {
+          fetchData();
+          setIsSubmitting(false);
+          setOpenCustomDataDialog({ open: false, data: null });
           setOpenAssignProductDialog(false);
         })
         .catch((error) => {
@@ -271,7 +306,7 @@ const ScheduledMaintenance = ({ onClose }) => {
       onClose={onClose}
       aria-labelledby="assign-roles-dialog"
     >
-      <CustomDialogHeader title={`Add`} showManimizeMaximize={false} showRequiredLabel={false} onClose={onClose} />
+      <CustomDialogHeader title={`Setup Schedule Maintenance`} showManimizeMaximize={false} showRequiredLabel={false} onClose={onClose} />
       <CustomDialogContent isFooterPresent={false}>
         <>
           <DetailsPageHeader
@@ -292,7 +327,7 @@ const ScheduledMaintenance = ({ onClose }) => {
               dispatch={dispatch}
               renderedFrom={renderedFrom}
               refreshGrid={fetchData}
-              showOnlyShowFilteredRecordSwitch={false}
+              showOnlyShowFilteredRecordSwitch={true}
               showFilters={false}
             />
           ) : (
@@ -306,18 +341,19 @@ const ScheduledMaintenance = ({ onClose }) => {
             handleCloseDialog={() => setOpenAssignProductDialog(false)}
             onSuccess={(rows) => {
               setRowsToAdd(rows);
-              setOpenCustomDataDialog(true);
+              setOpenCustomDataDialog({ open: true, data: null });
             }}
             serialized={true}
             isSubmitting={false}
-            ids={dataRows?.map((d) => d?.product)}
+            ids={dataRows?.map((d) => d?.productId)}
           />
         )}
 
-        {openCustomDataDialog && (
+        {openCustomDataDialog.open && (
           <CustomDataDialog
+            data={openCustomDataDialog?.data}
             handleClose={() => {
-              setOpenCustomDataDialog(false);
+              setOpenCustomDataDialog({ open: false, data: null });
             }}
             handleSave={(_data) => {
               handleAdd(_data);
