@@ -1,4 +1,4 @@
-import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import { Box } from '@mui/material';
 import { Edit } from '@mui/icons-material';
 import queryString from 'query-string';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
@@ -13,7 +13,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { expenseReport, getUniqueCurrencies, sidebarResource } from '../../constants/helpers';
+import { expenseReport, sidebarResource } from '../../constants/helpers';
 import Step from '../DynamicForm/Step';
 import ManageExpenseReports from 'src/pages/ExpensesReport/ManageExpenseReports';
 
@@ -30,7 +30,6 @@ const ExpenseReportDetailsPage = () => {
   }: any = useData();
   const [loadingDetails, setLoadingDetails] = useState(true);
   const [expenseReportData, setExpenseReportData] = useState(null);
-  const [currencySymbol, setCurrencySymbol] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
@@ -89,7 +88,6 @@ const ExpenseReportDetailsPage = () => {
     axiosInstance()
       .get(`${expenseReport.api}/${id}`)
       .then(({ data: { data } }) => {
-        setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data.currency)?.symbolNative);
         setLoadingDetails(false);
         setAllowedToEdit(permissions?.expenseReport?.isUpdate);
         setAllowedToDelete(permissions?.expenseReport?.isDelete);
