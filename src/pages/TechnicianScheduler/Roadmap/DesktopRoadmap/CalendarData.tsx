@@ -42,7 +42,7 @@ const Services = ({ startDate, services, handleSelect, dayPixel }) => {
               <div>
                 <p>{service?.fieldTicket[0]?.fieldTicketNumber ?? service?.rentalJob[0]?.rentalJobName}</p>
                 <p className="text-[12px]">
-                  {dayjs(service.startDate).format(dateFormat)} - {dayjs(service.endDate).format(dateFormat)}
+                  {dayjs(service?.startDate).format(dateFormat)} - {dayjs(service?.endDate).format(dateFormat)}
                 </p>
               </div>
             }
@@ -61,13 +61,13 @@ const Services = ({ startDate, services, handleSelect, dayPixel }) => {
               className="flex h-[--data-h] flex-col justify-center p-2"
             >
               <p className="mb-2 line-clamp-1 text-[13px] font-semibold leading-[16px]">
-                {service.fieldTicket[0]?.fieldTicketNumber || service.rentalJob[0].rentalJobName}
+                {service?.fieldTicket[0]?.fieldTicketNumber || service?.rentalJob[0]?.rentalJobName}
               </p>
               <p className="flex items-center gap-1 text-[10px] font-medium leading-[16px] text-[#777575] dark:text-gray-100">
-                <CalendarMonth className="!h-[12px] !w-[12px]" /> {dayjs(service.startDate).format(dateFormat)}-
-                <span className="line-clamp-1 ">{dayjs(service.endDate).format(dateFormat)}</span>
+                <CalendarMonth className="!h-[12px] !w-[12px]" /> {dayjs(service?.startDate).format(dateFormat)}-
+                <span className="line-clamp-1 ">{dayjs(service?.endDate).format(dateFormat)}</span>
               </p>
-              <p className="{styles.chip} {styles[priority]} text-[10px] font-medium leading-[16px] text-[#777575]">{service.status}</p>
+              <p className="{styles.chip} {styles[priority]} text-[10px] font-medium leading-[16px] text-[#777575]">{service?.status}</p>
             </div>
           </HtmlTooltip>
         );
