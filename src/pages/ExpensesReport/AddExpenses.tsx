@@ -24,26 +24,26 @@ function AddExpenses({
   onClose,
   fullScreen,
   setFullScreen,
-  isSubmitting
+  isSubmitting,
+  onSave
 }) {
   const renderedFrom = camelCase(sidebarResource?.expenses);
   const [columns, setColumns] = useState(null);
   const { generateColumns, checkStaticField } = useColumns();
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { page, limit, search, filters, sorting, showFilteredRecordsOnly } = state;
-  const {
-    state: { user, permissions }
-  }: any = useData();
+  const { page, limit, filters, sorting, showFilteredRecordsOnly } = state;
+  const { state: { user, permissions } } = useData();
+  const [selectedRows, setSelectedRows] = useState([]);
 
-    useEffect(() => {
-      fetchGridColumns();
-    }, []);
+  useEffect(() => {
+    fetchGridColumns();
+  }, []);
 
-    useEffect(() => {
-      const cancelTokenSource = axios.CancelToken.source();
-      fetchData(cancelTokenSource);
-      return () => cancelTokenSource.cancel();
-    }, [page, limit, filters, sorting, showFilteredRecordsOnly]);
+  useEffect(() => {
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
+  }, [page, limit, filters, sorting, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -57,24 +57,33 @@ function AddExpenses({
     setColumns(newColumns);
   };
 
-    const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
-      dispatch({ type: 'loading', loading: true });
-        let data: any = [], count;
-        const response: any = await axiosInstance().get(`${expenses.api}`);
-        data = response?.data?.data;
-        count = response?.data?.count;
-        let rows = data.map((u) => {
-          let finalObject: any = prepareDataForGrid(u, user);
-          finalObject['isChecked'] = false;
-          finalObject['canDelete'] = permissions?.expenses?.isDelete;
-          return finalObject;
-        });
-        dispatch({ type: 'initialize', data: rows, count: count });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-    };
-  
+  const fetchData = async (cancelTokenSource) => {
+    dispatch({ type: 'loading', loading: true });
+    let data = [], count;
+    const response = await axiosInstance().get(`${expenses.api}`);
+    data = response?.data?.data;
+    count = response?.data?.count;
+    let rows = data.map((u) => {
+      let finalObject = prepareDataForGrid(u, user);
+      finalObject['isChecked'] = false;
+      finalObject['canDelete'] = permissions?.expenses?.isDelete;
+      return finalObject;
+    });
+    dispatch({ type: 'initialize', data: rows, count: count });
+    setTimeout(() => {
+      dispatch({ type: 'loading', loading: false });
+    }, gridLoadingTimeout);
+  };
+
+  const handleSave = () => {
+    onSave(selectedRows); 
+    onClose();
+  };
+
+  const handleRowSelection = (selectedRows) => {
+    setSelectedRows(selectedRows); 
+  };
+
   return (
     <Dialog
       maxWidth="md"
@@ -99,7 +108,7 @@ function AddExpenses({
         showManimizeMaximize={true}
       />
       <CustomDialogContent>
-      {columns ? (
+        {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
@@ -109,6 +118,7 @@ function AddExpenses({
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
             resource={sidebarResource?.expenses}
+            onSelect={handleRowSelection} 
           />
         ) : (
           <Box p={2} height={500}>
@@ -120,7 +130,7 @@ function AddExpenses({
         <ThemeButton buttonType="transparent" id="dialog-cancel-button" onClick={onClose}>
           Cancel
         </ThemeButton>
-        <ThemeButton isLoading={isSubmitting} buttonType="theme" id="dialog-save-button" disabled={isSubmitting} onClick={onClose}>
+        <ThemeButton isLoading={isSubmitting} buttonType="theme" id="dialog-save-button" disabled={isSubmitting} onClick={handleSave}>
           Save
         </ThemeButton>
       </CustomDialogFooter>

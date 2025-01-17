@@ -13,7 +13,6 @@ import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import {
   gridLoadingTimeout,
   prepareDataForGrid,
@@ -42,7 +41,7 @@ const ExpenseReport = () => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [showManageExpenseReportDialog, setShowManageExpenseReportDialog] = useState({ open: false, isClone: false, idToClone: null });
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
 
   const { generateColumns, checkStaticField } = useColumns();

@@ -34,11 +34,9 @@ const ExpenseDetailsPage = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
-
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [locationKeys, setLocationKeys] = useState([]);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
-
   const [resourceData, setResourceData] = useState(null);
   const [fields, setFields] = useState(null);
 
@@ -170,30 +168,42 @@ const ExpenseDetailsPage = () => {
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </div>
             )}
-            <div className='mt-2'>
-              <TableContainer component={Paper}>
-                <Table sx={{ minWidth: 700 }} aria-label="spanning table">
-                  {expensesData?.lineItems?.length>0 && (<TableHead>
-                    <TableRow>
-                      <TableCell>Description</TableCell>
-                      <TableCell align="right">Amount</TableCell>
-                    </TableRow>
-                  </TableHead>)}
-                  <TableBody>
-                    {expensesData?.lineItems?.map((row) => (
-                      <TableRow key={row.id}>
-                        <TableCell>{row.description}</TableCell>
-                        <TableCell align="right">{currencySymbol} {row.amount}</TableCell>
+            {!loadingDetails ? (
+              <div className="mt-2">
+                <TableContainer component={Paper}>
+                  <Table sx={{ minWidth: 700 }} aria-label="spanning table">
+                    {expensesData?.lineItems?.length > 0 && (
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Description</TableCell>
+                          <TableCell align="right">Amount</TableCell>
+                        </TableRow>
+                      </TableHead>
+                    )}
+                    <TableBody>
+                      {expensesData?.lineItems?.map((row) => (
+                        <TableRow key={row.id}>
+                          <TableCell>{row.description}</TableCell>
+                          <TableCell align="right">
+                            {currencySymbol} {row.amount}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      <TableRow>
+                        <TableCell>Total Amount</TableCell>
+                        <TableCell align="right">
+                          {currencySymbol} {expensesData?.totalAmount}
+                        </TableCell>
                       </TableRow>
-                    ))}
-                    <TableRow>
-                      <TableCell>Total Amount</TableCell>
-                      <TableCell align="right">{currencySymbol} {expensesData?.totalAmount}</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </div>
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </div>
+            ) : (
+              <div className="p-2">
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+              </div>
+            )}
           </Box>
         </TabPanel>
         {resourceData &&

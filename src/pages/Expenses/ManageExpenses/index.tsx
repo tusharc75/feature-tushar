@@ -60,13 +60,6 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
     setValue(event.target.value);
   };
 
-  const handleCurrencyChange = (currency) => {
-    console.log(currency);
-    // const selectedCurrency = event.target.value;
-    // const symbol = getUniqueCurrencies().find((d) => d.currencyCode === selectedCurrency)?.symbolNative;
-    // setCurrencySymbol(symbol);
-  };
-
   const removeTextField = (id) => {
     setTextFields(textFields.filter((field) => field.id !== id));
   };
@@ -235,8 +228,8 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
                     resource={sidebarResource.expenses}
                     referenceId={expenseId || null}
                   />
-                  <Grid container spacing={2}>
-                    <Grid size={{ xs: 6, sm: 6, md: 4, lg: 6 }}>
+                  <Grid container spacing={2} sx={{ display: 'flex', flexDirection:'column' }}>
+                    <Grid size={{ xs: 6, sm: 6, md: 6, lg: 6 }}>
                       <TextField
                         id="outlined-required"
                         label="Total Amount"
@@ -254,7 +247,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
                         }}
                       />
                     </Grid>
-                    <Grid size={{ xs: 6, sm: 6, md: 4, lg: 6 }} sx={{ display: 'flex' }}>
+                    <Grid size={{ xs: 6, sm: 6, md: 6, lg: 6 }} sx={{display:'flex',justifyContent:'flex-end'}}>
                       <ThemeButton buttonType="transparent" onClick={() => setShowItemizeDialog(true)}>
                         Itemize
                       </ThemeButton>

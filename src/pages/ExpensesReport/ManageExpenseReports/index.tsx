@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { Formik, Form } from 'formik';
 import Grid from '@mui/material/Grid2';
-import { Box } from '@mui/material';
+import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import { useHistory } from 'react-router-dom';
 import { isEqual } from 'lodash';
@@ -20,6 +20,7 @@ import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import AddIcon from '@mui/icons-material/Add';
 import AddExpenses from 'src/pages/ExpensesReport/AddExpenses';
+import ExpenseTable from 'src/pages/ExpensesReport/ExpenseTable';
 
 const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose, onSuccess }) => {
   const history = useHistory();
@@ -34,6 +35,7 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
   const [showExpenseDialog, setShowExpenseDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [title, setTitle] = useState('');
+  const [selectedExpenses, setSelectedExpenses] = useState([]);
 
   useEffect(() => {
     axiosInstance()
@@ -78,10 +80,11 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
 
   const handleSubmit = (value) => {
     setIsSubmitting(true);
-    const {fields, values, ...data} = value;
+    const { fields, values, ...data } = value;
+    data.selectedExpenses = selectedExpenses;
+
     if (expenseReportId && isClone === false) {
-      axiosInstance();
-      values._id = expenseReportId
+      axiosInstance()
         .put(`${expenseReport.api}`, data)
         .then(({ data }) => {
           setIsSubmitting(false);
@@ -97,7 +100,6 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
           toastConfig.setToastConfig(error);
         });
     } else {
-      const {fields, values, ...data} = value;
       axiosInstance()
         .post(`${expenseReport.api}`, data)
         .then(({ data: { data, message } }) => {
@@ -127,6 +129,15 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
         inline: 'start'
       });
     }
+  };
+
+  const handleSaveExpenses = (expenses) => {
+    setSelectedExpenses(expenses);
+    setShowExpenseDialog(false);
+  };
+
+  const removeExpenseField = (id) => {
+    setSelectedExpenses(selectedExpenses.filter((field) => field.id !== id));
   };
 
   return (
@@ -174,6 +185,11 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
                     resource={sidebarResource.expenseReport}
                     referenceId={expenseReportId || null}
                   />
+                  {selectedExpenses.length > 0 && (
+                    <div className="mt-2">
+                      <ExpenseTable removeExpenseField={removeExpenseField} selectedExpenses={selectedExpenses} />
+                    </div>
+                  )}
                 </Form>
                 <Grid container spacing={2} sx={{ alignItems: 'center', marginTop: 2 }}>
                   <Grid size={{ xs: 8 }} sx={{ display: 'flex', alignItems: 'center' }}>
@@ -238,6 +254,7 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
                   fullScreen={fullScreen}
                   setFullScreen={setFullScreen}
                   isSubmitting={isSubmitting}
+                  onSave={handleSaveExpenses}
                 />
               )}
             </>
