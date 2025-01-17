@@ -1,6 +1,6 @@
 import { Autocomplete, Box, Dialog, TextField } from '@mui/material';
 import { Form, Formik } from 'formik';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -17,9 +17,18 @@ const Schema = object().shape({
 
 const DURATION = ['Monthly', 'Quarterly', 'Yearly'];
 
-const CustomDataDialog = ({ handleClose, handleSave, loading }) => {
+const CustomDataDialog = ({ data = null, handleClose, handleSave, loading }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [initialData] = useState({ effectiveDate: '', duration: '' });
+  const [initialData, setInitialData] = useState({ effectiveDate: '', duration: '' });
+
+  useEffect(() => {
+    if (data) {
+      setInitialData({
+        effectiveDate: data?.effectiveDate,
+        duration: data?.duration
+      });
+    }
+  }, [data]);
 
   const handleSubmit = (values) => {
     handleSave(values);
@@ -55,7 +64,6 @@ const CustomDataDialog = ({ handleClose, handleSave, loading }) => {
                     name={'effectiveDate'}
                     label={'Effective Date'}
                     value={values['effectiveDate']}
-                    disablePast={true}
                     required
                     margin="dense"
                     onChange={(value: any) => {
