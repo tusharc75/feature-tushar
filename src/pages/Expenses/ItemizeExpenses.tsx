@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Dialog, IconButton, Typography, TextField, InputAdornment } from '@mui/material';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Grid from '@mui/material/Grid2';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
@@ -102,10 +102,10 @@ const ItemizeExpenses = ({
           ))}
           <Grid container spacing={2} sx={{ alignItems: 'center', marginTop: 2 }}>
             <Grid size={{ xs: 8 }} sx={{ display: 'flex', alignItems: 'center' }}>
-              <IconButton onClick={addTextField} color="primary" size="small" sx={{ marginRight: 0.5 }} aria-label="add">
-                <AddCircleOutlineIcon fontSize="small" />
-              </IconButton>
-              Add
+              <ThemeButton onClick={addTextField} buttonType='themeBorder' sx={{marginRight: 0.5 }} aria-label="add">
+                <AddIcon fontSize="small" />
+                Add
+              </ThemeButton>
             </Grid>
             <Grid size={{ xs: 4 }} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
               <Typography variant="h6">Total Amount: {currencySymbol} {value}</Typography>

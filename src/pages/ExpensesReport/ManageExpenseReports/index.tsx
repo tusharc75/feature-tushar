@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { Formik, Form } from 'formik';
-import { Box, InputAdornment, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid2';
+import { Box } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import { useHistory } from 'react-router-dom';
 import { isEqual } from 'lodash';
@@ -15,21 +15,14 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { isMobile, isTablet } from 'react-device-detect';
-import {
-  CustomDialogTransition,
-  getObjKeysWithValues,
-  expenses,
-  yupSchema,
-  sidebarResource,
-  getObjKeys,
-  GenerateResourceLineNumber,
-  getUniqueCurrencies
-} from '../../../constants/helpers';
+import { CustomDialogTransition, getObjKeysWithValues, expenseReport, yupSchema, sidebarResource } from '../../../constants/helpers';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import ItemizeExpenses from 'src/pages/Expenses/ItemizeExpenses';
+import AddIcon from '@mui/icons-material/Add';
+import AddExpenses from 'src/pages/ExpensesReport/AddExpenses';
+import ExpenseTable from 'src/pages/ExpensesReport/ExpenseTable';
 
-const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess }) => {
+const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose, onSuccess }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -39,64 +32,30 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [showItemizeDialog, setShowItemizeDialog] = useState(false);
-  const [value, setValue] = useState('');
+  const [showExpenseDialog, setShowExpenseDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [title, setTitle] = useState('');
-  const [textFields, setTextFields] = useState([]);
-  const [currencySymbol, setCurrencySymbol] = useState(null);
-
-  const addTextField = () => {
-    setTextFields([...textFields, { id: textFields.length, description: '', amount: '' }]);
-  };
-
-  const handleInputChange = (index, field, event) => {
-    const newFields = [...textFields];
-    newFields[index][field] = event.target.value;
-    setTextFields(newFields);
-  };
-
-  const handleChange = (event) => {
-    setValue(event.target.value);
-  };
-
-  const removeTextField = (id) => {
-    setTextFields(textFields.filter((field) => field.id !== id));
-  };
-
-  const calculateTotal = () => {
-    const newValue = textFields
-      .reduce((total, field) => {
-        const amount = parseFloat(field.amount) || 0;
-        return total + amount;
-      }, 0)
-      .toFixed(2);
-    return setValue(newValue);
-  };
+  const [selectedExpenses, setSelectedExpenses] = useState([]);
 
   useEffect(() => {
     axiosInstance()
-      .get(`/field?resource=${sidebarResource.expenses}`)
+      .get(`/field?resource=${sidebarResource.expenseReport}`)
       .then(({ data: { data } }) => {
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-        if (expenseId) {
+        if (expenseReportId) {
           axiosInstance()
-            .get(`${expenses.api}/` + expenseId)
+            .get(`${expenseReport.api}/` + expenseReportId)
             .then(({ data: { data } }) => {
               if (isClone) {
-                const { _id, brand, createdBy, history, expenseNumber, updatedBy, ...rest } = data;
-                setTitle(`Clone - ${expenseNumber}`);
-                rest.expenseNumber = GenerateResourceLineNumber(fieldsDataForCreate);
+                const { _id, brand, createdBy, history, reportTitle, updatedBy, ...rest } = data;
+                setTitle(`Clone - ${reportTitle}`);
                 setInitialData({
                   fields: fieldsDataForCreate,
                   values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
                 });
               } else {
-                setValue(data.totalAmount);
-                setTextFields(data.lineItems);
-                setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data.currency)?.symbolNative);
-                setTitle(`Edit - ${data.expenseNumber}`);
+                setTitle(`Edit - ${data.reportTitle}`);
                 setInitialData({
                   fields: fieldsDataForUpdate,
                   values: { ...getObjKeysWithValues(data, fieldsDataForUpdate) }
@@ -107,13 +66,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
               toastConfig.setToastConfig(error);
             });
         } else {
-          setTitle(`Create ${resources?.expenses?.titleSingular}`);
-          let initialData = getObjKeys('', fieldsDataForCreate);
-          initialData['expenseNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
-          if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
-            initialData['currency'] = user.user?.brandCurrency;
-          }
-          setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === initialData['currency'])?.symbolNative);
+          setTitle(`Create ${resources?.expenseReport?.titleSingular}`);
           setInitialData({
             fields: fieldsDataForCreate,
             values: initialData
@@ -125,17 +78,14 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
       });
   }, []);
 
-  const handleSubmit = (values) => {
+  const handleSubmit = (value) => {
     setIsSubmitting(true);
-    const payload = {
-      ...values,
-      totalAmount: value,
-      lineItems: textFields
-    };
-    if (expenseId && isClone === false) {
-      payload._id = expenseId;
+    const { fields, values, ...data } = value;
+    data.selectedExpenses = selectedExpenses;
+
+    if (expenseReportId && isClone === false) {
       axiosInstance()
-        .put(`${expenses.api}`, payload)
+        .put(`${expenseReport.api}`, data)
         .then(({ data }) => {
           setIsSubmitting(false);
           onSuccess();
@@ -151,9 +101,9 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
         });
     } else {
       axiosInstance()
-        .post(`${expenses.api}`, payload)
+        .post(`${expenseReport.api}`, data)
         .then(({ data: { data, message } }) => {
-          history.push(`${routes.expensesDetail.path}/${data._id}`);
+          history.push(`${routes?.expenseReportDetail?.path}/${data._id}`);
           setIsSubmitting(false);
           onSuccess(data);
           toastConfig.setToastConfig({
@@ -181,11 +131,20 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
     }
   };
 
+  const handleSaveExpenses = (expenses) => {
+    setSelectedExpenses(expenses);
+    setShowExpenseDialog(false);
+  };
+
+  const removeExpenseField = (id) => {
+    setSelectedExpenses(selectedExpenses.filter((field) => field.id !== id));
+  };
+
   return (
     <Dialog
       maxWidth="md"
       fullWidth
-      fullScreen={fullScreen || isMobile || isTablet}
+      fullScreen
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
       onClose={(e, reason) => {
@@ -212,7 +171,6 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
                 }}
-                showManimizeMaximize={true}
               />
               <CustomDialogContent>
                 <Form>
@@ -220,40 +178,34 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
                     errors={errors}
                     values={values}
                     setFieldValue={setFieldValue}
-                    onChange={setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === values.currency)?.symbolNative)}
                     touched={touched}
                     fieldsData={initialData.fields}
                     size="small"
                     fullWidth
-                    resource={sidebarResource.expenses}
-                    referenceId={expenseId || null}
+                    resource={sidebarResource.expenseReport}
+                    referenceId={expenseReportId || null}
                   />
-                  <Grid container spacing={2} sx={{ display: 'flex', flexDirection:'column' }}>
-                    <Grid size={{ xs: 6, sm: 6, md: 6, lg: 6 }}>
-                      <TextField
-                        id="outlined-required"
-                        label="Total Amount"
-                        required
-                        type="number"
-                        size="small"
-                        disabled={textFields.length > 0}
-                        value={showItemizeDialog ? calculateTotal() : value}
-                        onChange={handleChange}
-                        fullWidth
-                        slotProps={{
-                          input: {
-                            startAdornment: <InputAdornment position="start">{currencySymbol}</InputAdornment>
-                          }
-                        }}
-                      />
-                    </Grid>
-                    <Grid size={{ xs: 6, sm: 6, md: 6, lg: 6 }} sx={{display:'flex',justifyContent:'flex-end'}}>
-                      <ThemeButton buttonType="transparent" onClick={() => setShowItemizeDialog(true)}>
-                        Itemize
-                      </ThemeButton>
-                    </Grid>
-                  </Grid>
+                  {selectedExpenses.length > 0 && (
+                    <div className="mt-2">
+                      <ExpenseTable removeExpenseField={removeExpenseField} selectedExpenses={selectedExpenses} />
+                    </div>
+                  )}
                 </Form>
+                <Grid container spacing={2} sx={{ alignItems: 'center', marginTop: 2 }}>
+                  <Grid size={{ xs: 8 }} sx={{ display: 'flex', alignItems: 'center' }}>
+                    <ThemeButton
+                      onClick={() => {
+                        setShowExpenseDialog(true);
+                      }}
+                      buttonType="themeBorder"
+                      sx={{ marginRight: 0.5 }}
+                      aria-label="add"
+                    >
+                      <AddIcon fontSize="small" />
+                      Add Expense
+                    </ThemeButton>
+                  </Grid>
+                </Grid>
               </CustomDialogContent>
               <CustomDialogFooter>
                 <ThemeButton
@@ -295,19 +247,14 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
                   }}
                 />
               )}
-              {showItemizeDialog && (
-                <ItemizeExpenses
-                  open={showItemizeDialog}
-                  onClose={() => setShowItemizeDialog(false)}
-                  textFields={textFields}
-                  value={value}
-                  addTextField={addTextField}
-                  currencySymbol={currencySymbol}
-                  removeTextField={removeTextField}
-                  handleInputChange={handleInputChange}
+              {showExpenseDialog && (
+                <AddExpenses
+                  open={showExpenseDialog}
+                  onClose={() => setShowExpenseDialog(false)}
                   fullScreen={fullScreen}
                   setFullScreen={setFullScreen}
                   isSubmitting={isSubmitting}
+                  onSave={handleSaveExpenses}
                 />
               )}
             </>
@@ -322,4 +269,4 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
   );
 };
 
-export default ManageExpenses;
+export default ManageExpenseReports;

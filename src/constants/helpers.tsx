@@ -291,6 +291,7 @@ export const sidebarResource = {
   pricingCondition: 'Pricing Condition',
   repairJob: 'Repair Job',
   expenses: 'Expenses',
+  expenseReport: 'Expense Report',
   salesOrder: 'Sales Order',
   invoice: 'Invoice',
   eCommercePolicy: 'e-Commerce Policy',
@@ -511,6 +512,11 @@ export const repairJob = {
 export const expenses = {
   resource: 'expenses',
   api: '/expenses'
+};
+
+export const expenseReport = {
+  resource: 'expenseReport',
+  api: '/expense-report'
 };
 
 export const repairOrder = {
