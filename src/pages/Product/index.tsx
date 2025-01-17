@@ -27,6 +27,8 @@ import { gridLoadingTimeout, prepareDataForGrid, product, sidebarResource } from
 import axios, { CancelTokenSource } from 'axios';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createResourceFlow } from 'src/components/CustomIntro/walkmeSteps';
+import ScheduledMaintenance from 'src/pages/Product/ScheduledMaintenance';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ignoreField = ['qty', 'priceTemplate'];
 
@@ -57,6 +59,7 @@ const Product = () => {
   const [productTypeList, setProductTypeList] = useState([]);
   const [isProductType, setIsProductType] = useState(false);
   const [productColumns, setProductColumns] = useState(null);
+  const [openScheduledMaintenance, setOpenScheduledMaintenance] = useState(false);
   const {
     state: { permissions, selectedEntity, resources }
   }: any = useData();
@@ -346,74 +349,79 @@ const Product = () => {
     <section className="main-container-v1">
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ title: resources?.product?.titlePlural }]} />
-        <ImportExportLinks
-          module={resources?.product?.titlePlural}
-          permission={permissions.product}
-          api={product.api}
-          refrenceId={null}
-          onSuccessfulImport={(isImportedSuccessfully) => {
-            if (isImportedSuccessfully) {
+        <div className="flex gap-2">
+          <ThemeButton onClick={() => setOpenScheduledMaintenance(true)}>Schedule Maintenance</ThemeButton>
+          <ImportExportLinks
+            module={resources?.product?.titlePlural}
+            permission={permissions.product}
+            api={product.api}
+            refrenceId={null}
+            onSuccessfulImport={(isImportedSuccessfully) => {
+              if (isImportedSuccessfully) {
+                fetchData();
+              }
+            }}
+            isExportAllOrSomeFeature={true}
+            total={rowCount}
+            recordsToExport={selectedRecords?.length}
+            ids={selectedRecords?.map((obj) => obj._id)}
+            onExportToExcelSuccess={() => {
               fetchData();
-            }
-          }}
-          isExportAllOrSomeFeature={true}
-          total={rowCount}
-          recordsToExport={selectedRecords?.length}
-          ids={selectedRecords?.map((obj) => obj._id)}
-          onExportToExcelSuccess={() => {
-            fetchData();
-          }}
-          additionalParams={getQueryString(true)}
-          extraImportExportLinks={[
-            {
-              title: 'Child Product Template',
-              api: `${product.api}/unknown/bom/template`,
-              type: 'download'
-            },
-            {
-              title: 'Child Product Export',
-              api: `${product.api}/unknown/bom/template?export=true${selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''}`,
-              type: 'export'
-            },
-            {
-              title: 'Child Product Import',
-              api: `${product.api}/unknown/bom/import`,
-              type: 'import'
-            },
-            {
-              title: 'Service/Consumable Template',
-              api: `${product.api}/unknown/service-master/template`,
-              type: 'download'
-            },
-            {
-              title: 'Service/Consumable Export',
-              api: `${product.api}/unknown/service-master/template?export=true${selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
+            }}
+            additionalParams={getQueryString(true)}
+            extraImportExportLinks={[
+              {
+                title: 'Child Product Template',
+                api: `${product.api}/unknown/bom/template`,
+                type: 'download'
+              },
+              {
+                title: 'Child Product Export',
+                api: `${product.api}/unknown/bom/template?export=true${selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''}`,
+                type: 'export'
+              },
+              {
+                title: 'Child Product Import',
+                api: `${product.api}/unknown/bom/import`,
+                type: 'import'
+              },
+              {
+                title: 'Service/Consumable Template',
+                api: `${product.api}/unknown/service-master/template`,
+                type: 'download'
+              },
+              {
+                title: 'Service/Consumable Export',
+                api: `${product.api}/unknown/service-master/template?export=true${
+                  selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
                 }`,
-              type: 'export'
-            },
-            {
-              title: 'Service/Consumable Import',
-              api: `${product.api}/unknown/service-master/import`,
-              type: 'import'
-            },
-            {
-              title: 'Service Package Template',
-              api: `${product.api}/unknown/package/template`,
-              type: 'download'
-            },
-            {
-              title: 'Service Package Export',
-              api: `${product.api}/unknown/package/template?export=true${selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
+                type: 'export'
+              },
+              {
+                title: 'Service/Consumable Import',
+                api: `${product.api}/unknown/service-master/import`,
+                type: 'import'
+              },
+              {
+                title: 'Service Package Template',
+                api: `${product.api}/unknown/package/template`,
+                type: 'download'
+              },
+              {
+                title: 'Service Package Export',
+                api: `${product.api}/unknown/package/template?export=true${
+                  selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
                 }`,
-              type: 'export'
-            },
-            {
-              title: 'Service Package Import',
-              api: `${product.api}/unknown/package/import`,
-              type: 'import'
-            }
-          ]}
-        />
+                type: 'export'
+              },
+              {
+                title: 'Service Package Import',
+                api: `${product.api}/unknown/package/import`,
+                type: 'import'
+              }
+            ]}
+          />
+        </div>
       </div>
       <CustomContainer>
         <ListingPageHeader
@@ -498,6 +506,14 @@ const Product = () => {
             setShowDeleteConfirmBox(false);
           }}
           onOk={handleDelete}
+        />
+      )}
+
+      {openScheduledMaintenance && (
+        <ScheduledMaintenance
+          onClose={() => {
+            setOpenScheduledMaintenance(false);
+          }}
         />
       )}
     </section>

@@ -277,6 +277,8 @@ import ScheduleAndDispatch from 'src/pages/ScheduleAndDispatch';
 import ReportsCenter from 'src/pages/Reports';
 import Expenses from 'src/pages/Expenses';
 import ExpenseDetailsPage from 'src/pages/Expenses/ExpenseDetailsPage';
+import ExpenseReport from 'src/pages/ExpensesReport';
+import ExpenseReportDetailsPage from 'src/pages/ExpensesReport/ExpenseReportDetailPage';
 
 var notificationInterval: any = null;
 
@@ -933,6 +935,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.expensesDetail.path}/:id`}>
               <ExpenseDetailsPage />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.expenseReport.path}`}>
+              <ExpenseReport />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.expenseReportDetail.path}/:id`}>
+              <ExpenseReportDetailsPage />
             </PrivateRoute>
             <PrivateRoute exact path={routes.employeeMaster.path}>
               <EmployeeMaster />
