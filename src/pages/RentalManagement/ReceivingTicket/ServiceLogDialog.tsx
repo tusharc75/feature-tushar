@@ -218,7 +218,12 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, onSuccess, allow
   const handleSubmitChangeDates = (values) => {
     setEditDateDialog({ ...editDateDialog, loading: true });
     let data = { ids: [id], serviceLogId: editDateDialog?.data?._id, ...values };
-
+    if (data?.startDate) {
+      data.startDate = displayDate(data.startDate, 'MM/DD/YYYY')
+    }
+    if (data?.endDate) {
+      data.endDate = displayDate(data.endDate, 'MM/DD/YYYY')
+    }
     axiosInstance()
       .put(`${rentalManagement.api}/${rentalId}/start-end-date`, data)
       .then((response) => {

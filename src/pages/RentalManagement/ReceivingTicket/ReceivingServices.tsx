@@ -206,8 +206,8 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
     setServiceConfirmationDialog({ ...serviceConfirmationDialog, loading: true });
     data = { ids: selectedRecords?.map((s) => s?.uniqueId) };
     data['type'] = type;
-    data['startDate'] = values.startDate;
-    data['endDate'] = values.endDate;
+    data['startDate'] = displayDate(values.startDate, 'MM/DD/YYYY');
+    data['endDate'] = displayDate(values.endDate, 'MM/DD/YYYY');
     axiosInstance()
       .put(`${rentalManagement.api}/${rentalManagementData?._id}/start-end-date`, data)
       .then((response) => {
@@ -268,7 +268,7 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
         hasXpadding
       />
       <Grid container>
-        <Grid size={{xs:12, md:12, sm:12}}>
+        <Grid size={{ xs: 12, md: 12, sm: 12 }}>
           {columns ? (
             <CustomReactTable
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
