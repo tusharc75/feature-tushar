@@ -90,71 +90,68 @@ const LoginMFA = () => {
       });
   };
 
-  const handleSubmit = useCallback(async () => {
-    setIsSubmitting(true);
-    axiosInstance()
-      .post('/user/mfa-auth/verify-otp', {
-        otp: otp,
-        token: token,
-        method: selectedMethod
-      })
-      .then(async ({ data: { data } }) => {
-        localStorage.setItem('token', data.token);
-        if (data?.hasExistingSession) {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.existingSessionMessage
-          });
-        }
-        const res = await axiosInstance().get(`/user/me`);
-        const {
-          data: { data: meData }
-        } = res;
-
-        dispatch({ type: SET_USER, payload: meData });
-        if (meData?.role?.selectedEntity?._id) {
-          dispatch({
-            type: SET_SELECTED_ENTITY,
-            payload: data.role.selectedEntity._id
-          });
-        }
-        if (data?.user?.defaultResource) {
-          if (routes[camelCase(data?.user?.defaultResource)]?.path) {
-            history.push({ pathname: routes[camelCase(data?.user?.defaultResource)]?.path });
+  const handleSubmit = useCallback(
+    async (otpProp = otp) => {
+      setIsSubmitting(true);
+      axiosInstance()
+        .post('/user/mfa-auth/verify-otp', {
+          otp: otpProp,
+          token: token,
+          method: selectedMethod
+        })
+        .then(async ({ data: { data } }) => {
+          localStorage.setItem('token', data.token);
+          if (data?.hasExistingSession) {
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: data.existingSessionMessage
+            });
           }
-        }
-        axiosInstance()
-          .get(`/user/notification/unseen`)
-          .then(({ data: { count } }) => {
-            notification.setCount(count);
-          })
-          .catch((error) => {
-            toastConfig.setToastConfig(error);
-          });
+          const res = await axiosInstance().get(`/user/me`);
+          const {
+            data: { data: meData }
+          } = res;
 
-        axiosInstance()
-          .get(`/user/user-notification/unseen`)
-          .then(({ data: { count } }) => {
-            chatNotification.setCount(count);
-          })
-          .catch((error) => {
-            toastConfig.setToastConfig(error);
-          });
-        setIsSubmitting(false);
-      })
-      .catch((error) => {
-        setOtp('');
-        setIsSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
-  }, [chatNotification, dispatch, history, notification, otp, selectedMethod, toastConfig, token]);
+          dispatch({ type: SET_USER, payload: meData });
+          if (meData?.role?.selectedEntity?._id) {
+            dispatch({
+              type: SET_SELECTED_ENTITY,
+              payload: data.role.selectedEntity._id
+            });
+          }
+          if (data?.user?.defaultResource) {
+            if (routes[camelCase(data?.user?.defaultResource)]?.path) {
+              history.push({ pathname: routes[camelCase(data?.user?.defaultResource)]?.path });
+            }
+          }
+          axiosInstance()
+            .get(`/user/notification/unseen`)
+            .then(({ data: { count } }) => {
+              notification.setCount(count);
+            })
+            .catch((error) => {
+              toastConfig.setToastConfig(error);
+            });
 
-  useEffect(() => {
-    if (otp.length === 6) {
-      handleSubmit();
-    }
-  }, [otp, handleSubmit]);
+          axiosInstance()
+            .get(`/user/user-notification/unseen`)
+            .then(({ data: { count } }) => {
+              chatNotification.setCount(count);
+            })
+            .catch((error) => {
+              toastConfig.setToastConfig(error);
+            });
+          setIsSubmitting(false);
+        })
+        .catch((error) => {
+          setOtp('');
+          setIsSubmitting(false);
+          toastConfig.setToastConfig(error);
+        });
+    },
+    [chatNotification, dispatch, history, notification, otp, selectedMethod, toastConfig, token]
+  );
 
   return (
     <>
@@ -204,8 +201,8 @@ const LoginMFA = () => {
                       value={otp}
                       onChange={(value) => {
                         setOtp(value);
-                        if (otp.length === 6) {
-                          handleSubmit();
+                        if (value.length === 6) {
+                          handleSubmit(value);
                         }
                       }}
                       TextFieldsProps={{ size: 'small', inputProps: { pattern: '[0-9]*', autoComplete: 'one-time-code', inputMode: 'numeric' } }}
