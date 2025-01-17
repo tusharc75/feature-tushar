@@ -1,9 +1,10 @@
 import { TableBody, Table, TableCell, TableContainer, TableHead, TableRow, Box, IconButton } from '@mui/material';
-import { startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import { useEffect, useState } from 'react';
 import { formatAmountWithCurrency } from '../../constants/helpers';
 import routes from 'src/components/Helpers/Routes';
 import { FiExternalLink } from 'react-icons/fi';
+import queryString from 'query-string';
 
 interface Props {
   id: string;
@@ -11,9 +12,11 @@ interface Props {
   currency: string;
   type: string;
   chart: any;
+  filters: any;
 }
 
-const TableView = ({ id, chartData, chart, currency }: Props) => {
+const TableView = ({ id, chartData, chart, currency, filters }: Props) => {
+
   const [tableData, setTableData] = useState([]);
   useEffect(() => {
     if (!chartData || chartData.length === 0) return;
@@ -31,6 +34,9 @@ const TableView = ({ id, chartData, chart, currency }: Props) => {
     let tableData = chartData.map((data) => {
       let obj: any = {};
       col.forEach((key) => {
+        if (key !== 'value') {
+          obj['linkField'] = data[key].value;
+        }
         obj[key] = data[key].value;
       });
 
@@ -48,9 +54,18 @@ const TableView = ({ id, chartData, chart, currency }: Props) => {
   }
 
   const handleRowClick = (key: any) => {
-    const assetStatus = tableData[key].status;
-    const url = `${routes.serializedAsset.path}?assetStatus=${encodeURIComponent(assetStatus)}`;
-    window.open(url, '_blank');
+    const resourcePath = routes[camelCase(chart.kpi.resource)]?.path;
+    const queryObj = {};
+    queryObj[chart.kpi.filterField] = tableData[key]?.linkField;
+    Object.keys(filters).forEach((key) => {
+      const value = filters[key];
+      if (Array.isArray(value) && value?.length > 0) {
+        queryObj[key] = JSON.stringify(value);
+      } else if (!Array.isArray(value) && value) {
+        queryObj[key] = JSON.stringify(value);
+      }
+    });
+    window.open(`${resourcePath}?${queryString.stringify(queryObj)}`, '_blank')
   };
 
   return (
@@ -58,7 +73,7 @@ const TableView = ({ id, chartData, chart, currency }: Props) => {
       <Table stickyHeader id={'table_' + id} aria-label="simple table">
         <TableHead>
           <TableRow>
-            {Object.keys(tableData[0]).map((key: string, index) => (
+            {Object.keys(tableData[0])?.filter(f => f!== 'linkField')?.map((key: string, index) => (
               <TableCell style={{ minWidth: '200px' }} key={key + ' ' + index + 1} align={index === 0 ? 'left' : 'right'}>
                 {startCase(key)}
               </TableCell>
@@ -68,7 +83,7 @@ const TableView = ({ id, chartData, chart, currency }: Props) => {
         <TableBody>
           {tableData.map((data: any, index) => (
             <TableRow key={'row ' + index + 1}>
-              {Object.keys(data).map((key, i) => (
+              {Object.keys(data)?.filter(f => f!== 'linkField')?.map((key, i) => (
                 <TableCell key={key} align={i < 1 ? 'left' : 'right'}>
                   {isNaN(data[key])
                     ? data[key]
@@ -81,7 +96,7 @@ const TableView = ({ id, chartData, chart, currency }: Props) => {
                           : data[key]}
                 </TableCell>
               ))}
-              {chart?.kpi?.name === 'Asset Status Count' && (
+              {chart?.kpi?.filterField && chart?.kpi?.resource && (
                 <div className='pt-3'>
                   <IconButton
                     size="small"

@@ -45,7 +45,7 @@ const SerializedAsset = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const history = useHistory();
-  let { assetStatus, product, warehouse, currentLocation }: any = queryString.parse(history.location.search);
+  let { assetStatus, product, warehouse, currentLocation, productCategory: productCategoryFromQuery }: any = queryString.parse(history.location.search);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
@@ -118,6 +118,18 @@ const SerializedAsset = () => {
             }
           };
         }
+      }
+      if (productCategoryFromQuery) {
+        const productCategoryFilter = JSON.parse(productCategoryFromQuery);
+        if (isArray(productCategoryFilter)) {
+          filterVal['productCategory'] = {
+            operator: 'OR',
+            condition1: {
+              filter: productCategoryFilter
+            }
+          };
+        }
+        
       }
       dispatch({ type: 'filter', filters: filterVal });
     }
