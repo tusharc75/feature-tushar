@@ -2,7 +2,7 @@ import { Box, Button, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import axios, { CancelTokenSource } from 'axios';
-import { camelCase } from 'lodash';
+import { camelCase, isArray, isObject } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -35,6 +35,7 @@ import { createRentalJobsFlow } from 'src/pages/RentalManagement/walkmeSteps';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageRentalManagementDialog from './ManageRental';
 import { rentalJobClearOffline, rentalJobOfflineUpdate } from './rentalOfflineHelper';
+import queryString from 'query-string';
 
 const RentalManagement = () => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -57,6 +58,7 @@ const RentalManagement = () => {
   ];
 
   const history = useHistory();
+  let { customerAccount, status, warehouse }: any = queryString.parse(history.location.search);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -75,6 +77,35 @@ const RentalManagement = () => {
   useEffect(() => {
     setUpindexDB();
     fetchGridColumns();
+
+    if (customerAccount || status || warehouse) {
+      const filterVal = {};
+      if (status) {
+        let statusFilter = JSON.parse(status);
+        if(isObject(statusFilter)) statusFilter = [statusFilter];
+        if (isArray(statusFilter)) {
+          filterVal['status'] = { filter: ['Closed'] };
+          if (statusFilter[0]?.optionValue === 'open') filterVal['status']['$nin'] = true;
+          else filterVal['status']['$nin'] = false;
+        }
+      }
+      if (customerAccount) {
+        filterVal['customerAccount'] = { filter: [customerAccount] };
+      }
+      if (warehouse) {
+        const warehouseFilter = JSON.parse(warehouse);
+        if (isArray(warehouseFilter)) {
+          filterVal['warehouse'] = {
+            operator: 'OR',
+            condition1: {
+              filter: warehouseFilter
+            }
+          };
+        }
+      }
+      dispatch({ type: 'filter', filters: filterVal });
+    }
+
   }, []);
 
   useEffect(() => {
@@ -479,12 +510,11 @@ const RentalManagement = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${
-              deleteRecord
+            message={`Are you sure you want to delete ${deleteRecord
                 ? `${resources?.rentalManagement?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.rentalJobName}`
                 : `selected ${resources?.rentalManagement?.titlePlural?.toLowerCase()}`
-            } ?`}
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
