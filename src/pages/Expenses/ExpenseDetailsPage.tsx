@@ -1,4 +1,4 @@
-import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { Edit } from '@mui/icons-material';
 import queryString from 'query-string';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
@@ -190,9 +190,15 @@ const ExpenseDetailsPage = () => {
                         </TableRow>
                       ))}
                       <TableRow>
-                        <TableCell>Total Amount</TableCell>
+                        <TableCell>
+                          <Typography variant='body1'>
+                            Total Amount
+                          </Typography>
+                        </TableCell>
                         <TableCell align="right">
+                        <Typography variant='body1'>
                           {currencySymbol} {expensesData?.totalAmount}
+                          </Typography>
                         </TableCell>
                       </TableRow>
                     </TableBody>

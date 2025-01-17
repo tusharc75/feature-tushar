@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { Edit } from '@mui/icons-material';
 import queryString from 'query-string';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
@@ -163,6 +163,32 @@ const ExpenseReportDetailsPage = () => {
           <Box>
             {!loadingDetails && expenseReportData && fields ? (
               <DetailsPage data={expenseReportData} fields={fields} />
+            ) : (
+              <div className="p-2">
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+              </div>
+            )}
+            {!loadingDetails ? (
+              <div className="mt-2">
+                <TableContainer component={Paper}>
+                  <Table sx={{ minWidth: 700 }} aria-label="spanning table">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Expense Number</TableCell>
+                        <TableCell>Category</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {expenseReportData?.selectedExpenses?.map((row) => (
+                        <TableRow key={row.id}>
+                          <TableCell>{row.expenseNumber}</TableCell>
+                          <TableCell>{row.category}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </div>
             ) : (
               <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />

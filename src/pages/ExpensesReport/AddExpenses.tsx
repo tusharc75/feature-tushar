@@ -25,6 +25,7 @@ function AddExpenses({
   fullScreen,
   setFullScreen,
   isSubmitting,
+  selectedExpense,
   onSave
 }) {
   const renderedFrom = camelCase(sidebarResource?.expenses);
@@ -115,6 +116,7 @@ function AddExpenses({
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
+            hideSelection={selectedExpense.length>1}
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
             resource={sidebarResource?.expenses}

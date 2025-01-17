@@ -15,7 +15,7 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, getObjKeysWithValues, expenseReport, yupSchema, sidebarResource } from '../../../constants/helpers';
+import { CustomDialogTransition, getObjKeysWithValues, expenseReport, yupSchema, sidebarResource, expenses } from '../../../constants/helpers';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import AddIcon from '@mui/icons-material/Add';
@@ -35,7 +35,8 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
   const [showExpenseDialog, setShowExpenseDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [title, setTitle] = useState('');
-  const [selectedExpenses, setSelectedExpenses] = useState([]);
+  const [selectedExpense, setSelectedExpense] = useState([]);
+  const [selectedExpensesData, setSelectedExpensesData] = useState([])
 
   useEffect(() => {
     axiosInstance()
@@ -56,6 +57,8 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
                 });
               } else {
                 setTitle(`Edit - ${data.reportTitle}`);
+                setSelectedExpense(data.selectedExpenses);
+                setSelectedExpensesData(selectedExpense);
                 setInitialData({
                   fields: fieldsDataForUpdate,
                   values: { ...getObjKeysWithValues(data, fieldsDataForUpdate) }
@@ -81,7 +84,7 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
   const handleSubmit = (value) => {
     setIsSubmitting(true);
     const { fields, values, ...data } = value;
-    data.selectedExpenses = selectedExpenses;
+    data.selectedExpenses = selectedExpense;
 
     if (expenseReportId && isClone === false) {
       axiosInstance()
@@ -131,13 +134,22 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
     }
   };
 
-  const handleSaveExpenses = (expenses) => {
-    setSelectedExpenses(expenses);
-    setShowExpenseDialog(false);
+  const handleSaveExpenses = (expense) => {
+    const expensesId = expense.map((obj) => obj = obj._id );
+    setSelectedExpense(expense);
+    axiosInstance()
+    .get(`${expenses.api}/${expensesId}`)
+    .then(({ data: { data } }) => {
+      setSelectedExpensesData(data)
+      setShowExpenseDialog(false);
+    })
+    .catch((err) => {
+      toastConfig.setToastConfig(err);
+    });
   };
 
   const removeExpenseField = (id) => {
-    setSelectedExpenses(selectedExpenses.filter((field) => field.id !== id));
+    setSelectedExpense(selectedExpense.filter((field) => field.id !== id));
   };
 
   return (
@@ -185,9 +197,9 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
                     resource={sidebarResource.expenseReport}
                     referenceId={expenseReportId || null}
                   />
-                  {selectedExpenses.length > 0 && (
+                  {selectedExpense.length > 0 && (
                     <div className="mt-2">
-                      <ExpenseTable removeExpenseField={removeExpenseField} selectedExpenses={selectedExpenses} />
+                      <ExpenseTable selectedExpensesData={selectedExpensesData} removeExpenseField={removeExpenseField} selectedExpenses={selectedExpense} />
                     </div>
                   )}
                 </Form>
@@ -252,6 +264,7 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
                   open={showExpenseDialog}
                   onClose={() => setShowExpenseDialog(false)}
                   fullScreen={fullScreen}
+                  selectedExpense={selectedExpense}
                   setFullScreen={setFullScreen}
                   isSubmitting={isSubmitting}
                   onSave={handleSaveExpenses}
