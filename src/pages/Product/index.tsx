@@ -1,4 +1,4 @@
-import { Box, Button, MenuItem } from '@mui/material';
+import { Box, MenuItem } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -28,6 +28,7 @@ import axios, { CancelTokenSource } from 'axios';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createResourceFlow } from 'src/components/CustomIntro/walkmeSteps';
 import ScheduledMaintenance from 'src/pages/Product/ScheduledMaintenance';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ignoreField = ['qty', 'priceTemplate'];
 
@@ -349,9 +350,7 @@ const Product = () => {
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ title: resources?.product?.titlePlural }]} />
         <div className="flex gap-2">
-          <Button variant="outlined" size="small" color="primary" onClick={() => setOpenScheduledMaintenance(true)}>
-            Schedule Maintenance
-          </Button>
+          <ThemeButton onClick={() => setOpenScheduledMaintenance(true)}>Schedule Maintenance</ThemeButton>
           <ImportExportLinks
             module={resources?.product?.titlePlural}
             permission={permissions.product}
