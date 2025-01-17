@@ -439,6 +439,7 @@ export default function TinyMCE(props) {
                             buttonType="transparent"
                             disabled={disabledEditor || isImgUploading}
                             startIcon={<AiOutlineFileAdd />}
+                            component="span"
                           >
                             Upload File
                           </ThemeButton>
