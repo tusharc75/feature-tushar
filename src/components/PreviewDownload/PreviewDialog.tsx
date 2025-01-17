@@ -156,7 +156,7 @@ export const PreviewDialog = ({
         />
         <CustomDialogContent>
           <Grid container justifyContent="space-between" alignItems="center">
-            <Grid style={{ padding: 5, marginTop: 10 }} size={{xs:12, md:12, sm:12}}>
+            <Grid style={{ padding: 5, marginTop: 10 }} size={{ xs: 12, md: 12, sm: 12 }}>
               {type?.includes('PDF') && (
                 <PreviewFields
                   views={views}
@@ -209,7 +209,7 @@ export const PreviewDialog = ({
               <>
                 <ThemeButton
                   iconForMobile={false}
-                  borderColor="yellow"
+                  buttonType="yellow"
                   id={'show-column-dialog-save-update-button'}
                   onClick={() => {
                     const selectedView = type === 'Excel' ? cloneDeep(selectedExcelView) : cloneDeep(selectedPdfView);
@@ -218,7 +218,7 @@ export const PreviewDialog = ({
                   }}
                   disabled={sortBy && !orderBy}
                 >
-                  Save as New View
+                  Save as New
                 </ThemeButton>
               </>
             )}

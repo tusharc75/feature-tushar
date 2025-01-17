@@ -7,7 +7,7 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import axiosInstance from '../../../axios/axiosInstance';
 import { isArray, uniqBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE, MATERIAL_TYPE } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE, MATERIAL_TYPE, displayDate } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -343,6 +343,12 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
     let estimateEndDate = dayjs(values?.estimateEndDate);
     if (estimateEndDate.diff(estimateStartDate, 'day') < 0) {
       errors['estimateEndDate'] = 'Please enter valid estimate end date';
+    }
+    if (fieldTicketData?.estimateStartDate && estimateStartDate.format('YYYY-MM-DD') < dayjs(fieldTicketData.estimateStartDate).format('YYYY-MM-DD')) {
+      errors['estimateStartDate'] = `Start date cannot be earlier than ${displayDate(fieldTicketData.estimateStartDate)}`;
+    }
+    if (fieldTicketData?.estimateEndDate && estimateEndDate.format('YYYY-MM-DD') > dayjs(fieldTicketData.estimateEndDate).format('YYYY-MM-DD')) {
+      errors['estimateEndDate'] = `End date cannot be later than ${displayDate(fieldTicketData.estimateEndDate)}`;
     }
     if (referenceType === 'consumables') {
       if (isBulkedit && rowData?.find((e) => e?.consumedQty || e?.requestedQty) && values.qty > 0) {
