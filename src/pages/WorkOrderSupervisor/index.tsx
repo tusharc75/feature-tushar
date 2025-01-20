@@ -96,7 +96,7 @@ const WorkOrderSupervisor = () => {
   const [viewType, setViewType] = useState<ViewType>(() => {
     return (localStorage.getItem(`${renderedFrom}_view`) as ViewType) || 'card-view';
   });
-  const [consumablesDialog, setConsumablesDialog] = useState(false);
+  const [consumablesDialog, setConsumablesDialog] = useState({ open: false, multiple: false });
   const [repairOrderDialog, setRepairOrderDialog] = useState(false);
 
   const [globalFilters, setGlobalFilters] = useState<DateRange>({
@@ -299,6 +299,8 @@ const WorkOrderSupervisor = () => {
       setAssignTechnicianDialog({ open: true, multiple: false });
     } else if (value === 'createRepairOrder') {
       setRepairOrderDialog(true);
+    } else if (value === 'addProductConsumables') {
+      setConsumablesDialog({ open: true, multiple: false });
     } else {
       setWorkStationAssignDialog({ open: true, multiple: false });
     }
@@ -457,7 +459,7 @@ const WorkOrderSupervisor = () => {
         visibleColumns?.map((c) => {
           fetchSingleColumn(c, 0, false, filterQuery);
         });
-        setConsumablesDialog(false);
+        setConsumablesDialog({ open: false, multiple: false });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -511,7 +513,7 @@ const WorkOrderSupervisor = () => {
   const addProductConsumablesButton = {
     disabled: selectedRecordsS?.length === 0,
     label: 'Add Products/Consumables',
-    onClick: () => setConsumablesDialog(true)
+    onClick: () => setConsumablesDialog({ open: true, multiple: true })
   };
 
   const checkUniqWarehouse = (selectedRecords) => {
@@ -821,7 +823,7 @@ const WorkOrderSupervisor = () => {
               filterQuery={filterQuery}
               ref={workOrderListRef}
               status={tableViewStatus}
-              consumablesDialog={consumablesDialog}
+              consumablesDialog={consumablesDialog.open}
               setConsumablesDialog={setConsumablesDialog}
               repairOrderDialog={repairOrderDialog}
               setRepairOrderDialog={setRepairOrderDialog}
@@ -935,6 +937,7 @@ const WorkOrderSupervisor = () => {
           }}
         />
       )}
+
       {isOpen.open && (
         <WorkOrderDetailDialog
           workOrderId={isOpen?.id}
@@ -943,13 +946,14 @@ const WorkOrderSupervisor = () => {
           }}
         />
       )}
-      {consumablesDialog && (
+
+      {consumablesDialog.open && (
         <AssignProductDialog
-          handleCloseDialog={() => setConsumablesDialog(false)}
+          handleCloseDialog={() => setConsumablesDialog({ open: false, multiple: false })}
           ids={[]}
           onSuccess={(rows) => {
             if (viewType === 'card-view') {
-              handleAddConsumables(rows, selectedRecordsS);
+              handleAddConsumables(rows, consumablesDialog?.multiple ? selectedRecordsS : [selectedServiceData]);
             } else {
               workOrderListRef.current?.handleAddConsumables(rows, selectedRecords);
             }
@@ -1056,6 +1060,14 @@ const RenderAssignOptions = ({ openAssignHandler, data, permissions, resources }
                   {`Assign ${resources?.workStations?.titlePlural}`}
                 </MenuItem>
               )}
+              <MenuItem
+                onClick={() => {
+                  openAssignHandler('addProductConsumables', data);
+                  setAnchorEl(null);
+                }}
+              >
+                {'Add Products/Consumables'}
+              </MenuItem>
             </>
           )}
         </Menu>
