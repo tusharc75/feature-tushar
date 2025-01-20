@@ -687,7 +687,7 @@ const Row = ({ _resource, isDisable, handleChange, fieldCheckbox }) => {
 
   return (
     <React.Fragment>
-      <TableRow className="[&:not(:last-child)]:shadow-[0_1px_0px_0px_var(--common-border-color)]">
+      <TableRow>
         <TableCell sx={{ minWidth: 300, py: 0 }}>
           <Box display="flex" justifyContent={'flex-start'} className="cursor-pointer" alignItems={'center'} onClick={() => setOpen(!open)}>
             <Typography className="tableMainHeader">{_resource?.resourceLabel}</Typography>
@@ -741,7 +741,7 @@ const Row = ({ _resource, isDisable, handleChange, fieldCheckbox }) => {
       </TableRow>
       {open &&
         fieldCheckbox.map((_field, innerIndex) => (
-          <TableRow key={innerIndex} className="[&:not(:last-child)]:shadow-[0_1px_0px_0px_var(--common-border-color)]">
+          <TableRow key={innerIndex}>
             <TableCell sx={{ py: 0 }}>
               <Typography variant="body1" style={{ fontWeight: '400' }}>
                 &emsp; {_field.fieldData.fieldLabel + (_field.fieldData.required ? ' *' : '')}
