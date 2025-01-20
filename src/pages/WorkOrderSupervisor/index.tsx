@@ -705,7 +705,7 @@ const WorkOrderSupervisor = () => {
                 </>
               ) : (
                 <div className="flex">
-                  <ToggleButtonGroup size="small" exclusive value={resourceType} onChange={(e, newVal) => {}}>
+                  <ToggleButtonGroup size="small" exclusive value={resourceType} onChange={(e, newVal) => { }}>
                     <ToggleButton value={'workOrder'} onClick={() => setResourceType('workOrder')}>
                       {resources?.workOrder?.titleSingular}
                     </ToggleButton>
@@ -871,15 +871,15 @@ const WorkOrderSupervisor = () => {
           workOrderData={
             assignTechnicianDialog.multiple
               ? selectedRecordsS?.map((r) => ({
-                  uniqueId: r?.uniqueId,
-                  workOrderId: r?.workOrder
-                }))
+                uniqueId: r?.uniqueId,
+                workOrderId: r?.workOrder
+              }))
               : [
-                  {
-                    uniqueId: selectedServiceData?.uniqueId,
-                    workOrderId: selectedServiceData?.workOrder
-                  }
-                ]
+                {
+                  uniqueId: selectedServiceData?.uniqueId,
+                  workOrderId: selectedServiceData?.workOrder
+                }
+              ]
           }
           assignedUsers={
             assignTechnicianDialog.multiple
@@ -905,15 +905,15 @@ const WorkOrderSupervisor = () => {
           workOrderData={
             workStationAssignDialog.multiple
               ? selectedRecordsS?.map((r) => ({
-                  uniqueId: r?.uniqueId,
-                  workOrderId: r?.workOrder
-                }))
+                uniqueId: r?.uniqueId,
+                workOrderId: r?.workOrder
+              }))
               : [
-                  {
-                    uniqueId: selectedServiceData?.uniqueId,
-                    workOrderId: selectedServiceData?._id
-                  }
-                ]
+                {
+                  uniqueId: selectedServiceData?.uniqueId,
+                  workOrderId: selectedServiceData?._id
+                }
+              ]
           }
           workStations={workStationAssignDialog.multiple ? selectedRecordsS[0]?.assignedWorkStations : selectedServiceData?.assignedWorkStations}
           handleClose={() => {
@@ -1033,6 +1033,7 @@ const RenderAssignOptions = ({ openAssignHandler, data, permissions, resources }
                 openAssignHandler('createRepairOrder', data);
                 setAnchorEl(null);
               }}
+              disabled={data?.assetStatus === ASSET_STATUS.reserved}
             >
               {`Create ${resources?.repairOrder?.titleSingular}`}
             </MenuItem>
