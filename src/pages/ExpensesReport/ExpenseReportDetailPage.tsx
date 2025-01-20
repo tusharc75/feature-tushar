@@ -174,15 +174,15 @@ const ExpenseReportDetailsPage = () => {
                   <Table sx={{ minWidth: 700 }} aria-label="spanning table">
                     <TableHead>
                       <TableRow>
-                        <TableCell>Expense Number</TableCell>
-                        <TableCell>Category</TableCell>
+                        <TableCell align='center'>Expense Number</TableCell>
+                        <TableCell align='center'>Category</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       {expenseReportData?.selectedExpenses?.map((row) => (
                         <TableRow key={row.id}>
-                          <TableCell>{row.expenseNumber}</TableCell>
-                          <TableCell>{row.category}</TableCell>
+                          <TableCell align='center'>{row.expenseNumber}</TableCell>
+                          <TableCell align='center'>{row.category}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
