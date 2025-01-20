@@ -330,6 +330,11 @@ function Dropdown({
   const fieldDependentOn = fieldData?.lookupDependentOn ? fields?.find((d) => d.fieldName === fieldData?.lookupDependentOn) : null;
   const isDisabled = fieldData?.lookupDependentOn && fieldData?.lookupDependentOn !== '' && fieldDependentOn && !!!values[fieldDependentOn.fieldName];
 
+  const handleSameNameFieldFromOptions = (name, val, fields) => {
+    const field = fields.find((d) => d.fieldName === name);
+    if (field) handleChange(name, val);
+  }
+
   const handleLookUpDependent = (name, val, fields, setFieldValue) => {
     const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
     if (filterFields?.length) {
@@ -365,6 +370,9 @@ function Dropdown({
           if (filterFieldDropDownOptions?.length === 1) {
             setFieldValue(ele?.fieldName, filterFieldDropDownOptions[0]?.optionValue);
             handleLookUpDependent(ele?.fieldName, filterFieldDropDownOptions[0], fields, setFieldValue);
+          } else if (filterFieldDropDownOptions?.find((f) => f?.default === true)) {
+            setFieldValue(ele?.fieldName, filterFieldDropDownOptions?.find((f) => f?.default === true)?.optionValue);
+            handleLookUpDependent(ele?.fieldName, filterFieldDropDownOptions?.find((f) => f?.default === true), fields, setFieldValue);
           }
         }
       });
@@ -470,15 +478,22 @@ function Dropdown({
                     onChange
                       ? onChange
                       : (e, val) => {
-                          if (setFieldValue) {
-                            handleChange(name, val && val.optionValue ? val.optionValue : '');
-                            const fieldChange: any = getNestedlookupDependentOn(fields, name);
-                            fieldChange?.forEach((val: any) => {
-                              setFieldValue(val.fieldName, val.value);
-                            });
-                            handleLookUpDependent(name, val, fields, setFieldValue);
-                          }
+                        if (setFieldValue) {
+                          const oldValue = (dropdownOptions(option, values, fields, fieldData, newAddressOptionList) || [])?.find((v: any) => v?.optionValue === values[name]) || {};
+                          Object.keys(oldValue)?.forEach((key) => {
+                            handleSameNameFieldFromOptions(key, null, fields);
+                          });
+                          handleChange(name, val && val.optionValue ? val.optionValue : '');
+                          const fieldChange: any = getNestedlookupDependentOn(fields, name);
+                          fieldChange?.forEach((val: any) => {
+                            setFieldValue(val.fieldName, val.value);
+                          });
+                          handleLookUpDependent(name, val, fields, setFieldValue);
+                          Object.keys(val)?.forEach((key) => {
+                            handleSameNameFieldFromOptions(key, val[key], fields);
+                          })
                         }
+                      }
                   }
                   selectOnFocus
                   clearOnBlur
