@@ -166,31 +166,36 @@ const ListingPageHeader = ({
   return (
     <div className="header-panel listing-head">
       <div className="flex items-start gap-2 [flex-wrap:wrap] lg:flex-nowrap">
-        <div className={'flex flex-grow flex-wrap items-center gap-2'}>
-          {toggleButtonList ? (
-            <HideWhenOffline>
-              <ToggleButtonGroup
-                size="small"
-                className="align-items-center"
-                value={toggleButtonList[selectedType - 1].key}
-                exclusive
-                onChange={(e, value) => handleToggle(e, value)}
-              >
-                {toggleButtonList.map((k, index) => {
-                  return (
-                    <ToggleButton value={k.key} key={index}>
-                      {k.key}
-                    </ToggleButton>
-                  );
-                })}
-              </ToggleButtonGroup>
-            </HideWhenOffline>
-          ) : null}
-          {leftSideContents ? <HideWhenOffline>{leftSideContents}</HideWhenOffline> : null}
-        </div>
+        {toggleButtonList || leftSideContents ? (
+          <>
+            <div className={'flex flex-grow flex-wrap items-center gap-2'}>
+              {toggleButtonList ? (
+                <HideWhenOffline>
+                  <ToggleButtonGroup
+                    size="small"
+                    className="align-items-center"
+                    value={toggleButtonList[selectedType - 1].key}
+                    exclusive
+                    onChange={(e, value) => handleToggle(e, value)}
+                  >
+                    {toggleButtonList.map((k, index) => {
+                      return (
+                        <ToggleButton value={k.key} key={index}>
+                          {k.key}
+                        </ToggleButton>
+                      );
+                    })}
+                  </ToggleButtonGroup>
+                </HideWhenOffline>
+              ) : null}
+              {leftSideContents ? <HideWhenOffline>{leftSideContents}</HideWhenOffline> : null}
+            </div>
+          </>
+        ) : null}
         <div
-          className={`flex flex-grow ${shouldNotFlexWrap ? '' : 'flex-wrap'} items-center justify-end gap-[8px] ${cn(showSearchInMobile ? 'max-[600px]:pt-2' : '')} ${!isLeftSidePresent && isMobile ? '-mt-2' : ''
-            }`}
+          className={`flex flex-grow ${shouldNotFlexWrap ? '' : 'flex-wrap'} items-center justify-end gap-[8px] ${cn(showSearchInMobile ? 'max-[600px]:pt-2' : '')} ${
+            !isLeftSidePresent && isMobile ? '-mt-2' : ''
+          }`}
         >
           {Boolean(leftSideContentsOfSearchFilter) ? leftSideContentsOfSearchFilter : null}
           {onSearch ? (
@@ -227,12 +232,12 @@ const ListingPageHeader = ({
                       }}
                       isLoading={addButtonLoading}
                       startIcon={isMobile ? null : addButtonIconsEnabled ? <AddOutlined /> : null}
-                      iconForMobile={<AddOutlined />}
                     >
                       {renderButtonText({
                         text: textAddShow ? 'Add' : `Create`,
                         loading: false,
-                        iconText: addButtonText
+                        iconText: addButtonText,
+                        mobileIcon: <AddOutlined fontSize="small" />
                       })}
                     </ThemeButton>
                   </HtmlTooltip>
