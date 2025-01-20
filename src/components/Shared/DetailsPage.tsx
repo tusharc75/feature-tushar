@@ -242,7 +242,10 @@ const Details = (props: DetailProps) => {
     if (fieldData?.hasOwnProperty('lookup') && fieldData?.lookup && permissions && permissions[camelCase(fieldData?.lookupResource)]?.isRead) {
       if (fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') {
         return (
-          <Typography className={`${classes.fieldText} ${classes.withMultichild} w-full`} variant="body2">
+          <Typography
+            className={`${classes.fieldText} ${classes.withMultichild} min-h-[35px] w-full items-center gap-1 px-[10px] py-[7px]`}
+            variant="body2"
+          >
             {Array.isArray(data[fieldData.fieldName]) ? (
               data[fieldData.fieldName].length ? (
                 data[fieldData.fieldName].map((_val: any, i) => (
@@ -251,10 +254,10 @@ const Details = (props: DetailProps) => {
                       to={`/${kebabCase(fieldData.lookupResource)}/detail/${_val.optionValue}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="link block w-full"
+                      className="link"
                       title={_val.optionLabel}
                     >
-                      <span className={`link block md:truncate md:text-ellipsis`}>
+                      <span className={`link p-0`}>
                         {_val.optionLabel}
                         {i < data[fieldData.fieldName].length - 1 ? ',' : ''}
                       </span>
@@ -262,9 +265,7 @@ const Details = (props: DetailProps) => {
                   </React.Fragment>
                 ))
               ) : (
-                <Typography component={'span'} style={{ padding: '7px 10px' }}>
-                  -
-                </Typography>
+                <>-</>
               )
             ) : data[fieldData.fieldName] ? (
               <Link
@@ -282,9 +283,7 @@ const Details = (props: DetailProps) => {
                 </span>
               </Link>
             ) : (
-              <Typography component={'span'} style={{ padding: '7px 10px' }}>
-                -
-              </Typography>
+              <Typography>-</Typography>
             )}
           </Typography>
         );
@@ -471,15 +470,21 @@ const Details = (props: DetailProps) => {
         >
           {fieldData.type === 'url' || fieldData.type === 'email' ? (
             <>
-              <MuiLink
-                href={fieldData.type === 'email' ? `mailto:${value}` : `https://${value}`}
-                target="_blank"
-                className="line-clamp-1"
-                rel="noopener noreferrer"
-              >
-                <span className={`text-truncate block`}> {value} </span>
-              </MuiLink>
-              {fieldData.type === 'email' && value !== '-' ? <CopyToClipboardButton text={value} style={{ padding: '3px' }} smallIcon /> : null}
+              {value !== '-' ? (
+                <>
+                  <MuiLink
+                    href={fieldData.type === 'email' ? `mailto:${value}` : `https://${value}`}
+                    target="_blank"
+                    className="line-clamp-1"
+                    rel="noopener noreferrer"
+                  >
+                    <span className={`text-truncate block`}> {value} </span>
+                  </MuiLink>
+                  {fieldData.type === 'email' && value !== '-' ? <CopyToClipboardButton text={value} style={{ padding: '3px' }} smallIcon /> : null}
+                </>
+              ) : (
+                <span>{value}</span>
+              )}
             </>
           ) : (
             <span className={` block md:truncate`}>{value}</span>
@@ -544,7 +549,6 @@ const Details = (props: DetailProps) => {
       <div className="form-v1">
         {formDataWithFollowUps?.map((form) => {
           if (!isSectionVisible(form, fieldsData, initialVals, true)) return null;
-          const isEven = 2 % form.sectionFields.length === 0;
           return (
             form.name && (
               <React.Fragment key={form.name}>
@@ -579,15 +583,13 @@ const Details = (props: DetailProps) => {
                         return (
                           <div
                             className={cn(
-                              '-mr-[1px] md:border-r',
-                              isEven ? i < form.sectionFields.length - 2 && 'border-b' : i < form.sectionFields.length - 1 && 'border-b',
-                              '[&:not(:last-child)]:max-md:border-b',
+                              '-mb-[1px] -mr-[1px] border-b md:border-r',
                               `md:${field.fieldData.columnSize ? colSpans[+field.fieldData.columnSize - 1] || 'col-span-6' : columnSize(field.fieldData.type)}`,
                               'col-span-12'
                             )}
                             key={i}
                           >
-                            <div className={cn(isTypeFile(field.fieldData.type) && 'flex-wrap', 'flex  ')}>
+                            <div className={cn(isTypeFile(field.fieldData.type) && 'flex-wrap', 'flex min-h-full')}>
                               <div className="w-1/2 md:w-[150px] lg:w-[180px] ">
                                 <div
                                   className={cn(

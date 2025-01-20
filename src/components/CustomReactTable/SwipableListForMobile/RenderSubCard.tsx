@@ -83,7 +83,7 @@ const RenderSubCard = ({
             {primaryField && (
               <div className="line-clamp-1">
                 <h6 className="line-clamp-1 text-[8px] font-medium text-[var(--dark-secondary-text,#8b8b8b)]">{primaryField.header}:</h6>
-                <h4 className="quote-name line-clamp-1 [&>*]:[font-weight:700_!important] [&_*]:line-clamp-1  [&_*]:[font-size:12px_!important] [&_*]:[white-space:unset_!important]">
+                <h4 className="quote-name line-clamp-1 [&>*]:[font-weight:700_!important] [&_*:not(.flex)]:line-clamp-1  [&_*]:[font-size:12px_!important] [&_*]:[white-space:unset_!important]">
                   {primaryField.cell({ row, table })}
                 </h4>
               </div>
