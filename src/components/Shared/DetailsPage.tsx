@@ -579,7 +579,7 @@ const Details = (props: DetailProps) => {
                         return (
                           <div
                             className={cn(
-                              '[&:nth-child(odd)]:md:border-r',
+                              '-mr-[1px] md:border-r',
                               isEven ? i < form.sectionFields.length - 2 && 'border-b' : i < form.sectionFields.length - 1 && 'border-b',
                               '[&:not(:last-child)]:max-md:border-b',
                               `md:${field.fieldData.columnSize ? colSpans[+field.fieldData.columnSize - 1] || 'col-span-6' : columnSize(field.fieldData.type)}`,
