@@ -56,7 +56,7 @@ const PolicyResources = ({
             ?.filter((item: string) => permissions[camelCase(item)]?.isRead)
             .map((resource: string, outerIndex) => (
               <>
-                <TableRow className="[&:not(:last-child)]:shadow-[0_1px_0px_0px_var(--common-border-color)]">
+                <TableRow>
                   <TableCell sx={{ minWidth: 300, py: 0 }}>
                     <Box
                       display="flex"
@@ -89,7 +89,7 @@ const PolicyResources = ({
                   fieldOfPolicyResources
                     .filter((item) => item.resource === resource)
                     .map((obj) => (
-                      <TableRow key={2} className="[&:not(:last-child)]:shadow-[0_1px_0px_0px_var(--common-border-color)]">
+                      <TableRow key={2}>
                         <TableCell sx={{ minWidth: 300, py: 0 }}>
                           <Typography variant="body1" style={{ fontWeight: 400 }}>
                             &emsp; {obj?.fieldLabel}

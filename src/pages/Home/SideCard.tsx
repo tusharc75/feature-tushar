@@ -50,7 +50,7 @@ const SideCard = ({
           <div className="mx-auto min-w-0 max-w-full">{icon}</div>
           <div className="content ">
             <h3 className="mb-[10px] text-[20px] font-semibold leading-[24px]">{heading}</h3>
-            <p className="text-[12px] font-normal leading-[1.5] text-[#737373] dark:text-gray-500">{description}</p>
+            <p className="text-[12px] font-normal leading-[1.5] text-[#737373] dark:text-[#bebebe]">{description}</p>
           </div>
         </div>
       </div>
