@@ -159,6 +159,7 @@ const DetailsPageHeader = ({
                   aria-controls="action-menu"
                   sx={{ width: 32, height: 32, borderRadius: '4px' }}
                   size="small"
+                  {...restOfActionButtonProps}
                   className="new-dropdown-v1"
                 >
                   <MoreVert />

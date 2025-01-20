@@ -1066,7 +1066,7 @@ const Steps = ({
                   isActionButtonVisible={true}
                   actionButtonType="iconButton"
                   actionButtonMenuItems={actionButtonMenuItems}
-                  actionButtonProps={{ disabled: selectedSteps?.length ? false : true }}
+                  actionButtonProps={{ disabled: selectedSteps.length === 0 }}
                   leftSideContents={leftSideContents}
                   rightSideContents={rightSideContents}
                   hasXpadding={false}
