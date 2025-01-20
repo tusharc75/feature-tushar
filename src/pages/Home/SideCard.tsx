@@ -39,10 +39,13 @@ const SideCard = ({
       onClick={handleCLick}
       role={onClick ? 'button' : href ? 'link' : 'article'}
       aria-label={onClick ? `open ${heading} modal` : href ? `Open the ${heading} ${external && 'site in a new tab'}` : `${heading}`}
-      className={cn('rounded-xl min-[900px]:min-h-[144px] ', (onClick || href) && 'cursor-pointer')}
-      style={{ background: `linear-gradient(180deg, ${gradientColors[0]}, ${gradientColors[1]})` }}
+      className={cn('relative overflow-hidden rounded-xl min-[900px]:min-h-[144px]', (onClick || href) && 'cursor-pointer')}
     >
-      <div className="group relative ml-1 min-h-full rounded-xl bg-[var(--dark-primary,white)]  p-[40px_18px_28px_18px] shadow-[0px_3.3px_40px_0px_#00000014]">
+      <div
+        style={{ background: `linear-gradient(180deg, ${gradientColors[0]}, ${gradientColors[1]})` }}
+        className="absolute bottom-0 left-0 top-0 w-1/2 rounded-xl"
+      />
+      <div className="group relative ml-1 min-h-full rounded-xl bg-[--dark-secondary,#f7f6fa] p-[40px_18px_28px_18px]  shadow-md">
         <div className="grid min-h-full gap-2 min-[500px]:grid-cols-[80px_1fr] min-[900px]:grid-cols-1 min-[1024px]:grid-cols-[1fr_3fr] min-[1300px]:grid-cols-[80px_1.5fr] min-[1370px]:grid-cols-[90px_3fr]">
           <div className="mx-auto min-w-0 max-w-full">{icon}</div>
           <div className="content ">
