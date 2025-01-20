@@ -58,7 +58,6 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
               } else {
                 setTitle(`Edit - ${data.reportTitle}`);
                 setSelectedExpense(data.selectedExpenses);
-                setSelectedExpensesData(selectedExpense);
                 setInitialData({
                   fields: fieldsDataForUpdate,
                   values: { ...getObjKeysWithValues(data, fieldsDataForUpdate) }
@@ -85,7 +84,6 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
     setIsSubmitting(true);
     const { fields, values, ...data } = value;
     data.selectedExpenses = selectedExpense;
-
     if (expenseReportId && isClone === false) {
       axiosInstance()
         .put(`${expenseReport.api}`, data)
@@ -134,7 +132,7 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
     }
   };
 
-  const handleSaveExpenses = (expense) => {
+  const handleSaveExpenses = async (expense) => {
     const expensesId = expense.map((obj) => obj = obj._id );
     setSelectedExpense(expense);
     axiosInstance()

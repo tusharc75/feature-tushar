@@ -114,7 +114,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
           accessor: element.fieldName,
           Header: element.fieldLabel,
           disableFilters: true,
-          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{displayDate(row.original[element.fieldName].slice(0, 10))}</p> : <NoDataCell />)
+          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{displayDate(row.original[element.fieldName])}</p> : <NoDataCell />)
         });
       } else if (element.fieldName === 'supplierAccount') {
         coloum.push({
@@ -223,15 +223,14 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === MATERIAL_TYPE.serializedAsset
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === MATERIAL_TYPE.product
-            ? parent.productDetail?.productName
-            : parent.type === MATERIAL_TYPE.service
-              ? parent.serviceDetail?.serviceName
-              : parent.packageDetail?.packageName
-      }`;
+      parent.detail = `${parent.type === MATERIAL_TYPE.serializedAsset
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.service
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+        }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -261,15 +260,14 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
 
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow.type === MATERIAL_TYPE.serializedAsset
-          ? _subRow.serializedAssetDetail?.assetNumber
-          : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow.productDetail?.productName
-            : _subRow.type === MATERIAL_TYPE.service
-              ? _subRow.serviceDetail?.serviceName
-              : _subRow.packageDetail?.packageName
-      }`;
+      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.serializedAsset
+        ? _subRow.serializedAssetDetail?.assetNumber
+        : _subRow.type === MATERIAL_TYPE.product
+          ? _subRow.productDetail?.productName
+          : _subRow.type === MATERIAL_TYPE.service
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''

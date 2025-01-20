@@ -36,7 +36,7 @@ type Props = {
   state: TInitialState;
   dispatch: Dispatch<TActios>;
   consumablesDialog: boolean;
-  setConsumablesDialog: (value: boolean) => void;
+  setConsumablesDialog: (value: any) => void;
   repairOrderDialog: boolean;
   setRepairOrderDialog: (value: boolean) => void;
   tableHead?: React.ReactNode;
@@ -418,7 +418,7 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
           });
           fetchData();
           setSubmitting(false);
-          setConsumablesDialog(false);
+          setConsumablesDialog({ open: false, multiple: false });
         })
         .catch((error) => {
           setSubmitting(false);

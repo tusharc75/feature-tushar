@@ -96,7 +96,7 @@ const WorkOrderSupervisor = () => {
   const [viewType, setViewType] = useState<ViewType>(() => {
     return (localStorage.getItem(`${renderedFrom}_view`) as ViewType) || 'card-view';
   });
-  const [consumablesDialog, setConsumablesDialog] = useState(false);
+  const [consumablesDialog, setConsumablesDialog] = useState({ open: false, multiple: false });
   const [repairOrderDialog, setRepairOrderDialog] = useState(false);
 
   const [globalFilters, setGlobalFilters] = useState<DateRange>({
@@ -269,7 +269,7 @@ const WorkOrderSupervisor = () => {
       {
         type: 'tooltip',
         accessor: 'tooltip',
-        renderer: (data) => <RenderAssignOptions openAssignHandler={openAssignHandler} data={data} permissions={permissions} resources={resources} />
+        renderer: (data) => <RenderAssignOptions openAssignHandler={openAssignHandler} data={data} permissions={permissions} resources={resources} isCreateRepairOrderDisabled={isCreateRepairOrderDisabled}/>
       }
     ];
 
@@ -299,6 +299,8 @@ const WorkOrderSupervisor = () => {
       setAssignTechnicianDialog({ open: true, multiple: false });
     } else if (value === 'createRepairOrder') {
       setRepairOrderDialog(true);
+    } else if (value === 'addProductConsumables') {
+      setConsumablesDialog({ open: true, multiple: false });
     } else {
       setWorkStationAssignDialog({ open: true, multiple: false });
     }
@@ -457,7 +459,7 @@ const WorkOrderSupervisor = () => {
         visibleColumns?.map((c) => {
           fetchSingleColumn(c, 0, false, filterQuery);
         });
-        setConsumablesDialog(false);
+        setConsumablesDialog({ open: false, multiple: false });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -511,7 +513,7 @@ const WorkOrderSupervisor = () => {
   const addProductConsumablesButton = {
     disabled: selectedRecordsS?.length === 0,
     label: 'Add Products/Consumables',
-    onClick: () => setConsumablesDialog(true)
+    onClick: () => setConsumablesDialog({ open: true, multiple: true })
   };
 
   const checkUniqWarehouse = (selectedRecords) => {
@@ -567,10 +569,10 @@ const WorkOrderSupervisor = () => {
             : selectedRecords?.every((r) => r?.status != WORKORDER_SERVICE_STATUS.planned)
               ? [assignTechnicianButton, assignWorkStationButton, ...(viewType === 'card-view' ? [addProductConsumablesButton] : [])]
               : [
-                  assignTechnicianButton,
-                  assignWorkStationButton,
-                  ...(viewType === 'card-view' ? [addProductConsumablesButton, createRepairOrderButton] : [])
-                ]
+                assignTechnicianButton,
+                assignWorkStationButton,
+                ...(viewType === 'card-view' ? [addProductConsumablesButton, createRepairOrderButton] : [])
+              ]
     };
     return data;
   }, [resources?.workStations?.titlePlural, selectedRecords, selectedRecordsS, selectedRecordsP, viewType, tableViewStatus]);
@@ -607,29 +609,22 @@ const WorkOrderSupervisor = () => {
   const moreButtonMenuItems: ButtonMenuProps<string>['items'] = useMemo(() => {
     return [
       {
-        visible: permissions?.repairOrder?.isCreate,
+        visible: permissions?.repairOrder?.isCreate || false,
         label: `${resources?.repairOrder?.titlePlural}`,
         onClick: () => window.open(`${routes?.repairOrder?.path}`)
       },
       {
-        visible: permissions?.productionOrder?.isCreate,
+        visible: permissions?.productionOrder?.isCreate || false,
         label: `${resources?.productionOrder?.titlePlural}`,
         onClick: () => window.open(`${routes?.productionOrder?.path}`)
       },
       {
-        visible: permissions?.assemblyOrder?.isCreate,
+        visible: permissions?.assemblyOrder?.isCreate || false,
         label: `${resources?.assemblyOrder?.titlePlural}`,
         onClick: () => window.open(`${routes?.assemblyOrder?.path}`)
       }
     ] as ButtonMenuProps<string>['items'];
-  }, [
-    permissions?.assemblyOrder?.isCreate,
-    permissions?.productionOrder?.isCreate,
-    permissions?.repairOrder?.isCreate,
-    resources?.assemblyOrder?.titlePlural,
-    resources?.productionOrder?.titlePlural,
-    resources?.repairOrder?.titlePlural
-  ]);
+  }, []);
 
   const handleApplyFilter = (filterByIdsP = filterByIds) => {
     setShowFilter(false);
@@ -664,20 +659,22 @@ const WorkOrderSupervisor = () => {
               {`${resources?.workOrder?.titlePlural}`}
             </ThemeButton>
           )}
-          <ButtonMenu
-            showChevron={true}
-            items={moreButtonMenuItems}
-            horizontal="right"
-            slot={
-              ((props) => (
-                <HtmlTooltip title={'More'}>
-                  <IconButton aria-haspopup="true" color="primary" size="small" title="More" {...props}>
-                    <MoreVert />
-                  </IconButton>
-                </HtmlTooltip>
-              )) as any
-            }
-          />
+          {moreButtonMenuItems?.find((e) => e.visible) &&
+            <ButtonMenu
+              showChevron={true}
+              items={moreButtonMenuItems}
+              horizontal="right"
+              slot={
+                ((props) => (
+                  <HtmlTooltip title={'More'}>
+                    <IconButton aria-haspopup="true" color="primary" size="small" title="More" {...props}>
+                      <MoreVert />
+                    </IconButton>
+                  </HtmlTooltip>
+                )) as any
+              }
+            />
+          }
         </div>
       </div>
       <div className="main-container">
@@ -705,7 +702,7 @@ const WorkOrderSupervisor = () => {
                 </>
               ) : (
                 <div className="flex">
-                  <ToggleButtonGroup size="small" exclusive value={resourceType} onChange={(e, newVal) => {}}>
+                  <ToggleButtonGroup size="small" exclusive value={resourceType} onChange={(e, newVal) => { }}>
                     <ToggleButton value={'workOrder'} onClick={() => setResourceType('workOrder')}>
                       {resources?.workOrder?.titleSingular}
                     </ToggleButton>
@@ -821,7 +818,7 @@ const WorkOrderSupervisor = () => {
               filterQuery={filterQuery}
               ref={workOrderListRef}
               status={tableViewStatus}
-              consumablesDialog={consumablesDialog}
+              consumablesDialog={consumablesDialog.open}
               setConsumablesDialog={setConsumablesDialog}
               repairOrderDialog={repairOrderDialog}
               setRepairOrderDialog={setRepairOrderDialog}
@@ -871,15 +868,15 @@ const WorkOrderSupervisor = () => {
           workOrderData={
             assignTechnicianDialog.multiple
               ? selectedRecordsS?.map((r) => ({
-                  uniqueId: r?.uniqueId,
-                  workOrderId: r?.workOrder
-                }))
+                uniqueId: r?.uniqueId,
+                workOrderId: r?.workOrder
+              }))
               : [
-                  {
-                    uniqueId: selectedServiceData?.uniqueId,
-                    workOrderId: selectedServiceData?.workOrder
-                  }
-                ]
+                {
+                  uniqueId: selectedServiceData?.uniqueId,
+                  workOrderId: selectedServiceData?.workOrder
+                }
+              ]
           }
           assignedUsers={
             assignTechnicianDialog.multiple
@@ -905,15 +902,15 @@ const WorkOrderSupervisor = () => {
           workOrderData={
             workStationAssignDialog.multiple
               ? selectedRecordsS?.map((r) => ({
-                  uniqueId: r?.uniqueId,
-                  workOrderId: r?.workOrder
-                }))
+                uniqueId: r?.uniqueId,
+                workOrderId: r?.workOrder
+              }))
               : [
-                  {
-                    uniqueId: selectedServiceData?.uniqueId,
-                    workOrderId: selectedServiceData?._id
-                  }
-                ]
+                {
+                  uniqueId: selectedServiceData?.uniqueId,
+                  workOrderId: selectedServiceData?._id
+                }
+              ]
           }
           workStations={workStationAssignDialog.multiple ? selectedRecordsS[0]?.assignedWorkStations : selectedServiceData?.assignedWorkStations}
           handleClose={() => {
@@ -935,6 +932,7 @@ const WorkOrderSupervisor = () => {
           }}
         />
       )}
+
       {isOpen.open && (
         <WorkOrderDetailDialog
           workOrderId={isOpen?.id}
@@ -943,13 +941,14 @@ const WorkOrderSupervisor = () => {
           }}
         />
       )}
-      {consumablesDialog && (
+
+      {consumablesDialog.open && (
         <AssignProductDialog
-          handleCloseDialog={() => setConsumablesDialog(false)}
+          handleCloseDialog={() => setConsumablesDialog({ open: false, multiple: false })}
           ids={[]}
           onSuccess={(rows) => {
             if (viewType === 'card-view') {
-              handleAddConsumables(rows, selectedRecordsS);
+              handleAddConsumables(rows, consumablesDialog?.multiple ? selectedRecordsS : [selectedServiceData]);
             } else {
               workOrderListRef.current?.handleAddConsumables(rows, selectedRecords);
             }
@@ -1003,7 +1002,7 @@ const WorkOrderSupervisor = () => {
 
 export default WorkOrderSupervisor;
 
-const RenderAssignOptions = ({ openAssignHandler, data, permissions, resources }) => {
+const RenderAssignOptions = ({ openAssignHandler, data, permissions, resources, isCreateRepairOrderDisabled }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const handleClose = () => {
     setAnchorEl(null);
@@ -1033,6 +1032,7 @@ const RenderAssignOptions = ({ openAssignHandler, data, permissions, resources }
                 openAssignHandler('createRepairOrder', data);
                 setAnchorEl(null);
               }}
+              disabled={isCreateRepairOrderDisabled([data])}
             >
               {`Create ${resources?.repairOrder?.titleSingular}`}
             </MenuItem>
@@ -1056,6 +1056,14 @@ const RenderAssignOptions = ({ openAssignHandler, data, permissions, resources }
                   {`Assign ${resources?.workStations?.titlePlural}`}
                 </MenuItem>
               )}
+              <MenuItem
+                onClick={() => {
+                  openAssignHandler('addProductConsumables', data);
+                  setAnchorEl(null);
+                }}
+              >
+                {'Add Products/Consumables'}
+              </MenuItem>
             </>
           )}
         </Menu>

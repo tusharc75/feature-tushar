@@ -249,4 +249,15 @@ export const resourcePolicy = [
       },
     ]
   },
+  {
+    resource: sidebarResource.address,
+    policy: [
+      {
+        fieldName: 'countyFromTaxMaster',
+        fieldLabel: 'County From Tax Master',
+        type: 'checkBox',
+        defaultValue: false
+      },
+    ]
+  },
 ];

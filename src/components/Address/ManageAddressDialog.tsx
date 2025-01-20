@@ -9,7 +9,7 @@ import Dialog from '@mui/material/Dialog';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { isMobile, isTablet } from 'react-device-detect';
-import { address, CustomDialogTransition, setFieldsInAscendingOrder } from '../../constants/helpers';
+import { address, CustomDialogTransition, setFieldsInAscendingOrder, sidebarResource } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box, Grid } from '@mui/material';
@@ -34,6 +34,7 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [latLngChangedManually, setLatLngChangedManually] = useState(false);
   const [addressDetail, setAddressDetail] = useState(addressData);
+  const [isCountyFromTaxMaster, setIsCountyFromTaxMaster] = useState(false);
 
   const formikRef = {
     current: null
@@ -46,11 +47,34 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
   }, [initialData.fields]);
 
   useEffect(() => {
-    axiosInstance()
-      .get(`/field?resource=Address`)
-      .then(({ data: { data } }) => {
-        const fieldsCreateData = data.filter((d) => d.isCreate).map((d: any) => d.fieldData);
+    fetchFields(); 
+  }, []);
+
+  const fetchFields = async ()=>{
+    try {
+      const {
+        data: { data: resourceData }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.address}`);
+      const { data: { data } } = await axiosInstance().get(`/field?resource=Address`);
+      if(resourceData && resourceData?.policy?.countyFromTaxMaster && data?.find((d)=> d?.fieldData?.fieldName==='county')){
+        const query = `sa-field/fieldName/options?resource=${sidebarResource.taxMaster}&fieldName=${'county'}`;
+        const response = await axiosInstance().get(query);
+        let countyOptions = response?.data?.data;
+        if(countyOptions?.length){
+          countyOptions = countyOptions?.map((c)=> ({optionValue: c, optionLabel: c})) || [];
+          setIsCountyFromTaxMaster(true);
+        }
+        data?.forEach((d)=>{
+          if(d.fieldData.fieldName==='county' && countyOptions?.length){
+            d.fieldData.type = 'dropDown';
+            d.fieldData.option = countyOptions;
+          }
+        })
+      }
+
+      const fieldsCreateData = data.filter((d) => d.isCreate).map((d: any) => d.fieldData);
         const fieldsEditData = data.filter((d) => d.isUpdate).map((d: any) => d.fieldData);
+      
         if (addressData) {
           setInitialData({
             fields: fieldsEditData,
@@ -70,11 +94,10 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
             values: tempInitialData
           });
         }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  }, []);
+    }catch(error){
+      toastConfig.setToastConfig(error);
+    }
+  }
 
   const handleSubmit = (values) => {
     setLoading(true);
@@ -300,7 +323,7 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
                                     'state',
                                     'zipCode',
                                     'country',
-                                    'county',
+                                    ...(isCountyFromTaxMaster ? [] : ['county']),
                                     'latitude',
                                     'longitude',
                                     'state/Province',
