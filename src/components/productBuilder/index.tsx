@@ -100,7 +100,7 @@ const ProductBuilder = (props) => {
   }, [productBuilderId, processStatus]);
 
   const fetchProduct = () => {
-    if (setNextStep) {
+    if (setNextStep && processStatus != QUOTE_PROCESS_STATUS.sendToCustomer) {
       setNextStep(false);
     }
     dispatch({ type: 'loading', loading: true });
@@ -175,8 +175,11 @@ const ProductBuilder = (props) => {
           if (e.accessor === 'productName') {
             e.cell = ({ row }) => (
               <div className="flex items-center gap-1">
-                <p className='text-truncate' title={row?.original?.productName}> {row?.original?.productName}</p>
-                {row?.original?.productId &&
+                <p className="text-truncate" title={row?.original?.productName}>
+                  {' '}
+                  {row?.original?.productName}
+                </p>
+                {row?.original?.productId && (
                   <IconButton
                     size="small"
                     onClick={() => {
@@ -185,11 +188,11 @@ const ProductBuilder = (props) => {
                   >
                     <FiExternalLink size={16} className="text-gray-500 dark:text-gray-300" />
                   </IconButton>
-                }
+                )}
               </div>
             );
           }
-        })
+        });
         columns = [...columns, ...newColumns];
 
         if (stage && stage === 'product') {
@@ -227,8 +230,7 @@ const ProductBuilder = (props) => {
         } else if (processStatus === QUOTE_PROCESS_STATUS.priceBuilder) {
           if (!rows?.length) {
             setNextStep(false);
-          }
-          else if (rows?.find((ele) => (ele[`totalSalesPrice_${currency?.toLowerCase()}`] || 0) === 0 || (ele[`qty`] || 0) === 0)) {
+          } else if (rows?.find((ele) => (ele[`totalSalesPrice_${currency?.toLowerCase()}`] || 0) === 0 || (ele[`qty`] || 0) === 0)) {
             setNextStep(false);
           } else {
             setNextStep(true);
