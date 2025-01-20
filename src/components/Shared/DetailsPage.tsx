@@ -265,17 +265,17 @@ const Details = (props: DetailProps) => {
                   </React.Fragment>
                 ))
               ) : (
-                <>-</>
+                <span className="p-0">-</span>
               )
             ) : data[fieldData.fieldName] ? (
               <Link
                 to={`/${kebabCase(fieldData.lookupResource)}/detail/${val[fieldData.fieldName]}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="link block w-full"
+                className="link"
                 title={data[fieldData.fieldName].optionLabel || value}
               >
-                <span className={`link block md:truncate md:text-ellipsis`}>
+                <span className={`link block p-0 md:truncate md:text-ellipsis`}>
                   {data[fieldData.fieldName].optionLabel || value}
                   {data[fieldData.fieldName]?.staticData?.approved && data[fieldData.fieldName]?.staticData?.approved === true ? (
                     <FcApproval className={classes.approvalIcon} title="Approved" size={20} />
@@ -283,7 +283,7 @@ const Details = (props: DetailProps) => {
                 </span>
               </Link>
             ) : (
-              <Typography>-</Typography>
+              <span className="p-0">-</span>
             )}
           </Typography>
         );
