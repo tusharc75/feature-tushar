@@ -330,11 +330,6 @@ function Dropdown({
   const fieldDependentOn = fieldData?.lookupDependentOn ? fields?.find((d) => d.fieldName === fieldData?.lookupDependentOn) : null;
   const isDisabled = fieldData?.lookupDependentOn && fieldData?.lookupDependentOn !== '' && fieldDependentOn && !!!values[fieldDependentOn.fieldName];
 
-  const handleSameNameFieldFromOptions = (name, val, fields) => {
-    const field = fields.find((d) => d.fieldName === name);
-    if (field) handleChange(name, val);
-  }
-
   const handleLookUpDependent = (name, val, fields, setFieldValue) => {
     const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
     if (filterFields?.length) {
