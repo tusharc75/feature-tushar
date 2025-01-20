@@ -728,7 +728,7 @@ export default function QuoteProcess(props) {
                   mobileTooltip="Quote Template"
                   iconForMobile={<AiFillEdit />}
                 >
-                  'Quote Template
+                  Quote Template
                 </ThemeButton>
               )}
           </>
