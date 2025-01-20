@@ -365,6 +365,9 @@ function Dropdown({
           if (filterFieldDropDownOptions?.length === 1) {
             setFieldValue(ele?.fieldName, filterFieldDropDownOptions[0]?.optionValue);
             handleLookUpDependent(ele?.fieldName, filterFieldDropDownOptions[0], fields, setFieldValue);
+          } else if (filterFieldDropDownOptions?.find((f) => f?.default === true)) {
+            setFieldValue(ele?.fieldName, filterFieldDropDownOptions?.find((f) => f?.default === true)?.optionValue);
+            handleLookUpDependent(ele?.fieldName, filterFieldDropDownOptions?.find((f) => f?.default === true), fields, setFieldValue);
           }
         }
       });
@@ -470,15 +473,22 @@ function Dropdown({
                     onChange
                       ? onChange
                       : (e, val) => {
-                          if (setFieldValue) {
-                            handleChange(name, val && val.optionValue ? val.optionValue : '');
-                            const fieldChange: any = getNestedlookupDependentOn(fields, name);
-                            fieldChange?.forEach((val: any) => {
-                              setFieldValue(val.fieldName, val.value);
-                            });
-                            handleLookUpDependent(name, val, fields, setFieldValue);
+                        if (setFieldValue) {
+                          handleChange(name, val && val.optionValue ? val.optionValue : '');
+                          const fieldChange: any = getNestedlookupDependentOn(fields, name);
+                          fieldChange?.forEach((val: any) => {
+                            setFieldValue(val.fieldName, val.value);
+                          });
+                          handleLookUpDependent(name, val, fields, setFieldValue);
+                          if (fields?.find((f) => f?.fieldName === 'toOpenInvoice')) {
+                            if (val?.defaultOpenInvoice === true) {
+                              setFieldValue('toOpenInvoice', true);
+                            } else {
+                              setFieldValue('toOpenInvoice', false);
+                            }
                           }
                         }
+                      }
                   }
                   selectOnFocus
                   clearOnBlur
