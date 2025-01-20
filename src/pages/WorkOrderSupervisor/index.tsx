@@ -680,7 +680,7 @@ const WorkOrderSupervisor = () => {
       <div className="main-container">
         <div className="header-panel pb-0">
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {['card-view', 'table-view'].includes(viewType) ? (
                 <>
                   <DateRangePicker horizontal="left" date={globalFilters} setDate={setGlobalFilters} />
