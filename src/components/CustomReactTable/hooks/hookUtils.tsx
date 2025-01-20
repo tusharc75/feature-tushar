@@ -34,10 +34,10 @@ export const getStaticFields = () => {
       disableFilters: true,
       cell: ({ row }) =>
         row?.original?.createdBy ? (
-          <h5 className="createBy" title={`${row?.original?.createdBy} • ${displayDate(row?.original?.createdByDate?.slice(0, 10))}`}>
+          <h5 className="createBy" title={`${row?.original?.createdBy} • ${displayDate(row?.original?.createdByDate)}`}>
             {row?.original?.createdBy}
             <span className="hidden">&nbsp;-&nbsp;</span>
-            <span className="createdAtTime badge-date">{displayDate(row?.original?.createdByDate?.slice(0, 10))}</span>
+            <span className="createdAtTime badge-date">{displayDate(row?.original?.createdByDate)}</span>
           </h5>
         ) : (
           <NoDataCell />
@@ -56,9 +56,9 @@ export const getStaticFields = () => {
       disableFilters: true,
       cell: ({ row }) =>
         row?.original?.updatedBy ? (
-          <h5 className="updateBy" title={`${row?.original?.updatedBy} • ${displayDate(row?.original?.updatedByDate?.slice(0, 10))}`}>
+          <h5 className="updateBy" title={`${row?.original?.updatedBy} • ${displayDate(row?.original?.updatedByDate)}`}>
             {row?.original?.updatedBy}&nbsp;
-            <span className="updatedAtTime badge-date">{displayDate(row?.original?.updatedByDate?.slice(0, 10))}</span>
+            <span className="updatedAtTime badge-date">{displayDate(row?.original?.updatedByDate)}</span>
           </h5>
         ) : (
           <NoDataCell />
@@ -84,11 +84,11 @@ export const getCompletedByField = () => {
         row?.original?.completedBy ? (
           <h5
             className="createBy"
-            title={`${row?.original?.completedBy} • ${displayDate(row?.original?.completedByDate?.slice(0, 10))}`}
+            title={`${row?.original?.completedBy} • ${displayDate(row?.original?.completedByDate)}`}
           >
             {row?.original?.completedBy}
             <span className="hidden">&nbsp;-&nbsp;</span>
-            <span className="createdAtTime badge-date">{displayDate(row?.original?.completedByDate?.slice(0, 10))}</span>
+            <span className="createdAtTime badge-date">{displayDate(row?.original?.completedByDate)}</span>
           </h5>
         ) : (
           <NoDataCell />
