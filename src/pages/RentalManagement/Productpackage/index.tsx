@@ -3,7 +3,7 @@ import Add from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { startCase } from 'lodash';
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AssetAvailabilityIcon } from 'src/assets/svg/svgIcons';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -942,7 +942,7 @@ const Productpackage = ({
     }
   };
 
-  const addButtonMenuItems = () => {
+  const addButtonMenuItems = useMemo(() => {
     return (
       <>
         <MenuItem
@@ -999,7 +999,7 @@ const Productpackage = ({
         )}
       </>
     );
-  };
+  }, [costFields, permissions?.managedPackages?.isRead, resources?.managedPackages?.titlePlural, resources?.serializedAsset?.titlePlural]);
 
   const rightSideContents = () => {
     return (
@@ -1065,7 +1065,7 @@ const Productpackage = ({
     <Fragment>
       <DetailsPageHeader
         isAddButtonVisible={true}
-        addButtonMenuItems={addButtonMenuItems()}
+        addButtonMenuItems={addButtonMenuItems}
         addButtonProps={{
           disabled: !allowedToEdit || quotationApproved,
           tooltip: !allowedToEdit ? ownerAndColaborator : quotationApproved ? `Quotation ${quotationStatus} you can not perform this action` : ``,
