@@ -49,10 +49,7 @@ const Layout = ({ children }) => {
             initial={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
             exit={{ opacity: 0 }}
-            className={cn(
-              `f-full min-h-[calc(100vh-64px)] flex-grow overflow-hidden max-[768px]:min-h-[calc(100vh-108px)]`,
-              pathName !== '/' ? 'bg-[--dark-primary,white]' : 'bg-[--dark-secondary,#f1f5ff]'
-            )}
+            className={cn(`f-full min-h-[calc(100vh-64px)] flex-grow overflow-hidden max-[768px]:min-h-[calc(100vh-108px)]`)}
             // style={{ backgroundColor: theme === 'light' ? '#f1f5ff' : 'var(--dark-secondary)' }}
             onClick={handleSidebarClose}
           >

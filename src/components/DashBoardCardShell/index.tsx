@@ -27,7 +27,7 @@ const DashBoardCardShell: React.FC<CardInterface> = ({
     '--min-height': minHeight ? '219px' : 'auto'
   } as React.CSSProperties;
   return (
-    <div {...props} style={{ ...styleConfig, ...style }} className={`${className} ${styles.singlecardShell}`}>
+    <div {...props} style={{ ...styleConfig, ...style }} className={`${className} bg-[--dark-secondary,#f7f6fa] shadow-md ${styles.singlecardShell}`}>
       {children}
     </div>
   );
