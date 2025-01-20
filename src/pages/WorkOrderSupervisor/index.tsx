@@ -269,7 +269,7 @@ const WorkOrderSupervisor = () => {
       {
         type: 'tooltip',
         accessor: 'tooltip',
-        renderer: (data) => <RenderAssignOptions openAssignHandler={openAssignHandler} data={data} permissions={permissions} resources={resources} />
+        renderer: (data) => <RenderAssignOptions openAssignHandler={openAssignHandler} data={data} permissions={permissions} resources={resources} isCreateRepairOrderDisabled={isCreateRepairOrderDisabled}/>
       }
     ];
 
@@ -1002,7 +1002,7 @@ const WorkOrderSupervisor = () => {
 
 export default WorkOrderSupervisor;
 
-const RenderAssignOptions = ({ openAssignHandler, data, permissions, resources }) => {
+const RenderAssignOptions = ({ openAssignHandler, data, permissions, resources, isCreateRepairOrderDisabled }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const handleClose = () => {
     setAnchorEl(null);
@@ -1032,6 +1032,7 @@ const RenderAssignOptions = ({ openAssignHandler, data, permissions, resources }
                 openAssignHandler('createRepairOrder', data);
                 setAnchorEl(null);
               }}
+              disabled={isCreateRepairOrderDisabled([data])}
             >
               {`Create ${resources?.repairOrder?.titleSingular}`}
             </MenuItem>
