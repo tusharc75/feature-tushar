@@ -152,9 +152,9 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
         <div>
           {row.original.reference ? (
             row.original.type === 'Loading Ticket' ||
-              row.original.type === 'Receiving Ticket' ||
-              row.original.type === 'Return Ticket' ||
-              row.original.type === 'Delivery Ticket' ? (
+            row.original.type === 'Receiving Ticket' ||
+            row.original.type === 'Return Ticket' ||
+            row.original.type === 'Delivery Ticket' ? (
               <Link
                 className="link"
                 title={row.original.reference}
@@ -515,7 +515,7 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
     <Box>
       <CustomTabs value={tabValue} onChange={handleMainTabChange}>
         {ASSET_HISTORY_RESOURCE?.filter((f) => permissions[camelCase(f.resource)]?.isRead || f.key === 'all')?.map((res, idx) => (
-          <CustomTab primaryColor={true} value={idx} id={res.key} label={`${res.title}`} />
+          <CustomTab underlined={true} value={idx} id={res.key} label={`${res.title}`} />
         ))}
       </CustomTabs>
       <Box className="flex flex-wrap items-center justify-between gap-3">
@@ -526,8 +526,8 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
           permissions={permissions?.history}
           module={'Asset History'}
           api={`/history/inventory/${id}`}
-          afterImportCompleted={() => { }}
-          onExportToExcelSuccess={() => { }}
+          afterImportCompleted={() => {}}
+          onExportToExcelSuccess={() => {}}
           additionalParams={getQueryString()}
           onlyExport={true}
         />

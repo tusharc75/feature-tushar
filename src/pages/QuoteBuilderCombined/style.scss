@@ -58,18 +58,6 @@
   }
 }
 
-.MuiTab-textColorPrimary.Mui-selected {
-  border-radius: 0;
-  background: white;
-  color: var(--primary) !important;
-  border: 1px solid lightgray;
-  border-top: 4px solid #1b7d1c !important;
-  border-bottom: 0px !important;
-
-  //border-top-right-radius: 12px;
-  //border-top-left-radius: 12px;
-}
-
 .tab-font {
   font-size: 14px;
 }

@@ -713,7 +713,7 @@ const Services = ({
           </Box>
           <Box mt={3}>
             <CustomTabs value={tabValue} onChange={handleMainTabChange} style={{ marginBottom: -1 }}>
-              <CustomTab value={0} label={'Technicians'} primaryColor={true} />
+              <CustomTab value={0} label={'Technicians'} underlined={true} />
             </CustomTabs>
             <TabPanel value={tabValue} index={0}>
               <Technicians
