@@ -353,7 +353,7 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
         </Box>
       )}
       <CustomTabs value={tabValue} onChange={handleMainTabChange} style={{ marginBottom: -1 }}>
-        <CustomTab value={0} label={'Products/Consumables'} primaryColor={true} />
+        <CustomTab value={0} label={'Products/Consumables'} underlined={true} />
       </CustomTabs>
       <TabPanel value={tabValue} index={0}>
         <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
@@ -366,7 +366,7 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
             isActionButtonVisible={allowedToEdit}
           />
           <Grid container spacing={2}>
-            <Grid size={{xs:12, md:12, sm:12}}>
+            <Grid size={{ xs: 12, md: 12, sm: 12 }}>
               {columns ? (
                 <CustomReactTable
                   height={stepFullScreen ? 'calc(100vh - 300px)' : '300px'}

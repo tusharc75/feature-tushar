@@ -181,7 +181,7 @@ const WorkOrderTechnician = () => {
   const handleCompleteService = () => {
     setIsSubmitting(true);
     const data = selectedRecords
-      ?.filter((s) => s?.status === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)
+      ?.filter((s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)
       ?.map((_s) => ({
         workOrder: _s?.workOrderDetail?._id,
         service: _s?.materialId,
@@ -208,7 +208,8 @@ const WorkOrderTechnician = () => {
         {
           disabled:
             selectedRecords?.length &&
-            selectedRecords?.filter((s) => s?.status === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length === selectedRecords?.length
+            selectedRecords?.filter((s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length ===
+              selectedRecords?.length
               ? false
               : true,
           label: `Complete Service(s)`,
@@ -217,7 +218,7 @@ const WorkOrderTechnician = () => {
       ]
     };
     return items;
-  }, [selectedRecords]);
+  }, [selectedRecords, viewType]);
 
   const statusMenuItems = useMemo(() => {
     return [

@@ -156,14 +156,14 @@ const ServiceMaster = (props: Props) => {
       },
       ...(serviceColumns && serviceColumns?.some((column) => column?.fieldData?.fieldName === 'frequency')
         ? [
-          {
-            accessor: 'frequency',
-            Header: 'Frequency',
-            width: 150,
-            minWidth: 150,
-            Cell: ({ row }) => (row.original?.frequency ? <p>{row.original?.frequency}</p> : <NoDataCell />)
-          }
-        ]
+            {
+              accessor: 'frequency',
+              Header: 'Frequency',
+              width: 150,
+              minWidth: 150,
+              Cell: ({ row }) => (row.original?.frequency ? <p>{row.original?.frequency}</p> : <NoDataCell />)
+            }
+          ]
         : []),
       {
         accessor: 'stepName',
@@ -524,9 +524,7 @@ const ServiceMaster = (props: Props) => {
     return (
       <>
         {dataRows?.length ? (
-          <ThemeButton
-            startIcon={<GrDrag fontSize="small" />}
-            onClick={() => setArrangeView(true)}>
+          <ThemeButton startIcon={<GrDrag fontSize="small" />} onClick={() => setArrangeView(true)}>
             Arrange
           </ThemeButton>
         ) : null}
@@ -553,8 +551,8 @@ const ServiceMaster = (props: Props) => {
   return (
     <Fragment>
       <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-        <CustomTab value={0} label={'Normal'} primaryColor={true} />
-        <CustomTab value={1} label={'Conditional'} primaryColor={true} />
+        <CustomTab value={0} label={'Normal'} underlined={true} />
+        <CustomTab value={1} label={'Conditional'} underlined={true} />
       </CustomTabs>
       <TabPanel value={tabValue} index={0}>
         {permissions?.product?.isUpdate && (
