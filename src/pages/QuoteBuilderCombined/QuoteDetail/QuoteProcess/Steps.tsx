@@ -156,7 +156,7 @@ const Steps = (props) => {
         isPrevStep={currentStep >= 0 && !loading && !globalLoading && isPrevStep}
         isStepEnded={isStepEnded || currentStep === steps.length}
         steps={steps}
-        setCurrentStep={() => { }}
+        setCurrentStep={() => {}}
         handleNext={() => {
           if (versionStatus.includes('Sent to Customer') && steps[currentStep]?.key === 'Send To Customer') {
             setShowManualCustomerActionDialog(true);
@@ -171,7 +171,7 @@ const Steps = (props) => {
         <></>
       ) : (
         <>
-          <div className="absolute right-[25px] top-[64px] rounded-bl-md  text-[20px] font-semibold">
+          <div className="absolute right-[0px] top-[-26px] rounded-bl-md text-[20px] font-semibold">
             {!versionStatus.includes('Accepted by Customer') && approvedQuote.approved && approvedQuote.versionApproved === version && (
               <div
                 className={`${approvedClasses} text d-flex align-items-center justify-content-center max-w-max gap-1  rounded-bl-md bg-[var(--dark-primary)] px-2 py-[3px] font-bold`}
@@ -262,18 +262,10 @@ const Steps = (props) => {
             </>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <ThemeButton
-              onClick={closeManualDiaog}
-              buttonType='transparent'
-            >
+            <ThemeButton onClick={closeManualDiaog} buttonType="transparent">
               Cancel
             </ThemeButton>
-            <ThemeButton
-              disabled={!Boolean(selectedOption) || submitting}
-              onClick={manualSendToCustomer}
-              buttonType='theme'
-              isLoading={submitting}
-            >
+            <ThemeButton disabled={!Boolean(selectedOption) || submitting} onClick={manualSendToCustomer} buttonType="theme" isLoading={submitting}>
               Save
             </ThemeButton>
           </CustomDialogFooter>
