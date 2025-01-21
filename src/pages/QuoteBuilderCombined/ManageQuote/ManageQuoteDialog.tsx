@@ -26,6 +26,7 @@ import {
   CustomDialogTransition,
   GenerateResourceLineNumber,
   QUOTATION_STATUS,
+  QUOTE_STATUS,
   customerAccount,
   formFieldNames,
   getObjKeys,
@@ -146,8 +147,7 @@ export default function ManageQuoteDialog({
     }
 
     const fields = initialData?.fields?.map((f) => {
-      if (
-        [QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(versionStatus) &&
+      if ([QUOTE_STATUS.sentToCustomer, QUOTE_STATUS.acceptByCustomer, QUOTE_STATUS.rejectByCustomer, QUOTE_STATUS.bookedbyCustomer]?.includes(versionStatus) &&
         f?.fieldName === 'customerAccountName'
       ) {
         return {
@@ -559,11 +559,11 @@ export default function ManageQuoteDialog({
                                           isTooltip={field?.isTooltip || false}
                                           tooltipMessage={field?.tooltipMessage}
                                           size="small"
-                                          // doNotShowInfoTooltip={true}
-                                          // onChange={(e, value) => {
-                                          //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
-                                          //   setFieldValue("customerContactName", [])
-                                          // }}
+                                        // doNotShowInfoTooltip={true}
+                                        // onChange={(e, value) => {
+                                        //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
+                                        //   setFieldValue("customerContactName", [])
+                                        // }}
                                         />
                                       ) : field.fieldName === 'opportunity' ? (
                                         <Grid container spacing={1}>
@@ -805,8 +805,8 @@ export default function ManageQuoteDialog({
                                           size="small"
                                         />
                                       ) : ['quoteAcceptDate', 'salesOrderCreationDate', 'invoiceCreationDate', 'invoicedDate'].indexOf(
-                                          field?.fieldName
-                                        ) >= 0 ? (
+                                        field?.fieldName
+                                      ) >= 0 ? (
                                         <FormTypes
                                           {...field}
                                           // {...rest}
@@ -830,8 +830,8 @@ export default function ManageQuoteDialog({
                                           imageOrFileUploadCompletePercentage={
                                             ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                               ? (completePercentage) => {
-                                                  setUploadingImageOrFileProgress(completePercentage);
-                                                }
+                                                setUploadingImageOrFileProgress(completePercentage);
+                                              }
                                               : null
                                           }
                                           customError={customError}
@@ -921,8 +921,8 @@ export default function ManageQuoteDialog({
                                           imageOrFileUploadCompletePercentage={
                                             ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                               ? (completePercentage) => {
-                                                  setUploadingImageOrFileProgress(completePercentage);
-                                                }
+                                                setUploadingImageOrFileProgress(completePercentage);
+                                              }
                                               : null
                                           }
                                           fieldData={field}

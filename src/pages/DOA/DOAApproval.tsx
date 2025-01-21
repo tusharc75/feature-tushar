@@ -14,7 +14,7 @@ import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ProductBuilder from '../../components/productBuilder';
-import { ACTIVITY_RESOURCE, defaultActivityShow, formatAmountWithCurrency, quoteBuilder, sidebarResource } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, defaultActivityShow, formatAmountWithCurrency, QUOTE_STATUS, quoteBuilder, sidebarResource } from '../../constants/helpers';
 import DOAReasonDialog from './DOAReasonDialog';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
@@ -73,7 +73,7 @@ const DOAApproval = () => {
         setVersionData(data?.version);
         setProductBuilderId(data?.version?.productBuilderId);
         setQData(data);
-        if (data?.version?.status !== 'Sent for DOA') {
+        if (data?.version?.status !== QUOTE_STATUS.sentforDOA) {
           setQStatus(false);
         }
       })
@@ -133,7 +133,7 @@ const DOAApproval = () => {
         data['commissionPercentPerUnit'] === null || data['commissionPercentPerUnit'] === undefined ? 0 : data['commissionPercentPerUnit'],
       [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
         data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === null ||
-        data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
+          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
           ? 0
           : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]
     }));
