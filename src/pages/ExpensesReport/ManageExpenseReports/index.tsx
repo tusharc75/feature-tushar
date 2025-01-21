@@ -24,7 +24,6 @@ import {
   expenses,
   EXPENSE_STATUS,
   getObjKeys,
-  GenerateResourceLineNumber
 } from '../../../constants/helpers';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
@@ -100,6 +99,7 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
       axiosInstance()
         .put(`${expenseReport.api}`, data)
         .then(({ data }) => {
+          handleStatusChange(data.selectedExpenses);
           setIsSubmitting(false);
           onSuccess();
           toastConfig.setToastConfig({
@@ -116,6 +116,7 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
       axiosInstance()
         .post(`${expenseReport.api}`, data)
         .then(({ data: { data, message } }) => {
+          handleStatusChange(data.selectedExpenses);
           history.push(`${routes?.expenseReportDetail?.path}/${data._id}`);
           setIsSubmitting(false);
           onSuccess(data);
@@ -146,10 +147,11 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
 
   const handleSaveExpenses = async (newExpenses) => {
     const updatedExpenses = [...selectedExpense, ...newExpenses];
-
     setSelectedExpense(updatedExpenses);
+  };
 
-    const newExpensesIds = newExpenses.map((obj) => obj._id);
+  const handleStatusChange = async (expenseInfo) =>{
+    const newExpensesIds = expenseInfo.map((obj) => obj._id);
 
     axiosInstance()
       .patch(`${expenses.api}/status/${newExpensesIds}`, { status: EXPENSE_STATUS.notSubmitted })
@@ -163,7 +165,7 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  };
+  }
 
   const removeExpenseField = (id) => {
     const removedExpense = selectedExpense.find((field) => field._id === id);
@@ -269,7 +271,7 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
                   isLoading={isSubmitting}
                   buttonType="theme"
                   id="dialog-save-button"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || selectedExpense.length === 0}
                   onClick={(e) => {
                     submitForm();
                   }}

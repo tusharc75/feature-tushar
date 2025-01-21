@@ -13,7 +13,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { expenseReport, sidebarResource } from '../../constants/helpers';
+import { EXPENSE_STATUS, expenseReport, expenses, sidebarResource } from '../../constants/helpers';
 import Step from '../DynamicForm/Step';
 import ManageExpenseReports from 'src/pages/ExpensesReport/ManageExpenseReports';
 
@@ -116,6 +116,7 @@ const ExpenseReportDetailsPage = () => {
     axiosInstance()
       .put(`${expenseReport.api}/remove`, { ids: [expenseReportData._id] })
       .then(() => {
+        handleStatusChange(expenseReportData.selectedExpenses)
         setShowConfirmBox(false);
         history.push(`${routes?.expenseReport?.path}`);
       })
@@ -124,6 +125,23 @@ const ExpenseReportDetailsPage = () => {
         setShowConfirmBox(false);
       });
   };
+
+    const handleStatusChange = async (expenseInfo) =>{
+      const newExpensesIds = expenseInfo.map((obj) => obj._id);
+  
+      axiosInstance()
+        .patch(`${expenses.api}/status/${newExpensesIds}`, { status: EXPENSE_STATUS.new })
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: `Status changed to ${EXPENSE_STATUS.new}`
+          });
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
 
   return (
     <Box className="main-container-v1">
