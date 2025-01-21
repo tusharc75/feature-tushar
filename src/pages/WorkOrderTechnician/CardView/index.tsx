@@ -114,6 +114,7 @@ const CardView = (props, ref) => {
           const rows = data.map((item) => {
             const newObj = { ...item };
             newObj['serviceName'] = item.service?.serviceName;
+            newObj['customServiceStatus'] = item.status;
             newObj['workOrderNumber'] = item.workOrderDetail?.workOrderNumber;
             newObj['repairOrderNumber'] = item.workOrderDetail?.repairOrder?.optionLabel;
             newObj['productionOrderNumber'] = item.workOrderDetail?.productionOrder?.optionLabel;

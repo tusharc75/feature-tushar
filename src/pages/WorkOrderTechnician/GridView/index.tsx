@@ -208,7 +208,7 @@ const GridView = React.forwardRef<GridViewRef, any>(({ renderedFrom, state, disp
           let workOrderDetailData: any = prepareDataForGrid(u?.workOrderDetail, user);
           finalObject['serviceName'] = u?.service?.serviceName;
           finalObject['serviceId'] = u?.service?._id;
-          finalObject['serviceStatus'] = u?.status;
+          finalObject['customServiceStatus'] = u?.status;
           finalObject['workOrderId'] = u?.workOrderDetail?._id;
           const matchedTempMaterial = workOrderDetailData?.tempMaterial?.find((t) => t?.materialId === u?.service?._id);
           finalObject['uniqueId'] = matchedTempMaterial?._id;
