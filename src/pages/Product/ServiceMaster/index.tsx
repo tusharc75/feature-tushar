@@ -550,9 +550,9 @@ const ServiceMaster = (props: Props) => {
 
   return (
     <Fragment>
-      <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-        <CustomTab value={0} label={'Normal'} underlined={true} />
-        <CustomTab value={1} label={'Conditional'} underlined={true} />
+      <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
+        <CustomTab value={0} label={'Normal'} />
+        <CustomTab value={1} label={'Conditional'} />
       </CustomTabs>
       <TabPanel value={tabValue} index={0}>
         {permissions?.product?.isUpdate && (

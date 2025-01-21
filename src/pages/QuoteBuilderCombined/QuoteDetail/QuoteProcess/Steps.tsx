@@ -11,9 +11,8 @@ import CustomDialogContent from '../../../../components/CustomDialog/CustomDialo
 import CustomDialogHeader from '../../../../components/CustomDialog/CustomDialogHeader';
 import { isMobile, isTablet } from 'react-device-detect';
 import DoaStepUsers from './DOAStepUsers';
-
 import Steps1 from 'src/components/Steps';
-import { CustomDialogTransition, QUOTE_STATUS } from 'src/constants/helpers';
+import { cn, CustomDialogTransition, QUOTE_STATUS } from 'src/constants/helpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -48,6 +47,7 @@ const Steps = (props) => {
     loading,
     approvedQuote,
     handleVersionUpdate,
+    stepFullScreen,
     allowedToEdit,
     DOAData = null,
     quoteData,
@@ -165,13 +165,16 @@ const Steps = (props) => {
           }
         }}
         handlePrev={handleBack}
+        stepFullScreen={stepFullScreen}
         setStepFullScreen={setStepFullScreen}
       />
       {isMobile && !isTablet ? (
         <></>
       ) : (
         <>
-          <div className="absolute right-[0px] top-[-26px] rounded-bl-md text-[20px] font-semibold">
+          <div
+            className={cn('absolute  rounded-bl-md text-[20px] font-semibold', stepFullScreen ? '-top-[12px] right-4' : '-top-[27px] right-[0px]')}
+          >
             {!versionStatus.includes(QUOTE_STATUS.acceptByCustomer) && approvedQuote.approved && approvedQuote.versionApproved === version && (
               <div
                 className={`${approvedClasses} text d-flex align-items-center justify-content-center max-w-max gap-1  rounded-bl-md bg-[var(--dark-primary)] px-2 py-[3px] font-bold`}
