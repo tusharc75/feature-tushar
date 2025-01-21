@@ -8,7 +8,7 @@ import { Block, KeyboardArrowUp, WatchLater } from '@mui/icons-material';
 import { DOAApproved, DOARejected, DOAPending } from 'src/assets/svg/svgIcons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
-const DEFAULT_DATA_COUNT = 3; // this value will change how many users will be displayed by default;
+const DEFAULT_DATA_COUNT = 2; // this value will change how many users will be displayed by default;
 
 const statusIconAndColorClassMap = {
   approve: {
