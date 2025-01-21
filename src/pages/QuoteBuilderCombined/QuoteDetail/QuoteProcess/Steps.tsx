@@ -166,6 +166,7 @@ const Steps = (props) => {
           }
         }}
         handlePrev={handleBack}
+        stepFullScreen={stepFullScreen}
         setStepFullScreen={setStepFullScreen}
       />
       {isMobile && !isTablet ? (
