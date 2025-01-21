@@ -642,7 +642,7 @@ const WorkOrderSupervisor = () => {
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ ...routes.workOrderSupervisor, title: resources?.workOrderSupervisor?.titlePlural }]} />
         <div className="flex items-center gap-2">
-          {permissions?.workOrder?.isCreate && (
+          {permissions?.workOrderPlanning?.isRead && (
             <ThemeButton
               iconForMobile={false}
               onClick={() => {
