@@ -27,7 +27,7 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
   const [loading, setLoading] = useState(false);
 
   const {
-    state: { resources }
+    state: { resources, permissions }
   }: any = useData();
 
   useEffect(() => {
@@ -65,8 +65,7 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
   }, [selectedProduct]);
 
   useEffect(() => {
-    axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=Service Master,Employee Master,Work Stations`)
+    axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.serviceMaster},${sidebarResource.employeeMaster},${sidebarResource.workStations}`)
       .then(({ data: { data } }) => {
         setOptions(data);
       });
@@ -190,8 +189,8 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                         <Autocomplete
                           multiple
                           size="small"
-                          options={options['Service Master'] || []}
-                          value={(options['Service Master'] || [])?.filter((option) => values.service.includes(option.optionValue))}
+                          options={options[sidebarResource.serviceMaster] || []}
+                          value={(options[sidebarResource.serviceMaster] || [])?.filter((option) => values.service.includes(option.optionValue))}
                           getOptionLabel={(option) => option?.optionLabel || ''}
                           onChange={(e, val) =>
                             setFieldValue(
@@ -211,60 +210,63 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                           )}
                         />
                       </Grid>
-                      <Grid size={{ xs: 12 }}>
-                        <Autocomplete
-                          multiple
-                          size="small"
-                          options={options['Employee Master'] || []}
-                          value={(options['Employee Master'] || []).filter((option) => values.technician.includes(option.optionValue))}
-                          getOptionLabel={(option) => option?.optionLabel || ''}
-                          onChange={(e, val) =>
-                            setFieldValue(
-                              'technician',
-                              val.map((item) => item.optionValue)
-                            )
-                          }
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              label="Technician"
-                              variant="outlined"
-                              error={Boolean(errors.technician && touched.technician)}
-                              helperText={touched.technician && errors.technician}
-                            />
-                          )}
-                        />
-                      </Grid>
-                      <Grid size={{ xs: 12 }}>
-                        <Autocomplete
-                          multiple
-                          size="small"
-                          options={options['Work Stations'] || []}
-                          value={(options['Work Stations'] || []).filter((option) => values.workStation.includes(option.optionValue))}
-                          getOptionLabel={(option) => option?.optionLabel || ''}
-                          onChange={(e, val) =>
-                            setFieldValue(
-                              'workStation',
-                              val.map((item) => item.optionValue)
-                            )
-                          }
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              label={resources?.workStations?.titlePlural}
-                              variant="outlined"
-                              error={Boolean(errors.workStation && touched.workStation)}
-                              helperText={touched.workStation && errors.workStation}
-                            />
-                          )}
-                        />
-                      </Grid>
+                      {permissions?.employeeMaster?.isRead &&
+                        <Grid size={{ xs: 12 }}>
+                          <Autocomplete
+                            multiple
+                            size="small"
+                            options={options[sidebarResource.employeeMaster] || []}
+                            value={(options[sidebarResource.employeeMaster] || []).filter((option) => values.technician.includes(option.optionValue))}
+                            getOptionLabel={(option) => option?.optionLabel || ''}
+                            onChange={(e, val) =>
+                              setFieldValue(
+                                'technician',
+                                val.map((item) => item.optionValue)
+                              )
+                            }
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                label="Technician"
+                                variant="outlined"
+                                error={Boolean(errors.technician && touched.technician)}
+                                helperText={touched.technician && errors.technician}
+                              />
+                            )}
+                          />
+                        </Grid>
+                      }
+                      {permissions?.workStations?.isRead &&
+                        <Grid size={{ xs: 12 }}>
+                          <Autocomplete
+                            multiple
+                            size="small"
+                            options={options[sidebarResource.workStations] || []}
+                            value={(options[sidebarResource.workStations] || []).filter((option) => values.workStation.includes(option.optionValue))}
+                            getOptionLabel={(option) => option?.optionLabel || ''}
+                            onChange={(e, val) =>
+                              setFieldValue(
+                                'workStation',
+                                val.map((item) => item.optionValue)
+                              )
+                            }
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                label={resources?.workStations?.titlePlural}
+                                variant="outlined"
+                                error={Boolean(errors.workStation && touched.workStation)}
+                                helperText={touched.workStation && errors.workStation}
+                              />
+                            )}
+                          />
+                        </Grid>}
                       <Grid size={{ xs: 12 }}>
                         <CustomDatePicker
                           fullWidth
                           size="small"
                           margin="dense"
-                          required
+                          required={true}
                           value={values.date}
                           name="Date"
                           label="Date"
