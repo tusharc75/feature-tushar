@@ -343,6 +343,15 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
     const errors = {};
     let estimateStartDate = dayjs(values?.estimateStartDate);
     let estimateEndDate = dayjs(values?.estimateEndDate);
+    if (isBulkedit) {
+      const maxEstimateStartDate = rowData
+        ?.map((r) => r?.estimateStartDate)
+        ?.reduce((max, current) => (dayjs(current).isAfter(dayjs(max)) ? current : max));
+      const estimateStartDateE = dayjs(maxEstimateStartDate);
+      if (estimateEndDate.diff(estimateStartDateE, 'day') < 0) {
+        errors['estimateEndDate'] = 'Please enter valid estimate end date';
+      }
+    }
     if (estimateEndDate.diff(estimateStartDate, 'day') < 0) {
       errors['estimateEndDate'] = 'Please enter valid estimate end date';
     }
