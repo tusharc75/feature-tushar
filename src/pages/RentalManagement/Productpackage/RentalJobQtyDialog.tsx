@@ -83,7 +83,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
     fetchData();
   }, [rowData]);
 
-  const fetchTaxRate = async (address: any) => {
+  const fetchTaxRate = async (address: any, taxCode: any) => {
     const zipCode = address?.zipCode;
     const state = address?.state;
     const county = address?.county;
@@ -92,7 +92,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
     else materialType = rowData?.type;
     try {
       const response = await axiosInstance().get(
-        `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&county=${county}&materialType=${materialType}`
+        `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&county=${county}&materialType=${materialType}${taxCode && `&taxCode=${taxCode}`}`
       );
       return response?.data?.data || [];
     } catch (e) {
@@ -226,7 +226,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
         rentalManagementData?.[taxApplicableField]?.state ||
         rentalManagementData?.[taxApplicableField]?.county)
     ) {
-      const taxCodeOptions = await fetchTaxRate(rentalManagementData?.[taxApplicableField]);
+      const taxCodeOptions = await fetchTaxRate(rentalManagementData?.[taxApplicableField], rentalManagementData?.taxCode?.optionValue);
       fields?.forEach((e: any) => {
         if (e?.fieldName === 'taxCode') {
           e.option = taxCodeOptions;
