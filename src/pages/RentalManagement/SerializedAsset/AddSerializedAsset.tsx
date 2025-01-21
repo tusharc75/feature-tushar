@@ -165,13 +165,11 @@ const AddSerializedAsset = ({
     if (selectedProducts.length > 0) {
       var updatedFilters = [];
       if (selectedProduct) {
-        updatedFilters.push({ field: 'product', term: selectedProduct });
+        updatedFilters.push({ field: 'product', term: { $in: [selectedProduct] } });
       } else {
-        updatedFilters = selectedProducts.map((m) => {
-          return { field: 'product', term: m?.id ?? '' };
-        });
+        updatedFilters.push({ field: 'product', term: { $in: selectedProducts.map((m) => m?.id) } });
       }
-      queryString = `${queryString}&filterById=${JSON.stringify(updatedFilters)}`;
+      queryString = `${queryString}&filterById=${JSON.stringify(updatedFilters)}&filterType=and`;
     }
     let api = '';
     if (Number(tabValue) === 2) {
