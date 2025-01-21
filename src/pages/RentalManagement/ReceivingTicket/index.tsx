@@ -2147,9 +2147,9 @@ const ReceivingTicket = ({
   return (
     <>
       {serviceData?.length > 0 && (
-        <CustomTabs value={tabValue} onChange={handleMainTabChange} className="mb-0">
-          <CustomTab value={0} label={'Assets/Products'} underlined={true} />
-          <CustomTab value={1} label={'Services'} underlined={true} />
+        <CustomTabs value={tabValue} onChange={handleMainTabChange} className="mb-0" tabVariant="underlined">
+          <CustomTab value={0} label={'Assets/Products'} />
+          <CustomTab value={1} label={'Services'} />
         </CustomTabs>
       )}
       <TabPanel value={tabValue} index={0}>

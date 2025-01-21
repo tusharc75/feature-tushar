@@ -20,6 +20,7 @@ import ProductBuilder from '../../../../components/productBuilder';
 import {
   CustomDialogTransition,
   QUOTE_PROCESS_STATUS,
+  QUOTE_STATUS,
   currencyCodeToSymbol,
   customerAccount,
   customerContact,
@@ -227,10 +228,10 @@ export default function QuoteProcess(props) {
               setDOAApproved(data.canApprove);
               setDOARequestId(data.requestId);
             })
-            .catch((err) => {});
+            .catch((err) => { });
         }
       })
-      .catch((error) => {});
+      .catch((error) => { });
   }, [currentVersion]);
 
   useEffect(() => {
@@ -266,20 +267,16 @@ export default function QuoteProcess(props) {
           if (DOAsetup && totalSellingPrice > DOAlimit && versionStatus === 'Building Quote') {
             setDOAreq(true);
             setCustomerreq(false);
-          } else if (versionStatus.includes('Rejected by DOA')) {
+          } else if (versionStatus.includes(QUOTE_STATUS.rejectedbyDOA)) {
             setDOAreq(true);
             setCustomerreq(false);
-          } else if (versionStatus === 'Sent for DOA') {
+          } else if (versionStatus === QUOTE_STATUS.sentforDOA) {
             setDOAreq(false);
             setCustomerreq(false);
-          } else if (
-            versionStatus === 'Sent to Customer' ||
-            versionStatus === 'Accepted by Customer' ||
-            versionStatus === 'Rejected by Customer' ||
-            versionStatus === 'Not Booked by Customer' ||
-            versionStatus === 'Others' ||
-            versionStatus === 'Booked by Customer'
-          ) {
+          } else if ([QUOTE_STATUS.sentToCustomer,
+          QUOTE_STATUS.acceptByCustomer,
+          QUOTE_STATUS.rejectByCustomer, QUOTE_STATUS.notBookedbyCustomer,
+          QUOTE_STATUS.others, QUOTE_STATUS.bookedbyCustomer]?.includes(versionStatus)) {
             setDOAreq(false);
             setCustomerreq(false);
           }
@@ -288,7 +285,7 @@ export default function QuoteProcess(props) {
   }, [DOAsetup, DOAlimit]);
 
   const fetchDOAData = () => {
-    if ((processStatus === QUOTE_PROCESS_STATUS.doaProcess && DOAneeded) || (versionStatus.includes('Rejected by DOA') && processStatus === 'End')) {
+    if ((processStatus === QUOTE_PROCESS_STATUS.doaProcess && DOAneeded) || (versionStatus.includes(QUOTE_STATUS.rejectedbyDOA) && processStatus === 'End')) {
       axiosInstance()
         .get(`doa-request/doaFlow/${quoteData._id}/${currentVersion}`)
         .then(({ data: { data } }) => {
@@ -325,7 +322,7 @@ export default function QuoteProcess(props) {
         data['commissionPercentPerUnit'] === null || data['commissionPercentPerUnit'] === undefined ? 0 : data['commissionPercentPerUnit'],
       [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
         data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === null ||
-        data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
+          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
           ? 0
           : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]
     }));
@@ -495,19 +492,16 @@ export default function QuoteProcess(props) {
       if (DOAsetup && totalSellingPrice > DOAlimit && versionStatus === 'Building Quote') {
         setDOAreq(true);
         setCustomerreq(false);
-      } else if (versionStatus.includes('Rejected by DOA')) {
+      } else if (versionStatus.includes(QUOTE_STATUS.rejectedbyDOA)) {
         setDOAreq(true);
         setCustomerreq(false);
-      } else if (versionStatus === 'Sent for DOA') {
+      } else if (versionStatus === QUOTE_STATUS.sentforDOA) {
         setDOAreq(false);
         setCustomerreq(false);
       } else if (
-        versionStatus === 'Sent to Customer' ||
-        versionStatus === 'Accepted by Customer' ||
-        versionStatus === 'Rejected by Customer' ||
-        versionStatus === 'Not Booked by Customer' ||
-        versionStatus === 'Others' ||
-        versionStatus === 'Booked by Customer'
+        [QUOTE_STATUS.sentToCustomer, QUOTE_STATUS.acceptByCustomer, QUOTE_STATUS.rejectByCustomer,
+        QUOTE_STATUS.notBookedbyCustomer, QUOTE_STATUS.others, QUOTE_STATUS.bookedbyCustomer
+        ]?.includes(versionStatus)
       ) {
         setDOAreq(false);
         setCustomerreq(false);
@@ -562,7 +556,7 @@ export default function QuoteProcess(props) {
     axiosInstance()
       .post(`/doa-request/create/${quoteData._id}?version=${currentVersion}`)
       .then(({ data }) => {
-        handleVersionUpdate('Sent for DOA', state?.selectedRecords);
+        handleVersionUpdate(QUOTE_STATUS.sentforDOA, state?.selectedRecords);
         fetchQuoteData(currentVersion);
         fetchDOAData();
         setSendToLoading(false);
@@ -655,36 +649,36 @@ export default function QuoteProcess(props) {
 
   const previewDownloadProps = ![QUOTE_PROCESS_STATUS.new, QUOTE_PROCESS_STATUS.priceBuilder].includes(processStatus)
     ? {
-        resource: sidebarResource.quoteBuilder,
-        referenceId: quoteData?._id,
-        fileName: `${`Quote-${quoteData?.quoteName}-V(${currentVersion})`}`,
-        columns: columns,
-        hideDetailButton: true,
-        isSendEmail:
-          processStatus === QUOTE_PROCESS_STATUS.sendToCustomer &&
+      resource: sidebarResource.quoteBuilder,
+      referenceId: quoteData?._id,
+      fileName: `${`Quote-${quoteData?.quoteName}-V(${currentVersion})`}`,
+      columns: columns,
+      hideDetailButton: true,
+      isSendEmail:
+        processStatus === QUOTE_PROCESS_STATUS.sendToCustomer &&
           versionStatus !== 'Send To Customer' &&
           !ifQuoteApproved.approved &&
           !quoteData?.versions[currentVersion]?.offered &&
           allowedToEdit
-            ? true
-            : false,
-        isExcelDownload: true,
-        extraQueryParams: { uniqueId: quoteData?.versions[currentVersion]?._id },
-        versionNumber: currentVersion,
-        subject: `${user?.user?.brandName ?? 'Brand'} Offer - ${quoteData?.quoteName ?? ''}`,
-        defaultColumns: [
-          'productName',
-          'unit',
-          'qty',
-          `salesPricePerUnit_${quoteData?.currency?.toLowerCase()}`,
-          `totalSalesPrice_${quoteData?.currency?.toLowerCase()}`
-        ],
-        handleRefresh: () => {
-          fetchQuoteData(currentVersion);
-        },
-        toEmails: userEmails?.to,
-        ccEmails: userEmails?.cc ?? []
-      }
+          ? true
+          : false,
+      isExcelDownload: true,
+      extraQueryParams: { uniqueId: quoteData?.versions[currentVersion]?._id },
+      versionNumber: currentVersion,
+      subject: `${user?.user?.brandName ?? 'Brand'} Offer - ${quoteData?.quoteName ?? ''}`,
+      defaultColumns: [
+        'productName',
+        'unit',
+        'qty',
+        `salesPricePerUnit_${quoteData?.currency?.toLowerCase()}`,
+        `totalSalesPrice_${quoteData?.currency?.toLowerCase()}`
+      ],
+      handleRefresh: () => {
+        fetchQuoteData(currentVersion);
+      },
+      toEmails: userEmails?.to,
+      ccEmails: userEmails?.cc ?? []
+    }
     : null;
 
   const leftSideContents = () => {
@@ -777,12 +771,12 @@ export default function QuoteProcess(props) {
                 version={currentVersion}
                 Refresh={fetchQuoteData}
                 nextStep={nextStep}
-                isPrevStep={['Rejected by Customer', 'Sent for DOA', 'Sent to Customer'].includes(versionStatus) ? false : prevStep}
+                isPrevStep={[QUOTE_STATUS.rejectByCustomer, QUOTE_STATUS.sentforDOA, QUOTE_STATUS.sentToCustomer].includes(versionStatus) ? false : prevStep}
                 versionStatus={versionStatus}
                 loading={loading}
                 approvedQuote={ifQuoteApproved}
                 handleVersionUpdate={() => {
-                  handleVersionUpdate(versionStatus === 'Sent for DOA' && !DOAneeded ? 'Sent to Customer' : versionStatus, state?.selectedRecords);
+                  handleVersionUpdate(versionStatus === QUOTE_STATUS.sentforDOA && !DOAneeded ? QUOTE_STATUS.sentToCustomer : versionStatus, state?.selectedRecords);
                 }}
                 isStepEnded={['End'].includes(processStatus)}
                 allowedToEdit={allowedToEdit}

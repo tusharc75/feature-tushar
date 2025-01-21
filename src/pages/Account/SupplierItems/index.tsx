@@ -194,10 +194,10 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
           additionalParams={``}
         />
       </Box>
-      <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-        <CustomTab value={0} label={'Product Category'} underlined={true} />
-        <CustomTab value={1} label={'Products'} underlined={true} />
-        <CustomTab value={2} label={'Assets'} underlined={true} />
+      <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
+        <CustomTab value={0} label={'Product Category'} />
+        <CustomTab value={1} label={'Products'} />
+        <CustomTab value={2} label={'Assets'} />
       </CustomTabs>
       <Box display="flex" justifyContent={'space-between'}>
         {allowedToEdit && (
