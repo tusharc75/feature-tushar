@@ -474,7 +474,6 @@ function Dropdown({
                       ? onChange
                       : (e, val) => {
                         if (setFieldValue) {
-                          const oldVal = (dropdownOptions(option, values, fields, fieldData, newAddressOptionList) || [])?.find(f => f.optionValue === values[name]);
                           handleChange(name, val && val.optionValue ? val.optionValue : '');
                           const fieldChange: any = getNestedlookupDependentOn(fields, name);
                           fieldChange?.forEach((val: any) => {
@@ -482,10 +481,9 @@ function Dropdown({
                           });
                           handleLookUpDependent(name, val, fields, setFieldValue);
                           if (fields?.find((f) => f?.fieldName === 'toOpenInvoice')) {
-                            if (val?.defaultOpenInvoice === true) {
+                            if (name === 'customerAccount' && val?.defaultOpenInvoice === true) {
                               setFieldValue('toOpenInvoice', true);
-                            } else if (oldVal?.defaultOpenInvoice === true) {
-                              
+                            } else if (name === 'customerAccount' && !val?.defaultOpenInvoice) {
                               setFieldValue('toOpenInvoice', false);
                             }
                           }
