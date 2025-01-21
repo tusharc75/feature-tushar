@@ -396,315 +396,327 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
           validate={validate}
           onSubmit={handleSubmit}
         >
-          {({ values, errors, touched, setFieldValue, submitForm }) => (
-            <Fragment>
-              <CustomDialogHeader
-                title={getTitle()}
-                onClose={() => {
-                  if (!isEqual(ref?.current?.values, initialData.values)) {
-                    setShowConfirmDialog(true);
-                  } else {
-                    onClose();
-                  }
-                }}
-                isMinimized={!fullScreen}
-                onMinimizeMaximize={() => {
-                  setFullScreen((prevState) => !prevState);
-                }}
-                showManimizeMaximize={true}
-              ></CustomDialogHeader>
-              <CustomDialogContent>
-                {isBulkedit && <h6 className="form-label-style mb-2">* Please enter value you want to bulk update.</h6>}
-                <Form autoComplete="off" autoCorrect="off" noValidate>
-                  {fields &&
-                    fields.map((section, i) => (
-                      <div key={i}>
-                        <div className={'detail-box-content detail-product-box'}>
-                          <div className={'product-form-layout'}>
-                            <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                            <h2 className={`${'form-label-style'} ${'form-label-product'}`}>{section.name}</h2>
-                          </div>
-                        </div>
-                        <Box marginY={2}>
-                          <Grid spacing={3} container>
-                            {section.sectionFields &&
-                              section.sectionFields.map((field) =>
-                                field.type === 'converter' || field.type === 'currencyAmount' || field.isConverter ? (
-                                  <FormTypes
-                                    fields={initialData.fields}
-                                    fieldData={{ ...field, hideConverter: true }}
-                                    values={values}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    type={field.type}
-                                    options={field.option}
-                                    setFieldValue={(name, value) => {
-                                      setFieldValue(name, value);
-                                    }}
-                                    required={field.required}
-                                    fullWidth
-                                    isTooltip={field.isTooltip}
-                                    tooltipMessage={field.tooltipMessage}
-                                    size="small"
-                                  />
-                                ) : rateChangeFields.includes(field.fieldName) && !isBulkedit ? (
-                                  <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
-                                    <Box display="flex">
-                                      <Box flexGrow={1}>
-                                        <FormTypes
-                                          {...field}
-                                          fields={initialData.fields}
-                                          fieldData={field}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          setFieldValue={(name, value) => {
-                                            setFieldValue(name, value);
-                                          }}
-                                          options={
-                                            field.fieldName === 'pricingCondition'
-                                              ? priceConditionList
-                                              : field.fieldName === 'pricingMethod'
-                                                ? priceMethodList
-                                                : field.option
-                                          }
-                                          onChange={(e, val) => {
-                                            const value = val && val.optionValue ? val.optionValue : '';
-                                            const { tempPriceCondition, tempPricingMethod } = updateRateChangeState(
-                                              { ...values, [field.fieldName]: value },
-                                              priceConditionListConst,
-                                              priceMethodListConst
-                                            );
-                                            if (values['pricingCondition']) {
-                                              if (!tempPriceCondition?.find((e) => e.optionValue === values['pricingCondition'])) {
-                                                setFieldValue('pricingCondition', '');
-                                                setPriceMethodList(priceMethodListConst);
-                                              }
-                                            }
-                                            if (values['pricingMethod']) {
-                                              if (!tempPricingMethod?.find((e) => e.optionValue === values['pricingMethod'])) {
-                                                setFieldValue('pricingMethod', '');
-                                              }
-                                            }
-                                            let priceValue;
-                                            if (field.fieldName === 'pricingCondition') {
-                                              priceValue = priceConditionListConst?.find(
-                                                (d) =>
-                                                  d.conditionId === value && d.pricingMethod === values['pricingMethod'] && d.unit === values['unit']
-                                              );
-                                            } else if (field.fieldName === 'pricingMethod') {
-                                              priceValue = priceConditionListConst?.find(
-                                                (d) =>
-                                                  d.conditionId === values['pricingCondition'] &&
-                                                  d.pricingMethod === value &&
-                                                  d.unit === values['unit']
-                                              );
-                                            } else {
-                                              priceValue = priceConditionListConst?.find(
-                                                (d) =>
-                                                  d.conditionId === values['pricingCondition'] &&
-                                                  d.pricingMethod === values['pricingMethod'] &&
-                                                  d.unit === value
-                                              );
-                                            }
-                                            let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
-                                            const result = autoCalculateSpecificFields(
-                                              { [priceFieldName]: priceValue?.mrp || 0, [field.fieldName]: value },
-                                              values,
-                                              initialData.fields
-                                            );
-                                            if (Object.keys(result).length >= 1) {
-                                              for (var x in result) {
-                                                setFieldValue(x, result[x]);
-                                              }
-                                            }
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field.isTooltip}
-                                          tooltipMessage={field.tooltipMessage}
-                                          size="small"
-                                        />
-                                      </Box>
-                                    </Box>
-                                  </Grid>
-                                ) : ['estimateStartDate', 'estimateEndDate'].includes(field.fieldName) ? (
-                                  <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
-                                    <Box display="flex">
-                                      <Box flexGrow={1}>
-                                        <FormTypes
-                                          {...field}
-                                          fields={initialData.fields}
-                                          fieldData={field}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={field.option}
-                                          setFieldValue={(name, value) => {
-                                            setFieldValue(name, value);
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field.isTooltip}
-                                          tooltipMessage={field.tooltipMessage}
-                                          size="small"
-                                          minDate={rentalManagementData?.estimateStartDate}
-                                          maxDate={rentalManagementData?.estimateEndDate}
-                                        />
-                                      </Box>
-                                    </Box>
-                                  </Grid>
-                                ) : ['taxCode'].includes(field.fieldName) ? (
-                                  <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
-                                    <Box display="flex">
-                                      <Box flexGrow={1}>
-                                        <FormTypes
-                                          {...field}
-                                          fields={initialData.fields}
-                                          fieldData={field}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={field.option}
-                                          setFieldValue={(name, value) => {
-                                            setFieldValue(name, value);
-                                            const taxCode = field.option?.find((d) => d.optionValue === value);
-                                            setFieldValue('taxPercentage', taxCode?.taxRate || 0);
-                                            const result = autoCalculateSpecificFields(
-                                              { ['taxPercentage']: taxCode?.taxRate || 0 },
-                                              values,
-                                              initialData.fields
-                                            );
-                                            if (Object.keys(result).length >= 1) {
-                                              for (var x in result) {
-                                                setFieldValue(x, result[x]);
-                                              }
-                                            }
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field.isTooltip}
-                                          tooltipMessage={field.tooltipMessage}
-                                          size="small"
-                                        />
-                                      </Box>
-                                    </Box>
-                                  </Grid>
-                                ) : (
-                                  <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
-                                    <Box display="flex">
-                                      <Box flexGrow={1}>
-                                        <FormTypes
-                                          {...field}
-                                          fields={initialData.fields}
-                                          fieldData={field}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={field.option}
-                                          setFieldValue={(name, value) => {
-                                            setFieldValue(name, value);
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field.isTooltip}
-                                          tooltipMessage={field.tooltipMessage}
-                                          size="small"
-                                        />
-                                      </Box>
-                                    </Box>
-                                  </Grid>
-                                )
-                              )}
-                          </Grid>
-                        </Box>
-                      </div>
-                    ))}
-                </Form>
-              </CustomDialogContent>
-              <CustomDialogFooter>
-                <ThemeButton
-                  id="rental-job-qty-dialog-close-button"
-                  onClick={() => {
-                    if (!isEqual(ref.current.values, initialData.values)) {
+          {({ values, errors, touched, setFieldValue, submitForm, setTouched }) => {
+            useEffect(() => {
+              const obj: any = {};
+              Object.keys(errors)?.forEach((_k) => {
+                obj[_k] = true;
+              });
+              setTouched({ ...obj });
+            }, [setTouched, errors]);
+
+            return (
+              <Fragment>
+                <CustomDialogHeader
+                  title={getTitle()}
+                  onClose={() => {
+                    if (!isEqual(ref?.current?.values, initialData.values)) {
                       setShowConfirmDialog(true);
                     } else {
                       onClose();
                     }
                   }}
-                >
-                  {'Close'}
-                </ThemeButton>
-                {isBulkedit === false && showSaveAndNext && (
+                  isMinimized={!fullScreen}
+                  onMinimizeMaximize={() => {
+                    setFullScreen((prevState) => !prevState);
+                  }}
+                  showManimizeMaximize={true}
+                ></CustomDialogHeader>
+                <CustomDialogContent>
+                  {isBulkedit && <h6 className="form-label-style mb-2">* Please enter value you want to bulk update.</h6>}
+                  <Form autoComplete="off" autoCorrect="off" noValidate>
+                    {fields &&
+                      fields.map((section, i) => (
+                        <div key={i}>
+                          <div className={'detail-box-content detail-product-box'}>
+                            <div className={'product-form-layout'}>
+                              <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                              <h2 className={`${'form-label-style'} ${'form-label-product'}`}>{section.name}</h2>
+                            </div>
+                          </div>
+                          <Box marginY={2}>
+                            <Grid spacing={3} container>
+                              {section.sectionFields &&
+                                section.sectionFields.map((field) =>
+                                  field.type === 'converter' || field.type === 'currencyAmount' || field.isConverter ? (
+                                    <FormTypes
+                                      fields={initialData.fields}
+                                      fieldData={{ ...field, hideConverter: true }}
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={(name, value) => {
+                                        setFieldValue(name, value);
+                                      }}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field.isTooltip}
+                                      tooltipMessage={field.tooltipMessage}
+                                      size="small"
+                                    />
+                                  ) : rateChangeFields.includes(field.fieldName) && !isBulkedit ? (
+                                    <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
+                                      <Box display="flex">
+                                        <Box flexGrow={1}>
+                                          <FormTypes
+                                            {...field}
+                                            fields={initialData.fields}
+                                            fieldData={field}
+                                            values={values}
+                                            errors={errors}
+                                            touched={touched}
+                                            label={field.fieldLabel}
+                                            name={field.fieldName}
+                                            type={field.type}
+                                            setFieldValue={(name, value) => {
+                                              setFieldValue(name, value);
+                                            }}
+                                            options={
+                                              field.fieldName === 'pricingCondition'
+                                                ? priceConditionList
+                                                : field.fieldName === 'pricingMethod'
+                                                  ? priceMethodList
+                                                  : field.option
+                                            }
+                                            onChange={(e, val) => {
+                                              const value = val && val.optionValue ? val.optionValue : '';
+                                              const { tempPriceCondition, tempPricingMethod } = updateRateChangeState(
+                                                { ...values, [field.fieldName]: value },
+                                                priceConditionListConst,
+                                                priceMethodListConst
+                                              );
+                                              if (values['pricingCondition']) {
+                                                if (!tempPriceCondition?.find((e) => e.optionValue === values['pricingCondition'])) {
+                                                  setFieldValue('pricingCondition', '');
+                                                  setPriceMethodList(priceMethodListConst);
+                                                }
+                                              }
+                                              if (values['pricingMethod']) {
+                                                if (!tempPricingMethod?.find((e) => e.optionValue === values['pricingMethod'])) {
+                                                  setFieldValue('pricingMethod', '');
+                                                }
+                                              }
+                                              let priceValue;
+                                              if (field.fieldName === 'pricingCondition') {
+                                                priceValue = priceConditionListConst?.find(
+                                                  (d) =>
+                                                    d.conditionId === value &&
+                                                    d.pricingMethod === values['pricingMethod'] &&
+                                                    d.unit === values['unit']
+                                                );
+                                              } else if (field.fieldName === 'pricingMethod') {
+                                                priceValue = priceConditionListConst?.find(
+                                                  (d) =>
+                                                    d.conditionId === values['pricingCondition'] &&
+                                                    d.pricingMethod === value &&
+                                                    d.unit === values['unit']
+                                                );
+                                              } else {
+                                                priceValue = priceConditionListConst?.find(
+                                                  (d) =>
+                                                    d.conditionId === values['pricingCondition'] &&
+                                                    d.pricingMethod === values['pricingMethod'] &&
+                                                    d.unit === value
+                                                );
+                                              }
+                                              let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
+                                              const result = autoCalculateSpecificFields(
+                                                { [priceFieldName]: priceValue?.mrp || 0, [field.fieldName]: value },
+                                                values,
+                                                initialData.fields
+                                              );
+                                              if (Object.keys(result).length >= 1) {
+                                                for (var x in result) {
+                                                  setFieldValue(x, result[x]);
+                                                }
+                                              }
+                                            }}
+                                            required={field.required}
+                                            fullWidth
+                                            isTooltip={field.isTooltip}
+                                            tooltipMessage={field.tooltipMessage}
+                                            size="small"
+                                          />
+                                        </Box>
+                                      </Box>
+                                    </Grid>
+                                  ) : ['estimateStartDate', 'estimateEndDate'].includes(field.fieldName) ? (
+                                    <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
+                                      <Box display="flex">
+                                        <Box flexGrow={1}>
+                                          <FormTypes
+                                            {...field}
+                                            fields={initialData.fields}
+                                            fieldData={field}
+                                            values={values}
+                                            errors={errors}
+                                            touched={touched}
+                                            label={field.fieldLabel}
+                                            name={field.fieldName}
+                                            type={field.type}
+                                            options={field.option}
+                                            setFieldValue={(name, value) => {
+                                              setFieldValue(name, value);
+                                            }}
+                                            required={field.required}
+                                            fullWidth
+                                            isTooltip={field.isTooltip}
+                                            tooltipMessage={field.tooltipMessage}
+                                            size="small"
+                                            minDate={rentalManagementData?.estimateStartDate}
+                                            maxDate={rentalManagementData?.estimateEndDate}
+                                          />
+                                        </Box>
+                                      </Box>
+                                    </Grid>
+                                  ) : ['taxCode'].includes(field.fieldName) ? (
+                                    <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
+                                      <Box display="flex">
+                                        <Box flexGrow={1}>
+                                          <FormTypes
+                                            {...field}
+                                            fields={initialData.fields}
+                                            fieldData={field}
+                                            values={values}
+                                            errors={errors}
+                                            touched={touched}
+                                            label={field.fieldLabel}
+                                            name={field.fieldName}
+                                            type={field.type}
+                                            options={field.option}
+                                            setFieldValue={(name, value) => {
+                                              setFieldValue(name, value);
+                                              const taxCode = field.option?.find((d) => d.optionValue === value);
+                                              setFieldValue('taxPercentage', taxCode?.taxRate || 0);
+                                              const result = autoCalculateSpecificFields(
+                                                { ['taxPercentage']: taxCode?.taxRate || 0 },
+                                                values,
+                                                initialData.fields
+                                              );
+                                              if (Object.keys(result).length >= 1) {
+                                                for (var x in result) {
+                                                  setFieldValue(x, result[x]);
+                                                }
+                                              }
+                                            }}
+                                            required={field.required}
+                                            fullWidth
+                                            isTooltip={field.isTooltip}
+                                            tooltipMessage={field.tooltipMessage}
+                                            size="small"
+                                          />
+                                        </Box>
+                                      </Box>
+                                    </Grid>
+                                  ) : (
+                                    <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
+                                      <Box display="flex">
+                                        <Box flexGrow={1}>
+                                          <FormTypes
+                                            {...field}
+                                            fields={initialData.fields}
+                                            fieldData={field}
+                                            values={values}
+                                            errors={errors}
+                                            touched={touched}
+                                            label={field.fieldLabel}
+                                            name={field.fieldName}
+                                            type={field.type}
+                                            options={field.option}
+                                            setFieldValue={(name, value) => {
+                                              setFieldValue(name, value);
+                                            }}
+                                            required={field.required}
+                                            fullWidth
+                                            isTooltip={field.isTooltip}
+                                            tooltipMessage={field.tooltipMessage}
+                                            size="small"
+                                          />
+                                        </Box>
+                                      </Box>
+                                    </Grid>
+                                  )
+                                )}
+                            </Grid>
+                          </Box>
+                        </div>
+                      ))}
+                  </Form>
+                </CustomDialogContent>
+                <CustomDialogFooter>
+                  <ThemeButton
+                    id="rental-job-qty-dialog-close-button"
+                    onClick={() => {
+                      if (!isEqual(ref.current.values, initialData.values)) {
+                        setShowConfirmDialog(true);
+                      } else {
+                        onClose();
+                      }
+                    }}
+                  >
+                    {'Close'}
+                  </ThemeButton>
+                  {isBulkedit === false && showSaveAndNext && (
+                    <ThemeButton
+                      isLoading={loading}
+                      buttonType="theme"
+                      disabled={loading || (isQtyOnly ? false : isEqual(ref?.current?.values, initialData.values))}
+                      id="rental-job-qty-dialog-save-and-next-button"
+                      onClick={() => {
+                        setSaveAndNext(true);
+                        submitForm();
+                      }}
+                    >
+                      {' '}
+                      Save & Next
+                    </ThemeButton>
+                  )}
                   <ThemeButton
                     isLoading={loading}
-                    buttonType="theme"
                     disabled={loading || (isQtyOnly ? false : isEqual(ref?.current?.values, initialData.values))}
-                    id="rental-job-qty-dialog-save-and-next-button"
+                    buttonType="theme"
+                    id="rental-job-qty-dialog-save-button"
                     onClick={() => {
-                      setSaveAndNext(true);
+                      setSaveAndNext(false);
                       submitForm();
                     }}
                   >
                     {' '}
-                    Save & Next
+                    Save
                   </ThemeButton>
+                </CustomDialogFooter>
+                {showConfirmationDialog && (
+                  <ConfirmationDialog
+                    open={showConfirmationDialog}
+                    message="Would you prefer to override the product-level price configuration?"
+                    onOk={() => {
+                      submitForm();
+                    }}
+                    onClose={() => {
+                      setShowConfirmationDialog(false);
+                    }}
+                  />
                 )}
-                <ThemeButton
-                  isLoading={loading}
-                  disabled={loading || (isQtyOnly ? false : isEqual(ref?.current?.values, initialData.values))}
-                  buttonType="theme"
-                  id="rental-job-qty-dialog-save-button"
-                  onClick={() => {
-                    setSaveAndNext(false);
-                    submitForm();
-                  }}
-                >
-                  {' '}
-                  Save
-                </ThemeButton>
-              </CustomDialogFooter>
-              {showConfirmationDialog && (
-                <ConfirmationDialog
-                  open={showConfirmationDialog}
-                  message="Would you prefer to override the product-level price configuration?"
-                  onOk={() => {
-                    submitForm();
-                  }}
-                  onClose={() => {
-                    setShowConfirmationDialog(false);
-                  }}
-                />
-              )}
-              {showConfirmDialog ? (
-                <ConfirmCancelDialog
-                  open={showConfirmDialog}
-                  onSave={() => {
-                    setShowConfirmDialog(false);
-                    submitForm();
-                  }}
-                  onClose={() => {
-                    setShowConfirmDialog(false);
-                    onClose();
-                  }}
-                />
-              ) : null}
-            </Fragment>
-          )}
+                {showConfirmDialog ? (
+                  <ConfirmCancelDialog
+                    open={showConfirmDialog}
+                    onSave={() => {
+                      setShowConfirmDialog(false);
+                      submitForm();
+                    }}
+                    onClose={() => {
+                      setShowConfirmDialog(false);
+                      onClose();
+                    }}
+                  />
+                ) : null}
+              </Fragment>
+            );
+          }}
         </Formik>
       ) : (
         <Box p={2} height={500}>
