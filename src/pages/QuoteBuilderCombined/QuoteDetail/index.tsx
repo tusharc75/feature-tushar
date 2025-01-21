@@ -492,7 +492,7 @@ export default function QuoteDetail() {
     };
     axiosInstance()
       .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
-      .then(() => { })
+      .then(() => {})
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -662,8 +662,8 @@ export default function QuoteDetail() {
                     <MenuItem
                       disabled={
                         allowedToEdit &&
-                          !['Sent for DOA', 'Sent to Customer']?.includes(quoteData?.versions[currentVersion]?.status) &&
-                          !quoteData?.versions[currentVersion]?.status?.includes('Accepted')
+                        !['Sent for DOA', 'Sent to Customer']?.includes(quoteData?.versions[currentVersion]?.status) &&
+                        !quoteData?.versions[currentVersion]?.status?.includes('Accepted')
                           ? false
                           : true
                       }
@@ -835,6 +835,7 @@ export default function QuoteDetail() {
           quoteApproved={isQuoteClone ? false : ifQuoteApproved.approved}
           cloneQuoteWithVersionNumber={cloneQuoteWithVersionNumber}
           doaCollaboratorResources={user.user?.doa?.map((obj) => obj.user)}
+          versionStatus={versionStatus}
         />
       )}
       {reopenReasonDialog && (
@@ -869,10 +870,10 @@ export default function QuoteDetail() {
             />
           </CustomDialogContent>
           <CustomDialogFooter>
-            <ThemeButton buttonType="transparent" onClick={() => setReopenReasonDialog(false)} >
+            <ThemeButton buttonType="transparent" onClick={() => setReopenReasonDialog(false)}>
               Close
             </ThemeButton>
-            <ThemeButton buttonType="theme" disabled={reopenReason === ''} onClick={handleReOpenQuote} >
+            <ThemeButton buttonType="theme" disabled={reopenReason === ''} onClick={handleReOpenQuote}>
               Save
             </ThemeButton>
           </CustomDialogFooter>

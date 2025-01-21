@@ -25,6 +25,7 @@ import routes from '../../../components/Helpers/Routes';
 import {
   CustomDialogTransition,
   GenerateResourceLineNumber,
+  QUOTATION_STATUS,
   customerAccount,
   formFieldNames,
   getObjKeys,
@@ -69,7 +70,8 @@ export default function ManageQuoteDialog({
   isCreateQuoteFromCart = false,
   onHandleSubmit = null,
   isFromProjectSales = false,
-  projectSalesTeam = []
+  projectSalesTeam = [],
+  versionStatus = null
 }) {
   const { qbApi } = quoteBuilder;
   const toastConfig = useContext(CustomToastContext);
@@ -143,7 +145,21 @@ export default function ManageQuoteDialog({
       }
     }
 
-    setFormsData(setFieldsInAscendingOrder(initialData.fields));
+    const fields = initialData?.fields?.map((f) => {
+      if (
+        [QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(versionStatus) &&
+        f?.fieldName === 'customerAccountName'
+      ) {
+        return {
+          ...f,
+          disableOnEdit: true,
+          isUneditable: true
+        };
+      }
+      return f;
+    });
+
+    setFormsData(setFieldsInAscendingOrder(fields));
   }, [initialData.fields]);
 
   const onOpportunityDropDownOpen = (selectedAccount) => {
@@ -543,11 +559,11 @@ export default function ManageQuoteDialog({
                                           isTooltip={field?.isTooltip || false}
                                           tooltipMessage={field?.tooltipMessage}
                                           size="small"
-                                        // doNotShowInfoTooltip={true}
-                                        // onChange={(e, value) => {
-                                        //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
-                                        //   setFieldValue("customerContactName", [])
-                                        // }}
+                                          // doNotShowInfoTooltip={true}
+                                          // onChange={(e, value) => {
+                                          //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
+                                          //   setFieldValue("customerContactName", [])
+                                          // }}
                                         />
                                       ) : field.fieldName === 'opportunity' ? (
                                         <Grid container spacing={1}>
@@ -789,8 +805,8 @@ export default function ManageQuoteDialog({
                                           size="small"
                                         />
                                       ) : ['quoteAcceptDate', 'salesOrderCreationDate', 'invoiceCreationDate', 'invoicedDate'].indexOf(
-                                        field?.fieldName
-                                      ) >= 0 ? (
+                                          field?.fieldName
+                                        ) >= 0 ? (
                                         <FormTypes
                                           {...field}
                                           // {...rest}
@@ -814,8 +830,8 @@ export default function ManageQuoteDialog({
                                           imageOrFileUploadCompletePercentage={
                                             ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                               ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(completePercentage);
-                                              }
+                                                  setUploadingImageOrFileProgress(completePercentage);
+                                                }
                                               : null
                                           }
                                           customError={customError}
@@ -905,8 +921,8 @@ export default function ManageQuoteDialog({
                                           imageOrFileUploadCompletePercentage={
                                             ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                               ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(completePercentage);
-                                              }
+                                                  setUploadingImageOrFileProgress(completePercentage);
+                                                }
                                               : null
                                           }
                                           fieldData={field}
