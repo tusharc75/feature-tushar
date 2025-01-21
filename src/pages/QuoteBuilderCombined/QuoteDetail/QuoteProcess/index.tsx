@@ -235,14 +235,6 @@ export default function QuoteProcess(props) {
 
   useEffect(() => {
     fetchUserEmails();
-    if (processStatus === QUOTE_PROCESS_STATUS.doaProcess) {
-      const currentVersionStatus = quoteData?.versions[currentVersion]?.status;
-      if (currentVersionStatus.includes('Accepted')) {
-        setNextStep(true);
-      } else {
-        setNextStep(false);
-      }
-    }
   }, [quoteData]);
 
   useEffect(() => {

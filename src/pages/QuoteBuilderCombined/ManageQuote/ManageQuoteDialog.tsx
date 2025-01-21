@@ -25,6 +25,7 @@ import routes from '../../../components/Helpers/Routes';
 import {
   CustomDialogTransition,
   GenerateResourceLineNumber,
+  QUOTATION_STATUS,
   customerAccount,
   formFieldNames,
   getObjKeys,
@@ -145,7 +146,10 @@ export default function ManageQuoteDialog({
     }
 
     const fields = initialData?.fields?.map((f) => {
-      if (['Sent to Customer', 'Accepted by Customer', 'Rejected by Customer']?.includes(versionStatus) && f?.fieldName === 'customerAccountName') {
+      if (
+        [QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(versionStatus) &&
+        f?.fieldName === 'customerAccountName'
+      ) {
         return {
           ...f,
           disableOnEdit: true,
