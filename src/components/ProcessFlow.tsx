@@ -47,9 +47,10 @@ const getIcon = (name: string): StepIconType => {
 };
 
 export default function ProcessFlow(props) {
+  
   const { steps, activeStep, isProcessing, handleMarkAsCompleted, hideBackButton = false, disableBackNext = false } = props;
   const [stateSteps, setStateSteps] = useState(getStepData(steps));
-
+  console.log(steps)
   useEffect(() => {
     setStateSteps(getStepData(steps));
   }, [steps]);
@@ -68,7 +69,7 @@ export default function ProcessFlow(props) {
   };
 
   if (steps.length === 0) return null;
-
+ 
   return (
     <>
       <div className="my-4">
@@ -76,7 +77,7 @@ export default function ProcessFlow(props) {
           currentStep={currentStep}
           isNextStep={steps[activeStep + 1]?.canCompleteManually || isProcessing ? false : true || !disableBackNext}
           isPrevStep={activeStep === 0 ? false : true || !disableBackNext}
-          isStepEnded={currentStep === steps.length + 1}
+          isStepEnded={currentStep === steps.length}
           nextStep={steps[activeStep + 1]?.text}
           setCurrentStep={setCurrentStep}
           steps={stateSteps}
