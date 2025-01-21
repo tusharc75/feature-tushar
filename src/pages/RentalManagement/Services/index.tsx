@@ -712,7 +712,6 @@ const Services = ({
             />
           </Box>
           <Box mt={3}>
-            {console.log(tabValue)}
             <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
               <CustomTab value={0} label={'Technicians'} />
             </CustomTabs>
