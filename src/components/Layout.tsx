@@ -2,16 +2,12 @@ import { Box, Toolbar, useMediaQuery } from '@mui/material';
 import { motion } from 'framer-motion';
 import { useRef, useState } from 'react';
 import { isMobile } from 'react-device-detect';
+import { cn } from 'src/constants/helpers';
+import { SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON, useStore } from 'src/StateProvider/fastContext';
 import GlobalUserChat from './GlobalUserChat';
 import Sidebar from './Sidebar/Sidebar';
-import { useAppTheme } from 'src/constants/AppConfig';
-import { useStore, SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON } from 'src/StateProvider/fastContext';
-import { usePathname } from 'src/hooks';
-import { cn } from 'src/constants/helpers';
 
 const Layout = ({ children }) => {
-  const pathName = usePathname();
-  const [theme] = useAppTheme();
   const contentRef = useRef(null);
   const bodyRef = useRef(null);
   const isSidebarOutsideScreen = useMediaQuery('(max-width:959px)');

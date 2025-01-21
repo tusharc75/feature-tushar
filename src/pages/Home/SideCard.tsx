@@ -45,12 +45,12 @@ const SideCard = ({
         style={{ background: `linear-gradient(180deg, ${gradientColors[0]}, ${gradientColors[1]})` }}
         className="absolute bottom-0 left-0 top-0 w-1/2 rounded-xl"
       />
-      <div className="group relative ml-1 min-h-full rounded-xl bg-[--dark-secondary,#f7f6fa] p-[40px_18px_28px_18px]  shadow-md">
+      <div className="group relative ml-1 min-h-full rounded-xl border bg-[--dark-secondary,#fcffff] p-[40px_18px_28px_18px]">
         <div className="grid min-h-full gap-2 min-[500px]:grid-cols-[80px_1fr] min-[900px]:grid-cols-1 min-[1024px]:grid-cols-[1fr_3fr] min-[1300px]:grid-cols-[80px_1.5fr] min-[1370px]:grid-cols-[90px_3fr]">
           <div className="mx-auto min-w-0 max-w-full">{icon}</div>
           <div className="content ">
             <h3 className="mb-[10px] text-[20px] font-semibold leading-[24px]">{heading}</h3>
-            <p className="text-[12px] font-normal leading-[1.5] text-[#737373] dark:text-gray-500">{description}</p>
+            <p className="text-[12px] font-normal leading-[1.5] text-[#737373] dark:text-[#bebebe]">{description}</p>
           </div>
         </div>
       </div>

@@ -269,7 +269,7 @@ const WorkOrderSupervisor = () => {
       {
         type: 'tooltip',
         accessor: 'tooltip',
-        renderer: (data) => <RenderAssignOptions openAssignHandler={openAssignHandler} data={data} permissions={permissions} resources={resources} />
+        renderer: (data) => <RenderAssignOptions openAssignHandler={openAssignHandler} data={data} permissions={permissions} resources={resources} isCreateRepairOrderDisabled={isCreateRepairOrderDisabled}/>
       }
     ];
 
@@ -680,7 +680,7 @@ const WorkOrderSupervisor = () => {
       <div className="main-container">
         <div className="header-panel pb-0">
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {['card-view', 'table-view'].includes(viewType) ? (
                 <>
                   <DateRangePicker horizontal="left" date={globalFilters} setDate={setGlobalFilters} />
@@ -1002,7 +1002,7 @@ const WorkOrderSupervisor = () => {
 
 export default WorkOrderSupervisor;
 
-const RenderAssignOptions = ({ openAssignHandler, data, permissions, resources }) => {
+const RenderAssignOptions = ({ openAssignHandler, data, permissions, resources, isCreateRepairOrderDisabled }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const handleClose = () => {
     setAnchorEl(null);
@@ -1032,6 +1032,7 @@ const RenderAssignOptions = ({ openAssignHandler, data, permissions, resources }
                 openAssignHandler('createRepairOrder', data);
                 setAnchorEl(null);
               }}
+              disabled={isCreateRepairOrderDisabled([data])}
             >
               {`Create ${resources?.repairOrder?.titleSingular}`}
             </MenuItem>
