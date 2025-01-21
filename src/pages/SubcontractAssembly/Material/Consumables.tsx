@@ -352,8 +352,8 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
           />
         </Box>
       )}
-      <CustomTabs value={tabValue} onChange={handleMainTabChange} style={{ marginBottom: -1 }}>
-        <CustomTab value={0} label={'Products/Consumables'} underlined={true} />
+      <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
+        <CustomTab value={0} label={'Products/Consumables'} />
       </CustomTabs>
       <TabPanel value={tabValue} index={0}>
         <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>

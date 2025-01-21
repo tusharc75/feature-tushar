@@ -513,9 +513,9 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
 
   return (
     <Box>
-      <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+      <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
         {ASSET_HISTORY_RESOURCE?.filter((f) => permissions[camelCase(f.resource)]?.isRead || f.key === 'all')?.map((res, idx) => (
-          <CustomTab underlined={true} value={idx} id={res.key} label={`${res.title}`} />
+          <CustomTab value={idx} id={res.key} label={`${res.title}`} />
         ))}
       </CustomTabs>
       <Box className="flex flex-wrap items-center justify-between gap-3">
