@@ -712,8 +712,9 @@ const Services = ({
             />
           </Box>
           <Box mt={3}>
-            <CustomTabs value={tabValue} onChange={handleMainTabChange} style={{ marginBottom: -1 }}>
-              <CustomTab value={0} label={'Technicians'} underlined={true} />
+            {console.log(tabValue)}
+            <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
+              <CustomTab value={0} label={'Technicians'} />
             </CustomTabs>
             <TabPanel value={tabValue} index={0}>
               <Technicians
