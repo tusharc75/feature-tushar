@@ -480,11 +480,13 @@ function Dropdown({
                             setFieldValue(val.fieldName, val.value);
                           });
                           handleLookUpDependent(name, val, fields, setFieldValue);
-                          if (fields?.find((f) => f?.fieldName === 'toOpenInvoice')) {
-                            if (name === 'customerAccount' && val?.defaultOpenInvoice === true) {
-                              setFieldValue('toOpenInvoice', true);
-                            } else if (name === 'customerAccount' && !val?.defaultOpenInvoice) {
-                              setFieldValue('toOpenInvoice', false);
+                          if (name === 'customerAccount') {
+                            if (fields?.find((f) => f?.fieldName === 'toOpenInvoice')) {
+                              if (val?.defaultOpenInvoice) {
+                                setFieldValue('toOpenInvoice', true);
+                              } else {
+                                setFieldValue('toOpenInvoice', false);
+                              }
                             }
                           }
                         }
