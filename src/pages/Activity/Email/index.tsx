@@ -148,7 +148,7 @@ const Email = () => {
                     <IconButton size="small" onClick={() => redirectToResource(d?.type, d?.referenceId)}>
                       <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                     </IconButton>
-                    <Chip color="primary" label={`${routes[d?.type]?.title}`} />
+                    <Chip color="primary" label={`${resources[d?.type]?.titleSingular}`} />
                   </div>
                 );
               })
@@ -184,7 +184,10 @@ const Email = () => {
         Cell: ({ row }) => (
           <HtmlTooltip title={permissions.email.isDelete ? 'Delete' : deleteDisable}>
             <span>
-              <IconButton disabled={!permissions.email.isDelete} size="small" aria-label="Delete" onClick={() => setDeleteRecord(row.original)}>
+              <IconButton disabled={!permissions.email.isDelete} size="small" aria-label="Delete"
+                onClick={() => {
+                  showConfirmBox(row.original)
+                }}>
                 <DeleteIcon fontSize="small" color={permissions.email.isDelete ? 'error' : 'disabled'} />
               </IconButton>
             </span>
@@ -227,8 +230,7 @@ const Email = () => {
     axiosInstance()
       .get(apiUrl, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
-        let inboxEmailsData = [],
-          sentEmails = [];
+        let inboxEmailsData = [], sentEmails = [];
         data = data.forEach((obj) => {
           const { createdBy, ...rest } = obj;
           let isCreatedByMe = obj?.createdBy?.user === user?.user?._id ? true : false;
@@ -365,7 +367,6 @@ const Email = () => {
     return (
       <>
         <MenuItem
-          disabled={selectedRecords?.every((e) => !e.canDelete) ? true : false}
           onClick={() => {
             showConfirmBox(null);
           }}
@@ -540,13 +541,13 @@ const LeftSideContents = ({
 }) => {
   return (
     <>
-      <div className="min-w-[200px] max-sm:flex-grow ">
+      <div className="min-w-[250px] max-sm:flex-grow ">
         <Autocomplete
           fullWidth
           options={resourceOptions}
           getOptionLabel={(option) => option.optionLabel || ''}
           value={resource}
-          className={`flex-grow sm:min-w-[200px] sm:max-w-[250px]`}
+          className={`flex-grow sm:min-w-[250px] sm:max-w-[270px]`}
           onChange={(event, newValue) => {
             setResource(newValue);
             if (newValue) {
