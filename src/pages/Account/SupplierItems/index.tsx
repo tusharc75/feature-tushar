@@ -89,7 +89,7 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
               setShowDeleteConfirmBox(true);
             }}
           >
-            <DeleteIcon color="error" fontSize='small' />
+            <DeleteIcon color="error" fontSize="small" />
           </IconButton>
         </HtmlTooltip>
       </>
@@ -195,9 +195,9 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
         />
       </Box>
       <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-        <CustomTab value={0} label={'Product Category'} primaryColor={true} />
-        <CustomTab value={1} label={'Products'} primaryColor={true} />
-        <CustomTab value={2} label={'Assets'} primaryColor={true} />
+        <CustomTab value={0} label={'Product Category'} underlined={true} />
+        <CustomTab value={1} label={'Products'} underlined={true} />
+        <CustomTab value={2} label={'Assets'} underlined={true} />
       </CustomTabs>
       <Box display="flex" justifyContent={'space-between'}>
         {allowedToEdit && (

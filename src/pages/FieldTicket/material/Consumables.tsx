@@ -612,11 +612,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
     return (
       <>
         <HideWhenOffline>
-          <ThemeButton
-            disabled={!Boolean(selectedRecords?.length)}
-            onClick={() => setOpenConsumablesQtyDialog(true)}
-            buttonType='theme'
-          >
+          <ThemeButton disabled={!Boolean(selectedRecords?.length)} onClick={() => setOpenConsumablesQtyDialog(true)} buttonType="theme">
             {consumeRequest ? 'Request ' : 'Consume '} {selectedRecords?.length > 0 ? '(' + selectedRecords?.length + ')' : ''}
           </ThemeButton>
         </HideWhenOffline>
@@ -681,8 +677,8 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
         </Box>
       )}
       <CustomTabs value={tabValue} onChange={handleMainTabChange} style={{ marginBottom: -1 }}>
-        <CustomTab value={0} label={'Products/Consumables'} primaryColor={true} id={'products-consumables-tab'} />
-        {!isOffline && <CustomTab value={1} label={'Technicians'} primaryColor={true} id={'technicians-tab'} />}
+        <CustomTab value={0} label={'Products/Consumables'} underlined={true} id={'products-consumables-tab'} />
+        {!isOffline && <CustomTab value={1} label={'Technicians'} underlined={true} id={'technicians-tab'} />}
       </CustomTabs>
 
       <TabPanel value={tabValue} index={0}>
