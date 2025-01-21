@@ -83,6 +83,11 @@ export default function ProcessFlow(props) {
           showExtraStep={true}
           handleNext={handleNext}
           handlePrev={handleBack}
+          updateStatus={(currIdx)=>{
+            if(currIdx<=activeStep){
+              handleMarkAsCompleted({ isSetBackStep: true, isStepBackIdx: currIdx-1 });
+            }
+          }}
         />
       </div>
     </>

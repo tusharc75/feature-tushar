@@ -434,7 +434,6 @@ function OpportunityDetailsPage() {
 
   const handleUpdateOpportunity = (supplierAccounts) => {
     let newFields = [];
-
     opportunityFields.filter((d) => d.isUpdate).map((_f) => newFields.push(_f.fieldData));
 
     let values = {
@@ -517,6 +516,15 @@ function OpportunityDetailsPage() {
 
   const handleMarkAsCompleted = (data) => {
     let tempActiveStep = data && data?.isSetBackStep ? activeStep - 1 : activeStep < steps.length - 1 ? activeStep + 1 : activeStep;
+    if(data?.isStepBackIdx){
+      const idx = data?.isStepBackIdx
+       if(idx===-1){
+        setActiveStep(idx);
+        return;
+       }else{
+        tempActiveStep = idx;
+       }
+    }
     if (tempActiveStep == steps.length - 1 && showAdditionalField) {
       setOpenAdditionalDialog(true);
     } else {
