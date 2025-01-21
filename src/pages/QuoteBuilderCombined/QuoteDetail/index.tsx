@@ -32,7 +32,8 @@ import {
   quoteBuilder,
   sidebarResource,
   termsAndCondition,
-  displayCardDate
+  displayCardDate,
+  QUOTE_STATUS
 } from '../../../constants/helpers';
 import DOAReasonDialog from '../../DOA/DOAReasonDialog';
 import AllVersionStatus from '../AllVersionStatus';
@@ -194,19 +195,6 @@ export default function QuoteDetail() {
       });
   };
 
-  const getMainPoints = useMemo(() => {
-    let mainPoint = {};
-    if (quoteData) {
-      mainPoint['Account Name'] = quoteData?.accountName?.optionLabel || '';
-      mainPoint['Expiry Date'] = displayCardDate(quoteData?.closeDate);
-      mainPoint['Estimated Amount'] = quoteData?.estimatedAmount
-        ? formatAmountWithCurrency(quoteData?.currency, quoteData?.estimatedAmount).fullFormatAmount
-        : '';
-      mainPoint['Quote Owner'] = quoteData?.owner?.optionLabel || '';
-    }
-    return mainPoint;
-  }, [quoteData?.accountName, quoteData?.closeDate, quoteData?.estimatedAmount, quoteData?.currency, quoteData?.owner]);
-
   const ifQuoteApproved = useMemo(() => {
     let approved = false;
     let disapproved = false;
@@ -217,16 +205,12 @@ export default function QuoteDetail() {
 
     if (quoteData) {
       Object.keys(quoteData.versions).forEach((v) => {
-        if (quoteData.versions[v]?.status.includes('Accepted by Customer') || quoteData.versions[v]?.status === 'Booked by Customer') {
+        if ([QUOTE_STATUS.acceptByCustomer, QUOTE_STATUS.bookedbyCustomer]?.includes(quoteData.versions[v]?.status)) {
           approved = true;
           versionApproved = Number(v);
           manualApproval = quoteData.versions[v]?.customerResponse?.manual;
         }
-        if (
-          quoteData.versions[v]?.status.includes('Rejected by Customer') ||
-          quoteData.versions[v]?.status.includes('Not Booked by Customer') ||
-          quoteData.versions[v]?.status.includes('Others')
-        ) {
+        if ([QUOTE_STATUS.rejectByCustomer, QUOTE_STATUS.notBookedbyCustomer, QUOTE_STATUS.others]?.includes(quoteData.versions[v]?.status)) {
           disapproved = true;
           versionDisapproved = Number(v);
           manualDispproval = quoteData.versions[v]?.customerResponse?.manual;
@@ -492,7 +476,7 @@ export default function QuoteDetail() {
     };
     axiosInstance()
       .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
-      .then(() => {})
+      .then(() => { })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -662,8 +646,8 @@ export default function QuoteDetail() {
                     <MenuItem
                       disabled={
                         allowedToEdit &&
-                        !['Sent for DOA', 'Sent to Customer']?.includes(quoteData?.versions[currentVersion]?.status) &&
-                        !quoteData?.versions[currentVersion]?.status?.includes('Accepted')
+                          ![QUOTE_STATUS.sentforDOA, QUOTE_STATUS.sentToCustomer]?.includes(quoteData?.versions[currentVersion]?.status) &&
+                          !quoteData?.versions[currentVersion]?.status?.includes('Accepted')
                           ? false
                           : true
                       }
@@ -692,7 +676,7 @@ export default function QuoteDetail() {
                     </MenuItem>
                   )}
                 </Menu>
-                {DOAApproved && versionStatus === 'Sent for DOA' && (
+                {DOAApproved && versionStatus === QUOTE_STATUS.sentforDOA && (
                   <>
                     <ThemeButton
                       iconForMobile={<ThumbUpIcon />}

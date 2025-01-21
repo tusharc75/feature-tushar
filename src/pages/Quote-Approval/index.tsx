@@ -13,6 +13,7 @@ import { backendApi } from './../../config';
 import CodeValidation from './CodeValidation';
 import styles from './quote-approval.module.scss';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { QUOTE_STATUS } from 'src/constants/helpers';
 
 const useStyles = makeStyles(() => ({
   header: {
@@ -79,15 +80,14 @@ const QuoteApproval = () => {
       .get(backendApi + '/quote-builder/getQuotefromId/' + id + location)
       .then(async ({ data }) => {
         setPdf(data.brand.pdf);
-
-        if (data.Quote_Status === 'Sent to Customer') {
+        if (data.Quote_Status === QUOTE_STATUS.sentToCustomer) {
           setLogo(data.logo);
           setSellingPrice(data.TotalSellingPriceamount);
           setCurrency(data.TotalSellingPricecurr);
 
           setQuoteData(data.quoteDetail);
           setVersionDetails(data.versionDetails);
-        } else if (data.Quote_Status === 'Accepted by Customer' || data.Quote_Status === 'Rejected by Customer') {
+        } else if (data.Quote_Status === QUOTE_STATUS.acceptByCustomer || data.Quote_Status === QUOTE_STATUS.rejectByCustomer) {
           setReplied(true);
         } else {
           setValidQuote(false);
@@ -101,9 +101,9 @@ const QuoteApproval = () => {
   const QuoteStatusChange = (accepted, signedDocumentBase64, comment) => {
     let body;
     if (accepted !== 'Rejected') {
-      body = { status: 'Accepted by Customer', signature: signedDocumentBase64, token: token };
+      body = { status: QUOTE_STATUS.acceptByCustomer, signature: signedDocumentBase64, token: token };
     } else {
-      body = { status: 'Rejected by Customer', comment: comment, token: token };
+      body = { status: QUOTE_STATUS.rejectByCustomer, comment: comment, token: token };
     }
     axios
       .post(backendApi + '/quote-builder/updateStatusfromCustomer/' + id + location, body)
