@@ -1,7 +1,7 @@
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-const ExpenseTable = ({ selectedExpensesData, selectedExpenses, removeExpenseField }) => {
+const ExpenseTable = ({ selectedExpenses, removeExpenseField }) => {
 
   return (
     <TableContainer component={Paper}>

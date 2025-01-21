@@ -127,15 +127,12 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
 
   const handleSubmit = (values) => {
     setIsSubmitting(true);
-    const payload = {
-      ...values,
-      totalAmount: value,
-      lineItems: textFields
-    };
+    values.totalAmount = value;
+    values.lineItems = textFields;
     if (expenseId && isClone === false) {
-      payload._id = expenseId;
+      values._id = expenseId;
       axiosInstance()
-        .put(`${expenses.api}`, payload)
+        .put(`${expenses.api}`, values)
         .then(({ data }) => {
           setIsSubmitting(false);
           onSuccess();
@@ -151,7 +148,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
         });
     } else {
       axiosInstance()
-        .post(`${expenses.api}`, payload)
+        .post(`${expenses.api}`, values)
         .then(({ data: { data, message } }) => {
           history.push(`${routes.expensesDetail.path}/${data._id}`);
           setIsSubmitting(false);

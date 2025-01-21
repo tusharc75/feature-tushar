@@ -25,6 +25,7 @@ import routes from './../../components/Helpers/Routes';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 let expensesTimeout;
 
@@ -60,7 +61,28 @@ const Expenses = () => {
     staticFields.forEach((field) => {
       newColumns.push(checkStaticField(renderedFrom, field));
     });
-    setColumns([...newColumns, ActionsRenderer]);
+    const extracolumns: any = [
+      ...newColumns,
+      {
+        accessor: 'totalAmount',
+        Header: 'Total Amount',
+        minWidth: 100,
+        width: 150,
+        disableFilters: true,
+        disableSortBy: false,
+        canDrag: true,
+        Cell: ({ row }) => {
+          return row?.original?.totalAmount ? (
+            <div>
+              <p className="text-truncate">{row?.original?.totalAmount}</p>
+            </div>
+          ) : (
+            <NoDataCell />
+          );
+        }
+      }
+    ];
+    setColumns([...extracolumns, ActionsRenderer]);
   };
 
   useEffect(() => {
