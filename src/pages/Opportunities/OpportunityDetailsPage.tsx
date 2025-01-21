@@ -516,7 +516,7 @@ function OpportunityDetailsPage() {
 
   const handleMarkAsCompleted = (data) => {
     let tempActiveStep = data && data?.isSetBackStep ? activeStep - 1 : activeStep < steps.length - 1 ? activeStep + 1 : activeStep;
-    if(data?.isStepBackIdx){
+    if(data?.isSetBackStep && data?.isStepBackIdx){
       const idx = data?.isStepBackIdx
        if(idx===-1){
         setActiveStep(idx);
