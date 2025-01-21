@@ -50,7 +50,7 @@ export default function ProcessFlow(props) {
   
   const { steps, activeStep, isProcessing, handleMarkAsCompleted, hideBackButton = false, disableBackNext = false } = props;
   const [stateSteps, setStateSteps] = useState(getStepData(steps));
-  console.log(steps)
+
   useEffect(() => {
     setStateSteps(getStepData(steps));
   }, [steps]);
