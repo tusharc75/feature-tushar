@@ -230,7 +230,7 @@ const ManageServiceOrderDialog = ({ isClone, serviceOrderId, onClose, onSuccess,
                           const customerAccount = initialData?.fields
                             ?.find((e) => e?.fieldName === 'customerAccount')
                             ?.option.find((d) => d.optionValue === value);
-                          const collaborator = [...(customerAccount.fieldServiceManager || []), ...(customerAccount?.lead || [])];
+                          const collaborator = [...(customerAccount?.fieldServiceManager || []), ...(customerAccount?.lead || [])];
                           if (collaborator?.length) {
                             setFieldValue(
                               'collaborator',
