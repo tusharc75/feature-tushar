@@ -35,7 +35,6 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import routes from '../../components/Helpers/Routes';
 import AssignUserDialog from '../WorkOrder/Service/AssignUserDialog';
 import AssignWorkStationDialog from '../WorkOrder/Service/AssignWorkStationDialog';
-
 import { camelCase, map, uniq, uniqBy } from 'lodash';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import { useTableReducer } from 'src/components/CustomReactTable';
@@ -269,20 +268,26 @@ const WorkOrderSupervisor = () => {
       {
         type: 'tooltip',
         accessor: 'tooltip',
-        renderer: (data) => <RenderAssignOptions openAssignHandler={openAssignHandler} data={data} permissions={permissions} resources={resources} isCreateRepairOrderDisabled={isCreateRepairOrderDisabled}/>
+        renderer: (data) => <RenderAssignOptions openAssignHandler={openAssignHandler} data={data} permissions={permissions} resources={resources} isCreateRepairOrderDisabled={isCreateRepairOrderDisabled} />
       }
     ];
+
+    let tempvisibleColumns = []
+    if (permissions?.workOrderPlanning?.isRead) {
+      tempvisibleColumns.push(WORKORDER_SERVICE_STATUS.planned)
+    }
+    tempvisibleColumns = [
+      ...tempvisibleColumns,
+      WORKORDER_SERVICE_STATUS.pending,
+      WORKORDER_SERVICE_STATUS.inProgress,
+      WORKORDER_SERVICE_STATUS.completed
+    ]
 
     dispatch({
       type: 'initialize',
       columnOrder: Object.values(WORKORDER_SERVICE_STATUS),
       rowDef: cardDataRows,
-      visibleColumns: [
-        WORKORDER_SERVICE_STATUS.planned,
-        WORKORDER_SERVICE_STATUS.pending,
-        WORKORDER_SERVICE_STATUS.inProgress,
-        WORKORDER_SERVICE_STATUS.completed
-      ],
+      visibleColumns: tempvisibleColumns,
       limit: LIMIT
     });
     localStorage.setItem(`${renderedFrom}_view`, viewType);
@@ -579,12 +584,12 @@ const WorkOrderSupervisor = () => {
 
   const statusMenuItems = useMemo(() => {
     return [
-      {
+      ...(permissions?.workOrderPlanning?.isRead ? [{
         label: WORKORDER_SERVICE_STATUS.planned,
         selected: tableViewStatus === WORKORDER_SERVICE_STATUS.planned,
         value: WORKORDER_SERVICE_STATUS.planned,
         startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.planned]
-      },
+      }] : []),
       {
         label: WORKORDER_SERVICE_STATUS.pending,
         selected: tableViewStatus === WORKORDER_SERVICE_STATUS.pending,
@@ -806,7 +811,12 @@ const WorkOrderSupervisor = () => {
         )}
         {viewType === 'calendar-view' && (
           <div className="pt-2">
-            <WorkOrderCalendar getFilterQuery={getQueryString} filterQuery={filterQuery} reference={resourceType} ref={ref} setOpen={setOpen} />
+            <WorkOrderCalendar
+              getFilterQuery={getQueryString}
+              filterQuery={filterQuery}
+              reference={resourceType}
+              ref={ref}
+              setOpen={setOpen} />
           </div>
         )}
         {viewType === 'table-view' && (
