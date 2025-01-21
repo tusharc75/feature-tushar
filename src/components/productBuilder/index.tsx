@@ -58,7 +58,9 @@ const ProductBuilder = (props) => {
     addButtonMenuItems,
     previewDownloadProps,
     leftSideContents,
-    rightSideContents
+    rightSideContents,
+    ifQuoteApproved = null,
+    currentVersion = null
   } = props;
 
   const renderedFrom = `${camelCase(`${sidebarResource.quoteBuilder}_Product`)}`;
@@ -100,7 +102,7 @@ const ProductBuilder = (props) => {
   }, [productBuilderId, processStatus]);
 
   const fetchProduct = () => {
-    if (setNextStep && processStatus != QUOTE_PROCESS_STATUS.sendToCustomer) {
+    if (setNextStep) {
       setNextStep(false);
     }
     dispatch({ type: 'loading', loading: true });
@@ -238,7 +240,10 @@ const ProductBuilder = (props) => {
         } else if (processStatus === QUOTE_PROCESS_STATUS.quoteBuilder) {
           setNextStep(true);
         } else if (processStatus === QUOTE_PROCESS_STATUS.doaProcess) {
-        } else {
+        } else if (processStatus === QUOTE_PROCESS_STATUS.sendToCustomer) {
+          if ((ifQuoteApproved && ifQuoteApproved.approved) || (currentVersion && quoteData?.versions[currentVersion]?.offered)) {
+            setNextStep(true);
+          }
         }
         refreshProducts(data);
       })
