@@ -79,7 +79,6 @@ const ManageDataList = ({ onClose, onSuccess, isEdit = false, id = null, dataLis
             if (isEdit) {
               fields = fieldsDataForCreate;
               const { ...rest } = data;
-              // setCloneHeading(taxCode);
               tempData = rest;
             }
             setInitialData({
