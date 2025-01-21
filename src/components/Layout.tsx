@@ -2,16 +2,12 @@ import { Box, Toolbar, useMediaQuery } from '@mui/material';
 import { motion } from 'framer-motion';
 import { useRef, useState } from 'react';
 import { isMobile } from 'react-device-detect';
+import { cn } from 'src/constants/helpers';
+import { SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON, useStore } from 'src/StateProvider/fastContext';
 import GlobalUserChat from './GlobalUserChat';
 import Sidebar from './Sidebar/Sidebar';
-import { useAppTheme } from 'src/constants/AppConfig';
-import { useStore, SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON } from 'src/StateProvider/fastContext';
-import { usePathname } from 'src/hooks';
-import { cn } from 'src/constants/helpers';
 
 const Layout = ({ children }) => {
-  const pathName = usePathname();
-  const [theme] = useAppTheme();
   const contentRef = useRef(null);
   const bodyRef = useRef(null);
   const isSidebarOutsideScreen = useMediaQuery('(max-width:959px)');
@@ -49,10 +45,7 @@ const Layout = ({ children }) => {
             initial={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
             exit={{ opacity: 0 }}
-            className={cn(
-              `f-full min-h-[calc(100vh-64px)] flex-grow overflow-hidden max-[768px]:min-h-[calc(100vh-108px)]`,
-              pathName !== '/' ? 'bg-[--dark-primary,white]' : 'bg-[--dark-secondary,#f1f5ff]'
-            )}
+            className={cn(`f-full min-h-[calc(100vh-64px)] flex-grow overflow-hidden max-[768px]:min-h-[calc(100vh-108px)]`)}
             // style={{ backgroundColor: theme === 'light' ? '#f1f5ff' : 'var(--dark-secondary)' }}
             onClick={handleSidebarClose}
           >

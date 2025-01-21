@@ -86,6 +86,7 @@ const ChartOfAccountDetail = () => {
             history.push(`${routes.chartOfAccount.path}`);
           })
           .catch((err) => {
+            toastConfig.setToastConfig(err);
             setShowDeleteConfirmBox(false);
           });
       }

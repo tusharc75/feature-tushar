@@ -279,6 +279,7 @@ interface DraggableHeaderProps {
   virtualTable?: boolean;
   className?: string;
   renderedFrom: string;
+  vtableData?: any;
 }
 export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
   header,
