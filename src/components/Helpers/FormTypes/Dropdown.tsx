@@ -409,36 +409,36 @@ function Dropdown({
                 onChange={
                   onChange
                     ? (e, value: any, reason) => {
-                        const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
-                        if (isSelectedAll) {
-                          onChange(e, dropdownOptions(option, values, fields, fieldData), reason);
-                        } else {
-                          onChange(e, value, reason);
-                        }
+                      const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
+                      if (isSelectedAll) {
+                        onChange(e, dropdownOptions(option, values, fields, fieldData), reason);
+                      } else {
+                        onChange(e, value, reason);
                       }
+                    }
                     : (e, value: any, reason) => {
-                        if (setFieldValue) {
-                          const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
+                      if (setFieldValue) {
+                        const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
 
-                          if (isSelectedAll) {
-                            // If "Select All" is selected, set all other options as values
-                            setFieldValue(
-                              name,
-                              dropdownOptions(option, values, fields, fieldData).map((item) => item.optionValue)
-                            );
-                          } else {
-                            // Remove "Select All" if it was selected and set the values accordingly
-                            setFieldValue(
-                              name,
-                              value.map((val) => val.optionValue)
-                            );
-                          }
-                          const fieldChange: any = getNestedlookupDependentOn(fields, name);
-                          fieldChange?.forEach((val: any) => {
-                            setFieldValue(val.fieldName, val.value);
-                          });
+                        if (isSelectedAll) {
+                          // If "Select All" is selected, set all other options as values
+                          setFieldValue(
+                            name,
+                            dropdownOptions(option, values, fields, fieldData).map((item) => item.optionValue)
+                          );
+                        } else {
+                          // Remove "Select All" if it was selected and set the values accordingly
+                          setFieldValue(
+                            name,
+                            value.map((val) => val.optionValue)
+                          );
                         }
+                        const fieldChange: any = getNestedlookupDependentOn(fields, name);
+                        fieldChange?.forEach((val: any) => {
+                          setFieldValue(val.fieldName, val.value);
+                        });
                       }
+                    }
                 }
                 forcePopupIcon={true}
                 renderInput={(params) => (
@@ -481,9 +481,9 @@ function Dropdown({
                           });
                           handleLookUpDependent(name, val, fields, setFieldValue);
                           if (fields?.find((f) => f?.fieldName === 'toOpenInvoice')) {
-                            if (val?.defaultOpenInvoice === true) {
+                            if (name === 'customerAccount' && val?.defaultOpenInvoice === true) {
                               setFieldValue('toOpenInvoice', true);
-                            } else {
+                            } else if (name === 'customerAccount' && !val?.defaultOpenInvoice) {
                               setFieldValue('toOpenInvoice', false);
                             }
                           }
@@ -660,11 +660,11 @@ function Dropdown({
                                   data[fieldData.lookupDependentOn]?.includes(values[fieldData.lookupDependentOn])
                                 ) {
                                   const newValue = type === 'multiSelect' ? [...[...(values[name] || [])], tempNewOption.optionValue] : (tempNewOption?.optionValue || '');
-                                  handleChange(name, newValue);
+                                  handleChange(name, newValue);
                                 }
                               } else {
                                 const newValue = type === 'multiSelect' ? [...[...(values[name] || [])], tempNewOption.optionValue] : (tempNewOption?.optionValue || '');
-                                handleChange(name, newValue);
+                                handleChange(name, newValue);
                               }
 
                               const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
