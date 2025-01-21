@@ -254,7 +254,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
 
   return !initialValues ? (
     <>
-      <CustomDialogHeader onClose={() => { }} title={`${noteId ? 'Edit' : 'New'} Note`}></CustomDialogHeader>
+      <CustomDialogHeader onClose={() => { }} title={`${noteId ? 'Edit' : 'Create'} Note`}></CustomDialogHeader>
       <CustomDialogContent>
         <CommonSkeleton lenArray={[...Array(4).keys()]} />
       </CustomDialogContent>
@@ -332,13 +332,11 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
                         imageOrFileUploadCompletePercentage={(completePercentage) => {
                           setUploadingImageOrFileProgress(completePercentage);
                         }}
-                        // doNotShowUploadFile={true : false}
                         onUploadFile={onUploadFile}
                         onUploadImage={handleUploadImage}
                         usePublicUrlforFileUpload={true}
                       />
                     </Box>
-
                     {noteId && (
                       <Fragment>
                         {initialValues.relatedTo && initialValues.relatedTo.length ? (
