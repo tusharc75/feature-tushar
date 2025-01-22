@@ -29,7 +29,6 @@ import {
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageOpportunityDialog from './ManageOpportunityDialog';
-import './style.scss';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
