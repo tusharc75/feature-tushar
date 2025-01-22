@@ -13,6 +13,7 @@ import {
   MATERIAL_TYPE,
   convertDateInDateTime,
   convertDateTimToDate,
+  dateFormatToSend,
   productInventory,
   purchaseOrder,
   sidebarResource
@@ -91,7 +92,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
 
     if (data?.length) {
       axiosInstance()
-        .post(`${purchaseOrder.api}/reject-inventory/${purchaseOrderID}`, { material: data, rejectDate: dayjs(rejectDate).format('MM/DD/YYYY') })
+        .post(`${purchaseOrder.api}/reject-inventory/${purchaseOrderID}`, { material: data, rejectDate: dateFormatToSend(rejectDate) })
         .then(({ data }) => {
           setIsSubmitting(false);
           toastConfig.setToastConfig({

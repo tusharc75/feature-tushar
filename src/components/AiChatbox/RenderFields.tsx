@@ -4,8 +4,7 @@ import { TChatboxActions, TInitialChatboxState } from 'src/components/AiChatbox/
 import { Field } from 'src/components/AiChatbox/types';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import FormTypes from 'src/components/Helpers/FormTypes';
-import { cn, yupSchema } from 'src/constants/helpers';
-import { displayDate } from 'src/constants/helpers';
+import { cn, dateFormatToSend, yupSchema } from 'src/constants/helpers';
 
 function validate(values: any) {
   const errors = {};
@@ -49,7 +48,7 @@ const RenderFields = ({ fields, handleSubmit, disabled = false, setState, state,
 
     for (const key of Object.keys(formattedData)) {
       if (fieldTypes[key] === 'date' && formattedData[key]) {
-        formattedData[key] = displayDate(formattedData[key]);
+        formattedData[key] = dateFormatToSend(formattedData[key]);
       }
     }
     handleSubmit(formattedData);
