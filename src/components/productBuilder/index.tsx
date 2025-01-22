@@ -101,6 +101,22 @@ const ProductBuilder = (props) => {
     fetchProduct();
   }, [productBuilderId, processStatus]);
 
+  useEffect(() => {
+    if (processStatus === QUOTE_PROCESS_STATUS.doaProcess) {
+      const currentVersionStatus = quoteData?.versions[currentVersion]?.status;
+      if (currentVersionStatus.includes('Accepted')) {
+        setNextStep(true);
+      } else {
+        setNextStep(false);
+      }
+    }
+    if (processStatus === QUOTE_PROCESS_STATUS.sendToCustomer) {
+      if ((ifQuoteApproved && ifQuoteApproved.approved) || (currentVersion && quoteData?.versions[currentVersion]?.offered)) {
+        setNextStep(true);
+      }
+    }
+  }, [quoteData]);
+
   const fetchProduct = () => {
     if (setNextStep) {
       setNextStep(false);
@@ -224,7 +240,6 @@ const ProductBuilder = (props) => {
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
-
         if (processStatus === QUOTE_PROCESS_STATUS.new) {
           if (rows?.length) {
             setNextStep(true);
@@ -240,16 +255,7 @@ const ProductBuilder = (props) => {
         } else if (processStatus === QUOTE_PROCESS_STATUS.quoteBuilder) {
           setNextStep(true);
         } else if (processStatus === QUOTE_PROCESS_STATUS.doaProcess) {
-          const currentVersionStatus = quoteData?.versions[currentVersion]?.status;
-          if (currentVersionStatus.includes('Accepted')) {
-            setNextStep(true);
-          } else {
-            setNextStep(false);
-          }
-        } else if (processStatus === QUOTE_PROCESS_STATUS.sendToCustomer) {
-          if ((ifQuoteApproved && ifQuoteApproved.approved) || (currentVersion && quoteData?.versions[currentVersion]?.offered)) {
-            setNextStep(true);
-          }
+        } else {
         }
         refreshProducts(data);
       })

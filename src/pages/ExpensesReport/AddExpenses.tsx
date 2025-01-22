@@ -1,15 +1,15 @@
 import { Box, Dialog } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, EXPENSE_STATUS, sidebarResource } from 'src/constants/helpers';
 import { camelCase } from 'lodash';
 import axios, { CancelTokenSource } from 'axios';
 import { useData } from '../../StateProvider/Provider';
@@ -18,6 +18,7 @@ import {
   prepareDataForGrid,
   expenses,
 } from '../../constants/helpers';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 function AddExpenses({
   open,
@@ -35,7 +36,8 @@ function AddExpenses({
   const { page, limit, filters, sorting, showFilteredRecordsOnly } = state;
   const { state: { user, permissions } } = useData();
   const [selectedRows, setSelectedRows] = useState([]);
-
+  const toastConfig = useContext(CustomToastContext);
+  
   useEffect(() => {
     fetchGridColumns();
   }, []);
@@ -64,6 +66,7 @@ function AddExpenses({
     const response = await axiosInstance().get(`${expenses.api}`);
     data = response?.data?.data;
     count = response?.data?.count;
+    data = data.filter((item) => item.status === EXPENSE_STATUS.unreported);
     let rows = data.map((u) => {
       let finalObject = prepareDataForGrid(u, user);
       finalObject['isChecked'] = false;
@@ -106,7 +109,6 @@ function AddExpenses({
         onMinimizeMaximize={() => {
           setFullScreen((prevState) => !prevState);
         }}
-        showManimizeMaximize={true}
       />
       <CustomDialogContent>
         {columns ? (
@@ -116,9 +118,6 @@ function AddExpenses({
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            hideSelection={selectedExpense.length>1}
-            refreshGrid={fetchData}
-            showOnlyShowFilteredRecordSwitch={true}
             resource={sidebarResource?.expenses}
             onSelect={handleRowSelection} 
           />
