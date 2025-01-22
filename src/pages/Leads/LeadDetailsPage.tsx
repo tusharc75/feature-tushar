@@ -93,7 +93,6 @@ const LeadDetailsPage = () => {
           if (!permissions['opportunity'].isCreate) {
             dontHavePermissions.push('Opportunity');
           }
-          console.log(user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity)
           setHasPermissionToConvertToOpportunity(
             dontHavePermissions.length === 0 &&
               user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity &&
