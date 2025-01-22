@@ -66,13 +66,11 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
     if (selectedProducts.length > 0) {
       var updatedFilters = [];
       if (selectedProduct) {
-        updatedFilters.push({ field: 'product', term: selectedProduct });
+        updatedFilters.push({ field: 'product', term: { $in: [selectedProduct] } });
       } else {
-        updatedFilters = selectedProducts.map((m) => {
-          return { field: 'product', term: m?.product ?? '' };
-        });
+        updatedFilters.push({ field: 'product', term: { $in: selectedProducts.map((m) => m?.product) } });
       }
-      queryString = `${queryString}&filterById=${JSON.stringify(updatedFilters)}`;
+      queryString = `${queryString}&filterById=${JSON.stringify(updatedFilters)}&filterType=and`;
     }
     axiosInstance()
       .get(`${serializedAsset.api}${queryString}`, { cancelToken: cancelTokenSource?.token })

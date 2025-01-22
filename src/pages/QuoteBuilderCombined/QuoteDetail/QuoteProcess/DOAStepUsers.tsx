@@ -4,11 +4,11 @@ import { Link } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
 import { FcApproval } from 'react-icons/fc';
 import { Block, KeyboardArrowUp, WatchLater } from '@mui/icons-material';
-
 import { DOAApproved, DOARejected, DOAPending } from 'src/assets/svg/svgIcons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { QUOTE_STATUS } from 'src/constants/helpers';
 
-const DEFAULT_DATA_COUNT = 3; // this value will change how many users will be displayed by default;
+const DEFAULT_DATA_COUNT = 2; // this value will change how many users will be displayed by default;
 
 const statusIconAndColorClassMap = {
   approve: {
@@ -29,17 +29,17 @@ const statusIconAndColorClassMap = {
 };
 
 const versionStatusIconMap = {
-  'Sent for DOA': {
+  [QUOTE_STATUS.sentforDOA]: {
     icon: <WatchLater className="[font-size:20px_!important]" />,
     lebel: 'DOA Sent',
     colorClass: 'text-[#00acc1]'
   },
-  'Rejected by DOA': {
+  [QUOTE_STATUS.rejectedbyDOA]: {
     icon: <Block className="[font-size:20px_!important]" />,
     lebel: 'Rejected by DOA',
     colorClass: 'text-[#d60f0f]'
   },
-  'Accepted by DOA': {
+  [QUOTE_STATUS.acceptedbyDOA]: {
     icon: <FcApproval size={20} />,
     lebel: 'Approved by DOA',
     colorClass: 'bg-[#6ca826] dark:bg-[#294c00]'
@@ -62,7 +62,7 @@ type TStatus = 'approve' | 'pending' | 'rejected';
 
 type TDoaStepUsersProps = {
   DOAData?: TDOAData[];
-  versionStatus?: 'Sent for DOA' | 'Rejected by DOA' | 'Accepted by DOA';
+  versionStatus?: any;
 } & React.HTMLAttributes<HTMLDivElement>;
 
 const DoaStepUsers: FC<TDoaStepUsersProps> = ({ DOAData, versionStatus, ...props }) => {

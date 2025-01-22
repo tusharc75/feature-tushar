@@ -51,6 +51,7 @@ const CustomDatePicker = (props) => {
           helperText: helperText,
           error: error ? error : false,
           variant: 'outlined',
+          required: required,
           fullWidth: fullWidth ? true : false,
           ...(margin ? { margin: margin } : {}),
           ...(size ? { size: size } : {}),

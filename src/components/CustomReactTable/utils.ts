@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import { flatMapDeep, isEmpty, snakeCase, uniqBy } from 'lodash';
 import React from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import { displayDate } from 'src/constants/helpers';
+import { dateFormatToSend } from 'src/constants/helpers';
 import xlsx from 'xlsx-js-style';
 import { TColType } from './TableComponents/TableHelperComponents';
 import { FilterModel } from './types';
@@ -577,8 +577,8 @@ export const createFilterModel = (formValues, coloums) => {
         if (fromDate || toDate) {
           filterModel.set(fieldName, {
             filter: {
-              from: fromDate ? dayjs(new Date(fromDate)).format('MM/DD/YYYY') : null,
-              to: toDate ? dayjs(new Date(toDate)).format('MM/DD/YYYY') : null
+              from: fromDate ? dateFormatToSend(fromDate) : null,
+              to: toDate ? dateFormatToSend(toDate) : null
             }
           });
         }
@@ -645,10 +645,10 @@ export const createFilterData = (coloums, filterByIds, deepFilters, filterTerm) 
       ?.map((f) => {
         if (deepFilters?.some((d) => [`from_${f?.fieldData?.fieldName}`, `to_${f?.fieldData?.fieldName}`].includes(d?.field))) {
           const fromDate = deepFilters?.find((d) => d?.field === `from_${f?.fieldData?.fieldName}`)
-            ? displayDate(deepFilters?.find((d) => d?.field === `from_${f?.fieldData?.fieldName}`)?.term, 'MM/DD/YYYY')
+            ? dateFormatToSend(deepFilters?.find((d) => d?.field === `from_${f?.fieldData?.fieldName}`)?.term)
             : null;
           const toDate = deepFilters?.find((d) => d?.field === `to_${f?.fieldData?.fieldName}`)
-            ? displayDate(deepFilters?.find((d) => d?.field === `to_${f?.fieldData?.fieldName}`)?.term, 'MM/DD/YYYY')
+            ? dateFormatToSend(deepFilters?.find((d) => d?.field === `to_${f?.fieldData?.fieldName}`)?.term)
             : null;
           filterModel.set(f?.fieldData?.fieldName, {
             filter: {

@@ -6,7 +6,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { Link } from 'react-router-dom';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { displayDate, displayDateTime, INVENTORY_HISTORY_TYPE, sidebarResource } from 'src/constants/helpers';
+import { dateFormatToSend, displayDateTime, INVENTORY_HISTORY_TYPE, sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import DurationFilter from 'src/components/DurationFilter';
 import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -468,8 +468,8 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
       deepFilters.push({
         field: 'date',
         term: {
-          from: displayDate(duration?.from),
-          to: displayDate(duration?.to)
+          from: dateFormatToSend(duration?.from),
+          to: dateFormatToSend(duration?.to)
         }
       });
     }
@@ -513,9 +513,9 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
 
   return (
     <Box>
-      <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+      <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
         {ASSET_HISTORY_RESOURCE?.filter((f) => permissions[camelCase(f.resource)]?.isRead || f.key === 'all')?.map((res, idx) => (
-          <CustomTab primaryColor={true} value={idx} id={res.key} label={`${res.title}`} />
+          <CustomTab value={idx} id={res.key} label={`${res.title}`} />
         ))}
       </CustomTabs>
       <Box className="flex flex-wrap items-center justify-between gap-3">

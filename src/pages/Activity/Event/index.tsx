@@ -98,7 +98,7 @@ const Event = () => {
               <SearchFilter
                 handleChangeFilter={handleChangeFilter}
                 filter={filter}
-                chip={{ variant: 'default', size: 'small', color: 'default' }}
+                chip={{ size: 'small', color: 'primary' }}
                 activityName="event"
               />
             </Box>

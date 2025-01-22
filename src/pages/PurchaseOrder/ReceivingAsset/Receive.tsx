@@ -9,7 +9,6 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import {
   CustomDialogTransition,
   MATERIAL_TYPE,
-  convertDateInDateTime,
   convertDateTimToDate,
   productInventory,
   purchaseOrder,
@@ -533,7 +532,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
                           }
                           maxDate={new Date()}
                           onChange={(value) => {
-                            setFieldValue('receiveDate', convertDateInDateTime(value));
+                            setFieldValue('receiveDate', value);
                           }}
                           error={validateDate(values)?.receiveDate}
                           helperText={validateDate(values)?.receiveDate ? validateDate(values)?.receiveDate : ''}

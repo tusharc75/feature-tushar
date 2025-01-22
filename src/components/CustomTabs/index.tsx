@@ -4,6 +4,11 @@ import Tab, { TabProps } from '@mui/material/Tab';
 import Tabs, { TabsProps } from '@mui/material/Tabs';
 import { cn } from 'src/constants/helpers';
 
+interface TabContextType {
+  tabVariant: 'contained' | 'underlined';
+}
+const TabContext = React.createContext<TabContextType | null>(null);
+
 interface TabPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
   index: number;
@@ -20,34 +25,57 @@ const TabPanel = (props: TabPanelProps) => {
 
 type CustomTabInterface = {
   onChange?: (event: React.ChangeEvent<{}>, newValue: number | string) => void;
+  tabVariant?: 'contained' | 'underlined';
 } & Omit<TabsProps, 'TabIndicatorProps' | 'TabIndicatorProps' | 'onChange'>;
-const CustomTabs: React.FC<CustomTabInterface> = ({ children, className = '', ...others }) => {
-  const borderColor = children?.[0]?.props?.primaryColor
+
+const CustomTabs: React.FC<CustomTabInterface> = ({ children, className = '', tabVariant = 'contained', ...others }) => {
+  const isUnderlinedTabs = tabVariant === 'underlined';
+  const borderColor = isUnderlinedTabs
     ? '[--tab-border-color:var(--primary-color)] dark:[--tab-border-color:var(--common-border-color)]'
     : '[--tab-border-color:var(--common-border-color)]';
+
   return (
-    <Tabs
-      {...others}
-      className={cn(`new-tab-container-v1 `, className, borderColor)}
-      textColor={'primary'}
-      TabIndicatorProps={{
-        style: {
-          display: 'none'
+    <TabContext.Provider value={{ tabVariant }}>
+      <Tabs
+        {...others}
+        className={cn(!isUnderlinedTabs ? `new-tab-container-v1 ` : '', className, borderColor)}
+        variant="scrollable"
+        scrollButtons="auto"
+        sx={
+          isUnderlinedTabs
+            ? {
+                mb: '16px',
+                '--mui-palette-primary-main': 'var(--new-theme-color)',
+                borderBottom: '1px solid var(--common-border-color)',
+                minHeight: '44px'
+              }
+            : {}
         }
-      }}
-    >
-      {children}
-    </Tabs>
+        textColor={'primary'}
+        TabIndicatorProps={
+          isUnderlinedTabs
+            ? { style: { marginBottom: '0px' } }
+            : {
+                style: {
+                  display: 'none'
+                }
+              }
+        }
+      >
+        {children}
+      </Tabs>
+    </TabContext.Provider>
   );
 };
 
 type CustomTabProps = {
   children?: React.ReactNode;
   value: number;
-  primaryColor?: boolean;
 } & Omit<TabProps, 'children'>;
 
-const CustomTab: React.FC<CustomTabProps> = ({ children, label, className = '', value = 0, primaryColor = false, ...props }) => {
+const CustomTab: React.FC<CustomTabProps> = ({ children, label, className = '', value = 0, ...props }) => {
+  const { tabVariant } = React.useContext(TabContext) || {};
+  const underlined = tabVariant === 'underlined';
   return (
     <Tab
       label={
@@ -55,15 +83,19 @@ const CustomTab: React.FC<CustomTabProps> = ({ children, label, className = '', 
           {children || label}
         </div>
       }
-      sx={{
-        borderTop: `1px solid var(--tab-border-color)`,
-        borderRight: `1px solid var(--tab-border-color)`,
-        '&:first-child': {
-          borderLeft: `1px solid var(--tab-border-color)`
-        }
-      }}
+      sx={
+        !underlined
+          ? {
+              borderTop: `1px solid var(--tab-border-color)`,
+              borderRight: `1px solid var(--tab-border-color)`,
+              '&:first-child': {
+                borderLeft: `1px solid var(--tab-border-color)`
+              }
+            }
+          : {}
+      }
       value={value}
-      className={cn(`tabLayout`, className, primaryColor ? 'primaryColoredTab' : '')}
+      className={cn(underlined ? '' : `tabLayout`, className)}
       id={`main-tab-${value}`}
       aria-controls={`main-tabpanel-${value}`}
       {...props}

@@ -58,7 +58,9 @@ const ProductBuilder = (props) => {
     addButtonMenuItems,
     previewDownloadProps,
     leftSideContents,
-    rightSideContents
+    rightSideContents,
+    ifQuoteApproved = null,
+    currentVersion = null
   } = props;
 
   const renderedFrom = `${camelCase(`${sidebarResource.quoteBuilder}_Product`)}`;
@@ -98,6 +100,22 @@ const ProductBuilder = (props) => {
   useEffect(() => {
     fetchProduct();
   }, [productBuilderId, processStatus]);
+
+  useEffect(() => {
+    if (processStatus === QUOTE_PROCESS_STATUS.doaProcess) {
+      const currentVersionStatus = quoteData?.versions[currentVersion]?.status;
+      if (currentVersionStatus.includes('Accepted')) {
+        setNextStep(true);
+      } else {
+        setNextStep(false);
+      }
+    }
+    if (processStatus === QUOTE_PROCESS_STATUS.sendToCustomer) {
+      if ((ifQuoteApproved && ifQuoteApproved.approved) || (currentVersion && quoteData?.versions[currentVersion]?.offered)) {
+        setNextStep(true);
+      }
+    }
+  }, [quoteData]);
 
   const fetchProduct = () => {
     if (setNextStep) {
@@ -175,8 +193,11 @@ const ProductBuilder = (props) => {
           if (e.accessor === 'productName') {
             e.cell = ({ row }) => (
               <div className="flex items-center gap-1">
-                <p className='text-truncate' title={row?.original?.productName}> {row?.original?.productName}</p>
-                {row?.original?.productId &&
+                <p className="text-truncate" title={row?.original?.productName}>
+                  {' '}
+                  {row?.original?.productName}
+                </p>
+                {row?.original?.productId && (
                   <IconButton
                     size="small"
                     onClick={() => {
@@ -185,11 +206,11 @@ const ProductBuilder = (props) => {
                   >
                     <FiExternalLink size={16} className="text-gray-500 dark:text-gray-300" />
                   </IconButton>
-                }
+                )}
               </div>
             );
           }
-        })
+        });
         columns = [...columns, ...newColumns];
 
         if (stage && stage === 'product') {
@@ -219,7 +240,6 @@ const ProductBuilder = (props) => {
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
-
         if (processStatus === QUOTE_PROCESS_STATUS.new) {
           if (rows?.length) {
             setNextStep(true);
@@ -227,8 +247,7 @@ const ProductBuilder = (props) => {
         } else if (processStatus === QUOTE_PROCESS_STATUS.priceBuilder) {
           if (!rows?.length) {
             setNextStep(false);
-          }
-          else if (rows?.find((ele) => (ele[`totalSalesPrice_${currency?.toLowerCase()}`] || 0) === 0 || (ele[`qty`] || 0) === 0)) {
+          } else if (rows?.find((ele) => (ele[`totalSalesPrice_${currency?.toLowerCase()}`] || 0) === 0 || (ele[`qty`] || 0) === 0)) {
             setNextStep(false);
           } else {
             setNextStep(true);

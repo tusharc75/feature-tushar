@@ -18,6 +18,8 @@ import {
   prepareDataForGrid,
   expenseReport,
   sidebarResource,
+  expenses,
+  EXPENSE_STATUS,
 } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
@@ -199,6 +201,7 @@ const ExpenseReport = () => {
             type: 'success',
             message: data.message
           });
+          handleStatusChange(deleteRecord.selectedExpenses)
           dispatch({ type: 'selection', selectedRecords: [] });
           setShowDeleteConfirmBox(false);
           setDeleteLoading(false);
@@ -212,6 +215,17 @@ const ExpenseReport = () => {
         });
     }
   };
+
+      const handleStatusChange = async (expenseInfo) =>{
+        const newExpensesIds = expenseInfo.map((obj) => obj._id);
+    
+        axiosInstance()
+          .patch(`${expenses.api}/status/${newExpensesIds}`, { status: EXPENSE_STATUS.unreported })
+          .then(({ data }) => {})
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
+      }
 
   const ActionMenuItems = () => {
     return (

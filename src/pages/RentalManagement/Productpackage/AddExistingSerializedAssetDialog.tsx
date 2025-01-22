@@ -24,7 +24,6 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import axios, { CancelTokenSource } from 'axios';
 import Autocomplete from '@mui/material/Autocomplete';
-import { isMobile, isTablet } from 'react-device-detect';
 import { camelCase, map, uniq } from 'lodash';
 import ManageTransferAsset from 'src/pages/TransferAssets/ManageTransferAsset';
 import AssetDetailsChangeDialog from 'src/pages/RentalManagement/ReceivingTicket/AssetDetailsChangeDialog';
@@ -374,27 +373,27 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
         {(Number(tabValue) === 0 || Number(tabValue) === 1) && (
           <>
             {permissions?.transferAsset?.isCreate && selectedRecords?.length !== 0 && !checkUniqWarehouse() && (
-            <ThemeButton
-              disabled={isSubmitting}
-              buttonType='theme'
-              isLoading={isSubmitting}
-              onClick={() => {
-                if (checkAssetPolicy(ASSET_STATUS.reserved)) {
-                  const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.reserved);
-                  setOpenAssetDataDialog({
-                    open: true,
-                    statusPolicy: statusPolicy,
-                    _ids: assetIds,
-                    type: 'transfer'
-                  });
-                } else {
-                  setShowTransferAssetDialog({ open: true, data: null });
-                }
-              }}
-            >
-              {`Transfer to ${referenceData?.warehouse?.optionLabel}`}
-              {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
-            </ThemeButton>
+              <ThemeButton
+                disabled={isSubmitting}
+                buttonType='theme'
+                isLoading={isSubmitting}
+                onClick={() => {
+                  if (checkAssetPolicy(ASSET_STATUS.reserved)) {
+                    const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.reserved);
+                    setOpenAssetDataDialog({
+                      open: true,
+                      statusPolicy: statusPolicy,
+                      _ids: assetIds,
+                      type: 'transfer'
+                    });
+                  } else {
+                    setShowTransferAssetDialog({ open: true, data: null });
+                  }
+                }}
+              >
+                {`Transfer to ${referenceData?.warehouse?.optionLabel}`}
+                {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
+              </ThemeButton>
             )}
           </>
         )}
@@ -556,7 +555,7 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
         <AssetDetailsChangeDialog
           ids={openAssetDataDialog._ids}
           statusPolicy={openAssetDataDialog.statusPolicy}
-          setAssetsData={() => {}}
+          setAssetsData={() => { }}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: '' })}
           onSuccess={(data) => {
             if (Number(tabValue) === 2) {

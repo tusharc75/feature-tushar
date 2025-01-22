@@ -8,7 +8,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, displayDate, GenerateResourceLineNumber, sidebarResource } from '../../constants/helpers';
+import { CustomDialogTransition, dateFormatToSend, GenerateResourceLineNumber, sidebarResource } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box } from '@mui/material';
@@ -80,10 +80,10 @@ const ManageTransactionLock = ({ isClone = false, id = null, onClose, onSuccess 
 
   const handleSubmit = (values) => {
     if (values?.fromDate) {
-      values.fromDate = displayDate(values?.fromDate);
+      values.fromDate = dateFormatToSend(values?.fromDate);
     }
     if (values?.toDate) {
-      values.toDate = displayDate(values?.toDate);
+      values.toDate = dateFormatToSend(values?.toDate);
     }
     setLoading(true);
     if (id && isClone === false) {

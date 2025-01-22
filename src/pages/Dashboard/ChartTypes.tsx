@@ -22,12 +22,11 @@ import StaticCards from './StaticCards';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useAppTheme } from 'src/constants/AppConfig';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import { formatAmountWithCurrency } from 'src/constants/helpers';
+import { dateFormatToSend, formatAmountWithCurrency } from 'src/constants/helpers';
 import { FunnelChart } from 'react-funnel-pipeline';
 import 'react-funnel-pipeline/dist/index.css';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import axios, { CancelTokenSource } from 'axios';
-import dayjs from 'dayjs';
 import OpenInFullIcon from '@mui/icons-material/OpenInFull';
 import routes from 'src/components/Helpers/Routes';
 import queryString from 'query-string';
@@ -115,8 +114,8 @@ const ChartTypes = ({
       ...filterValues,
       ...globalFilters,
       between: JSON.stringify({
-        from: dayjs(globalFilters.between.from).format("MM/DD/YYYY"),
-        to: dayjs(globalFilters.between.to).format("MM/DD/YYYY"),
+        from: dateFormatToSend(globalFilters.between.from),
+        to: dateFormatToSend(globalFilters.between.to),
       })
     };
     const keys = Object.keys(params);

@@ -25,6 +25,8 @@ import routes from '../../../components/Helpers/Routes';
 import {
   CustomDialogTransition,
   GenerateResourceLineNumber,
+  QUOTATION_STATUS,
+  QUOTE_STATUS,
   customerAccount,
   formFieldNames,
   getObjKeys,
@@ -69,7 +71,8 @@ export default function ManageQuoteDialog({
   isCreateQuoteFromCart = false,
   onHandleSubmit = null,
   isFromProjectSales = false,
-  projectSalesTeam = []
+  projectSalesTeam = [],
+  versionStatus = null
 }) {
   const { qbApi } = quoteBuilder;
   const toastConfig = useContext(CustomToastContext);
@@ -143,7 +146,20 @@ export default function ManageQuoteDialog({
       }
     }
 
-    setFormsData(setFieldsInAscendingOrder(initialData.fields));
+    const fields = initialData?.fields?.map((f) => {
+      if ([QUOTE_STATUS.sentToCustomer, QUOTE_STATUS.acceptByCustomer, QUOTE_STATUS.rejectByCustomer, QUOTE_STATUS.bookedbyCustomer]?.includes(versionStatus) &&
+        f?.fieldName === 'customerAccountName'
+      ) {
+        return {
+          ...f,
+          disableOnEdit: true,
+          isUneditable: true
+        };
+      }
+      return f;
+    });
+
+    setFormsData(setFieldsInAscendingOrder(fields));
   }, [initialData.fields]);
 
   const onOpportunityDropDownOpen = (selectedAccount) => {

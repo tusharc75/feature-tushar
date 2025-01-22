@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@mui/material/Grid2';
 import axiosInstance from 'src/axios/axiosInstance';
-import { displayDate, MATERIAL_TYPE, rentalManagement, sidebarResource } from 'src/constants/helpers';
+import { dateFormatToSend, displayDate, MATERIAL_TYPE, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { IconButton, MenuItem } from '@mui/material';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -206,8 +206,8 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
     setServiceConfirmationDialog({ ...serviceConfirmationDialog, loading: true });
     data = { ids: selectedRecords?.map((s) => s?.uniqueId) };
     data['type'] = type;
-    data['startDate'] = displayDate(values.startDate, 'MM/DD/YYYY');
-    data['endDate'] = displayDate(values.endDate, 'MM/DD/YYYY');
+    data['startDate'] = dateFormatToSend(values.startDate);
+    data['endDate'] = dateFormatToSend(values.endDate);
     axiosInstance()
       .put(`${rentalManagement.api}/${rentalManagementData?._id}/start-end-date`, data)
       .then((response) => {

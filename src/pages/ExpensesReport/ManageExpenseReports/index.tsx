@@ -15,12 +15,21 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, getObjKeysWithValues, expenseReport, yupSchema, sidebarResource, expenses } from '../../../constants/helpers';
+import {
+  CustomDialogTransition,
+  getObjKeysWithValues,
+  expenseReport,
+  yupSchema,
+  sidebarResource,
+  expenses,
+  EXPENSE_STATUS,
+  getObjKeys
+} from '../../../constants/helpers';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import AddIcon from '@mui/icons-material/Add';
 import AddExpenses from 'src/pages/ExpensesReport/AddExpenses';
-import ExpenseTable from 'src/pages/ExpensesReport/ExpenseTable';
+import Expenses from 'src/pages/ExpensesReport/Expenses';
 
 const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose, onSuccess }) => {
   const history = useHistory();
@@ -36,7 +45,6 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [title, setTitle] = useState('');
   const [selectedExpense, setSelectedExpense] = useState([]);
-  const [selectedExpensesData, setSelectedExpensesData] = useState([])
 
   useEffect(() => {
     axiosInstance()
@@ -69,6 +77,8 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
             });
         } else {
           setTitle(`Create ${resources?.expenseReport?.titleSingular}`);
+          let initialData = getObjKeys('', fieldsDataForCreate);
+          initialData['status'] = EXPENSE_STATUS.draft;
           setInitialData({
             fields: fieldsDataForCreate,
             values: initialData
@@ -85,9 +95,11 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
     const { fields, values, ...data } = value;
     data.selectedExpenses = selectedExpense;
     if (expenseReportId && isClone === false) {
+      data._id = expenseReportId;
       axiosInstance()
         .put(`${expenseReport.api}`, data)
         .then(({ data }) => {
+          handleStatusChange(data.selectedExpenses);
           setIsSubmitting(false);
           onSuccess();
           toastConfig.setToastConfig({
@@ -104,6 +116,7 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
       axiosInstance()
         .post(`${expenseReport.api}`, data)
         .then(({ data: { data, message } }) => {
+          handleStatusChange(data.selectedExpenses);
           history.push(`${routes?.expenseReportDetail?.path}/${data._id}`);
           setIsSubmitting(false);
           onSuccess(data);
@@ -132,22 +145,39 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
     }
   };
 
-  const handleSaveExpenses = async (expense) => {
-    const expensesId = expense.map((obj) => obj = obj._id );
-    setSelectedExpense(expense);
+  const handleSaveExpenses = async (newExpenses) => {
+    const updatedExpenses = [...selectedExpense, ...newExpenses];
+    setSelectedExpense(updatedExpenses);
+  };
+
+  const handleStatusChange = async (expenseInfo) => {
+    const newExpensesIds = expenseInfo.map((obj) => obj._id);
+
     axiosInstance()
-    .get(`${expenses.api}/${expensesId}`)
-    .then(({ data: { data } }) => {
-      setSelectedExpensesData(data)
-      setShowExpenseDialog(false);
-    })
-    .catch((err) => {
-      toastConfig.setToastConfig(err);
-    });
+      .patch(`${expenses.api}/status/${newExpensesIds}`, { status: EXPENSE_STATUS.unSubmitted })
+      .then(({ data }) => {})
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const removeExpenseField = (id) => {
-    setSelectedExpense(selectedExpense.filter((field) => field.id !== id));
+    const removedExpense = selectedExpense.find((field) => field._id === id);
+    setSelectedExpense(selectedExpense.filter((field) => field._id !== id));
+    if (removedExpense) {
+      axiosInstance()
+        .patch(`${expenses.api}/status/${removedExpense._id}`, { status: EXPENSE_STATUS.unreported })
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: `Status changed to ${EXPENSE_STATUS.unreported}`
+          });
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
   };
 
   return (
@@ -195,27 +225,27 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
                     resource={sidebarResource.expenseReport}
                     referenceId={expenseReportId || null}
                   />
+                  <Grid container spacing={2} sx={{ marginTop: 2 }}>
+                    <Grid size={{ xs: 8 }} sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                      <ThemeButton
+                        onClick={() => {
+                          setShowExpenseDialog(true);
+                        }}
+                        buttonType="themeBorder"
+                        sx={{ marginRight: 0.5 }}
+                        aria-label="add"
+                      >
+                        <AddIcon fontSize="small" />
+                        Add Expense
+                      </ThemeButton>
+                    </Grid>
+                  </Grid>
                   {selectedExpense.length > 0 && (
                     <div className="mt-2">
-                      <ExpenseTable selectedExpensesData={selectedExpensesData} removeExpenseField={removeExpenseField} selectedExpenses={selectedExpense} />
+                      <Expenses selectedExpenseData={selectedExpense} removeExpense={removeExpenseField}/>
                     </div>
                   )}
                 </Form>
-                <Grid container spacing={2} sx={{ alignItems: 'center', marginTop: 2 }}>
-                  <Grid size={{ xs: 8 }} sx={{ display: 'flex', alignItems: 'center' }}>
-                    <ThemeButton
-                      onClick={() => {
-                        setShowExpenseDialog(true);
-                      }}
-                      buttonType="themeBorder"
-                      sx={{ marginRight: 0.5 }}
-                      aria-label="add"
-                    >
-                      <AddIcon fontSize="small" />
-                      Add Expense
-                    </ThemeButton>
-                  </Grid>
-                </Grid>
               </CustomDialogContent>
               <CustomDialogFooter>
                 <ThemeButton
@@ -235,7 +265,7 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
                   isLoading={isSubmitting}
                   buttonType="theme"
                   id="dialog-save-button"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || selectedExpense.length === 0}
                   onClick={(e) => {
                     submitForm();
                   }}
@@ -261,7 +291,7 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
                 <AddExpenses
                   open={showExpenseDialog}
                   onClose={() => setShowExpenseDialog(false)}
-                  fullScreen={fullScreen}
+                  fullScreen
                   selectedExpense={selectedExpense}
                   setFullScreen={setFullScreen}
                   isSubmitting={isSubmitting}

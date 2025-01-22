@@ -42,6 +42,7 @@ import {
   RENTAL_INTERNAL_ASSET_STATUS,
   RENTAL_STEPS,
   REPAIR_JOB_STATUS,
+  dateFormatToSend,
   deliveryTicket,
   displayDate,
   findSimilarRecords,
@@ -1898,10 +1899,10 @@ const ReceivingTicket = ({
       asset: asset
     };
     if (values?.manualStartDate) {
-      data.startDate = displayDate(values.manualStartDate, 'MM/DD/YYYY');
+      data.startDate = dateFormatToSend(values.manualStartDate);
     }
     if (values?.manualEndDate) {
-      data.endDate = displayDate(values.manualEndDate, 'MM/DD/YYYY');
+      data.endDate = dateFormatToSend(values.manualStartDate);
     }
     axiosInstance()
       .put(`${rentalManagement.api}/${rentalManagementData?._id}/start-end-date`, data)
@@ -2083,10 +2084,7 @@ const ReceivingTicket = ({
           </ThemeButton>
         )}
         {(repairJobCount > 0 || repairOrderCount > 0) && (
-          <ThemeButton
-            onClick={openLinkActions}
-            endIcon={<ExpandMore fontSize="inherit" />}
-          >
+          <ThemeButton onClick={openLinkActions} endIcon={<ExpandMore fontSize="inherit" />}>
             Order(s)
           </ThemeButton>
         )}
@@ -2095,8 +2093,8 @@ const ReceivingTicket = ({
             <HtmlTooltip title="Process Multiple Receiving/Return Ticket(s)">
               <ThemeButton
                 iconForMobile={<AddBoxRoundedIcon />}
-                mobileTooltip='Process Ticket'
-                buttonType='theme'
+                mobileTooltip="Process Ticket"
+                buttonType="theme"
                 onClick={() => {
                   setOpenDeliveryTicketDialog(true);
                 }}
@@ -2150,9 +2148,9 @@ const ReceivingTicket = ({
   return (
     <>
       {serviceData?.length > 0 && (
-        <CustomTabs value={tabValue} onChange={handleMainTabChange} className="mb-0">
-          <CustomTab value={0} label={'Assets/Products'} primaryColor={true} />
-          <CustomTab value={1} label={'Services'} primaryColor={true} />
+        <CustomTabs value={tabValue} onChange={handleMainTabChange} className="mb-0" tabVariant="underlined">
+          <CustomTab value={0} label={'Assets/Products'} />
+          <CustomTab value={1} label={'Services'} />
         </CustomTabs>
       )}
       <TabPanel value={tabValue} index={0}>
@@ -2510,18 +2508,10 @@ const ReceivingTicket = ({
             </Box>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <ThemeButton
-              onClick={() => setStatusToUpdate((prevState) => ({ ...prevState, open: false }))}
-              buttonType='transparent'
-            >
+            <ThemeButton onClick={() => setStatusToUpdate((prevState) => ({ ...prevState, open: false }))} buttonType="transparent">
               Cancel
             </ThemeButton>
-            <ThemeButton
-              onClick={handleChangeStatus}
-              disabled={statusToUpdate.isUpdating}
-              buttonType='theme'
-              isLoading={statusToUpdate.isUpdating}
-            >
+            <ThemeButton onClick={handleChangeStatus} disabled={statusToUpdate.isUpdating} buttonType="theme" isLoading={statusToUpdate.isUpdating}>
               Change Status
             </ThemeButton>
           </CustomDialogFooter>
