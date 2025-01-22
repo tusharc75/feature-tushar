@@ -3115,6 +3115,17 @@ export const SALES_ORDER_STATUS = {
   closed: 'Closed'
 };
 
+export const EXPENSE_STATUS ={
+  unreported: 'Unreported',
+  unSubmitted:'Unsubmitted',
+  awaitingApproval:'Awaiting Approval',
+  approved:'Approved',
+  rejected:'Rejected',
+  reimbursed:'Reimbursed',
+  draft:'Draft',
+  recalled:'Recalled'
+};
+
 export const PRICING_TYPE = [
   { optionLabel: 'Rent', optionValue: 'Rent' },
   { optionLabel: 'Sell', optionValue: 'Price' }
