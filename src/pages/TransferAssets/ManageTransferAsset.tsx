@@ -12,7 +12,6 @@ import {
   transferAsset,
   setFieldsInAscendingOrder,
   GenerateResourceLineNumber,
-  convertDateInDateTime
 } from 'src/constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -343,7 +342,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                 values?.transferType.includes('Internal') && (
                                   <Fragment key={index2}>
                                     {field.fieldName === 'transfertoPlant' && (
-                                      <Grid size={{xs:12, sm:6, md:6}}>
+                                      <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                                         <FormTypes
                                           {...field}
                                           disabled={Boolean(transferAssetId) && field.disableOnEdit}
@@ -370,7 +369,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                       </Grid>
                                     )}
                                     {field.fieldName === 'plantShipTo' && (
-                                      <Grid key={index2} size={{xs:12, sm:6, md:6}}>
+                                      <Grid key={index2} size={{ xs: 12, sm: 6, md: 6 }}>
                                         <FormTypes
                                           {...field}
                                           disabled={Boolean(transferAssetId) && field.disableOnEdit}
@@ -404,7 +403,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                 )
                               ) : field.fieldName === 'transfertoSupplier' || field.fieldName === 'supplierShipTo' ? (
                                 values?.transferType.includes('Supplier') && (
-                                  <Grid size={{xs:12, sm:6, md:6}}>
+                                  <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                                     <FormTypes
                                       {...field}
                                       disabled={Boolean(transferAssetId) && field.disableOnEdit}
@@ -430,7 +429,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                 )
                               ) : field.fieldName === 'transfertoCustomer' || field.fieldName === 'customerShipTo' ? (
                                 values?.transferType.includes('Customer') && (
-                                  <Grid size={{xs:12, sm:6, md:6}}>
+                                  <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                                     <FormTypes
                                       {...field}
                                       disabled={Boolean(transferAssetId) && field.disableOnEdit}
@@ -455,7 +454,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                   </Grid>
                                 )
                               ) : field.fieldName === 'transferType' ? (
-                                <Grid key={index2} size={{xs:12, sm:6, md:6}}>
+                                <Grid key={index2} size={{ xs: 12, sm: 6, md: 6 }}>
                                   <FormTypes
                                     {...field}
                                     disabled={Boolean(transferAssetId) && field.disableOnEdit}
@@ -497,7 +496,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                   />
                                 </Grid>
                               ) : field.fieldName === 'transferFromPlant' ? (
-                                <Grid key={index2} size={{xs:12, sm:6, md:6}}>
+                                <Grid key={index2} size={{ xs: 12, sm: 6, md: 6 }}>
                                   <FormTypes
                                     {...field}
                                     disabled={Boolean(transferAssetId) && field.disableOnEdit}
@@ -526,7 +525,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                   />
                                 </Grid>
                               ) : field.fieldName === 'createDate' ? (
-                                <Grid key={index2} size={{xs:12, sm:6, md:6}}>
+                                <Grid key={index2} size={{ xs: 12, sm: 6, md: 6 }}>
                                   <FormTypes
                                     {...field}
                                     fieldData={field}
@@ -539,8 +538,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                     type={field.type}
                                     options={field.option}
                                     setFieldValue={(name, value) => {
-                                      var newDate = convertDateInDateTime(value);
-                                      setFieldValue(name, newDate);
+                                      setFieldValue(name, value);
                                     }}
                                     required={field.required}
                                     fullWidth
@@ -551,7 +549,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                   />
                                 </Grid>
                               ) : (
-                                <Grid key={index2} size={{xs:12, sm:6, md:6}}>
+                                <Grid key={index2} size={{ xs: 12, sm: 6, md: 6 }}>
                                   <FormTypes
                                     {...field}
                                     disabled={
@@ -587,7 +585,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
               </CustomDialogContent>
               <CustomDialogFooter>
                 <ThemeButton
-                  buttonType="transparent" 
+                  buttonType="transparent"
                   disabled={isSubmitting}
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
@@ -596,7 +594,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                 >
                   Cancel
                 </ThemeButton>
-                <ThemeButton isLoading={isSubmitting} disabled={isSubmitting}   buttonType="theme" onClick={submitForm}>
+                <ThemeButton isLoading={isSubmitting} disabled={isSubmitting} buttonType="theme" onClick={submitForm}>
                   {' '}
                   Save
                 </ThemeButton>

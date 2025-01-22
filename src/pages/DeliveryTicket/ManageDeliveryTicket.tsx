@@ -33,7 +33,6 @@ import {
 import { findOne, objectStore } from '../../constants/indexdbhelper';
 import {
   CustomDialogTransition,
-  convertDateInDateTime,
   generateUniqueIdOnly,
   getCollaboratorDropdownDataSource,
   getOwnerDropdownDataSource,
@@ -733,8 +732,7 @@ const ManageDeliveryTicket = ({
                                         type={field.type}
                                         options={field.option}
                                         setFieldValue={(name, value) => {
-                                          var newDate = convertDateInDateTime(value);
-                                          setFieldValue(name, newDate);
+                                          setFieldValue(name, value);
                                         }}
                                         required={field.required}
                                         fullWidth

@@ -4,7 +4,7 @@ import Dialog from '@mui/material/Dialog';
 import { Form, Formik } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { convertDateInDateTime, CustomDialogTransition, productInventory } from 'src/constants/helpers';
+import { CustomDialogTransition, productInventory } from 'src/constants/helpers';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import axiosInstance from 'src/axios/axiosInstance';
 import { useData } from 'src/StateProvider/Provider';
@@ -78,8 +78,7 @@ const ReceiveDateDialog = ({ handleClose, handleSucess, loading, refrenceData })
                   label="Receive Date"
                   maxDate={new Date()}
                   onChange={(value) => {
-                    var newDate = convertDateInDateTime(value);
-                    setFieldValue('receiveDate', newDate);
+                    setFieldValue('receiveDate', value);
                   }}
                   error={touched['receiveDate'] && Boolean(errors['receiveDate'])}
                   helperText={touched['receiveDate'] && errors['receiveDate']}
@@ -90,7 +89,7 @@ const ReceiveDateDialog = ({ handleClose, handleSucess, loading, refrenceData })
               <ThemeButton buttonType="transparent" onClick={handleClose}>
                 Cancel
               </ThemeButton>
-              <ThemeButton isLoading={loading} disabled={loading}  buttonType="theme" onClick={submitForm}>
+              <ThemeButton isLoading={loading} disabled={loading} buttonType="theme" onClick={submitForm}>
                 {'Deliver'}
               </ThemeButton>
             </CustomDialogFooter>
