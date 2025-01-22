@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaSyncAlt } from 'react-icons/fa';
 import { MdDelete } from 'react-icons/md';
@@ -13,7 +13,6 @@ import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
-import ProcessFlow from '../../components/ProcessFlow';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import {
   ACTIVITY_RESOURCE,
@@ -31,6 +30,9 @@ import ManageLeadDialog from './ManageLeadDialog/ManageLeadDialog';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import Step from 'src/pages/DynamicForm/Step';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import Steps from 'src/components/Steps';
+import { StepIconType } from 'src/components/Steps/icons';
+import ContentFullScreen from 'src/components/ContentFullScreen';
 
 const LeadDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -50,12 +52,7 @@ const LeadDetailsPage = () => {
   const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
   const [showAtLast, setShowAtLast] = useState(false);
   const [additionalFieldName, setAdditionalFieldName] = useState('');
-  const [leadsPermissions, setLeadsPermissions] = useState({
-    isCreate: false,
-    isUpdate: false,
-    isRead: false,
-    isDelete: false
-  });
+
   const [hasPermissionToConvertToOpportunity, setHasPermissionToConvertToOpportunity] = useState(false);
   const [isLeadAlreadyConvertedToOpportunity, setIsLeadAlreadyConvertedToOpportunity] = useState(false);
 
@@ -71,15 +68,10 @@ const LeadDetailsPage = () => {
   const [tabValue, setTabValue] = useState<any>(0);
   const [resourceData, setResourceData] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [stepFullScreen, setStepFullScreen] = useState(false);
 
   const { leadResource, leadApi } = lead;
   let { id } = useParams();
-
-  useEffect(() => {
-    if (permissions) {
-      setLeadsPermissions(permissions[leadResource]);
-    }
-  }, [permissions]);
 
   useEffect(() => {
     if (steps.length > 0) {
@@ -103,10 +95,10 @@ const LeadDetailsPage = () => {
           }
           setHasPermissionToConvertToOpportunity(
             dontHavePermissions.length === 0 &&
-            user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity &&
-            allowedToEdit &&
-            leadData[processFieldName] &&
-            currentStepToShow + 1 >= steps.length
+              user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity &&
+              allowedToEdit &&
+              leadData[processFieldName] &&
+              currentStepToShow + 1 >= steps.length
           );
         } else {
           setShowAtLast(false);
@@ -141,6 +133,27 @@ const LeadDetailsPage = () => {
       });
   };
 
+  const getIcon = (name: string): StepIconType => {
+    switch (true) {
+      case name === 'New':
+        return 'add';
+      case name === 'Prospecting':
+        return 'prospecting';
+      case name === 'Proposal':
+        return 'proposal';
+      case name === 'Negotiating':
+        return 'negotiating';
+      case name === 'Closed':
+        return 'closed';
+      case name === 'Unqualified':
+        return 'unqualified';
+      case name === 'Qualified':
+        return 'qualified';
+      default:
+        return 'add';
+    }
+  };
+
   const fetchFields = () => {
     axiosInstance()
       .get(`/field?resource=Lead&entity=${selectedEntity}`)
@@ -152,7 +165,10 @@ const LeadDetailsPage = () => {
             processSteps.fieldData.option.map((m) => {
               return {
                 text: m.optionLabel,
-                canCompleteManually: true
+                canCompleteManually: true,
+                name: m.optionLabel,
+                title: m.optionLabel,
+                icon: getIcon(m.optionLabel)
               };
             })
           );
@@ -198,9 +214,11 @@ const LeadDetailsPage = () => {
             type: 'success',
             message: data.message
           });
-          goBackToListing();
           setIsDeleting(false);
           setShowConfirmBox(false);
+          history.push({
+            pathname: leadPage.path
+          });
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -210,12 +228,6 @@ const LeadDetailsPage = () => {
     } else {
       setShowConfirmBox(false);
     }
-  };
-
-  const goBackToListing = () => {
-    history.push({
-      pathname: leadPage.path
-    });
   };
 
   const handleUpdateLead = (values) => {
@@ -314,9 +326,6 @@ const LeadDetailsPage = () => {
       axiosInstance()
         .put(`/lead?entity=${selectedEntity}`, updatedData)
         .then(() => {
-          // setActiveStep(data && data?.isSetBackStep ? tempActiveStep : tempActiveStep + 1)
-          // if (steps[tempActiveStep].text.toLowerCase() === "qualified") {
-          // }
           fetchData();
         })
         .catch((error) => {
@@ -325,7 +334,8 @@ const LeadDetailsPage = () => {
     }
   };
 
-  let filteredLeadFields = fields?.filter((item) => item.fieldData.sectionName != additionalFieldName);
+  const filteredLeadFields = useMemo(() => fields?.filter((item) => item.fieldData.sectionName !== additionalFieldName), [fields, additionalFieldName]);
+ 
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -346,7 +356,7 @@ const LeadDetailsPage = () => {
                       message: `Are you sure you want to convert ${leadName} to opportunity?`
                     });
                   }}
-                  buttonType='theme'
+                  buttonType="theme"
                   iconForMobile={<FaSyncAlt size={15} />}
                   mobileTooltip={'Convert Lead To Opportunity'}
                 >
@@ -354,12 +364,12 @@ const LeadDetailsPage = () => {
                 </ThemeButton>
               </>
             )}
-            {leadsPermissions.isUpdate && allowedToEdit && (
+            {allowedToEdit && (
               <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpneUpdateDialog} mobileTooltip={'Edit'}>
                 {'Edit'}
               </ThemeButton>
             )}
-            {leadsPermissions.isDelete && allowedToDelete && !leadData?.staticData?.convertedToOpportunity && (
+            {allowedToDelete && !leadData?.staticData?.convertedToOpportunity && (
               <DeleteButton
                 text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'}
                 disabled={isDeleting}
@@ -384,34 +394,40 @@ const LeadDetailsPage = () => {
           <CustomTab value={0}>Header</CustomTab>
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 1}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
-        <TabPanel value={tabValue} index={0}>
-          <>
-            <Box pb={2}>
-              <ProcessFlow
-                disableBackNext={leadsPermissions.isUpdate && allowedToEdit ? false : true}
-                steps={steps}
-                activeStep={activeStep}
-                handleMarkAsCompleted={handleMarkAsCompleted}
-                hideBackButton={isLeadAlreadyConvertedToOpportunity}
-                className="stepper-box-layout"
-              />
-            </Box>
-            <div className="bg-white dark:bg-[var(--dark-primary)_!important]">
-              {!leadData || !fields?.length ? (
-                <Box p={2} height={500}>
-                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                </Box>
-              ) : showAtLast ? (
-                <DetailsPage data={leadData} fields={fields} />
-              ) : (
-                <DetailsPage data={leadData} fields={filteredLeadFields} />
-              )}
-            </div>
-            <Box pt={3}>
-              <AccordionOfOpportunity recordsPerLine={3} opportunity={leadData?.staticData?.opportunity} />
-            </Box>
-          </>
-        </TabPanel>
+        <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+          <TabPanel value={tabValue} index={0}>
+            <>
+              <Box pb={2}>
+                <Steps
+                  currentStep={activeStep + 1}
+                  isNextStep={steps[activeStep + 1]?.canCompleteManually && allowedToEdit}
+                  isPrevStep={activeStep > 0 && allowedToEdit}
+                  isStepEnded={activeStep === steps.length - 1}
+                  nextStep={steps[activeStep + 1]?.text}
+                  setCurrentStep={setActiveStep}
+                  steps={steps}
+                  showExtraStep={true}
+                  handleNext={() => handleMarkAsCompleted()}
+                  handlePrev={() => handleMarkAsCompleted({ isSetBackStep: true })}
+                  stepFullScreen={stepFullScreen}
+                  setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
+                />
+              </Box>
+              <div>
+                {!leadData || !fields?.length ? (
+                  <Box p={2} height={500}>
+                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                  </Box>
+                ) : (
+                  <DetailsPage data={leadData} fields={showAtLast ? fields : filteredLeadFields} />
+                )}
+              </div>
+              <Box pt={3}>
+                <AccordionOfOpportunity recordsPerLine={3} opportunity={leadData?.staticData?.opportunity} />
+              </Box>
+            </>
+          </TabPanel>
+        </ContentFullScreen>
         {resourceData &&
           resourceData?.tabs?.length > 0 &&
           resourceData?.tabs?.map((tab, i) => {
