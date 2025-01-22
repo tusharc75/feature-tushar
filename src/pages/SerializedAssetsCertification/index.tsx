@@ -16,7 +16,7 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import routes from '../../components/Helpers/Routes';
 import {
   CHILD_RESOURCE,
-  displayDate,
+  dateFormatToSend,
   gridLoadingTimeout,
   prepareDataForGrid,
   serializedAsset,
@@ -130,8 +130,8 @@ const SerializedAssetsCertification = () => {
       deepFilters.push({
         field: 'certificateIssueDate',
         term: {
-          from: displayDate(issueDuration?.from),
-          to: displayDate(issueDuration?.to)
+          from: dateFormatToSend(issueDuration?.from),
+          to: dateFormatToSend(issueDuration?.to)
         }
       });
     }
@@ -139,8 +139,8 @@ const SerializedAssetsCertification = () => {
       deepFilters.push({
         field: 'certificateExpiryDate',
         term: {
-          from: displayDate(expireDuration?.from),
-          to: displayDate(expireDuration?.to)
+          from: dateFormatToSend(expireDuration?.from),
+          to: dateFormatToSend(expireDuration?.to)
         }
       });
     }

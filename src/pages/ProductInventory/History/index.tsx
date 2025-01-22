@@ -10,7 +10,7 @@ import DurationFilter from 'src/components/DurationFilter';
 import { useAppTheme } from 'src/constants/AppConfig';
 import {
   PRODUCT_SERIAL_NUMBER_STATUS,
-  displayDate,
+  dateFormatToSend,
   displayDateTime,
   gridLoadingTimeout,
   prepareDataForGrid,
@@ -159,8 +159,8 @@ const History = ({ product, warehouse, storageLocation }) => {
       deepFilters.push({
         field: 'date',
         term: {
-          from: displayDate(duration?.from),
-          to: displayDate(duration?.to)
+          from: dateFormatToSend(duration?.from),
+          to: dateFormatToSend(duration?.to)
         }
       });
     }
@@ -549,7 +549,7 @@ const History = ({ product, warehouse, storageLocation }) => {
       {warehouseOptions ? (
         <div className="md:pr-[82px]">
           <Grid container spacing={2} justifyContent="space-between">
-            <Grid size={{md:3, sm:6, xs:12}}>
+            <Grid size={{ md: 3, sm: 6, xs: 12 }}>
               <Autocomplete
                 options={warehouseOptions}
                 getOptionLabel={(option: any) => option.optionLabel}
@@ -571,7 +571,7 @@ const History = ({ product, warehouse, storageLocation }) => {
                 )}
               />
             </Grid>
-            <Grid size={{md:3, sm:6, xs:12}}>
+            <Grid size={{ md: 3, sm: 6, xs: 12 }}>
               {user?.user?.brandPolicy?.storageLocation && (
                 <Autocomplete
                   options={storageLocationOptions.filter((item) => item.warehouse === selectedWarehouse)}
@@ -591,7 +591,7 @@ const History = ({ product, warehouse, storageLocation }) => {
                 />
               )}
             </Grid>
-            <Grid size={{md:6, sm:12, xs:12}}>
+            <Grid size={{ md: 6, sm: 12, xs: 12 }}>
               <Box mt={1}>
                 <DurationFilter label={''} defaultTimeFrame="1-year" duration={duration} setDuration={setDuration} />
               </Box>
@@ -601,7 +601,7 @@ const History = ({ product, warehouse, storageLocation }) => {
       ) : (
         <div className="min-h-[50px]" />
       )}
-      <Grid size={{xs:12, md:12, sm:12}}>
+      <Grid size={{ xs: 12, md: 12, sm: 12 }}>
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 300px)'}

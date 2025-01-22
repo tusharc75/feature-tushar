@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { Dialog, Box, IconButton } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { CustomDialogTransition, displayDate, gridLoadingTimeout, rentalManagement, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, dateFormatToSend, displayDate, gridLoadingTimeout, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { camelCase, isEmpty } from 'lodash';
 import { Link } from 'react-router-dom';
@@ -219,10 +219,10 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, onSuccess, allow
     setEditDateDialog({ ...editDateDialog, loading: true });
     let data = { ids: [id], serviceLogId: editDateDialog?.data?._id, ...values };
     if (data?.startDate) {
-      data.startDate = displayDate(data.startDate, 'MM/DD/YYYY')
+      data.startDate = dateFormatToSend(data.startDate)
     }
     if (data?.endDate) {
-      data.endDate = displayDate(data.endDate, 'MM/DD/YYYY')
+      data.endDate = dateFormatToSend(data.endDate)
     }
     axiosInstance()
       .put(`${rentalManagement.api}/${rentalId}/start-end-date`, data)

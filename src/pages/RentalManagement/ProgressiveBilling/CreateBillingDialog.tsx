@@ -18,7 +18,8 @@ import {
   ASSET_STATUS,
   sidebarResource,
   getObjKeysWithValues,
-  displayDate
+  displayDate,
+  dateFormatToSend
 } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -29,7 +30,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { camelCase, isEqual, isObject, startCase } from 'lodash';
+import { camelCase, isEqual, startCase } from 'lodash';
 import InfoIcon from '@mui/icons-material/InfoOutlined';
 import EditIcon from '@mui/icons-material/Edit';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
@@ -562,8 +563,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         if (e.type === MATERIAL_TYPE.serializedAsset) {
           assetList.push({
             asset: e._id,
-            startDate: displayDate(e.actualStartDate),
-            endDate: displayDate(endDate)
+            startDate: dateFormatToSend(e.actualStartDate),
+            endDate: dateFormatToSend(endDate)
           });
         }
       });
@@ -592,8 +593,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         `${routes.rentalManagement.path}/${rentalManagementData?._id}/inventory/rental-unit-volume-utilization`,
         assetList?.map((d) => ({
           asset: d?._id,
-          fromDate: displayDate(d?.actualStartDate),
-          toDate: displayDate(endDate)
+          fromDate: dateFormatToSend(d?.actualStartDate),
+          toDate: dateFormatToSend(endDate)
         }))
       );
     }

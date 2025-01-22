@@ -20,7 +20,7 @@ import routes from 'src/components/Helpers/Routes';
 import {
   cn,
   CustomDialogTransition,
-  displayDate,
+  dateFormatToSend,
   downloadExcel,
   formatAmountWithCurrency,
   gridLoadingTimeout,
@@ -342,7 +342,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
           })
           ?.map((d) => {
             const isoDate = dayjs(d?.term);
-            const term = isoDate.isValid() ? displayDate(d?.term, 'MM/DD/YYYY') : d?.term;
+            const term = isoDate.isValid() ? dateFormatToSend(d?.term) : d?.term;
             if (filterTerm[d?.field] === '$nin' && isArray(term)) {
               return {
                 ...d,
@@ -659,7 +659,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
                   permissions={permissions?.report}
                   module={selectedReport.resource}
                   api={`/report/${selectedReport.resource}`}
-                  afterImportCompleted={() => {}}
+                  afterImportCompleted={() => { }}
                   isExportCount={true}
                   exportCount={0}
                   ids={[]}
