@@ -18,9 +18,8 @@ import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 
-let expensesTimeout;
 
-const Expenses = (selectedExpenseData) => {
+const Expenses = (selectedExpenseData, removeExpense) => {
   const renderedFrom = camelCase(sidebarResource?.expenses);
 
   const toastConfig = useContext(CustomToastContext);
@@ -103,30 +102,13 @@ const Expenses = (selectedExpenseData) => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={permissions?.expenses?.isCreate ? 'Clone' : cloneDisable}>
-          <span>
-            <IconButton
-              size="small"
-              aria-label="Clone"
-              disabled={permissions?.expenses?.isCreate ? false : true}
-              onClick={() => {
-                setShowManageExpensesDialog({ open: true, isClone: true, idToClone: row.original._id });
-              }}
-            >
-              <FileCopyIcon fontSize="small" color={permissions?.expenses?.isCreate ? 'primary' : 'disabled'} />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
         <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
               size="small"
               aria-label="Delete"
               disabled={row?.original?.canDelete ? false : true}
-              onClick={() => {
-                setDeleteRecord(row.original);
-                setShowDeleteConfirmBox(true);
-              }}
+              onClick={removeExpense}
             >
               <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
             </IconButton>
@@ -136,7 +118,7 @@ const Expenses = (selectedExpenseData) => {
     )
   };
 
-  const getQueryString = () => {
+  const getQueryString = (isExport = false) => {
     // let deepFilter = `?page=${page}&limit=${limit}`;
      let deepFilter = `?`;
      if (selectedEntity) {
@@ -144,11 +126,11 @@ const Expenses = (selectedExpenseData) => {
     }
     // const { filterByIds, deepFilters } = gridFilterParser(filters);
     // const expenseNumbers = selectedExpenseData.map(item => item.expenseNumber);
-    // console.log(selectedExpenseData)
-    // const filterByIds = [{ field: 'expenseNumber', term: selectedExpenseData[0]?._id }];
-    // if (filterByIds?.length) {
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify(selectedExpenseData[0]._id)}&filterType=and`;
-    // }
+    const expenseNumbers = selectedExpenseData.map(item => item._id);
+    const filterByIds = [{ field: 'expenseNumber', term: expenseNumbers }];
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}&filterType=and`;
+    }
     // if (deepFilters?.length) {
     //   deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     // }
@@ -174,8 +156,7 @@ const Expenses = (selectedExpenseData) => {
     const queryString = getQueryString();
     try {
       let data: any = [], count;
-      const expenseNumbers = selectedExpenseData.map(item => item._id);
-      const response: any = await axiosInstance().get(`${expenses.api}/${expenseNumbers}`, { cancelToken: cancelTokenSource?.token });
+      const response: any = await axiosInstance().get(`${expenses.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
       data = response?.data?.data;
       count = response?.data?.count;
       let rows = data.map((u) => {
