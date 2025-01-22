@@ -118,7 +118,6 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
       }
     }
     setResourceColumns(resourceColumns);
-    setIsColumnsLoading(false);
     let columns = [];
     data.forEach((o) => {
       if (o?.fieldData?.fieldName === primaryFields[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]) {
@@ -451,7 +450,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
               permissions={permissions[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
               module={''}
               api={getApi()}
-              afterImportCompleted={() => { }}
+              afterImportCompleted={() => {}}
               onlyExport={true}
             />
           </>
