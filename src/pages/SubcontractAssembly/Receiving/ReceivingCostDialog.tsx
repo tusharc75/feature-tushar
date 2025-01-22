@@ -12,8 +12,8 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import {
   CHILD_RESOURCE,
-  convertDateInDateTime,
   CustomDialogTransition,
+  dateFormatToSend,
   displayDate,
   getObjKeys,
   yupSchema
@@ -71,7 +71,7 @@ export default function ReceivingCostDialog({ onClose, onSuccess, _id, subcontra
     axiosInstance()
       .put(`${routes.subcontractAssembly.path}/${subcontractAssemblyData?._id}/material/received`, {
         cost: values,
-        receiveDate: receiveDate,
+        receiveDate: dateFormatToSend(receiveDate),
         _id: _id
       })
       .then(({ data }) => {
@@ -143,7 +143,7 @@ export default function ReceivingCostDialog({ onClose, onSuccess, _id, subcontra
                   />
                 </Form>
                 <Grid spacing={3} container>
-                  <Grid size={{xs:12, sm:6, md:6}}>
+                  <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                     <CustomDatePicker
                       label="Received Date"
                       required
@@ -153,7 +153,7 @@ export default function ReceivingCostDialog({ onClose, onSuccess, _id, subcontra
                       placeholder="Receive Date"
                       value={receiveDate}
                       onChange={(value) => {
-                        setReceiveDate(convertDateInDateTime(value));
+                        setReceiveDate(value);
                       }}
                       fullWidth
                       {...(minReceiveDate ? { minDate: minReceiveDate } : {})}
@@ -177,7 +177,7 @@ export default function ReceivingCostDialog({ onClose, onSuccess, _id, subcontra
                 <ThemeButton
                   disabled={validateDate()?.receiveDate || isSubmitting}
                   isLoading={isSubmitting}
-                   buttonType="theme"
+                  buttonType="theme"
                   onClick={(e) => {
                     e.preventDefault();
                     submitForm();
