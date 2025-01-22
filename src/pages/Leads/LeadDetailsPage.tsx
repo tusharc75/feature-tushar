@@ -334,7 +334,8 @@ const LeadDetailsPage = () => {
     }
   };
 
-  const filteredLeadFields = useMemo(() => fields?.filter((item) => item.fieldData.sectionName !== additionalFieldName), [fields]);
+  const filteredLeadFields = useMemo(() => fields?.filter((item) => item.fieldData.sectionName !== additionalFieldName), [fields, additionalFieldName]);
+ 
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
