@@ -65,7 +65,7 @@ const CalendarView = (props: Props) => {
           }));
         setEvents(eventsData);
       })
-      .catch((err) => {});
+      .catch((err) => { });
   }, []);
 
   const onRangeChange = useCallback(

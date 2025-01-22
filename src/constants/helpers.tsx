@@ -1424,9 +1424,8 @@ export const dateFormatForInputControl = localStorage.getItem('dateFormatForInpu
 
 export const dayNamesShort = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-export const displayDate = (date, format = null) => {
-  format = format ? format : dateFormat;
-  return date ? dayjs.utc(date).tz().format(format) : date;
+export const displayDate = (date) => {
+  return date ? dayjs.utc(date).tz().format(dateFormat) : date;
 };
 
 export const displayDateTime = (date, format = null) => {
@@ -1436,6 +1435,10 @@ export const displayDateTime = (date, format = null) => {
 
 export const displayCardDate = (date) => {
   return date ? dayjs.utc(date).tz().format(cardDateFormat) : date;
+};
+
+export const dateFormatToSend = (date) => {
+  return date ? dayjs.utc(date).tz().format('MM/DD/YYYY') : date;
 };
 
 export const convertDateInDateTime = (date) => {
@@ -3115,15 +3118,15 @@ export const SALES_ORDER_STATUS = {
   closed: 'Closed'
 };
 
-export const EXPENSE_STATUS ={
+export const EXPENSE_STATUS = {
   unreported: 'Unreported',
-  unSubmitted:'Unsubmitted',
-  awaitingApproval:'Awaiting Approval',
-  approved:'Approved',
-  rejected:'Rejected',
-  reimbursed:'Reimbursed',
-  draft:'Draft',
-  recalled:'Recalled'
+  unSubmitted: 'Unsubmitted',
+  awaitingApproval: 'Awaiting Approval',
+  approved: 'Approved',
+  rejected: 'Rejected',
+  reimbursed: 'Reimbursed',
+  draft: 'Draft',
+  recalled: 'Recalled'
 };
 
 export const PRICING_TYPE = [
