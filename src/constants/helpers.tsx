@@ -3116,9 +3116,9 @@ export const SALES_ORDER_STATUS = {
 };
 
 export const EXPENSE_STATUS ={
-  new: 'Unreported',
-  notSubmitted:'Unsubmitted',
-  awaiting:'Awaiting Approval',
+  unreported: 'Unreported',
+  unSubmitted:'Unsubmitted',
+  awaitingApproval:'Awaiting Approval',
   approved:'Approved',
   rejected:'Rejected',
   reimbursed:'Reimbursed',

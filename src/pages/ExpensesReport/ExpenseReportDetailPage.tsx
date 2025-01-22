@@ -16,6 +16,10 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { EXPENSE_STATUS, expenseReport, expenses, sidebarResource } from '../../constants/helpers';
 import Step from '../DynamicForm/Step';
 import ManageExpenseReports from 'src/pages/ExpensesReport/ManageExpenseReports';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import { camelCase } from 'lodash';
+import AddExpenses from 'src/pages/ExpensesReport/AddExpenses';
+import Expenses from 'src/pages/ExpensesReport/Expenses';
 
 const ExpenseReportDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -33,7 +37,8 @@ const ExpenseReportDetailsPage = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
-
+  const renderedFrom = camelCase(sidebarResource?.expenses);
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [locationKeys, setLocationKeys] = useState([]);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
@@ -116,7 +121,7 @@ const ExpenseReportDetailsPage = () => {
     axiosInstance()
       .put(`${expenseReport.api}/remove`, { ids: [expenseReportData._id] })
       .then(() => {
-        handleStatusChange(expenseReportData.selectedExpenses)
+        handleStatusChange(expenseReportData.selectedExpenses);
         setShowConfirmBox(false);
         history.push(`${routes?.expenseReport?.path}`);
       })
@@ -126,22 +131,22 @@ const ExpenseReportDetailsPage = () => {
       });
   };
 
-    const handleStatusChange = async (expenseInfo) =>{
-      const newExpensesIds = expenseInfo.map((obj) => obj._id);
-  
-      axiosInstance()
-        .patch(`${expenses.api}/status/${newExpensesIds}`, { status: EXPENSE_STATUS.new })
-        .then(({ data }) => {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: `Status changed to ${EXPENSE_STATUS.new}`
-          });
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
+  const handleStatusChange = async (expenseInfo) => {
+    const newExpensesIds = expenseInfo.map((obj) => obj._id);
+
+    axiosInstance()
+      .patch(`${expenses.api}/status/${newExpensesIds}`, { status: EXPENSE_STATUS.unreported })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Status changed to ${EXPENSE_STATUS.unreported}`
         });
-    }
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
 
   return (
     <Box className="main-container-v1">
@@ -188,24 +193,7 @@ const ExpenseReportDetailsPage = () => {
             )}
             {!loadingDetails ? (
               <div className="mt-2">
-                <TableContainer component={Paper}>
-                  <Table sx={{ minWidth: 700 }} aria-label="spanning table">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell align='center'>Expense Number</TableCell>
-                        <TableCell align='center'>Category</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {expenseReportData?.selectedExpenses?.map((row) => (
-                        <TableRow key={row.id}>
-                          <TableCell align='center'>{row.expenseNumber}</TableCell>
-                          <TableCell align='center'>{row.category}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+                {/* <Expenses selectedExpenseData={expenseReportData?.selectedExpenses} /> */}
               </div>
             ) : (
               <div className="p-2">

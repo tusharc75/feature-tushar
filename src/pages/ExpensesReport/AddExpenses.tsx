@@ -66,7 +66,7 @@ function AddExpenses({
     const response = await axiosInstance().get(`${expenses.api}`);
     data = response?.data?.data;
     count = response?.data?.count;
-    data = data.filter((item) => item.status === EXPENSE_STATUS.new);
+    data = data.filter((item) => item.status === EXPENSE_STATUS.unreported);
     let rows = data.map((u) => {
       let finalObject = prepareDataForGrid(u, user);
       finalObject['isChecked'] = false;

@@ -23,7 +23,7 @@ import {
   sidebarResource,
   expenses,
   EXPENSE_STATUS,
-  getObjKeys,
+  getObjKeys
 } from '../../../constants/helpers';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
@@ -78,7 +78,7 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
         } else {
           setTitle(`Create ${resources?.expenseReport?.titleSingular}`);
           let initialData = getObjKeys('', fieldsDataForCreate);
-          initialData["status"] = EXPENSE_STATUS.draft;
+          initialData['status'] = EXPENSE_STATUS.draft;
           setInitialData({
             fields: fieldsDataForCreate,
             values: initialData
@@ -150,34 +150,34 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
     setSelectedExpense(updatedExpenses);
   };
 
-  const handleStatusChange = async (expenseInfo) =>{
+  const handleStatusChange = async (expenseInfo) => {
     const newExpensesIds = expenseInfo.map((obj) => obj._id);
 
     axiosInstance()
-      .patch(`${expenses.api}/status/${newExpensesIds}`, { status: EXPENSE_STATUS.notSubmitted })
+      .patch(`${expenses.api}/status/${newExpensesIds}`, { status: EXPENSE_STATUS.unSubmitted })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: `Status changed to ${EXPENSE_STATUS.notSubmitted}`
+          message: `Status changed to ${EXPENSE_STATUS.unSubmitted}`
         });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  }
+  };
 
   const removeExpenseField = (id) => {
     const removedExpense = selectedExpense.find((field) => field._id === id);
     setSelectedExpense(selectedExpense.filter((field) => field._id !== id));
     if (removedExpense) {
       axiosInstance()
-        .patch(`${expenses.api}/status/${removedExpense._id}`, { status: EXPENSE_STATUS.new })
+        .patch(`${expenses.api}/status/${removedExpense._id}`, { status: EXPENSE_STATUS.unreported })
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
-            message: `Status changed to ${EXPENSE_STATUS.new}`
+            message: `Status changed to ${EXPENSE_STATUS.unreported}`
           });
         })
         .catch((error) => {
