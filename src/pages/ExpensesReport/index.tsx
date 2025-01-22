@@ -221,13 +221,7 @@ const ExpenseReport = () => {
     
         axiosInstance()
           .patch(`${expenses.api}/status/${newExpensesIds}`, { status: EXPENSE_STATUS.unreported })
-          .then(({ data }) => {
-            toastConfig.setToastConfig({
-              open: true,
-              type: 'success',
-              message: `Status changed to ${EXPENSE_STATUS.unreported}`
-            });
-          })
+          .then(({ data }) => {})
           .catch((error) => {
             toastConfig.setToastConfig(error);
           });

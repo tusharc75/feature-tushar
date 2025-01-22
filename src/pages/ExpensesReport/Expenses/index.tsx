@@ -7,7 +7,6 @@ import { useHistory } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { ListingPageHeader } from 'src/components/PageHeaders';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
@@ -17,9 +16,6 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import CustomContainer from 'src/components/CustomContainer';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 
 let expensesTimeout;
@@ -140,7 +136,7 @@ const Expenses = (selectedExpenseData) => {
     )
   };
 
-  const getQueryString = (isExport = false) => {
+  const getQueryString = () => {
     // let deepFilter = `?page=${page}&limit=${limit}`;
      let deepFilter = `?`;
      if (selectedEntity) {
@@ -179,7 +175,7 @@ const Expenses = (selectedExpenseData) => {
     try {
       let data: any = [], count;
       const expenseNumbers = selectedExpenseData.map(item => item._id);
-      const response: any = await axiosInstance().get(`${expenses.api}?&filterById=${encodeURIComponent(JSON.stringify(expenseNumbers))}`, { cancelToken: cancelTokenSource?.token });
+      const response: any = await axiosInstance().get(`${expenses.api}/${expenseNumbers}`, { cancelToken: cancelTokenSource?.token });
       data = response?.data?.data;
       count = response?.data?.count;
       let rows = data.map((u) => {
