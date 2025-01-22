@@ -671,7 +671,7 @@ const Services = ({
 
       {columns ? (
         <CustomReactTable
-          height={'300px'}
+          height={permissions?.employeeMaster?.isRead ? "300px" : stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
           columns={columns}
           state={state}
           dispatch={dispatch}
@@ -712,8 +712,8 @@ const Services = ({
             />
           </Box>
           <Box mt={3}>
-            <CustomTabs value={tabValue} onChange={handleMainTabChange} style={{ marginBottom: -1 }}>
-              <CustomTab value={0} label={'Technicians'} underlined={true} />
+            <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
+              <CustomTab value={0} label={'Technicians'} />
             </CustomTabs>
             <TabPanel value={tabValue} index={0}>
               <Technicians
