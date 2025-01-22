@@ -24,7 +24,6 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import FullScreenDialog from '../../components/Helpers/FullScreenDialog';
 import OpportunityInAccordian from '../../components/OpportunityInAccordian/OpportunityInAccordian';
-import ProcessFlow from '../../components/ProcessFlow';
 import ProjectInAccordion from '../../components/ProjectInAccordion/ProjectInAccordion';
 import QuickLinks, { IQuickLinks } from '../../components/QuickLinks/QuickLinks';
 import QuotesInAccordion from '../../components/QuotesInAccordion/QuotesInAccordion';
@@ -567,40 +566,6 @@ export default function AccountDetailPage(props) {
       });
   };
 
-  const handleMarkAsCompleted = (data) => {
-    setShowAtLast(false);
-    setIsProcessing(true);
-    let tempActiveStep = data && data?.isSetBackStep ? activeStep - 1 : activeStep < steps.length - 1 ? activeStep + 1 : activeStep;
-    if (tempActiveStep == steps.length - 1 && showAdditionalField) {
-      setOpenAdditionalDialog(true);
-    } else {
-      let processFieldName = '';
-      const accountFieldData = accountFields.map((f) => {
-        if (f.fieldData.type == 'process') {
-          processFieldName = f.fieldData.fieldName;
-        }
-        return f.fieldData;
-      });
-
-      const updatedData = {
-        ...getObjKeysWithValues(accountData, accountFieldData),
-        [processFieldName]: steps[tempActiveStep].text,
-        _id: accountData._id
-      };
-
-      axiosInstance()
-        .put(`${accountApi}`, updatedData)
-        .then(() => {
-          fetchAccountData();
-          setIsProcessing(false);
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-          setIsProcessing(false);
-        });
-    }
-  };
-
   const handleEntityChange = (id) => {
     dispatch({ type: SET_SELECTED_ENTITY, payload: id });
   };
@@ -641,7 +606,7 @@ export default function AccountDetailPage(props) {
                   setShowApproveDisapproveConfirmBox(true);
                 }}
                 iconForMobile={accountData.staticData?.approved ? <FcDisapprove size={21} /> : <FcApproval size={21} />}
-                borderColor={accountData.staticData?.approved ? 'red' : 'none'}
+                buttonType={accountData.staticData?.approved ? 'red' : 'none'}
                 textColor={accountData.staticData?.approved ? 'red' : 'white'}
                 backgroundColor={accountData.staticData?.approved ? 'none' : 'theme'}
               >
@@ -667,12 +632,6 @@ export default function AccountDetailPage(props) {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <ProcessFlow
-          disableBackNext={permissions && permissions[accountResource] && permissions[accountResource].isUpdate && allowedToEdit ? false : true}
-          steps={steps}
-          activeStep={activeStep}
-          handleMarkAsCompleted={handleMarkAsCompleted}
-        />
         {loading ? (
           <Grid container spacing={2}>
             {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (

@@ -28,7 +28,6 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import FullScreenDialog from '../../components/Helpers/FullScreenDialog';
 import OpportunityInAccordian from '../../components/OpportunityInAccordian/OpportunityInAccordian';
 import OrgChartContainer from '../../components/OrgChart/OrgChartContainer';
-import ProcessFlow from '../../components/ProcessFlow';
 import ProjectInAccordion from '../../components/ProjectInAccordion/ProjectInAccordion';
 import QuickLinks, { IQuickLinks } from '../../components/QuickLinks/QuickLinks';
 import QuotesInAccordion from '../../components/QuotesInAccordion/QuotesInAccordion';
@@ -432,37 +431,6 @@ const ContactDetailsPage = (props) => {
       });
   };
 
-  const handleMarkAsCompleted = (data) => {
-    setShowAtLast(false);
-    let tempActiveStep = data && data?.isSetBackStep ? activeStep - 1 : activeStep < steps.length - 1 ? activeStep + 1 : activeStep;
-    if (tempActiveStep === steps.length - 1 && showAdditionalField) {
-      setOpenAdditionalDialog(true);
-    } else {
-      let processFieldName = '';
-      const contactFieldData = contactFields.map((f) => {
-        if (f.fieldData.type === 'process') {
-          processFieldName = f.fieldData.fieldName;
-        }
-        return f.fieldData;
-      });
-
-      const updatedData = {
-        ...getObjKeysWithValues(contactData, contactFieldData),
-        [processFieldName]: steps[tempActiveStep].text,
-        _id: contactData._id
-      };
-
-      axiosInstance()
-        .put(`${contactApi}`, updatedData)
-        .then(() => {
-          fetchContactData();
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-    }
-  };
-
   const handleUpdateContact = (values, isUpdateReportsTo = false, isFetch = true) => {
     if (values.employees) {
       values.employees = parseInt(values.employees);
@@ -575,12 +543,6 @@ const ContactDetailsPage = (props) => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <ProcessFlow
-          disableBackNext={contactPermissions?.isUpdate && allowedToEdit ? false : true}
-          steps={steps}
-          activeStep={activeStep}
-          handleMarkAsCompleted={handleMarkAsCompleted}
-        />
         <Box>
           {loading ? (
             <Grid container spacing={2}>

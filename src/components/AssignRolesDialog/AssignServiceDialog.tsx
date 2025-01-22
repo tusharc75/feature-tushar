@@ -198,7 +198,7 @@ const AssignServiceDialog = ({
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
-    const updatedDeepFilters = [...deepFilters];
+    let updatedDeepFilters = [...deepFilters];
     const updatedFilterByIds = [...filterByIds];
 
     if (extraStaticFilter?.length) {
@@ -207,7 +207,9 @@ const AssignServiceDialog = ({
           if (user?.user?.brandPolicy?.servicePrePost) {
             updatedDeepFilters.push(e);
           }
-        } else {
+        }
+        else {
+          updatedDeepFilters = updatedDeepFilters?.filter((ele) => e.field !== ele.field);
           updatedDeepFilters.push(e);
         }
       });
