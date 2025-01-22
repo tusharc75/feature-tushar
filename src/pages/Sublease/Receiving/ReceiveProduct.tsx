@@ -7,7 +7,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { convertDateInDateTime, CustomDialogTransition, sublease, SUBLEASE_TYPE } from 'src/constants/helpers';
+import { CustomDialogTransition, dateFormatToSend, sublease, SUBLEASE_TYPE } from 'src/constants/helpers';
 import AssetDialog from 'src/pages/Sublease/Receiving/AssetDialog';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
@@ -48,7 +48,7 @@ const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess, subleaseData
           assetNumber: m?.assetNumber,
           assetNumberType: m?.assetNumberType
         })),
-        receiveDate: receiveDate
+        receiveDate: dateFormatToSend(receiveDate)
       })
       .then(({ data }) => {
         setIsSubmitting(false);
@@ -203,7 +203,7 @@ const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess, subleaseData
                             value={values.receiveDate}
                             maxDate={new Date()}
                             onChange={(value) => {
-                              setFieldValue('receiveDate', convertDateInDateTime(value));
+                              setFieldValue('receiveDate', value);
                             }}
                             error={validateDate(values)?.receiveDate}
                             helperText={validateDate(values)?.receiveDate ? validateDate(values)?.receiveDate : ''}

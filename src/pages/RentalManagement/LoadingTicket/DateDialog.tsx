@@ -5,7 +5,7 @@ import Grid from '@mui/material/Grid2';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import { ASSET_STATUS, CustomDialogTransition, convertDateInDateTime, dateFormatToSend } from 'src/constants/helpers';
+import { ASSET_STATUS, CustomDialogTransition, dateFormatToSend } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
@@ -77,7 +77,7 @@ const DateDialog = ({ title, type, status, onClose, handleSubmit, loading, asset
                     error={touched['date'] && Boolean(errors['date'])}
                     helperText={touched['date'] && errors['date']}
                     onChange={(value) => {
-                      setFieldValue('date', convertDateInDateTime(value));
+                      setFieldValue('date', value);
                     }}
                   />
                   {status === ASSET_STATUS.delivered && (

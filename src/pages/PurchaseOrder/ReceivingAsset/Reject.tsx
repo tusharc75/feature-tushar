@@ -11,7 +11,6 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import {
   CustomDialogTransition,
   MATERIAL_TYPE,
-  convertDateInDateTime,
   convertDateTimToDate,
   dateFormatToSend,
   productInventory,
@@ -431,7 +430,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                         }
                         maxDate={new Date()}
                         onChange={(value) => {
-                          setFieldValue('rejectDate', convertDateInDateTime(value));
+                          setFieldValue('rejectDate', value);
                         }}
                         error={validateDate(values)?.rejectDate}
                         helperText={validateDate(values)?.rejectDate ? validateDate(values)?.rejectDate : ''}

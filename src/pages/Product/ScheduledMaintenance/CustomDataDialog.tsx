@@ -7,7 +7,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { convertDateInDateTime, CustomDialogTransition } from 'src/constants/helpers';
+import { CustomDialogTransition } from 'src/constants/helpers';
 import { date, object, string } from 'yup';
 
 const Schema = object().shape({
@@ -67,7 +67,7 @@ const CustomDataDialog = ({ data = null, handleClose, handleSave, loading }) => 
                     required
                     margin="dense"
                     onChange={(value: any) => {
-                      setFieldValue('effectiveDate', convertDateInDateTime(value));
+                      setFieldValue('effectiveDate', value);
                     }}
                     error={touched['effectiveDate'] && Boolean(errors['effectiveDate'])}
                     helperText={touched['effectiveDate'] && errors['effectiveDate']}

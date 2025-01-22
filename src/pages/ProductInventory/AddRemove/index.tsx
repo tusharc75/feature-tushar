@@ -11,7 +11,6 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { capitalize } from 'lodash';
 import axiosInstance from 'src/axios/axiosInstance';
 import {
-  convertDateInDateTime,
   currencyCodeToSymbol,
   CustomDialogTransition,
   dateFormatToSend,
@@ -436,13 +435,12 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                       error={touched['customDate'] && Boolean(errors['customDate'])}
                       helperText={touched['customDate'] && errors['customDate']}
                       onChange={(value) => {
-                        var newDate = convertDateInDateTime(value);
-                        setFieldValue('customDate', newDate);
+                        setFieldValue('customDate', value);
                         if (!user?.user?.brandPolicy?.allowNegativeInventory) {
                           if (type === 'remove' && product.length === 1) {
-                            var date = dayjs(newDate);
+                            var date = dayjs(value);
                             if (date.isValid()) {
-                              var api = `${productInventory.api}/inventory-at-date?date=${newDate}&warehouse=${warehouse}&product=${product[0]._id}`;
+                              var api = `${productInventory.api}/inventory-at-date?date=${dateFormatToSend(value)}&warehouse=${warehouse}&product=${product[0]._id}`;
                               if (values['storageLocation']) {
                                 api = api + `&storageLocation=${values['storageLocation']}`;
                               }
