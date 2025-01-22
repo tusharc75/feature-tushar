@@ -14,6 +14,7 @@ import {
   convertDateInDateTime,
   currencyCodeToSymbol,
   CustomDialogTransition,
+  dateFormatToSend,
   productInventory,
   sidebarResource
 } from '../../../constants/helpers';
@@ -159,7 +160,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
             : product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), serialNumberIds: serialNumberIds.map((item) => item?._id) })),
         warehouse: warehouse,
         storageLocation: values.storageLocation,
-        customDate: dayjs(values.customDate).format('MM/DD/YYYY'),
+        customDate: dateFormatToSend(values.customDate),
         comment: values.comment
       };
       axiosInstance()

@@ -10,7 +10,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { cn, displayDate, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, primaryFields, sidebarResource } from 'src/constants/helpers';
+import { cn, dateFormatToSend, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, primaryFields, sidebarResource } from 'src/constants/helpers';
 import { TableCommonProps } from 'src/pages/Reports/types';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import DisplayFilterChip from 'src/pages/Reports/tables/DisplayFilterChip';
@@ -291,7 +291,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
             })
             ?.map((d) => {
               const isoDate = dayjs(d?.term);
-              const term = isoDate.isValid() ? displayDate(d?.term, 'MM/DD/YYYY') : d?.term;
+              const term = isoDate.isValid() ? dateFormatToSend(d?.term) : d?.term;
               if (filterTerm[d?.field] === '$nin' && Array.isArray(term)) {
                 return {
                   ...d,
@@ -451,7 +451,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
               permissions={permissions[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
               module={''}
               api={getApi()}
-              afterImportCompleted={() => {}}
+              afterImportCompleted={() => { }}
               onlyExport={true}
             />
           </>

@@ -6,7 +6,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CustomDialogTransition, productInventory } from 'src/constants/helpers';
+import { CustomDialogTransition, dateFormatToSend, productInventory } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import InfoIcon from '@mui/icons-material/Info';
@@ -45,7 +45,7 @@ function SettingsDialog({ onClose, warehouse }) {
 
   const handleSubmit = (values) => {
     axiosInstance()
-      .post(`${productInventory.api}/setting`, { lockDate: dayjs(values.lockDate).format('MM/DD/YYYY'), warehouse: warehouse })
+      .post(`${productInventory.api}/setting`, { lockDate: dateFormatToSend(values.lockDate), warehouse: warehouse })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -90,7 +90,7 @@ function SettingsDialog({ onClose, warehouse }) {
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
                   <Grid container spacing={2}>
-                    <Grid size={{xs:12, sm:12, md:6}}>
+                    <Grid size={{ xs: 12, sm: 12, md: 6 }}>
                       <Fragment>
                         <CustomDatePicker
                           label="Lock Date"
@@ -109,7 +109,7 @@ function SettingsDialog({ onClose, warehouse }) {
                         />
                       </Fragment>
                     </Grid>
-                    <Grid size={{xs:12, sm:12, md:6}}>
+                    <Grid size={{ xs: 12, sm: 12, md: 6 }}>
                       <Box mt={2}>
                         <HtmlTooltip title="The transactions recorded prior to this date cannot be modified or deleted.">
                           <InfoIcon />

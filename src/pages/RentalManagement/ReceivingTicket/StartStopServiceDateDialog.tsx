@@ -7,7 +7,6 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { CustomDialogTransition, displayDate, normalizeDate } from 'src/constants/helpers';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { useEffect, useState } from 'react';
-import dayjs from 'dayjs';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, loading, minStartDate = null, maxEndDate = null }) => {
