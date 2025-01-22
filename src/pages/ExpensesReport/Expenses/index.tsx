@@ -178,8 +178,8 @@ const Expenses = (selectedExpenseData) => {
     const queryString = getQueryString();
     try {
       let data: any = [], count;
-      const expenseNumbers = selectedExpenseData.map(item => item.expenseNumber);
-      const response: any = await axiosInstance().get(`${expenses.api}`, { cancelToken: cancelTokenSource?.token });
+      const expenseNumbers = selectedExpenseData.map(item => item._id);
+      const response: any = await axiosInstance().get(`${expenses.api}?&filterById=${encodeURIComponent(JSON.stringify(expenseNumbers))}`, { cancelToken: cancelTokenSource?.token });
       data = response?.data?.data;
       count = response?.data?.count;
       let rows = data.map((u) => {
@@ -235,23 +235,14 @@ const Expenses = (selectedExpenseData) => {
   return (
     <div className="main-container-v1">
       <>
-        <ListingPageHeader
-          isActionButtonVisible={true}
-          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
-          addButtonOnclick={() => {
-            setShowManageExpensesDialog({ open: true, isClone: false, idToClone: null });
-          }}
-          isAddButtonVisible={permissions?.expenses?.isCreate}
-        />
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
             state={state}
+            showArrangeView = {false}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            refreshGrid={fetchData}
-            showOnlyShowFilteredRecordSwitch={true}
             resource={sidebarResource.expenses}
           />
         ) : (

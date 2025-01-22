@@ -193,7 +193,7 @@ const ExpenseReportDetailsPage = () => {
             )}
             {!loadingDetails ? (
               <div className="mt-2">
-                {/* <Expenses selectedExpenseData={expenseReportData?.selectedExpenses} /> */}
+                <Expenses selectedExpenseData={expenseReportData?.selectedExpenses} />
               </div>
             ) : (
               <div className="p-2">

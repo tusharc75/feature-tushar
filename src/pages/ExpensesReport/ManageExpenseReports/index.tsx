@@ -30,6 +30,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import AddIcon from '@mui/icons-material/Add';
 import AddExpenses from 'src/pages/ExpensesReport/AddExpenses';
 import ExpenseTable from 'src/pages/ExpensesReport/ExpenseTable';
+import Expenses from 'src/pages/ExpensesReport/Expenses';
 
 const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose, onSuccess }) => {
   const history = useHistory();
@@ -248,7 +249,7 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
                   </Grid>
                   {selectedExpense.length > 0 && (
                     <div className="mt-2">
-                      <ExpenseTable removeExpenseField={removeExpenseField} selectedExpenses={selectedExpense} />
+                      <Expenses selectedExpenseData={selectedExpense} />
                     </div>
                   )}
                 </Form>
