@@ -1902,7 +1902,7 @@ const ReceivingTicket = ({
       data.startDate = dateFormatToSend(values.manualStartDate);
     }
     if (values?.manualEndDate) {
-      data.endDate = dateFormatToSend(values.manualStartDate);
+      data.endDate = dateFormatToSend(values.manualEndDate);
     }
     axiosInstance()
       .put(`${rentalManagement.api}/${rentalManagementData?._id}/start-end-date`, data)
