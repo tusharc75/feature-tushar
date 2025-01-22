@@ -668,7 +668,7 @@ const Services = ({
 
       {columns ? (
         <CustomReactTable
-          height={'300px'}
+          height={permissions?.employeeMaster?.isRead ? "300px" : stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
           columns={columns}
           state={state}
           dispatch={dispatch}
