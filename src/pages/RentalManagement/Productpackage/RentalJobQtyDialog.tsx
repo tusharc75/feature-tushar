@@ -24,6 +24,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import dayjs from 'dayjs';
+import SelectionConfirmationDialog from 'src/components/Helpers/SelectionConfirmationDialog';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -62,6 +63,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
 
   const toastConfig = useContext(CustomToastContext);
   const [showConfirmationDialog, setShowConfirmationDialog] = useState({ open: false, type: '' });
+  const [showSelectionConfirmationDialog, setShowSelectionConfirmationDialog] = useState({ open: false, type: '' });
+
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [allFields, setAllFields] = useState([]);
   const [fields, setFields] = useState([]);
@@ -268,11 +271,16 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
   };
 
   const handleSubmit = async (values) => {
+    let currency = rentalManagementData?.currency?.toLowerCase()
     if (isBulkedit) {
-      const rows = bulkUpdate(values, selectedProducts, material, allFields, rentalManagementData?.currency);
-      handleSaveData(rows);
+      if (values[`price_${currency}`] && selectedProducts?.find((e) => !e.parentId) && !selectedProducts?.every((e) => !e.parentId)) {
+        setShowSelectionConfirmationDialog({ open: true, type: '' });
+      }
+      else {
+        const rows = bulkUpdate(values, selectedProducts, material, allFields, rentalManagementData?.currency);
+        handleSaveData(rows);
+      }
     } else {
-      let currency = rentalManagementData?.currency?.toLowerCase()
       let childResetAlert = false;
       if (!rowData.parentId && material?.find((e) => e.parentId === rowData?._id)) {
         if (values[`finalPrice_${currency}`] !== rowData[`finalPrice_${currency}`] &&
@@ -294,6 +302,12 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       }
     }
   };
+
+  const handleUpdateBulk = async (values, type) => {
+    const rows = bulkUpdate(values, selectedProducts, material, allFields, rentalManagementData?.currency, type === 'Parent' ? true : false);
+    handleSaveData(rows);
+    setShowSelectionConfirmationDialog({ open: false, type: '' });
+  }
 
   async function getAllPricingCondition(values: any, unitOptions: any, pricingMethodOptions: any) {
     if (rowData) {
@@ -700,13 +714,27 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                 <ConfirmationDialog
                   open={showConfirmationDialog.open}
                   message={showConfirmationDialog.type === 'child' ?
-                    "This action will remove the child level Pricing Data ?" : ""}
+                    "This action will remove the child line items pricing. Any field update that changes final price will remove the child line items pricing" : ""}
                   onOk={() => {
                     submitForm();
                   }}
                   onClose={() => {
                     setShowConfirmationDialog({ open: false, type: '' });
                   }}
+                />
+              )}
+              {showSelectionConfirmationDialog.open && (
+                <SelectionConfirmationDialog
+                  open={showSelectionConfirmationDialog.open}
+                  message={"Do you want apply price on parent or child ?"}
+                  onOk={(type) => {
+                    handleUpdateBulk(values, type)
+                  }}
+                  onClose={() => {
+                    setShowSelectionConfirmationDialog({ open: false, type: '' });
+                  }}
+                  selection1={'Parent'}
+                  selection2={'Child'}
                 />
               )}
               {showConfirmDialog ? (

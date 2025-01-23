@@ -1,5 +1,5 @@
 import { Box, Dialog, MenuItem } from '@mui/material';
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -18,8 +18,8 @@ import {
   prepareDataForGrid,
   expenses,
 } from '../../constants/helpers';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { useHistory } from 'react-router-dom';
 
 function AddExpenses({
   open,
@@ -37,9 +37,9 @@ function AddExpenses({
   const { page, limit, filters, sorting, showFilteredRecordsOnly } = state;
   const { state: { user, permissions, resources } } = useData();
   const [selectedRows, setSelectedRows] = useState([]);
-  const toastConfig = useContext(CustomToastContext);
   const { selectedRecords } = state;
-  
+  const history = useHistory();
+
   useEffect(() => {
     fetchGridColumns();
   }, []);
@@ -93,7 +93,11 @@ function AddExpenses({
   const addButtonMenuItems = () => {
     return (
       <>
-        <MenuItem>
+        <MenuItem
+          onClick={() => {
+            history.push(routes?.expenses?.path);
+          }}
+        >
           {`Create New ${resources?.expenses?.titlePlural}`}
         </MenuItem>
       </>
@@ -141,6 +145,7 @@ function AddExpenses({
             resource={sidebarResource?.expenses}
             onSelect={handleRowSelection} 
             showArrangeView={false}
+            pagination={false}
           />
         ) : (
           <Box p={2} height={500}>
