@@ -256,7 +256,7 @@ export const getNestedSubRows = (obj, original) => {
     }
 };
 
-export const bulkUpdate = (values, selectedProducts, material, allFields, currency) => {
+export const bulkUpdate = (values, selectedProducts, material, allFields, currency, priorityToParent = false) => {
 
     var rows: any = []
 
@@ -294,9 +294,20 @@ export const bulkUpdate = (values, selectedProducts, material, allFields, curren
                     const calValues = autoCalculateSpecificFields(values, { ...parent, ...values }, allFields)
                     Object.assign(parent, calValues)
                 }
-                const tempParent = sumOnParent([parent], child, allFields, currency)
-                Object.assign(parent, tempParent[0])
-                rows.push(parent)
+                if (priorityToParent) {
+                    rows.push(parent)
+                    const resetChilds = resetValueZero(child, allFields, parent._id)
+                    rows?.forEach((ele) => {
+                        if (resetChilds?.find((e) => e?._id === ele?._id)) {
+                            Object.assign(ele, resetChilds?.find((e) => e?._id === ele?._id))
+                        }
+                    })
+                }
+                else {
+                    const tempParent = sumOnParent([parent], child, allFields, currency)
+                    Object.assign(parent, tempParent[0])
+                    rows.push(parent)
+                }
             }
         })
     }
