@@ -726,7 +726,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
               {showSelectionConfirmationDialog.open && (
                 <SelectionConfirmationDialog
                   open={showSelectionConfirmationDialog.open}
-                  message={"Do you want apply price on parent or child ?"}
+                  message={"Would you like to apply the price at the parent level or the child level?"}
                   onOk={(type) => {
                     handleUpdateBulk(values, type)
                   }}
