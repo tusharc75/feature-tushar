@@ -28,7 +28,8 @@ import {
   getObjKeysWithValues,
   sidebarResource,
   yupSchema,
-  restoreObjKeysWithValues
+  restoreObjKeysWithValues,
+  dateFormatToSend
 } from '../../constants/helpers';
 import { findOne, objectStore } from '../../constants/indexdbhelper';
 import {
@@ -530,6 +531,9 @@ const ManageDeliveryTicket = ({
       } else {
         setSubmitting(true);
         let updatedValues = { ...values };
+        if (updatedValues?.createDate) {
+          updatedValues.createDate = dateFormatToSend(updatedValues?.createDate)
+        }
         axiosInstance()
           .post(`${deliveryTicket.api}`, updatedValues)
           .then(({ data }) => {

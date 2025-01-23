@@ -61,7 +61,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
   const ref = useRef(null);
 
   const toastConfig = useContext(CustomToastContext);
-  const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
+  const [showConfirmationDialog, setShowConfirmationDialog] = useState({ open: false, type: '' });
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [allFields, setAllFields] = useState([]);
   const [fields, setFields] = useState([]);
@@ -88,13 +88,15 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
     const zipCode = address?.zipCode;
     const state = address?.state;
     const county = address?.county;
-    let materialType;
-    if (isBulkedit) materialType = rowData[0]?.type;
-    else materialType = rowData?.type;
+    let api = `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&county=${county}`
+    if (!isBulkedit) {
+      api += `&materialType=${rowData?.type}`
+    }
+    if (taxCode) {
+      api += `&taxCode=${taxCode}`
+    }
     try {
-      const response = await axiosInstance().get(
-        `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&county=${county}&materialType=${materialType}${taxCode && `&taxCode=${taxCode}`}`
-      );
+      const response = await axiosInstance().get(api);
       return response?.data?.data || [];
     } catch (e) {
       toastConfig.setToastConfig(e);
@@ -216,23 +218,24 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       fields = fields.filter((d) => d.fieldName !== 'pricingCondition' && d.fieldName !== 'pricingMethod');
     }
 
-    const taxApplicableField =
-      user?.user?.brandPolicy?.rentalTaxAppliedOn && user?.user?.brandPolicy?.rentalTaxAppliedOn !== ''
-        ? fieldLabelToFieldName(user?.user?.brandPolicy?.rentalTaxAppliedOn)
-        : 'billingAddress';
+    if (!rentalManagementData?.taxCode?.optionValue) {
+      const taxApplicableField =
+        user?.user?.brandPolicy?.rentalTaxAppliedOn && user?.user?.brandPolicy?.rentalTaxAppliedOn !== ''
+          ? fieldLabelToFieldName(user?.user?.brandPolicy?.rentalTaxAppliedOn)
+          : 'billingAddress';
 
-    if (
-      rentalManagementData?.customerAccount?.taxApplicable &&
-      (rentalManagementData?.[taxApplicableField]?.zipCode ||
-        rentalManagementData?.[taxApplicableField]?.state ||
-        rentalManagementData?.[taxApplicableField]?.county)
-    ) {
-      const taxCodeOptions = await fetchTaxRate(rentalManagementData?.[taxApplicableField], rentalManagementData?.taxCode?.optionValue);
-      fields?.forEach((e: any) => {
-        if (e?.fieldName === 'taxCode') {
-          e.option = taxCodeOptions;
-        }
-      });
+      if (rentalManagementData?.customerAccount?.taxApplicable &&
+        (rentalManagementData?.[taxApplicableField]?.zipCode ||
+          rentalManagementData?.[taxApplicableField]?.state ||
+          rentalManagementData?.[taxApplicableField]?.county)
+      ) {
+        const taxCodeOptions = await fetchTaxRate(rentalManagementData?.[taxApplicableField], rentalManagementData?.taxCode?.optionValue);
+        fields?.forEach((e: any) => {
+          if (e?.fieldName === 'taxCode') {
+            e.option = taxCodeOptions;
+          }
+        });
+      }
     }
 
     const sections = uniq(
@@ -269,19 +272,25 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       const rows = bulkUpdate(values, selectedProducts, material, allFields, rentalManagementData?.currency);
       handleSaveData(rows);
     } else {
-      if (rowData.parentId && !showConfirmationDialog && isRateRequired) {
-        setShowConfirmationDialog(true);
+      let currency = rentalManagementData?.currency?.toLowerCase()
+      let childResetAlert = false;
+      if (!rowData.parentId && material?.find((e) => e.parentId === rowData?._id)) {
+        if (values[`finalPrice_${currency}`] !== rowData[`finalPrice_${currency}`] &&
+          material?.find((e) => e.parentId === rowData?._id && e[`finalPrice_${currency}`])) {
+          childResetAlert = true;
+        }
+      }
+      if (childResetAlert && !showConfirmationDialog.open) {
+        setShowConfirmationDialog({ open: true, type: 'child' });
       } else {
         const rows = await calculateRowsField(
           material,
           values,
           allFields,
           rowData,
-          rentalManagementData?.currency,
-          user?.user?.brandPolicy?.packagePriceComponentWise ? false : true
-        );
+          rentalManagementData?.currency);
         handleSaveData(rows, saveAndNext);
-        setShowConfirmationDialog(false);
+        setShowConfirmationDialog({ open: false, type: '' });
       }
     }
   };
@@ -687,15 +696,16 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                   Save
                 </ThemeButton>
               </CustomDialogFooter>
-              {showConfirmationDialog && (
+              {showConfirmationDialog.open && (
                 <ConfirmationDialog
-                  open={showConfirmationDialog}
-                  message="Would you prefer to override the product-level price configuration?"
+                  open={showConfirmationDialog.open}
+                  message={showConfirmationDialog.type === 'child' ?
+                    "This action will remove the child level Pricing Data ?" : ""}
                   onOk={() => {
                     submitForm();
                   }}
                   onClose={() => {
-                    setShowConfirmationDialog(false);
+                    setShowConfirmationDialog({ open: false, type: '' });
                   }}
                 />
               )}
