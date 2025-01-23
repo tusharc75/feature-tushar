@@ -4,7 +4,7 @@ import { useContext, useMemo, useState } from 'react';
 import { IoIosArrowDropdown } from 'react-icons/io';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
-import { downloadExcel, IMPORT_EXPORT_TYPE } from '../../constants/helpers';
+import { downloadExcel, IMPORT_EXPORT_TYPE, sidebarResource } from '../../constants/helpers';
 
 import { DownloadIcon, ExportIcon, ImportIcon, MobileDownloadIcon, MobileExportIcon, MobileImportIcon } from 'src/assets/svg/svgIcons';
 import ImportExportDialog from 'src/components/AsynImportExportMenu/ImportExportDialog';
@@ -58,7 +58,7 @@ export default function ImportExportLinks({
 
   const toastConfig = useContext(CustomToastContext);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [openAsyncImpExpDialog, setOpenAsyncImpExpDialog] = useState({ open: false, type: null });
+  const [openAsyncImpExpDialog, setOpenAsyncImpExpDialog] = useState({ open: false, type: null, api: null });
   const [refresh, setRefresh] = useState(false);
   const open = Boolean(anchorEl);
   const [imptExptDnldMenuDta, setImptExptDnldMenuDta] = useState({ anchorEl: null, action: null, open: false });
@@ -90,6 +90,7 @@ export default function ImportExportLinks({
   };
 
   const uploadData = (event, apiUrl = null) => {
+    handleCloseMenu();
     if (event.target.files && event.target.files.length) {
       toastConfig.setToastConfig({
         hideDuration: null,
@@ -214,11 +215,13 @@ export default function ImportExportLinks({
   /**
    * DOWNLOAD TEMPLATE
    */
-  const downloadTemplate = () => {
-    let exportApi = `${api}/template`;
-
+  const downloadTemplate = (apiUrl = null) => {
+    let exportApi = apiUrl ? apiUrl : `${api}/template`;
     if (additionalParams) {
-      exportApi = `${exportApi}?${additionalParams}`;
+      if (exportApi?.includes('?') && additionalParams?.includes('?')) {
+        additionalParams = additionalParams?.replace(`?`, `&`);
+      }
+      exportApi = `${exportApi}${additionalParams}`;
     }
 
     axiosInstance()
@@ -277,7 +280,7 @@ export default function ImportExportLinks({
         {imptExptDnldMenuDta.action === 'export' && !hideDefaultImportExport && (
           <MenuItem
             onClick={() => {
-              exportToExcel();
+              asyncExport && resource ? setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.export, api: null }) : exportToExcel();
               handleCloseMenu();
             }}
           >
@@ -322,7 +325,9 @@ export default function ImportExportLinks({
               <MenuItem
                 key={d.title}
                 onClick={() => {
-                  exportToExcel(d.api);
+                  asyncExport && resource
+                    ? setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.export, api: d.api })
+                    : exportToExcel(d.api);
                   handleCloseMenu();
                 }}
               >
@@ -335,7 +340,11 @@ export default function ImportExportLinks({
               <MenuItem
                 key={d.title}
                 onClick={() => {
-                  exportToExcel(d.api);
+                  if (resource === sidebarResource.rentalManagement) {
+                    downloadTemplate(d.api);
+                  } else {
+                    exportToExcel(d.api);
+                  }
                   handleCloseMenu();
                 }}
               >
@@ -433,7 +442,7 @@ export default function ImportExportLinks({
               if (extraImportExportLinks.length > 0) {
                 handleOpenMenu(e, 'export');
               } else {
-                asyncExport && resource ? setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.export }) : exportToExcel();
+                asyncExport && resource ? setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.export, api: null }) : exportToExcel();
               }
             }}
             className={`new-headerbox-button-v1 ${small ? 'small' : ''}`}
@@ -510,15 +519,15 @@ export default function ImportExportLinks({
       {openAsyncImpExpDialog.open && (
         <ImportExportDialog
           handleClose={() => {
-            setOpenAsyncImpExpDialog({ open: false, type: null });
+            setOpenAsyncImpExpDialog({ open: false, type: null, api: null });
             setAnchorEl(null);
           }}
           type={openAsyncImpExpDialog.type}
           resource={resource}
           subResource={null}
           referenceId={null}
-          handleExport={()=>{
-            exportToExcel();
+          handleExport={() => {
+            exportToExcel(openAsyncImpExpDialog.api);
           }}
           refresh={refresh}
           api={api}

@@ -252,16 +252,18 @@ const useReport = () => {
 
   useEffect(() => {
     (async () => {
-      setColumns(null);
-      setResourceColumns(null);
-      const currentRouteData = [...reportList, ...customReports].find((d) => d.route === pathname);
-      if (currentRouteData) {
-        const data = await handleGetRoute({ route: currentRouteData.route, title: currentRouteData.label });
-        dispatch({ type: 'setSelectedReport', payload: data });
-        setIsColumnsLoading(true);
+      if (selectedReport?.route !== pathname) {
+        setColumns(null);
+        setResourceColumns(null);
+        const currentRouteData = [...reportList, ...customReports].find((d) => d.route === pathname);
+        if (currentRouteData) {
+          const data = await handleGetRoute({ route: currentRouteData.route, title: currentRouteData.label });
+          dispatch({ type: 'setSelectedReport', payload: data });
+          setIsColumnsLoading(true);
+        }
       }
     })();
-  }, [customReports, reportList, setIsColumnsLoading, setColumns, setResourceColumns]);
+  }, [customReports, reportList, selectedReport?.route, setIsColumnsLoading, setColumns, setResourceColumns]);
 
   return {
     ...state,

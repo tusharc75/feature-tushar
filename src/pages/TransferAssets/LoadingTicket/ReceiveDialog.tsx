@@ -5,7 +5,6 @@ import { Form, Formik } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import {
-  convertDateInDateTime,
   deliveryTicket,
   DELIVERY_TICKET_STATUS,
   CustomDialogTransition,
@@ -149,8 +148,7 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSuccess, transferAs
                   placeholder={'Receive Date'}
                   label="Receive Date"
                   onChange={(value) => {
-                    var newDate = convertDateInDateTime(value);
-                    setFieldValue('receiveDate', newDate);
+                    setFieldValue('receiveDate', value);
                   }}
                   error={touched['receiveDate'] && Boolean(errors['receiveDate'])}
                   helperText={touched['receiveDate'] && errors['receiveDate']}
@@ -158,10 +156,10 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSuccess, transferAs
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <ThemeButton  buttonType="transparent"  onClick={handleClose}>
+              <ThemeButton buttonType="transparent" onClick={handleClose}>
                 Cancel
               </ThemeButton>
-              <ThemeButton isLoading={loading} disabled={loading}    buttonType="theme" onClick={submitForm}>
+              <ThemeButton isLoading={loading} disabled={loading} buttonType="theme" onClick={submitForm}>
                 {'Receive'}
               </ThemeButton>
             </CustomDialogFooter>

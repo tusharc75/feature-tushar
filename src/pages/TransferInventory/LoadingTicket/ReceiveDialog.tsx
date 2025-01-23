@@ -5,11 +5,11 @@ import { Form, Formik } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import {
-  convertDateInDateTime,
   deliveryTicket,
   DELIVERY_TICKET_STATUS,
   productInventory,
-  CustomDialogTransition
+  CustomDialogTransition,
+  dateFormatToSend
 } from 'src/constants/helpers';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -68,7 +68,7 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSucess, transferInv
     if (loadingTicketIds.length) {
       data['_ids'] = loadingTicketIds?.map((e) => e);
       data['status'] = DELIVERY_TICKET_STATUS.delivered;
-      data['receiveDate'] = values?.receiveDate;
+      data['receiveDate'] = dateFormatToSend(values?.receiveDate);
       data['signatures'] = [];
       axiosInstance()
         .post(`${deliveryTicket.api}/updatebulk`, data)
@@ -132,8 +132,7 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSucess, transferInv
                   label="Receive Date"
                   maxDate={new Date()}
                   onChange={(value) => {
-                    var newDate = convertDateInDateTime(value);
-                    setFieldValue('receiveDate', newDate);
+                    setFieldValue('receiveDate', value);
                   }}
                   error={touched['receiveDate'] && Boolean(errors['receiveDate'])}
                   helperText={touched['receiveDate'] && errors['receiveDate']}

@@ -1424,9 +1424,8 @@ export const dateFormatForInputControl = localStorage.getItem('dateFormatForInpu
 
 export const dayNamesShort = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-export const displayDate = (date, format = null) => {
-  format = format ? format : dateFormat;
-  return date ? dayjs.utc(date).tz().format(format) : date;
+export const displayDate = (date) => {
+  return date ? dayjs.utc(date).tz().format(dateFormat) : date;
 };
 
 export const displayDateTime = (date, format = null) => {
@@ -1438,34 +1437,8 @@ export const displayCardDate = (date) => {
   return date ? dayjs.utc(date).tz().format(cardDateFormat) : date;
 };
 
-export const convertDateInDateTime = (date) => {
-  if (!date) {
-    return date;
-  }
-  var newDate = new Date(date);
-  var currentDate = new Date();
-  newDate.setHours(currentDate.getHours(), currentDate.getMinutes(), currentDate.getSeconds());
-  return newDate;
-};
-
-export const materialTableIcons: any = {
-  // Add: forwardRef((props: any, ref: any) => <AddBox {...props} ref={ref} />),
-  // Check: forwardRef((props: any, ref: any) => <Check {...props} ref={ref} />),
-  // Clear: forwardRef((props: any, ref: any) => <Clear {...props} ref={ref} />),
-  // Delete: forwardRef((props: any, ref: any) => <DeleteOutline {...props} ref={ref} />),
-  // DetailPanel: forwardRef((props: any, ref: any) => <ChevronRight {...props} ref={ref} />),
-  // Edit: forwardRef((props: any, ref: any) => <Edit {...props} ref={ref} />),
-  // Export: forwardRef((props: any, ref: any) => <SaveAlt {...props} ref={ref} />),
-  // Filter: forwardRef((props: any, ref: any) => <FilterList {...props} ref={ref} />),
-  // FirstPage: forwardRef((props: any, ref: any) => <FirstPage {...props} ref={ref} />),
-  // LastPage: forwardRef((props: any, ref: any) => <LastPage {...props} ref={ref} />),
-  // NextPage: forwardRef((props: any, ref: any) => <ChevronRight {...props} ref={ref} />),
-  // PreviousPage: forwardRef((props: any, ref: any) => <ChevronLeft {...props} ref={ref} />),
-  // ResetSearch: forwardRef((props: any, ref: any) => <Clear {...props} ref={ref} />),
-  // Search: forwardRef((props: any, ref: any) => <Search {...props} ref={ref} />),
-  // SortArrow: forwardRef((props: any, ref: any) => <ArrowDownward {...props} ref={ref} />),
-  // ThirdStateCheck: forwardRef((props: any, ref: any) => <Remove {...props} ref={ref} />),
-  // ViewColumn: forwardRef((props: any, ref: any) => <ViewColumn {...props} ref={ref} />)
+export const dateFormatToSend = (date) => {
+  return date ? dayjs.utc(date).tz().format('MM/DD/YYYY') : date;
 };
 
 export const convertDateTimToDate = (date): Dayjs => {
@@ -3115,15 +3088,15 @@ export const SALES_ORDER_STATUS = {
   closed: 'Closed'
 };
 
-export const EXPENSE_STATUS ={
+export const EXPENSE_STATUS = {
   unreported: 'Unreported',
-  unSubmitted:'Unsubmitted',
-  awaitingApproval:'Awaiting Approval',
-  approved:'Approved',
-  rejected:'Rejected',
-  reimbursed:'Reimbursed',
-  draft:'Draft',
-  recalled:'Recalled'
+  unSubmitted: 'Unsubmitted',
+  awaitingApproval: 'Awaiting Approval',
+  approved: 'Approved',
+  rejected: 'Rejected',
+  reimbursed: 'Reimbursed',
+  draft: 'Draft',
+  recalled: 'Recalled'
 };
 
 export const PRICING_TYPE = [

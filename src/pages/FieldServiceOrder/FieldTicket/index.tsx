@@ -23,7 +23,7 @@ import {
   prepareDataForGrid,
   sidebarResource
 } from 'src/constants/helpers';
-import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import { cloneDisable, deleteDisable, ownerAndColaborator } from 'src/constants/messageHelpers';
 import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { findAll, findOne, objectStore } from 'src/constants/indexdbhelper';
@@ -350,7 +350,11 @@ const FieldTicket = ({
     <Fragment>
       {resource === sidebarResource.fieldServiceOrder && (
         <DetailsPageHeader
-          isAddButtonVisible={allowedToEdit && !serviceOrderData?.quotation}
+          isAddButtonVisible={true}
+          addButtonProps={{
+            disabled: allowedToEdit && !serviceOrderData?.quotation ? false : true,
+            tooltip: !allowedToEdit ? ownerAndColaborator : serviceOrderData?.quotation ? `Converted from ${resources?.quotation?.titleSingular} you can not perform this action` : ''
+          }}
           addButtonMenuItems={addButtonMenuItems()}
           isActionButtonVisible={!isOffline}
           actionButtonMenuItems={actionButtonMenuItems()}
