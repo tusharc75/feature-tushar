@@ -37,6 +37,7 @@ import {
   INVENTORY_OWNER_TYPE,
   MATERIAL_TYPE,
   RENTAL_INTERNAL_ASSET_STATUS,
+  dateFormatToSend,
   deliveryTicket,
   gridLoadingTimeout,
   rentalManagement,
@@ -1003,7 +1004,7 @@ const LoadingTicket = ({
       data['status'] = DELIVERY_TICKET_STATUS.delivered;
       data['signatures'] = [];
       data['warehouse'] = rentalManagementData?.warehouse?.optionValue;
-      data['receiveDate'] = date;
+      data['receiveDate'] = dateFormatToSend(date);
       axiosInstance()
         .post(`${deliveryTicket.api}/updatebulk`, data)
         .then(({ data: { data } }) => {
@@ -1101,7 +1102,7 @@ const LoadingTicket = ({
           assets,
           status: status,
           prevStatus: prevStatus,
-          date: date
+          date: dateFormatToSend(date)
         })
         .then(({ data }) => {
           fetchRecords();
@@ -1125,7 +1126,7 @@ const LoadingTicket = ({
   const handleChangeDate = (date) => {
     setOpenDateDialog((prev) => ({ ...prev, loading: true }));
     axiosInstance()
-      .put(`${rentalManagement.api}/${rentalManagementData._id}/assets-date-update`, { assets: openDateDialog.assets, date: date })
+      .put(`${rentalManagement.api}/${rentalManagementData._id}/assets-date-update`, { assets: openDateDialog.assets, date: dateFormatToSend(date) })
       .then(({ data }) => {
         fetchRecords();
         toastConfig.setToastConfig({
