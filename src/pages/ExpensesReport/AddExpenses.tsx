@@ -1,4 +1,4 @@
-import { Box, Dialog } from '@mui/material';
+import { Box, Dialog, MenuItem } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -19,6 +19,7 @@ import {
   expenses,
 } from '../../constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 
 function AddExpenses({
   open,
@@ -34,9 +35,10 @@ function AddExpenses({
   const { generateColumns, checkStaticField } = useColumns();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, filters, sorting, showFilteredRecordsOnly } = state;
-  const { state: { user, permissions } } = useData();
+  const { state: { user, permissions, resources } } = useData();
   const [selectedRows, setSelectedRows] = useState([]);
   const toastConfig = useContext(CustomToastContext);
+  const { selectedRecords } = state;
   
   useEffect(() => {
     fetchGridColumns();
@@ -88,6 +90,17 @@ function AddExpenses({
     setSelectedRows(selectedRows); 
   };
 
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem>
+          {`Create New ${resources?.expenses?.titlePlural}`}
+        </MenuItem>
+      </>
+    );
+  };
+
+
   return (
     <Dialog
       maxWidth="md"
@@ -111,6 +124,13 @@ function AddExpenses({
         }}
       />
       <CustomDialogContent>
+      <DetailsPageHeader
+          isAddButtonVisible={true}
+          addButtonMenuItems={addButtonMenuItems()}
+          isActionButtonVisible={false}
+          actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+          hasXpadding
+        />
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
@@ -120,6 +140,7 @@ function AddExpenses({
             renderedFrom={renderedFrom}
             resource={sidebarResource?.expenses}
             onSelect={handleRowSelection} 
+            showArrangeView={false}
           />
         ) : (
           <Box p={2} height={500}>
