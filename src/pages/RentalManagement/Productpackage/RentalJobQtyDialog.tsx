@@ -216,23 +216,24 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       fields = fields.filter((d) => d.fieldName !== 'pricingCondition' && d.fieldName !== 'pricingMethod');
     }
 
-    const taxApplicableField =
-      user?.user?.brandPolicy?.rentalTaxAppliedOn && user?.user?.brandPolicy?.rentalTaxAppliedOn !== ''
-        ? fieldLabelToFieldName(user?.user?.brandPolicy?.rentalTaxAppliedOn)
-        : 'billingAddress';
+    if (!rentalManagementData?.taxCode?.optionValue) {
+      const taxApplicableField =
+        user?.user?.brandPolicy?.rentalTaxAppliedOn && user?.user?.brandPolicy?.rentalTaxAppliedOn !== ''
+          ? fieldLabelToFieldName(user?.user?.brandPolicy?.rentalTaxAppliedOn)
+          : 'billingAddress';
 
-    if (
-      rentalManagementData?.customerAccount?.taxApplicable &&
-      (rentalManagementData?.[taxApplicableField]?.zipCode ||
-        rentalManagementData?.[taxApplicableField]?.state ||
-        rentalManagementData?.[taxApplicableField]?.county)
-    ) {
-      const taxCodeOptions = await fetchTaxRate(rentalManagementData?.[taxApplicableField], rentalManagementData?.taxCode?.optionValue);
-      fields?.forEach((e: any) => {
-        if (e?.fieldName === 'taxCode') {
-          e.option = taxCodeOptions;
-        }
-      });
+      if (rentalManagementData?.customerAccount?.taxApplicable &&
+        (rentalManagementData?.[taxApplicableField]?.zipCode ||
+          rentalManagementData?.[taxApplicableField]?.state ||
+          rentalManagementData?.[taxApplicableField]?.county)
+      ) {
+        const taxCodeOptions = await fetchTaxRate(rentalManagementData?.[taxApplicableField], rentalManagementData?.taxCode?.optionValue);
+        fields?.forEach((e: any) => {
+          if (e?.fieldName === 'taxCode') {
+            e.option = taxCodeOptions;
+          }
+        });
+      }
     }
 
     const sections = uniq(
