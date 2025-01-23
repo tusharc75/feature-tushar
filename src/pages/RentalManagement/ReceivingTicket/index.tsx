@@ -1626,8 +1626,7 @@ const ReceivingTicket = ({
       data['status'] = DELIVERY_TICKET_STATUS.delivered;
       data['signatures'] = [];
       data['warehouse'] = rentalManagementData?.warehouse?.optionValue;
-      data['receiveDate'] = date;
-
+      data['receiveDate'] = dateFormatToSend(date);
       axiosInstance()
         .post(`${deliveryTicket.api}/updatebulk`, data)
         .then(({ data: { data } }) => {
@@ -1935,7 +1934,7 @@ const ReceivingTicket = ({
           assets,
           status: status,
           prevStatus: prevStatus,
-          date: date
+          date: dateFormatToSend(date)
         })
         .then(({ data }) => {
           fetchRecords();
@@ -1959,7 +1958,7 @@ const ReceivingTicket = ({
   const handleChangeDate = (date) => {
     setOpenDateDialog((prev) => ({ ...prev, loading: true }));
     axiosInstance()
-      .put(`${rentalManagement.api}/${rentalManagementData._id}/assets-date-update`, { assets: openDateDialog.assets, date: date })
+      .put(`${rentalManagement.api}/${rentalManagementData._id}/assets-date-update`, { assets: openDateDialog.assets, date: dateFormatToSend(date) })
       .then(({ data }) => {
         fetchRecords();
         toastConfig.setToastConfig({

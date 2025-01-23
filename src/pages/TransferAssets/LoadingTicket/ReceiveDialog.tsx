@@ -8,7 +8,8 @@ import {
   deliveryTicket,
   DELIVERY_TICKET_STATUS,
   CustomDialogTransition,
-  displayDate
+  displayDate,
+  dateFormatToSend
 } from 'src/constants/helpers';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -55,7 +56,7 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSuccess, transferAs
     setLoading(true);
     if (type === 'changeReceiveDate') {
       let data = {};
-      data['date'] = values?.receiveDate;
+      data['date'] = dateFormatToSend(values?.receiveDate);
       data['assets'] = selectedRecords?.map((e: any) => {
         return {
           asset: e?._id,
@@ -83,7 +84,7 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSuccess, transferAs
       if (loadingTicketIds.length) {
         data['_ids'] = loadingTicketIds?.map((e) => e);
         data['status'] = DELIVERY_TICKET_STATUS.delivered;
-        data['receiveDate'] = values?.receiveDate;
+        data['receiveDate'] = dateFormatToSend(values?.receiveDate);
         data['signatures'] = [];
         axiosInstance()
           .post(`${deliveryTicket.api}/updatebulk`, data)

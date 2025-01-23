@@ -24,7 +24,7 @@ const ManageTransactionLock = ({ isClone = false, id = null, onClose, onSuccess 
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions, selectedEntity, resources }
+    state: { user, resources }
   }: any = useData();
   const ref = useRef(null);
   const [loading, setLoading] = useState(false);
