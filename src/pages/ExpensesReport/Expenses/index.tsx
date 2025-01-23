@@ -1,13 +1,12 @@
-import { Box, IconButton, MenuItem } from '@mui/material';
-import FileCopyIcon from '@mui/icons-material/FileCopy';
+import { Box, IconButton } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import { deleteDisable } from 'src/constants/messageHelpers';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -33,7 +32,7 @@ const Expenses = (selectedExpenseData, removeExpense) => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [showManageExpensesDialog, setShowManageExpensesDialog] = useState({ open: false, isClone: false, idToClone: null });
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { selectedRecords, dataRows } = state;
+  const { selectedRecords } = state;
   const [columns, setColumns] = useState(null);
 
   const { generateColumns, checkStaticField } = useColumns();
@@ -75,16 +74,6 @@ const Expenses = (selectedExpenseData, removeExpense) => {
     setColumns([...extracolumns, ActionsRenderer]);
   };
 
-  // useEffect(() => {
-  //   let millisec = Object.keys(search).length > 0 ? 600 : 5;
-  //   if (expensesTimeout) {
-  //     clearTimeout(expensesTimeout);
-  //   }
-  //   expensesTimeout = setTimeout(() => {
-  //     fetchData();
-  //   }, millisec);
-  // }, [search]);
-
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
@@ -118,37 +107,54 @@ const Expenses = (selectedExpenseData, removeExpense) => {
     )
   };
 
-  const getQueryString = (isExport = false) => {
-    // let deepFilter = `?page=${page}&limit=${limit}`;
-     let deepFilter = `?`;
-     if (selectedEntity) {
-      deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+  // const getQueryString = (isExport = false) => {
+  //   // let deepFilter = `?page=${page}&limit=${limit}`;
+  //    let deepFilter = `?`;
+  //    if (selectedEntity) {
+  //     deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+  //   }
+  //   // const { filterByIds, deepFilters } = gridFilterParser(filters);
+  //   // const expenseNumbers = selectedExpenseData.map(item => item.expenseNumber);
+  //   // const expenseNumbers = selectedExpenseData.map(item => item._id);
+  //   const filterByIds = [{ field: 'selectedExpenses', term: selectedExpenseData?.selectedExpenseData?._id}];
+  //   if (filterByIds?.length) {
+  //     deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}&filterType=and`;
+  //   }
+  //   // if (deepFilters?.length) {
+  //   //   deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+  //   // }
+
+  //   // if (filterByIds?.length || deepFilters?.length) {
+  //   //   deepFilter = `${deepFilter}&filterType=and`;
+  //   // }
+
+  //   // if (sorting.length > 0) {
+  //   //   deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+  //   // }
+  //   // if (search) {
+  //   //   deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
+  //   // }
+  //   // if (showFilteredRecordsOnly) {
+  //   //   deepFilter = `${deepFilter}&getById=${JSON.stringify(selectedRecords.map((m) => m._id))}`;
+  //   // }
+  //   return deepFilter;
+  // };
+
+  const getQueryString = () => {
+    let queryString = `?`;
+    if (selectedEntity) {
+      queryString = `${queryString}&entity=${selectedEntity}`;
     }
-    // const { filterByIds, deepFilters } = gridFilterParser(filters);
-    // const expenseNumbers = selectedExpenseData.map(item => item.expenseNumber);
-    const expenseNumbers = selectedExpenseData.map(item => item._id);
-    const filterByIds = [{ field: 'expenseNumber', term: expenseNumbers }];
+  
+    // Extract selected expense IDs
+    const filterByIds = selectedExpenseData?.selectedExpenses?.map((expense) => ({ field: '_id', term: expense._id }));
     if (filterByIds?.length) {
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}&filterType=and`;
+      // Pass filterById as a simple array of IDs (assuming API expects this format)
+      queryString = `${queryString}&filterById=${encodeURIComponent(JSON.stringify(filterByIds))}`;
     }
-    // if (deepFilters?.length) {
-    //   deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
-    // }
-
-    // if (filterByIds?.length || deepFilters?.length) {
-    //   deepFilter = `${deepFilter}&filterType=and`;
-    // }
-
-    // if (sorting.length > 0) {
-    //   deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
-    // }
-    // if (search) {
-    //   deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
-    // }
-    // if (showFilteredRecordsOnly) {
-    //   deepFilter = `${deepFilter}&getById=${JSON.stringify(selectedRecords.map((m) => m._id))}`;
-    // }
-    return deepFilter;
+  
+    queryString = `${queryString}&filterType=and`; // Ensure filter type is added
+    return queryString;
   };
 
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
@@ -221,6 +227,7 @@ const Expenses = (selectedExpenseData, removeExpense) => {
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             resource={sidebarResource.expenses}
+            pagination={false}
           />
         ) : (
           <Box p={2} height={500}>

@@ -29,7 +29,7 @@ import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import AddIcon from '@mui/icons-material/Add';
 import AddExpenses from 'src/pages/ExpensesReport/AddExpenses';
-import Expenses from 'src/pages/ExpensesReport/Expenses';
+import ExpenseTable from 'src/pages/ExpensesReport/ExpenseTable';
 
 const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose, onSuccess }) => {
   const history = useHistory();
@@ -99,7 +99,7 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
       axiosInstance()
         .put(`${expenseReport.api}`, data)
         .then(({ data }) => {
-          handleStatusChange(data.selectedExpenses);
+          handleStatusChange(data?.data?.selectedExpenses);
           setIsSubmitting(false);
           onSuccess();
           toastConfig.setToastConfig({
@@ -116,7 +116,7 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
       axiosInstance()
         .post(`${expenseReport.api}`, data)
         .then(({ data: { data, message } }) => {
-          handleStatusChange(data.selectedExpenses);
+          handleStatusChange(data?.data?.selectedExpenses);
           history.push(`${routes?.expenseReportDetail?.path}/${data._id}`);
           setIsSubmitting(false);
           onSuccess(data);
@@ -167,13 +167,7 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
     if (removedExpense) {
       axiosInstance()
         .patch(`${expenses.api}/status/${removedExpense._id}`, { status: EXPENSE_STATUS.unreported })
-        .then(({ data }) => {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: `Status changed to ${EXPENSE_STATUS.unreported}`
-          });
-        })
+        .then(({ data }) => {})
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
@@ -242,7 +236,7 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
                   </Grid>
                   {selectedExpense.length > 0 && (
                     <div className="mt-2">
-                      <Expenses selectedExpenseData={selectedExpense} removeExpense={removeExpenseField}/>
+                      <ExpenseTable removeExpenseField={removeExpenseField} selectedExpenses={selectedExpense} />
                     </div>
                   )}
                 </Form>
