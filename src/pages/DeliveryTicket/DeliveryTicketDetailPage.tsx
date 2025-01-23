@@ -27,6 +27,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import {
   ACTIVITY_RESOURCE,
   ASSET_STATUS,
+  dateFormatToSend,
   DELIVERY_FROM_TO_TYPE,
   DELIVERY_TICKET_MAPPED_STATUS,
   DELIVERY_TICKET_REFERENCE_TYPE,
@@ -411,7 +412,7 @@ export default function DeliveryTicketDetail(props) {
     data['_ids'] = [deliveryTicketData._id];
     data['status'] = DELIVERY_TICKET_STATUS.delivered;
     data['signatures'] = [];
-    data['receiveDate'] = date;
+    data['receiveDate'] = dateFormatToSend(date);
     axiosInstance()
       .post(`${deliveryTicket.api}/updatebulk`, data)
       .then(({ data: { data } }) => {
@@ -442,7 +443,7 @@ export default function DeliveryTicketDetail(props) {
           assets,
           status: status,
           prevStatus: prevStatus,
-          date: date
+          date: dateFormatToSend(date)
         })
         .then(({ data }) => {
           fetchDeliveryTicketData();

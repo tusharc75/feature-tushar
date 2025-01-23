@@ -253,7 +253,6 @@ const LoadingTicket = ({ salesOrderData, setNextStep, stepFullScreen }) => {
       data['status'] = DELIVERY_TICKET_STATUS.delivered;
       data['signatures'] = [];
       data['warehouse'] = salesOrderData?.warehouse?.optionValue;
-      data['receiveDate'] = new Date();
       axiosInstance()
         .post(`${deliveryTicket.api}/updatebulk`, data)
         .then(({ data: { data } }) => {
