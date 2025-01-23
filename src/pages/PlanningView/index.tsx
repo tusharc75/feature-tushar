@@ -199,7 +199,7 @@ function PlanningView() {
           )}
         </Box>
         <Box className={`detail-container-v1`}>
-          <div className="absolute right-[25px] top-[25px] flex justify-end gap-1 max-md:right-[15px] max-md:top-[15px]">
+          <div className="absolute right-0 top-0 flex justify-end gap-1 ">
             <IconButtonTabs
               onItemClick={resetSelectedRecords}
               items={
