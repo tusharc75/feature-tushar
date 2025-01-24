@@ -75,7 +75,7 @@ const InvoiceDetails = () => {
   const [showReOpenConfirmBox, setShowReOpenConfirmBox] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [updateLoading, setUpdateLoading] = useState(false);
-  const [isDownloadingPdf,setIsDownloadingPdf] = useState(false);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
   const invoiceProcessStepsNames = React.useMemo(() => {
     return invoiceProcessSteps.map((item) => item.name);
@@ -273,18 +273,20 @@ const InvoiceDetails = () => {
                 >
                   {isDownloading ? 'Please wait...' : 'Download'}
                 </ThemeButton>
-                <ThemeButton
-                  type="button"
-                  iconForMobile={<DownloadIcon />}
-                  disabled={isDownloadingPdf ? true : false}
-                  startIcon={<DownloadIcon />}
-                  onClick={(e) => {
-                    handleDownloadPdf();
-                  }}
-                  mobileTooltip={isDownloadingPdf ? 'Please wait...' : 'Download Invoice Tickets'}
-                >
-                  {isDownloadingPdf ? 'Please wait...' : 'Download Invoice Tickets'}
-                </ThemeButton>
+                {invoiceData?.fieldTicket?.length ? (
+                  <ThemeButton
+                    type="button"
+                    iconForMobile={<DownloadIcon />}
+                    disabled={isDownloadingPdf ? true : false}
+                    startIcon={<DownloadIcon />}
+                    onClick={(e) => {
+                      handleDownloadPdf();
+                    }}
+                    mobileTooltip={isDownloadingPdf ? 'Please wait...' : 'Download Invoice Tickets'}
+                  >
+                    {isDownloadingPdf ? 'Please wait...' : 'Download Invoice Tickets'}
+                  </ThemeButton>
+                ): null}
                 {invoiceData?.versions?.length && (
                   <ThemeButton
                     onClick={() => {
