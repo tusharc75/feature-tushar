@@ -56,7 +56,7 @@ const TableView = ({ id, chartData, chart, currency, filters }: Props) => {
   const handleRowClick = (key: any) => {
     const resourcePath = routes[camelCase(chart.kpi.resource)]?.path;
     const queryObj = {};
-    queryObj[chart.kpi.filterField] = tableData[key]?.linkField;
+    queryObj[chart.kpi.redirectField] = tableData[key]?.linkField;
     Object.keys(filters).forEach((key) => {
       const value = filters[key];
       if (Array.isArray(value) && value?.length > 0) {
@@ -96,7 +96,7 @@ const TableView = ({ id, chartData, chart, currency, filters }: Props) => {
                           : data[key]}
                 </TableCell>
               ))}
-              {chart?.kpi?.filterField && chart?.kpi?.resource && (
+              {chart?.kpi?.redirectField && chart?.kpi?.resource && (
                 <div className='pt-3'>
                   <IconButton
                     size="small"
