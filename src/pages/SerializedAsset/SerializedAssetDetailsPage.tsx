@@ -123,7 +123,7 @@ const SerializedAssetDetailsPage = () => {
       }   
       
       if (data.totalInUseTimeAfterLastRepair) {
-        if(permissions?.repairOrder?.isRead){
+        if(permissions?.repairOrder?.isRead || permissions?.repairJob?.isRead){
           data[`totalInUseTimeAfterLastRepairHours`] = `${round(dayjs.duration(data?.totalInUseTimeAfterLastRepair).asHours())}:${Math.floor(
             dayjs.duration(data?.totalInUseTimeAfterLastRepair).asMinutes() % 60
           )}`;
