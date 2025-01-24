@@ -130,7 +130,7 @@ const SerializedAssetDetailsPage = () => {
         }
         delete data?.totalInUseTimeAfterLastRepair;
       }
-      console.log(data)
+
       handleMainPoints(data);
     } catch (error) {
       toastConfig.setToastConfig(error);
