@@ -53,7 +53,6 @@ import AzureSSOLogin from './pages/Auth/AzureSSOLogin';
 import ForgetPassword from './pages/Auth/ForgetPassword';
 import Login from './pages/Auth/Login';
 import Logout from './pages/Auth/Logout';
-import Oauth from './pages/Auth/Oauth';
 import PasswordSetup from './pages/Auth/PasswordSetup';
 import ResetPassword from './pages/Auth/ResetPassword';
 import Blog from './pages/Blog';
@@ -439,11 +438,6 @@ function App() {
               // exact
               path="/login"
               render={({ location }) => conditionalRedirect(Login, location)}
-            />
-            <Route
-              // exact
-              path="/auth/login"
-              render={({ location }) => conditionalRedirect(Oauth, location)}
             />
             <Route
               // exact
