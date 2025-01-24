@@ -1,17 +1,15 @@
 import {
-  Button,
   Checkbox,
-  CircularProgress,
   Dialog,
   FormControl,
   FormControlLabel,
-  Grid,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
   Typography
-} from '@material-ui/core';
+} from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { cloneDeep } from 'lodash';
 import { useContext, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -22,6 +20,7 @@ import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader
 import SearchBox from '../../components/Helpers/SearchBox';
 import Loader from '../../components/Loader';
 import { CustomDialogTransition } from 'src/constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export default function AssignContactsDialog({
   opportunityId,
@@ -125,7 +124,7 @@ export default function AssignContactsDialog({
         ) : currentContactsConst.length ? (
           <>
             <Grid container>
-              <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
+              <Grid size={{xs:12, md:6, sm:6}} className="d-flex align-items-center gap-1">
                 <FormControl component="fieldset">
                   <FormControlLabel
                     value="top"
@@ -146,7 +145,7 @@ export default function AssignContactsDialog({
                   />
                 </FormControl>
               </Grid>
-              <Grid item xs={12} md={6} sm={6} container justify="flex-end">
+              <Grid size={{xs:12, md:6, sm:6}} container justifyContent="flex-end">
                 <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
               </Grid>
             </Grid>
@@ -183,12 +182,19 @@ export default function AssignContactsDialog({
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button disabled={isAssigning} onClick={handleCloseDialog} color="primary" size="small">
+        <ThemeButton
+          onClick={handleCloseDialog}
+          buttonType='transparent'
+        >
           Cancel
-        </Button>
-        <Button onClick={handleAssignContacts} color="primary" variant="contained" size="small">
-          {isAssigning ? <CircularProgress size={22} /> : 'Save'}
-        </Button>
+        </ThemeButton>
+        <ThemeButton
+          onClick={handleAssignContacts}
+          isLoading={isAssigning}
+          buttonType='theme'
+        >
+          Save
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

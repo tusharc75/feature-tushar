@@ -1,10 +1,10 @@
-import { Button, Dialog, Typography, Box } from '@material-ui/core';
+import { Dialog, Typography, Box } from '@mui/material';
 import { useContext, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomDialogTransition, fieldTicket, rentalManagement } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
@@ -22,15 +22,15 @@ function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleCl
         warehouse: ele?.warehouse,
         ...(type === 'fieldTicket'
           ? {
-              fieldTicket: ele?.resourceId,
-              startDate: ele?.service?.estimateStartDate,
-              endDate: ele?.service?.estimateEndDate
-            }
+            fieldTicket: ele?.resourceId,
+            startDate: ele?.service?.estimateStartDate,
+            endDate: ele?.service?.estimateEndDate
+          }
           : {
-              rentalJob: ele?.resourceId,
-              startDate: ele?.estimateStartDate,
-              endDate: ele?.estimateEndDate
-            }),
+            rentalJob: ele?.resourceId,
+            startDate: ele?.estimateStartDate,
+            endDate: ele?.estimateEndDate
+          }),
         status: 'Assigned'
       };
     });
@@ -55,18 +55,18 @@ function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleCl
         <Box p={2}>
           <Typography variant="body1" color="textPrimary">
             Do You want to assign{' '}
-            {`${selectedServiceOrder[0]?.service?.serviceName} (${selectedServiceOrder[0]?.fieldTicketNumber || selectedServiceOrder[0]?.rentalJobName})`}{' '}
+            {`${selectedServiceOrder[0]?.service?.serviceName || ''} (${selectedServiceOrder[0]?.fieldTicketNumber || selectedServiceOrder[0]?.rentalJobName})`}{' '}
             to {technicianData?.firstName || ''} {technicianData?.lastName || ''}?
           </Typography>
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button size="small" color="primary" onClick={handleClose}>
+        <ThemeButton buttonType="transparent" onClick={handleClose}>
           Close
-        </Button>
-        <CustomButton loading={isSubmitting} variant="contained" color="primary" type="submit" onClick={handleAssign} disabled={isSubmitting}>
+        </ThemeButton>
+        <ThemeButton isLoading={isSubmitting} buttonType="theme" onClick={handleAssign} disabled={isSubmitting}>
           Assign
-        </CustomButton>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

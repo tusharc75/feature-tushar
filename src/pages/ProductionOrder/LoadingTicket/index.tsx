@@ -1,7 +1,6 @@
-import { IconButton, MenuItem } from '@material-ui/core';
-import Box from '@material-ui/core/Box/Box';
-import Grid from '@material-ui/core/Grid/Grid';
-import { map, startCase, uniq } from 'lodash';
+import { IconButton, MenuItem } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Grid from '@mui/material/Grid2';import { map, startCase, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from 'src/StateProvider/Provider';
@@ -293,7 +292,7 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
         />
       )}
 
-      <Grid item xs={12} md={12} sm={12} className="mt-3">
+      <Grid size={{xs:12, md:12, sm:12}} className="mt-3">
         {columns ? (
           <Box zIndex={5} width={'100%'}>
             <CustomReactTable

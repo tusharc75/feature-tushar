@@ -1,17 +1,16 @@
 import { useState, useContext, useEffect } from 'react';
-import Button from '@material-ui/core/Button';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomButton from '../../components/Helpers/CustomButton';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from './../../constants/helpers';
 import { Form, Formik } from 'formik';
 import { object, string } from 'yup';
-import { TextField } from '@material-ui/core';
+import { TextField } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const CreateZip = (props) => {
   const { setToastConfig } = useContext(CustomToastContext);
@@ -54,7 +53,7 @@ const CreateZip = (props) => {
   function validate(values) {
     const errors = {};
     if (!values['zipCode']) {
-      errors['zipCode'] = 'Required field'
+      errors['zipCode'] = 'Required field';
     }
     return errors;
   }
@@ -108,20 +107,18 @@ const CreateZip = (props) => {
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType="transparent"
                   onClick={() => {
                     onClose();
                   }}
                 >
                   {isUpdateDisabled ? 'Close' : 'Cancel'}
-                </Button>
+                </ThemeButton>
                 {!isUpdateDisabled && (
-                  <CustomButton loading={loading} variant="contained" color="primary" type="submit" disabled={saveClick} onClick={submitForm}>
-                    {' '}
+                  <ThemeButton isLoading={loading} buttonType="theme" disabled={saveClick} onClick={submitForm}>
                     Save
-                  </CustomButton>
+                  </ThemeButton>
                 )}
               </CustomDialogFooter>
             </>

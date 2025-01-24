@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { gridLoadingTimeout, prepareDataForGrid } from '../../../constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';

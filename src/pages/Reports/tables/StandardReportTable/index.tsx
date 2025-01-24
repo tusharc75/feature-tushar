@@ -1,7 +1,5 @@
-import MomentUtils from '@date-io/moment';
-import { CircularProgress, Dialog, IconButton } from '@material-ui/core';
-import { History, Visibility } from '@material-ui/icons';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { Dialog, IconButton } from '@mui/material';
+import { History, Visibility } from '@mui/icons-material';
 import axios from 'axios';
 import { camelCase, isArray, isEmpty, isNumber, isObject, startCase } from 'lodash';
 import React, { useEffect, useState } from 'react';
@@ -22,6 +20,7 @@ import routes from 'src/components/Helpers/Routes';
 import {
   cn,
   CustomDialogTransition,
+  dateFormatToSend,
   downloadExcel,
   formatAmountWithCurrency,
   gridLoadingTimeout,
@@ -37,6 +36,7 @@ import PadData from 'src/pages/Reports/tables/PadData';
 import {
   CreditDebitRenderer,
   CreditDebitTypeRenderer,
+  InvoiceNumberRenderer,
   PackageRenderer,
   ProductRenderer,
   SerializedAssetRenderer,
@@ -47,6 +47,7 @@ import {
 import SendMailMenu from 'src/pages/Reports/tables/StandardReportTable/SendMailMenu';
 import { TableCommonProps } from 'src/pages/Reports/types';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import dayjs from 'dayjs';
 
 let cancelTokenSource = null;
 
@@ -66,6 +67,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
     navigateToMainPage
   } = reportState;
 
+  const customReportData = selectedReport?.customReportData ? selectedReport?.customReportData : null;
   const resourceCamelCase = camelCase(selectedReport.resource);
   const resourceStartCase = startCase(selectedReport.resource);
   const renderedFrom = `${selectedReport.resource}_report_new`;
@@ -88,6 +90,31 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
   const [isSendMail, setIsSendMail] = React.useState(false);
   const [htmlContent, setHtmlContent] = React.useState(null);
   const [fullScreen, setFullScreen] = React.useState(isMobile || isTablet);
+
+  useEffect(() => {
+    if (customReportData && selectedReport?.type === 'custom-report') {
+      if (customReportData?.filters?.length > 0) {
+        const filterById: any = [];
+        const deepFilter: any = [];
+        customReportData?.filters?.forEach((f) => {
+          if (f?.lookup) {
+            filterById.push({
+              field: f?.term,
+              term: f?.value
+            });
+          } else {
+            deepFilter.push({
+              field: f?.term,
+              term: f?.value
+            });
+          }
+        });
+        setFilterByIds(filterById);
+        setDeepFilters(deepFilter);
+      }
+      setShowGrid(true);
+    }
+  }, []);
 
   useEffect(() => {
     fetchGridColumns();
@@ -222,6 +249,13 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
           }
         });
         columns = [...newColumns];
+      } else if (resourceCamelCase === 'invoiceDetails') {
+        newColumns?.forEach((e) => {
+          if (e.accessor === 'invoiceNumber') {
+            e.cell = ({ row }) => InvoiceNumberRenderer(row);
+          }
+        });
+        columns = [...newColumns];
       } else if (resourceCamelCase === 'volumeReport') {
         columns = [...newColumns, ActionsRenderer];
       } else {
@@ -263,6 +297,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
         const tempFilter = deepFiltersP[i];
         if (filters[tempFilter.field]) {
           newDeepFilter = newDeepFilter.filter((d) => d.field !== tempFilter.field);
+          deepFiltersP = newDeepFilter;
         }
       }
 
@@ -293,26 +328,31 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
 
     const isStatusPeriod =
       resourceStartCase === sidebarResource.serializedAsset && resourceColumns?.some((r) => r?.fieldData?.fieldName === 'status');
-
     if (deepFiltersP?.length > 0) {
       deepFilter = [
         ...deepFilter,
         ...deepFiltersP
           ?.filter((d) => {
-            const hasTermLength = d?.term?.length ? true : false;
+            const isoDate = dayjs(d?.term);
+            const hasTermLength = isoDate.isValid() ? true : d?.term?.length ? true : false;
             if (isStatusPeriod) {
               return hasTermLength && !['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field);
             }
             return hasTermLength;
           })
           ?.map((d) => {
-            if (filterTerm[d?.field] === '$nin' && isArray(d?.term)) {
+            const isoDate = dayjs(d?.term);
+            const term = isoDate.isValid() ? dateFormatToSend(d?.term) : d?.term;
+            if (filterTerm[d?.field] === '$nin' && isArray(term)) {
               return {
                 ...d,
-                term: { $nin: d?.term }
+                term: { $nin: term }
               };
             }
-            return d;
+            return {
+              ...d,
+              term
+            };
           })
       ];
     }
@@ -334,7 +374,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
     }
 
     if (isExport) {
-      let newColumns = columns.map((col) => col.accessor);
+      let newColumns = columns?.map((col) => col.accessor);
       if (!isEmpty(visibleColumns) && isObject(visibleColumns)) {
         newColumns = [];
         for (const [key, value] of Object.entries(visibleColumns)) {
@@ -366,8 +406,9 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
       })
       .then(({ data: { data, count, columns } }) => {
         if (resourceCamelCase === 'userSession') {
+          setColumns([]);
           setIsColumnsLoading(true);
-          columns = columns?.map((e) => {
+          const newColumns = columns?.map((e) => {
             return {
               accessor: e.fieldName,
               Header: e.fieldLabel,
@@ -399,7 +440,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
               }
             };
           });
-          setColumns(columns);
+          setColumns([...newColumns]);
           setIsColumnsLoading(false);
         }
         if (resourceCamelCase === 'iotDataPoints') {
@@ -549,6 +590,9 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
       }
       return tempColumn;
     }
+    if (selectedReport?.type === 'custom-report' && customReportData && customReportData?.column?.length > 0) {
+      return tempColumn?.filter((t) => customReportData?.column?.includes(t?.accessor));
+    }
     return column;
   };
 
@@ -588,24 +632,24 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
   }, [columns?.length, selectedReport.resource, footerData]);
 
   return (
-    <MuiPickersUtilsProvider utils={MomentUtils}>
+    <>
       {showGrid && (
         <div className={cn('inline-flex justify-between gap-2', !isSidebarOpen ? 'w-[calc(100%-40px)]' : 'w-full')}>
           <>
-            <ThemeButton
-              iconForMobile={<MdFilterList />}
-              size="small"
-              variant="outlined"
-              color="primary"
-              disableElevation
-              onClick={() => {
-                setShowGrid(false);
-                dispatch({ type: 'onlyFilter', filters: {} });
-              }}
-              startIcon={<MdFilterList />}
-            >
-              Show Filters
-            </ThemeButton>
+            {selectedReport?.type === 'custom-report' && customReportData ? (
+              <div></div>
+            ) : (
+              <ThemeButton
+                iconForMobile={<MdFilterList />}
+                onClick={() => {
+                  setShowGrid(false);
+                  dispatch({ type: 'onlyFilter', filters: {} });
+                }}
+                startIcon={<MdFilterList />}
+              >
+                Show Filters
+              </ThemeButton>
+            )}
             <span id="importExportLinks" className="space-x-2">
               {['inUsedSerializedAsset', 'lostAssets'].includes(resourceCamelCase) ? (
                 <AsynImportExportMenu
@@ -615,7 +659,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
                   permissions={permissions?.report}
                   module={selectedReport.resource}
                   api={`/report/${selectedReport.resource}`}
-                  afterImportCompleted={() => {}}
+                  afterImportCompleted={() => { }}
                   isExportCount={true}
                   exportCount={0}
                   ids={[]}
@@ -628,22 +672,18 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
                   {reportConfig?.isExportPdf && (
                     <ThemeButton
                       iconForMobile={false}
-                      variant="outlined"
-                      size="small"
                       disabled={isProcessing === 'pdf'}
                       onClick={() => exportData('pdf', 'pdf')}
-                      startIcon={isProcessing === 'pdf' && <CircularProgress color="inherit" size={18} />}
+                      isLoading={isProcessing === 'pdf'}
                     >
                       Export To PDF
                     </ThemeButton>
                   )}
                   <ThemeButton
                     iconForMobile={false}
-                    variant="outlined"
-                    size="small"
                     disabled={isProcessing === 'excel'}
                     onClick={() => exportData('excel', 'excel')}
-                    startIcon={isProcessing === 'excel' && <CircularProgress color="inherit" size={18} />}
+                    isLoading={isProcessing === 'excel'}
                   >
                     Export To Excel
                   </ThemeButton>
@@ -665,9 +705,11 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
                 fetchResourceData={fetchResourceData}
                 setDeepFilters={setDeepFilters}
                 setFilterByIds={setFilterByIds}
+                disableClear={customReportData && selectedReport?.type === 'custom-report' ? true : false}
               />
             }
             height={'calc(100vh - 270px)'}
+            resource={sidebarResource[resourceCamelCase]}
             columns={getFilteredColumn(columns)}
             state={state}
             dispatch={dispatch}
@@ -684,7 +726,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </div>
       )}
-      {!showGrid && (
+      {!showGrid && !customReportData && selectedReport?.type != 'custom-report' && (
         <Filter
           onClose={() => {
             setShowGrid(true);
@@ -765,7 +807,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
           />
         </Dialog>
       )}
-    </MuiPickersUtilsProvider>
+    </>
   );
 };
 

@@ -1,23 +1,20 @@
-import { useState, useContext, useEffect, Fragment } from 'react';
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
-import TextField from '@material-ui/core/TextField';
-import { makeStyles } from '@material-ui/core/styles';
+import { useState, useContext, useEffect } from 'react';
+import Grid from '@mui/material/Grid2';
+import TextField from '@mui/material/TextField';
+import { makeStyles } from '@mui/styles';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { Formik, Form } from 'formik';
 import { object, string, boolean } from 'yup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
 import { useParams, useHistory } from 'react-router-dom';
 import routes from '../../components/Helpers/Routes';
-import Box from '@material-ui/core/Box';
-import Typography from '@material-ui/core/Typography';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import TinyMce from './../../components/TinyMCE/index';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete, Theme } from '@mui/material';
 import { useData } from '../../StateProvider/Provider';
 import { quoteBuilder, PDF_RESOURCE_LIST, sidebarResource, checkSuperAdminAccess } from '../../constants/helpers';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
@@ -27,6 +24,7 @@ import queryString from 'query-string';
 import { quotation } from '../../constants/helpers';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 import { camelCase, startCase } from 'lodash';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const defaultProductColumns = 7;
 
@@ -37,7 +35,7 @@ const PdfTemplateSchema = object().shape({
   pageNumberInFooter: boolean()
 });
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   mainContainer: {
     overflowY: 'scroll'
   },
@@ -321,7 +319,7 @@ export default function NewCreateQuotePdfTemplate() {
 
   const previewPdfTemplate = (templateId) => {
     toastConfig.setToastConfig({
-      hideDuration: null,
+      // hideDuration: null,
       open: true,
       type: 'info',
       message: `Downloading preview file, Please wait...`
@@ -510,49 +508,43 @@ export default function NewCreateQuotePdfTemplate() {
                   />
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <Button
+                  <ThemeButton
                     disabled={isUpdating || (!isClone && !hasPermissionToUpdate)}
-                    size="small"
-                    color="primary"
                     onClick={submitForm}
-                    variant="contained"
-                    endIcon={isUpdating && <CircularProgress color="inherit" size={18} />}
+                    buttonType='theme'
+                    isLoading={isUpdating}
                   >
                     Save
-                  </Button>
+                  </ThemeButton>
 
                   {!quoteData && (
-                    <Button
+                    <ThemeButton
                       disabled={!isClone && (isUpdatingAndPreview || !hasPermissionToUpdate)}
-                      size="small"
-                      color="primary"
                       onClick={() => {
                         setIsPreview(true);
                         submitForm();
                       }}
-                      variant="contained"
-                      endIcon={isUpdatingAndPreview && <CircularProgress color="inherit" size={18} />}
+                      buttonType='theme'
+                      isLoading={isUpdatingAndPreview}
                     >
                       Save & Preview
-                    </Button>
+                    </ThemeButton>
                   )}
 
-                  <Button
-                    size="small"
-                    color="primary"
-                    variant="contained"
+                  <ThemeButton
                     onClick={() => {
                       handleClose();
                     }}
+                    buttonType='transparent'
                   >
                     Close
-                  </Button>
+                  </ThemeButton>
                 </div>
               </div>
               <div className={`main-container ${classes.mainContainer}`}>
                 <Box className={classes.paper}>
                   <Grid container>
-                    <Grid item xs={12} md={6}></Grid>
+                    <Grid size={{ xs: 12, md: 6 }}></Grid>
                   </Grid>
 
                   <div className="grid grid-cols-1 gap-x-2 gap-y-3 sm:grid-cols-2 md:grid-cols-3">
@@ -680,11 +672,11 @@ export default function NewCreateQuotePdfTemplate() {
                         <Autocomplete
                           disabled={!isClone && !hasPermissionToUpdate}
                           getOptionLabel={(option) => option.title}
-                          getOptionSelected={(option, value) => option.value === value.value}
+                          isOptionEqualToValue={(option, value) => option.value === value.value}
                           value={
                             pdfResourceOption.find((data) => data.value === values['type'])
                               ? pdfResourceOption.find((data) => data.value === values['type'])
-                              : ''
+                              : null
                           }
                           options={pdfResourceOption}
                           onChange={(e, val: any) => {
@@ -717,7 +709,11 @@ export default function NewCreateQuotePdfTemplate() {
                       variant="outlined"
                       margin="none"
                       size="small"
-                      InputProps={{ inputProps: { min: 5, max: 20 } }}
+                      slotProps={{
+                        input: {
+                          inputProps: { min: 5, max: 20 }
+                        }
+                      }}
                       onChange={(e) => {
                         setFieldValue('productColumns', e.target.value);
                       }}
@@ -765,7 +761,7 @@ export default function NewCreateQuotePdfTemplate() {
                     />
                   </div>
 
-                  <Grid item xs={12} className="mt-4">
+                  <Grid size={{ xs: 12 }} className="mt-4">
                     <Box className={classes.tinyMCEContainer}>
                       <Typography className={classes.headingLabel} variant="h5" component="h5">
                         Header
@@ -790,7 +786,7 @@ export default function NewCreateQuotePdfTemplate() {
                       />
                     </Box>
                   </Grid>
-                  <Grid item xs={12} className="mt-4">
+                  <Grid size={{ xs: 12 }} className="mt-4">
                     <Box className={classes.tinyMCEContainer}>
                       <Typography className={classes.headingLabel} variant="h5" component="h5">
                         Above Table
@@ -813,7 +809,7 @@ export default function NewCreateQuotePdfTemplate() {
                       />
                     </Box>
                   </Grid>
-                  <Grid item xs={12} className="mt-4">
+                  <Grid size={{ xs: 12 }} className="mt-4">
                     <Box className={classes.tinyMCEContainer}>
                       <Typography className={classes.headingLabel} variant="h5" component="h5">
                         Below Table
@@ -836,7 +832,7 @@ export default function NewCreateQuotePdfTemplate() {
                       />
                     </Box>
                   </Grid>
-                  <Grid item xs={12} className="mt-4">
+                  <Grid size={{ xs: 12 }} className="mt-4">
                     <Box className={classes.tinyMCEContainer}>
                       <Typography className={classes.headingLabel} variant="h5" component="h5">
                         Footer
@@ -860,7 +856,7 @@ export default function NewCreateQuotePdfTemplate() {
                       />
                     </Box>
                   </Grid>
-                  <Grid item xs={12} className="mt-4">
+                  <Grid size={{ xs: 12 }} className="mt-4">
                     <Box className={classes.tinyMCEContainer}>
                       <Typography className={classes.headingLabel} variant="h5" component="h5">
                         Tabel Summary Left Side
@@ -889,7 +885,6 @@ export default function NewCreateQuotePdfTemplate() {
               </div>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

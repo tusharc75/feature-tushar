@@ -1,14 +1,13 @@
-import React, { useContext, useState } from 'react';
-import Box from '@material-ui/core/Box';
-import { makeStyles } from '@material-ui/core/styles';
-import { Typography, Button, Grid, Chip, IconButton, TextField, CircularProgress, Avatar } from '@material-ui/core';
-import { DeleteOutline } from '@material-ui/icons';
+import { Avatar, Chip, Grid, IconButton, TextField, Typography } from '@mui/material';
+import Box from '@mui/material/Box';
+import { makeStyles } from '@mui/styles';
+import { useContext, useState } from 'react';
 
+import { MdDelete } from 'react-icons/md';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
-import { BsDot } from 'react-icons/bs';
-import { MdDelete } from 'react-icons/md';
 import { SubCaseColors } from '../Helpers/utils';
 
 const useStyles = makeStyles(() => ({
@@ -97,9 +96,7 @@ export const SubTask = ({ setId, openAddSub, setOpenAddSub, fetchTaskDetail, dat
         {((childTasks && childTasks.length > 0) || openAddSub === true) && (
           <Box mb={1}>
             <div className="position-relative">
-              <h4 className="form-label-style">
-                Child Task
-              </h4>
+              <h4 className="form-label-style">Child Task</h4>
             </div>
           </Box>
         )}
@@ -144,10 +141,8 @@ export const SubTask = ({ setId, openAddSub, setOpenAddSub, fetchTaskDetail, dat
                         color: 'white'
                       }}
                     />
-
                     <IconButton
                       size="small"
-                      color="default"
                       onClick={(e) => {
                         setShowConfirmBox(true);
                         setDeleteTaskId(element._id);
@@ -173,19 +168,19 @@ export const SubTask = ({ setId, openAddSub, setOpenAddSub, fetchTaskDetail, dat
               name="name"
               fullWidth
               margin="dense"
+              size="small"
               onChange={(e) => setTaskName(e.target.value)}
               error={isError && taskName.length < 3}
               helperText={isError && taskName.length < 3 && 'Task name must be at least 3 letters'}
             />
-            <Box mt={1}>
-              <Button color="primary" size="small" variant="contained" disabled={!taskName || isSubmitting} onClick={handleSave}>
-                {isSubmitting ? <CircularProgress size={18} /> : 'Create'}
-              </Button>
-              <Button variant="contained" size="small" className={classes.marginLeft} disableElevation onClick={() => setOpenAddSub(false)}>
-                {' '}
+            <div className="mt-2 flex gap-2">
+              <ThemeButton buttonType="theme" disabled={!taskName || isSubmitting} onClick={handleSave} isLoading={isSubmitting}>
+                Create
+              </ThemeButton>
+              <ThemeButton buttonType="theme" disableElevation onClick={() => setOpenAddSub(false)}>
                 Cancel
-              </Button>
-            </Box>
+              </ThemeButton>
+            </div>
           </Box>
         )}
       </Box>

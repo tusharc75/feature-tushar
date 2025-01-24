@@ -1,14 +1,14 @@
-import { Button, Collapse, Tooltip } from '@material-ui/core';
+import { Button, Collapse } from '@mui/material';
 import React, { FC, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
 import { FcApproval } from 'react-icons/fc';
-import { Block, KeyboardArrowUp, WatchLater } from '@material-ui/icons';
-
+import { Block, KeyboardArrowUp, WatchLater } from '@mui/icons-material';
 import { DOAApproved, DOARejected, DOAPending } from 'src/assets/svg/svgIcons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { QUOTE_STATUS } from 'src/constants/helpers';
 
-const DEFAULT_DATA_COUNT = 3; // this value will change how many users will be displayed by default;
+const DEFAULT_DATA_COUNT = 2; // this value will change how many users will be displayed by default;
 
 const statusIconAndColorClassMap = {
   approve: {
@@ -29,17 +29,17 @@ const statusIconAndColorClassMap = {
 };
 
 const versionStatusIconMap = {
-  'Sent for DOA': {
+  [QUOTE_STATUS.sentforDOA]: {
     icon: <WatchLater className="[font-size:20px_!important]" />,
     lebel: 'DOA Sent',
     colorClass: 'text-[#00acc1]'
   },
-  'Rejected by DOA': {
+  [QUOTE_STATUS.rejectedbyDOA]: {
     icon: <Block className="[font-size:20px_!important]" />,
     lebel: 'Rejected by DOA',
     colorClass: 'text-[#d60f0f]'
   },
-  'Accepted by DOA': {
+  [QUOTE_STATUS.acceptedbyDOA]: {
     icon: <FcApproval size={20} />,
     lebel: 'Approved by DOA',
     colorClass: 'bg-[#6ca826] dark:bg-[#294c00]'
@@ -62,7 +62,7 @@ type TStatus = 'approve' | 'pending' | 'rejected';
 
 type TDoaStepUsersProps = {
   DOAData?: TDOAData[];
-  versionStatus?: 'Sent for DOA' | 'Rejected by DOA' | 'Accepted by DOA';
+  versionStatus?: any;
 } & React.HTMLAttributes<HTMLDivElement>;
 
 const DoaStepUsers: FC<TDoaStepUsersProps> = ({ DOAData, versionStatus, ...props }) => {
@@ -80,14 +80,14 @@ const DoaStepUsers: FC<TDoaStepUsersProps> = ({ DOAData, versionStatus, ...props
   return (
     <div className="  min-w-[120px]" {...props}>
       <div
-        className={`flex items-center text-[12px] px-[7px] py-[4px]  gap-[7px] [--width:177px] max-w-[var(--width)] bg-[white] dark:bg-[var(--dark-primary)]`}
+        className={`flex max-w-[var(--width)] items-center gap-[7px] bg-[white]  px-[7px] py-[4px] text-[12px] [--width:177px] dark:bg-[var(--dark-primary)]`}
       >
-        <div className={`${versionData?.colorClass} w-[20px] h-[20px] rounded-full`}>{versionData?.icon}</div>
-        <p title={versionData?.lebel} className=" line-clamp-1 text-[var(--primary-text)] text-[13px]">
+        <div className={`${versionData?.colorClass} h-[20px] w-[20px] rounded-full`}>{versionData?.icon}</div>
+        <p title={versionData?.lebel} className=" line-clamp-1 text-[13px] text-[var(--primary-text)]">
           {versionData?.lebel}
         </p>
       </div>
-      <div className="step bg-[white] dark:bg-[var(--dark-primary)] pt-[12px] relative z-50 px-[4px] [--line-height:6px] py-[var(--line-height)]  max-w-[120px] ml-auto">
+      <div className="step relative z-50 ml-auto max-w-[120px] bg-[white] px-[4px] py-[var(--line-height)] pt-[12px]  [--line-height:6px] dark:bg-[var(--dark-primary)]">
         {visibleData?.map((d, index) => {
           return <RenderUser userData={d} index={index} />;
         })}
@@ -136,28 +136,30 @@ const RenderUser = ({ userData, index }: TRenderUserProps) => {
   const userFullName = `${user?.firstName} ${user?.lastName}`;
 
   return (
-    <div key={user?.id || index} className="grid grid-cols-[24px_85px] gap-[7px] items-center  mb-[var(--line-height)]">
+    <div key={user?.id || index} className="mb-[var(--line-height)] grid grid-cols-[24px_85px] items-center  gap-[7px]">
       <div
         style={{ borderWidth: '1px', borderStyle: 'solid' }}
-        className={`status-icon w-[24px] h-[24px] rounded-full dark:border-[var(--common-border-color)] border-[var(--primary)] relative transition-colors ${icon.colorClasses} `}
+        className={`status-icon relative h-[24px] w-[24px] rounded-full border-[var(--primary)] transition-colors dark:border-[var(--common-border-color)] ${icon.colorClasses} `}
       >
         <div className={`${lineClassName} -top-[var(--line-height)]`} />
         <HtmlTooltip title={<span className=" capitalize">{icon.text}</span>} placement="top" arrow>
-          <span className="block absolute inset-0 m-auto max-w-[16px] max-h-[16px] cursor-pointer ">{icon.icon}</span>
+          <span className="absolute inset-0 m-auto block max-h-[16px] max-w-[16px] cursor-pointer ">{icon.icon}</span>
         </HtmlTooltip>
         <div className={`${lineClassName} -bottom-[var(--line-height)]`} />
       </div>
-      {user?.id ?
+      {user?.id ? (
         <Link
           title={userFullName}
           target="_blank"
           rel="noopener noreferrer"
-          className="link text-[12px] font-normal max-w-[85px] line-clamp-1"
+          className="link line-clamp-1 max-w-[85px] text-[12px] font-normal"
           to={`${routes.userDetail.path}/${user?.id}`}
         >
           {userFullName}
         </Link>
-        : <span className="text-[12px] font-normal max-w-[85px] line-clamp-1" >{userFullName}</span>}
+      ) : (
+        <span className="line-clamp-1 max-w-[85px] text-[12px] font-normal">{userFullName}</span>
+      )}
     </div>
   );
 };

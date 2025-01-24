@@ -1,7 +1,7 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
-import Add from '@material-ui/icons/Add';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
+import { Box, IconButton, MenuItem } from '@mui/material';
+import Add from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -104,16 +104,16 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
                 <Box>
                   {!row?.original?.parentId && (
                     <HtmlTooltip title="Add Existing Products">
-                    <IconButton
-                      onClick={() => {
-                        setAddDialog({ open: true, type: MATERIAL_TYPE.product, parentId: row.original?._id });
-                      }}
-                      size="small"
-                    >
-                      <Add fontSize="small" color="primary" />
-                    </IconButton>
-                  </HtmlTooltip>
-                )}
+                      <IconButton
+                        onClick={() => {
+                          setAddDialog({ open: true, type: MATERIAL_TYPE.product, parentId: row.original?._id });
+                        }}
+                        size="small"
+                      >
+                        <Add fontSize="small" color="primary" />
+                      </IconButton>
+                    </HtmlTooltip>
+                  )}
                 </Box>
               </>
             )}
@@ -123,9 +123,9 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
                 onClick={() => {
                   if (row.original.type === MATERIAL_TYPE.product) {
                     window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else if(row.original.type === MATERIAL_TYPE.package) {
+                  } else if (row.original.type === MATERIAL_TYPE.package) {
                     window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                  }else {
+                  } else {
                     window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
                   }
                 }}
@@ -234,7 +234,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
           ? _subRow.productDetail?.productName
           : _subRow.type === MATERIAL_TYPE.package
             ? _subRow.packageDetail?.packageName
-            :  '';
+            : '';
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription

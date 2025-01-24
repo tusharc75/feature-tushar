@@ -1,11 +1,10 @@
 import { CustomDialogTransition } from 'src/constants/helpers';
 import CreditMemoMaterial from 'src/pages/CreditMemo/Material';
-import { Dialog } from '@material-ui/core';
+import { Dialog } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 
 const MaterialDialog = ({ creditMemoDetail, handleClose, allowedToEdit }) => {
-
   return (
     <>
       <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
@@ -17,9 +16,7 @@ const MaterialDialog = ({ creditMemoDetail, handleClose, allowedToEdit }) => {
           showRequiredLabel={false}
         />
         <CustomDialogContent isFooterPresent={false}>
-          <CreditMemoMaterial
-            creditMemoData={creditMemoDetail}
-            allowedToEdit={allowedToEdit} />
+          <CreditMemoMaterial creditMemoData={creditMemoDetail} allowedToEdit={allowedToEdit} fetchCreditMemoData={() => { }} />
         </CustomDialogContent>
       </Dialog>
     </>

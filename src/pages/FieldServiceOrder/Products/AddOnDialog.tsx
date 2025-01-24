@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -14,6 +14,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { isEqual } from 'lodash';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import InputField from 'src/components/Helpers/InputField';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const AddOnDialog = ({ addOnData, onClose, parentId, onSuccess, serviceOrderData }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -123,32 +124,26 @@ const AddOnDialog = ({ addOnData, onClose, parentId, onSuccess, serviceOrderData
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
-                  disabled={submitting}
+                <ThemeButton
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
+                  buttonType='transparent'
                 >
                   Cancel
-                </Button>
-                <Button
-                  disabled={submitting}
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  type="submit"
+                </ThemeButton>
+                <ThemeButton
                   onClick={submitForm}
-                  endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                  disabled={submitting}
+                  isLoading={submitting}
+                  buttonType='theme'
                 >
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

@@ -1,6 +1,6 @@
-import { Box, IconButton, MenuItem, TextField } from '@material-ui/core';
-import CachedIcon from '@material-ui/icons/Cached';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, IconButton, MenuItem, TextField } from '@mui/material';
+import CachedIcon from '@mui/icons-material/Cached';
+import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
@@ -292,7 +292,7 @@ const LeftSideContents = ({
         options={warehouseOptions}
         getOptionLabel={(option: any) => option.optionLabel}
         disableClearable
-        getOptionSelected={(option: any, val) => option.optionValue === val}
+        isOptionEqualToValue={(option: any, val) => option.optionValue === val}
         value={
           warehouseOptions.filter((data) => data.optionValue === warehouseId).length
             ? warehouseOptions.filter((data) => data.optionValue === warehouseId)[0]
@@ -315,7 +315,7 @@ const LeftSideContents = ({
           className="md:max-w-[250px]"
           options={storageLocationOptions.filter((item) => item.warehouse === warehouseId)}
           getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-          getOptionSelected={(option: any, val) => option.optionValue === val}
+          isOptionEqualToValue={(option: any, val) => option.optionValue === val}
           value={
             storageLocationOptions.filter((data) => data.optionValue === storageLocationId).length
               ? storageLocationOptions.filter((data) => data.optionValue === storageLocationId)[0]

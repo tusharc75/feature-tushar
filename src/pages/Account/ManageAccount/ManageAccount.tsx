@@ -1,14 +1,14 @@
-import { Box, Button, Grid, IconButton } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
-import AddIcon from '@material-ui/icons/AddCircle';
-import InfoIcon from '@material-ui/icons/Info';
+import { Box, IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import Dialog from '@mui/material/Dialog';
+import AddIcon from '@mui/icons-material/AddCircle';
+import InfoIcon from '@mui/icons-material/Info';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
 import { NewAddressOptionList } from 'src/StateProvider/AddressProvider';
-import routes from 'src/components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
 import ManageAddressDialog from '../../../components/Address/ManageAddressDialog';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
@@ -17,7 +17,7 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomButton from '../../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import { CustomDialogTransition, setFieldsInAscendingOrder, yupSchema } from '../../../constants/helpers';
 import ManageAccountDialog from './index';
@@ -172,7 +172,7 @@ export default function ManageAccount(props) {
                               <Box marginY={2}>
                                 <Grid spacing={3} container>
                                   {form.sectionFields.map((field, index2) => (
-                                    <Grid key={index2} item xs={12} sm={6} md={6}>
+                                    <Grid key={index2} size={{ xs: 12, sm: 6, md: 6 }}>
                                       {field.fieldName === 'entity' ? (
                                         <FormTypes
                                           isNew={isNew}
@@ -317,7 +317,7 @@ export default function ManageAccount(props) {
                                           </HtmlTooltip>
 
                                           {field?.tooltipMessage ? (
-                                            <Grid item xs={1} sm={1} md={1}>
+                                            <Grid size={{ xs: 1, sm: 1, md: 1 }}>
                                               <HtmlTooltip title={field?.tooltipMessage ?? ''}>
                                                 <InfoIcon color="disabled" />
                                               </HtmlTooltip>
@@ -325,9 +325,9 @@ export default function ManageAccount(props) {
                                           ) : null}
                                         </div>
                                       ) : field.fieldName === 'parentAccount' ? (
-                                        <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                        <Grid key={field.fieldName} size={{ xs: 12, sm: 12, md: 12 }}>
                                           <Grid container spacing={1}>
-                                            <Grid item xs={permissions[accountResource]?.isCreate ? 10 : 11}>
+                                            <Grid size={{ xs: permissions[accountResource]?.isCreate ? 10 : 11 }}>
                                               <FormTypes
                                                 isNew={isNew}
                                                 {...field}
@@ -350,7 +350,7 @@ export default function ManageAccount(props) {
                                               />
                                             </Grid>
                                             {permissions[accountResource]?.isCreate && (
-                                              <Grid item xs={1} sm={1} md={1}>
+                                              <Grid size={{ xs: 1, sm: 1, md: 1 }}>
                                                 <HtmlTooltip title="Add Parent Account" className="mt-1">
                                                   <IconButton
                                                     onClick={() => {
@@ -365,7 +365,7 @@ export default function ManageAccount(props) {
                                               </Grid>
                                             )}
                                             {field?.tooltipMessage ? (
-                                              <Grid item xs={1} sm={1} md={1}>
+                                              <Grid size={{ xs: 1, sm: 1, md: 1 }}>
                                                 <HtmlTooltip title={field?.tooltipMessage ?? ''}>
                                                   <InfoIcon color="disabled" />
                                                 </HtmlTooltip>
@@ -488,21 +488,18 @@ export default function ManageAccount(props) {
                     ) : null}
                   </CustomDialogContent>
                   <CustomDialogFooter>
-                    <Button
+                    <ThemeButton
                       onClick={() => {
                         if (isEqual(accountData.initialValues, values)) onClose({});
                         else setShowConfirmDialog(true);
                       }}
-                      variant="outlined"
-                      color="primary"
-                      size="small"
+                      buttonType="transparent"
                     >
                       Cancel
-                    </Button>
-                    <CustomButton
-                      variant="contained"
-                      color="primary"
-                      loading={loading}
+                    </ThemeButton>
+                    <ThemeButton
+                      buttonType="theme"
+                      isLoading={loading}
                       disabled={loading || uploadingImageOrFileProgress > 0}
                       onClick={(e) => {
                         e.preventDefault();
@@ -511,13 +508,12 @@ export default function ManageAccount(props) {
                       }}
                     >
                       Save
-                    </CustomButton>
+                    </ThemeButton>
                   </CustomDialogFooter>
 
                   {showConfirmDialog ? (
                     <ConfirmCancelDialog
                       open={showConfirmDialog}
-                      close={() => setShowConfirmDialog(false)}
                       onSave={() => {
                         setShowConfirmDialog(false);
                         // e.preventDefault();

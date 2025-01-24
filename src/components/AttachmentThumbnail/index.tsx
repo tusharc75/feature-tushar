@@ -1,7 +1,7 @@
-import { IconButton } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
-import GetAppIcon from '@material-ui/icons/GetApp';
-import PreviewIcon from '@material-ui/icons/Visibility';
+import { IconButton } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import GetAppIcon from '@mui/icons-material/GetApp';
+import PreviewIcon from '@mui/icons-material/Visibility';
 import axios from 'axios';
 import _ from 'lodash';
 import mimeDb from 'mime-db';
@@ -251,13 +251,13 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                               }}
                               style={{ paddingBottom: 3, width: 30, height: 30 }}
                             >
-                              {<DeleteIcon color="error" />}
+                              {<DeleteIcon color="error" fontSize='small' />}
                             </IconButton>
                           </HtmlTooltip>
                         ) : (
                           <HtmlTooltip className="cursor-stop" title={"You don't have permissions to delete attachment"} enterTouchDelay={0}>
                             <IconButton size={'small'} style={{ paddingBottom: 3, width: 30, height: 30 }}>
-                              <DeleteIcon color="disabled" />
+                              <DeleteIcon color="disabled" fontSize='small' />
                             </IconButton>
                           </HtmlTooltip>
                         )}

@@ -1,11 +1,11 @@
 import { useState, Fragment, useRef } from 'react';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import TextField from '@material-ui/core/TextField';
-import FormControl from '@material-ui/core/FormControl';
-import MenuItem from '@material-ui/core/MenuItem';
-import Select from '@material-ui/core/Select';
-import InputLabel from '@material-ui/core/InputLabel';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Dialog from '@mui/material/Dialog';
+import TextField from '@mui/material/TextField';
+import FormControl from '@mui/material/FormControl';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import InputLabel from '@mui/material/InputLabel';
 import { object, string } from 'yup';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, fieldLabelToFieldName } from 'src/constants/helpers';
@@ -13,7 +13,7 @@ import { Form, Formik } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import { Autocomplete } from '@material-ui/lab';
+import Autocomplete from '@mui/material/Autocomplete';
 
 const FieldSchema = object().shape({
   type: string().required('please select field type'),
@@ -78,7 +78,7 @@ export const AddColumnDialog = (props) => {
   function validate(values) {
     const errors = {};
     if (!values.sectionName) {
-      errors['sectionName'] = 'Please select SectionName';
+      errors['sectionName'] = 'Please select Section Name';
     }
     return errors;
   }
@@ -107,7 +107,7 @@ export const AddColumnDialog = (props) => {
                   options={section || []}
                   fullWidth
                   size="small"
-                  getOptionSelected={(option, val) => option === val}
+                  isOptionEqualToValue={(option, val) => option === val}
                   getOptionLabel={(option) => option ?? ''}
                   value={values?.sectionName}
                   onChange={(_, newVal) => {
@@ -121,6 +121,7 @@ export const AddColumnDialog = (props) => {
                       helperText={touched['sectionName'] && errors['sectionName']}
                       label="Section Name"
                       margin="dense"
+                      size="small"
                       name="sectionName"
                       variant="outlined"
                     />
@@ -130,7 +131,7 @@ export const AddColumnDialog = (props) => {
                   options={fieldLabelOptions || []}
                   fullWidth
                   size="small"
-                  getOptionSelected={(option, val) => option === val}
+                  isOptionEqualToValue={(option, val) => option === val}
                   getOptionLabel={(option) => option?.fieldLabel ?? ''}
                   value={
                     fieldLabelOptions?.filter((f) => f?.fieldLabel === values?.fieldLabel)?.length > 0
@@ -152,12 +153,13 @@ export const AddColumnDialog = (props) => {
                       helperText={touched['fieldLabel'] && errors['fieldLabel']}
                       label="Field Label"
                       margin="dense"
+                      size="small"
                       name="fieldLabel"
                       variant="outlined"
                     />
                   )}
                 />
-                <FormControl fullWidth margin="dense" variant="outlined">
+                <FormControl fullWidth margin="dense" size="small" variant="outlined">
                   <InputLabel id="demo-simple-select-outlined-label">Field Type</InputLabel>
                   <Select
                     labelId="demo-simple-select-outlined-label"
@@ -167,6 +169,7 @@ export const AddColumnDialog = (props) => {
                     label="Type"
                     name="type"
                     margin="dense"
+                    size="small"
                     error={touched['type'] && Boolean(errors['type'])}
                     disabled={true}
                   >
@@ -177,12 +180,12 @@ export const AddColumnDialog = (props) => {
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button size="small" onClick={handleClose} color="primary">
+              <ThemeButton buttonType="transparent" onClick={handleClose}>
                 Cancel
-              </Button>
-              <Button size="small" type="submit" color="primary" onClick={submitForm} variant="contained">
+              </ThemeButton>
+              <ThemeButton buttonType="theme" onClick={submitForm}>
                 Add
-              </Button>
+              </ThemeButton>
             </CustomDialogFooter>
           </Fragment>
         )}

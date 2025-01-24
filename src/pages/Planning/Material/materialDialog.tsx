@@ -1,12 +1,12 @@
 import React, { Fragment, useEffect, useState } from 'react';
-import { Box, Button, Dialog } from '@material-ui/core';
+import { Box, Dialog } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Form, Formik } from 'formik';
 import { arrayToDropwdownOption, CHILD_RESOURCE, CustomDialogTransition, getObjKeys, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
@@ -132,22 +132,19 @@ const MaterialDialog = ({ onClose, materialData, planningData, handleUpdate, loa
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType="transparent"
                   onClick={() => {
                     onClose();
                   }}
                 >
                   {'Close'}
-                </Button>
+                </ThemeButton>
                 {bulkEdit === false && showSaveAndNext && (
-                  <CustomButton
-                    loading={loadingEdit}
+                  <ThemeButton
+                    isLoading={loadingEdit}
                     disabled={loadingEdit}
-                    variant="contained"
-                    color="primary"
-                    type="submit"
+                    buttonType="theme"
                     onClick={() => {
                       setSaveAndNext(true);
                       submitForm();
@@ -155,21 +152,19 @@ const MaterialDialog = ({ onClose, materialData, planningData, handleUpdate, loa
                   >
                     {' '}
                     Save & Next
-                  </CustomButton>
+                  </ThemeButton>
                 )}
-                <CustomButton
-                  loading={loadingEdit}
+                <ThemeButton
+                  isLoading={loadingEdit}
                   disabled={loadingEdit}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+                  buttonType="theme"
                   onClick={() => {
                     setSaveAndNext(false);
                     submitForm();
                   }}
                 >
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
             </Fragment>
           )}

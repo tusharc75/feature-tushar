@@ -1,8 +1,8 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Checkbox, CheckboxProps, CircularProgress, IconButton, TableCell, TextField } from '@material-ui/core';
-import { Check, DragIndicator, Edit, ExpandLess, ExpandMore } from '@material-ui/icons';
-import { Autocomplete } from '@material-ui/lab';
+import { Checkbox, CheckboxProps, CircularProgress, IconButton, TableCell, TextField } from '@mui/material';
+import { Check, DragIndicator, Edit, ExpandLess, ExpandMore } from '@mui/icons-material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { Column, ColumnDef, Header, Table, flexRender } from '@tanstack/react-table';
 import { eq, isEqual } from 'lodash';
 import React, { useEffect, useState } from 'react';
@@ -139,14 +139,14 @@ export function TempFilter({ filterValue, id, setFilters, customFilters }) {
           setIsOpen(true);
         }}
         size="small"
-        className={`${filterValue ? 'activeFilter' : ''}`}
+        className={`${typeof filterValue === 'string' && filterValue ? 'activeFilter' : ''}`}
       >
         <CgSearch />
       </IconButton>
 
       <div className={`tableFilterSearch ${isOpen ? 'open' : ''}`} ref={ref}>
         <input
-          value={filterValue || ''}
+          value={typeof filterValue === 'string' && filterValue ? filterValue || '' : ''}
           onChange={(e) => handleFilterChange(e.target.value)}
           autoComplete="off"
           placeholder="Search..."
@@ -159,11 +159,13 @@ export function TempFilter({ filterValue, id, setFilters, customFilters }) {
         <GrFormClose
           onClick={(e) => {
             e.stopPropagation();
-            if ((filterValue || '').trim() === '') {
-              setIsOpen(false);
-              return;
+            if (typeof filterValue === 'string') {
+              if ((filterValue || '') === '') {
+                setIsOpen(false);
+                return;
+              }
+              handleFilterChange('');
             }
-            handleFilterChange('');
             setIsOpen(false);
           }}
         />
@@ -276,6 +278,8 @@ interface DraggableHeaderProps {
   overlayMode?: boolean;
   virtualTable?: boolean;
   className?: string;
+  renderedFrom: string;
+  vtableData?: any;
 }
 export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
   header,
@@ -288,7 +292,8 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
   overlayMode,
   virtualTable = true,
   className = '',
-  vtableData
+  vtableData,
+  renderedFrom
 }: any) => {
   const { column, index } = header;
   const columnDef = column.columnDef as TColType;
@@ -336,14 +341,14 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
           }
         });
         dispatch({ type: 'filter', filters: tempResult });
-        const data = getTempFilter(resource) || {};
-        setTempFilter(resource, { ...data, filters: tempResult });
+        const data = getTempFilter(renderedFrom) || {};
+        setTempFilter(renderedFrom, { ...data, filters: tempResult });
       }
     }, MINIMUM_SEARCH_DELAY);
 
     // Clear the timer when the component unmounts or when filters change
     return () => clearTimeout(searchTimer);
-  }, [filters, isClientSideGrid]);
+  }, [filters, isClientSideGrid, renderedFrom]);
 
   const colSize = header.getSize();
 
@@ -516,7 +521,7 @@ const RenderInputs = ({ columnDef, row, cell, cellValue, submitInput, resetField
           }}
           options={columnDef?.option || []}
           getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-          getOptionSelected={(option: any, val) => option.optionValue === val}
+          isOptionEqualToValue={(option: any, val) => option.optionValue === val}
           value={
             columnDef?.option?.filter((data) => data.optionValue === cellValue).length
               ? columnDef?.option?.filter((data) => data.optionValue === cellValue)[0]
@@ -708,6 +713,7 @@ export const CellRenderer = ({
       return (
         <td {...props}>
           <RenderInputs
+            key={cellValue}
             cell={cell}
             cellValue={cellValue}
             columnDef={columnDef}

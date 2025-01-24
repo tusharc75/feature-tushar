@@ -42,7 +42,7 @@ export const generateReceiveStepReceive = (index: number, waitForStepInsertion =
       title: 'Receive',
       willOpenDialog: true
     },
-    { target: '#receive-dialog-save-button', title: 'Save', willOpenDialog: true },
+    { target: '#receive-dialog-save-button', title: 'Save', willOpenDialog: true , isPreviousButtonDisabled : true},
     { target: '#receive-dialog-submit-button', title: 'Submit', checkForRequired: true, waitForStepInsertion }
   ]
 });
@@ -56,7 +56,7 @@ export const generateAddStepEditProduct = (index: number, waitForStepInsertion =
       title: 'Edit',
       willOpenDialog: true
     },
-    { target: '#field-qty', title: 'Select Quantity', nextOnValueChange: true, skipIfValueExist: true },
+    { target: '#field-qty', title: 'Select Quantity', nextOnValueChange: true, skipIfValueExist: true ,isPreviousButtonDisabled : true},
     { target: '#field-unit', title: 'Select Unit', nextOnValueChange: true, skipIfValueExist: true },
     { target: '#field-pricing-method', title: 'Select Pricing Method', nextOnValueChange: true, skipIfValueExist: true },
     { target: '#field-price', title: 'Change Price', nextOnValueChange: true },
@@ -102,12 +102,12 @@ export const generateAddExistingProduct = (waitForStepInsertion = false): Walkme
 export const createSubleaseFlow = (fields: any, path: any): WalkmeData => {
   const includeFields = ['fromWarehouse', 'toWarehouse', 'warehouse'];
   const data: WalkmeData = {
-    name: `Add ${path}`,
+    name: `Create ${path}`,
     url: routes.sublease.path,
     type: 'flow',
     steps: [
       {
-        title: `Add`,
+        title: `Create`,
         target: '#add-button'
       },
       ...generateFormFieldSteps(fields, [], includeFields),

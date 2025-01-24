@@ -1,15 +1,15 @@
-import { Box, Button, Paper, Typography } from '@material-ui/core';
-import { ExpandLess, ExpandMore } from '@material-ui/icons';
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import { Box, Paper, Typography } from '@mui/material';
+import { ExpandLess, ExpandMore } from '@mui/icons-material';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import { COLOUR_MASTER, fieldServiceOrder, fieldTicket, invoice, sidebarResource } from 'src/constants/helpers';
+import { COLOUR_MASTER, fieldTicket, invoice, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ReactFlow, { Controls, ControlButton, ReactFlowProvider } from 'react-flow-renderer';
 import { MdZoomOutMap } from 'react-icons/md';
 import axiosInstance from 'src/axios/axiosInstance';
-import routes from 'src/components/Helpers/Routes';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useData } from 'src/StateProvider/Provider';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const customNodeStyles = {
   fieldServiceOrder: {
@@ -37,7 +37,9 @@ function ServiceOrderViews({ serviceData }) {
   const [loading, setLoading] = useState(false);
   const [flowData, setFlowData] = useState([]);
 
-  const { state:{permissions} }:any =  useData();
+  const {
+    state: { permissions }
+  }: any = useData();
 
   useEffect(() => {
     fetchData();
@@ -54,7 +56,7 @@ function ServiceOrderViews({ serviceData }) {
           }
         ])}`
       );
-       const invoices = permissions?.invoice?.isRead && await axiosInstance().get(`${invoice.api}?fieldServiceOrder=${serviceData?._id}`) ;
+      const invoices = permissions?.invoice?.isRead && (await axiosInstance().get(`${invoice.api}?fieldServiceOrder=${serviceData?._id}`));
 
       var xPosition = 0;
       var flowEdge: any[] = [];
@@ -231,20 +233,16 @@ function ServiceOrderViews({ serviceData }) {
 
   return (
     <ContentFullScreen fullScreen={fullDialogueOpen} setFullScreen={setFullDialogueOpen}>
-      <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
+      <Box display="flex" flexDirection="column">
         <Box>
-          <Button
-            variant={'outlined'}
-            color="default"
-            size="small"
+          <ThemeButton
             onClick={() => {
               setColorInfo(!colorInfo);
             }}
-            aria-controls="action-menu"
             endIcon={colorInfo ? <ExpandLess /> : <ExpandMore />}
           >
             {'Color Info'}
-          </Button>
+          </ThemeButton>
         </Box>
         {colorInfo && (
           <Box>
@@ -275,7 +273,7 @@ function ServiceOrderViews({ serviceData }) {
           </Box>
         )}
       </Box>
-      <div style={fullDialogueOpen ? { height: '92vh' } : { height: '65vh' }}>
+      <div style={fullDialogueOpen ? { height: '92vh' } : { height: '75vh' }}>
         {!loading ? (
           flowData.length ? (
             <Fragment>

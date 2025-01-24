@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import { camelCase, isEmpty } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';

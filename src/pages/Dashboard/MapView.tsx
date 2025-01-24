@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, CircularProgress, TableBody, IconButton, Table, TableCell, TableRow } from '@material-ui/core';
+import { Box, Typography, CircularProgress, TableBody, IconButton, Table, TableCell, TableRow } from '@mui/material';
 import { GoogleMap, Marker, MarkerClusterer, InfoWindow, GoogleMapProps } from '@react-google-maps/api';
 import axiosInstance from 'src/axios/axiosInstance';
 import { useAppTheme } from 'src/constants/AppConfig';
@@ -155,7 +155,7 @@ const MapView = (props: MapViewProps) => {
   if (!data || !Array.isArray(data) || data.length === 0) return <div>No data</div>;
 
   return (
-    <Box height={height} borderRadius={4} overflow="hidden" className="google-map-chart">
+    <Box height={height} overflow="hidden" className="google-map-chart">
       <GoogleMap
         key={themeColor}
         onClick={() => {
@@ -209,7 +209,7 @@ const MapView = (props: MapViewProps) => {
             <div
               ref={(ref) => {
                 if (ref) {
-                  const infoWindowContent = (ref.closest('.gm-style-iw') as HTMLElement);
+                  const infoWindowContent = ref.closest('.gm-style-iw') as HTMLElement;
 
                   if (infoWindowContent) {
                     infoWindowContent.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
@@ -226,7 +226,7 @@ const MapView = (props: MapViewProps) => {
             >
               {selectedAsset.length > 0 || !isFetching ? (
                 <Box textAlign={'left'} maxWidth={250} padding={0} margin={0}>
-                  <Typography color="textPrimary" variant="body1" style={{ marginBottom: '8px' }} >
+                  <Typography color="textPrimary" variant="body1" style={{ marginBottom: '8px' }}>
                     {`"${selectedBase?.location.concatedName}"`}
                   </Typography>
                   <Table
@@ -234,20 +234,20 @@ const MapView = (props: MapViewProps) => {
                       borderCollapse: 'collapse',
                       width: '100%',
                       border: '1px solid #ccc',
-                      tableLayout: 'auto',
+                      tableLayout: 'auto'
                     }}
                   >
                     <TableBody>
                       <TableRow
                         style={{
                           height: '28px',
-                          borderBottom: '1px solid #ddd',
+                          borderBottom: '1px solid #ddd'
                         }}
                       >
                         <TableCell
                           style={{
                             padding: '2px 6px',
-                            borderRight: '1px solid #ddd',
+                            borderRight: '1px solid #ddd'
                           }}
                         >
                           <Typography variant="body2" color="textPrimary">
@@ -256,14 +256,15 @@ const MapView = (props: MapViewProps) => {
                         </TableCell>
                         <TableCell style={{ padding: '2px 6px' }}>
                           <Box display="flex">
-                            <Typography variant="body2">
-                              {selectedBase?.count?.toLocaleString()}
-                            </Typography>
+                            <Typography variant="body2">{selectedBase?.count?.toLocaleString()}</Typography>
                             <IconButton
                               size="small"
                               color="primary"
                               onClick={() =>
-                                window.open(`${routes.serializedAsset.path}?currentLocation=${encodeURIComponent(JSON.stringify([{ optionLabel: selectedBase?.location.concatedName, optionValue: selectedBase?.location?._id }]))}`, '_blank')
+                                window.open(
+                                  `${routes.serializedAsset.path}?currentLocation=${encodeURIComponent(JSON.stringify([{ optionLabel: selectedBase?.location.concatedName, optionValue: selectedBase?.location?._id }]))}`,
+                                  '_blank'
+                                )
                               }
                             >
                               <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
@@ -276,13 +277,13 @@ const MapView = (props: MapViewProps) => {
                           key={d.status}
                           style={{
                             height: '28px',
-                            borderBottom: '1px solid #ddd',
+                            borderBottom: '1px solid #ddd'
                           }}
                         >
                           <TableCell
                             style={{
                               padding: '2px 6px',
-                              borderRight: '1px solid #ddd',
+                              borderRight: '1px solid #ddd'
                             }}
                           >
                             <Typography variant="body2" color="textPrimary">
@@ -298,7 +299,10 @@ const MapView = (props: MapViewProps) => {
                                 size="small"
                                 color="primary"
                                 onClick={() =>
-                                  window.open(`${routes.serializedAsset.path}?assetStatus=${d.status}&currentLocation=${encodeURIComponent(JSON.stringify([{ optionLabel: selectedBase?.location.concatedName, optionValue: selectedBase?.location?._id }]))}`, '_blank')
+                                  window.open(
+                                    `${routes.serializedAsset.path}?assetStatus=${d.status}&currentLocation=${encodeURIComponent(JSON.stringify([{ optionLabel: selectedBase?.location.concatedName, optionValue: selectedBase?.location?._id }]))}`,
+                                    '_blank'
+                                  )
                                 }
                               >
                                 <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
@@ -319,7 +323,7 @@ const MapView = (props: MapViewProps) => {
           </InfoWindow>
         )}
       </GoogleMap>
-    </Box >
+    </Box>
   );
 };
 

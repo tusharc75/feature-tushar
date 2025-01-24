@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useState, FC, Fragment } from 'react';
-import { Dialog, Button, TextField, Box } from '@material-ui/core';
+import { useContext, useState } from 'react';
+import { Dialog, TextField, Box } from '@mui/material';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -10,9 +10,8 @@ import { useData } from '../../../StateProvider/Provider';
 import CustomAssetDialog from 'src/pages/ConvertInventory/InventoryToAsset/CustomAssetDialog';
 import { isEqual } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';
-import routes from 'src/components/Helpers/Routes';
 import { Formik, Form } from 'formik';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const AssetQtyDialog = ({ onClose, onSuccess, product, purchaseOrderData }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -119,12 +118,12 @@ const AssetQtyDialog = ({ onClose, onSuccess, product, purchaseOrderData }) => {
                 </Box>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button variant="outlined" disabled={isSubmitting} size="small" color="primary" onClick={onClose}>
+                <ThemeButton disabled={isSubmitting} buttonType="transparent" onClick={onClose}>
                   Cancel
-                </Button>
-                <CustomButton variant="contained" color="primary" type="submit">
+                </ThemeButton>
+                <ThemeButton onClick={submitForm} buttonType="theme">
                   Submit
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
             </Form>
           )}

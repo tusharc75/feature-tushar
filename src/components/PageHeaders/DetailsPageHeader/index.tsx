@@ -1,13 +1,13 @@
-import { Button, ButtonProps, Menu, useMediaQuery } from '@material-ui/core';
-import { Add, ExpandMore } from '@material-ui/icons';
+import { ButtonProps, IconButton, Menu, useMediaQuery } from '@mui/material';
+import { Add, ExpandMore, MoreVert } from '@mui/icons-material';
 import { ReactNode, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import PreviewDownload from 'src/components/PreviewDownload';
-// import { MdExpandCircleDown } from 'react-icons/md';
 import { FaCircleChevronDown } from 'react-icons/fa6';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import NewActionButton, { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHeader/NewActionButton';
 import { cn } from 'src/constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 type ButtonPropsWithTooltip = {
   tooltip?: string;
@@ -32,6 +32,7 @@ type DetailsPageHeaderProps = {
   newActionButtonProps?: NewActionButtonProps<any>;
   hasYpadding?: boolean;
   className?: string;
+  actionButtonType?: 'button' | 'iconButton';
 };
 
 const DetailsPageHeader = ({
@@ -48,7 +49,8 @@ const DetailsPageHeader = ({
   isNewActionButtonVisible = false,
   newActionButtonProps,
   hasYpadding = true,
-  className = ''
+  className = '',
+  actionButtonType = 'button'
 }: DetailsPageHeaderProps) => {
   const walkmeInstance = useGetWalkmeInstance();
   const { tooltip: actionButtonTooltip, onClick: actionButtonOnClick, ...restOfActionButtonProps } = actionButtonProps || {};
@@ -84,7 +86,7 @@ const DetailsPageHeader = ({
     <div
       className={cn(
         `details-page-header flex flex-wrap items-center justify-between gap-2`,
-        hasXpadding ? 'px-2' : '',
+        hasXpadding ? '' : '',
         hasYpadding ? 'py-2' : '',
         className
       )}
@@ -92,31 +94,26 @@ const DetailsPageHeader = ({
       <div className="flex flex-grow flex-wrap items-center gap-2">
         {isAddButtonVisible && placement === 'left' ? (
           <>
-            <HtmlTooltip title={addButtonTooltip ?? ''} arrow placement="top" enterTouchDelay={0}>
-              <span>
-                <Button
-                  id={'add-menu-button'}
-                  variant={isMobile ? 'text' : 'outlined'}
-                  color="primary"
-                  size="small"
-                  startIcon={isMobile ? null : <Add />}
-                  onClick={AddClick}
-                  {...restOfAddButtonProps}
-                  aria-controls="add-menu"
-                  className={`${isMobile ? 'btn-outline-v1  with-border max-[600px]:[max-width:36px_!important]' : ''}`}
-                  endIcon={isMobile ? null : addButtonOnClick ? null : <ExpandMore fontSize="small" />}
-                >
-                  {isMobile ? <Add /> : 'Add'}
-                </Button>
-              </span>
-            </HtmlTooltip>
+            <ThemeButton
+              tooltip={addButtonTooltip ?? ''}
+              id={'add-menu-button'}
+              mobileTooltip="Add"
+              startIcon={isMobile ? null : <Add />}
+              onClick={AddClick}
+              {...restOfAddButtonProps}
+              aria-controls="add-menu"
+              mode="light"
+              iconForMobile={<Add />}
+              endIcon={isMobile ? null : addButtonOnClick ? null : <ExpandMore fontSize="small" />}
+            >
+              Add
+            </ThemeButton>
           </>
         ) : null}
         {isAddButtonVisible && (
           <Menu
             anchorEl={addAnchorEl}
             keepMounted
-            getContentAnchorEl={null}
             anchorOrigin={{
               vertical: 'bottom',
               horizontal: 'left'
@@ -134,24 +131,19 @@ const DetailsPageHeader = ({
       <div className="ml-auto flex flex-wrap items-center gap-2">
         {isAddButtonVisible && placement === 'right' ? (
           <>
-            <HtmlTooltip title={addButtonTooltip ?? ''} arrow placement="top" enterTouchDelay={0}>
-              <span>
-                <Button
-                  variant={isMobile ? 'text' : 'outlined'}
-                  color="primary"
-                  id={'details-page-add-button'}
-                  size="small"
-                  startIcon={isMobile ? null : <Add />}
-                  onClick={AddClick}
-                  {...restOfAddButtonProps}
-                  aria-controls="add-menu"
-                  className={`${isMobile ? 'btn-outline-v1  with-border !min-w-fit max-[600px]:[max-width:36px_!important]' : ''}`}
-                  endIcon={isMobile ? null : addButtonOnClick ? null : <ExpandMore fontSize="small" />}
-                >
-                  {isMobile ? <Add /> : 'Add'}
-                </Button>
-              </span>
-            </HtmlTooltip>
+            <ThemeButton
+              tooltip={addButtonTooltip ?? ''}
+              id={'details-page-add-button'}
+              startIcon={isMobile ? null : <Add />}
+              onClick={AddClick}
+              {...restOfAddButtonProps}
+              aria-controls="add-menu"
+              mode="light"
+              iconForMobile={<Add />}
+              endIcon={isMobile ? null : addButtonOnClick ? null : <ExpandMore fontSize="small" />}
+            >
+              Add
+            </ThemeButton>
           </>
         ) : null}
         {previewDownloadProps ? <PreviewDownload {...previewDownloadProps} /> : null}
@@ -159,31 +151,39 @@ const DetailsPageHeader = ({
         {isNewActionButtonVisible && <NewActionButton {...newActionButtonProps} />}
         {isActionButtonVisible ? (
           <>
-            <HtmlTooltip title={actionButtonTooltip ?? ''} arrow placement="top" enterTouchDelay={0}>
-              <span>
-                <Button
-                  variant={'outlined'}
-                  color="default"
+            {actionButtonType === 'iconButton' ? (
+              <HtmlTooltip title={actionButtonTooltip ?? 'Actions'}>
+                <IconButton
                   id={'details-page-action-button'}
-                  size="small"
                   onClick={ActionClick}
                   aria-controls="action-menu"
-                  className="new-dropdown-v1 min-h-[30px] max-[600px]:min-h-[32px] max-[600px]:[border:0px_!important] max-[600px]:[max-width:36px_!important]"
+                  sx={{ width: 32, height: 32, borderRadius: '4px' }}
+                  size="small"
                   {...restOfActionButtonProps}
+                  className="new-dropdown-v1"
                 >
-                  <span className="sr-only max-[600px]:not-sr-only max-[600px]:!h-[16px] max-[600px]:!w-[20px]">
-                    <FaCircleChevronDown size={16} className="" />
-                  </span>
-                  <span className="not-sr-only flex max-[600px]:sr-only">
-                    Actions <ExpandMore fontSize="small" />
-                  </span>
-                </Button>
-              </span>
-            </HtmlTooltip>
+                  <MoreVert />
+                </IconButton>
+              </HtmlTooltip>
+            ) : (
+              <ThemeButton
+                variant={'outlined'}
+                tooltip={actionButtonTooltip ?? ''}
+                id={'details-page-action-button'}
+                size="small"
+                onClick={ActionClick}
+                aria-controls="action-menu"
+                buttonType="yellow"
+                {...restOfActionButtonProps}
+                iconForMobile={<FaCircleChevronDown size={16} className="" />}
+                endIcon={<ExpandMore fontSize="small" />}
+              >
+                Actions
+              </ThemeButton>
+            )}
             <Menu
               anchorEl={actionAnchorEl}
               keepMounted
-              getContentAnchorEl={null}
               anchorOrigin={{
                 vertical: 'bottom',
                 horizontal: 'right'

@@ -1,13 +1,14 @@
 import { useEffect, useState, useContext } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import ThumbUpIcon from '@material-ui/icons/ThumbUp';
-import ThumbDownIcon from '@material-ui/icons/ThumbDown';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { Box, Button, Card, CardContent, Grid, Typography } from '@material-ui/core';
+import { Box, Button, Card, CardContent, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { AiOutlineEye } from 'react-icons/ai';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import { formatAmountWithCurrency, sidebarResource, quotation, CHILD_RESOURCE } from '../../constants/helpers';
+import { formatAmountWithCurrency, sidebarResource, quotation, CHILD_RESOURCE, DOA_STATUS } from '../../constants/helpers';
 import { startCase } from 'lodash';
 import { useData } from '../../StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -66,7 +67,7 @@ const DoaQuotationApproval = () => {
     setQuoteData(doaRequest.quotationDetail);
     fetchFields(doaRequest.quotationDetail);
     fetchRows(material, doaRequest.quotationDetail);
-    if (doaRequest?.versionDetail?.status !== 'Sent for DOA') {
+    if (doaRequest?.versionDetail?.status !== DOA_STATUS.sentForDoa) {
       setQStatus(false);
     }
   };
@@ -282,7 +283,7 @@ const DoaQuotationApproval = () => {
         {quoteData && (
           <Box mb={3}>
             <Grid container spacing={2}>
-              <Grid item xs={4}>
+              <Grid size={{ xs: 4 }}>
                 <Card>
                   <CardContent>
                     <Typography>Total Profit</Typography>
@@ -290,7 +291,7 @@ const DoaQuotationApproval = () => {
                   </CardContent>
                 </Card>
               </Grid>
-              <Grid item xs={4}>
+              <Grid size={{ xs: 4 }}>
                 <Card>
                   <CardContent>
                     <Typography>Total Cost Price</Typography>
@@ -298,7 +299,7 @@ const DoaQuotationApproval = () => {
                   </CardContent>
                 </Card>
               </Grid>
-              <Grid item xs={4}>
+              <Grid size={{ xs: 4 }}>
                 <Card>
                   <CardContent>
                     <Typography>Total Selling Price</Typography>

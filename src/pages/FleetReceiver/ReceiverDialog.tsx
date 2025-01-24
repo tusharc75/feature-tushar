@@ -1,4 +1,5 @@
-import { Box, Button, CircularProgress, Dialog, Grid, TextField } from '@material-ui/core';
+import { Box, Dialog, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import React, { useContext, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
@@ -6,13 +7,12 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const ReceiverDialog = ({ handleClose, handleSucess, data }) => {
-
   const toastConfig = useContext(CustomToastContext);
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -76,55 +76,27 @@ const ReceiverDialog = ({ handleClose, handleSucess, data }) => {
         </div>
         <Box marginY={2}>
           <Grid spacing={2} container>
-            <Grid item xs={12} sm={6} md={6}>
-              <TextField
-                variant="outlined"
-                type="text"
-                label="Job Number"
-                fullWidth
-                margin="dense"
-                value={data?.job?.jobNumber}
-              />
+            <Grid size={{xs:12, sm:6, md:6}}>
+              <TextField variant="outlined" type="text" label="Job Number" fullWidth margin="dense" size="small" value={data?.job?.jobNumber} />
             </Grid>
-            <Grid item xs={12} sm={6} md={6}>
-              <TextField
-                variant="outlined"
-                type="text"
-                label="PRS"
-                fullWidth
-                margin="dense"
-                value={data?.asset?.assetNumber}
-              />
+            <Grid size={{xs:12, sm:6, md:6}}>
+              <TextField variant="outlined" type="text" label="PRS" fullWidth margin="dense" size="small" value={data?.asset?.assetNumber} />
             </Grid>
-            <Grid item xs={12} sm={6} md={6}>
-              <TextField
-                variant="outlined"
-                type="text"
-                label="Fleet Number"
-                fullWidth
-                margin="dense"
-                value={data?.fleet?.fleetNumber}
-              />
+            <Grid size={{xs:12, sm:6, md:6}}>
+              <TextField variant="outlined" type="text" label="Fleet Number" fullWidth margin="dense" size="small" value={data?.fleet?.fleetNumber} />
             </Grid>
-            <Grid item xs={12} sm={6} md={6}>
-              <TextField
-                variant="outlined"
-                type="text"
-                label="Location"
-                fullWidth
-                margin="dense"
-                value={data?.job?.shippingAddress?.optionLabel}
-              />
+            <Grid size={{xs:12, sm:6, md:6}}>
+              <TextField variant="outlined" type="text" label="Location" fullWidth margin="dense" size="small" value={data?.job?.shippingAddress?.optionLabel} />
             </Grid>
           </Grid>
         </Box>
-        <div className={"detail-box-content"}>
-          <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
-          <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{'Receiver Information'}</h2>
+        <div className={'detail-box-content'}>
+          <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+          <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{'Receiver Information'}</h2>
         </div>
         <Box marginY={2}>
           <Grid spacing={2} container>
-            <Grid item xs={12} sm={6} md={6}>
+            <Grid size={{xs:12, sm:6, md:6}}>
               <FormTypes
                 fieldData={null}
                 values={dispatchData}
@@ -148,7 +120,7 @@ const ReceiverDialog = ({ handleClose, handleSucess, data }) => {
                 imageOrFileUploadCompletePercentage={null}
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={6}>
+            <Grid size={{xs:12, sm:6, md:6}}>
               <FormTypes
                 fieldData={null}
                 values={dispatchData}
@@ -172,7 +144,7 @@ const ReceiverDialog = ({ handleClose, handleSucess, data }) => {
                 imageOrFileUploadCompletePercentage={null}
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={6}>
+            <Grid size={{xs:12, sm:6, md:6}}>
               <TextField
                 variant="outlined"
                 type="text"
@@ -181,6 +153,7 @@ const ReceiverDialog = ({ handleClose, handleSucess, data }) => {
                 fullWidth
                 rows={3}
                 margin="dense"
+                size="small"
                 value={comment}
                 onChange={(e: any) => setComment(e.target.value)}
               />
@@ -189,29 +162,24 @@ const ReceiverDialog = ({ handleClose, handleSucess, data }) => {
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button
-          type="button"
-          variant="outlined"
-          color="primary"
-          size="small"
+        <ThemeButton
           onClick={() => {
             handleClose();
           }}
+          buttonType='transparent'
         >
           Cancel
-        </Button>
-        <CustomButton
-          loading={false}
-          variant="contained"
-          color="primary"
-          startIcon={submitting && <CircularProgress size={20} color="inherit" />}
-          disabled={submitting}
+        </ThemeButton>
+        <ThemeButton
           onClick={(e) => {
             handleReceive();
           }}
+          disabled={submitting}
+          isLoading={submitting}
+          buttonType='theme'
         >
           Receive
-        </CustomButton>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

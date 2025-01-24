@@ -1,18 +1,18 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Box, Button, CircularProgress, Dialog, Typography } from '@material-ui/core';
+import { Box, Dialog, Typography } from '@mui/material';
 import axiosInstance from 'src/axios/axiosInstance';
 import { ACTIVITY_RESOURCE, CustomDialogTransition, rentalManagement } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import ErrorIcon from '@material-ui/icons/Error';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
 import DashboardModal, { ModalHead } from 'src/components/DashboardModal';
-import Skeleton from '@material-ui/lab/Skeleton';
+import Skeleton from '@mui/material/Skeleton';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import routes from 'src/components/Helpers/Routes';
 import { CreateTask } from 'src/components/Activity/Task/CreateTask';
 import { isMobile, isTablet } from 'react-device-detect';
 import { SerializedAssetAvailableIllustration } from 'src/assets/svg/svgIcons';
 import { useData } from 'src/StateProvider/Provider';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 interface CssObj {
   [index: string]: React.CSSProperties;
@@ -215,16 +215,14 @@ export default function AssetAvailability({ rentalId, handleClose }) {
                     ?.filter((e) => !e.baseWarehouse)
                     ?.map((product) => <ShowProduct key={product._id} product={product} resources={resources} />)}
                   <div className="mt-3" style={{ ...styles.buttonContaier }}>
-                    <Button
-                      size="small"
-                      variant={'contained'}
-                      color="primary"
+                    <ThemeButton
                       onClick={() => {
                         setTaskDialog(true);
                       }}
+                      buttonType='theme'
                     >
                       Create Task
-                    </Button>
+                    </ThemeButton>
                   </div>
                 </div>
               </Box>

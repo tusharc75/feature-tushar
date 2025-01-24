@@ -1,7 +1,7 @@
-import { Chip, Dialog, IconButton, MenuItem, TextField } from '@material-ui/core';
-import Box from '@material-ui/core/Box';
-import { Delete as DeleteIcon } from '@material-ui/icons';
-import { Autocomplete } from '@material-ui/lab';
+import { Chip, Dialog, IconButton, MenuItem, TextField } from '@mui/material';
+import Box from '@mui/material/Box';
+import { Delete as DeleteIcon } from '@mui/icons-material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
@@ -101,7 +101,7 @@ const Note = () => {
                     <IconButton size="small" onClick={() => window.open(`${routes[d?.type].path}/detail/${d?.referenceId}`)}>
                       <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                     </IconButton>
-                    <Chip color="primary" label={`${routes[d?.type]?.title}`} />
+                    <Chip color="primary" label={`${resources[d?.type]?.titleSingular}`} />
                   </div>
                 );
               })
@@ -125,7 +125,7 @@ const Note = () => {
           <>
             <HtmlTooltip title={row.original?.canDelete ? 'Delete' : deleteDisable}>
               <span>
-                <IconButton disabled={!row.original?.canDelete} size="small" aria-label="Delete" onClick={() => setDeleteRecord(row.original)}>
+                <IconButton disabled={!row.original?.canDelete} size="small" aria-label="Delete" onClick={() => showConfirmBox(row.original)}>
                   <DeleteIcon fontSize="small" color={row.original?.canDelete ? 'error' : 'disabled'} />
                 </IconButton>
               </span>
@@ -364,12 +364,8 @@ const Note = () => {
       {isConfirmDialogVisible ? (
         <ConfirmationDialog
           open={isConfirmDialogVisible}
-          message={`Are you sure you want to delete ${
-            deleteRecord
-              ? `${resources?.activity?.titleSingular?.toLowerCase()} :
-            ${deleteRecord.name || 'Notes'}`
-              : `selected ${resources?.activity?.titlePlural?.toLowerCase()}`
-          } ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.note?.titleSingular?.toLowerCase()} : ${deleteRecord.name || 'Notes'}`
+            : `selected ${resources?.note?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             if (deleteRecord.id) setDeleteRecord({ id: null, name: null });
             setIsConformDialogVisible(false);
@@ -416,7 +412,7 @@ const Note = () => {
               setFullScreen((prevState) => !prevState);
             }}
             showManimizeMaximize={true}
-            // noteData={noteData}
+          // noteData={noteData}
           />
         </Dialog>
       )}
@@ -472,7 +468,7 @@ const LeftSideContents = ({
           fullWidth
           className={`flex-grow sm:min-w-[250px] sm:max-w-[270px]`}
           getOptionLabel={(option: any) => option.optionLabel || ''}
-          getOptionSelected={(option: any, value: any) => option.optionLabel === value.optionLabel}
+          isOptionEqualToValue={(option: any, value: any) => option.optionLabel === value.optionLabel}
           value={selectedResourceData}
           onChange={(event, newValue) => {
             setSelectedResourceData(newValue);

@@ -1,5 +1,5 @@
-import { Badge, Box, IconButton, MenuItem, Popover, useMediaQuery } from '@material-ui/core';
-import { ArrowBack, ChatBubbleOutlineOutlined } from '@material-ui/icons';
+import { Badge, Box, IconButton, MenuItem, Popover, useMediaQuery } from '@mui/material';
+import { ArrowBack, ChatBubbleOutlineOutlined } from '@mui/icons-material';
 import { useCallback, useContext, useState } from 'react';
 import { CustomChatNotificationCountContext } from '../../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -115,7 +115,7 @@ const ChatNotification = () => {
           toggle: true,
           _id: d._id
         })
-        .then(() => { })
+        .then(() => {})
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
@@ -127,17 +127,16 @@ const ChatNotification = () => {
         setAnchorEl(null);
         setChatOpen(true);
         setSelectedChat(selectedChat);
-      }
-      else if (d?.resourcePath !== '') {
+      } else if (d?.resourcePath !== '') {
         setAnchorEl(null);
-        history.push(d.resourcePath)
+        history.push(d.resourcePath);
       }
     }
   };
 
   const isReplayVisible = (d) => {
-    return Boolean(chatList.find((c) => c.id === d.chatterId)) || d?.resourcePath !== '' ? true : false
-  }
+    return Boolean(chatList.find((c) => c.id === d.chatterId)) || d?.resourcePath !== '' ? true : false;
+  };
 
   const handleClickHistory = (chat) => {
     setSelectedChat(chat);
@@ -157,7 +156,7 @@ const ChatNotification = () => {
     <>
       {isMobile ? (
         <>
-          <MenuItem onClick={anchorEl === null ? getAllNotifications : () => { }}>
+          <MenuItem onClick={anchorEl === null ? getAllNotifications : () => {}}>
             <Badge
               variant="dot"
               overlap="circular"
@@ -179,7 +178,7 @@ const ChatNotification = () => {
           color="inherit"
           title="Notifications"
           onClick={getAllNotifications}
-          className={`[padding:5px_!important] [margin-inline:8px_!important]`}
+          className={`[margin-inline:8px_!important] [padding:5px_!important]`}
         >
           <Badge variant="dot" overlap="circular" badgeContent={notification ? notification.count : 0} color="secondary">
             <ChatBubbleOutlineOutlined />
@@ -210,7 +209,7 @@ const ChatNotification = () => {
       >
         {newChat ? (
           <>
-            <div className="[border-bottom:1px_solid_var(--common-border-color)] flex justify-between items-center px-[20px] py-[10px]">
+            <div className="flex items-center justify-between px-[20px] py-[10px] [border-bottom:1px_solid_var(--common-border-color)]">
               <h6 className="text-[16px] font-semibold ">Start New Chat</h6>
               <HtmlTooltip title={'back'} enterTouchDelay={0} placement="top" arrow>
                 <span>

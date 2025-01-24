@@ -1,14 +1,14 @@
-import { IconButton, List, ListItem, ListItemText, Menu, MenuItem } from '@material-ui/core';
-import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
+import { IconButton, List, ListItem, ListItemText, Menu, MenuItem } from '@mui/material';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Chat, Delete } from '@material-ui/icons';
-import { Skeleton } from '@material-ui/lab';
+import { Chat, Delete } from '@mui/icons-material';
+import { Skeleton } from '@mui/material';
 import { groupBy } from 'lodash';
-import moment from 'moment';
 import { FiSidebar } from 'react-icons/fi';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { cn } from 'src/constants/helpers';
+import dayjs from 'dayjs';
 
 type HistorySidebarProps = {
   setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -62,18 +62,18 @@ const HistorySidebar = ({
       return;
     }
     const formatter = (date: Date) => {
-      const momentDate = moment(date);
-      const currentYear = moment().year();
-      const currentMonth = moment().month();
+      const dayjsDate = dayjs(date);
+      const currentYear = dayjs().year();
+      const currentMonth = dayjs().month();
       let format = '';
 
-      if (momentDate.year() < currentYear) {
-        format = momentDate.format('YYYY');
-      } else if (momentDate.month() === currentMonth) {
+      if (dayjsDate.year() < currentYear) {
+        format = dayjsDate.format('YYYY');
+      } else if (dayjsDate.month() === currentMonth) {
         format = `Previous 30 days`;
       } else {
         // Current year (other than current month)
-        format = momentDate.format('MMM');
+        format = dayjsDate.format('MMM');
       }
       return format;
     };
@@ -83,25 +83,20 @@ const HistorySidebar = ({
   }, []);
 
   function customSort(items) {
-    // Separate items into three arrays: Previous 30 days, months, and years
-    const months = [];
-    const years = [];
+    const monthList = [];
+    const yearList = [];
     const monthArray = ['Dec', 'Nov', 'Oct', 'Sep', 'Aug', 'Jul', 'Jun', 'May', 'Apr', 'Mar', 'Feb', 'Jan'];
-
     for (const item of items) {
       if (item === 'Previous 30 days') {
       } else if (monthArray.includes(item)) {
-        months.push(item);
+        monthList.push(item);
       } else {
-        years.push(item);
+        yearList.push(item);
       }
     }
-    // Sort months in reverse order
-    months.sort((a, b) => monthArray.findIndex((d) => d === a) - monthArray.findIndex((d) => d === b));
-    // Sort years in reverse order
-    years.sort((a, b) => b.localeCompare(a));
-    // Combine the arrays in the desired order
-    return ['Previous 30 days', ...months, ...years];
+    monthList.sort((a, b) => monthArray.findIndex((d) => d === a) - monthArray.findIndex((d) => d === b));
+    yearList.sort((a, b) => b.localeCompare(a));
+    return ['Previous 30 days', ...monthList, ...yearList];
   }
 
   useEffect(() => {
@@ -124,10 +119,8 @@ const HistorySidebar = ({
         <ThemeButton
           mobileTooltip="New Chat"
           iconForMobile={<Chat fontSize={'small'} />}
-          color="primary"
-          borderColor="none"
+          buttonType="theme"
           startIcon={<Chat fontSize={'small'} />}
-          size="small"
           onClick={() => hadleNewChat()}
           style={{ padding: 8 }}
         >

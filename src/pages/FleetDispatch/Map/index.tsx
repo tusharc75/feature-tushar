@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Box, CircularProgress, Dialog, Typography } from '@material-ui/core';
+import { Box, CircularProgress, Dialog, Typography } from '@mui/material';
 import { GoogleMap, InfoWindow, Marker } from '@react-google-maps/api';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import LocalShippingIcon from '@material-ui/icons/LocalShipping';
 
 const containerStyle = {
   minHeight: '500px',

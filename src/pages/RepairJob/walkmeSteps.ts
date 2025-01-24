@@ -3,12 +3,12 @@ import routes from 'src/components/Helpers/Routes';
 
 export const createRepairJobFlow = (resources): WalkmeData => {
   const data: WalkmeData = {
-    name: `Add ${resources?.repairJob?.titleSingular}`,
+    name: `Create ${resources?.repairJob?.titleSingular}`,
     url: '/repair-job',
     type: 'flow',
     steps: [
       {
-        title: `Add`,
+        title: `Create`,
         target: '#add-button',
         waitForStepInsertion: true
       },
@@ -44,7 +44,9 @@ export const generateAddExistingSerialisedAsset = (waitForStepInsertion: boolean
       },
       {
         target: `#serializedAssets_assign-table-checkbox-0`,
-        title: 'Select a SerialisedAsset'
+        title: 'Select a SerialisedAsset',
+        isPreviousButtonDisabled : true
+
       },
       {
         target: '#dialog-add-button',

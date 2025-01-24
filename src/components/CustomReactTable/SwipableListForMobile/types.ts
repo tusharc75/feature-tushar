@@ -6,9 +6,9 @@ export type TSwipableListInputProps = {
   table: any;
   allColumns: any;
   allowSelection: boolean;
-  dataRows: Row<any>[];
+  dataRows?: Row<any>[];
   dispatch: Dispatch<any>;
-  loading: boolean;
+  loading?: boolean;
   expander: boolean;
   backgroundColorClass?: (data: any) => string | null;
   renderedFrom: string;

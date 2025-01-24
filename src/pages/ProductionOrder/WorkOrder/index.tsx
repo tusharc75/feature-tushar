@@ -1,8 +1,8 @@
-import { Box, Button, IconButton, MenuItem, TextField, Typography, useMediaQuery } from '@material-ui/core';
-import { CheckCircle, CloudUpload, Delete } from '@material-ui/icons';
-import DescriptionIcon from '@material-ui/icons/Description';
-import SyncIcon from '@material-ui/icons/Sync';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, IconButton, MenuItem, TextField, Typography, useMediaQuery } from '@mui/material';
+import { CheckCircle, CloudUpload, Delete } from '@mui/icons-material';
+import DescriptionIcon from '@mui/icons-material/Description';
+import SyncIcon from '@mui/icons-material/Sync';
+import Autocomplete from '@mui/material/Autocomplete';
 import { flatMap, map, orderBy, startCase, uniq } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -40,6 +40,7 @@ import UploadDrawingDialog from './UploadDrawingDialog';
 import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -591,7 +592,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         toastConfig.setToastConfig({
           open: true,
           message: data.message,
-          severity: 'success'
+          type: 'success'
         });
       })
       .catch((err) => {
@@ -827,21 +828,15 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
             small={true}
           />
         )}
-        <HtmlTooltip title={isMobile ? '' : 'Upload Drawings'} enterTouchDelay={0} arrow placement="top">
-          <Button
-            variant={isMobile ? 'text' : 'outlined'}
-            className={`${isMobile ? 'btn-outline-v1  with-border max-[600px]:[max-width:36px_!important]' : ''}`}
-            color="primary"
-            size="small"
-            startIcon={isMobile ? null : <CloudUpload />}
-            onClick={() => {
-              setOpenUploadDrawingDialog(true);
-            }}
-            aria-controls="add-menu"
-          >
-            {isMobile ? <CloudUpload /> : 'Upload Drawings'}
-          </Button>
-        </HtmlTooltip>
+        <ThemeButton
+          onClick={() => {
+            setOpenUploadDrawingDialog(true);
+          }}
+          iconForMobile={<CloudUpload />}
+          mobileTooltip="Upload Drawings"
+        >
+          Upload Drawings
+        </ThemeButton>
       </>
     );
   };
@@ -1000,13 +995,12 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         <ConfirmationDialog
           okBtnLoading={isSubmitting}
           open={showServiceActionConfirmBox.open}
-          message={`Are you sure you want to ${
-            showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed
-              ? 'complete'
-              : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
-                ? 'skip'
-                : 'revert'
-          } this Service(s)`}
+          message={`Are you sure you want to ${showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed
+            ? 'complete'
+            : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
+              ? 'skip'
+              : 'revert'
+            } this Service(s)`}
           onClose={() => {
             setShowServiceActionConfirmBox({ open: false, action: '' });
           }}
@@ -1195,8 +1189,8 @@ const ActionButtonMenuItems = ({
         }}
         disabled={
           selectedRecords?.length &&
-          selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || (d.type === MATERIAL_TYPE.product && !d?.parentId)) &&
-          selectedRecords?.every((d) => d.workOrder?._id === selectedRecords[0]?.workOrder?._id)
+            selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || (d.type === MATERIAL_TYPE.product && !d?.parentId)) &&
+            selectedRecords?.every((d) => d.workOrder?._id === selectedRecords[0]?.workOrder?._id)
             ? false
             : true
         }
@@ -1215,8 +1209,8 @@ const ActionButtonMenuItems = ({
       <MenuItem
         disabled={
           checkUniqWorkOrder() &&
-          (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
-            selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length === 1)
+            (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
+              selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length === 1)
             ? false
             : true
         }

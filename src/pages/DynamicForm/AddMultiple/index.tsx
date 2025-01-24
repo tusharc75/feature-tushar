@@ -1,18 +1,18 @@
 import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomDialogTransition, getObjKeys } from 'src/constants/helpers';
-import { Box, Button, CircularProgress, Dialog, TableBody, TableCell, TableHead, TableRow } from '@material-ui/core';
+import { Box, Dialog, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { isEmpty, isEqual } from 'lodash';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import CustomButton from '../../../components/Helpers/CustomButton';
 import ConfirmCancelDialog from 'src/components/ConfirmCancelDialog';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import MaUTable from '@material-ui/core/Table';
-import { Add, Delete } from '@material-ui/icons';
+import MaUTable from '@mui/material/Table';
+import { Add, Delete } from '@mui/icons-material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 function AddMultiple({ resource, referenceData = null, onClose, onSuccess }) {
   const toastConfig = useContext(CustomToastContext);
@@ -185,7 +185,7 @@ function AddMultiple({ resource, referenceData = null, onClose, onSuccess }) {
         <Fragment>
           <CustomDialogHeader
             title={title}
-            onClose={(e, reason) => {
+            onClose={() => {
               onClose();
               if (!isEqual(ref.current.values, entryValues)) {
                 setShowConfirmDialog(true);
@@ -206,15 +206,15 @@ function AddMultiple({ resource, referenceData = null, onClose, onSuccess }) {
                 overflow: 'auto',
                 height: '100%'
               }}
-              className="border custom-react-table editable-table-v1"
+              className="custom-react-table editable-table-v1 border"
             >
-              <MaUTable size="small" className="tableWrap table sticky">
+              <MaUTable size="small" className="tableWrap sticky table">
                 <TableHead style={{ overflowY: 'auto', overflowX: 'hidden' }} className="header">
                   <TableRow key={'thead'} className="tr">
                     {entries[0]?.map((field, index) => (
                       <TableCell key={`${index}-${field?.fieldName}-head`} className="th text-truncate table-header overflow-initial">
                         <div className="d-flex align-items-center justify-content-space-between pos-rel">
-                          <div className="d-flex gap-2 align-items-center">
+                          <div className="d-flex align-items-center gap-2">
                             <span>{field?.fieldLabel}</span>
                           </div>
                         </div>
@@ -308,12 +308,7 @@ function AddMultiple({ resource, referenceData = null, onClose, onSuccess }) {
             </div>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button
-              disabled={submitting}
-              type="button"
-              variant="outlined"
-              color="primary"
-              size="small"
+            <ThemeButton
               onClick={() => {
                 if (!isEmpty(entryValues)) {
                   setShowConfirmDialog(true);
@@ -321,26 +316,24 @@ function AddMultiple({ resource, referenceData = null, onClose, onSuccess }) {
                   onClose();
                 }
               }}
+              buttonType='transparent'
             >
               Cancel
-            </Button>
-            <CustomButton
-              loading={loading}
-              variant="contained"
-              color="primary"
-              startIcon={submitting && <CircularProgress size={20} color="inherit" />}
-              disabled={submitting || isEmpty(entryValues)}
+            </ThemeButton>
+            <ThemeButton
               onClick={(e) => {
                 e.preventDefault();
                 handleSubmit(entryValues);
               }}
+              disabled={submitting || isEmpty(entryValues)}
+              isLoading={submitting}
+              buttonType='theme'
             >
               Save
-            </CustomButton>
+            </ThemeButton>
           </CustomDialogFooter>
           {showConfirmDialog ? (
             <ConfirmCancelDialog
-              close={() => setShowConfirmDialog(false)}
               open={showConfirmDialog}
               onSave={() => {
                 setShowConfirmDialog(false);

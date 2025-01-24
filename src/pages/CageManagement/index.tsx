@@ -1,7 +1,8 @@
-import { Grid, IconButton, TextField } from '@material-ui/core';
-import CropFreeIcon from '@material-ui/icons/CropFree';
-import HistoryIcon from '@material-ui/icons/History';
-import { Autocomplete } from '@material-ui/lab';
+import { IconButton, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import CropFreeIcon from '@mui/icons-material/CropFree';
+import HistoryIcon from '@mui/icons-material/History';
+import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
@@ -140,10 +141,9 @@ const CageManagement = () => {
   return (
     <Fragment>
       <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
+        <Grid size={{ xs:10, sm:11, md:4}}>
           <CustomBreadCrumbs routes={[{ ...routes.cageManagement, title: resources?.cageManagement?.titlePlural }]} />
         </Grid>
-        <Grid item md={8} sm={11} xs={10}></Grid>
       </Grid>
       <CustomContainer>
         <ListingPageHeader
@@ -216,7 +216,7 @@ const LeftSideContent = ({ plantOptions, plantId, setPlantId, productCategoryLis
         options={plantOptions}
         getOptionLabel={(option: any) => option.warehouseName}
         disableClearable
-        getOptionSelected={(option: any, val) => option.warehouseId === val}
+        isOptionEqualToValue={(option: any, val) => option.warehouseId === val}
         size={'small'}
         value={
           plantOptions.filter((data) => data.warehouseId === plantId).length ? plantOptions.filter((data) => data.warehouseId === plantId)[0] : ''
@@ -235,7 +235,7 @@ const LeftSideContent = ({ plantOptions, plantId, setPlantId, productCategoryLis
         className="md:max-w-[250px]"
         options={productCategoryList}
         getOptionLabel={(option: any) => (option ? option.name : '')}
-        getOptionSelected={(option: any, val) => option._id === val}
+        isOptionEqualToValue={(option: any, val) => option._id === val}
         value={
           productCategoryList.find((data) => data._id === productCategory) ? productCategoryList.find((data) => data._id === productCategory) : ''
         }

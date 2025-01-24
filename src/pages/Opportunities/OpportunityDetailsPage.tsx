@@ -1,20 +1,17 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import { Edit } from '@material-ui/icons';
-import { Skeleton } from '@material-ui/lab';
+import { Box } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import { Skeleton } from '@mui/material';
 import { cloneDeep } from 'lodash';
-import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdDelete } from 'react-icons/md';
 import { useHistory, useParams } from 'react-router-dom';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
-import { SVG } from '../../assets';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import routes from '../../components/Helpers/Routes';
-import ProcessFlow from '../../components/ProcessFlow';
 import ProjectInAccordion from '../../components/ProjectInAccordion/ProjectInAccordion';
 import QuotesInAccordion from '../../components/QuotesInAccordion/QuotesInAccordion';
 import DetailsPage from '../../components/Shared/DetailsPage';
@@ -28,8 +25,7 @@ import {
   processFieldName,
   sidebarResource,
   stepsToIgnoreManualCompleteForOpportunity,
-  supplierContact,
-  yyyyMMDD
+  supplierContact
 } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -46,6 +42,8 @@ import Step from '../DynamicForm/Step';
 import QuotationInAccordion from 'src/components/QuotationInAccordion/QuotationInAccordion';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useTableReducer } from 'src/components/CustomReactTable';
+import ContentFullScreen from 'src/components/ContentFullScreen';
+import Steps from 'src/components/Steps';
 
 interface StepInterface extends stepIconInterface {
   text: string;
@@ -96,7 +94,6 @@ function OpportunityDetailsPage() {
   });
   const [supplierAccountOptions, setSupplierAccountOptions] = useState([]);
   const [loadingSupplierAccounts, setLoadingSupplierAccounts] = useState(false);
-  const [contactsEmailsData, setContactsEmailsData] = useState([]);
   const [notToBeRemovedContacts, setNotToBeRemovedContacts] = useState([]);
 
   const [showAdditionalField, setShowAdditionalField] = useState(false);
@@ -107,28 +104,23 @@ function OpportunityDetailsPage() {
     switch (true) {
       case name === 'New':
         return 'add';
-        break;
       case name === 'Prospecting':
         return 'prospecting';
-        break;
       case name === 'Proposal':
         return 'proposal';
-        break;
       case name === 'Negotiating':
         return 'negotiating';
-        break;
       case name === 'Closed':
         return 'endIcon';
-        break;
       default:
         return 'add';
-        break;
     }
   };
 
   const { opportunityResource, opportunityApi } = opportunity;
   const [projectSales, setProjectSales] = useState([]);
   const [typeCreateProjectSalesDialog, setTypeCreateProjectSalesDialog] = useState([{ id: id, type: opportunity.opportunityResource }]);
+  const [stepFullScreen, setStepFullScreen] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -193,7 +185,6 @@ function OpportunityDetailsPage() {
         setAllowedToEdit(permissions?.opportunity?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.opportunity, data));
         setAllowedToDelete(permissions?.opportunity?.isDelete && checkIsAllowedToDelete(user, sidebarResource.opportunity, data.owner.optionValue));
         setOpportunityData(data);
-        handleContactsEmails(data);
 
         if (data?.staticData?.notToBeRemoved && typeof data.staticData.notToBeRemoved === 'object') {
           let ids = [];
@@ -300,27 +291,6 @@ function OpportunityDetailsPage() {
         });
     } else {
       setShowAddSupplierContactsDialog(showDialog);
-    }
-  };
-
-  const getContactEmails = (contacts) => {
-    return contacts.reduce((emails, contact) => {
-      if (contact?.email) emails.push(contact.email);
-      return emails;
-    }, []);
-  };
-
-  const handleContactsEmails = (opportunityData) => {
-    let data = [];
-    if (opportunityData && opportunityData?.staticData) {
-      const { customerContact, supplierContact } = opportunityData?.staticData;
-      if (customerContact && customerContact.length) {
-        data = getContactEmails(customerContact);
-      }
-      if (supplierContact && supplierContact.length) {
-        data = [...data, ...getContactEmails(supplierContact)];
-      }
-      if (data.length > 0) setContactsEmailsData(data);
     }
   };
 
@@ -436,7 +406,6 @@ function OpportunityDetailsPage() {
 
   const handleUpdateOpportunity = (supplierAccounts) => {
     let newFields = [];
-
     opportunityFields.filter((d) => d.isUpdate).map((_f) => newFields.push(_f.fieldData));
 
     let values = {
@@ -517,8 +486,13 @@ function OpportunityDetailsPage() {
       });
   };
 
-  const handleMarkAsCompleted = (data) => {
+  const handleMarkAsCompleted = (data = null) => {
     let tempActiveStep = data && data?.isSetBackStep ? activeStep - 1 : activeStep < steps.length - 1 ? activeStep + 1 : activeStep;
+    if (data?.isSetBackStep && data?.isStepBackIdx !== null) {
+      if(data?.isStepBackIdx===-1) return;
+      tempActiveStep = data?.isStepBackIdx;
+    }
+
     if (tempActiveStep == steps.length - 1 && showAdditionalField) {
       setOpenAdditionalDialog(true);
     } else {
@@ -555,23 +529,24 @@ function OpportunityDetailsPage() {
       <Box className="main-container-v1">
         <Box className="headerbox-v1">
           <Box className="nav-v1">
-            <CustomBreadCrumbs routes={[{ ...routes.opportunity, title: resources?.opportunity?.titlePlural }, { title: opportunityData?.opportunityName }]} />
+            <CustomBreadCrumbs
+              routes={[{ ...routes.opportunity, title: resources?.opportunity?.titlePlural }, { title: opportunityData?.opportunityName }]}
+            />
           </Box>
           <Box className="controls-v1">
             <Box className="control-buttons-v1">
               {opportunityData ? (
                 <>
                   {allowedToEdit ? (
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      size="small"
+                    <ThemeButton
+                      iconForMobile={<EditIcon />}
                       onClick={() => {
                         setOpenUpdateDialog(true);
                       }}
-                      className={'btn-outline-v1'}
+                      mobileTooltip={'Edit'}
                     >
-                      {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                    </Button>
+                      {'Edit'}
+                    </ThemeButton>
                   ) : null}
 
                   {allowedToDelete ? (
@@ -600,113 +575,129 @@ function OpportunityDetailsPage() {
             <CustomTab value={0}>Details</CustomTab>
             {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 1}>{tab?.tabName}</CustomTab>)}
           </CustomTabs>
-          <TabPanel value={currentTabIndex} index={0}>
-            <ProcessFlow
-              disableBackNext={allowedToEdit ? false : true}
-              steps={steps}
-              activeStep={activeStep}
-              handleMarkAsCompleted={handleMarkAsCompleted}
-            />
-            {loading || !opportunityFields.length ? (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-              </Grid>
-            ) : (
-              <DetailsPage data={copyOfOpportunityData} fields={opportunityFields} />
-            )}
-            <div className="pt-3 ">
-              {opportunityData && permissions?.supplierContact?.isRead && (
-                <Box mb={2}>
-                  <OpportunityContacts
-                    contacts={cloneDeep(opportunityData?.staticData?.supplierContact)}
-                    title="Supplier Contacts"
-                    contactApi={supplierContact.contactApi}
-                    isExpanded={expanded.supplierContacts}
-                    onAddContact={() => {
-                      fetchSupplierContactData(true);
-                    }}
-                    onSetExpanded={() => {
-                      setExpanded({
-                        ...expanded,
-                        supplierContacts: !expanded.supplierContacts
-                      });
-                    }}
-                    recordsPerLine={recordsPerLine}
-                    accounts={cloneDeep(opportunityData?.supplierAccount)}
-                    allowedToEdit={allowedToEdit}
-                  />
-                </Box>
+          <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+            <TabPanel value={currentTabIndex} index={0}>
+              <Steps
+                currentStep={activeStep + 1}
+                isNextStep={allowedToEdit && steps[activeStep + 1]?.canCompleteManually}
+                isPrevStep={allowedToEdit && activeStep > 0}
+                isStepEnded={activeStep === steps.length - 1}
+                nextStep={steps[activeStep + 1]?.text}
+                setCurrentStep={setActiveStep}
+                steps={steps}
+                handleNext={() => handleMarkAsCompleted()}
+                handlePrev={() => handleMarkAsCompleted({ isSetBackStep: true })}
+                stepFullScreen={stepFullScreen}
+                setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
+                showExtraStep={true}
+                updateStatus={(currIdx)=>{
+                  if(currIdx<=activeStep){
+                    setActiveStep(currIdx-1);
+                    handleMarkAsCompleted({ isSetBackStep: true, isStepBackIdx: currIdx-1 });
+                  }
+                }}
+              />
+              {loading || !opportunityFields.length ? (
+                <div className="p-2">
+                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                </div>
+              ) : (
+                <DetailsPage data={copyOfOpportunityData} fields={opportunityFields} />
               )}
-              {opportunityData && permissions?.customerContact?.isRead && (
-                <Box mb={2}>
-                  <OpportunityContacts
-                    contacts={cloneDeep(opportunityData?.staticData?.customerContact)}
-                    title="Customer Contacts"
-                    isExpanded={expanded['customerContacts']}
-                    contactApi={customerContact.contactApi}
-                    onAddContact={() => {
-                      fetchCustomerContactData(true);
-                    }}
-                    onSetExpanded={() => {
-                      setExpanded({
-                        ...expanded,
-                        customerContacts: !expanded.customerContacts
-                      });
-                    }}
-                    recordsPerLine={recordsPerLine}
-                    saveContactToOpportunity={handleAssignContacts}
-                    accountId={opportunityData?.customerAccount?.optionValue}
-                    allowedToEdit={allowedToEdit}
-                  />
-                </Box>
-              )}
-              {permissions?.projectSales?.isRead && (
-                <Box mb={2}>
-                  <ProjectInAccordion
+              <div className="pt-3 ">
+                {opportunityData && permissions?.supplierContact?.isRead && (
+                  <Box mb={2}>
+                    <OpportunityContacts
+                      contacts={cloneDeep(opportunityData?.staticData?.supplierContact)}
+                      title="Supplier Contacts"
+                      contactApi={supplierContact.contactApi}
+                      isExpanded={expanded.supplierContacts}
+                      onAddContact={() => {
+                        fetchSupplierContactData(true);
+                      }}
+                      onSetExpanded={() => {
+                        setExpanded({
+                          ...expanded,
+                          supplierContacts: !expanded.supplierContacts
+                        });
+                      }}
+                      recordsPerLine={recordsPerLine}
+                      accounts={cloneDeep(opportunityData?.supplierAccount)}
+                      allowedToEdit={allowedToEdit}
+                    />
+                  </Box>
+                )}
+                {opportunityData && permissions?.customerContact?.isRead && (
+                  <Box mb={2}>
+                    <OpportunityContacts
+                      contacts={cloneDeep(opportunityData?.staticData?.customerContact)}
+                      title="Customer Contacts"
+                      isExpanded={expanded['customerContacts']}
+                      contactApi={customerContact.contactApi}
+                      onAddContact={() => {
+                        fetchCustomerContactData(true);
+                      }}
+                      onSetExpanded={() => {
+                        setExpanded({
+                          ...expanded,
+                          customerContacts: !expanded.customerContacts
+                        });
+                      }}
+                      recordsPerLine={recordsPerLine}
+                      saveContactToOpportunity={handleAssignContacts}
+                      accountId={opportunityData?.customerAccount?.optionValue}
+                      allowedToEdit={allowedToEdit}
+                    />
+                  </Box>
+                )}
+                {permissions?.projectSales?.isRead && (
+                  <Box mb={2}>
+                    <ProjectInAccordion
+                      recordsPerLine={3}
+                      projectSales={projectSales}
+                      type={typeCreateProjectSalesDialog}
+                      fetchData={fetchRelatedData}
+                      permissions={permissions}
+                      isAddProjectSale={true}
+                      isAllowedToEdit={allowedToEdit}
+                      accountId={opportunityData?._id}
+                      accountName={opportunityData?.opportunityName}
+                      resource={sidebarResource.opportunity}
+                      resources={resources}
+                    />
+                  </Box>
+                )}
+                {permissions?.quoteBuilder?.isRead && (
+                  <Box mb={2}>
+                    <QuotesInAccordion
+                      recordsPerLine={3}
+                      quotes={quotes}
+                      fetchData={fetchRelatedData}
+                      quoteBuilderPermission={permissions.quoteBuilder}
+                      opportunityId={id}
+                      accountId={opportunityData?.customerAccount?.optionValue}
+                      opportunityName={opportunityData?.opportunityName}
+                      marketSegmentId={opportunityData?.marketSegment?.optionValue}
+                      subMarketSegmentId={opportunityData?.subMarketSegment?.optionValue}
+                      currency={opportunityData?.currency}
+                      estimatedAmount={opportunityData?.estimatedAmount}
+                      isRenderedFromOpportunity={true}
+                      allowedToEdit={allowedToEdit}
+                    />
+                  </Box>
+                )}
+                {permissions?.quotation?.isRead && (
+                  <QuotationInAccordion
                     recordsPerLine={3}
-                    projectSales={projectSales}
-                    type={typeCreateProjectSalesDialog}
+                    quotations={quotations}
                     fetchData={fetchRelatedData}
-                    permissions={permissions}
-                    isAddProjectSale={true}
-                    isAllowedToEdit={allowedToEdit}
-                    accountId={opportunityData?._id}
-                    accountName={opportunityData?.opportunityName}
-                    resource={sidebarResource.opportunity}
-                    resources={resources}
-                  />
-                </Box>
-              )}
-              {permissions?.quoteBuilder?.isRead && (
-                <Box mb={2}>
-                  <QuotesInAccordion
-                    recordsPerLine={3}
-                    quotes={quotes}
-                    fetchData={fetchRelatedData}
-                    quoteBuilderPermission={permissions.quoteBuilder}
-                    opportunityId={id}
-                    accountId={opportunityData?.customerAccount?.optionValue}
-                    opportunityName={opportunityData?.opportunityName}
-                    marketSegmentId={opportunityData?.marketSegment?.optionValue}
-                    subMarketSegmentId={opportunityData?.subMarketSegment?.optionValue}
-                    currency={opportunityData?.currency}
-                    estimatedAmount={opportunityData?.estimatedAmount}
-                    isRenderedFromOpportunity={true}
+                    opportunityData={opportunityData}
                     allowedToEdit={allowedToEdit}
                   />
-                </Box>
-              )}
-              {permissions?.quotation?.isRead && (
-                <QuotationInAccordion
-                  recordsPerLine={3}
-                  quotations={quotations}
-                  fetchData={fetchRelatedData}
-                  opportunityData={opportunityData}
-                  allowedToEdit={allowedToEdit}
-                />
-              )}
-            </div>
-          </TabPanel>
+                )}
+              </div>
+            </TabPanel>
+          </ContentFullScreen>
           {resourceData &&
             resourceData?.tabs?.length > 0 &&
             resourceData?.tabs?.map((tab, i) => {
@@ -728,7 +719,7 @@ function OpportunityDetailsPage() {
         {showConfirmBox ? (
           <ConfirmationDialog
             open={showConfirmBox}
-            message={`Are you sure you want to delete ${resources?.opportunity?.titleSingular?.toLowerCase()} : ${opportunityData?.opportunityName || ''} ?`}           
+            message={`Are you sure you want to delete ${resources?.opportunity?.titleSingular?.toLowerCase()} : ${opportunityData?.opportunityName || ''} ?`}
             onClose={() => setShowConfirmBox(false)}
             onOk={handleDeleteOpportunity}
           />

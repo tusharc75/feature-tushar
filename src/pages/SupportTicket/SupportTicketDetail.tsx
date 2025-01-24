@@ -1,15 +1,15 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import { Edit } from '@material-ui/icons';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import EditIcon from '@mui/icons-material/Edit';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import { SUPPORT_TICKET_STATUS, checkIsAllowedToDelete, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -64,7 +64,9 @@ const SupportTicketDetail = () => {
         [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id) &&
         data?.status !== SUPPORT_TICKET_STATUS.completed;
       setAllowedToEdit(isAllowedToEdit);
-      setAllowedToDelete(checkIsAllowedToDelete(user, sidebarResource.supportTicket, data.owner.optionValue) && data?.status !== SUPPORT_TICKET_STATUS.completed);
+      setAllowedToDelete(
+        checkIsAllowedToDelete(user, sidebarResource.supportTicket, data.owner.optionValue) && data?.status !== SUPPORT_TICKET_STATUS.completed
+      );
       setSupportTicketData(data);
       setLoading(false);
     } catch (error) {
@@ -139,19 +141,19 @@ const SupportTicketDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ ...routes.supportTicket, title: resources?.supportTicket?.titlePlural }, { title: supportTicketData?.supportTicketNumber }]} />
+          <CustomBreadCrumbs routes={[routes.supportTicket, { title: supportTicketData?.supportTicketNumber }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {supportTicketData?.status === SUPPORT_TICKET_STATUS.completed && (
-              <Button disabled={loading} variant={'outlined'} color="default" size="small" className="btn-outline-v1" onClick={handleReopenStatus}>
+              <ThemeButton iconForMobile={false} onClick={handleReopenStatus} disabled={loading} mobileTooltip={'Re-Open'}>
                 {'Re-Open'}
-              </Button>
+              </ThemeButton>
             )}
             {allowedToEdit && (
-              <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className={'btn-outline-v1'} onClick={handleOpenUpdateDialog}>
-                {isMobile && !isTablet ? <Edit /> : 'Edit'}
-              </Button>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                {'Edit'}
+              </ThemeButton>
             )}
             {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
           </Box>
@@ -159,19 +161,15 @@ const SupportTicketDetail = () => {
       </Box>
       <Box className={'detail-container-v1'}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0}>
-            Details
-          </CustomTab>
-          <CustomTab value={1}>
-            Activity
-          </CustomTab>
+          <CustomTab value={0}>Details</CustomTab>
+          <CustomTab value={1}>Activity</CustomTab>
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
             {loading || !fields?.length ? (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-              </Grid>
+              <div className="p-2">
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+              </div>
             ) : (
               <>
                 <DetailsPage data={supportTicketData} fields={fields} />
@@ -186,7 +184,7 @@ const SupportTicketDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.supportTicket?.titleSingular?.toLowerCase()} : ${supportTicketData?.supportTicketNumber} ?`}
+          message={`Are you sure you want to delete support ticket : ${supportTicketData?.supportTicketNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

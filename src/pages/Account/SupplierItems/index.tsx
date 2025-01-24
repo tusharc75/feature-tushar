@@ -1,4 +1,4 @@
-import { Button, IconButton } from '@material-ui/core';
+import { IconButton } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
@@ -9,10 +9,10 @@ import { camelCase } from 'lodash';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
-import { ExpandMore } from '@material-ui/icons';
-import { Menu, MenuItem, Box } from '@material-ui/core';
+import { ExpandMore } from '@mui/icons-material';
+import { Menu, MenuItem, Box } from '@mui/material';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialog';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
@@ -20,6 +20,7 @@ import { useHistory } from 'react-router-dom';
 import queryString from 'query-string';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
   const history = useHistory();
@@ -88,7 +89,7 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
               setShowDeleteConfirmBox(true);
             }}
           >
-            <DeleteIcon color="error" />
+            <DeleteIcon color="error" fontSize="small" />
           </IconButton>
         </HtmlTooltip>
       </>
@@ -193,18 +194,15 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
           additionalParams={``}
         />
       </Box>
-      <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-        <CustomTab value={0} label={'Product Category'} primaryColor={true} />
-        <CustomTab value={1} label={'Products'} primaryColor={true} />
-        <CustomTab value={2} label={'Assets'} primaryColor={true} />
+      <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
+        <CustomTab value={0} label={'Product Category'} />
+        <CustomTab value={1} label={'Products'} />
+        <CustomTab value={2} label={'Assets'} />
       </CustomTabs>
       <Box display="flex" justifyContent={'space-between'}>
         {allowedToEdit && (
           <>
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
+            <ThemeButton
               onClick={() => {
                 if (tabValue === 0) {
                   setAssignDialog({ open: true, type: 'productCategory', data: dataRows });
@@ -216,23 +214,19 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
               }}
             >
               Add {tabValue === 0 ? 'Product Category' : tabValue === 1 ? 'Product' : 'Asset'}
-            </Button>
-            <Button
-              variant="outlined"
-              color="default"
-              size="small"
+            </ThemeButton>
+            <ThemeButton
               onClick={openActions}
-              aria-controls="action-menu"
+              mobileTooltip="Actions"
               disabled={selectedRecords.length === 0}
               endIcon={<ExpandMore />}
-              className="new-dropdown-v1"
+              buttonType="yellow"
             >
               Actions
-            </Button>
+            </ThemeButton>
             <Menu
               anchorEl={anchorEl}
               keepMounted
-              getContentAnchorEl={null}
               anchorOrigin={{
                 vertical: 'bottom',
                 horizontal: 'left'

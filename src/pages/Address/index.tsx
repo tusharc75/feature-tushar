@@ -1,6 +1,6 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { Box, IconButton, MenuItem } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -76,7 +76,7 @@ const Address = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon fontSize='small' color="error" />
+              <DeleteIcon fontSize="small" color="error" />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -170,12 +170,12 @@ const Address = () => {
         <MenuItem
           disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
           onClick={() => {
-            if (selectedRecords.length === 1){ 
+            if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-              }else{
-                setDeleteRecord(null)
-              }            
-              setShowDeleteConfirmBox(true);
+            } else {
+              setDeleteRecord(null);
+            }
+            setShowDeleteConfirmBox(true);
           }}
         >
           {`Delete (${selectedRecords?.length})`}
@@ -238,8 +238,12 @@ const Address = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.address?.titleSingular?.toLowerCase()} :
-            ${deleteRecord?.fullAddress}` : `selected ${resources?.address?.titlePlural?.toLowerCase()}`} ?`}
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.address?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.fullAddress}`
+              : `selected ${resources?.address?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

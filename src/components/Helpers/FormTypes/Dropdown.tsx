@@ -1,6 +1,6 @@
-import { Box, Grid, IconButton, ListSubheader, TextField, useMediaQuery } from '@material-ui/core';
-import AddCircleIcon from '@material-ui/icons/AddCircle';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, Grid, IconButton, ListSubheader, TextField, useMediaQuery } from '@mui/material';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase, has, isEmpty } from 'lodash';
 import React, { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import { ListChildComponentProps, VariableSizeList } from 'react-window';
@@ -205,10 +205,14 @@ function dropdownOptions(options, values, fields, fieldData, newAddressOptionLis
     const lookupResource = fields?.find((e) => e.fieldName === lookupDependentOn)?.lookupResource;
     const value = values[lookupDependentOn] || values[camelCase(lookupResource)];
     if (Array.isArray(value) && value?.length) {
-      const newOptions = options?.filter((option: any) => value.some((val) => option[lookupDependentOn]?.includes(val) || option[camelCase(lookupResource)]?.includes(val))) || [];
+      const newOptions =
+        options?.filter((option: any) =>
+          value.some((val) => option[lookupDependentOn]?.includes(val) || option[camelCase(lookupResource)]?.includes(val))
+        ) || [];
       optionsToShow.push(...newOptions);
     } else if (!Array.isArray(value) && value) {
-      const newOptions = options?.filter((option: any) => option[lookupDependentOn]?.includes(value) || option[camelCase(lookupResource)]?.includes(value)) || [];
+      const newOptions =
+        options?.filter((option: any) => option[lookupDependentOn]?.includes(value) || option[camelCase(lookupResource)]?.includes(value)) || [];
       optionsToShow.push(...newOptions);
     }
   }
@@ -361,6 +365,9 @@ function Dropdown({
           if (filterFieldDropDownOptions?.length === 1) {
             setFieldValue(ele?.fieldName, filterFieldDropDownOptions[0]?.optionValue);
             handleLookUpDependent(ele?.fieldName, filterFieldDropDownOptions[0], fields, setFieldValue);
+          } else if (filterFieldDropDownOptions?.find((f) => f?.default === true)) {
+            setFieldValue(ele?.fieldName, filterFieldDropDownOptions?.find((f) => f?.default === true)?.optionValue);
+            handleLookUpDependent(ele?.fieldName, filterFieldDropDownOptions?.find((f) => f?.default === true), fields, setFieldValue);
           }
         }
       });
@@ -398,7 +405,7 @@ function Dropdown({
                     ? [...dropdownOptions(option, values, fields, fieldData)].filter((data: any) => values[name].includes(data.optionValue))
                     : []
                 }
-                getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
                 onChange={
                   onChange
                     ? (e, value: any, reason) => {
@@ -455,7 +462,7 @@ function Dropdown({
                   disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
                   options={dropdownOptions(option, values, fields, fieldData, newAddressOptionList) || []}
                   getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                  getOptionSelected={(option: any, val) => option.optionValue === val}
+                  isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                   ListboxComponent={ListboxComponent as React.ComponentType<React.HTMLAttributes<HTMLElement>>}
                   value={
                     [...dropdownOptions(option, values, fields, fieldData, newAddressOptionList)].find(
@@ -473,6 +480,15 @@ function Dropdown({
                             setFieldValue(val.fieldName, val.value);
                           });
                           handleLookUpDependent(name, val, fields, setFieldValue);
+                          if (name === 'customerAccount') {
+                            if (fields?.find((f) => f?.fieldName === 'toOpenInvoice')) {
+                              if (val?.defaultOpenInvoice) {
+                                setFieldValue('toOpenInvoice', true);
+                              } else {
+                                setFieldValue('toOpenInvoice', false);
+                              }
+                            }
+                          }
                         }
                       }
                   }
@@ -536,7 +552,10 @@ function Dropdown({
                         });
                         setOptionsList([...tempOptions, ...option]);
                         if (type === 'multiSelect') {
-                          handleChange(name, tempOptions?.length ? [...tempOptions?.map((item: any) => item?.optionValue || ''), ...values[name]] : []);
+                          handleChange(
+                            name,
+                            tempOptions?.length ? [...tempOptions?.map((item: any) => item?.optionValue || ''), ...values[name]] : []
+                          );
                         } else {
                           handleChange(name, tempOptions?.length && tempOptions[0].optionValue ? tempOptions[0].optionValue : '');
                         }
@@ -642,10 +661,12 @@ function Dropdown({
                                   data[fieldData.lookupDependentOn] === values[fieldData.lookupDependentOn] ||
                                   data[fieldData.lookupDependentOn]?.includes(values[fieldData.lookupDependentOn])
                                 ) {
-                                  handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                                  const newValue = type === 'multiSelect' ? [...[...(values[name] || [])], tempNewOption.optionValue] : (tempNewOption?.optionValue || '');
+                                  handleChange(name, newValue);
                                 }
                               } else {
-                                handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                                const newValue = type === 'multiSelect' ? [...[...(values[name] || [])], tempNewOption.optionValue] : (tempNewOption?.optionValue || '');
+                                handleChange(name, newValue);
                               }
 
                               const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
@@ -713,8 +734,10 @@ function Dropdown({
                               };
                               setOptionsList([tempNewOption, ...option]);
                               if (fieldData.lookupDependentOn) {
-                                if (data[fieldData.lookupDependentOn] === values[fieldData.lookupDependentOn] ||
-                                  data[fieldData.lookupDependentOn]?.includes(values[fieldData.lookupDependentOn])) {
+                                if (
+                                  data[fieldData.lookupDependentOn] === values[fieldData.lookupDependentOn] ||
+                                  data[fieldData.lookupDependentOn]?.includes(values[fieldData.lookupDependentOn])
+                                ) {
                                   if (type === 'multiSelect') {
                                     handleChange(
                                       name,
@@ -943,7 +966,7 @@ function Dropdown({
                           isRedirectToDetailPage={false}
                           onSuccess={({ data }) => {
                             setLookupDialog(false);
-                            if (data._id) {
+                            if (data._id && (data?.active ?? true)) {
                               let tempNewOption = {
                                 default: true,
                                 optionLabel: data.accountName,

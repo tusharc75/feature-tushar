@@ -1,7 +1,7 @@
-import { Box, Button, IconButton, MenuItem } from '@material-ui/core';
-import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
+import { Box, IconButton, MenuItem } from '@mui/material';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FcApproval } from 'react-icons/fc';
@@ -28,6 +28,7 @@ import FrequencyDialog from './FrequencyDialog';
 import { FiExternalLink } from 'react-icons/fi';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import ServiceCondition from 'src/pages/Product/ServiceMaster/ServiceCondition';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 interface Props {
   renderedFrom: string;
@@ -214,7 +215,7 @@ const ServiceMaster = (props: Props) => {
             row?.original?.type === 'Service' &&
             serviceColumns &&
             serviceColumns?.some((column) => column?.fieldData?.fieldName === 'frequency') && (
-              <HtmlTooltip title="Edit Frequency">
+              <HtmlTooltip title="Edit">
                 <IconButton
                   size="small"
                   aria-label="Edit"
@@ -290,7 +291,7 @@ const ServiceMaster = (props: Props) => {
                   setShowDeleteConfirmBox(true);
                 }}
               >
-                <DeleteIcon color="error" />
+                <DeleteIcon fontSize="small" color="error" />
               </IconButton>
             </HtmlTooltip>
           )}
@@ -523,10 +524,9 @@ const ServiceMaster = (props: Props) => {
     return (
       <>
         {dataRows?.length ? (
-          <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
-            <GrDrag fontSize="small" color="primary" className="mr-1" />
+          <ThemeButton startIcon={<GrDrag fontSize="small" />} onClick={() => setArrangeView(true)}>
             Arrange
-          </Button>
+          </ThemeButton>
         ) : null}
         <ImportExportMenu
           permissions={permissions?.packages}
@@ -550,9 +550,9 @@ const ServiceMaster = (props: Props) => {
 
   return (
     <Fragment>
-      <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-        <CustomTab value={0} label={'Normal'} primaryColor={true} />
-        <CustomTab value={1} label={'Conditional'} primaryColor={true} />
+      <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
+        <CustomTab value={0} label={'Normal'} />
+        <CustomTab value={1} label={'Conditional'} />
       </CustomTabs>
       <TabPanel value={tabValue} index={0}>
         {permissions?.product?.isUpdate && (

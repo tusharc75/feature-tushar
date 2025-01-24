@@ -1,11 +1,12 @@
-import { Box, Button, Checkbox, CircularProgress, FormControlLabel, Grid, IconButton, TextField, Typography } from '@material-ui/core';
-import { ControlPoint } from '@material-ui/icons';
-import { Autocomplete, Skeleton } from '@material-ui/lab';
+import { Box, Checkbox, FormControlLabel, IconButton, TextField, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { ControlPoint } from '@mui/icons-material';
+import { Autocomplete, Skeleton } from '@mui/material';
 import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { FaEye } from 'react-icons/fa';
 import { useHistory, useParams } from 'react-router-dom';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -361,27 +362,29 @@ const RoleDetailsPage = () => {
       return newData;
     });
 
-    axiosInstance().put(`/role`, {
-      _id: id,
-      ...values,
-      field: fields,
-      resource: resources,
-      type: roleData.type,
-      policy: policyFieldCheckBox,
-      dashBoards: dashBoardIds,
-      defaultResource: defaultResourceName,
-      superAdminAccess: superAdminAccess,
-      canAssignByAnyuser: canAssignByAnyuser
-    }).then(({ data }) => {
-      fetchRoleData();
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
-      });
-      setUpdating(false);
-      setIsEdit(false);
-    })
+    axiosInstance()
+      .put(`/role`, {
+        _id: id,
+        ...values,
+        field: fields,
+        resource: resources,
+        type: roleData.type,
+        policy: policyFieldCheckBox,
+        dashBoards: dashBoardIds,
+        defaultResource: defaultResourceName,
+        superAdminAccess: superAdminAccess,
+        canAssignByAnyuser: canAssignByAnyuser
+      })
+      .then(({ data }) => {
+        fetchRoleData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setUpdating(false);
+        setIsEdit(false);
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
         setUpdating(false);
@@ -537,20 +540,19 @@ const RoleDetailsPage = () => {
                     isImport={permissions?.role.isUpdate && isEdit && !isEditDeleteDisable}
                   />
                   {permissions?.role.isUpdate && !isEdit && (
-                    <Button variant="contained" color="primary" size="medium" onClick={() => setIsEdit(true)}>
+                    <ThemeButton buttonType="theme" onClick={() => setIsEdit(true)}>
                       Edit
-                    </Button>
+                    </ThemeButton>
                   )}
                   {permissions?.role.isUpdate && isEdit && (
-                    <Button
+                    <ThemeButton
                       disabled={isUpdating || checkError() || !isEdit}
-                      variant="contained"
-                      color="primary"
-                      size="medium"
+                      buttonType="theme"
+                      isLoading={isUpdating}
                       onClick={handleUpdateRole}
                     >
-                      {isUpdating ? <CircularProgress size={22} /> : 'Update'}
-                    </Button>
+                      Update
+                    </ThemeButton>
                   )}
                   {permissions?.role.isDelete && !isEditDeleteDisable && (
                     <DeleteButton
@@ -570,10 +572,10 @@ const RoleDetailsPage = () => {
         </Box>
         <Box className={`detail-container-v1`}>
           <Grid container spacing={3}>
-            <Grid item xs={12} sm={12} md={8} lg={8}>
+            <Grid size={{ xs: 12, sm: 12, md: 8, lg: 8 }}>
               <div className="mb-4">
                 <Grid container spacing={1}>
-                  <Grid item lg={5} md={5} sm={12} xs={12}>
+                  <Grid size={{ lg: 5, md: 5, sm: 12, xs: 12 }}>
                     <TextField
                       disabled={roleData?.type && roleData?.permission ? true : !permissions?.role?.isUpdate || !isEdit}
                       required
@@ -585,7 +587,7 @@ const RoleDetailsPage = () => {
                       onChange={(e) => setValues({ ...values, name: e.target.value.trimStart() })}
                     />
                   </Grid>
-                  <Grid item lg={5} md={5} sm={12} xs={12}>
+                  <Grid size={{ lg: 5, md: 5, sm: 12, xs: 12 }}>
                     <TextField
                       disabled={roleData?.type && roleData?.permission ? true : !permissions?.role?.isUpdate || !isEdit}
                       required
@@ -597,14 +599,21 @@ const RoleDetailsPage = () => {
                       onChange={(e) => setValues({ ...values, description: e.target.value.trimStart() })}
                     />
                   </Grid>
-                  <Grid item lg={2} md={2} sm={12} xs={12}>
+                  <Grid size={{ lg: 2, md: 2, sm: 12, xs: 12 }}>
                     <Autocomplete
                       id={`roleTier`}
                       disabled={roleData?.type && roleData?.permission ? true : !permissions?.role?.isUpdate || !isEdit}
                       options={Object.values(ROLE_TIER)}
                       autoHighlight
                       disableClearable
-                      renderOption={(option) => option || ''}
+                      renderOption={(props, option, state, ownerState) => {
+                        const { key, ...optionProps } = props;
+                        return (
+                          <Box component="li" key={key} {...optionProps}>
+                            {ownerState.getOptionLabel(option)}
+                          </Box>
+                        );
+                      }}
                       onChange={(event: any, newValue: any) => {
                         setValues({ ...values, tier: newValue });
                       }}
@@ -718,7 +727,7 @@ const RoleDetailsPage = () => {
               </div>
               <Box marginY={2} />
             </Grid>
-            <Grid item xs={12} sm={12} md={4} lg={4}>
+            <Grid size={{ xs: 12, sm: 12, md: 4, lg: 4 }}>
               <Box className="single-form-v1 ">
                 <Box className="form-head-v1">
                   <Typography component={'h3'}>Assigned Users ({roleUsers.length || 0})</Typography>
@@ -758,10 +767,9 @@ const RoleDetailsPage = () => {
                           {roleUsers.length > showRecordsBeforeViewAll && (
                             <>
                               <Box marginY={2} />
-                              <Button
-                                variant="outlined"
+                              <ThemeButton
+                                buttonType="transparent"
                                 className="accordion-outlined-button"
-                                startIcon={<FaEye />}
                                 onClick={() =>
                                   history.push(`/user`, {
                                     id: roleData._id,
@@ -775,7 +783,7 @@ const RoleDetailsPage = () => {
                                 }
                               >
                                 View All
-                              </Button>
+                              </ThemeButton>
                             </>
                           )}
                         </>

@@ -1,16 +1,16 @@
 import { useState, useEffect, useContext } from 'react';
-import { Box, IconButton } from '@material-ui/core';
+import { Box, IconButton } from '@mui/material';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import TinyMce from './../../components/TinyMCE';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import moment from 'moment';
-import { Button, Grid } from '@material-ui/core';
-import { dateTimeFormat } from 'src/constants/helpers';
-import RefreshIcon from '@material-ui/icons/Refresh';
+import Grid from '@mui/material/Grid2';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { displayDateTime } from 'src/constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const Comments = ({ uniqueId }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -68,13 +68,13 @@ const Comments = ({ uniqueId }) => {
             {data.map((item: any) => (
               <div key={item._id} className="mb-4 border border-[var(--common-border-color)] p-2">
                 <div key={item._id} className="md:mb-[26px]">
-                  <div className="flex mt-[9px] gap-[10px] justify-between flex-wrap text-[13px] text-[var(--primary-text)] mb-4 ">
+                  <div className="mb-4 mt-[9px] flex flex-wrap justify-between gap-[10px] text-[13px] text-[var(--primary-text)] ">
                     <p>
                       <span className="font-semibold">{item?.user?.optionLabel}</span>
-                      <span className="text-[#969696] dark:text-gray-400 ml-2">{moment(item.date).format(dateTimeFormat)}</span>
+                      <span className="ml-2 text-[#969696] dark:text-gray-400">{displayDateTime(item.date)}</span>
                     </p>
                   </div>
-                  <div className="flex flex-wrap md:gap-[32px] gap-4 items-start justify-between">
+                  <div className="flex flex-wrap items-start justify-between gap-4 md:gap-[32px]">
                     <div
                       className="max-image"
                       dangerouslySetInnerHTML={{
@@ -86,7 +86,7 @@ const Comments = ({ uniqueId }) => {
               </div>
             ))}
             <Grid style={{ marginTop: data?.length > 0 ? '5px' : '0' }} container justifyContent="center" alignItems="center" spacing={2}>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <TinyMce
                   id="comment"
                   onChange={(value) => {
@@ -97,10 +97,10 @@ const Comments = ({ uniqueId }) => {
                   height={200}
                 />
               </Grid>
-              <Grid item xs={12}>
-                <Button disabled={comment === ''} variant="contained" color="primary" size="small" onClick={handleSubmit}>
+              <Grid size={{ xs: 12 }}>
+                <ThemeButton disabled={comment === ''} buttonType="theme" onClick={handleSubmit}>
                   Send
-                </Button>
+                </ThemeButton>
               </Grid>
             </Grid>
           </div>

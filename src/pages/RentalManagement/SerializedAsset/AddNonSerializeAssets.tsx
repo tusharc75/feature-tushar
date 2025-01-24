@@ -1,32 +1,30 @@
-import React, { useEffect, useState, useContext } from 'react';
+import { makeStyles } from '@mui/styles';
 import {
-  Dialog,
   Box,
-  Button,
+  Dialog,
   Link,
-  TextField,
-  Table,
-  TableHead,
   Paper,
-  TableContainer,
+  Table,
   TableBody,
   TableCell,
+  TableContainer,
+  TableHead,
   TableRow,
-  Typography
-} from '@material-ui/core';
-import { read, utils, writeFile } from 'xlsx';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { makeStyles, createStyles, withStyles } from '@material-ui/styles';
+  TextField
+} from '@mui/material';
+import React, { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import routes from 'src/components/Helpers/Routes';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { CircularProgress } from '@material-ui/core';
-import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
-import { addAssetsInRental } from '../rentalOfflineHelper';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { CustomDialogTransition } from 'src/constants/helpers';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
+import { read, utils, writeFile } from 'xlsx';
+import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
+import { addAssetsInRental } from '../rentalOfflineHelper';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 interface DialogProps {
   closeDialog: () => void;
@@ -223,16 +221,13 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
       <CustomDialogContent isFooterPresent={false}>
         <Box display="flex" flexDirection="column" component={'form'} onSubmit={handleSubmit}>
           <Box alignSelf={'flex-end'} mb={2}>
-            <Button
-              type="submit"
-              variant="contained"
-              size="small"
-              color="primary"
-              endIcon={isSubmitting && <CircularProgress size={18} />}
+            <ThemeButton
               disabled={isSubmitting || dataWithNumber.length === 0}
+              buttonType='theme'
+              isLoading={isSubmitting}
             >
               Add
-            </Button>
+            </ThemeButton>
           </Box>
           <Box display="flex" justifyContent="space-between" alignItems="center">
             <Box mb={1} display="flex">

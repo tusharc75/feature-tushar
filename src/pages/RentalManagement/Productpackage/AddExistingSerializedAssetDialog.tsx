@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog, TextField } from '@material-ui/core';
+import { Box, Dialog, TextField } from '@mui/material';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -23,12 +23,12 @@ import {
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import axios, { CancelTokenSource } from 'axios';
-import { Autocomplete } from '@material-ui/lab';
-import { isMobile, isTablet } from 'react-device-detect';
+import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase, map, uniq } from 'lodash';
 import ManageTransferAsset from 'src/pages/TransferAssets/ManageTransferAsset';
 import AssetDetailsChangeDialog from 'src/pages/RentalManagement/ReceivingTicket/AssetDetailsChangeDialog';
 import { Link } from 'react-router-dom';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, referenceData = null }) => {
   const renderedFrom = `${camelCase(sidebarResource?.serializedAsset)}`;
@@ -340,7 +340,7 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
           fullWidth
           options={warehouseOption}
           getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-          getOptionSelected={(option: any, val) => option.optionValue === val}
+          isOptionEqualToValue={(option: any, val) => option.optionValue === val}
           value={
             warehouseOption.filter((data) => data.optionValue === selectedWarehouse).length
               ? warehouseOption.filter((data) => data.optionValue === selectedWarehouse)[0]
@@ -353,6 +353,7 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
             <TextField
               {...params}
               margin="dense"
+              size="small"
               name="plant"
               placeholder={resources?.warehouse?.titleSingular}
               label={resources?.warehouse?.titleSingular}
@@ -372,10 +373,10 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
         {(Number(tabValue) === 0 || Number(tabValue) === 1) && (
           <>
             {permissions?.transferAsset?.isCreate && selectedRecords?.length !== 0 && !checkUniqWarehouse() && (
-              <Button
-                style={{ minWidth: 'max-content', marginRight: '10px' }}
-                size="small"
-                color="primary"
+              <ThemeButton
+                disabled={isSubmitting}
+                buttonType='theme'
+                isLoading={isSubmitting}
                 onClick={() => {
                   if (checkAssetPolicy(ASSET_STATUS.reserved)) {
                     const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.reserved);
@@ -389,61 +390,39 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
                     setShowTransferAssetDialog({ open: true, data: null });
                   }
                 }}
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                disabled={isSubmitting}
-                className={`${isMobile && !isTablet ? 'mobile_button' : ''}  `}
-                endIcon={isSubmitting && <CircularProgress size={20} />}
               >
                 {`Transfer to ${referenceData?.warehouse?.optionLabel}`}
                 {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
-              </Button>
+              </ThemeButton>
             )}
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              disabled={isSubmitting || selectedRecords?.length === 0}
-              onClick={() => {
-                if (checkAssetPolicy(ASSET_STATUS.reserved)) {
-                  const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.reserved);
-                  setOpenAssetDataDialog({
-                    open: true,
-                    statusPolicy: statusPolicy,
-                    _ids: assetIds,
-                    type: 'add'
-                  });
-                } else if (checkMTRValidation) {
-                  if (selectedRecords?.some((e) => e.mtrAttached !== true)) {
-                    setMtrConfirmBox(true);
-                  } else {
-                    handleAddAsset();
-                  }
-                } else {
-                  handleAddAsset();
-                }
-              }}
-              endIcon={isSubmitting && <CircularProgress size={20} />}
-            >
-              Add {selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : ''}
-            </Button>
           </>
-        )}
-        {Number(tabValue) === 2 && (
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            disabled={isSubmitting || selectedRecords?.length === 0}
-            onClick={() => {
-              setInuseAssetConfirmBox(true);
-            }}
-            endIcon={isSubmitting && <CircularProgress size={20} />}
-          >
-            Add {selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : ''}
-          </Button>
         )}
       </Box>
     );
+  };
+
+  const addButtonOnClick = () => {
+    if (Number(tabValue) === 2) {
+      setInuseAssetConfirmBox(true);
+    } else if (Number(tabValue) === 0 || Number(tabValue) === 1) {
+      if (checkAssetPolicy(ASSET_STATUS.reserved)) {
+        const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.reserved);
+        setOpenAssetDataDialog({
+          open: true,
+          statusPolicy: statusPolicy,
+          _ids: assetIds,
+          type: 'add'
+        });
+      } else if (checkMTRValidation) {
+        if (selectedRecords?.some((e) => e.mtrAttached !== true)) {
+          setMtrConfirmBox(true);
+        } else {
+          handleAddAsset();
+        }
+      } else {
+        handleAddAsset();
+      }
+    }
   };
 
   return (
@@ -470,7 +449,15 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
           isActionButtonVisible={false}
           leftSideContentsOfSearchFilter={leftSideContentsOfSearchFilter()}
           rightSideContents={rightSideContents()}
-          isAddButtonVisible={false}
+          isAddButtonVisible={true}
+          addButtonOnclick={addButtonOnClick}
+          addButtonProps={{
+            textAddShow: true,
+            text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : '',
+            iconsEnabled: false,
+            disabled: isSubmitting || selectedRecords?.length === 0,
+            loading: isSubmitting
+          }}
           setQueryString={false}
         />
         <Box pt={1}>
@@ -541,7 +528,7 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
             setInuseAssetConfirmBox(false);
           }}
           onOk={() => {
-            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingAvailableStatus ? ASSET_STATUS.available : ASSET_STATUS.underReview
+            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingAvailableStatus ? ASSET_STATUS.available : ASSET_STATUS.underReview;
             if (checkAssetPolicy(receivingStatus)) {
               const { statusPolicy, assetIds } = checkAssetPolicy(receivingStatus);
               setOpenAssetDataDialog({
@@ -568,7 +555,7 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
         <AssetDetailsChangeDialog
           ids={openAssetDataDialog._ids}
           statusPolicy={openAssetDataDialog.statusPolicy}
-          setAssetsData={() => {}}
+          setAssetsData={() => { }}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: '' })}
           onSuccess={(data) => {
             if (Number(tabValue) === 2) {

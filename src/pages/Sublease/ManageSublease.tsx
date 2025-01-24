@@ -1,14 +1,11 @@
 import { useState, useEffect, Fragment, useContext, useRef } from 'react';
-import Button from '@material-ui/core/Button';
 import { Formik, Form } from 'formik';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomButton from '../../components/Helpers/CustomButton';
-import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
 import {
   CustomDialogTransition,
@@ -21,14 +18,16 @@ import {
 } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { Box, Grid } from '@material-ui/core';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import FormTypes from '../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { FaDiceOne } from 'react-icons/fa';
 import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import { isEqual } from 'lodash';
-import moment from 'moment';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 const ManageSublease = ({
   isClone = false,
@@ -224,15 +223,15 @@ const ManageSublease = ({
 
   function validate(values) {
     const errors = {};
-    let estimateStartDate = moment(values?.estimateStartDate);
-    let estimateEndDate = moment(values?.estimateEndDate);
-    if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
+    let estimateStartDate = dayjs(values?.estimateStartDate);
+    let estimateEndDate = dayjs(values?.estimateEndDate);
+    if (estimateEndDate.diff(estimateStartDate, 'day') < 0) {
       errors['estimateEndDate'] = 'Please enter valid estimate end date';
     }
-    let actualStartDate = moment(values?.actualStartDate);
-    let actualEndDate = moment(values?.actualEndDate);
+    let actualStartDate = dayjs(values?.actualStartDate);
+    let actualEndDate = dayjs(values?.actualEndDate);
     if (actualStartDate.format('YYYY-MM-DD') !== actualEndDate.format('YYYY-MM-DD')) {
-      if (actualEndDate.diff(actualStartDate, 'days') <= 0) {
+      if (actualEndDate.diff(actualStartDate, 'day') <= 0) {
         errors['actualEndDate'] = 'Please enter valid actual end date';
       }
     }
@@ -321,7 +320,7 @@ const ManageSublease = ({
                         <Box marginY={2}>
                           <Grid spacing={3} container>
                             {form.sectionFields.map((field, index2) => (
-                              <Grid key={index2} item xs={12} sm={6} md={6}>
+                              <Grid key={index2} size={{ xs: 12, sm: 6, md: 6 }}>
                                 {field.fieldName === 'estimateStartDate' ? (
                                   <FormTypes
                                     {...field}
@@ -426,9 +425,8 @@ const ManageSublease = ({
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType="transparent"
                   id="dialog-cancel-button"
                   onClick={() => {
                     if (!isEqual(ref.current.values, initialData.values)) {
@@ -439,13 +437,11 @@ const ManageSublease = ({
                   }}
                 >
                   Cancel
-                </Button>
-                <CustomButton
-                  loading={loading}
-                  variant="contained"
+                </ThemeButton>
+                <ThemeButton
+                  isLoading={loading}
                   id="dialog-save-button"
-                  color="primary"
-                  type="submit"
+                  buttonType="theme"
                   onClick={(e) => {
                     e.preventDefault();
                     handleScroll(errors);
@@ -455,11 +451,10 @@ const ManageSublease = ({
                 >
                   {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

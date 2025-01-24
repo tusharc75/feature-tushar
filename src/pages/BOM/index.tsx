@@ -1,14 +1,14 @@
 import { useState, useEffect, useContext } from 'react';
-import { Box, Button, Menu, MenuItem } from '@material-ui/core';
+import { Box, Menu, MenuItem } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { product, prepareDataForGrid, gridLoadingTimeout, sidebarResource } from '../../constants/helpers';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import routes from '../../components/Helpers/Routes';
 import { AiOutlineApartment } from 'react-icons/ai';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import { Delete } from '@material-ui/icons';
-import { IconButton } from '@material-ui/core';
+import { AddOutlined, ExpandMore } from '@mui/icons-material';
+import { Delete } from '@mui/icons-material';
+import { IconButton } from '@mui/material';
 import { useData } from '../../StateProvider/Provider';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import AssignProductDialog from '../../components/AssignRolesDialog/AssignProductDialog';
@@ -18,6 +18,7 @@ import { camelCase } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const BOMTable = () => {
   const { id } = useParams();
@@ -246,30 +247,27 @@ const BOMTable = () => {
             </div>
             <div className="flex flex-wrap justify-end gap-[8px]">
               <div className="flex flex-wrap items-center gap-[8px]">
-                <Button
-                  variant={'contained'}
-                  color="primary"
-                  size="small"
+                <ThemeButton
                   className={`no-shadow`}
                   onClick={() => {
                     setOpenAssignProductDialog(true);
                   }}
+                  mobileTooltip="Add"
                   startIcon={<AddOutlined />}
+                  iconForMobile={<AddOutlined />}
                 >
                   Add
-                </Button>
-                <Button
-                  variant={'outlined'}
-                  color="default"
-                  size="small"
+                </ThemeButton>
+                <ThemeButton
                   onClick={openActions}
-                  className={`new-dropdown-v1`}
-                  aria-controls="action-menu"
+                  mobileTooltip="Actions"
+                  buttonType="yellow"
                   endIcon={<ExpandMore />}
+                  iconForMobile={<ExpandMore />}
                   disabled={selectedRecords?.length ? false : true}
                 >
                   Actions
-                </Button>
+                </ThemeButton>
                 <Menu
                   anchorEl={anchorEl}
                   keepMounted
@@ -283,14 +281,16 @@ const BOMTable = () => {
                   onClose={closeActions}
                 >
                   <MenuItem
-                   disabled={selectedRecords?.every((e) => !e.canDelete) ? true : false}
-                   onClick={() =>{     
-                          if (selectedRecords.length === 1){ 
-                          setDeleteRecord(selectedRecords[0]);
-                          }else{
-                            setDeleteRecord(null)
-                          }
-                          setShowDeleteConfirmBox(true);}}>
+                    disabled={selectedRecords?.every((e) => !e.canDelete) ? true : false}
+                    onClick={() => {
+                      if (selectedRecords.length === 1) {
+                        setDeleteRecord(selectedRecords[0]);
+                      } else {
+                        setDeleteRecord(null);
+                      }
+                      setShowDeleteConfirmBox(true);
+                    }}
+                  >
                     {`Delete (${selectedRecords?.length})`}
                   </MenuItem>
                 </Menu>
@@ -318,8 +318,12 @@ const BOMTable = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.product?.titleSingular?.toLowerCase()} :
-            ${deleteRecord?.productName || ''}` : resources?.product?.titlePlural?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.product?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.productName || ''}`
+              : resources?.product?.titlePlural?.toLowerCase()
+          } ?`}
           okBtnLoading={isDeleting}
           onClose={() => {
             setDeleteRecord(null);

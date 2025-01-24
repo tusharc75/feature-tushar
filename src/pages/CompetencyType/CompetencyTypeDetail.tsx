@@ -1,5 +1,5 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import { Edit } from '@material-ui/icons';
+import { Box, Grid } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
@@ -9,7 +9,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import { ACTIVITY_RESOURCE, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -129,14 +129,12 @@ const CompetencyMasterDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            <>
-              {permissions?.competencyType?.isUpdate && (
-                <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
-                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                </Button>
-              )}
-              {permissions?.competencyType?.isDelete && <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />}
-            </>
+            {permissions?.competencyType?.isUpdate && (
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                {'Edit'}
+              </ThemeButton>
+            )}
+            {permissions?.competencyType?.isDelete && <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />}
             <ActivityButton
               referenceId={competencyMasterData?._id}
               resource={ACTIVITY_RESOURCE.competencyType}
@@ -154,9 +152,9 @@ const CompetencyMasterDetail = () => {
         <TabPanel value={tabValue} index={0}>
           <Box>
             {loading || !fields?.length ? (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
+              <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(7).keys()]} />
-              </Grid>
+              </div>
             ) : (
               <DetailsPage data={competencyMasterData} fields={fields} />
             )}

@@ -1,17 +1,15 @@
+import { KeyboardArrowLeft } from '@mui/icons-material';
+import { Box, IconButton, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { Box, Grid, IconButton, Typography } from '@material-ui/core';
-import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
-import ContentFullScreen from 'src/components/ContentFullScreen';
-import Steps from 'src/components/Steps';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import View from './View';
-import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
-import { STEPS_STYLE } from 'src/constants/helpers';
-import { KeyboardArrowLeft } from '@material-ui/icons';
 import axiosInstance from 'src/axios/axiosInstance';
+import ContentFullScreen from 'src/components/ContentFullScreen';
+import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
+import Steps from 'src/components/Steps';
+import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import { STEPS_STYLE } from 'src/constants/helpers';
+import View from './View';
 
 const Step = ({ tab, resourcePolicyId = null, workflowId = null, resourceId, resource, data, allowedToEdit, referenceData = null }) => {
   const [steps, setSteps] = useState(null);
@@ -142,18 +140,7 @@ const Step = ({ tab, resourcePolicyId = null, workflowId = null, resourceId, res
                     onChange={() => setExpended((prev) => ({ ...prev, [`${step?._id}`]: !prev[`${step?._id}`] }))}
                   >
                     <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
-                      <Grid container className="pos_rel">
-                        <Grid item xs={8}>
-                          <Box display="flex" alignItems="center">
-                            <Box>
-                              <IconButton size="small">{expended[`${step?._id}`] === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
-                            </Box>
-                            <Box padding="5px">
-                              <Typography variant="subtitle2">{step?.stepName}</Typography>
-                            </Box>
-                          </Box>
-                        </Grid>
-                      </Grid>
+                      <Typography variant="subtitle2">{step?.stepName}</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
                       <>

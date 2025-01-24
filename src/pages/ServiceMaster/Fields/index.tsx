@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, Dialog } from '@mui/material';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -10,11 +10,14 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { map, uniq } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
 import { checkFormulaLoop } from 'src/constants/formulaUtility';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ConfigureFields = ({ serviceId, handleClose, handleSucess, reference = '', fields = null }) => {
   const toastConfig = useContext(CustomToastContext);
 
-  const { state: { user } }: any = useData();
+  const {
+    state: { user }
+  }: any = useData();
 
   const [isSubmitting, setSubmitting] = useState(false);
   const [section, setSection] = useState([]);
@@ -109,7 +112,7 @@ const ConfigureFields = ({ serviceId, handleClose, handleSucess, reference = '',
           toastConfig.setToastConfig({
             open: true,
             message: data.message,
-            severity: 'success'
+            type: 'success'
           });
         })
         .catch((err) => {
@@ -145,7 +148,7 @@ const ConfigureFields = ({ serviceId, handleClose, handleSucess, reference = '',
       <CustomDialogContent>
         <Box display="flex" justifyContent="flex-end">
           <Box>
-            <label htmlFor="importField" className="cursor-pointer mr-3">
+            <label htmlFor="importField" className="mr-3 cursor-pointer">
               Import Fields
               <input
                 onClick={(e: any) => (e.target.value = null)}
@@ -160,7 +163,7 @@ const ConfigureFields = ({ serviceId, handleClose, handleSucess, reference = '',
                 type="file"
               />
             </label>
-            <label className="cursor-pointer mr-3" onClick={handleExportFields}>
+            <label className="mr-3 cursor-pointer" onClick={handleExportFields}>
               Export Fields
             </label>
             <a id="downloadAnchorElem" style={{ display: 'none' }}></a>
@@ -179,19 +182,22 @@ const ConfigureFields = ({ serviceId, handleClose, handleSucess, reference = '',
         />
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button disabled={isSubmitting} variant="outlined" size="small" color="primary" onClick={handleClose}>
-          Close
-        </Button>
-        <Button
-          variant="contained"
-          size="small"
-          color="primary"
+
+
+        <ThemeButton
+          buttonType='transparent'
+          onClick={handleClose}
+        >
+          Cancel
+        </ThemeButton>
+        <ThemeButton
+          buttonType='theme'
           disabled={isSubmitting}
           onClick={handleSave}
-          endIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
+          isLoading={isSubmitting}
         >
           Save
-        </Button>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

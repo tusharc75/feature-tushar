@@ -1,5 +1,6 @@
 import { FC, useEffect, useState, Fragment, useRef, useContext } from 'react';
-import { Button, Dialog, Grid, Box } from '@material-ui/core';
+import { Dialog, Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -11,18 +12,19 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '..//../../constants/helpers';
 import { Formik, Form } from 'formik';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomButton from '../../../components/Helpers/CustomButton';
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import moment from 'moment';
 import { bulkUpdate, calculatePrice, calculateRowsField, fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
+import SelectionConfirmationDialog from 'src/components/Helpers/SelectionConfirmationDialog';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -60,7 +62,9 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
   const ref = useRef(null);
 
   const toastConfig = useContext(CustomToastContext);
-  const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
+  const [showConfirmationDialog, setShowConfirmationDialog] = useState({ open: false, type: '' });
+  const [showSelectionConfirmationDialog, setShowSelectionConfirmationDialog] = useState({ open: false, type: '' });
+
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [allFields, setAllFields] = useState([]);
   const [fields, setFields] = useState([]);
@@ -87,13 +91,15 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
     const zipCode = address?.zipCode;
     const state = address?.state;
     const county = address?.county;
-    let materialType;
-    if (isBulkedit) materialType = rowData[0]?.type;
-    else materialType = rowData?.type;
+    let api = `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&county=${county}`
+    if (!isBulkedit) {
+      api += `&materialType=${rowData?.type}`
+    }
+    if (taxCode) {
+      api += `&taxCode=${taxCode}`
+    }
     try {
-      const response = await axiosInstance().get(
-        `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&county=${county}&materialType=${materialType}${taxCode && `&taxCode=${taxCode}`}`
-      );
+      const response = await axiosInstance().get(api);
       return response?.data?.data || [];
     } catch (e) {
       toastConfig.setToastConfig(e);
@@ -215,23 +221,24 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       fields = fields.filter((d) => d.fieldName !== 'pricingCondition' && d.fieldName !== 'pricingMethod');
     }
 
-    const taxApplicableField =
-      user?.user?.brandPolicy?.rentalTaxAppliedOn && user?.user?.brandPolicy?.rentalTaxAppliedOn !== ''
-        ? fieldLabelToFieldName(user?.user?.brandPolicy?.rentalTaxAppliedOn)
-        : 'billingAddress';
+    if (!rentalManagementData?.taxCode?.optionValue) {
+      const taxApplicableField =
+        user?.user?.brandPolicy?.rentalTaxAppliedOn && user?.user?.brandPolicy?.rentalTaxAppliedOn !== ''
+          ? fieldLabelToFieldName(user?.user?.brandPolicy?.rentalTaxAppliedOn)
+          : 'billingAddress';
 
-    if (
-      rentalManagementData?.customerAccount?.taxApplicable &&
-      (rentalManagementData?.[taxApplicableField]?.zipCode ||
-        rentalManagementData?.[taxApplicableField]?.state ||
-        rentalManagementData?.[taxApplicableField]?.county)
-    ) {
-      const taxCodeOptions = await fetchTaxRate(rentalManagementData?.[taxApplicableField], rentalManagementData?.taxCode?.optionValue);
-      fields?.forEach((e: any) => {
-        if (e?.fieldName === 'taxCode') {
-          e.option = taxCodeOptions;
-        }
-      });
+      if (rentalManagementData?.customerAccount?.taxApplicable &&
+        (rentalManagementData?.[taxApplicableField]?.zipCode ||
+          rentalManagementData?.[taxApplicableField]?.state ||
+          rentalManagementData?.[taxApplicableField]?.county)
+      ) {
+        const taxCodeOptions = await fetchTaxRate(rentalManagementData?.[taxApplicableField], rentalManagementData?.taxCode?.optionValue);
+        fields?.forEach((e: any) => {
+          if (e?.fieldName === 'taxCode') {
+            e.option = taxCodeOptions;
+          }
+        });
+      }
     }
 
     const sections = uniq(
@@ -264,26 +271,43 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
   };
 
   const handleSubmit = async (values) => {
+    let currency = rentalManagementData?.currency?.toLowerCase()
     if (isBulkedit) {
-      const rows = bulkUpdate(values, selectedProducts, material, allFields, rentalManagementData?.currency);
-      handleSaveData(rows);
+      if (values[`price_${currency}`] && selectedProducts?.find((e) => !e.parentId) && !selectedProducts?.every((e) => !e.parentId)) {
+        setShowSelectionConfirmationDialog({ open: true, type: '' });
+      }
+      else {
+        const rows = bulkUpdate(values, selectedProducts, material, allFields, rentalManagementData?.currency);
+        handleSaveData(rows);
+      }
     } else {
-      if (rowData.parentId && !showConfirmationDialog && isRateRequired) {
-        setShowConfirmationDialog(true);
+      let childResetAlert = false;
+      if (!rowData.parentId && material?.find((e) => e.parentId === rowData?._id)) {
+        if (values[`finalPrice_${currency}`] !== rowData[`finalPrice_${currency}`] &&
+          material?.find((e) => e.parentId === rowData?._id && e[`finalPrice_${currency}`])) {
+          childResetAlert = true;
+        }
+      }
+      if (childResetAlert && !showConfirmationDialog.open) {
+        setShowConfirmationDialog({ open: true, type: 'child' });
       } else {
         const rows = await calculateRowsField(
           material,
           values,
           allFields,
           rowData,
-          rentalManagementData?.currency,
-          user?.user?.brandPolicy?.packagePriceComponentWise ? false : true
-        );
+          rentalManagementData?.currency);
         handleSaveData(rows, saveAndNext);
-        setShowConfirmationDialog(false);
+        setShowConfirmationDialog({ open: false, type: '' });
       }
     }
   };
+
+  const handleUpdateBulk = async (values, type) => {
+    const rows = bulkUpdate(values, selectedProducts, material, allFields, rentalManagementData?.currency, type === 'Parent' ? true : false);
+    handleSaveData(rows);
+    setShowSelectionConfirmationDialog({ open: false, type: '' });
+  }
 
   async function getAllPricingCondition(values: any, unitOptions: any, pricingMethodOptions: any) {
     if (rowData) {
@@ -340,17 +364,26 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
 
   function validate(values) {
     const errors = {};
-    let estimateStartDate = moment(values?.estimateStartDate);
-    let estimateEndDate = moment(values?.estimateEndDate);
-    if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
+    let estimateStartDate = dayjs(values?.estimateStartDate);
+    let estimateEndDate = dayjs(values?.estimateEndDate);
+    if (isBulkedit) {
+      const maxEstimateStartDate = rowData
+        ?.map((r) => r?.estimateStartDate)
+        ?.reduce((max, current) => (dayjs(current).isAfter(dayjs(max)) ? current : max));
+      const estimateStartDateE = dayjs(maxEstimateStartDate);
+      if (estimateEndDate.diff(estimateStartDateE, 'day') < 0) {
+        errors['estimateEndDate'] = 'Please enter valid estimate end date';
+      }
+    }
+    if (estimateEndDate.diff(estimateStartDate, 'day') < 0) {
       errors['estimateEndDate'] = 'Please enter valid estimate end date';
     }
-    let rentalManagementEstimateStartDate = moment(rentalManagementData?.estimateStartDate);
-    let rentalManagementEstimateEndDate = moment(rentalManagementData?.estimateEndDate);
-    if (estimateStartDate.diff(rentalManagementEstimateStartDate, 'days') < 0) {
+    let rentalManagementEstimateStartDate = dayjs(rentalManagementData?.estimateStartDate);
+    let rentalManagementEstimateEndDate = dayjs(rentalManagementData?.estimateEndDate);
+    if (estimateStartDate.diff(rentalManagementEstimateStartDate, 'day') < 0) {
       errors['estimateStartDate'] = 'Please enter valid estimate start date';
     }
-    if (estimateEndDate.diff(rentalManagementEstimateEndDate, 'days') > 0) {
+    if (estimateEndDate.diff(rentalManagementEstimateEndDate, 'day') > 0) {
       errors['estimateEndDate'] = 'Please enter valid estimate end date';
     }
     if (rowData && !rowData.canDelete) {
@@ -449,7 +482,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                     size="small"
                                   />
                                 ) : rateChangeFields.includes(field.fieldName) && !isBulkedit ? (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                     <Box display="flex">
                                       <Box flexGrow={1}>
                                         <FormTypes
@@ -533,7 +566,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                     </Box>
                                   </Grid>
                                 ) : ['estimateStartDate', 'estimateEndDate'].includes(field.fieldName) ? (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                     <Box display="flex">
                                       <Box flexGrow={1}>
                                         <FormTypes
@@ -562,7 +595,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                     </Box>
                                   </Grid>
                                 ) : ['taxCode'].includes(field.fieldName) ? (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                     <Box display="flex">
                                       <Box flexGrow={1}>
                                         <FormTypes
@@ -601,7 +634,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                     </Box>
                                   </Grid>
                                 ) : (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                     <Box display="flex">
                                       <Box flexGrow={1}>
                                         <FormTypes
@@ -636,9 +669,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
                   id="rental-job-qty-dialog-close-button"
                   onClick={() => {
                     if (!isEqual(ref.current.values, initialData.values)) {
@@ -649,14 +680,12 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                   }}
                 >
                   {'Close'}
-                </Button>
+                </ThemeButton>
                 {isBulkedit === false && showSaveAndNext && (
-                  <CustomButton
-                    loading={loading}
+                  <ThemeButton
+                    isLoading={loading}
+                    buttonType="theme"
                     disabled={loading || (isQtyOnly ? false : isEqual(ref?.current?.values, initialData.values))}
-                    variant="contained"
-                    color="primary"
-                    type="submit"
                     id="rental-job-qty-dialog-save-and-next-button"
                     onClick={() => {
                       setSaveAndNext(true);
@@ -665,14 +694,12 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                   >
                     {' '}
                     Save & Next
-                  </CustomButton>
+                  </ThemeButton>
                 )}
-                <CustomButton
-                  loading={loading}
+                <ThemeButton
+                  isLoading={loading}
                   disabled={loading || (isQtyOnly ? false : isEqual(ref?.current?.values, initialData.values))}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+                  buttonType="theme"
                   id="rental-job-qty-dialog-save-button"
                   onClick={() => {
                     setSaveAndNext(false);
@@ -681,23 +708,37 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                 >
                   {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
-              {showConfirmationDialog && (
+              {showConfirmationDialog.open && (
                 <ConfirmationDialog
-                  open={showConfirmationDialog}
-                  message="Would you prefer to override the product-level price configuration?"
+                  open={showConfirmationDialog.open}
+                  message={showConfirmationDialog.type === 'child' ?
+                    "This action will remove the child line items pricing. Any field update that changes final price will remove the child line items pricing" : ""}
                   onOk={() => {
                     submitForm();
                   }}
                   onClose={() => {
-                    setShowConfirmationDialog(false);
+                    setShowConfirmationDialog({ open: false, type: '' });
                   }}
+                />
+              )}
+              {showSelectionConfirmationDialog.open && (
+                <SelectionConfirmationDialog
+                  open={showSelectionConfirmationDialog.open}
+                  message={"Would you like to apply the price at the parent level or the child level?"}
+                  onOk={(type) => {
+                    handleUpdateBulk(values, type)
+                  }}
+                  onClose={() => {
+                    setShowSelectionConfirmationDialog({ open: false, type: '' });
+                  }}
+                  selection1={'Parent'}
+                  selection2={'Child'}
                 />
               )}
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

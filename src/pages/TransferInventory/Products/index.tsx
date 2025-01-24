@@ -1,5 +1,5 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
+import { Box, IconButton, MenuItem } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import React, { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -18,6 +18,7 @@ import {
   deliveryTicket,
   gridLoadingTimeout,
   prepareDataForGrid,
+  sidebarResource,
   transferInventory
 } from 'src/constants/helpers';
 import { deleteDisable, transferInventoryMessage } from 'src/constants/messageHelpers';
@@ -48,7 +49,6 @@ const Products = ({
   const { dataRows, selectedRecords } = state;
   const {
     state: {
-      user: { user, resources },
       permissions
     }
   } = useData();
@@ -212,7 +212,7 @@ const Products = ({
 
   const handleAddWalkmeData = (rows: any[]) => {
     if (allowedToEdit) {
-      setWalkmeData([generateAddExistingProduct(false,resources?.transferInventory?.titleSingular)]);
+      setWalkmeData([generateAddExistingProduct(false, sidebarResource.transferInventory)]);
     } else {
       setWalkmeData([]);
     }

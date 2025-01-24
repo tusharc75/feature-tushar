@@ -1,4 +1,4 @@
-import { Collapse, IconButton } from '@material-ui/core';
+import { Collapse, IconButton } from '@mui/material';
 import { flexRender } from '@tanstack/react-table';
 import { BsChevronContract, BsChevronExpand } from 'react-icons/bs';
 import { DEFAULT_DATA_ROWS_VISIBLE } from 'src/components/CustomReactTable/SwipableListForMobile';
@@ -131,7 +131,7 @@ const VirtualSwipableList = ({
                               <h6 className="line-clamp-1 text-[8px] font-medium text-[var(--dark-secondary-text,#8b8b8b)]">
                                 {primaryField.header}:
                               </h6>
-                              <h4 className="quote-name line-clamp-1 [&>*]:[font-weight:700_!important] [&_*]:line-clamp-1 [&_*]:[font-size:12px_!important] [&_*]:[white-space:unset_!important]">
+                              <h4 className="quote-name line-clamp-1 [&>*]:[font-weight:700_!important] [&_*:not(.flex)]:line-clamp-1 [&_*]:[font-size:12px_!important] [&_*]:[white-space:unset_!important]">
                                 {primaryField.cell({ row, table })}
                               </h4>
                             </div>

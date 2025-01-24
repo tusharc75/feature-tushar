@@ -1,4 +1,4 @@
-import { BoxProps, Checkbox, Typography } from '@material-ui/core';
+import { BoxProps, Checkbox, Typography } from '@mui/material';
 import React, { ReactNode, useMemo } from 'react';
 import RenderColumns from './RenderColumns';
 import { TActios, TInitialState } from './hooks/useCardReducer';
@@ -8,7 +8,7 @@ import { cn } from 'src/constants/helpers';
 
 export * from './hooks/useCardReducer';
 
-interface CardColInterface extends BoxProps {
+type CardColInterface = {
   cardOnClick?: (e: React.MouseEvent, data: any) => void;
   passFailStatus?: boolean;
   passFailAccessor?: string;
@@ -21,7 +21,16 @@ interface CardColInterface extends BoxProps {
   fetchSingleColumn: (column: string, page: number, appendData?: boolean, filterQuery?: string) => void;
   assignOptions?: any;
   openAssignHandler?: (option: any, data: any) => void;
-}
+  getColColors?: (col: any) => Colors;
+  height?: string | number;
+} & BoxProps;
+
+type Colors = {
+  color: string;
+  background: string;
+  indicatorBackground: string;
+  indicatorColor: string;
+};
 
 export type datarowInterface = TDate | TDateTime | TText | TTimer | TLink | TTitle | TLinkTitle | TTooltip;
 
@@ -63,7 +72,7 @@ type TTooltip = {
   renderer: (data: any) => ReactNode | Element;
 };
 
-const CardColTimeline: React.FC<CardColInterface> = ({
+const CardColTimeline = <D,>({
   cardOnClick = null,
   passFailStatus = true,
   passFailAccessor = 'passfail',
@@ -75,8 +84,10 @@ const CardColTimeline: React.FC<CardColInterface> = ({
   state,
   dispatch,
   fetchSingleColumn,
+  getColColors,
+  height = 'max(calc(100vh - 170px), 600px)',
   ...others
-}) => {
+}: CardColInterface) => {
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const [containerHeight, setContainerHeight] = React.useState(600);
 
@@ -95,9 +106,10 @@ const CardColTimeline: React.FC<CardColInterface> = ({
   }, [containerRef]);
 
   return (
-    <div className={cn(`${styles.container}`, className)} {...others} ref={containerRef}>
+    <div className={cn(`${styles.container}`, className)} style={{ height, ...others.style }} {...others} ref={containerRef}>
       <div className="flex snap-x snap-mandatory gap-[10px] overflow-auto pb-4 md:scroll-px-[24px]">
         {columns.map((col) => {
+          const { background, color } = getColColors?.(col) || { background: 'bg-[var(--dark-secondary,#f1f5ff)]' };
           return (
             <div
               key={col}
@@ -110,8 +122,8 @@ const CardColTimeline: React.FC<CardColInterface> = ({
                 } as React.CSSProperties
               }
             >
-              <div className="min-h-full rounded-[8px] bg-[var(--section-bg)] px-[6px] pb-[10px] pt-[0px]">
-                <h6 className={styles.colTitle}>
+              <div className="min-h-full rounded-[8px] bg-[var(--section-bg)] pb-[10px] pt-[0px]">
+                <h6 className={cn(color, background, styles.colTitle, 'mb-4')}>
                   <span className="absolute left-2">
                     <Checkbox
                       size="small"
@@ -145,6 +157,8 @@ const CardColTimeline: React.FC<CardColInterface> = ({
                   state={state}
                   dispatch={dispatch}
                   fetchSingleColumn={fetchSingleColumn}
+                  background={background}
+                  color={color}
                 />
               </div>
             </div>

@@ -1,8 +1,8 @@
-import { Box, IconButton, MenuItem, TextField } from '@material-ui/core';
-import Add from '@material-ui/icons/Add';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, IconButton, MenuItem, TextField } from '@mui/material';
+import Add from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import Autocomplete from '@mui/material/Autocomplete';
 import { startCase } from 'lodash';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -358,13 +358,16 @@ const Services = ({
           setNextStep(true);
           setNextStepToolTip(null);
         }
-      }
-      else {
-        if (data?.material?.filter((e) => e.parentId === null).filter((e) => e.type === MATERIAL_TYPE.product || (e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType !== 'Service'))?.length) {
+      } else {
+        if (
+          data?.material
+            ?.filter((e) => e.parentId === null)
+            .filter((e) => e.type === MATERIAL_TYPE.product || (e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType !== 'Service'))
+            ?.length
+        ) {
           setNextStep(true);
           setNextStepToolTip(null);
-        }
-        else {
+        } else {
           setNextStep(false);
           setNextStepToolTip(rentalManagementMessage.addServicePackage);
         }
@@ -697,7 +700,7 @@ const Services = ({
               autoHighlight
               value={selectedServiceOption}
               getOptionLabel={(option: any) => option?.optionLabel || ''}
-              getOptionSelected={(option, val) => (option ? option?.optionLabel === val?.optionLabel : false)}
+              isOptionEqualToValue={(option, val) => (option ? option?.optionLabel === val?.optionLabel : false)}
               onChange={(_, val) => {
                 let value = val;
                 if (!val) {
@@ -709,8 +712,8 @@ const Services = ({
             />
           </Box>
           <Box mt={3}>
-            <CustomTabs value={tabValue} onChange={handleMainTabChange} style={{ marginBottom: -1 }}>
-              <CustomTab value={0} label={'Technicians'} primaryColor={true} />
+            <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
+              <CustomTab value={0} label={'Technicians'} />
             </CustomTabs>
             <TabPanel value={tabValue} index={0}>
               <Technicians

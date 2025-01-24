@@ -1,12 +1,11 @@
 import { useState, useEffect, useContext } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ReactApexChart from 'react-apexcharts';
 import { useAppTheme } from 'src/constants/AppConfig';
-import moment from 'moment';
-import { dateTimeFormat24Hours } from 'src/constants/helpers';
+import { dateTimeFormat24Hours, displayDateTime } from 'src/constants/helpers';
 
 let chartOptions: any = {
   theme: {
@@ -37,7 +36,7 @@ let chartOptions: any = {
     type: 'datetime',
     labels: {
       formatter: function (value) {
-        const formattedDateTime = moment(value).format(dateTimeFormat24Hours);
+        const formattedDateTime = displayDateTime(value, dateTimeFormat24Hours);
         return formattedDateTime;
       }
     },
@@ -53,7 +52,7 @@ let chartOptions: any = {
         if (isNaN(date.getTime())) {
           return value;
         } else {
-          return moment(value).format(dateTimeFormat24Hours);
+          return displayDateTime(value, dateTimeFormat24Hours);
         }
       }
     }
@@ -97,8 +96,7 @@ const TimelineChart = ({ assetId, dateFilters, dataPoints }) => {
       .then(({ data: { data } }) => {
         if (data?.length) {
           setChartData(transformData(data));
-        }
-        else {
+        } else {
           setChartData({ active: [], inactive: [] });
         }
       })
@@ -108,7 +106,6 @@ const TimelineChart = ({ assetId, dateFilters, dataPoints }) => {
   };
 
   function transformData(piData) {
-
     const dataPointsFieldName: any = dataPoints?.map((e) => e.fieldName);
 
     if (!piData) return null;
@@ -118,7 +115,7 @@ const TimelineChart = ({ assetId, dateFilters, dataPoints }) => {
     let inactiveIntervals = [];
 
     for (let key of statusKeys) {
-      const fieldLabel = dataPoints?.find((e) => e?.fieldName === key)?.fieldLabel || key
+      const fieldLabel = dataPoints?.find((e) => e?.fieldName === key)?.fieldLabel || key;
 
       let currentIntervalStart = new Date(piData[0].time).getTime();
       let currentStatus = piData[0][key];
@@ -175,7 +172,8 @@ const TimelineChart = ({ assetId, dateFilters, dataPoints }) => {
             }
           ]}
           type="rangeBar"
-          height={500} />
+          height={500}
+        />
       ) : (
         <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />

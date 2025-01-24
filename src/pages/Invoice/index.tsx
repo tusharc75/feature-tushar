@@ -1,6 +1,6 @@
-import { Box, Chip, IconButton, MenuItem } from '@material-ui/core';
-import { Delete } from '@material-ui/icons';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { Box, Chip, IconButton, MenuItem } from '@mui/material';
+import { Delete } from '@mui/icons-material';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase, sortBy } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -30,12 +30,13 @@ import routes from './../../components/Helpers/Routes';
 import ManageInvoiceDialog from './ManageInvoiceDialog';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
+import { Link } from 'react-router-dom';
+import WarningIcon from '@mui/icons-material/Warning';
+import OpenInvoiceErrorDialog from 'src/pages/Invoice/OpenInvoiceErrorDialog';
 
 let invoiceTimeout;
 
 const Invoice = () => {
-
-
   const renderedFrom = camelCase(sidebarResource.invoice);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -58,6 +59,7 @@ const Invoice = () => {
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
   const [statusOptions, setStatusOptions] = useState(null);
+  const [openOpenInvoiceError, setOpenOpenInvoiceError] = useState({ open: false, data: null });
 
   const types = [
     {
@@ -85,6 +87,35 @@ const Invoice = () => {
       }
     });
     const newColumns = generateColumns(renderedFrom, data, routes.invoiceDetail.path, true);
+    newColumns?.forEach((o) => {
+      if (o?.accessor === 'invoiceNumber') {
+        o.cell = ({ row }) => (
+          <div>
+            <Link
+              className="link text-truncate"
+              title={row?.original?.invoiceNumber}
+              to={`${routes.invoiceDetail.path}/${row?.original?._id}`}
+            >
+              {row?.original?.invoiceNumber}
+            </Link>
+            {(row?.original?.toOpenInvoice && row?.original?.sendToOpenInvoiceError && (
+              <Box ml={1}>
+                <HtmlTooltip title="Error in post to open invoice">
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      setOpenOpenInvoiceError({ open: true, data: row?.original })
+                    }}
+                  >
+                    <WarningIcon style={{ fontSize: '14px' }} fontSize="small" color="error" />
+                  </IconButton>
+                </HtmlTooltip>
+              </Box>
+            ))}
+          </div>
+        );
+      }
+    });
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
@@ -273,8 +304,7 @@ const Invoice = () => {
           onClick={() => {
             if (selectedRecords?.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-            }
-            else {
+            } else {
               setDeleteRecord(null);
             }
             setShowDeleteConfirmBox(true);
@@ -406,8 +436,11 @@ const Invoice = () => {
         {showDeleteConfirmBox ? (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.invoice?.titleSingular?.toLowerCase()} :
-              ${deleteRecord?.invoiceNumber}` : `selected ${resources?.invoice?.titlePlural?.toLowerCase()}`} ?`}
+            message={`Are you sure you want to delete ${deleteRecord
+              ? `${resources?.invoice?.titleSingular?.toLowerCase()} :
+              ${deleteRecord?.invoiceNumber}`
+              : `selected ${resources?.invoice?.titlePlural?.toLowerCase()}`
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
@@ -427,6 +460,13 @@ const Invoice = () => {
             fetchData();
             setShowManageDialog({ open: false, isClone: false, idToClone: null });
           }}
+        />
+      )}
+      {openOpenInvoiceError.open && (
+        <OpenInvoiceErrorDialog
+          invoiceNumber={openOpenInvoiceError.data.invoiceNumber}
+          invoiceId={openOpenInvoiceError.data._id}
+          onClose={() => setOpenOpenInvoiceError({ open: false, data: null })}
         />
       )}
     </section>

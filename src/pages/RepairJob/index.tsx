@@ -1,5 +1,5 @@
-import { Box, Chip, IconButton, MenuItem } from '@material-ui/core';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { Box, Chip, IconButton, MenuItem } from '@mui/material';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
@@ -33,7 +33,7 @@ import ManageRepairJob from './ManageRepairJob';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createRepairJobFlow } from './walkmeSteps';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 let repairJobTimeout;
 
@@ -336,8 +336,7 @@ const RepairJob = () => {
         onClick={() => {
           if (selectedRecords?.length === 1) {
             setDeleteRecord(selectedRecords[0]);
-          }
-          else {
+          } else {
             setDeleteRecord(null);
           }
           setShowDeleteConfirmBox(true);
@@ -409,8 +408,12 @@ const RepairJob = () => {
         {showDeleteConfirmBox ? (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.repairJob?.titleSingular?.toLowerCase()} :
-              ${deleteRecord?.repairJobName}` : `selected ${resources?.repairJob?.titlePlural?.toLowerCase()}`} ?`}
+            message={`Are you sure you want to delete ${
+              deleteRecord
+                ? `${resources?.repairJob?.titleSingular?.toLowerCase()} :
+              ${deleteRecord?.repairJobName}`
+                : `selected ${resources?.repairJob?.titlePlural?.toLowerCase()}`
+            } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

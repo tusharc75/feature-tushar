@@ -1,6 +1,13 @@
-import { ThemeProvider, createTheme, useTheme } from '@material-ui/core/styles';
+import { CssVarsThemeOptions, ThemeOptions, ThemeProvider, createTheme, useTheme } from '@mui/material/styles';
 import React, { ReactNode, useEffect } from 'react';
 import { useStore, THEME } from 'src/StateProvider/fastContext';
+
+type CreateThemeT = Omit<ThemeOptions, 'components'> &
+  Pick<CssVarsThemeOptions, 'defaultColorScheme' | 'colorSchemes' | 'components'> & {
+    cssVariables?:
+      | boolean
+      | Pick<CssVarsThemeOptions, 'colorSchemeSelector' | 'rootSelector' | 'disableCssColorScheme' | 'cssVarPrefix' | 'shouldSkipGeneratingVar'>;
+  };
 
 const LOCAL_STORE_NAME = 'app_color_mode';
 
@@ -79,7 +86,7 @@ export default function ColorModeProvider({ children }: ColorModeInterface) {
   );
 }
 
-const getDesignTokens = (mode: ThemeColor) => ({
+const getDesignTokens = (mode: ThemeColor): CreateThemeT => ({
   typography: {
     fontFamily: [
       'Poppins',
@@ -95,9 +102,14 @@ const getDesignTokens = (mode: ThemeColor) => ({
       '"Segoe UI Symbol"'
     ].join(',')
   },
+  cssVariables: {
+    colorSchemeSelector: '[data-mode=dark]',
+    disableCssColorScheme: true,
+    cssVarPrefix: 'mui',
+    shouldSkipGeneratingVar: () => false
+  },
   palette: {
     mode,
-    type: mode,
     ...(mode === 'light'
       ? {
           primary: {
@@ -124,7 +136,8 @@ const getDesignTokens = (mode: ThemeColor) => ({
             light: '#81c784',
             main: '#4caf50',
             dark: '#388e3c'
-          }
+          },
+          divider: '#dee2e6'
         }
       : {
           primary: {
@@ -154,7 +167,8 @@ const getDesignTokens = (mode: ThemeColor) => ({
           },
           background: {
             paper: '#0e0e23'
-          }
+          },
+          divider: '#3d3d5c'
         })
   }
 });

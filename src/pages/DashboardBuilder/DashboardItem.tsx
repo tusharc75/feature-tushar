@@ -1,10 +1,13 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Box, IconButton, ThemeOptions, Typography, makeStyles } from '@material-ui/core';
-import { Delete, Edit } from '@material-ui/icons';
+import { Box, IconButton, ThemeOptions, Typography } from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import { Delete } from '@mui/icons-material';
+import EditIcon from '@mui/icons-material/Edit';
 import RenderIcon from './RenderIcon';
 import { IFormDataType } from './builderHelpers';
 import { colSpans } from 'src/constants/helpers';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const useClasses = makeStyles((theme: ThemeOptions) => ({
   paper: {
@@ -66,9 +69,8 @@ const DashboardItem = ({ id, formData, handleEdit, handleRemove, selectedData, i
   return (
     <li ref={setNodeRef} {...attributes} {...listeners} className={`${colSpans[formData.column - 1]}  list-none`} style={style}>
       <Box
-        className={`${classes.paper} [border:1px_solid_var(--common-border-color)] ${
-          isEditing || isDragging ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,_white)]'
-        }`}
+        className={`${classes.paper} [border:1px_solid_var(--common-border-color)] ${isEditing || isDragging ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,_white)]'
+          }`}
       >
         <Box>
           <Typography className={classes.title}>{formData.chartTitle}</Typography>
@@ -77,19 +79,23 @@ const DashboardItem = ({ id, formData, handleEdit, handleRemove, selectedData, i
           </p>
 
           <Box mt={2} display="flex" flexDirection="column" alignItems="center">
-            <RenderIcon type={CHART_TYPE} style={{ color: 'var(--new_theme_secondary_color)' }} className={classes.chartIcon} />
+            <RenderIcon type={CHART_TYPE} style={{ color: 'var(--new-theme-secondary-color)' }} className={classes.chartIcon} />
             {isEditing && <Typography className={classes.title}>Editing...</Typography>}
           </Box>
         </Box>
 
         {!isEditing && (
           <Box display={'flex'} justifyContent="space-between">
-            <IconButton size="small" onClick={() => handleEdit(formData)}>
-              <Edit color="primary" />
-            </IconButton>
-            <IconButton size="small" onClick={() => handleRemove(id)}>
-              <Delete color="error" />
-            </IconButton>
+            <HtmlTooltip title='Edit'>
+              <IconButton size="small" onClick={() => handleEdit(formData)}  >
+                <EditIcon color="primary" fontSize='small' />
+              </IconButton>
+            </HtmlTooltip>
+            <HtmlTooltip title='Delete'>
+              <IconButton size="small" onClick={() => handleRemove(id)}>
+                <Delete color="error" fontSize='small' />
+              </IconButton>
+            </HtmlTooltip>
           </Box>
         )}
       </Box>

@@ -1,14 +1,13 @@
-import { Box, Button, Dialog, TextField } from '@material-ui/core';
-import _, { camelCase, uniqBy } from 'lodash';
+import { Box, Dialog } from '@mui/material';
+import _, { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import routes from 'src/components/Helpers/Routes';
 import { ASSET_STATUS, CustomDialogTransition, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import AssetDetailsChangeDialog from 'src/pages/RentalManagement/ReceivingTicket/AssetDetailsChangeDialog';
 
@@ -147,12 +146,10 @@ const TransferToAnotherProductDialog = ({ onClose, onSuccess, rentalManagementDa
           <CustomDialogContent>
             <Box>
               <Box display={'flex'} justifyContent={'end'} alignItems={'center'}>
-                <CustomButton
-                  loading={isSubmitting}
+                <ThemeButton
+                  isLoading={isSubmitting}
                   disabled={isSubmitting || selectedRecords?.length === 0 || addButtonDisabled()}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+                  buttonType="theme"
                   onClick={() => {
                     const statusPolicy = checkAssetPolicy(ASSET_STATUS.reserved);
                     if (statusPolicy) {
@@ -163,7 +160,7 @@ const TransferToAnotherProductDialog = ({ onClose, onSuccess, rentalManagementDa
                   }}
                 >
                   {`Add ${selectedRecords?.length ? `(${selectedRecords?.length})` : ''}`}
-                </CustomButton>
+                </ThemeButton>
               </Box>
               <Box>
                 <CustomReactTable

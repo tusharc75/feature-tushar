@@ -1,10 +1,10 @@
-import React, { useState, useEffect, Fragment } from 'react';
-import Grid from '@material-ui/core/Grid';
-import { Button, IconButton } from '@material-ui/core';
-import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
-import HideWhenOffline from '../HideWhenOffline';
-import Activity from '.';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import Grid from '@mui/material/Grid';
+import { Fragment, useEffect, useState } from 'react';
 import { useData } from 'src/StateProvider/Provider';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Activity from '.';
+import HideWhenOffline from '../HideWhenOffline';
 
 const ActivityButton = ({ referenceId, resource, resourceLabel = '', extraRelatedTo = null, handleClose = null }) => {
   const [showActivity, setActivityShow] = useState(false);
@@ -26,15 +26,9 @@ const ActivityButton = ({ referenceId, resource, resourceLabel = '', extraRelate
   return (
     <Fragment>
       <HideWhenOffline>
-        <Button
-          endIcon={<ArrowForwardIcon />}
-          id="collaborator-button"
-          variant="contained"
-          onClick={() => setActivityShow(!showActivity)}
-          style={{ background: 'var(--new_theme_color)', color: 'white', boxShadow: 'unset' }}
-        >
+        <ThemeButton endIcon={<ArrowForwardIcon />} id="collaborator-button" onClick={() => setActivityShow(!showActivity)} buttonType="theme">
           Workspace
-        </Button>
+        </ThemeButton>
       </HideWhenOffline>
       {showActivity && <div className="backdrop-new-v1" onClick={() => setActivityShow(false)}></div>}
       <div className={`activity-new-v1 ${showActivity ? 'show-activity-v1' : 'hide-activity-v1'}`}>
@@ -59,14 +53,14 @@ const ActivityButton = ({ referenceId, resource, resourceLabel = '', extraRelate
                   extraRelatedTo={
                     extraRelatedTo
                       ? {
-                        type: extraRelatedTo?.resource,
-                        referenceId: extraRelatedTo?.referenceId,
-                        access: true
-                      }
+                          type: extraRelatedTo?.resource,
+                          referenceId: extraRelatedTo?.referenceId,
+                          access: true
+                        }
                       : null
                   }
                   close={() => setActivityShow(false)}
-                  handleActivityRefresh={() => { }}
+                  handleActivityRefresh={() => {}}
                   emails={[]}
                 />
               )}

@@ -1,9 +1,8 @@
 import React, { useContext, useState } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import Button from '@material-ui/core/Button';
+import { makeStyles } from '@mui/styles';
 import axiosInstance from '../../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../../StateProvider/CustomToastContext/CustomToastContext';
-import { Dialog, ListItemText, ListItem, List, ListItemIcon, Checkbox, TextField, Box, CircularProgress } from '@material-ui/core';
+import { Dialog, ListItemText, ListItem, List, ListItemIcon, Checkbox, TextField, Box, Theme } from '@mui/material';
 import { FcCancel } from 'react-icons/fc';
 import { AiOutlineClockCircle } from 'react-icons/ai';
 import { FcApproval } from 'react-icons/fc';
@@ -12,11 +11,11 @@ import CustomDialogContent from '../../../../components/CustomDialog/CustomDialo
 import CustomDialogHeader from '../../../../components/CustomDialog/CustomDialogHeader';
 import { isMobile, isTablet } from 'react-device-detect';
 import DoaStepUsers from './DOAStepUsers';
-
 import Steps1 from 'src/components/Steps';
-import { CustomDialogTransition } from 'src/constants/helpers';
+import { cn, CustomDialogTransition, QUOTE_STATUS } from 'src/constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   rejected: {
     background: '#fedddd',
     color: 'var(--error) !important'
@@ -48,6 +47,7 @@ const Steps = (props) => {
     loading,
     approvedQuote,
     handleVersionUpdate,
+    stepFullScreen,
     allowedToEdit,
     DOAData = null,
     quoteData,
@@ -156,23 +156,26 @@ const Steps = (props) => {
         isPrevStep={currentStep >= 0 && !loading && !globalLoading && isPrevStep}
         isStepEnded={isStepEnded || currentStep === steps.length}
         steps={steps}
-        setCurrentStep={() => {}}
+        setCurrentStep={() => { }}
         handleNext={() => {
-          if (versionStatus.includes('Sent to Customer') && steps[currentStep]?.key === 'Send To Customer') {
+          if (versionStatus.includes(QUOTE_STATUS.sentToCustomer) && steps[currentStep]?.key === QUOTE_STATUS.sentToCustomer) {
             setShowManualCustomerActionDialog(true);
           } else {
             handleNext();
           }
         }}
         handlePrev={handleBack}
+        stepFullScreen={stepFullScreen}
         setStepFullScreen={setStepFullScreen}
       />
       {isMobile && !isTablet ? (
         <></>
       ) : (
         <>
-          <div className="absolute right-[25px] top-[64px] rounded-bl-md  text-[20px] font-semibold">
-            {!versionStatus.includes('Accepted by Customer') && approvedQuote.approved && approvedQuote.versionApproved === version && (
+          <div
+            className={cn('absolute  rounded-bl-md text-[20px] font-semibold', stepFullScreen ? '-top-[12px] right-4' : '-top-[27px] right-[0px]')}
+          >
+            {!versionStatus.includes(QUOTE_STATUS.acceptByCustomer) && approvedQuote.approved && approvedQuote.versionApproved === version && (
               <div
                 className={`${approvedClasses} text d-flex align-items-center justify-content-center max-w-max gap-1  rounded-bl-md bg-[var(--dark-primary)] px-2 py-[3px] font-bold`}
               >
@@ -180,10 +183,10 @@ const Steps = (props) => {
               </div>
             )}
             <>
-              {versionStatus === 'Sent for DOA' && <DoaStepUsers DOAData={DOAData} versionStatus={'Sent for DOA'} />}
-              {versionStatus.split(' (')[0] === 'Accepted by DOA' && <DoaStepUsers DOAData={DOAData} versionStatus={'Accepted by DOA'} />}
-              {versionStatus.split(' (')[0] === 'Rejected by DOA' && <DoaStepUsers DOAData={DOAData} versionStatus={'Rejected by DOA'} />}
-              {versionStatus === 'Sent to Customer' && (
+              {versionStatus === QUOTE_STATUS.sentforDOA && <DoaStepUsers DOAData={DOAData} versionStatus={QUOTE_STATUS.sentforDOA} />}
+              {versionStatus.split(' (')[0] === QUOTE_STATUS.acceptedbyDOA && <DoaStepUsers DOAData={DOAData} versionStatus={QUOTE_STATUS.acceptedbyDOA} />}
+              {versionStatus.split(' (')[0] === QUOTE_STATUS.rejectedbyDOA && <DoaStepUsers DOAData={DOAData} versionStatus={QUOTE_STATUS.rejectedbyDOA} />}
+              {versionStatus === QUOTE_STATUS.sentToCustomer && (
                 <div
                   className={`${classes.sent} d-flex align-items-center justify-content-center max-w-max  gap-1 rounded-bl-md bg-[var(--dark-primary)] px-2 py-[3px]`}
                 >
@@ -191,7 +194,7 @@ const Steps = (props) => {
                   <h6>Quote has been sent to customer</h6>
                 </div>
               )}
-              {versionStatus.includes('Accepted by Customer') && (
+              {versionStatus.includes(QUOTE_STATUS.acceptByCustomer) && (
                 <div
                   className={`${approvedClasses} d-flex align-items-center justify-content-center max-w-max  gap-1 rounded-bl-md bg-[var(--dark-primary)] px-2 py-[3px]`}
                 >
@@ -199,7 +202,7 @@ const Steps = (props) => {
                   <h6>Approved by Customer</h6>
                 </div>
               )}
-              {versionStatus.includes('Rejected by Customer') && (
+              {versionStatus.includes(QUOTE_STATUS.rejectByCustomer) && (
                 <div
                   className={`${classes.rejected} d-flex align-items-center justify-content-center max-w-max  gap-1 rounded-bl-md bg-[var(--dark-primary)] px-2 py-[3px]`}
                 >
@@ -262,19 +265,12 @@ const Steps = (props) => {
             </>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button onClick={closeManualDiaog} color="primary" size="small" disabled={submitting}>
+            <ThemeButton onClick={closeManualDiaog} buttonType="transparent">
               Cancel
-            </Button>
-            <Button
-              disabled={!Boolean(selectedOption) || submitting}
-              onClick={manualSendToCustomer}
-              color="primary"
-              size="small"
-              variant="contained"
-              endIcon={submitting && <CircularProgress size={20} />}
-            >
+            </ThemeButton>
+            <ThemeButton disabled={!Boolean(selectedOption) || submitting} onClick={manualSendToCustomer} buttonType="theme" isLoading={submitting}>
               Save
-            </Button>
+            </ThemeButton>
           </CustomDialogFooter>
         </Dialog>
       )}

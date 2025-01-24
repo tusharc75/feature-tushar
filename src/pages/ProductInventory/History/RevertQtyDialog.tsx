@@ -1,5 +1,5 @@
-import { Box, Button, Dialog, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, Dialog, TextField } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { Form, Formik } from 'formik';
 import React from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -7,11 +7,10 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomDialogTransition, productInventory, sidebarResource } from 'src/constants/helpers';
 
 function RevertQtyDialog({ referenceType, productName, product, onClose, onSuccess, qty, revertedQty, ledgerId, serialNumber = [] }) {
-
   const toastConfig = React.useContext(CustomToastContext);
   const [loading, setLoading] = React.useState(false);
 
@@ -20,7 +19,7 @@ function RevertQtyDialog({ referenceType, productName, product, onClose, onSucce
     if (values.revertQty <= 0) {
       errors['revertQty'] = 'Please enter valid revert qty';
     }
-    if (parseInt(values.revertQty) > (qty - revertedQty)) {
+    if (parseInt(values.revertQty) > qty - revertedQty) {
       errors['revertQty'] = 'Insufficient Quantity !';
     }
     if (serialNumber?.length && values.serialNumber?.length !== parseInt(values.revertQty)) {
@@ -31,12 +30,17 @@ function RevertQtyDialog({ referenceType, productName, product, onClose, onSucce
 
   const handleSubmit = (values) => {
     setLoading(true);
-    let data = { revertQty: parseInt(values.revertQty), comment: values.comment, ...(serialNumber?.length ? { serialNumber: values.serialNumber } : {}) };
+    let data = {
+      revertQty: parseInt(values.revertQty),
+      comment: values.comment,
+      ...(serialNumber?.length ? { serialNumber: values.serialNumber } : {})
+    };
     if ([sidebarResource.workOrder, sidebarResource.fieldTicket]?.includes(referenceType)) {
-      axiosInstance().put(`/material-handling/revert/${ledgerId}`, {
-        ...data,
-        referenceType: referenceType
-      })
+      axiosInstance()
+        .put(`/material-handling/revert/${ledgerId}`, {
+          ...data,
+          referenceType: referenceType
+        })
         .then(({ data: { data } }) => {
           setLoading(false);
           onSuccess();
@@ -45,9 +49,9 @@ function RevertQtyDialog({ referenceType, productName, product, onClose, onSucce
           setLoading(false);
           toastConfig.setToastConfig(error);
         });
-    }
-    else {
-      axiosInstance().put(`${productInventory.api}/${product}/ledger-revert/${ledgerId}`, data)
+    } else {
+      axiosInstance()
+        .put(`${productInventory.api}/${product}/ledger-revert/${ledgerId}`, data)
         .then(({ data: { data } }) => {
           setLoading(false);
           onSuccess();
@@ -65,18 +69,20 @@ function RevertQtyDialog({ referenceType, productName, product, onClose, onSucce
         onClose={onClose}
         title={productName !== '' ? `Revert - ${productName}` : 'Revert'}
         showManimizeMaximize={false}
-        showRequiredLabel={false} />
+        showRequiredLabel={false}
+      />
       <Formik
-        initialValues={{ revertQty: (qty - revertedQty), comment: 'Reverted', ...(serialNumber?.length ? { serialNumber: [] } : {}) }}
+        initialValues={{ revertQty: qty - revertedQty, comment: 'Reverted', ...(serialNumber?.length ? { serialNumber: [] } : {}) }}
         onSubmit={handleSubmit}
         validateOnMount
         validate={validate}
       >
-        {({ touched, errors, setFieldValue, values }) => (
+        {({ touched, errors, setFieldValue, values, submitForm }) => (
           <Form autoComplete="off" autoCorrect="off" noValidate>
             <CustomDialogContent>
               <TextField
                 margin="dense"
+                size="small"
                 type="number"
                 label="Revert Qty"
                 name="revertQty"
@@ -91,32 +97,38 @@ function RevertQtyDialog({ referenceType, productName, product, onClose, onSucce
                   setFieldValue('revertQty', e.target.value?.replace(/\D/g, ''));
                 }}
               />
-              {serialNumber?.length ?
+              {serialNumber?.length ? (
                 <Box mt={2} mb={1}>
                   <Autocomplete
-                    options={[
-                      { optionValue: 'all', optionLabel: 'Select All' },
-                      ...serialNumber
-                    ]}
+                    options={[{ optionValue: 'all', optionLabel: 'Select All' }, ...serialNumber]}
                     fullWidth
                     multiple
                     size="small"
                     value={values?.serialNumber ? serialNumber?.filter((data: any) => values?.serialNumber?.includes(data.optionValue)) : []}
                     getOptionLabel={(option) => option.optionLabel}
-                    getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                    isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
                     onChange={(_, newVal: any) => {
                       const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
                       const values = isAll ? [...serialNumber?.map((o) => o.optionValue)] : newVal?.map((val) => val.optionValue);
                       setFieldValue('serialNumber', values);
                     }}
                     renderInput={(params) => (
-                      <TextField required={true} {...params} label="Select Serial Number" name="serialNumber" variant="outlined" error={touched['serialNumber'] && Boolean(errors['serialNumber'])} helperText={touched['serialNumber'] && errors['serialNumber']} />
+                      <TextField
+                        required={true}
+                        {...params}
+                        label="Select Serial Number"
+                        name="serialNumber"
+                        variant="outlined"
+                        error={touched['serialNumber'] && Boolean(errors['serialNumber'])}
+                        helperText={touched['serialNumber'] && errors['serialNumber']}
+                      />
                     )}
                   />
                 </Box>
-                : null}
+              ) : null}
               <TextField
                 margin="dense"
+                size="small"
                 type="text"
                 label="Comment"
                 name="comment"
@@ -133,25 +145,17 @@ function RevertQtyDialog({ referenceType, productName, product, onClose, onSucce
               />
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button
-                type="button"
-                variant="outlined"
-                color="primary"
-                size="small"
+              <ThemeButton
+                buttonType="transparent"
                 onClick={() => {
                   onClose();
                 }}
               >
                 Cancel
-              </Button>
-              <CustomButton
-                loading={loading}
-                variant="contained"
-                color="primary"
-                disabled={loading}
-                type="submit">
+              </ThemeButton>
+              <ThemeButton onClick={submitForm} isLoading={loading} buttonType="theme" disabled={loading}>
                 Revert
-              </CustomButton>
+              </ThemeButton>
             </CustomDialogFooter>
           </Form>
         )}

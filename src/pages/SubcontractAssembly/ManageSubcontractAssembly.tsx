@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -11,6 +11,7 @@ import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import routes from 'src/components/Helpers/Routes';
@@ -29,7 +30,7 @@ const ManageSubcontractAssembly = ({ onClose, onSuccess, isClone = false, id = n
   const history = useHistory();
 
   const {
-    state: { user,resources }
+    state: { user, resources }
   }: any = useData();
 
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -167,13 +168,12 @@ const ManageSubcontractAssembly = ({ onClose, onSuccess, isClone = false, id = n
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${
-                  id
-                    ? isClone
-                      ? `Clone - ${cloneHeading}`
-                      : `Update ${initialData.values?.subcontractAssemblyNumber ? `(${initialData.values?.subcontractAssemblyNumber})` : ''}`
-                    : `Create ${resources?.subcontractAssembly?.titleSingular}`
-                }`}
+                title={`${id
+                  ? isClone
+                    ? `Clone - ${cloneHeading}`
+                    : `Update ${initialData.values?.subcontractAssemblyNumber ? `(${initialData.values?.subcontractAssemblyNumber})` : ''}`
+                  : `Create ${resources?.subcontractAssembly?.titleSingular}`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -196,34 +196,27 @@ const ManageSubcontractAssembly = ({ onClose, onSuccess, isClone = false, id = n
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
-                  disabled={submitting}
+                <ThemeButton
+                  buttonType='transparent'
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
                 >
                   Cancel
-                </Button>
-                <Button
-                  disabled={loading || submitting}
-                  variant="contained"
-                  color="primary"
-                  size="small"
+                </ThemeButton>
+                <ThemeButton
+                  buttonType='theme'
                   id="dialog-save-button"
-                  type="submit"
+                  disabled={loading || submitting}
                   onClick={submitForm}
-                  endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                  isLoading={submitting}
                 >
-                  {' '}
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

@@ -1,18 +1,18 @@
-import { useState, useEffect, useContext, useReducer } from 'react';
-import CustomDialogHeader from '../../CustomDialog/CustomDialogHeader';
-import Dialog from '@material-ui/core/Dialog';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { Box, Grid, IconButton, Theme, Typography } from '@mui/material';
+import MuiAccordion from '@mui/material/Accordion';
+import MuiAccordionDetails from '@mui/material/AccordionDetails';
+import MuiAccordionSummary from '@mui/material/AccordionSummary';
+import Dialog from '@mui/material/Dialog';
+import { withStyles } from '@mui/styles';
+import { useContext, useEffect, useState } from 'react';
 import axiosInstance from '../../../axios/axiosInstance';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomDialogTransition } from '../../../constants/helpers';
-import ProductGridSupplierAskPrice from './ProductGridSupplierAskPrice';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import CustomDialogHeader from '../../CustomDialog/CustomDialogHeader';
 import AskSupplierPriceDialog from '../AskSupplierPriceDialog';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import MuiAccordion from '@material-ui/core/Accordion';
-import MuiAccordionSummary from '@material-ui/core/AccordionSummary';
-import MuiAccordionDetails from '@material-ui/core/AccordionDetails';
-import { withStyles } from '@material-ui/core/styles';
-import { Box, Grid, IconButton, Typography } from '@material-ui/core';
+import ProductGridSupplierAskPrice from './ProductGridSupplierAskPrice';
 
 const Accordion = withStyles({
   root: {
@@ -49,7 +49,7 @@ const AccordionSummary = withStyles({
   expanded: {}
 })(MuiAccordionSummary);
 
-const AccordionDetails = withStyles((theme) => ({
+const AccordionDetails = withStyles((theme: Theme) => ({
   root: {
     padding: theme.spacing(1),
     display: 'block'
@@ -112,7 +112,7 @@ const ViewSupplierPriceDialog = (props) => {
       {productDataList && productDataList.length !== 0 ? (
         productDataList.map((data, index) => (
           <Box ml={2} mr={2}>
-            <div className="pt-1 modified_style_of_accordion_supplier_ask_price">
+            <div className="modified_style_of_accordion_supplier_ask_price pt-1">
               <Accordion expanded={Boolean(expandSupplierGrid === index)} className="omsAccordian accordSupplierAskPrice">
                 <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
                   <Grid container className="pos_rel">

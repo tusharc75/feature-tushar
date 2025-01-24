@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Dialog, Box, TextField, Table, TableHead, Paper, TableContainer, TableBody, TableCell, TableRow, Link, Checkbox } from '@material-ui/core';
+import { Dialog, Box, TextField, Table, TableHead, Paper, TableContainer, TableBody, TableCell, TableRow, Link, Checkbox } from '@mui/material';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { ASSET_NUMBER_TYPE, CustomDialogTransition, sidebarResource } from '../../../constants/helpers';
 import { Formik, Form, FieldArray } from 'formik';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { read, utils, writeFile } from 'xlsx';
 import { serializedAsset } from '../../../constants/helpers';
-import { Autocomplete } from '@material-ui/lab';
+import Autocomplete from '@mui/material/Autocomplete';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -318,9 +318,9 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess, reso
                 </Box>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <CustomButton onClick={submitForm} variant="contained" color="primary" disabled={loading} loading={loading}>
+                <ThemeButton onClick={submitForm} buttonType="theme" disabled={loading} isLoading={loading}>
                   Submit
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
             </Form>
           )}

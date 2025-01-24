@@ -1,18 +1,17 @@
+import { Info } from '@mui/icons-material';
+import DescriptionIcon from '@mui/icons-material/Description';
+import { IconButton } from '@mui/material';
+import queryString from 'query-string';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import queryString from 'query-string';
-import CardColTimeline, { useCardReducer } from 'src/components/CardColTimeline';
-import { useData } from 'src/StateProvider/Provider';
-import routes from 'src/components/Helpers/Routes';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { Info } from '@material-ui/icons';
-import { WORKORDER_SERVICE_STATUS, WORKORDER_TECHNICIAN_SERVICE_STATUS } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
-import { camelCase } from 'lodash';
-import TechnicianDialog from '../TechnicianDialog';
-import { IconButton } from '@material-ui/core';
-import DescriptionIcon from '@material-ui/icons/Description';
+import CardColTimeline from 'src/components/CardColTimeline';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import routes from 'src/components/Helpers/Routes';
+import { WORKORDER_SERVICE_STATUS, WORKORDER_TECHNICIAN_SERVICE_STATUS, workOrderColormap } from 'src/constants/helpers';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
+import { useData } from 'src/StateProvider/Provider';
+import TechnicianDialog from '../TechnicianDialog';
 
 const LIMIT = 25;
 
@@ -115,6 +114,7 @@ const CardView = (props, ref) => {
           const rows = data.map((item) => {
             const newObj = { ...item };
             newObj['serviceName'] = item.service?.serviceName;
+            newObj['customServiceStatus'] = item.status;
             newObj['workOrderNumber'] = item.workOrderDetail?.workOrderNumber;
             newObj['repairOrderNumber'] = item.workOrderDetail?.repairOrder?.optionLabel;
             newObj['productionOrderNumber'] = item.workOrderDetail?.productionOrder?.optionLabel;
@@ -148,14 +148,11 @@ const CardView = (props, ref) => {
   }, []);
 
   useEffect(() => {
-    if (filterQuery?.filterById?.length > 0 || filterQuery?.deepFilter?.length > 0) {
+    if (filterQuery?.length > 0) {
       let query = `&filterType=and`;
 
-      if (filterQuery?.filterById?.length > 0) {
-        query = `${query}&filterById=${JSON.stringify(filterQuery?.filterById)}`;
-      }
-      if (filterQuery?.deepFilter?.length > 0) {
-        query = `${query}&deepFilter=${JSON.stringify(filterQuery?.deepFilter)}`;
+      if (filterQuery?.length > 0) {
+        query = `${query}&filterById=${JSON.stringify(filterQuery)}`;
       }
       dispatch({ type: 'setFilterQuery', filterQuery: query });
     } else {
@@ -167,6 +164,7 @@ const CardView = (props, ref) => {
     <>
       <CardColTimeline
         fetchSingleColumn={fetchSingleColumn}
+        getColColors={(colName) => workOrderColormap[colName]}
         state={state}
         dispatch={dispatch}
         passFailStatus={true}

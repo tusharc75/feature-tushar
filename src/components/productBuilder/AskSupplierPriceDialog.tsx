@@ -1,389 +1,369 @@
-import MomentUtils from "@date-io/moment";
-import { Box, Button, Grid, IconButton, Paper, TextField, Typography } from "@material-ui/core";
-import Dialog from "@material-ui/core/Dialog";
-import MuiPickersUtilsProvider from "@material-ui/pickers/MuiPickersUtilsProvider";
-import { CustomDialogTransition, imageUploadMaxSize } from "src/constants/helpers";
-import ImageAttachments from "../Activity/Email/ImageAttachments";
-import CustomDialogContent from "../CustomDialog/CustomDialogContent";
-import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
-import CustomDialogHeader from "../CustomDialog/CustomDialogHeader";
-import CustomButton from "../Helpers/CustomButton";
-import TinyMce from "../TinyMCE"
-import DeleteIcon from "@material-ui/icons/Delete";
-import { GoArrowDown } from "react-icons/go";
-import { fileIcons } from "../Activity/Email/FileIcons";
-import { useContext, useEffect, useState } from "react";
-import emailStyles from "../../pages/Activity/Email/email.module.scss";
-import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
-import axiosInstance from "src/axios/axiosInstance";
-import { isMobile, isTablet } from "react-device-detect";
-import { Autocomplete } from "@material-ui/lab";
+import { Box, IconButton, Paper, TextField, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import Dialog from '@mui/material/Dialog';
+import { CustomDialogTransition, imageUploadMaxSize } from 'src/constants/helpers';
+import ImageAttachments from '../Activity/Email/ImageAttachments';
+import CustomDialogContent from '../CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import TinyMce from '../TinyMCE';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { GoArrowDown } from 'react-icons/go';
+import { fileIcons } from '../Activity/Email/FileIcons';
+import { useContext, useEffect, useState } from 'react';
+import emailStyles from '../../pages/Activity/Email/email.module.scss';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from 'src/axios/axiosInstance';
+import { isMobile, isTablet } from 'react-device-detect';
+import Autocomplete from '@mui/material/Autocomplete';
 
 const AskSupplierPriceDialog = (props) => {
+  const {
+    setAskSupplierPriceDialog,
+    askSupplierPriceDialog,
+    handelAskPriceToSupplier,
+    supplierContactData,
+    from,
+    handleReject,
+    productDataList,
+    productBuilderId
+  } = props;
 
-    const {
-        setAskSupplierPriceDialog,
-        askSupplierPriceDialog,
-        handelAskPriceToSupplier,
-        supplierContactData,
-        from,
-        handleReject,
-        productDataList,
-        productBuilderId
-    } = props;
+  const [otherAttachments, setOtherAttachments] = useState([]);
+  const [fileImageAttachments, setFileImageAttachments] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [imageSource, setImageSource] = useState(null);
+  const [imageAttachments, setImageAttachments] = useState([]);
+  const [contantValue, setContantValue] = useState(null);
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
+  const toastConfig = useContext(CustomToastContext);
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [contactId, setContactId] = useState([]);
+  const [fields, setFields] = useState([]);
+  const [selectedFields, setSelectedFields] = useState([]);
+  const [displayColumns, setDisplayColumns] = useState(['qty', 'productName', 'productDescription', 'unit', 'productCategory']);
 
-    const [otherAttachments, setOtherAttachments] = useState([]);
-    const [fileImageAttachments, setFileImageAttachments] = useState([]);
-    const [open, setOpen] = useState(false);
-    const [imageSource, setImageSource] = useState(null);
-    const [imageAttachments, setImageAttachments] = useState([]);
-    const [contantValue, setContantValue] = useState(null);
-    const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
-    const toastConfig = useContext(CustomToastContext);
-    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-    const [contactId, setContactId] = useState([]);
-    const [fields, setFields] = useState([]);
-    const [selectedFields, setSelectedFields] = useState([]);
-    const [displayColumns, setDisplayColumns] = useState(["qty", "productName", "productDescription", "unit", "productCategory"]);
+  useEffect(() => {
+    if (from !== 'SupplierAskPrice') {
+      axiosInstance()
+        .get(`/productbuilder/getoneproduct/${productBuilderId}/${productDataList[0]?._id}`)
+        .then(({ data: { data } }) => {
+          var _fields = [];
+          data.productData.fields.forEach((_f) => {
+            _fields.push({ ..._f });
+          });
+          setFields(_fields);
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+  }, []);
 
+  const getFileIconSrc = (file) => {
+    let extension = file.substring(file.lastIndexOf('.')).toLowerCase();
+    let data = fileIcons.find((o) => o.extensions.indexOf(extension) >= 0);
+    if (data && data?.source) return data.source;
+  };
 
-    useEffect(() => {
-        if (from !== "SupplierAskPrice") {
-            axiosInstance().get(`/productbuilder/getoneproduct/${productBuilderId}/${productDataList[0]?._id}`).then(({ data: { data } }) => {
-                var _fields = [];
-                data.productData.fields.forEach((_f) => {
-                    _fields.push({ ..._f })
-                })
-                setFields(_fields)
-            }).catch((error) => {
-                toastConfig.setToastConfig(error);
-            });
-        }
-    }, []);
+  const handleDeleteAttachment = (url) => {
+    setOtherAttachments(otherAttachments.filter((currentUrl) => currentUrl !== url));
+  };
 
-    const getFileIconSrc = (file) => {
-        let extension = file.substring(file.lastIndexOf(".")).toLowerCase();
-        let data = fileIcons.find((o) => o.extensions.indexOf(extension) >= 0);
-        if (data && data?.source) return data.source;
-    };
+  const handleDeleteImageAttachment = (url) => {
+    setImageAttachments(imageAttachments.filter((currentUrl) => currentUrl !== url));
+  };
+  const handleDeleteFileImageAttachment = (url) => {
+    setFileImageAttachments(fileImageAttachments.filter((currentUrl) => currentUrl !== url));
+  };
 
-    const handleDeleteAttachment = (url) => {
-        setOtherAttachments(
-            otherAttachments.filter((currentUrl) => currentUrl !== url)
-        );
-    };
+  const checkImageUrl = (url) => {
+    let extension = url.substring(url.lastIndexOf('.')).toLowerCase();
+    let imageExtensions = ['.tif', '.tiff', '.bmp', '.jpg', '.jpeg', '.gif', '.png', '.eps', '.raw', '.cr2', '.nef', '.orf', '.sr2'];
+    return imageExtensions.indexOf(extension) >= 0;
+  };
 
+  const onUploadFile = (file) => {
+    if (checkImageUrl(file)) {
+      setFileImageAttachments((prevState) => [...prevState, file]);
+    } else {
+      setOtherAttachments((prevState) => [...prevState, file]);
+    }
+  };
 
-    const handleDeleteImageAttachment = (url) => {
-        setImageAttachments(
-            imageAttachments.filter((currentUrl) => currentUrl !== url)
-        );
-    };
-    const handleDeleteFileImageAttachment = (url) => {
-        setFileImageAttachments(
-            fileImageAttachments.filter((currentUrl) => currentUrl !== url)
-        );
-    };
+  const getImageUrl = (file) => {
+    let formData = new FormData();
+    formData.append('file', file);
+    axiosInstance()
+      .post('/user/upload-public', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      .then(({ data }) => {
+        setImageAttachments((prevState) => [...prevState, data.fileUrl]);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
 
-    const checkImageUrl = (url) => {
-        let extension = url.substring(url.lastIndexOf(".")).toLowerCase();
-        let imageExtensions = [
-            ".tif",
-            ".tiff",
-            ".bmp",
-            ".jpg",
-            ".jpeg",
-            ".gif",
-            ".png",
-            ".eps",
-            ".raw",
-            ".cr2",
-            ".nef",
-            ".orf",
-            ".sr2",
-        ];
-        return imageExtensions.indexOf(extension) >= 0;
-    };
+  const handleUploadImage = (event) => {
+    if (event.target.files && event.target.files.length) {
+      const file = event.target.files[0];
+      if (file.size > imageUploadMaxSize.size) {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'error',
+          message: `Image must be less than ${imageUploadMaxSize.text} size`
+        });
+      } else {
+        getImageUrl(file);
+      }
+    }
+  };
 
-    const onUploadFile = (file) => {
-        if (checkImageUrl(file)) {
-            setFileImageAttachments((prevState) => [...prevState, file]);
-        } else {
-            setOtherAttachments((prevState) => [...prevState, file]);
-        }
-    };
-
-    const getImageUrl = (file) => {
-        let formData = new FormData();
-        formData.append("file", file);
-        axiosInstance()
-            .post("/user/upload-public", formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-            })
-            .then(({ data }) => {
-                setImageAttachments((prevState) => [...prevState, data.fileUrl]);
-            })
-            .catch((err) => {
-                toastConfig.setToastConfig(err);
-            });
-    };
-
-    const handleUploadImage = (event) => {
-        if (event.target.files && event.target.files.length) {
-            const file = event.target.files[0];
-            if (file.size > imageUploadMaxSize.size) {
-                toastConfig.setToastConfig({
-                    open: true,
-                    type: "error",
-                    message: `Image must be less than ${imageUploadMaxSize.text} size`,
-                });
-            } else {
-                getImageUrl(file);
-            }
-        }
-    };
-
-    const renderFileThumbnails = (
-        <Grid container spacing={1} className={emailStyles.createEmailContainer}>
-            {otherAttachments && otherAttachments.length > 0 ? (
-                <>
-                    {otherAttachments.map((attachment, i) => {
-                        return (
-                            <>
-                                <Grid item key={i} sm={3} xs={3} md={3} xl={3}>
-                                    <Paper className={emailStyles.fileContainer}>
-                                        <img
-                                            src={getFileIconSrc(attachment)}
-                                            className={emailStyles.file}
-                                            alt="attchment"
-                                        />
-                                        <Typography noWrap variant="body2">
-                                            {attachment
-                                                ? attachment.substring(attachment.lastIndexOf("/") + 1)
-                                                : "attachment"}
-                                        </Typography>
-                                        <div className={emailStyles.fileOverlay}>
-                                            <Typography variant="subtitle2">
-                                                {attachment
-                                                    ? attachment.substring(
-                                                        attachment.lastIndexOf("/") + 1
-                                                    )
-                                                    : "attachment"}
-                                            </Typography>
-                                            <div className={emailStyles.actionButton}>
-                                                <IconButton className={emailStyles.text}>
-                                                    <a href={`${attachment} `} download={true}>
-                                                        <GoArrowDown color="white" size={21} />
-                                                    </a>
-                                                </IconButton>
-                                                <IconButton className={emailStyles.text}>
-                                                    <DeleteIcon
-                                                        className={emailStyles.deleteIcon}
-                                                        onClick={() => handleDeleteAttachment(attachment)}
-                                                    />
-                                                </IconButton>
-                                            </div>
-                                        </div>
-
-                                    </Paper>
-                                </Grid>
-                            </>
-                        );
-                    })}
-                </>
-            ) : null}
-        </Grid>
-    );
-
-    return (
+  const renderFileThumbnails = (
+    <Grid container spacing={1} className={emailStyles.createEmailContainer}>
+      {otherAttachments && otherAttachments.length > 0 ? (
         <>
-            <Dialog
-                maxWidth={'md'}
-                fullWidth={true}
-                fullScreen={fullScreen || isMobile || isTablet}
-                TransitionComponent={CustomDialogTransition}
-                aria-labelledby="customized-dialog-title"
-                onClose={() => {
-                    setAskSupplierPriceDialog(false)
-                }}
-                open={askSupplierPriceDialog}
-                disableBackdropClick={true}
-                disableEnforceFocus={true}
-            >
-                <CustomDialogHeader title={from != "SupplierAskPrice" ? "Ask Supplier to Quote" : "Reject Supplier Quote"} onClose={() => {
-                    setAskSupplierPriceDialog(false)
-                }}
-                    isMinimized={!fullScreen}
-                    onMinimizeMaximize={() => {
-                        setFullScreen((prevState) => !prevState);
-                    }}
-                    showManimizeMaximize={true}
-                    showRequiredLabel={false}
-                />
-
-                <CustomDialogContent>
-                    <MuiPickersUtilsProvider utils={MomentUtils}>
-                        <Box padding={1}>
-                            <Grid container spacing={1}>
-                                <Grid item xs={12}>
-                                    {from != "SupplierAskPrice" && <Autocomplete
-                                        multiple
-                                        options={[{ _id: "All", concatedName: "All" }, ...supplierContactData]}
-                                        getOptionLabel={(option: any) => (option ? option?.accountName ? `${option?.concatedName} - ${option?.accountName?.optionLabel}` : `${option?.concatedName}` : '')}
-                                        value={
-                                            supplierContactData.filter((data) => contactId?.some((d) => d === data._id)).length
-                                                ? supplierContactData.filter((data) => contactId?.some((d) => d === data._id))
-                                                : []
-                                        }
-                                        onChange={(e, val: any) => {
-                                            val?.some(d => d?._id === "All") ?
-                                                setContactId(supplierContactData?.map((d) => d._id))
-                                                : setContactId(val && val?.map((d) => d._id))
-                                        }}
-                                        renderInput={(params) => (
-                                            <TextField
-                                                {...params}
-                                                margin="dense"
-                                                name="contact"
-                                                label="Supplier Contact"
-                                                variant="outlined"
-                                                required
-                                                fullWidth
-                                            />
-                                        )}
-                                    />}
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <Box>
-                                        {otherAttachments && otherAttachments.length > 0 && renderFileThumbnails}
-                                        {otherAttachments && otherAttachments.length > 0 && <ImageAttachments
-                                            imageAttachments={fileImageAttachments}
-                                            onImageClick={(attachment) => {
-                                                setImageSource(attachment);
-                                                setOpen(true);
-                                            }}
-                                            isCreateOnly={true}
-                                            onDelete={handleDeleteFileImageAttachment}
-                                            emailId={null}
-                                        />}
-                                        {otherAttachments && otherAttachments.length > 0 && <ImageAttachments
-                                            imageAttachments={imageAttachments}
-                                            onImageClick={(attachment) => {
-                                                setImageSource(attachment);
-                                                setOpen(true);
-                                            }}
-                                            isCreateOnly={true}
-                                            onDelete={handleDeleteImageAttachment}
-                                            emailId={null}
-                                        />}
-                                        <TinyMce
-                                            onChange={(value) => {
-                                                setContantValue(value)
-                                            }}
-                                            initialValue={""}
-                                            imageOrFileUploadCompletePercentage={(
-                                                completePercentage
-                                            ) => {
-                                                setUploadingImageOrFileProgress(
-                                                    completePercentage
-                                                );
-                                            }}
-                                            doNotShowUploadFile={false}
-                                            onUploadFile={onUploadFile}
-                                            onUploadImage={handleUploadImage}
-                                            usePublicUrlforFileUpload={true}
-                                            isSendToCustomer={false}
-                                        />
-                                    </Box>
-                                </Grid>
-                                <Grid item xs={12}>
-                                    {from != "SupplierAskPrice" && <Autocomplete
-                                        multiple
-                                        options={[{ fieldName: "All", fieldLabel: "All" }, ...fields]}
-                                        getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
-                                        value={
-                                            fields.filter((data) => displayColumns?.some((d) => d === data?.fieldName)).length
-                                                ? fields.filter((data) => displayColumns?.some((d) => d === data?.fieldName))
-                                                : []
-                                        }
-                                        onChange={(e, val: any) => {
-                                            val?.some(d => d?.fieldName === "All") ?
-                                                setDisplayColumns(fields?.map((d) => d?.fieldName))
-                                                : setDisplayColumns(val && val?.map((d) => d?.fieldName))
-                                        }}
-                                        renderInput={(params) => (
-                                            <TextField
-                                                {...params}
-                                                margin="dense"
-                                                name="displayColumns"
-                                                label="Display Columns"
-                                                variant="outlined"
-                                                required
-                                                fullWidth
-                                            />
-                                        )}
-                                    />}
-                                </Grid>
-                                <Grid item xs={12}>
-                                    {from != "SupplierAskPrice" && <Autocomplete
-                                        multiple
-                                        options={[{ fieldName: "All", fieldLabel: "All" }, ...fields.filter(d => d.sectionName === "Cost Calculation" && (d.formula === undefined || d.formula === null || d.formula === ""))]}
-                                        getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
-                                        value={
-                                            fields.filter((data) => selectedFields?.some((d) => d === data?.fieldName)).length
-                                                ? fields.filter((data) => selectedFields?.some((d) => d === data?.fieldName))
-                                                : []
-                                        }
-                                        onChange={(e, val: any) => {
-                                            val?.some(d => d?.fieldName === "All") ?
-                                                setSelectedFields(fields?.filter(d => d.sectionName === "Cost Calculation" && (d.formula === undefined || d.formula === null || d.formula === "")).map((d) => d?.fieldName))
-                                                : setSelectedFields(val && val?.map((d) => d?.fieldName))
-                                        }}
-                                        renderInput={(params) => (
-                                            <TextField
-                                                {...params}
-                                                margin="dense"
-                                                name="field"
-                                                label="Required Field"
-                                                variant="outlined"
-                                                required
-                                                fullWidth
-                                            />
-                                        )}
-                                    />}
-                                </Grid>
-                            </Grid>
-                        </Box>
-                    </MuiPickersUtilsProvider>
-                </CustomDialogContent>
-
-                <CustomDialogFooter>
-                    <Button type="button" variant="outlined" color="primary" size="small" onClick={() => {
-                        setAskSupplierPriceDialog(false)
-                    }}>
-                        Cancel
-                    </Button>
-
-                    {from === "SupplierAskPrice" ?
-                        <CustomButton
-                            variant="contained"
-                            color="primary"
-                            onClick={() => handleReject(contantValue)}
-                        >
-                            Submit
-                        </CustomButton>
-                        : <CustomButton
-                            variant="contained"
-                            color="primary"
-                            disabled={contactId.length === 0 || selectedFields.length === 0 || displayColumns.length === 0}
-                            onClick={() => handelAskPriceToSupplier(contantValue, contactId, selectedFields, displayColumns)}
-                        >
-                            Send
-                        </CustomButton>}
-                </CustomDialogFooter>
-
-            </Dialog>
+          {otherAttachments.map((attachment, i) => {
+            return (
+              <>
+                <Grid key={i} size={{sm:3, xs:3, md:3, xl:3}}>
+                  <Paper className={emailStyles.fileContainer}>
+                    <img src={getFileIconSrc(attachment)} className={emailStyles.file} alt="attchment" />
+                    <Typography noWrap variant="body2">
+                      {attachment ? attachment.substring(attachment.lastIndexOf('/') + 1) : 'attachment'}
+                    </Typography>
+                    <div className={emailStyles.fileOverlay}>
+                      <Typography variant="subtitle2">{attachment ? attachment.substring(attachment.lastIndexOf('/') + 1) : 'attachment'}</Typography>
+                      <div className={emailStyles.actionButton}>
+                        <IconButton className={emailStyles.text}>
+                          <a href={`${attachment} `} download={true}>
+                            <GoArrowDown color="white" size={21} />
+                          </a>
+                        </IconButton>
+                        <IconButton className={emailStyles.text}>
+                          <DeleteIcon className={emailStyles.deleteIcon} onClick={() => handleDeleteAttachment(attachment)} />
+                        </IconButton>
+                      </div>
+                    </div>
+                  </Paper>
+                </Grid>
+              </>
+            );
+          })}
         </>
-    )
-}
+      ) : null}
+    </Grid>
+  );
+
+  return (
+    <>
+      <Dialog
+        maxWidth={'md'}
+        fullWidth={true}
+        fullScreen={fullScreen || isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
+        aria-labelledby="customized-dialog-title"
+        open={askSupplierPriceDialog}
+        onClose={(event, reason) => {
+          if (reason !== 'backdropClick') {
+            setAskSupplierPriceDialog(false);
+          }
+        }}
+        disableEnforceFocus={true}
+      >
+        <CustomDialogHeader
+          title={from != 'SupplierAskPrice' ? 'Ask Supplier to Quote' : 'Reject Supplier Quote'}
+          onClose={() => {
+            setAskSupplierPriceDialog(false);
+          }}
+          isMinimized={!fullScreen}
+          onMinimizeMaximize={() => {
+            setFullScreen((prevState) => !prevState);
+          }}
+          showManimizeMaximize={true}
+          showRequiredLabel={false}
+        />
+
+        <CustomDialogContent>
+          <Box padding={1}>
+            <Grid container spacing={1}>
+              <Grid size={{xs:12}}>
+                {from != 'SupplierAskPrice' && (
+                  <Autocomplete
+                    multiple
+                    options={[{ _id: 'All', concatedName: 'All' }, ...supplierContactData]}
+                    getOptionLabel={(option: any) =>
+                      option
+                        ? option?.accountName
+                          ? `${option?.concatedName} - ${option?.accountName?.optionLabel}`
+                          : `${option?.concatedName}`
+                        : ''
+                    }
+                    value={
+                      supplierContactData.filter((data) => contactId?.some((d) => d === data._id)).length
+                        ? supplierContactData.filter((data) => contactId?.some((d) => d === data._id))
+                        : []
+                    }
+                    onChange={(e, val: any) => {
+                      val?.some((d) => d?._id === 'All')
+                        ? setContactId(supplierContactData?.map((d) => d._id))
+                        : setContactId(val && val?.map((d) => d._id));
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        margin="dense"
+                        size="small"
+                        name="contact"
+                        label="Supplier Contact"
+                        variant="outlined"
+                        required
+                        fullWidth
+                      />
+                    )}
+                  />
+                )}
+              </Grid>
+              <Grid size={{xs:12}}>
+                <Box>
+                  {otherAttachments && otherAttachments.length > 0 && renderFileThumbnails}
+                  {otherAttachments && otherAttachments.length > 0 && (
+                    <ImageAttachments
+                      imageAttachments={fileImageAttachments}
+                      onImageClick={(attachment) => {
+                        setImageSource(attachment);
+                        setOpen(true);
+                      }}
+                      isCreateOnly={true}
+                      onDelete={handleDeleteFileImageAttachment}
+                      emailId={null}
+                    />
+                  )}
+                  {otherAttachments && otherAttachments.length > 0 && (
+                    <ImageAttachments
+                      imageAttachments={imageAttachments}
+                      onImageClick={(attachment) => {
+                        setImageSource(attachment);
+                        setOpen(true);
+                      }}
+                      isCreateOnly={true}
+                      onDelete={handleDeleteImageAttachment}
+                      emailId={null}
+                    />
+                  )}
+                  <TinyMce
+                    onChange={(value) => {
+                      setContantValue(value);
+                    }}
+                    initialValue={''}
+                    imageOrFileUploadCompletePercentage={(completePercentage) => {
+                      setUploadingImageOrFileProgress(completePercentage);
+                    }}
+                    doNotShowUploadFile={false}
+                    onUploadFile={onUploadFile}
+                    onUploadImage={handleUploadImage}
+                    usePublicUrlforFileUpload={true}
+                    isSendToCustomer={false}
+                  />
+                </Box>
+              </Grid>
+              <Grid size={{xs:12}}>
+                {from != 'SupplierAskPrice' && (
+                  <Autocomplete
+                    multiple
+                    options={[{ fieldName: 'All', fieldLabel: 'All' }, ...fields]}
+                    getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
+                    value={
+                      fields.filter((data) => displayColumns?.some((d) => d === data?.fieldName)).length
+                        ? fields.filter((data) => displayColumns?.some((d) => d === data?.fieldName))
+                        : []
+                    }
+                    onChange={(e, val: any) => {
+                      val?.some((d) => d?.fieldName === 'All')
+                        ? setDisplayColumns(fields?.map((d) => d?.fieldName))
+                        : setDisplayColumns(val && val?.map((d) => d?.fieldName));
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        margin="dense"
+                        size="small"
+                        name="displayColumns"
+                        label="Display Columns"
+                        variant="outlined"
+                        required
+                        fullWidth
+                      />
+                    )}
+                  />
+                )}
+              </Grid>
+              <Grid size={{xs:12}}>
+                {from != 'SupplierAskPrice' && (
+                  <Autocomplete
+                    multiple
+                    options={[
+                      { fieldName: 'All', fieldLabel: 'All' },
+                      ...fields.filter(
+                        (d) => d.sectionName === 'Cost Calculation' && (d.formula === undefined || d.formula === null || d.formula === '')
+                      )
+                    ]}
+                    getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
+                    value={
+                      fields.filter((data) => selectedFields?.some((d) => d === data?.fieldName)).length
+                        ? fields.filter((data) => selectedFields?.some((d) => d === data?.fieldName))
+                        : []
+                    }
+                    onChange={(e, val: any) => {
+                      val?.some((d) => d?.fieldName === 'All')
+                        ? setSelectedFields(
+                            fields
+                              ?.filter(
+                                (d) => d.sectionName === 'Cost Calculation' && (d.formula === undefined || d.formula === null || d.formula === '')
+                              )
+                              .map((d) => d?.fieldName)
+                          )
+                        : setSelectedFields(val && val?.map((d) => d?.fieldName));
+                    }}
+                    renderInput={(params) => (
+                      <TextField {...params} margin="dense" size="small" name="field" label="Required Field" variant="outlined" required fullWidth />
+                    )}
+                  />
+                )}
+              </Grid>
+            </Grid>
+          </Box>
+        </CustomDialogContent>
+
+        <CustomDialogFooter>
+          <ThemeButton
+            buttonType="transparent"
+            onClick={() => {
+              setAskSupplierPriceDialog(false);
+            }}
+          >
+            Cancel
+          </ThemeButton>
+
+          {from === 'SupplierAskPrice' ? (
+            <ThemeButton buttonType="theme" onClick={() => handleReject(contantValue)}>
+              Submit
+            </ThemeButton>
+          ) : (
+            <ThemeButton
+              buttonType="theme"
+              disabled={contactId.length === 0 || selectedFields.length === 0 || displayColumns.length === 0}
+              onClick={() => handelAskPriceToSupplier(contantValue, contactId, selectedFields, displayColumns)}
+            >
+              Send
+            </ThemeButton>
+          )}
+        </CustomDialogFooter>
+      </Dialog>
+    </>
+  );
+};
 export default AskSupplierPriceDialog;

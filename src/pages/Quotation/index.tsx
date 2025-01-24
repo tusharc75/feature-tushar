@@ -1,8 +1,7 @@
-import { Box, Chip, IconButton, MenuItem } from '@material-ui/core';
-import { Delete, Help, Warning } from '@material-ui/icons';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { Box, Chip, IconButton, MenuItem } from '@mui/material';
+import { Delete, Help, Warning } from '@mui/icons-material';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
-import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -31,10 +30,9 @@ import {
 import ManageQuotationDialog from './ManageQuotationDialog';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
+import dayjs from 'dayjs';
 
 const Quotation = () => {
-
-
   const renderedFrom = camelCase(sidebarResource?.quotation);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -88,7 +86,7 @@ const Quotation = () => {
             </Link>
             {row.original?.type === QUOTATION_TYPE.rentalJob && (
               <>
-                {moment(row.original?.estimateEndDate).isBefore(moment(), 'day') && (
+                {dayjs(row.original?.estimateEndDate).isBefore(dayjs(), 'day') && (
                   <Box ml={1}>
                     <HtmlTooltip title={`${resources?.quotation?.titleSingular} Expired`} enterTouchDelay={0} arrow placement="top">
                       <Warning className=" cursor-pointer text-[22px] md:text-[14px]" fontSize="small" color="error" />
@@ -150,9 +148,9 @@ const Quotation = () => {
   };
 
   const isDateWithinNext15Days = (endData) => {
-    var a = moment(endData);
-    var b = moment();
-    const days = a.diff(b, 'days');
+    var a = dayjs(endData);
+    var b = dayjs();
+    const days = a.diff(b, 'day');
     if (days < 15 && days >= 0) {
       return true;
     } else if (days < 0) {
@@ -324,8 +322,7 @@ const Quotation = () => {
           onClick={() => {
             if (selectedRecords?.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-            }
-            else {
+            } else {
               setDeleteRecord(null);
             }
             setShowDeleteConfirmBox(true);
@@ -398,8 +395,11 @@ const Quotation = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.quotation?.titleSingular?.toLowerCase()} :
-              ${deleteRecord?.quotationNumber}` : `selected ${resources?.quotation?.titlePlural?.toLowerCase()}`} ?`}
+            message={`Are you sure you want to delete ${deleteRecord
+              ? `${resources?.quotation?.titleSingular?.toLowerCase()} :
+              ${deleteRecord?.quotationNumber}`
+              : `selected ${resources?.quotation?.titlePlural?.toLowerCase()}`
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

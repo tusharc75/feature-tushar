@@ -1,15 +1,11 @@
-import { Avatar, Box, Collapse, IconButton, Typography } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import { Close, DateRange, ExpandLess, ExpandMore, Image, Map } from '@material-ui/icons';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import { TreeItem, TreeView } from '@material-ui/lab';
-import moment from 'moment';
-import React, { Fragment, useCallback, useState } from 'react';
+import { AccountCircle, CalendarMonth, Close, ExpandLess, ExpandMore, Map } from '@mui/icons-material';
+import { Avatar, Collapse, IconButton, ListItemButton, Typography } from '@mui/material';
+import dayjs from 'dayjs';
+import React, { useCallback, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { dateTimeFormat } from 'src/constants/helpers';
+import { cn, dateFormat } from 'src/constants/helpers';
 import MapView from '../Map';
 import { getColorFromPriority, getPriority } from './helperFunctions';
-import styles from './roadmap.module.scss';
 import type { TActivity } from './types';
 
 type TProps = {
@@ -21,129 +17,10 @@ type TProps = {
   setSelected: (data) => void;
 };
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    '&:hover > $content': {
-      backgroundColor: theme.palette.action.hover
-    },
-    '&:focus > $content, &$selected > $content': {
-      backgroundColor: `var(--tree-view-bg-color, ${theme.palette.grey[100]})`,
-      color: 'var(--tree-view-color)'
-    },
-    '&:focus > $content $label, &:hover > $content $label, &$selected > $content $label': {
-      backgroundColor: 'transparent'
-    }
-  },
-  label: {
-    paddingLeft: 0
-  },
-  group: {
-    marginLeft: 0
-  }
-}));
-
 const COLLAPSIBLE_UNIQUE_NAME = '_fieldTicketInvoice';
 
 const MobileRoadmap: React.FC<TProps> = ({ activity, expanded, selected, handleToggle, handleSelect, setSelected }) => {
-  const classes = useStyles();
   const [open, setOpen] = useState<string | false>(false);
-
-  const getTreeNodes = (treeList: TActivity[]) => {
-    return treeList.map((data, index) => {
-      let children = [];
-      if (data.child && data.child.length > 0) {
-        children = getTreeNodes(data.child);
-        children.push(<div></div>);
-      }
-
-      let label = (
-        <Fragment key={data._id}>
-          <div
-            role="button"
-            className="grid grid-cols-[1fr_auto] gap-4 items-center min-h-[70px] pr-4"
-            onClick={(event) => {
-              handleSelect(event, data, 'technician');
-            }}
-          >
-            <div className="flex items-center">
-              <Avatar variant="circle" sizes="small" style={{ height: 45, width: 45 }} alt="Remy Sharp" src={data?.photo}>
-                <Image style={{ fontSize: 28 }} />
-              </Avatar>
-              <Box ml={2} flex style={{ flexDirection: 'column' }}>
-                <Typography style={{ fontWeight: 'bolder', fontSize: '1rem' }}>{`${data?.firstName} ${data?.lastName}`}</Typography>
-                <p style={{ fontSize: '0.8rem', color: 'grey' }}>{`${data?.competencyType?.optionLabel || ''}`}</p>
-                <p style={{ fontSize: '0.6rem', color: 'grey' }}>{`${data?.competencies?.map((e) => e.optionLabel)?.toString()}`}</p>
-              </Box>
-            </div>
-            <div className="">
-              <IconButton
-                size="small"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  handleMapClick(`${index}`);
-                  handleSelect(event, data, 'map');
-                }}
-              >
-                <Map fontSize="medium" />
-              </IconButton>
-              <IconButton
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelected(null);
-                  handleChange(`${index}`);
-                }}
-              >
-                {compareCollapse(index) ? <ExpandLess /> : <ExpandMore />}
-              </IconButton>
-            </div>
-          </div>
-          <Collapse in={compareCollapse(index)}>
-            <div className="py-4 px-4 border border-[var(--common-border-color)] -mb-[1px] -mr-[1px] -ml-[24px] bg-[var(--dark-secondary,white)]">
-              {!selected ? (
-                <Box>
-                  <CalendarData activity={data} />
-                </Box>
-              ) : (
-                <Box width={'100%'} height={'100%'} className=" relative overflow-auto">
-                  <MapView technician={selected} />
-                  <IconButton
-                    onClick={() => {
-                      setSelected(null);
-                    }}
-                    size="small"
-                    style={{
-                      padding: '8.5px',
-                      position: 'absolute',
-                      top: 11,
-                      right: 56,
-                      zIndex: 1,
-                      backgroundColor: 'var(--dark-secondary, white)'
-                    }}
-                  >
-                    <Close />
-                  </IconButton>
-                </Box>
-              )}
-            </div>
-          </Collapse>
-        </Fragment>
-      );
-
-      return (
-        <TreeItem
-          key={index}
-          nodeId={data._id.toString()}
-          label={label}
-          children={children}
-          style={{ borderBottom: '1px solid var(--common-border-color)' }}
-          classes={{
-            root: classes.root
-          }}
-        />
-      );
-    });
-  };
 
   const handleChange = useCallback((index: string | number) => {
     const newIndex = `${index}${COLLAPSIBLE_UNIQUE_NAME}`;
@@ -159,75 +36,147 @@ const MobileRoadmap: React.FC<TProps> = ({ activity, expanded, selected, handleT
   );
 
   const handleMapClick = useCallback(
-    (index: number | string) => {
-      const isOpen = compareCollapse(index);
-      if (isOpen) return;
-      handleChange(index);
+    (index: number, item: any) => {
+      const newIndex = `${index}${COLLAPSIBLE_UNIQUE_NAME}`;
+      handleSelect('', item, 'map');
+      setOpen(newIndex);
     },
-    [compareCollapse, handleChange]
+    [handleSelect]
   );
 
-  let TreeNodes = getTreeNodes(activity);
-
   return (
-    <div className="border border-[var(--common-border-color)]">
-      <div className="flex items-center gap-2 p-4 " style={{ borderBottom: '1px solid var(--common-border-color)' }}>
+    <div className="max-h-[600px] overflow-auto border border-[var(--common-border-color)]">
+      <div className="sticky top-0 z-[2] flex items-center gap-2 border-b bg-[--dark-secondary,white] p-4">
         <Map />
         <Typography variant="body1" display="block">
           Technician
         </Typography>
       </div>
-      <div className="tree">
-        <TreeView
-          defaultCollapseIcon={<ExpandMore />}
-          defaultExpandIcon={<ChevronRightIcon />}
-          expanded={expanded}
-          selected={selected}
-          onNodeToggle={handleToggle}
-        >
-          {TreeNodes.map((node) => {
-            return node;
-          })}
-        </TreeView>
-      </div>
+      <ul>
+        {activity.map((item, index) => {
+          return (
+            <li className="list-none border-b">
+              <ListItemButton
+                className="flex h-[--data-h] items-center !justify-between px-4 "
+                onClick={(event) => {
+                  handleSelect(event, item, 'technician');
+                }}
+              >
+                <div className="flex min-w-0 items-center gap-4">
+                  <Avatar sizes="small" style={{ height: 45, width: 45 }} alt="Remy Sharp" src={item?.photo}>
+                    <AccountCircle style={{ fontSize: 28 }} />
+                  </Avatar>
+                  <div className="">
+                    <Typography style={{ fontWeight: 'bolder', fontSize: '1rem' }}>{`${item?.firstName} ${item?.lastName}`}</Typography>
+                    <p className="line-clamp-1 text-[0.8rem] text-gray-500" title={`${item?.competencyType?.optionLabel || ''}`}>
+                      {`${item?.competencyType?.optionLabel || ''}`}
+                    </p>
+                    <p
+                      className="line-clamp-1 text-[0.6rem] text-gray-500"
+                      title={`${item?.competencies?.map((e) => e?.optionLabel)?.toString() || ''}`}
+                    >
+                      {`${item?.competencies?.map((e) => e?.optionLabel)?.toString() || ''}`}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-shrink-0">
+                  <IconButton
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      handleMapClick(index, item);
+                    }}
+                  >
+                    <Map fontSize="medium" />
+                  </IconButton>
+                  <IconButton
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelected(null);
+                      handleChange(`${index}`);
+                    }}
+                  >
+                    {compareCollapse(index) ? <ExpandLess /> : <ExpandMore />}
+                  </IconButton>
+                </div>
+              </ListItemButton>
+
+              <Collapse in={compareCollapse(index)}>
+                <CalendarData services={item?.fieldTicket || []} handleSelect={handleSelect} selected={selected} setSelected={setSelected} />
+              </Collapse>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 };
 
 export default MobileRoadmap;
 
-type TCalendarProps = {
-  activity: TActivity;
-};
-const CalendarData: React.FC<TCalendarProps> = ({ activity }) => {
-  const services = activity.fieldTicket;
-  // const name = activity.firstName + ' ' + activity.lastName;
-  // const createDate = activity.createDate;
-  if (!services || !services.length) return <p className=" text-center text-sm">No Data found</p>;
+const CalendarData = ({ services, handleSelect, selected, setSelected }) => {
+  if (selected)
+    return (
+      <div className="relative min-h-[400px] w-full overflow-auto p-2">
+        <MapView technician={selected} />
+        <IconButton
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setSelected(null);
+          }}
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            zIndex: 1
+          }}
+        >
+          <Close />
+        </IconButton>
+      </div>
+    );
   return (
-    <div className="grid gap-5 roadmapContainer">
-      {services.map((service, index) => {
-        const priority = getPriority(service.status);
-        const bgColor = getColorFromPriority(priority);
-        return (
-          <div key={service._id}>
-            <span className="text-[12px] flex gap-2 items-center mb-[7px]">
-              <DateRange className="max-w-[16px] max-h-[16px]" />
-              <span className="text-[#6B6B6B] dark:text-gray-200">{moment(service.startDate).format(dateTimeFormat)}</span>
-            </span>
-            <HtmlTooltip title={<p>{service?.fieldTicket[0]?.fieldTicketNumber}</p>} placement="top">
-              <div className={`rounded-md px-3 py-2 min-h-[20px] flex flex-wrap ${bgColor}`}>
-                <h6 className={`${styles.servicesText} truncate text-sm`} title={service?.serviceDetail?.serviceName}>
-                  {service?.serviceDetail?.serviceName}
-                </h6>
-                <span className={`${styles.chip} ${styles[priority]} ml-auto`}>
-                  <Typography component={'span'}>{service.status}</Typography>
-                </span>
-              </div>
-            </HtmlTooltip>
-          </div>
-        );
-      })}
+    <div>
+      <ul className="space-y-2 border-t p-4">
+        {(!services || !services.length) && <p className=" text-center text-sm">No Data found</p>}
+        {services?.map((service) => {
+          const priority = getPriority(service.status);
+          const bgColor = getColorFromPriority(priority);
+          return (
+            <li className="list-none">
+              <HtmlTooltip
+                title={
+                  <div>
+                    <p>{service?.fieldTicket[0]?.fieldTicketNumber ?? service?.rentalJob[0]?.rentalJobName}</p>
+                    <p className="text-[12px]">
+                      {dayjs(service.startDate).format(dateFormat)} - {dayjs(service.endDate).format(dateFormat)}
+                    </p>
+                  </div>
+                }
+                className={cn(`block h-[--data-h] cursor-pointer overflow-hidden rounded-md border bg-[--dark-primary,white]`, bgColor)}
+                key={service._id}
+              >
+                <div
+                  onClick={() => {
+                    handleSelect(null, { _id: service?.technician, technicianHistoryId: service?._id }, '');
+                  }}
+                  className="flex h-[--data-h] flex-col justify-center p-[14px]"
+                >
+                  <p className="mb-2 line-clamp-1 text-[13px] font-semibold leading-[16px]">
+                    {service.fieldTicket[0]?.fieldTicketNumber || service.rentalJob[0].rentalJobName}
+                  </p>
+                  <p className="flex items-center gap-1 text-[10px] font-medium leading-[16px] text-[#777575] dark:text-gray-100">
+                    <CalendarMonth className="!h-[12px] !w-[12px]" /> {dayjs(service.startDate).format(dateFormat)}-
+                    <span className="line-clamp-1 ">{dayjs(service.endDate).format(dateFormat)}</span>
+                  </p>
+                  <p className="{styles.chip} {styles[priority]} text-[10px] font-medium leading-[16px] text-[#777575]">{service.status}</p>
+                </div>
+              </HtmlTooltip>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 };

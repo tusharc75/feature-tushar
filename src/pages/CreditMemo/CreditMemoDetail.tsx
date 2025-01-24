@@ -1,4 +1,5 @@
-import { Box, Button, Grid, Menu, MenuItem } from '@material-ui/core';
+import { Box, Menu, MenuItem } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -15,13 +16,13 @@ import ManageCreditMemo from './ManageCreditMemo';
 import Step from '../DynamicForm/Step';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Material from './Material';
-import { isMobile, isTablet } from 'react-device-detect';
-import { Edit, ExpandMore } from '@material-ui/icons';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import EditIcon from '@mui/icons-material/Edit';
+import { ExpandMore } from '@mui/icons-material';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import { RiExchangeBoxFill } from 'react-icons/ri';
-import { Skeleton } from '@material-ui/lab';
+import { Skeleton } from '@mui/material';
 
-const creditMemoDetail = () => {
+const CreditMemoDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -78,7 +79,9 @@ const creditMemoDetail = () => {
       setCreditMemoData(data);
       setCustomizedRoutes([{ ...routes.creditMemo, title: resources?.creditMemo?.titlePlural }, { title: data?.creditMemoNumber }]);
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.creditMemo, data));
-      setAllowedToDelete(permissions?.creditMemo?.isDelete && checkIsAllowedToDelete(user, sidebarResource.creditMemo, data?.owner?.optionValue) && data?.canDelete);
+      setAllowedToDelete(
+        permissions?.creditMemo?.isDelete && checkIsAllowedToDelete(user, sidebarResource.creditMemo, data?.owner?.optionValue) && data?.canDelete
+      );
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -161,7 +164,6 @@ const creditMemoDetail = () => {
       });
   };
 
-
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -175,7 +177,6 @@ const creditMemoDetail = () => {
     return statusOptions[currIdx + 1]?.optionValue !== status;
   };
 
-
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -186,37 +187,23 @@ const creditMemoDetail = () => {
           <Box className="control-buttons-v1">
             {creditMemoData ? (
               <>
-                {permissions?.creditMemo?.isUpdate && allowedToEdit && statusOptions?.length > 0 && (
-                  <Button
-                    variant={'outlined'}
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    className="btn-outline-v1"
-                    disabled={updateLoading}
-                    aria-controls="action-menu"
-                    endIcon={<ExpandMore />}
-                  >
-                    {isMobile && !isTablet ? <RiExchangeBoxFill size={24} style={{ color: 'var(--primary-text)' }} /> : 'Change Status'}
-                  </Button>
-                )}
                 {permissions?.creditMemo?.isUpdate &&
                   allowedToEdit &&
-                  ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(creditMemoData?.status) && (
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      className={'btn-outline-v1'}
-                      size="small"
-                      onClick={handleOpenUpdateDialog}
+                  statusOptions?.length > 0 &&
+                  ![INVOICE_STATUS.closed]?.includes(creditMemoData?.status) && (
+                    <ThemeButton
+                      iconForMobile={<RiExchangeBoxFill size={24} style={{ color: 'var(--primary-text)' }} />}
+                      onClick={openActions}
+                      disabled={updateLoading}
+                      endIcon={<ExpandMore />}
+                      mobileTooltip={'Change Status'}
                     >
-                      {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                    </Button>
+                      Change Status
+                    </ThemeButton>
                   )}
-                {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
                 <Menu
                   anchorEl={anchorEl}
                   keepMounted
-                  getContentAnchorEl={null}
                   anchorOrigin={{
                     vertical: 'bottom',
                     horizontal: 'left'
@@ -244,18 +231,22 @@ const creditMemoDetail = () => {
                     })}
                 </Menu>
                 {permissions?.creditMemo?.isUpdate && allowedToEdit && creditMemoData?.status === INVOICE_STATUS.closed && (
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    size="small"
-                    className={'btn-outline-v1'}
+                  <ThemeButton
                     onClick={() => {
                       setShowReOpenConfirmBox(true);
                     }}
                   >
                     Re-Open
-                  </Button>
+                  </ThemeButton>
                 )}
+                {permissions?.creditMemo?.isUpdate &&
+                  allowedToEdit &&
+                  ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(creditMemoData?.status) && (
+                    <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                      {'Edit'}
+                    </ThemeButton>
+                  )}
+                {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
@@ -272,9 +263,9 @@ const creditMemoDetail = () => {
         <TabPanel value={tabValue} index={0}>
           <Box>
             {loading || !fields?.length ? (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-              </Grid>
+              <div className="p-2">
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+              </div>
             ) : (
               <DetailsPage data={creditMemoData} fields={fields} />
             )}
@@ -339,4 +330,4 @@ const creditMemoDetail = () => {
   );
 };
 
-export default creditMemoDetail;
+export default CreditMemoDetail;

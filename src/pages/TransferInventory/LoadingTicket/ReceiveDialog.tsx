@@ -1,26 +1,23 @@
 import React, { useContext, useEffect, useState } from 'react';
-import Button from '@material-ui/core/Button';
-import { Box } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
-import DateUtils from '@date-io/date-fns';
+import { Box } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
 import { Form, Formik } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import {
-  convertDateInDateTime,
-  dateFormatForInputControl,
   deliveryTicket,
   DELIVERY_TICKET_STATUS,
   productInventory,
-  CustomDialogTransition
+  CustomDialogTransition,
+  dateFormatToSend
 } from 'src/constants/helpers';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import CustomButton from 'src/components/Helpers/CustomButton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { uniq, map } from 'lodash';
 import axiosInstance from 'src/axios/axiosInstance';
-import moment from 'moment';
+import CustomDatePicker from 'src/components/CustomDatePicker';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 const ReceiveDialog = ({ handleClose, selectedRecords, handleSucess, transferInventoryData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -52,7 +49,7 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSucess, transferInv
       }
     }
     if (fromLockDate && toLockDate) {
-      if (moment(fromLockDate).diff(moment(toLockDate), 'days') > 0) {
+      if (dayjs(fromLockDate).diff(dayjs(toLockDate), 'day') > 0) {
         setLockDate(fromLockDate);
       } else {
         setLockDate(toLockDate);
@@ -71,7 +68,7 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSucess, transferInv
     if (loadingTicketIds.length) {
       data['_ids'] = loadingTicketIds?.map((e) => e);
       data['status'] = DELIVERY_TICKET_STATUS.delivered;
-      data['receiveDate'] = values?.receiveDate;
+      data['receiveDate'] = dateFormatToSend(values?.receiveDate);
       data['signatures'] = [];
       axiosInstance()
         .post(`${deliveryTicket.api}/updatebulk`, data)
@@ -94,11 +91,11 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSucess, transferInv
   const validate = (values) => {
     const errors = {};
     if (lockDate) {
-      if (!moment(values['receiveDate']).isSameOrAfter(moment(lockDate))) {
+      if (!dayjs(values['receiveDate']).isSameOrAfter(dayjs(lockDate))) {
         errors['receiveDate'] = `Date entered prior to the locked date`;
       }
     }
-    if (moment(values['receiveDate']).isAfter(moment())) {
+    if (dayjs(values['receiveDate']).isAfter(dayjs())) {
       errors['receiveDate'] = `Please select valid date`;
     }
     return errors;
@@ -120,51 +117,42 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSucess, transferInv
       <Formik initialValues={{ receiveDate: new Date() }} onSubmit={handleSubmit} validateOnMount validate={validate}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
           <Form autoComplete="off" autoCorrect="off" noValidate>
-            <MuiPickersUtilsProvider utils={DateUtils}>
-              <CustomDialogHeader title="Receive Inventory" showRequiredLabel={true} onClose={handleClose} />
-              <CustomDialogContent>
-                <Box p={1}>
-                  <KeyboardDatePicker
-                    {...(lockDate ? { minDate: lockDate } : {})}
-                    fullWidth
-                    size="small"
-                    margin="dense"
-                    autoOk
-                    required
-                    variant="inline"
-                    inputVariant="outlined"
-                    value={values.receiveDate}
-                    name="receiveDate"
-                    placeholder={'Receive Date'}
-                    label="Receive Date"
-                    format={dateFormatForInputControl}
-                    maxDate={new Date()}
-                    onChange={(value) => {
-                      var newDate = convertDateInDateTime(value);
-                      setFieldValue('receiveDate', newDate);
-                    }}
-                    error={touched['receiveDate'] && Boolean(errors['receiveDate'])}
-                    helperText={touched['receiveDate'] && errors['receiveDate']}
-                  />
-                </Box>
-              </CustomDialogContent>
-              <CustomDialogFooter>
-                <Button color="primary" size="small" onClick={handleClose}>
-                  Cancel
-                </Button>
-                <CustomButton
-                  id={`receive-dialog-receive-button`}
-                  loading={loading}
-                  disabled={loading}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
-                  onClick={submitForm}
-                >
-                  {'Receive'}
-                </CustomButton>
-              </CustomDialogFooter>
-            </MuiPickersUtilsProvider>
+            <CustomDialogHeader title="Receive Inventory" showRequiredLabel={true} onClose={handleClose} />
+            <CustomDialogContent>
+              <Box p={1}>
+                <CustomDatePicker
+                  {...(lockDate ? { minDate: lockDate } : {})}
+                  fullWidth
+                  size="small"
+                  margin="dense"
+                  required
+                  value={values.receiveDate}
+                  name="receiveDate"
+                  placeholder={'Receive Date'}
+                  label="Receive Date"
+                  maxDate={new Date()}
+                  onChange={(value) => {
+                    setFieldValue('receiveDate', value);
+                  }}
+                  error={touched['receiveDate'] && Boolean(errors['receiveDate'])}
+                  helperText={touched['receiveDate'] && errors['receiveDate']}
+                />
+              </Box>
+            </CustomDialogContent>
+            <CustomDialogFooter>
+              <ThemeButton buttonType="transparent" onClick={handleClose}>
+                Cancel
+              </ThemeButton>
+              <ThemeButton
+                id={`receive-dialog-receive-button`}
+                disabled={loading}
+                isLoading={loading}
+                buttonType="theme"
+                onClick={submitForm}
+              >
+                {'Receive'}
+              </ThemeButton>
+            </CustomDialogFooter>
           </Form>
         )}
       </Formik>

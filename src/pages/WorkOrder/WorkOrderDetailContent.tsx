@@ -1,6 +1,7 @@
-import { Box, Button, Grid, Menu, MenuItem, MenuItemProps, Typography, useMediaQuery } from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
-import { Skeleton } from '@material-ui/lab';
+import { Box, Menu, MenuItem, MenuItemProps, Typography, useMediaQuery } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { ExpandMore } from '@mui/icons-material';
+import { Skeleton } from '@mui/material';
 import queryString from 'query-string';
 import { Fragment, useContext, useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -13,7 +14,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { ThemeButton, ButtonType } from 'src/components/Helpers/Buttons';
+import { ThemeButton, ThemeButtonProps } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import routes from 'src/components/Helpers/Routes';
@@ -59,7 +60,7 @@ type ToolbarElement<T> = {
   type: 'element';
   id: string;
   isVisible?: boolean;
-  component: React.ReactNode;
+  component: any;
 } & T;
 
 type ToolbarButton = {
@@ -70,7 +71,7 @@ type ToolbarButton = {
   isVisible?: boolean;
   onClick: (e: any) => void;
   ripple?: boolean;
-} & ButtonType;
+} & ThemeButtonProps;
 
 type ToolbarComponents<T> = ToolbarElement<T> | ToolbarButton | ToolbarMenuItem;
 
@@ -376,16 +377,16 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
     return result;
   };
 
-  const toolbarButtons: ToolbarComponents<ButtonType | MenuItemProps>[] = [
+  const toolbarButtons: ToolbarComponents<ThemeButtonProps | MenuItemProps>[] = [
     {
       id: `Repair Job`,
       type: 'menuItem',
       isVisible:
         permissions?.repairJob?.isCreate &&
-          allowedToEdit &&
-          workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
-          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-          !workOrderData?.currentRepairJob
+        allowedToEdit &&
+        workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+        !workOrderData?.currentRepairJob
           ? true
           : false,
       children: `Create ${resources?.repairJob?.titleSingular}`,
@@ -477,10 +478,9 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
       children: 'Create Version Without Existing Data',
       isVisible: Boolean(
         allowedToEdit &&
-        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-        !workOrderData?.currentRepairJob &&
-        !workOrderData?.deleted &&
-        workOrderData?.canCreateWorkOrderVersion
+          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+          !workOrderData?.currentRepairJob &&
+          workOrderData?.canCreateWorkOrderVersion
       )
     },
     {
@@ -493,10 +493,9 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
       },
       isVisible: Boolean(
         allowedToEdit &&
-        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-        !workOrderData?.currentRepairJob &&
-        !workOrderData?.deleted &&
-        workOrderData?.canCreateWorkOrderVersion
+          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+          !workOrderData?.currentRepairJob &&
+          workOrderData?.canCreateWorkOrderVersion
       ),
       disabled: false
     },
@@ -527,7 +526,7 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
       id: 'Edit',
       type: 'menuItem',
       tooltip: 'Edit Work Order',
-      isVisible: Boolean(allowedToEdit && !workOrderData?.deleted && !completed),
+      isVisible: Boolean(allowedToEdit && !completed),
       children: 'Edit',
       onClick: () => setOpenUpdateDialog(true)
     },
@@ -539,8 +538,7 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
         permissions?.workOrder?.isDelete &&
         allowedToEdit &&
         workOrderData?.canDelete &&
-        checkIsAllowedToDelete(user, sidebarResource.workOrder, workOrderData.owner.optionValue) &&
-        !workOrderData?.deleted,
+        checkIsAllowedToDelete(user, sidebarResource.workOrder, workOrderData.owner.optionValue),
       children: 'Delete'
     }
   ] as const;
@@ -550,15 +548,15 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
       <Box className="headerbox-v1">
         {resource === sidebarResource.workOrder && (
           <Box className="nav-v1">
-            <CustomBreadCrumbs routes={[{ ...routes?.workOrder, title: resources?.workOrder?.titlePlural }, { title: workOrderData?.workOrderNumber }]} />
+            <CustomBreadCrumbs
+              routes={[{ ...routes?.workOrder, title: resources?.workOrder?.titlePlural }, { title: workOrderData?.workOrderNumber }]}
+            />
           </Box>
         )}
         <Box className="controls-v1 ml-auto">
           <Box className="control-buttons-v1 items-center">
             {workOrderData ? (
-              <>
-                <RenderHeaderButtons buttonOptions={toolbarButtons} />
-              </>
+              <>{!workOrderData?.deleted && <RenderHeaderButtons buttonOptions={toolbarButtons} />}</>
             ) : (
               <Skeleton variant="text" width="150px" height="40px" />
             )}
@@ -591,9 +589,9 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
             {workOrderData && workOrderFields.length ? (
               <DetailsPage data={workOrderData} fields={workOrderFields} />
             ) : (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-              </Grid>
+              <div className="p-2">
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+              </div>
             )}
             {workOrderCostFields?.length && workOrderData?.workOrderCost ? (
               <Box pt={2}>
@@ -607,7 +605,7 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
             ) : (
               <Box pt={2}>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6} md={6} xl={6}>
+                  <Grid size={{ xs: 12, sm: 6, md: 6, xl: 6 }}>
                     <div style={{ overflow: 'hidden' }} className="single-form-v1">
                       <Box display={'flex'} justifyContent="space-between" className={'form-head-v1'}>
                         <Box display="flex" alignItems="center">
@@ -851,7 +849,7 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
 
 export default WorkOrderDetailContent;
 
-const RenderHeaderButtons = ({ buttonOptions }: { buttonOptions: ToolbarComponents<ButtonType | MenuItemProps>[] }) => {
+const RenderHeaderButtons = ({ buttonOptions }: { buttonOptions: ToolbarComponents<ThemeButtonProps | MenuItemProps>[] }) => {
   const isMobile = useMediaQuery('(max-width:600px)');
   const [actionAnchor, setActionAnchor] = useState<null | HTMLElement>(null);
 
@@ -863,10 +861,10 @@ const RenderHeaderButtons = ({ buttonOptions }: { buttonOptions: ToolbarComponen
     setActionAnchor(event.currentTarget);
   };
 
-  const renderComponent = (componentOptions: ToolbarComponents<ButtonType | MenuItemProps>) => {
+  const renderComponent = (componentOptions: ToolbarComponents<ThemeButtonProps | MenuItemProps>) => {
     if (componentOptions.isVisible === false) return null;
     if (componentOptions.type === 'menuItem') {
-      const { children, type, id, button, ...rest } = componentOptions;
+      const { children, type, id, ...rest } = componentOptions;
       return componentOptions.isVisible ? (
         <HtmlTooltip title={componentOptions.tooltip || ''} placement="top" arrow enterTouchDelay={0}>
           <span>
@@ -924,22 +922,13 @@ const RenderHeaderButtons = ({ buttonOptions }: { buttonOptions: ToolbarComponen
         <Fragment key={item.id}>{renderComponent(item)}</Fragment>
       ))}
       {menuItems.length > 0 && (
-        <Button
-          variant={'outlined'}
-          color="default"
-          size="small"
-          className={`new-dropdown-v1 [height:32px_!important] max-[600px]:[border:0px_!important] max-[600px]:[max-width:36px_!important]`}
-          onClick={openActions}
-          aria-controls="action-menu"
-          endIcon={isMobile ? null : <ExpandMore />}
-        >
-          {isMobile ? <FaCircleChevronDown size={20} /> : <>Actions </>}
-        </Button>
+        <ThemeButton onClick={openActions} endIcon={<ExpandMore />} mobileTooltip="Actions" buttonType="yellow" iconForMobile={<ExpandMore />}>
+          Actions
+        </ThemeButton>
       )}
       <Menu
         anchorEl={actionAnchor}
         keepMounted
-        getContentAnchorEl={null}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'right'

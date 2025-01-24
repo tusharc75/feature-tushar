@@ -1,20 +1,19 @@
 import { useState, useEffect, useContext } from 'react';
-import { Box, Chip, Dialog, IconButton, Typography } from '@material-ui/core';
+import { Box, Dialog, IconButton } from '@mui/material';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import styles from './logs.module.scss';
-import moment from 'moment';
-import { TextField, Button, Grid } from '@material-ui/core';
-import { CustomDialogTransition, dateTimeFormat } from 'src/constants/helpers';
-import PersonIcon from '@material-ui/icons/Person';
+import { TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { CustomDialogTransition, displayDateTime } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import EditIcon from '@material-ui/icons/Edit';
+import EditIcon from '@mui/icons-material/Edit';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId, userId }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -132,12 +131,19 @@ const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId, use
                           label={'Comment'}
                         />
                         <div className="mt-[8px] flex flex-wrap justify-end gap-[8px]">
-                          <Button variant="contained" size="small" color="primary" onClick={handleSave} disabled={!editedComment?.trim().length}>
-                            Save
-                          </Button>
-                          <Button variant="outlined" size="small" color="primary" onClick={handleCancel}>
+                          <ThemeButton
+                            onClick={handleCancel}
+                            buttonType='transparent'
+                          >
                             Cancel
-                          </Button>
+                          </ThemeButton>
+                          <ThemeButton
+                            onClick={handleSave}
+                            buttonType='theme'
+                            disabled={!editedComment?.trim().length}
+                          >
+                            Save
+                          </ThemeButton>
                         </div>
                       </div>
                     ) : (
@@ -162,12 +168,12 @@ const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId, use
                   <div className="mt-[9px] flex flex-wrap justify-between gap-[10px] text-[13px] text-[var(--primary-text)]">
                     <p>
                       Created by : <span className="font-semibold">{item?.user?.optionLabel}</span>
-                      <span className="ml-2 text-[#969696] dark:text-gray-400">{moment(item.date).format(dateTimeFormat)}</span>
+                      <span className="ml-2 text-[#969696] dark:text-gray-400">{displayDateTime(item.date)}</span>
                     </p>
                     {item.updatedBy && item.updatedAt ? (
                       <p>
                         Edited by : <span className="font-semibold">{item?.user?.optionLabel}</span>
-                        <span className="ml-2 text-[#969696] dark:text-gray-400">{moment(item.updatedAt).format(dateTimeFormat)}</span>
+                        <span className="ml-2 text-[#969696] dark:text-gray-400">{displayDateTime(item.updatedAt)}</span>
                       </p>
                     ) : null}
                     <div></div>
@@ -182,7 +188,7 @@ const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId, use
           </Box>
         )}
         <Grid container justifyContent="center" alignItems="center" spacing={2}>
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <TextField
               fullWidth
               value={comment}
@@ -194,17 +200,24 @@ const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId, use
               rows={2}
             />
           </Grid>
-          <Grid item xs={12}>
-            <Button disabled={comment === ''} variant="contained" color="primary" size="small" onClick={handleSubmit}>
+          <Grid size={{ xs: 12 }}>
+            <ThemeButton
+              onClick={handleSubmit}
+              buttonType='theme'
+              disabled={comment === ''}
+            >
               Add
-            </Button>
+            </ThemeButton>
           </Grid>
         </Grid>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button variant="outlined" color="primary" size="small" onClick={handleClose}>
+        <ThemeButton
+          onClick={handleClose}
+          buttonType='transparent'
+        >
           Cancel
-        </Button>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Box, IconButton, Menu, MenuItem } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
@@ -10,7 +11,7 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { CHILD_RESOURCE, MATERIAL_TYPE, fieldServiceOrder } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -18,10 +19,11 @@ import { BiChevronDown } from 'react-icons/bi';
 import { startCase } from 'lodash';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import AddOnDialog from './AddOnDialog';
-import AddIcon from '@material-ui/icons/Add';
+import AddIcon from '@mui/icons-material/Add';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
   const toastConfig = useContext(CustomToastContext);
@@ -315,31 +317,29 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
     setDeleteData(obj);
   };
 
-  const handleAssignAssets = (data) => {};
+  const handleAssignAssets = (data) => { };
 
   return (
     <Fragment>
       <Grid container spacing={2}>
         {allowedToEdit && (
-          <Grid item xs={12} md={12} sm={12}>
+          <Grid size={{ xs: 12, md: 12, sm: 12 }}>
             <Box display="flex" justifyContent="space-between" m={1} mb={0}>
               <Box display="flex"></Box>
               <Box display="flex">
-                <Button
-                  variant={'outlined'}
-                  color="primary"
-                  size="small"
+                <ThemeButton
+                  buttonType="yellow"
+                  mobileTooltip="Actions"
                   onClick={handleClick}
                   disabled={selectedRecords?.length ? false : true}
                   endIcon={<BiChevronDown />}
-                  className="new-dropdown-v1"
+                  iconForMobile={<BiChevronDown />}
                 >
                   Actions
-                </Button>
+                </ThemeButton>
                 <Menu
                   anchorEl={anchorEl}
                   open={open}
-                  getContentAnchorEl={null}
                   anchorOrigin={{
                     vertical: 'bottom',
                     horizontal: 'left'
@@ -383,7 +383,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
             </Box>
           </Grid>
         )}
-        <Grid item xs={12} md={12} sm={12}>
+        <Grid size={{ xs: 12, md: 12, sm: 12 }}>
           {columns ? (
             <Box zIndex={5}>
               <CustomReactTable

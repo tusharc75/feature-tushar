@@ -1,6 +1,6 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { Box, IconButton, MenuItem } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { SiConvertio } from 'react-icons/si';
@@ -37,7 +37,6 @@ import axios, { CancelTokenSource } from 'axios';
 const renderedFrom = camelCase(sidebarResource.lead);
 
 const Leads = () => {
-
   const {
     state: { user, selectedEntity, permissions, resources }
   }: any = useData();
@@ -196,13 +195,12 @@ const Leads = () => {
     if (selectedType === 3) {
       deepFilters.push({
         field: 'staticData.convertedToOpportunity',
-        term: "Yes"
+        term: 'Yes'
       });
-    }
-    else {
+    } else {
       deepFilters.push({
         field: 'staticData.convertedToOpportunity',
-        term: "No"
+        term: 'No'
       });
     }
 
@@ -427,11 +425,11 @@ const Leads = () => {
         <MenuItem
           disabled={selectedRecords.every((e) => e.canDelete && !e.convertedToOpportunity) ? false : true}
           onClick={() => {
-            if (selectedRecords.length === 1){
+            if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-              }else{
-                setDeleteRecord(null)
-              }
+            } else {
+              setDeleteRecord(null);
+            }
             setIsConformDialogVisible(true);
           }}
         >
@@ -561,7 +559,7 @@ const Leads = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.lead?.titleSingular?.toLowerCase()} : ${deleteRecord?.concatedName}` : `selected ${resources?.lead?.titlePlural?.toLowerCase()}`} ?`}              
+            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.lead?.titleSingular?.toLowerCase()} : ${deleteRecord?.concatedName}` : `selected ${resources?.lead?.titlePlural?.toLowerCase()}`} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

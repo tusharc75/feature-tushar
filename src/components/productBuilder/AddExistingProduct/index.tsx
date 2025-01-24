@@ -1,11 +1,10 @@
-import { Box } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import TextField from '@material-ui/core/TextField';
-import { Autocomplete } from '@material-ui/lab';
+import { Box } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Dialog from '@mui/material/Dialog';
+import TextField from '@mui/material/TextField';
+import Autocomplete from '@mui/material/Autocomplete';
 import { sortBy } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -34,6 +33,8 @@ const AddExistingProduct = (props) => {
   const [productTemplate, setProductTemplate] = useState(null);
   const [isProductTemplate, setIsProductTemplate] = useState(true);
   const [orderedSelectedRecords, setOrderedSelectedRecords] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const { generateColumns } = useColumns();
 
   useEffect(() => {
@@ -77,39 +78,37 @@ const AddExistingProduct = (props) => {
     }
   }, [page, limit, filters, sorting, search, productColoums, productCategory, productTemplate, showFilteredRecordsOnly]);
 
-  useEffect(()=>{
-   if(selectedRecords?.length){
-    const newlySelected = selectedRecords?.filter(data => !orderedSelectedRecords?.some(item => item._id === data._id)) || [];
-    const deselected = orderedSelectedRecords?.filter(item => !selectedRecords?.some(data => data._id === item._id));
+  useEffect(() => {
+    if (selectedRecords?.length) {
+      const newlySelected = selectedRecords?.filter((data) => !orderedSelectedRecords?.some((item) => item._id === data._id)) || [];
+      const deselected = orderedSelectedRecords?.filter((item) => !selectedRecords?.some((data) => data._id === item._id));
 
-    let updatedOrder = [];
-    if(orderedSelectedRecords?.length){
-      updatedOrder = [...orderedSelectedRecords?.filter(item => !deselected?.some(d => d._id === item._id))]
+      let updatedOrder = [];
+      if (orderedSelectedRecords?.length) {
+        updatedOrder = [...orderedSelectedRecords?.filter((item) => !deselected?.some((d) => d._id === item._id))];
+      }
+
+      updatedOrder = [...updatedOrder, ...newlySelected];
+
+      setOrderedSelectedRecords(updatedOrder);
     }
-  
-    updatedOrder = [...updatedOrder, ...newlySelected];
-
-    setOrderedSelectedRecords(updatedOrder);
-   }
-  },[selectedRecords])
+  }, [selectedRecords]);
 
   useEffect(() => {
-    axiosInstance()
-      .get('/field?resource=Product&view=true')
-      .then(({ data: { data } }) => {
-        if (data.filter((e) => e.fieldData.fieldName === 'productTemplate').length === 0) {
-          setIsProductTemplate(false);
-        }
-        const newColumns = generateColumns(
-          sidebarResource.product,
-          data?.filter((d) => !ignoreField?.includes(d?.fieldData?.fieldName)),
-          routes.productDetail.path
-        );
-        newColumns?.forEach((ele) => {
-          ele.leval = 'product';
-        });
-        setProductColoums(newColumns);
+    axiosInstance().get('/field?resource=Product&view=true').then(({ data: { data } }) => {
+      if (data.filter((e) => e.fieldData.fieldName === 'productTemplate').length === 0) {
+        setIsProductTemplate(false);
+      }
+      const newColumns = generateColumns(
+        sidebarResource.product,
+        data?.filter((d) => !ignoreField?.includes(d?.fieldData?.fieldName)),
+        routes.productDetail.path
+      );
+      newColumns?.forEach((ele) => {
+        ele.leval = 'product';
       });
+      setProductColoums(newColumns);
+    });
   }, []);
 
   const getQueryString = () => {
@@ -194,49 +193,48 @@ const AddExistingProduct = (props) => {
   };
 
   const handleAdd = () => {
+    setIsSubmitting(true)
     const orderIds = orderedSelectedRecords?.map((m) => m._id);
-
     dispatch({ type: 'loading', loading: true });
-    axiosInstance()
-      .get(`${product.api}?limit=0&getById=${JSON.stringify(selectedRecords.map((m) => m._id))}`)
-      .then(({ data: { data } }) => {
-        const sortedData = orderIds?.map((m) => data.find((f) => f._id === m));
-        sortedData.forEach((_d) => {
-          _d.productId = _d._id;
-          if (_d.fields) {
-            const qtyField = _d.fields.filter((_f) => _f.fieldName === 'qty');
-            if (qtyField.length) {
-              if (!qtyField[0].isFormula) {
-                _d.qty = 0;
-              }
+    axiosInstance().get(`${product.api}?limit=0&getById=${JSON.stringify(selectedRecords.map((m) => m._id))}`).then(({ data: { data } }) => {
+      const sortedData = orderIds?.map((m) => data.find((f) => f._id === m));
+      sortedData.forEach((_d) => {
+        _d.productId = _d._id;
+        if (_d.fields) {
+          const qtyField = _d.fields.filter((_f) => _f.fieldName === 'qty');
+          if (qtyField.length) {
+            if (!qtyField[0].isFormula) {
+              _d.qty = 0;
             }
           }
-          delete _d.id;
-          delete _d.brand;
-          delete _d.createdBy;
-          delete _d.updatedBy;
-          delete _d.fields;
-          for (const [key, value] of Object.entries(_d)) {
-            if (typeof value === 'object' && value && value['optionValue']) {
-              _d[key] = value['optionValue'];
-            }
-            if (Array.isArray(value) && value.length && value[0].optionValue) {
-              const entity = [];
-              value &&
-                value.forEach((ele) => {
-                  entity.push(ele.optionValue);
-                });
-              _d[key] = entity;
-            }
+        }
+        delete _d.id;
+        delete _d.brand;
+        delete _d.createdBy;
+        delete _d.updatedBy;
+        delete _d.fields;
+        for (const [key, value] of Object.entries(_d)) {
+          if (typeof value === 'object' && value && value['optionValue']) {
+            _d[key] = value['optionValue'];
           }
-        });
-        addProductInBuilder(sortedData);
-        handleClose();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        dispatch({ type: 'loading', loading: false });
+          if (Array.isArray(value) && value.length && value[0].optionValue) {
+            const entity = [];
+            value &&
+              value.forEach((ele) => {
+                entity.push(ele.optionValue);
+              });
+            _d[key] = entity;
+          }
+        }
       });
+      addProductInBuilder(sortedData);
+      handleClose();
+      setIsSubmitting(false)
+    }).catch((error) => {
+      setIsSubmitting(false)
+      toastConfig.setToastConfig(error);
+      dispatch({ type: 'loading', loading: false });
+    });
   };
 
   return (
@@ -253,7 +251,7 @@ const AddExistingProduct = (props) => {
                 style={{ width: '250px' }}
                 options={productCategoryList}
                 getOptionLabel={(option: any) => (option ? option.name : '')}
-                getOptionSelected={(option: any, val) => option._id === val}
+                isOptionEqualToValue={(option: any, val) => option._id === val}
                 disabled={referenceData && referenceData?.productCategory ? true : false}
                 value={
                   productCategoryList.filter((data) => data._id === productCategory).length
@@ -272,7 +270,7 @@ const AddExistingProduct = (props) => {
                   style={{ width: '250px' }}
                   options={productTemplateList}
                   getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                  getOptionSelected={(option: any, val) => option.optionValue === val}
+                  isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                   disabled={referenceData && referenceData?.productTemplate ? true : false}
                   value={
                     productTemplateList.filter((data) => data.optionValue === productTemplate).length
@@ -283,17 +281,21 @@ const AddExistingProduct = (props) => {
                     setProductTemplate(val && val.optionValue ? val.optionValue : '');
                   }}
                   renderInput={(params) => (
-                    <TextField {...params} margin="dense" name="productTemplate" label="Product Template" variant="outlined" fullWidth />
+                    <TextField {...params} margin="dense" size="small" name="productTemplate" label="Product Template" variant="outlined" fullWidth />
                   )}
                 />
               )}
             </div>
             <div className="ml-auto flex flex-wrap items-start justify-end gap-2 ">
               <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
-              <Button size="small" color="primary" onClick={handleAdd} variant="contained" disabled={selectedRecords.length > 0 ? false : true}>
+              <ThemeButton
+                buttonType='theme'
+                onClick={handleAdd}
+                isLoading={isSubmitting}
+                disabled={selectedRecords.length > 0 ? false : isSubmitting}>
                 {selectedRecords.length ? '(' + selectedRecords.length + ')  ' : ''}
                 Add
-              </Button>
+              </ThemeButton>
             </div>
           </div>
         </Box>

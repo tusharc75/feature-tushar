@@ -1,10 +1,10 @@
-import React, { FC, Fragment, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 import type { Activity } from './types';
 import { useAppTheme } from 'src/constants/AppConfig';
-import { Typography, Box, Avatar, IconButton, Collapse, Tooltip, Button } from '@material-ui/core';
-import { Close, Map, ExpandMore, ExpandLess, DateRange } from '@material-ui/icons';
-import moment from 'moment';
-import { dateTimeFormat, dateFormat } from 'src/constants/helpers';
+import { Typography, IconButton, Collapse } from '@mui/material';
+import { ExpandMore, ExpandLess } from '@mui/icons-material';
+import { displayDate } from 'src/constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 interface MobileRoadmapProps {
   activity: Activity[];
@@ -116,18 +116,15 @@ const RenderSubTree: FC<TSubTreeProps> = ({ data, subTrees }) => {
       {subTrees.map((tree) => {
         return (
           <div className="mt-3 grid gap-2" key={tree._id}>
-            <Button
-              variant="contained"
-              role="button"
+            <ThemeButton
+              buttonType="theme"
               fullWidth
-              tabIndex={'0'}
               className="no-shadow px-3 py-2"
               style={{ background: tree.color }}
               onClick={() => handleChange(tree.name)}
-              endIcon={compareCollapse(tree.name) ? <ExpandLess /> : <ExpandMore />}
             >
               {tree.name}
-            </Button>
+            </ThemeButton>
             <Collapse in={compareCollapse(tree.name)}>
               <div className="grid gap-2 py-2">
                 {data.map((item) => {
@@ -136,7 +133,7 @@ const RenderSubTree: FC<TSubTreeProps> = ({ data, subTrees }) => {
                     return (
                       <div className="rounded-md border border-[var(--common-border-color)] bg-[white] p-2 dark:bg-[var(--dark-secondary)]">
                         <div className="mb-1 flex flex-wrap justify-between gap-2 text-[12px] text-gray-500 dark:text-gray-300">
-                          {moment(item.startDate).format(dateFormat)} - {moment(item.endDate).format(dateFormat)}
+                          {displayDate(item.startDate)} - {displayDate(item.endDate)}
                         </div>
                         <p>
                           <b className="font-semibold">QTY :</b> {item.qty}

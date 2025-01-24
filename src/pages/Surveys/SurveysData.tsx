@@ -1,4 +1,4 @@
-import { Box, IconButton } from '@material-ui/core';
+import { Box, IconButton } from '@mui/material';
 import { camelCase } from 'lodash';
 import React, { useContext, useState, useEffect } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -8,7 +8,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { sidebarResource } from 'src/constants/helpers';
 
@@ -76,14 +76,14 @@ const SurveysData = ({ surveyId }) => {
               setShowConfirmBox({ open: true, ids: [row?.original?._id] });
             }}
           >
-            <DeleteIcon color="error" />
+            <DeleteIcon color="error" fontSize='small' />
           </IconButton>
         </HtmlTooltip>
       </>
     )
   };
 
-  const handleDelete = () => {};
+  const handleDelete = () => { };
 
   return (
     <div>

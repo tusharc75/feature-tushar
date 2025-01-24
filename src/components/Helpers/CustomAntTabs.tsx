@@ -1,63 +1,19 @@
-import { withStyles, Theme, createStyles } from '@material-ui/core/styles';
-import { Typography, Tabs, Tab } from '@material-ui/core';
-import { DeveloperBoard, Map } from '@material-ui/icons';
-
-const AntTabs = withStyles((theme) => ({
-  root: {
-    minHeight: '38px'
-    // borderBottom: "1px solid #e8e8e8",
-  },
-  indicator: {
-    backgroundColor: theme.palette.primary.main, //  dargBg
-    display: 'none'
-  },
-  '&.Component-root.Component-selected': {
-    color: 'red !important'
-  }
-}))(Tabs);
-
-const AntTab = withStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      textTransform: 'none',
-      minWidth: 72,
-      fontWeight: 600,
-      marginRight: theme.spacing(4),
-
-      '&:hover': {
-        color: 'var(--secondary)', //  dargBg
-        opacity: 1
-      },
-      '&$selected': {
-        color: theme.palette.primary.main, //  dargBg
-        fontWeight: theme.typography.fontWeightMedium,
-        pointerEvents: 'none'
-      },
-      '&:focus': {
-        color: theme.palette.primary.main //  darkBg
-      }
-    },
-    selected: {
-      color: '#43AEAA !important'
-    }
-  })
-)((props: StyledTabProps) => <Tab className="AntTab" icon={props.label === 'Board' ? <DeveloperBoard /> : <Map />} disableRipple {...props} />);
-
-interface StyledTabProps {
-  label: string;
-}
+import { DeveloperBoard, Map } from '@mui/icons-material';
+import { Typography } from '@mui/material';
 
 const CustomAntTabs = ({ value, setValue, tabs }) => {
-  const handleTabChange = (event, newValue) => {
-    setValue(newValue);
-  };
   return (
-    <div>
-      <AntTabs value={value} onChange={handleTabChange} aria-label="ant example">
-        {tabs.map((tab, i) => (
-          <AntTab key={i} label={tab} />
-        ))}
-      </AntTabs>
+    <div className="flex divide-y overflow-hidden rounded-md border">
+      {tabs.map((tab, i) => (
+        <button
+          className="flex cursor-pointer items-center gap-2 border-none bg-transparent px-4 py-1.5 text-sm font-medium outline-none transition-colors first:rounded-l-md last:rounded-r-md hover:bg-gray-200 data-[selected=true]:bg-[--new-theme-color] data-[selected=true]:text-white dark:text-white dark:hover:bg-gray-700"
+          data-selected={i === value}
+          onClick={() => setValue(i)}
+        >
+          {tab === 'Board' ? <DeveloperBoard /> : <Map />}
+          {tab}
+        </button>
+      ))}
       <Typography />
     </div>
   );

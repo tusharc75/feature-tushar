@@ -1,10 +1,11 @@
-import { Button, Menu, MenuItem } from '@material-ui/core';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import ToggleButton from '@material-ui/lab/ToggleButton';
-import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
+import { Menu, MenuItem } from '@mui/material';
+import { AddOutlined, ExpandMore } from '@mui/icons-material';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import { useState } from 'react';
 import { useData } from '../../StateProvider/Provider';
 import SearchBox from '../../components/Helpers/SearchBox';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 function QuoteHeader({
   selectedRecords,
@@ -78,7 +79,7 @@ function QuoteHeader({
   );
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       <div className={'d-flex align-items-center gap-1'}>
         <div className="d-flex align-items-center">
           {icon} <span className="listingHeader">{heading}</span>
@@ -94,33 +95,30 @@ function QuoteHeader({
         </ToggleButtonGroup>
         {children}
       </div>
-      <div className="flex flex-wrap gap-[8px]  justify-end">
+      <div className="flex flex-wrap justify-end  gap-[8px]">
         <SearchBox onChange={onSearch} value={searchVal} />
 
-        <div className="flex gap-[8px] flex-wrap items-center">
+        <div className="flex flex-wrap items-center gap-[8px]">
           {QuotePermissions.isCreate && (
-            <Button variant={'contained'} color="primary" size="small" onClick={onCreate} className={'no-shadow'} startIcon={<AddOutlined />}>
+            <ThemeButton mobileTooltip="Add" iconForMobile={<AddOutlined />} onClick={onCreate} startIcon={<AddOutlined />}>
               Add
-            </Button>
+            </ThemeButton>
           )}
           {(QuotePermissions.isCreate || QuotePermissions.isUpdate) && (
             <>
-              <Button
+              <ThemeButton
                 disabled={canDelete}
-                variant={'outlined'}
-                color="default"
-                size="small"
+                mobileTooltip="Actions"
+                buttonType="yellow"
+                iconForMobile={<ExpandMore />}
                 onClick={openActions}
-                className={` new-dropdown-v1`}
-                aria-controls="action-menu"
                 endIcon={<ExpandMore />}
               >
                 Actions
-              </Button>
+              </ThemeButton>
               <Menu
                 anchorEl={anchorEl}
                 keepMounted
-                getContentAnchorEl={null}
                 anchorOrigin={{
                   vertical: 'bottom',
                   horizontal: 'left'

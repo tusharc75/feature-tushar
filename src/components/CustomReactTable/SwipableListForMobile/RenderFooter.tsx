@@ -1,5 +1,5 @@
-import { Button, Collapse } from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
+import { Button, Collapse } from '@mui/material';
+import { ExpandMore } from '@mui/icons-material';
 import { flexRender } from '@tanstack/react-table';
 import { Fragment, useState } from 'react';
 

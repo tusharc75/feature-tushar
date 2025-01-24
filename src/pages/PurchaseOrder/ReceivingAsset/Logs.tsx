@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Box, Dialog } from '@material-ui/core';
-import { CustomDialogTransition, dateTimeFormat } from '../../../constants/helpers';
+import { Box, Dialog } from '@mui/material';
+import { CustomDialogTransition, displayDateTime } from '../../../constants/helpers';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import { capitalize } from 'lodash';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { useAppTheme } from 'src/constants/AppConfig';
-import moment from 'moment';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const renderedFrom = `purchaseOrder_logs`;
@@ -32,7 +31,7 @@ const Logs = ({ handleClose, detail, inventoryHistory }) => {
         disableSortBy: true,
         disabled: true,
         Cell: ({ row }) => {
-          return row.original?.date ? <p className="text-truncate">{moment(row?.original?.date)?.format(dateTimeFormat)}</p> : <NoDataCell />;
+          return row.original?.date ? <p className="text-truncate">{displayDateTime(row?.original?.date)}</p> : <NoDataCell />;
         }
       },
       {
@@ -93,11 +92,7 @@ const Logs = ({ handleClose, detail, inventoryHistory }) => {
         disableFilters: true,
         disableSortBy: true,
         Cell: ({ row }) => {
-          return row.original?.transactionDate ? (
-            <p className="text-truncate">{moment(row?.original?.transactionDate)?.format(dateTimeFormat)}</p>
-          ) : (
-            <NoDataCell />
-          );
+          return row.original?.transactionDate ? <p className="text-truncate">{displayDateTime(row?.original?.transactionDate)}</p> : <NoDataCell />;
         }
       }
     ];
@@ -118,19 +113,23 @@ const Logs = ({ handleClose, detail, inventoryHistory }) => {
     <Dialog fullWidth fullScreen TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
       <CustomDialogHeader title={`Logs - ${detail}`} showRequiredLabel={false} onClose={handleClose} />
       <CustomDialogContent isFooterPresent={false}>
-        {columns ? <CustomReactTable
-          height={'calc(100vh - 200px)'}
-          columns={columns}
-          state={state}
-          dispatch={dispatch}
-          renderedFrom={renderedFrom}
-          isClientSideGrid={true}
-          refreshGrid={() => { }}
-          hideAction={true}
-          hideSelection={true}
-        /> : <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={true}
+            refreshGrid={() => {}}
+            hideAction={true}
+            hideSelection={true}
+          />
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
       </CustomDialogContent>
     </Dialog>
   );

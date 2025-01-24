@@ -1,19 +1,18 @@
 import { useState, useEffect, Fragment, useContext } from 'react';
-import Button from '@material-ui/core/Button';
 import { Formik, Form } from 'formik';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomButton from '../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from './../../constants/helpers';
 import InputField from '../../components/Helpers/InputField';
-import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
+import { getObjKeysWithValues, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import { isEqual } from 'lodash';
 
 const DetailsDialog = (props) => {
@@ -119,21 +118,20 @@ const DetailsDialog = (props) => {
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+buttonType="transparent"
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
                 >
                   {isUpdateDisabled ? 'Close' : 'Cancel'}
-                </Button>
+                </ThemeButton>
                 {!isUpdateDisabled && (
-                  <CustomButton loading={loading} variant="contained" color="primary" type="submit" disabled={saveClick} onClick={submitForm}>
+                  <ThemeButton isLoading={loading} buttonType="theme" disabled={saveClick} onClick={submitForm}>
                     {' '}
                     Save
-                  </CustomButton>
+                  </ThemeButton>
                 )}
               </CustomDialogFooter>
             </Fragment>

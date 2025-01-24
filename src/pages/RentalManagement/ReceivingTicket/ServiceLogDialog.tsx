@@ -1,9 +1,8 @@
 import { useContext, useEffect, useState } from 'react';
-import { Dialog, Box, IconButton } from '@material-ui/core';
+import { Dialog, Box, IconButton } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { CustomDialogTransition, dateFormat, gridLoadingTimeout, rentalManagement, sidebarResource } from 'src/constants/helpers';
-import moment from 'moment';
+import { CustomDialogTransition, dateFormatToSend, displayDate, gridLoadingTimeout, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { camelCase, isEmpty } from 'lodash';
 import { Link } from 'react-router-dom';
@@ -13,7 +12,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { Delete, Edit } from '@material-ui/icons';
+import { Delete, Edit } from '@mui/icons-material';
 import StartStopServiceDateDialog from './StartStopServiceDateDialog';
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -77,8 +76,8 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, onSuccess, allow
           <>
             {row?.original?.startDate ? (
               <>
-                <h5 className="text-truncate" title={`${moment(row?.original?.startDate)?.format(dateFormat)}`}>
-                  {moment(row?.original?.startDate)?.format(dateFormat)}
+                <h5 className="text-truncate" title={`${displayDate(row?.original?.startDate)}`}>
+                  {displayDate(row?.original?.startDate)}
                 </h5>
               </>
             ) : (
@@ -99,8 +98,8 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, onSuccess, allow
           <>
             {row?.original?.endDate ? (
               <>
-                <h5 className="text-truncate" title={`${moment(row?.original?.endDate)?.format(dateFormat)}`}>
-                  {moment(row?.original?.endDate)?.format(dateFormat)}
+                <h5 className="text-truncate" title={`${displayDate(row?.original?.endDate)}`}>
+                  {displayDate(row?.original?.endDate)}
                 </h5>
               </>
             ) : (
@@ -219,7 +218,12 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, onSuccess, allow
   const handleSubmitChangeDates = (values) => {
     setEditDateDialog({ ...editDateDialog, loading: true });
     let data = { ids: [id], serviceLogId: editDateDialog?.data?._id, ...values };
-
+    if (data?.startDate) {
+      data.startDate = dateFormatToSend(data.startDate)
+    }
+    if (data?.endDate) {
+      data.endDate = dateFormatToSend(data.endDate)
+    }
     axiosInstance()
       .put(`${rentalManagement.api}/${rentalId}/start-end-date`, data)
       .then((response) => {

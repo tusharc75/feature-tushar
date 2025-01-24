@@ -1,16 +1,18 @@
-import { Avatar, IconButton, ListItem, TextField } from '@material-ui/core';
-import { Add, Remove, RemoveCircleOutline } from '@material-ui/icons';
+import { Avatar, Dialog, IconButton, ListItem, TextField } from '@mui/material';
+import { Add, RemoveCircleOutline } from '@mui/icons-material';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DashboardModal from 'src/components/DashboardModal';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { useAppTheme } from 'src/constants/AppConfig';
 import AddMemberDialog from 'src/pages/WorkSpace/MessagePanel/AddMembersDialog';
 import { getAvatarColor } from 'src/pages/WorkSpace/utils';
 import { ChannelData, TChannel } from 'src/pages/WorkSpace/types';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { CustomDialogTransition } from 'src/constants/helpers';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 
 type ViewMembersProps = {
   selectedChannel: TChannel | null;
@@ -27,6 +29,7 @@ const ViewMembers = ({ selectedChannel, fetchChannelData, channelData, handleClo
   const [isAddMemberDialogOpen, setIsAddMemberDialogOpen] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState({ open: false, data: null });
   const [themeColor] = useAppTheme();
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const handleRemoveMember = useCallback(
     async (userId) => {
@@ -52,23 +55,34 @@ const ViewMembers = ({ selectedChannel, fetchChannelData, channelData, handleClo
     setMembers(newMembers);
   };
 
-  return (
-    <>
-      <DashboardModal
-        handleClose={handleClose}
-        open={true}
-        dialogProps={{
-          fullScreen: isMobile || isTablet,
-          maxWidth: 'sm'
+
+
+  return (<>
+    <Dialog
+      maxWidth="sm"
+      fullScreen={fullScreen || isMobile || isTablet}
+      TransitionComponent={CustomDialogTransition}
+      aria-labelledby="customized-dialog-title"
+      open={true}
+      fullWidth
+      onClose={(e, reason) => {
+        if (reason !== 'backdropClick') {
+          handleClose()
+        }
+      }}
+    >
+      <CustomDialogHeader
+        onClose={handleClose}
+        title={channelData?.title}
+        isMinimized={!fullScreen}
+        onMinimizeMaximize={() => {
+          setFullScreen((prevState) => !prevState);
         }}
-        modalHead={{
-          title: `${channelData?.title}`,
-          description: <span className=" line-clamp-1">{channelData?.description}</span>,
-          fullScreenOption: true
-        }}
-        contentMaxHeight="350px"
-      >
-        <div className="sticky -top-[16px] z-10 flex items-center gap-2 bg-[var(--dark-primary,white)]">
+        showManimizeMaximize={true}
+        showRequiredLabel={false}
+      />
+      <CustomDialogContent isFooterPresent={false}>
+        <div className="sticky -top-[16px] mt-1 z-10 flex items-center gap-2 bg-[var(--dark-primary,white)]">
           <TextField
             size="small"
             id="search-member"
@@ -80,15 +94,17 @@ const ViewMembers = ({ selectedChannel, fetchChannelData, channelData, handleClo
             fullWidth
             autoFocus
           />
-          <HtmlTooltip title={`Add member`}>
-            <IconButton
-              size="small"
-              style={{ border: '1px solid var(--common-border-color)', padding: 6 }}
-              onClick={() => setIsAddMemberDialogOpen(true)}
-            >
-              <Add />
-            </IconButton>
-          </HtmlTooltip>
+          {selectedChannel?.isOwner && (
+            <HtmlTooltip title={`Add Members`}>
+              <IconButton
+                size="small"
+                style={{ border: '1px solid var(--common-border-color)', padding: 6 }}
+                onClick={() => setIsAddMemberDialogOpen(true)}
+              >
+                <Add />
+              </IconButton>
+            </HtmlTooltip>
+          )}
         </div>
         <ul className={'mt-4  space-y-2 overflow-y-auto'}>
           {members?.map((member) => (
@@ -110,41 +126,40 @@ const ViewMembers = ({ selectedChannel, fetchChannelData, channelData, handleClo
                 </Avatar>
                 <span>{member.optionLabel}</span>
               </div>
-              <HtmlTooltip title={<span className="block w-[200px] py-2 text-center">Remove {member.optionLabel}</span>}>
-                <IconButton onClick={() => setConfirmDialog({ open: true, data: member })} size="small">
-                  <RemoveCircleOutline color="error" />
-                </IconButton>
-              </HtmlTooltip>
+              {selectedChannel?.isOwner && selectedChannel?.createdBy?.user !== member?.optionValue && (
+                <HtmlTooltip title={'Remove'}>
+                  <IconButton onClick={() => setConfirmDialog({ open: true, data: member })} size="small">
+                    <RemoveCircleOutline color="error" />
+                  </IconButton>
+                </HtmlTooltip>
+              )}
             </ListItem>
           ))}
         </ul>
-      </DashboardModal>
-      {isAddMemberDialogOpen && (
-        <AddMemberDialog
-          channelId={selectedChannel._id}
-          ignoreIds={channelData?.members?.map((member) => member.optionValue)}
-          onClose={() => setIsAddMemberDialogOpen(false)}
-          onSuccess={fetchChannelData}
-        />
-      )}
-      {confirmDialog.open && (
-        <ConfirmationDialog
-          open={true}
-          message={
-            <>
-              Are you sure you want to remove user <br /> <span className="font-semibold text-gray-500">{confirmDialog.data?.optionLabel}</span>?
-            </>
-          }
-          onClose={() => {
-            setConfirmDialog({ open: false, data: null });
-          }}
-          onOk={() => {
-            handleRemoveMember(confirmDialog.data?.optionValue);
-            setConfirmDialog({ open: false, data: null });
-          }}
-        />
-      )}
-    </>
+      </CustomDialogContent>
+    </Dialog>
+    {isAddMemberDialogOpen && (
+      <AddMemberDialog
+        channelId={selectedChannel._id}
+        ignoreIds={channelData?.members?.map((member) => member.optionValue)}
+        onClose={() => setIsAddMemberDialogOpen(false)}
+        onSuccess={fetchChannelData}
+      />
+    )}
+    {confirmDialog.open && (
+      <ConfirmationDialog
+        open={true}
+        message={`Are you sure you want to remove ${confirmDialog.data?.optionLabel}?`}
+        onClose={() => {
+          setConfirmDialog({ open: false, data: null });
+        }}
+        onOk={() => {
+          handleRemoveMember(confirmDialog.data?.optionValue);
+          setConfirmDialog({ open: false, data: null });
+        }}
+      />
+    )}
+  </>
   );
 };
 

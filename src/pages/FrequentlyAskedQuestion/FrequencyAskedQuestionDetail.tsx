@@ -1,13 +1,13 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import { Edit } from '@material-ui/icons';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import EditIcon from '@mui/icons-material/Edit';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -100,9 +100,9 @@ const FrequencyAskedQuestionDetail = () => {
           <Box className="control-buttons-v1">
             <>
               {permissions?.frequentlyAskedQuestion?.isUpdate && (
-                <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
-                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                </Button>
+                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                  {'Edit'}
+                </ThemeButton>
               )}
               {permissions?.frequentlyAskedQuestion?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             </>
@@ -112,9 +112,9 @@ const FrequencyAskedQuestionDetail = () => {
       <Box className="detail-container-v1">
         <Box>
           {loading || !fields?.length ? (
-            <Grid container spacing={2} style={{ padding: '8px' }}>
-              <CommonSkeleton lenArray={[...Array(7).keys()]} />
-            </Grid>
+            <div className="p-2">
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </div>
           ) : (
             <DetailsPage data={frequentlyAskedQuestionData} fields={fields} />
           )}
@@ -123,7 +123,7 @@ const FrequencyAskedQuestionDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.frequentlyAskedQuestion?.titleSingular?.toLowerCase()} : ${frequentlyAskedQuestionData?.label} ?`}            
+          message={`Are you sure you want to delete ${resources?.frequentlyAskedQuestion?.titleSingular?.toLowerCase()} : ${frequentlyAskedQuestionData?.label} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

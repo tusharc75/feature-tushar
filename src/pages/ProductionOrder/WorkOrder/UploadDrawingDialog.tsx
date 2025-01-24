@@ -1,13 +1,13 @@
 import { useState, useContext } from 'react';
-import Box from '@material-ui/core/Box';
-import Button from '@material-ui/core/Button';
+import Box from '@mui/material/Box';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { CircularProgress, Dialog } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { CustomDialogTransition, productionOrder } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { Dialog } from '@mui/material';
 
 const UploadDrawingDialog = ({ productionOrderData, handleClose }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -54,22 +54,16 @@ const UploadDrawingDialog = ({ productionOrderData, handleClose }) => {
             style={{ display: 'none' }}
           />
           <label htmlFor="zip-upload">
-            <Button
-              variant="contained"
-              color="primary"
-              component="span"
-              disabled={isUploading}
-              startIcon={isUploading ? <CircularProgress size={24} /> : null}
-            >
+            <ThemeButton disabled={isUploading} isLoading={isUploading} buttonType="theme">
               {isUploading ? 'Uploading...' : 'Select File *'}
-            </Button>
+            </ThemeButton>
           </label>
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button type="button" variant="outlined" color="primary" size="small" onClick={handleClose}>
+        <ThemeButton buttonType="transparent" onClick={handleClose}>
           Cancel
-        </Button>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

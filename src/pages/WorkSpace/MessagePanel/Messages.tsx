@@ -1,8 +1,7 @@
-import { Avatar, IconButton, Menu, MenuItem, Popper, Tooltip } from '@material-ui/core';
-import { MoreVert, Delete, GetApp } from '@material-ui/icons';
+import { Avatar, IconButton, Menu, MenuItem, Popper, Tooltip } from '@mui/material';
+import { MoreVert, Delete, GetApp } from '@mui/icons-material';
 import EmojiPicker from 'emoji-picker-react';
 import { groupBy, uniqBy } from 'lodash';
-import moment from 'moment';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { BsEmojiGrin, BsReply } from 'react-icons/bs';
 import { Socket } from 'socket.io-client';
@@ -13,7 +12,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { useAppTheme } from 'src/constants/AppConfig';
-import { cn, dateFormat, getFileIconSrc } from 'src/constants/helpers';
+import { cn, dateFormat, displayDate, displayDateTime, getFileIconSrc } from 'src/constants/helpers';
 import { ChannelData, Message } from 'src/pages/WorkSpace/types';
 import { formatDateWithTodayYestarday } from 'src/pages/WorkSpace/utils';
 import SendMessage from './SendMessage';
@@ -26,52 +25,75 @@ type MessagesProps = {
   threadDialogOpen: { open: boolean; message: Message };
   setThreadDialogOpen: React.Dispatch<React.SetStateAction<{ open: boolean; message: Message }>>;
   channelData: ChannelData;
+  newChat: boolean;
+  toUsers: string[];
+  refreshNewChat: () => void;
+  type: 'messages' | 'pins';
 };
 
 export const groupByDate = (messages: Message[]) => {
-  return groupBy(messages, (message) => moment(message.date).format(dateFormat));
+  return groupBy(messages, (message) => displayDate(message.date));
 };
 
-const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, channelData }: MessagesProps) => {
+const Messages = ({
+  channelId,
+  socket,
+  threadDialogOpen,
+  setThreadDialogOpen,
+  channelData,
+  newChat,
+  toUsers,
+  refreshNewChat,
+  type
+}: MessagesProps) => {
   const [messages, setMessages] = useState<{ [key: string]: Message[] }>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [lastMessageId, setLastMessageId] = useState(null);
+  const [lastMessageSeen, setLastMessageSeen] = useState(null);
   const toastConfig = useContext(CustomToastContext);
-  const [showConfirmBox, setShowConfirmBox] = useState({ open: false, _id: null });
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedMessage, setSelectedMessage] = useState<Message>(null);
   const [editingMessage, setEditingMessage] = useState(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const fetchMessages = async (after: string = null) => {
+  const fetchMessages = async (messageId: string = null, updateMessage: Boolean = false) => {
     try {
       let api = `/work-space/channel/message/${channelId}`;
-      if (after) {
-        api += `?after=${after}`;
+      if (updateMessage && messageId) {
+        api += `/${messageId}`;
+      } else if (messageId) {
+        api += `?after=${messageId}${type === 'pins' ? '&type=pins' : ''}`;
       } else {
+        api += `${type === 'pins' ? '?type=pins' : ''}`;
         setIsLoading(true);
       }
+
       const { data } = await axiosInstance().get(api);
 
       setMessages((prevMessages) => {
         let newMessages = data?.data || [];
-        if (after) {
-          return groupByDate([...Object.values(prevMessages).flat().slice(0, -1), ...newMessages]);
+        if (updateMessage) {
+          const updatedMessages: Message[] = Object?.values(prevMessages)?.flat();
+          const index: number = updatedMessages?.findIndex((message) => message._id === messageId);
+          updatedMessages[index] = data?.data;
+          return groupByDate(updatedMessages);
+        } else if (!updateMessage && messageId) {
+          return groupByDate([...Object?.values(prevMessages)?.flat()?.slice(0, -1), ...newMessages]);
         } else {
           return groupByDate(newMessages);
         }
       });
+
       setTimeout(() => {
         containerRef.current?.scrollTo(0, containerRef.current?.scrollHeight || 0);
       }, 100);
       setThreadDialogOpen((prevDialog) => {
-        if (prevDialog.open && (prevDialog.message?._id === after || !after)) {
+        if (prevDialog.open && (prevDialog.message?._id === messageId || !messageId)) {
           const updatedMessage = data?.data?.find((message) => message._id === prevDialog.message?._id);
           return { open: true, message: updatedMessage || prevDialog.message };
         }
         return prevDialog;
       });
-      if (data?.data?.length > 0) setLastMessageId(data.data[data.data.length - 1]?._id);
+      if (data?.data?.length > 0) setLastMessageSeen(data?.data[data.data.length - 1]?._id);
     } catch (error) {
       toastConfig.setToastConfig(error);
     } finally {
@@ -81,15 +103,11 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, ch
 
   useEffect(() => {
     if (socket) {
-      socket.on('fetchNewMessage', (messageId) => {
-        if (messageId) {
-          fetchMessages(messageId);
-        } else {
-          fetchMessages(lastMessageId);
-        }
+      socket.on('fetchUpdatedMessage', (messageId) => {
+        fetchMessages(messageId, true);
       });
-      socket.on('fetchMessages', () => {
-        fetchMessages();
+      socket.on('fetchMessages', (messageId) => {
+        fetchMessages(messageId);
       });
       socket.on('addReaction', ({ messageId, emoji, user }) => {
         setMessages((prevMessages) => {
@@ -121,20 +139,24 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, ch
         });
       });
     }
-  }, [socket, lastMessageId]);
+    return () => {
+      if (socket) {
+        socket.off('fetchUpdatedMessage');
+        socket.off('fetchMessages');
+        socket.off('addReaction');
+        socket.off('removeReaction');
+      }
+    };
+  }, [socket, channelId, type]);
 
   useEffect(() => {
-    fetchMessages();
-  }, [channelId]);
-
-  const deleteMessage = async (_id) => {
-    try {
-      await axiosInstance().delete(`/work-space/channel/message`, { data: { _id } });
-      socket.emit('messageDeleted', { channelId });
-    } catch (error) {
-      toastConfig.setToastConfig(error);
+    if (newChat) {
+      setMessages({});
+      setIsLoading(false);
+    } else {
+      fetchMessages();
     }
-  };
+  }, [channelId, newChat, type]);
 
   const handleMenuClick = (event, message: Message) => {
     setAnchorEl(event.currentTarget);
@@ -143,7 +165,6 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, ch
 
   const handleMenuClose = () => {
     setAnchorEl(null);
-    setSelectedMessage(null);
   };
 
   const handleEdit = () => {
@@ -196,16 +217,23 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, ch
           </div>
         )}
       </div>
-      <SendMessage channelId={channelId} socket={socket} channelData={channelData} disabled={isLoading} />
+      <SendMessage
+        channelId={channelId}
+        socket={socket}
+        channelData={channelData}
+        disabled={isLoading || (newChat && toUsers?.length === 0) || type === 'pins'}
+        messageId={lastMessageSeen}
+        newChat={newChat}
+        toUsers={toUsers}
+        refreshNewChat={refreshNewChat}
+      />
       <MoreMenuAndDeleteConfirmDialog
         anchorEl={anchorEl}
         handleMenuClose={handleMenuClose}
         setThreadDialogOpen={setThreadDialogOpen}
         selectedMessage={selectedMessage}
         handleEdit={handleEdit}
-        setShowConfirmBox={setShowConfirmBox}
-        showConfirmBox={showConfirmBox}
-        deleteMessage={deleteMessage}
+        socket={socket}
       />
       <Thread
         message={threadDialogOpen.message}
@@ -213,7 +241,6 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, ch
         onClose={() => setThreadDialogOpen({ open: false, message: null })}
         socket={socket}
         channelId={channelId}
-        deleteMessage={deleteMessage}
         channelData={channelData}
       />
     </>
@@ -233,6 +260,7 @@ type DisplaySingleMessageProps = {
   handleMenuClick: (event: React.MouseEvent<HTMLButtonElement>, message: Message) => void;
   messageTimeFormatter?: (string) => string;
   channelData: ChannelData;
+  type?: 'messages' | 'pins';
 };
 
 export const DisplaySingleMessage = ({
@@ -244,8 +272,9 @@ export const DisplaySingleMessage = ({
   handleEditComplete,
   setThreadDialogOpen,
   handleMenuClick,
-  messageTimeFormatter = (date) => moment(date).format('hh:mm A'),
-  channelData
+  messageTimeFormatter = (date) => displayDateTime(date, 'hh:mm A'),
+  channelData,
+  type = 'messages'
 }: DisplaySingleMessageProps) => {
   const [theme] = useAppTheme();
   const [emojiPanleAnchor, setEmojiPanelAnchor] = useState<HTMLElement>(null);
@@ -379,12 +408,18 @@ export const DisplaySingleMessage = ({
                        [&_span:last-child]:text-gray-400`,
                       isSelf
                         ? 'ml-auto bg-[#0DA0A840] text-[#777575] dark:bg-[#0DA0A840] dark:text-[white]'
-                        : 'bg-[#F4F4F4] text-[#777575] dark:bg-[hsla(0deg,0%,37.27%,0.5)] dark:text-white'
+                        : 'bg-[#F4F4F4] text-[#777575] dark:bg-[hsla(0deg,0%,37.27%,0.5)] dark:text-white',
+                      message?.pinned ? 'relative border-l-4 border-[#cdbb54]' : ''
                     )}
                     dangerouslySetInnerHTML={{
                       __html: `${message.message} <span className=''>${message?.lastModified ? '(edited)' : ''}</span>`
                     }}
                   ></span>
+                  {message?.pinned && (
+                    <span className="absolute right-11 top-7 text-[15px]" title="Pinned">
+                      📌
+                    </span>
+                  )}
                   <div className={cn('max-w-fit', isSelf ? 'ml-auto text-right' : '')}>
                     {groupedReactions?.length > 0 && (
                       <div className={cn('reactions mt-2 flex gap-1', isSelf ? ' justify-end' : '')}>
@@ -468,7 +503,7 @@ export const DisplaySingleMessage = ({
                         })}
                       </div>
                     )}
-                    {replies.length > 0 && setThreadDialogOpen && (
+                    {replies.length > 0 && setThreadDialogOpen && type !== 'pins' && (
                       <div
                         onClick={() => setThreadDialogOpen({ open: true, message })}
                         className="group flex cursor-pointer items-center gap-1 rounded-md bg-[var(--dark-primary,white)] p-1 transition-all duration-200 [outline:1px_solid_transparent] hover:shadow-md hover:[outline:1px_solid_var(--common-border-color)]"
@@ -490,7 +525,9 @@ export const DisplaySingleMessage = ({
                             </Avatar>
                           );
                         })}
-                        <span className="link ml-1 line-clamp-1">{message.replies.length} replies</span>
+                        <span className="link ml-1 line-clamp-1">
+                          {message.replies.length} {message.replies.length > 1 ? 'replies' : 'reply'}
+                        </span>
                         <div className="relative ml-1 text-[13px] font-normal">
                           <span className="absolute line-clamp-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100">View Thread</span>
                           <span className="line-clamp-1 opacity-100 transition-opacity duration-200 group-hover:opacity-0">
@@ -504,8 +541,7 @@ export const DisplaySingleMessage = ({
 
                 <div
                   className={cn(
-                    'floating-controls absolute -top-[10px] right-2 z-[10] flex items-center gap-[2px] rounded-md bg-[var(--dark-primary,_white)] p-1 opacity-0 [border:1px_solid_var(--common-border-color)] group-hover:opacity-100',
-                    selectedMessage?._id === message._id && 'opacity-100'
+                    'floating-controls absolute -top-[10px] right-2 z-[10] flex items-center gap-[2px] rounded-md bg-[var(--dark-primary,_white)] p-1 opacity-0 [border:1px_solid_var(--common-border-color)] group-hover:opacity-100'
                   )}
                 >
                   <HtmlTooltip title="Find reaction">
@@ -515,7 +551,7 @@ export const DisplaySingleMessage = ({
                       </span>
                     </IconButton>
                   </HtmlTooltip>
-                  {setThreadDialogOpen && (
+                  {setThreadDialogOpen && type !== 'pins' && (
                     <HtmlTooltip title="Reply in thread">
                       <IconButton size="small" onClick={() => setThreadDialogOpen({ open: true, message })}>
                         <span className="flex h-6 w-6 items-center justify-center">
@@ -594,9 +630,8 @@ type MoreMenuAndDeleteConfirmDialogProps = {
   setThreadDialogOpen?: React.Dispatch<React.SetStateAction<{ open: boolean; message: Message }>>;
   selectedMessage: Message;
   handleEdit: () => void;
-  setShowConfirmBox: React.Dispatch<React.SetStateAction<{ open: boolean; _id: string }>>;
-  showConfirmBox: { open: boolean; _id: string };
-  deleteMessage: (id: string) => void;
+  socket: Socket;
+  type?: 'messages' | 'pins';
 };
 
 export const MoreMenuAndDeleteConfirmDialog = ({
@@ -605,9 +640,8 @@ export const MoreMenuAndDeleteConfirmDialog = ({
   setThreadDialogOpen,
   selectedMessage,
   handleEdit,
-  setShowConfirmBox,
-  showConfirmBox,
-  deleteMessage
+  socket,
+  type = 'messages'
 }: MoreMenuAndDeleteConfirmDialogProps) => {
   const {
     state: {
@@ -615,13 +649,34 @@ export const MoreMenuAndDeleteConfirmDialog = ({
     }
   } = useData();
 
+  const toastConfig = useContext(CustomToastContext);
+
+  const [showConfirmBox, setShowConfirmBox] = useState<boolean>(false);
+
+  const deleteMessage = async () => {
+    try {
+      await axiosInstance().delete(`/work-space/channel/message`, { data: { _id: selectedMessage?._id } });
+      socket.emit('messageDeleted', { channelId: selectedMessage?.channel });
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const pinMessage = async () => {
+    try {
+      await axiosInstance().post(`/work-space/channel/message/pin-unpin/${selectedMessage?._id}`);
+      socket.emit('messageUpdated', { channelId: selectedMessage?.channel, messageId: selectedMessage?._id });
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
   return (
     <>
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
-        getContentAnchorEl={null}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'left'
@@ -632,10 +687,9 @@ export const MoreMenuAndDeleteConfirmDialog = ({
         }}
       >
         <span onClick={handleMenuClose}>
-          <MenuItem button>Mark unread</MenuItem>
-          {setThreadDialogOpen && (
+          <MenuItem onClick={pinMessage}>{selectedMessage?.pinned ? 'Unpin' : 'Pin'}</MenuItem>
+          {setThreadDialogOpen && type !== 'pins' && (
             <MenuItem
-              button
               onClick={() => {
                 handleMenuClose();
                 setThreadDialogOpen({ open: true, message: selectedMessage });
@@ -644,28 +698,20 @@ export const MoreMenuAndDeleteConfirmDialog = ({
               Reply
             </MenuItem>
           )}
-          {selectedMessage?.user?.optionValue === user?._id && (
-            <MenuItem button onClick={() => handleEdit()}>
-              Edit
-            </MenuItem>
-          )}
-          {selectedMessage?.user?.optionValue === user?._id && (
-            <MenuItem button onClick={() => setShowConfirmBox({ open: true, _id: selectedMessage?._id })}>
-              Delete
-            </MenuItem>
-          )}
+          {selectedMessage?.user?.optionValue === user?._id && <MenuItem onClick={() => handleEdit()}>Edit</MenuItem>}
+          {selectedMessage?.user?.optionValue === user?._id && <MenuItem onClick={() => setShowConfirmBox(true)}>Delete</MenuItem>}
         </span>
       </Menu>
-      {showConfirmBox.open && (
+      {showConfirmBox && (
         <ConfirmationDialog
-          open={showConfirmBox.open}
+          open={showConfirmBox}
           message={`Are you sure you want to delete Message?`}
           onClose={() => {
-            setShowConfirmBox({ open: false, _id: null });
+            setShowConfirmBox(false);
           }}
           onOk={() => {
-            deleteMessage(showConfirmBox._id);
-            setShowConfirmBox({ open: false, _id: null });
+            deleteMessage();
+            setShowConfirmBox(false);
           }}
         />
       )}

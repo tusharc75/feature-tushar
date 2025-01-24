@@ -1,6 +1,6 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { Box, IconButton, MenuItem } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -12,7 +12,6 @@ import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTab
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import MessageDialog from 'src/components/Helpers/MessageDialog';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import { checkIsAllowedToDelete, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
@@ -195,12 +194,12 @@ const IrtTicket = () => {
       <MenuItem
         disabled={selectedRecords?.every((e) => !e.canDelete) ? true : false}
         onClick={() => {
-          if (selectedRecords.length === 1){
+          if (selectedRecords.length === 1) {
             setDeleteRecord(selectedRecords[0]);
-            }else{
-              setDeleteRecord(null)
-            }
-            setShowDeleteConfirmBox(true);
+          } else {
+            setDeleteRecord(null);
+          }
+          setShowDeleteConfirmBox(true);
         }}
       >
         {`Delete (${selectedRecords?.length})`}
@@ -271,7 +270,7 @@ const IrtTicket = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.productionOrder?.titleSingular?.toLowerCase()} : ${deleteRecord?.productionOrderNumber}` : `selected ${resources?.productionOrder?.titlePlural?.toLowerCase()}`} ?`}              
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.productionOrder?.titleSingular?.toLowerCase()} : ${deleteRecord?.productionOrderNumber}` : `selected ${resources?.productionOrder?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

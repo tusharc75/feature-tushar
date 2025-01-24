@@ -75,7 +75,8 @@ export const generateAddExistingProduct = (waitForStepInsertion = false, resourc
     },
     {
       target: `#${camelCase(resource)}_grid-1_sub-1-table-checkbox-0`,
-      title: 'Add a Product'
+      title: 'Add a Product',
+      isPreviousButtonDisabled : true
     },
     {
       target: '#dialog-add-button',
@@ -88,12 +89,12 @@ export const generateAddExistingProduct = (waitForStepInsertion = false, resourc
 export const createTransferInventoryFlow = (fields: any, resource: any): WalkmeData => {
   const includeFields = [];
   const data: WalkmeData = {
-    name: `Add ${resource}`,
+    name: `Create ${resource}`,
     url: routes.transferInventory.path,
     type: 'flow',
     steps: [
       {
-        title: `Add`,
+        title: `Create`,
         target: '#add-button'
       },
       ...generateFormFieldSteps(fields, [], includeFields),

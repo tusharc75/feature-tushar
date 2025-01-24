@@ -1,6 +1,6 @@
-import { Button } from '@material-ui/core';
-import AddIcon from '@material-ui/icons/Add';
-import { Skeleton } from '@material-ui/lab';
+import { Button } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import { Skeleton } from '@mui/material';
 import React, { useEffect, useRef } from 'react';
 import { VariableSizeList as List } from 'react-window';
 import InfiniteLoader from 'react-window-infinite-loader';
@@ -8,7 +8,7 @@ import CommonSkeleton from '../Helpers/CommonSkeleton';
 import ColCard from './ColCard';
 import { TActios, TInitialState, datarowInterface } from './index';
 
-export interface colDataInterface extends React.HTMLAttributes<HTMLDivElement> {
+export interface ColDataInterface extends React.HTMLAttributes<HTMLDivElement> {
   cardOnClick?: (e: React.MouseEvent, data: any) => void | null;
   passFailStatus?: boolean;
   passFailAccessor?: string;
@@ -23,6 +23,8 @@ export interface colDataInterface extends React.HTMLAttributes<HTMLDivElement> {
   fetchSingleColumn: (column: string, page: number, appendData?: boolean, filterQuery?: string) => void;
   assignOptions?: any;
   openAssignHandler?: (option: any, data: any) => void | null;
+  background?: string;
+  color?: string;
 }
 
 const HEADER_HEIGHT = 90;
@@ -61,7 +63,7 @@ const calcCardHeight = (rowDef: datarowInterface[], data) => {
   return HEADER_HEIGHT + rowsWithHeight.length * ROW_HEIGHT + rowsWithExternalLInk.length * ROW_EXTERNALliNK_HEIGHT;
 };
 
-const RenderColumns: React.FC<colDataInterface> = ({
+const RenderColumns: React.FC<ColDataInterface> = ({
   cardOnClick,
   passFailStatus,
   passFailAccessor,
@@ -73,7 +75,9 @@ const RenderColumns: React.FC<colDataInterface> = ({
   state,
   dispatch,
   fetchSingleColumn,
-  column
+  column,
+  background,
+  color
 }) => {
   const { data, count, loading, page, filterQuery, rowDef, selectedRecords, refreshDataCount } = state;
 
@@ -109,12 +113,14 @@ const RenderColumns: React.FC<colDataInterface> = ({
         rowDef={rowDef}
         passFailStatus={passFailStatus}
         passFailAccessor={passFailAccessor}
+        background={background}
+        color={color}
       />
     );
 
     if (!isItemLoaded(index)) {
       content = (
-        <div className="loader-skeleton overflow-hidden rounded-[8px] shadow-[0px_4px_40px_rgba(0,0,0,0.08)] [border:1px_solid_var(--common-border-color)] ">
+        <div className="loader-skeleton overflow-hidden rounded-[8px] border shadow-[0px_4px_40px_rgba(0,0,0,0.08)]">
           <CommonSkeleton lenArray={Array.from(Array(2).keys())} lg={12} sm={12} xs={12} md={12} />
         </div>
       );
@@ -142,16 +148,22 @@ const RenderColumns: React.FC<colDataInterface> = ({
 
   return (
     <>
-      <div className="col group" key={refreshDataCount}>
+      <div className="col group relative isolate px-[6px]" key={refreshDataCount}>
+        <div className="absolute -top-[6px] bottom-0 left-0 right-0 -z-[1] rounded-md bg-gray-100 dark:bg-gray-700" />
+        {itemCount === 0 && !isInitialLoading && (
+          <div className="absolute inset-0 -z-[1] flex h-full items-center justify-center">
+            <div className="select-none text-center text-[16px] font-semibold text-gray-400">No Data Found</div>
+          </div>
+        )}
         {isInitialLoading ? (
-          <div className="grid gap-2 overflow-hidden" style={{ maxHeight: containerHeight || 600 }}>
+          <div className="grid gap-2 overflow-hidden " style={{ maxHeight: containerHeight || 600 }}>
             {Array.from(Array(10).keys()).map((item) => (
               <div
                 key={item}
                 style={{ maxHeight: cardHeight, height: cardHeight }}
-                className="loader-skeleton overflow-hidden rounded-[8px] bg-[var(--dark-primary,_white)] shadow-[0px_4px_40px_rgba(0,0,0,0.08)] [border:1px_solid_var(--common-border-color)]"
+                className="loader-skeleton overflow-hidden rounded-[8px] border bg-[var(--dark-primary,_white)]"
               >
-                <div className="overflow-hidden p-2" style={{ maxHeight: cardHeight - 16, height: cardHeight - 16 }}>
+                <div className=" overflow-hidden p-2" style={{ maxHeight: cardHeight - 16, height: cardHeight - 16 }}>
                   <Skeleton variant="text" width="100px" height="16px" />
                   <Skeleton width="100%" height="50px" />
                   <Skeleton variant="text" width="100px" height="16px" />

@@ -1,6 +1,6 @@
-import { Box, Button, IconButton } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
+import { Box, IconButton } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { sortBy } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { MdDragIndicator } from 'react-icons/md';
@@ -14,8 +14,9 @@ import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useDndSensors } from 'src/hooks';
-import { AddOutlined } from '@material-ui/icons';
+import { AddOutlined } from '@mui/icons-material';
 import routes from 'src/components/Helpers/Routes';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const Steps = ({ resourceData, tab, fetchData, workflowId = null }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -34,7 +35,7 @@ const Steps = ({ resourceData, tab, fetchData, workflowId = null }) => {
   const handleSave = (values) => {
     setIsSubmitting(true);
     let api = `/sa-formbuilder/tabs/steps/${resourceData?._id}/${tab?._id}`;
-    if(workflowId) api = `${routes.workflow.path}/tabs/steps/${workflowId}/${tab?._id}`;
+    if (workflowId) api = `${routes.workflow.path}/tabs/steps/${workflowId}/${tab?._id}`;
     if (values?.stepId) {
       axiosInstance()
         .put(api, values)
@@ -75,7 +76,7 @@ const Steps = ({ resourceData, tab, fetchData, workflowId = null }) => {
   const handleDelete = (step) => {
     setDeleting(true);
     let api = `/sa-formbuilder/tabs/steps/${resourceData?._id}/${tab?._id}/delete`;
-    if(workflowId) api = `${routes.workflow.path}/tabs/steps/${workflowId}/${tab?._id}/delete`;
+    if (workflowId) api = `${routes.workflow.path}/tabs/steps/${workflowId}/${tab?._id}/delete`;
     axiosInstance()
       .put(api, { stepId: step?._id })
       .then(() => {
@@ -92,7 +93,7 @@ const Steps = ({ resourceData, tab, fetchData, workflowId = null }) => {
 
   const handleUpdateOrder = (steps) => {
     let api = `/sa-formbuilder/tabs/steps/${resourceData?._id}/${tab?._id}/order`;
-    if(workflowId) api = `${routes.workflow.path}/tabs/steps/${workflowId}/${tab?._id}/order`;
+    if (workflowId) api = `${routes.workflow.path}/tabs/steps/${workflowId}/${tab?._id}/order`;
     axiosInstance()
       .put(
         api,
@@ -133,17 +134,14 @@ const Steps = ({ resourceData, tab, fetchData, workflowId = null }) => {
   return (
     <Box>
       <Box>
-        <Button
-          variant="outlined"
-          color="primary"
-          size="small"
+        <ThemeButton
           onClick={() => {
             setOpen({ open: true, data: null });
           }}
           startIcon={<AddOutlined />}
         >
           Add Step
-        </Button>
+        </ThemeButton>
       </Box>
       <Box pt={2}>
         <DndContext onDragEnd={handleOnDragEnd} onDragStart={onDragStart} sensors={sensors} modifiers={[restrictToVerticalAxis]}>

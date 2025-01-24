@@ -1,23 +1,17 @@
 import _ from 'lodash';
-import React, { useContext, useState, useEffect, Fragment } from 'react';
+import { useContext, useState, useEffect, Fragment } from 'react';
 import ReactFlow, { Controls, ControlButton, ReactFlowProvider } from 'react-flow-renderer';
 import axiosInstance from '../../../axios/axiosInstance';
 import { COLOUR_MASTER, transferAsset, deliveryTicket, DELIVERY_TICKET_STATUS, sidebarResource } from '../../../constants/helpers';
 import routes from '../../../components/Helpers/Routes';
-import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { MdZoomOutMap } from 'react-icons/md';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import { Box, Button, Paper, Typography } from '@material-ui/core';
-import { ExpandMore, ExpandLess } from '@material-ui/icons';
+import { Box, Paper, Typography } from '@mui/material';
+import { ExpandMore, ExpandLess } from '@mui/icons-material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const customDeliveredNodeStyle = {
-  closedTransferAsset: {
-    name: 'Closed Transfer Asset',
-    ...COLOUR_MASTER.closedRepairJob
-  }
-};
+
 const customNodeStyles = {
   transferAsset: {
     name: 'Transfer Asset',
@@ -31,14 +25,17 @@ const customNodeStyles = {
     name: 'Loading Ticket',
     ...COLOUR_MASTER.loadingTicket
   },
-  ...customDeliveredNodeStyle
+  closedTransferAsset: {
+    name: 'Closed Transfer Asset',
+    ...COLOUR_MASTER.closedRepairJob
+  }
 };
 
 const TransferAssetViews = (props) => {
+
   const { tANumber, tAId } = props;
   const [loading, setLoading] = useState(false);
   const [flowData, setFlowData] = useState([]);
-  const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const [fullDialogueOpen, setFullDialogueOpen] = useState(false);
   const [colorInfo, setColorInfo] = useState(false);
@@ -92,7 +89,7 @@ const TransferAssetViews = (props) => {
             ref_id: asset._id,
             label: (
               <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                <Typography variant="body2">{customNodeStyles.productAssets}</Typography>
+                <Typography variant="body2">{customNodeStyles.productAssets.name}</Typography>
                 <Typography variant="subtitle2">{asset.assetNumber}</Typography>
               </div>
             )
@@ -154,7 +151,7 @@ const TransferAssetViews = (props) => {
             )
           },
           position: { x: xPosition, y: 30 },
-          style: customDeliveredNodeStyle.closedTransferAsset
+          style: customNodeStyles.closedTransferAsset
         });
         allLoadingTicket
           ?.filter((lt) => lt.status == DELIVERY_TICKET_STATUS.delivered)
@@ -193,20 +190,17 @@ const TransferAssetViews = (props) => {
 
   return (
     <ContentFullScreen fullScreen={fullDialogueOpen} setFullScreen={setFullDialogueOpen}>
-      <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
+      <Box display="flex" flexDirection="column">
         <Box>
-          <Button
-            variant={'outlined'}
-            color="default"
-            size="small"
+          <ThemeButton
             onClick={() => {
               setColorInfo(!colorInfo);
             }}
-            aria-controls="action-menu"
+
             endIcon={colorInfo ? <ExpandLess /> : <ExpandMore />}
           >
             {'Color Info'}
-          </Button>
+          </ThemeButton>
         </Box>
         {colorInfo && (
           <Box>
@@ -237,7 +231,7 @@ const TransferAssetViews = (props) => {
           </Box>
         )}
       </Box>
-      <div style={fullDialogueOpen ? { height: '95vh' } : { height: '68vh' }}>
+      <div style={fullDialogueOpen ? { height: '95vh' } : { height: '75vh' }}>
         {!loading ? (
           flowData.length ? (
             <Fragment>

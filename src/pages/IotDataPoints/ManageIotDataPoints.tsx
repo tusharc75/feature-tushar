@@ -1,17 +1,5 @@
-import {
-  Box,
-  Button,
-  Chip,
-  CircularProgress,
-  Dialog,
-  FormControl,
-  Grid,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField,
-  Typography
-} from '@material-ui/core';
+import { Box, Chip, Dialog, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
@@ -29,8 +17,9 @@ import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
-import { Autocomplete } from '@material-ui/lab';
+import Autocomplete from '@mui/material/Autocomplete';
 import { checkFormula } from 'src/constants/formulaUtility';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null }) => {
   const history = useHistory();
@@ -250,13 +239,12 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${
-                  id
+                title={`${id
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update ${initialData.values?.fieldLabel ? `(${initialData.values?.fieldLabel})` : ''}`
                     : `Create ${resources?.iotDataPoints?.titleSingular}`
-                }`}
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -336,6 +324,7 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
                         <TextField
                           inputRef={inputRef}
                           margin="dense"
+                          size="small"
                           type="text"
                           label="Formula"
                           name="formula"
@@ -352,15 +341,18 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
                         />
                       </Box>
                       <Grid container>
-                        <Grid item xs={6}>
+                        <Grid size={{xs:6}}>
                           {formulaError && (
                             <Typography variant="caption" display="block">
                               {formulaError}{' '}
                             </Typography>
                           )}
-                          <Button size="small" onClick={() => handleCheckSyntax(values)} color="primary">
+                          <ThemeButton
+                            onClick={() => handleCheckSyntax(values)}
+                            buttonType='theme'
+                          >
                             Check Syntax
-                          </Button>
+                          </ThemeButton>
                         </Grid>
                       </Grid>
                       <Box>
@@ -372,6 +364,7 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
                             value={values['returnType']}
                             onChange={(e) => setFieldValue('returnType', e.target.value)}
                             label="Return Type"
+                            size="small"
                             name="returnType"
                           >
                             <MenuItem value="decimal">Decimal</MenuItem>
@@ -384,33 +377,26 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
-                  disabled={submitting}
+                <ThemeButton
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
+                  buttonType='transparent'
                 >
                   Cancel
-                </Button>
-                <Button
-                  disabled={loading || submitting}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
-                  size="small"
+                </ThemeButton>
+                <ThemeButton
                   onClick={submitForm}
-                  endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                  disabled={loading || submitting}
+                  isLoading={submitting}
+                  buttonType='theme'
                 >
-                  {' '}
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

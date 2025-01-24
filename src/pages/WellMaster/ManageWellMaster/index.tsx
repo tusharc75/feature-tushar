@@ -1,9 +1,8 @@
 import { useState, useEffect, useContext, useRef, Fragment } from 'react';
 import { Formik, Form } from 'formik';
-import { Box, Button, CircularProgress } from '@material-ui/core';
+import { Box } from '@mui/material';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import CustomButton from '../../../components/Helpers/CustomButton';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -16,7 +15,7 @@ import {
   yupSchema
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { useHistory } from 'react-router-dom';
 import { useData } from '../../../StateProvider/Provider';
@@ -24,6 +23,7 @@ import { isArray, isEqual } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import InputField from 'src/components/Helpers/InputField';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuccess, referenceData = null, isRedirectToDetailPage = true }) => {
   const history = useHistory();
@@ -83,8 +83,7 @@ const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuc
               const field: any = fieldsDataForCreate?.find((e) => e.fieldName === key);
               if (field.type === 'multiSelect' && !isArray(referenceData[key])) {
                 tempInitialData[key] = [referenceData[key]];
-              }
-              else {
+              } else {
                 tempInitialData[key] = referenceData[key];
               }
               field.disableOnEdit = true;
@@ -178,7 +177,7 @@ const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuc
             <Fragment>
               <CustomDialogHeader
                 title={title}
-                onClose={(e, reason) => {
+                onClose={() => {
                   if (!isEqual(ref.current.values, initialData.values)) {
                     setShowConfirmDialog(true);
                   } else {
@@ -205,12 +204,9 @@ const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuc
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
+                <ThemeButton
                   disabled={submitting}
-                  type="button"
-                  variant="outlined"
-                  color="primary"
-                  size="small"
+                  buttonType="transparent"
                   onClick={() => {
                     if (!isEqual(ref.current.values, initialData.values)) {
                       setShowConfirmDialog(true);
@@ -220,12 +216,10 @@ const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuc
                   }}
                 >
                   Cancel
-                </Button>
-                <CustomButton
-                  loading={loading}
-                  variant="contained"
-                  color="primary"
-                  startIcon={submitting && <CircularProgress size={20} color="inherit" />}
+                </ThemeButton>
+                <ThemeButton
+                  isLoading={loading}
+                  buttonType="theme"
                   disabled={submitting}
                   onClick={(e) => {
                     e.preventDefault();
@@ -234,11 +228,10 @@ const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuc
                   }}
                 >
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

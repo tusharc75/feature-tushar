@@ -1,15 +1,15 @@
 import { Form, Formik } from 'formik';
-import { Button, CircularProgress, Dialog, Grid, Box } from '@material-ui/core';
+import { Dialog, Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { CustomDialogTransition, displayDate, normalizeDate } from 'src/constants/helpers';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { useEffect, useState } from 'react';
-import moment from 'moment';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, loading, minStartDate = null, maxEndDate = null }) => {
-
   const [initialValues, setInitialValues] = useState(null);
 
   useEffect(() => {
@@ -17,22 +17,14 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
       setInitialValues({
         startDate: new Date(data.startDate),
         ...(data?.endDate && { endDate: new Date(data.endDate) })
-      })
+      });
     } else {
       setInitialValues({
         startDate: minStartDate ? new Date(minStartDate) : new Date(),
         ...(type !== 'start' ? { endDate: minStartDate ? new Date(minStartDate) : new Date() } : {})
-      })
+      });
     }
   }, [data, type]);
-
-  const onSubmit = (values) => {
-    handleSubmit({
-      ...values,
-      startDate: moment(values.startDate).format('MM/DD/YYYY'),
-      ...(values.endDate && { endDate: moment(values.endDate).format('MM/DD/YYYY') })
-    });
-  };
 
   const validate = (values) => {
     const errors = {};
@@ -58,16 +50,27 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
         }
       }}
       maxWidth="sm"
-      fullWidth>
-      <Formik initialValues={initialValues} onSubmit={(val) => { onSubmit(val) }} enableReinitialize={true} validate={validate}>
-        {({ values, errors, touched, setFieldValue }) => (
-          <Form >
-            <CustomDialogHeader title={`Set Actual ${type === 'start' ? 'Start' : type === 'startStop' ? 'Start/End' : 'End'} Date`} onClose={onClose} />
+      fullWidth
+    >
+      <Formik
+        initialValues={initialValues}
+        onSubmit={(val) => {
+          handleSubmit(val);
+        }}
+        enableReinitialize={true}
+        validate={validate}
+      >
+        {({ values, errors, touched, setFieldValue, submitForm }) => (
+          <Form>
+            <CustomDialogHeader
+              title={`Set Actual ${type === 'start' ? 'Start' : type === 'startStop' ? 'Start/End' : 'End'} Date`}
+              onClose={onClose}
+            />
             <CustomDialogContent>
               <Box p={2}>
                 <Grid container spacing={2}>
                   {type !== 'stop' && (
-                    <Grid item xs={12} sm={12}>
+                    <Grid size={{ xs: 12, sm: 12 }}>
                       <FormTypes
                         size="small"
                         fullWidth
@@ -85,8 +88,8 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
                       />
                     </Grid>
                   )}
-                  {(type === 'startStop' || type === 'stop') &&
-                    (<Grid item xs={12} sm={12}>
+                  {(type === 'startStop' || type === 'stop') && (
+                    <Grid size={{ xs: 12, sm: 12 }}>
                       <FormTypes
                         size="small"
                         fullWidth
@@ -104,24 +107,25 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
                         {...(maxEndDate ? { maxDate: maxEndDate } : {})}
                       />
                     </Grid>
-                    )}
+                  )}
                 </Grid>
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button disabled={loading} size="small" variant="outlined" color="primary" onClick={onClose}>
+              <ThemeButton
+                onClick={onClose}
+                buttonType='transparent'
+              >
                 Close
-              </Button>
-              <Button
+              </ThemeButton>
+              <ThemeButton
+                onClick={submitForm}
                 disabled={loading}
-                startIcon={loading && <CircularProgress size={18} color="inherit" />}
-                size="small"
-                variant="contained"
-                color="primary"
-                type="submit"
+                buttonType='theme'
+                isLoading={loading}
               >
                 Save
-              </Button>
+              </ThemeButton>
             </CustomDialogFooter>
           </Form>
         )}

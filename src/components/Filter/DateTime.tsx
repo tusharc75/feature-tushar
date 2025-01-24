@@ -1,11 +1,10 @@
-import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
-import { KeyboardDatePicker } from '@material-ui/pickers';
-import moment from 'moment';
+import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { dateFormat } from 'src/constants/helpers';
+import CustomDatePicker from 'src/components/CustomDatePicker';
+import dayjs from 'dayjs';
 
-const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required = false, sidebarIcon = null }) => {
+const DateTime = ({ fieldData, deepFilters, setDeepFilters, required = false, sidebarIcon = null }) => {
   const [timeFrame, setTimeFrame] = useState<any>('custom');
 
   const handleDuration = useCallback(
@@ -13,23 +12,23 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required =
       let fromDate: any = '';
       let toDate: any = '';
       if (timeFrame === '1-month') {
-        fromDate = new Date(moment().subtract('1', 'month').calendar());
+        fromDate = new Date(dayjs().subtract(1, 'month').toDate());
         toDate = new Date();
       } else if (timeFrame === '3-months') {
-        fromDate = new Date(moment().subtract('3', 'months').calendar());
+        fromDate = new Date(dayjs().subtract(3, 'month').toDate());
         toDate = new Date();
       } else if (timeFrame === '6-months') {
-        fromDate = new Date(moment().subtract('6', 'months').calendar());
+        fromDate = new Date(dayjs().subtract(6, 'month').toDate());
         toDate = new Date();
       } else if (timeFrame === '1-year') {
-        fromDate = new Date(moment().subtract('1', 'year').calendar());
+        fromDate = new Date(dayjs().subtract(1, 'year').toDate());
         toDate = new Date();
       }
       setDeepFilters([
         ...deepFilters?.filter((d) => d?.field !== `from_${fieldData?.fieldName}` && d?.field !== `to_${fieldData?.fieldName}`),
         ...[
-          { field: `from_${fieldData?.fieldName}`, term: moment(fromDate).format('MM/DD/YYYY') },
-          { field: `to_${fieldData?.fieldName}`, term: moment(toDate).format('MM/DD/YYYY') }
+          { field: `from_${fieldData?.fieldName}`, term: fromDate },
+          { field: `to_${fieldData?.fieldName}`, term: toDate }
         ]
       ]);
     },
@@ -62,16 +61,16 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required =
   }, [deepFilters, fieldData?.fieldName]);
 
   useEffect(() => {
-    const fromDate = moment(deepFilters?.find((item) => item.field === `from_${fieldData?.fieldName}`)?.term, 'MM/DD/YYYY');
-    const toDate = moment(deepFilters?.find((item) => item.field === `to_${fieldData?.fieldName}`)?.term, 'MM/DD/YYYY');
+    const fromDate = dayjs(deepFilters?.find((item) => item.field === `from_${fieldData?.fieldName}`)?.term);
+    const toDate = dayjs(deepFilters?.find((item) => item.field === `to_${fieldData?.fieldName}`)?.term);
     if (fromDate && toDate) {
-      const differenceInMonths = toDate.diff(fromDate, 'months');
-      const differenceInDays = toDate.diff(fromDate, 'days');
+      const differenceInMonths = toDate.diff(fromDate, 'month');
+      const differenceInDays = toDate.diff(fromDate, 'day');
       if (differenceInMonths === 1 && [28, 29, 30, 31]?.includes(differenceInDays)) {
         setTimeFrame('1-month');
       } else if (differenceInMonths === 3 && [88, 89, 90, 91, 92]?.includes(differenceInDays)) {
         setTimeFrame('3-months');
-      } else if (differenceInMonths === 6 && [178, 179, 180, 181, 182, 183]?.includes(differenceInDays)) {
+      } else if (differenceInMonths === 6 && [178, 179, 180, 181, 182, 183, 184]?.includes(differenceInDays)) {
         setTimeFrame('6-months');
       } else if (differenceInMonths === 12 && [365, 366]?.includes(differenceInDays)) {
         setTimeFrame('1-year');
@@ -83,7 +82,7 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required =
 
   return (
     <>
-      <div className="sticky top-0 z-10 flex min-h-[64px] items-center justify-between bg-[var(--dark-primary,white)] py-[--py,_16px]">
+      <div className="sticky top-0 z-10  flex min-h-[64px] items-center justify-between bg-[var(--dark-primary,white)] py-[--py,_16px]">
         <div className="flex items-center gap-2">
           {sidebarIcon}
           <p className="text-[16px] font-medium leading-[19px]">{fieldData?.fieldLabel}</p>
@@ -94,6 +93,7 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required =
           <FormControl fullWidth size="small" variant="outlined">
             <InputLabel id={fieldData?.fieldName}>Select Duration</InputLabel>
             <Select
+              size="small"
               labelId={fieldData?.fieldName}
               id={`time-${fieldData?.fieldName}`}
               value={timeFrame}
@@ -111,13 +111,10 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required =
           </FormControl>
         </div>
         <div className="mt-5">
-          <KeyboardDatePicker
-            autoOk
+          <CustomDatePicker
             disabled={timeFrame !== 'custom'}
             fullWidth
             size="small"
-            variant="inline"
-            inputVariant="outlined"
             name={`from_${fieldData?.fieldName}`}
             label={`From ${fieldData?.fieldLabel}`}
             value={
@@ -128,26 +125,16 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required =
             onChange={(date: any) => {
               setDeepFilters([
                 ...deepFilters?.filter((d) => d?.field !== `from_${fieldData?.fieldName}`),
-                { field: `from_${fieldData?.fieldName}`, term: moment(date).format('MM/DD/YYYY') }
+                { field: `from_${fieldData?.fieldName}`, term: date }
               ]);
             }}
-            format={dateFormat}
-            InputLabelProps={{
-              shrink: true
-            }}
-            // required={reportConfig?.defaultColumn ? field?.required : false}
-            // error={error && error[`from_${field.fieldName}`] && Boolean(error[`from_${field.fieldName}`])}
-            // helperText={error && Boolean(error[`from_${field.fieldName}`]) && error[`from_${field.fieldName}`]}
           />
         </div>
         <div className="mt-5">
-          <KeyboardDatePicker
-            autoOk
+          <CustomDatePicker
             disabled={timeFrame !== 'custom'}
             fullWidth
             size="small"
-            variant="inline"
-            inputVariant="outlined"
             name={`to_${fieldData?.fieldName}`}
             label={`To ${fieldData?.fieldLabel}`}
             value={
@@ -158,16 +145,9 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required =
             onChange={(date: any) => {
               setDeepFilters([
                 ...deepFilters?.filter((d) => d?.field !== `to_${fieldData?.fieldName}`),
-                { field: `to_${fieldData?.fieldName}`, term: moment(date).format('MM/DD/YYYY') }
+                { field: `to_${fieldData?.fieldName}`, term: date }
               ]);
             }}
-            format={dateFormat}
-            InputLabelProps={{
-              shrink: true
-            }}
-            // required={reportConfig?.defaultColumn ? field?.required : false}
-            // error={error && error[`from_${field.fieldName}`] && Boolean(error[`from_${field.fieldName}`])}
-            // helperText={error && Boolean(error[`from_${field.fieldName}`]) && error[`from_${field.fieldName}`]}
           />
         </div>
         {isDatePresent && (

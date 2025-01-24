@@ -1,4 +1,4 @@
-import { Box, MenuItem } from '@material-ui/core';
+import { Box, MenuItem } from '@mui/material';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';

@@ -1,7 +1,6 @@
-import { Box, Card, CardContent, Grid, IconButton, Typography } from '@material-ui/core';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { Box, Card, CardContent, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useEffect, useState } from 'react';
 import { BiCustomize } from 'react-icons/bi';
 import { IoCalendarOutline } from 'react-icons/io5';
@@ -9,10 +8,10 @@ import { Link } from 'react-router-dom';
 import DisplayData from 'src/components/CardDisplayData';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { displayDate } from 'src/constants/helpers';
 import { useData } from '../../StateProvider/Provider';
 import routes from '../../components/Helpers/Routes';
 import { formatAmountWithCurrency } from '../../constants/helpers';
-import { displayDate } from '../../services/util';
 
 export default function AccordionOfOpportunity({ opportunity, expanded = true, recordsPerLine = 2 }) {
   const {
@@ -46,18 +45,9 @@ export default function AccordionOfOpportunity({ opportunity, expanded = true, r
     <>
       <Accordion expanded={expandOpportunity} onChange={() => setExpandOpportunity(!expandOpportunity)}>
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
-          <Grid container>
-            <Grid item xs={8}>
-              <Box display="flex">
-                <Box>
-                  <IconButton size="small">{expandOpportunity === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
-                </Box>
-                <Box padding="5px">
-                  <Typography variant="subtitle2">Opportunity ({opportunity ? 1 : 0})</Typography>
-                </Box>
-              </Box>
-            </Grid>
-          </Grid>
+          <div className="flex items-center justify-between">
+            <Typography variant="subtitle2">Opportunity ({opportunity ? 1 : 0})</Typography>
+          </div>
         </AccordionSummary>
         <AccordionDetails>
           <>
@@ -66,7 +56,7 @@ export default function AccordionOfOpportunity({ opportunity, expanded = true, r
                 {opportunity ? (
                   <Grid container spacing={1}>
                     {
-                      <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={1}>
+                      <Grid size={{ xs: 12, sm: 12, md: recordsPerLineInLargeScreen }} key={1}>
                         <Card className="detailCard  card-v1" variant="outlined">
                           <CardContent className="card-link">
                             <div className="mb-2">
@@ -80,7 +70,7 @@ export default function AccordionOfOpportunity({ opportunity, expanded = true, r
                                   <Typography>{opportunity?.opportunityName}</Typography>
                                 </Link>
                               ) : (
-                                <span className="d-flex gap-2 align-items-center">
+                                <span className="d-flex align-items-center gap-2">
                                   <Typography>{opportunity.opportunityName}</Typography>{' '}
                                   <HtmlTooltip title={`${opportunity.opportunityName} belongs to different entity`}>
                                     <InfoOutlinedIcon fontSize="small" />
@@ -90,13 +80,13 @@ export default function AccordionOfOpportunity({ opportunity, expanded = true, r
                             </div>
                             {opportunity?.estimatedAmount && (
                               <p
-                                className="font-semibold text-[14px] text-gray-400"
+                                className="text-[14px] font-semibold text-gray-400"
                                 title={formatAmountWithCurrency(opportunity['currency'], opportunity?.estimatedAmount).fullFormatAmount}
                               >
                                 Estimated Amount : {formatAmountWithCurrency(opportunity['currency'], opportunity?.estimatedAmount).fullFormatAmount}
                               </p>
                             )}
-                            <div className="grid max-[500px]:grid-cols-1 max-[960px]:grid-cols-2 min-[1153px]:grid-cols-2">
+                            <div className="grid max-[960px]:grid-cols-2 max-[500px]:grid-cols-1 min-[1153px]:grid-cols-2">
                               <div>
                                 {opportunity?.stage ? (
                                   <DisplayData label="Stage" value={opportunity?.stage ?? ''} icon={<BiCustomize size={20} />} />

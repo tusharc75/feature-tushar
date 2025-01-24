@@ -1,7 +1,6 @@
-import { Button, MenuItem } from '@material-ui/core';
-import Box from '@material-ui/core/Box/Box';
+import Box from '@mui/material/Box/Box';
 import { map, uniq } from 'lodash';
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -31,6 +30,7 @@ import CustomMessageDialog from 'src/components/MessageDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { generateStepSendToSupplier } from 'src/pages/Sublease/walkmeSteps';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, allowedToEdit, isProcessor, stepFullScreen }) => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -86,6 +86,7 @@ const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, a
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
         const newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path);
+
         newColumns?.forEach((o) => {
           if (data?.find((d) => d?.fieldData?.fieldName === o?.accessor)?.type === 'singleLine' && o?.accessor !== 'assetNumber') {
             o.editable = true;
@@ -111,18 +112,18 @@ const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, a
               )
           },
           {
-            accessor: 'wellName',
-            Header: 'Well Name',
+            accessor: 'rentalWellName',
+            Header: 'Rental Well Name',
             show: true,
             Cell: ({ row }) =>
-              row.original?.wellName ? (
+              row.original?.rentalWellName ? (
                 <Link
                   className="link text-truncate"
                   target="_blank"
-                  title={row.original?.wellName}
-                  to={`${routes.wellMasterDetail.path}/${row.original?.wellNameId}`}
+                  title={row.original?.rentalWellName}
+                  to={`${routes.wellMasterDetail.path}/${row.original?.rentalWellNameId}`}
                 >
-                  {row.original?.wellName}
+                  {row.original?.rentalWellName}
                 </Link>
               ) : (
                 <NoDataCell />
@@ -237,11 +238,9 @@ const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, a
           />
         )}
         {allowedToEdit && (
-          <Button
-            variant={'contained'}
-            color="primary"
-            size="small"
+          <ThemeButton
             id="send-to-supplier-button"
+            buttonType='theme'
             disabled={checkUniqWarehouse() && (allowedToEdit || isProcessor) ? false : true}
             onClick={() => {
               if (!validateAction()) {
@@ -278,7 +277,7 @@ const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, a
             }}
           >
             Send to Supplier
-          </Button>
+          </ThemeButton>
         )}
       </>
     );

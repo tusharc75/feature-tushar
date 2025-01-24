@@ -1,14 +1,15 @@
 import React, { useContext } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import DialogContent from '@material-ui/core/DialogContent';
-import Dialog from '@material-ui/core/Dialog';
+import { makeStyles } from '@mui/styles';
+import DialogContent from '@mui/material/DialogContent';
+import Dialog from '@mui/material/Dialog';
 import { FaTimesCircle } from 'react-icons/fa';
-import { Button, DialogActions } from '@material-ui/core';
+import { DialogActions, Theme } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomDialogTransition } from 'src/constants/helpers';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     width: '100%',
     maxWidth: 360,
@@ -39,7 +40,6 @@ export default function RecordDeletedDialog() {
 
   return (
     <Dialog
-      disableBackdropClick
       disableEscapeKeyDown
       TransitionComponent={CustomDialogTransition}
       maxWidth="xs"
@@ -62,17 +62,15 @@ export default function RecordDeletedDialog() {
       </DialogContent>
 
       <DialogActions>
-        <Button
+        <ThemeButton
           onClick={() => {
             setToastConfig({ open: false, type: '', message: '' });
             history.push('/');
           }}
-          variant="contained"
-          color="primary"
-          size="small"
+          buttonType="theme"
         >
           Back To Home
-        </Button>
+        </ThemeButton>
       </DialogActions>
     </Dialog>
   );

@@ -1,5 +1,5 @@
-import { Box } from '@material-ui/core';
-import WarningIcon from '@material-ui/icons/Warning';
+import { Box } from '@mui/material';
+import WarningIcon from '@mui/icons-material/Warning';
 import { camelCase } from 'lodash';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -17,7 +17,7 @@ import routes from './../../components/Helpers/Routes';
 import WarningFilter from 'src/components/WarningFilter';
 import axios, { CancelTokenSource } from 'axios';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import InfoIcon from '@material-ui/icons/Info';
+import InfoIcon from '@mui/icons-material/Info';
 
 const getWarningList = (row?: any) => {
   const icon = <WarningIcon style={{ fontSize: '16px' }} fontSize="small" color="error" />;
@@ -124,12 +124,12 @@ const Deals = () => {
                   </Link>
                   {warnings?.length > 0
                     ? warnings.map((w) => (
-                      <Box ml={1} key={w.warningFilter}>
-                        <HtmlTooltip title={w.title} placement="top" arrow>
-                          {w.icon}
-                        </HtmlTooltip>
-                      </Box>
-                    ))
+                        <Box ml={1} key={w.warningFilter}>
+                          <HtmlTooltip title={w.title} placement="top" arrow>
+                            {w.icon}
+                          </HtmlTooltip>
+                        </Box>
+                      ))
                     : null}
                 </div>
               );

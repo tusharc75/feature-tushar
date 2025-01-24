@@ -1,20 +1,13 @@
 import React, { useEffect, useState, useContext, Fragment, useRef } from 'react';
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box } from '@mui/material';
 import { Formik, Form } from 'formik';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import axiosInstance from '../../../axios/axiosInstance';
-import {
-  getObjKeys,
-  yupSchema,
-  getObjKeysWithValues,
-  opportunity,
-  setFieldsInAscendingOrder,
-  GenerateResourceLineNumber
-} from '../../../constants/helpers';
+import { getObjKeys, yupSchema, getObjKeysWithValues, opportunity, GenerateResourceLineNumber } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomButton from '../../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { useData } from '../../../StateProvider/Provider';
@@ -23,7 +16,6 @@ import PropTypes from 'prop-types';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import { FaDiceOne } from 'react-icons/fa';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
 export default function ManageOpportunityDialog({
@@ -174,7 +166,7 @@ export default function ManageOpportunityDialog({
               <Fragment>
                 <CustomDialogHeader
                   title={isClone ? `Clone - ${cloneHeading}` : isNew ? 'Create Opportunity' : `Editing ${dataToUpdate.opportunityName}`}
-                  onClose={(e, reason) => {
+                  onClose={() => {
                     if (!isEqual(values, initialData.values)) {
                       setShowConfirmDialog(true);
                     } else {
@@ -203,11 +195,8 @@ export default function ManageOpportunityDialog({
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                  <Button
-                    type="button"
-                    variant="outlined"
-                    color="primary"
-                    size="small"
+                  <ThemeButton
+                    buttonType="transparent"
                     onClick={() => {
                       if (!isEqual(values, initialData.values)) {
                         setShowConfirmDialog(true);
@@ -217,11 +206,10 @@ export default function ManageOpportunityDialog({
                     }}
                   >
                     Cancel
-                  </Button>
-                  <CustomButton
-                    loading={loading}
-                    variant="contained"
-                    color="primary"
+                  </ThemeButton>
+                  <ThemeButton
+                    isLoading={loading}
+                    buttonType="theme"
                     disabled={loading}
                     onClick={(e) => {
                       e.preventDefault();
@@ -230,7 +218,7 @@ export default function ManageOpportunityDialog({
                     }}
                   >
                     Save
-                  </CustomButton>
+                  </ThemeButton>
                 </CustomDialogFooter>
                 {showConfirmDialog ? (
                   <ConfirmCancelDialog

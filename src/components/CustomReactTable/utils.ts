@@ -1,11 +1,12 @@
+import { Column, Header } from '@tanstack/react-table';
+import dayjs from 'dayjs';
 import { flatMapDeep, isEmpty, snakeCase, uniqBy } from 'lodash';
-import moment from 'moment';
 import React from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
+import { dateFormatToSend } from 'src/constants/helpers';
 import xlsx from 'xlsx-js-style';
 import { TColType } from './TableComponents/TableHelperComponents';
 import { FilterModel } from './types';
-import { Column, Header, Table } from '@tanstack/react-table';
 
 export const childrenProperty = 'subRows';
 
@@ -15,15 +16,24 @@ export const gridFilterParser = (filters) => {
   if (!isEmpty(filters)) {
     Object.keys(filters).forEach((field) => {
       if (filters[field].operator && filters[field].condition1) {
+        const term = filters[field].condition1?.['$nin'] === true ? '$nin' : '$in';
         filterByIds.push({
           field: field,
-          term: { $in: filters[field].condition1?.filter?.map((e) => e.optionValue) }
+          term: { [term]: filters[field].condition1?.filter?.map((e) => e.optionValue) }
         });
       } else {
-        deepFilters.push({
-          field: field,
-          term: Array.isArray(filters[field].filter) ? filters[field].filter : filters[field].filter
-        });
+        const term = filters[field]?.['$nin'] === true ? '$nin' : '$in';
+        if (term === '$nin') {
+          deepFilters.push({
+            field: field,
+            term: { [term]: filters[field].filter }
+          });
+        } else {
+          deepFilters.push({
+            field: field,
+            term: Array.isArray(filters[field].filter) ? filters[field].filter : filters[field].filter
+          });
+        }
       }
     });
   }
@@ -69,6 +79,11 @@ export const getStickyPosition = (columnDef: TColType, index, table) => {
   return obj;
 };
 
+const marginMap = {
+  left: {},
+  right: { marginLeft: 'auto' }
+};
+
 export const getStickyPosition2 = (columnDef: TColType, index, colSizes) => {
   const obj = {
     className: columnDef.sticky ? `sticky-cell-${columnDef.sticky}` : '',
@@ -100,7 +115,7 @@ export const getStickyPosition2 = (columnDef: TColType, index, colSizes) => {
 
   if (['left', 'right'].includes(columnDef.sticky)) {
     const offset = addSizes(index);
-    obj.style = { position: 'sticky', [columnDef.sticky]: offset } as React.CSSProperties;
+    obj.style = { position: 'sticky', [columnDef.sticky]: offset, ...marginMap[columnDef.sticky] } as React.CSSProperties;
   }
 
   return obj;
@@ -379,44 +394,43 @@ export const fetchFieldOptions = async ({ resource, sidebarResource, toastConfig
     const {
       data: { data }
     } = req;
-    const coloum = data?.filter((e) => !FILTER_NOT_APPLIED.includes(e?.fieldData?.type));
-    var modifiedColumn: any = coloum?.map((col: any) => {
-      const d = col.fieldData;
-      if (d?.type === 'dropDown') {
-        d.type = 'multiSelect';
-      }
-      return d;
-    });
+    let coloum = data?.filter((e) => !FILTER_NOT_APPLIED.includes(e?.fieldData?.type));
     if (resource === sidebarResource.user || resource === sidebarResource.employeeMaster) {
-      modifiedColumn?.forEach((e) => {
-        if (e.fieldName === 'firstName') {
-          e.fieldName = 'concatedName';
-          e.fieldLabel = 'Name';
-          e.type = 'singleLine';
+      coloum?.forEach((e) => {
+        if (e?.fieldData?.fieldName === 'firstName') {
+          e.fieldData.fieldName = 'concatedName';
+          e.fieldData.fieldLabel = 'Name';
+          e.fieldData.type = 'singleLine';
         }
       });
-      modifiedColumn = modifiedColumn?.filter((e) => e.fieldName !== 'lastName');
+      coloum = coloum?.filter((e) => e?.fieldData?.fieldName !== 'lastName');
     } else if (resource === sidebarResource.customerContact || resource === sidebarResource.supplierContact || resource === sidebarResource.lead) {
-      modifiedColumn?.forEach((e) => {
-        if (e.fieldName === 'firstName') {
-          e.fieldName = 'concatedName';
-          e.fieldLabel = 'Name';
-          e.type = 'singleLine';
+      coloum?.forEach((e) => {
+        if (e?.fieldData?.fieldName === 'firstName') {
+          e.fieldData.fieldName = 'concatedName';
+          e.fieldData.fieldLabel = 'Name';
+          e.fieldData.type = 'singleLine';
         }
       });
-      modifiedColumn = modifiedColumn?.filter((e) => !['lastName', 'middleName', 'salutation']?.includes(e.fieldName));
+      coloum = coloum?.filter((e) => !['lastName', 'middleName', 'salutation']?.includes(e?.fieldData?.fieldName));
     }
     if (resource === sidebarResource.serializedAsset) {
-      const currentOwner: any = modifiedColumn?.find((e) => e.fieldName === 'currentOwner');
+      const currentOwner: any = coloum?.find((e) => e?.fieldData?.fieldName === 'currentOwner');
       if (currentOwner) {
-        currentOwner.lookup = true;
-        currentOwner.option = [
-          ...(modifiedColumn?.find((e) => e.lookupResource === sidebarResource.customerAccount)?.option || []),
-          ...(modifiedColumn?.find((e) => e.lookupResource === sidebarResource.supplierAccount)?.option || [])
-        ];
+        const {
+          data: { data: lookupResource }
+        } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.customerAccount},${sidebarResource.supplierAccount}`);
+        if (lookupResource) {
+          currentOwner.fieldData.lookup = true;
+          currentOwner.fieldData.lookupResource = sidebarResource.customerAccount;
+          currentOwner.fieldData.customOptions = [
+            ...lookupResource?.[sidebarResource.customerAccount],
+            ...lookupResource?.[sidebarResource.supplierAccount]
+          ];
+        }
       }
     }
-    return modifiedColumn;
+    return coloum;
   } catch (error) {
     if (toastConfig) toastConfig.setToastConfig?.(error);
     throw error;
@@ -534,7 +548,7 @@ export const createFilterModel = (formValues, coloums) => {
         break;
       case 'year':
         if (formValues[fieldName]) {
-          filterModel.set(fieldName, { filter: moment(new Date(formValues[fieldName])).format('YYYY') });
+          filterModel.set(fieldName, { filter: dayjs(new Date(formValues[fieldName])).format('YYYY') });
         }
         break;
       case 'multiSelect':
@@ -563,8 +577,8 @@ export const createFilterModel = (formValues, coloums) => {
         if (fromDate || toDate) {
           filterModel.set(fieldName, {
             filter: {
-              from: fromDate ? moment(new Date(fromDate)).format('MM/DD/YYYY') : null,
-              to: toDate ? moment(new Date(toDate)).format('MM/DD/YYYY') : null
+              from: fromDate ? dateFormatToSend(fromDate) : null,
+              to: toDate ? dateFormatToSend(toDate) : null
             }
           });
         }
@@ -586,6 +600,90 @@ export const createFilterModel = (formValues, coloums) => {
   }
 
   return Object.fromEntries(filterModel);
+};
+
+export const createFilterData = (coloums, filterByIds, deepFilters, filterTerm) => {
+  const filterModel = new Map();
+
+  const dateFields: any = [];
+  coloums
+    ?.filter((c) => c?.fieldData?.type === 'date')
+    ?.map((c) => {
+      dateFields.push(`from_${c?.fieldData?.fieldName}`);
+      dateFields.push(`to_${c?.fieldData?.fieldName}`);
+    });
+
+  if (filterByIds?.length > 0) {
+    filterByIds
+      ?.filter((f) => f?.term?.length > 0)
+      ?.map((f) => {
+        filterModel.set(f?.field, {
+          operator: 'OR',
+          condition1: {
+            filter: f?.term ?? [],
+            ['$nin']: filterTerm[f?.field] === '$nin' ? true : false
+          }
+        });
+      });
+  }
+
+  if (deepFilters?.length > 0) {
+    deepFilters
+      ?.filter((d) => {
+        const hasTermLength = d?.term?.length ? true : false;
+        if (dateFields?.length > 0) {
+          return hasTermLength && !dateFields?.includes(d?.field);
+        }
+        return hasTermLength;
+      })
+      ?.map((d) => {
+        filterModel.set(d?.field, { filter: d?.term, ['$nin']: filterTerm[d?.field] === '$nin' ? true : false });
+      });
+
+    coloums
+      ?.filter((c) => c?.fieldData?.type === 'date')
+      ?.map((f) => {
+        if (deepFilters?.some((d) => [`from_${f?.fieldData?.fieldName}`, `to_${f?.fieldData?.fieldName}`].includes(d?.field))) {
+          const fromDate = deepFilters?.find((d) => d?.field === `from_${f?.fieldData?.fieldName}`)
+            ? dateFormatToSend(deepFilters?.find((d) => d?.field === `from_${f?.fieldData?.fieldName}`)?.term)
+            : null;
+          const toDate = deepFilters?.find((d) => d?.field === `to_${f?.fieldData?.fieldName}`)
+            ? dateFormatToSend(deepFilters?.find((d) => d?.field === `to_${f?.fieldData?.fieldName}`)?.term)
+            : null;
+          filterModel.set(f?.fieldData?.fieldName, {
+            filter: {
+              from: fromDate,
+              to: toDate
+            }
+          });
+        }
+      });
+  }
+
+  return Object.fromEntries(filterModel);
+};
+
+export const createFilterSetData = (val, columns) => {
+  const filterById: any = [];
+  const deepFilter: any = [];
+  Object.keys(val?.filterValue || {})?.map((v) => {
+    if (val?.filterValue[v]?.length > 0) {
+      const col = columns?.find((c) => c?.fieldData?.fieldName === v);
+      if (col?.fieldData?.lookup) {
+        filterById.push({
+          field: v,
+          term: val?.filterValue[v]
+        });
+      } else {
+        deepFilter.push({
+          field: v,
+          term: val?.filterValue[v]
+        });
+      }
+    }
+  });
+
+  return { filterById, deepFilter };
 };
 
 export const filtermodelToFormValue = (filtermodel: FilterModel) => {

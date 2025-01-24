@@ -1,5 +1,5 @@
-import { Grid } from '@material-ui/core';
-import Box from '@material-ui/core/Box/Box';
+import Grid from '@mui/material/Grid2';
+import Box from '@mui/material/Box/Box';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -88,7 +88,7 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit, s
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
-    return `${deepFilter}&filterType=and&filterByIdType=and`;
+    return `${deepFilter}&filterType=and`;
   };
 
   const handleValueUpdate = async (data, row) => {
@@ -145,7 +145,7 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit, s
           <DetailsPageHeader isActionButtonVisible={false} isAddButtonVisible={false} rightSideContents={rightSideContents()} hasXpadding />
         )}
       </Box>
-      <Grid item xs={12} md={12} sm={12}>
+      <Grid size={{ xs: 12, sm: 12, md: 12 }}>
         {columns ? (
           <CustomReactTable
             height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}

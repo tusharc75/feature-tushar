@@ -1,16 +1,14 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
-import BuildIcon from '@material-ui/icons/Build';
-import ExpandMore from '@material-ui/icons/ExpandMore';
-import { Skeleton } from '@material-ui/lab';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import BuildIcon from '@mui/icons-material/Build';
+import ExpandMore from '@mui/icons-material/ExpandMore';
+import { Skeleton } from '@mui/material';
 import { round, startCase } from 'lodash';
-import moment from 'moment';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
-import { MdEdit } from 'react-icons/md';
-import { RiExchangeBoxFill } from 'react-icons/ri';
+import { RiExchange2Line } from 'react-icons/ri';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
@@ -49,8 +47,12 @@ import ReasonDialog from './ReasonDialog';
 import StatusChangeFieldDialog from './StatusChangeFieldDialog';
 import VolumeData from 'src/pages/IotChart/VolumeData';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import WarningIcon from '@material-ui/icons/Warning';
+import WarningIcon from '@mui/icons-material/Warning';
 // import DataSimulationDialog from '../IotChart/DataSimulation';
+import SendIcon from '@mui/icons-material/Send';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import EditIcon from '@mui/icons-material/Edit';
+import dayjs from 'dayjs';
 
 const SerializedAssetDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -114,14 +116,14 @@ const SerializedAssetDetailsPage = () => {
         data: { data }
       } = await axiosInstance().post(`${serializedAsset.api}/inventory-stats`, { ids: [id] });
       if (data.totalUtilization) {
-        data[`totalUtilizationHours`] = `${round(moment.duration(data?.totalUtilization).asHours())}:${Math.floor(
-          moment.duration(data?.totalUtilization).asMinutes() % 60
+        data[`totalUtilizationHours`] = `${round(dayjs.duration(data?.totalUtilization).asHours())}:${Math.floor(
+          dayjs.duration(data?.totalUtilization).asMinutes() % 60
         )}`;
         delete data?.totalUtilization;
       }
       if (data.totalInUseTimeAfterLastRepair) {
-        data[`totalInUseTimeAfterLastRepairHours`] = `${round(moment.duration(data?.totalInUseTimeAfterLastRepair).asHours())}:${Math.floor(
-          moment.duration(data?.totalInUseTimeAfterLastRepair).asMinutes() % 60
+        data[`totalInUseTimeAfterLastRepairHours`] = `${round(dayjs.duration(data?.totalInUseTimeAfterLastRepair).asHours())}:${Math.floor(
+          dayjs.duration(data?.totalInUseTimeAfterLastRepair).asMinutes() % 60
         )}`;
         delete data?.totalInUseTimeAfterLastRepair;
       }
@@ -157,10 +159,7 @@ const SerializedAssetDetailsPage = () => {
         data: { data }
       } = await axiosInstance().get(`${serializedAsset.api}/${id}`);
       if (history.location.pathname.includes(routes.serializedAssetDetail.path)) {
-        setCustomizedRoutes([
-          { ...routes.serializedAsset, title: resources?.serializedAsset?.titlePlural },
-          { title: `${data?.assetNumber ?? ''}` }
-        ]);
+        setCustomizedRoutes([{ ...routes.serializedAsset, title: resources?.serializedAsset?.titlePlural }, { title: `${data?.assetNumber ?? ''}` }]);
       } else if (history.location.pathname.includes(routes.iotChartDetail.path)) {
         setCustomizedRoutes([{ ...routes.iotChart, title: resources?.iotChart?.titlePlural }, { title: `${data?.assetNumber ?? ''}` }]);
       }
@@ -284,7 +283,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: assetDetails.status }] })
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -400,27 +399,23 @@ const SerializedAssetDetailsPage = () => {
             {assetDetails ? (
               <>
                 {permissions?.sendOutboundMessage?.isCreate && assetDetails?.iotUnit && (
-                  <Button
-                    variant="outlined"
-                    className={'btn-outline-v1'}
-                    size="small"
+                  <ThemeButton
+                    iconForMobile={<SendIcon />}
                     onClick={() => {
                       setManageSendOutBoundMessageDialog(true);
                     }}
+                    mobileTooltip={`Send Outbound Message`}
                   >
                     Send Outbound Message
-                  </Button>
+                  </ThemeButton>
                 )}
-                {/* <Button
+                {/* <ThemeButton
                   onClick={() => {
                     setOpenDataSimulationDialog(!openDataSimulationDialog);
                   }}
-                  variant="outlined"
-                  color="primary"
-                  size="small"
                 >
                   Data Simulation
-                </Button> */}
+                </ThemeButton> */}
                 {permissions?.serializedAsset?.isUpdate && assetDetails.active && (
                   <>
                     {permissions?.repairJob?.isCreate &&
@@ -428,72 +423,55 @@ const SerializedAssetDetailsPage = () => {
                       [ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(
                         assetDetails?.status
                       ) && (
-                        <Button
-                          variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                          color="default"
-                          className="btn-outline-v1"
-                          size="small"
+                        <ThemeButton
+                          iconForMobile={<BuildIcon />}
                           onClick={() => setShowRepairJobDialog(true)}
+                          mobileTooltip={`Create ${resources?.repairJob?.titleSingular}`}
                         >
-                          {isMobile && !isTablet ? <BuildIcon /> : 'Create Repair Job'}
-                        </Button>
+                          {`Create ${resources?.repairJob?.titleSingular}`}
+                        </ThemeButton>
                       )}
                     {openDataChange() && !resourceData?.policy?.dataChangeStatus ? (
                       <HtmlTooltip title={'If you update data from this button it will add log in history'}>
-                        <Button
-                          variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                          color="default"
-                          className="btn-outline-v1"
-                          size="small"
+                        <ThemeButton
+                          iconForMobile={<EditIcon />}
                           onClick={() =>
                             setOpenUpdateDialog({ open: true, assetLogFields: resourceData.policy.dataChangeAssetLogFields, updateStatus: null })
                           }
                         >
-                          {'Edit Data'}
-                        </Button>
+                          Edit Data
+                        </ThemeButton>
                       </HtmlTooltip>
                     ) : null}
                     {allowUpdateStatus ? (
                       assetDetails?.status === ASSET_STATUS.lost ? (
-                        <Button
-                          variant="outlined"
-                          color="default"
-                          size="small"
+                        <ThemeButton
+                          iconForMobile={false}
                           onClick={() => {
                             setStatus(ASSET_STATUS.available);
                             setShowReasonDialog(true);
                           }}
-                          aria-controls="action-menu"
                         >
                           Asset Found
-                        </Button>
+                        </ThemeButton>
                       ) : (
-                        <Button
-                          variant={'outlined'}
-                          color="default"
-                          size="small"
+                        <ThemeButton
                           onClick={openActions}
-                          className="btn-outline-v1"
-                          disabled={updateLoading}
-                          aria-controls="action-menu"
                           endIcon={<ExpandMore />}
+                          mobileTooltip="Change Status"
+                          disabled={updateLoading}
+                          iconForMobile={<RiExchange2Line size={24} style={{ color: 'var(--primary-text)' }} />}
                         >
-                          {isMobile && !isTablet ? <RiExchangeBoxFill size={24} style={{ color: 'var(--primary-text)' }} /> : 'Change Status'}
-                        </Button>
+                          {'Change Status'}
+                        </ThemeButton>
                       )
                     ) : null}
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                      className={'btn-outline-v1'}
-                      size="small"
-                      onClick={handleOpenUpdateDialog}
-                    >
-                      {isMobile && !isTablet ? <MdEdit size={22} /> : 'Edit'}
-                    </Button>
+                    <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip="Edit">
+                      Edit
+                    </ThemeButton>
                     <Menu
                       anchorEl={anchorEl}
                       keepMounted
-                      getContentAnchorEl={null}
                       anchorOrigin={{
                         vertical: 'bottom',
                         horizontal: 'left'
@@ -565,9 +543,9 @@ const SerializedAssetDetailsPage = () => {
           {assetDetails && <DetailsPageHeader mainPoints={mainPoints} />}
           <Box>
             {loading || !fields.length ? (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-              </Grid>
+              <div className="p-2">
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+              </div>
             ) : (
               <>
                 <DetailsPage

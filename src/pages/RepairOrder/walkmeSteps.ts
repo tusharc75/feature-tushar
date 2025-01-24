@@ -24,7 +24,8 @@ export const generateAddExistingSerializedAsset = (
     },
     {
       target: `#${sidebarResource.serializedAsset.split(' ').join('-')}-table-checkbox-0`,
-      title: 'Add a Product'
+      title: 'Add a Product',
+      isPreviousButtonDisabled : true
     },
     {
       target: '#dialog-add-button',
@@ -88,12 +89,12 @@ export const createRepairOrderFlow = (fields: any): WalkmeData => {
   const ignoreField = ['currency', 'owner'];
 
   const data: WalkmeData = {
-    name: `Add ${sidebarResource?.repairOrder}`,
+    name: `Create ${sidebarResource?.repairOrder}`,
     url: `${routes?.repairOrder?.path}`,
     type: 'flow',
     steps: [
       {
-        title: `Add`,
+        title: `Create`,
         target: '#add-button'
       },
       ...generateFormFieldSteps(fields, ignoreField),

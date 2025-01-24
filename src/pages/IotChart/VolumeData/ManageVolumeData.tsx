@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -15,6 +15,7 @@ import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ManageVolumeData = ({ onClose, onSuccess, data = null, assetId }) => {
   const {
@@ -42,11 +43,11 @@ const ManageVolumeData = ({ onClose, onSuccess, data = null, assetId }) => {
         required: true,
         tooltipMessage: '',
         sectionName: 'Volume Data',
-        type: 'date',
+        type: 'date'
       },
       isCreate: true,
       isDelete: true,
-      isUpdate: true,
+      isUpdate: true
     },
     {
       fieldData: {
@@ -58,11 +59,11 @@ const ManageVolumeData = ({ onClose, onSuccess, data = null, assetId }) => {
         required: true,
         tooltipMessage: '',
         sectionName: 'Volume Data',
-        type: 'number',
+        type: 'number'
       },
       isCreate: true,
       isDelete: true,
-      isUpdate: true,
+      isUpdate: true
     },
     {
       fieldData: {
@@ -74,11 +75,11 @@ const ManageVolumeData = ({ onClose, onSuccess, data = null, assetId }) => {
         required: true,
         tooltipMessage: '',
         sectionName: 'Volume Data',
-        type: 'number',
+        type: 'number'
       },
       isCreate: true,
       isDelete: true,
-      isUpdate: true,
+      isUpdate: true
     },
     {
       fieldData: {
@@ -91,11 +92,11 @@ const ManageVolumeData = ({ onClose, onSuccess, data = null, assetId }) => {
         defaultValue: 0,
         tooltipMessage: '',
         sectionName: 'Volume Data',
-        type: 'number',
+        type: 'number'
       },
       isCreate: true,
       isDelete: true,
-      isUpdate: true,
+      isUpdate: true
     },
     {
       fieldData: {
@@ -108,11 +109,11 @@ const ManageVolumeData = ({ onClose, onSuccess, data = null, assetId }) => {
         required: false,
         tooltipMessage: '',
         sectionName: 'Volume Data',
-        type: 'number',
+        type: 'number'
       },
       isCreate: true,
       isDelete: true,
-      isUpdate: true,
+      isUpdate: true
     },
     {
       fieldData: {
@@ -124,11 +125,11 @@ const ManageVolumeData = ({ onClose, onSuccess, data = null, assetId }) => {
         required: true,
         tooltipMessage: '',
         sectionName: 'Volume Data',
-        type: 'number',
+        type: 'number'
       },
       isCreate: true,
       isDelete: true,
-      isUpdate: true,
+      isUpdate: true
     },
     {
       fieldData: {
@@ -140,31 +141,31 @@ const ManageVolumeData = ({ onClose, onSuccess, data = null, assetId }) => {
         required: true,
         tooltipMessage: '',
         sectionName: 'Volume Data',
-        type: 'number',
+        type: 'number'
       },
       isCreate: true,
       isDelete: true,
-      isUpdate: true,
-    },
-  ]
+      isUpdate: true
+    }
+  ];
 
   const fetchFields = async () => {
-      let fieldsDataForCreate = columns.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      let fieldsDataForUpdate = columns.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+    let fieldsDataForCreate = columns.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+    let fieldsDataForUpdate = columns.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
-      if (data) {
-        fieldsDataForUpdate[0].isUneditable = true;
-            setInitialData({
-              fields: fieldsDataForUpdate,
-              values: getObjKeysWithValues(data, fieldsDataForUpdate)
-            });
-      } else {
-        const tempInitialData = getObjKeys('', fieldsDataForCreate);
-        setInitialData({
-          fields: fieldsDataForCreate,
-          values: tempInitialData
-        });
-      }
+    if (data) {
+      fieldsDataForUpdate[0].isUneditable = true;
+      setInitialData({
+        fields: fieldsDataForUpdate,
+        values: getObjKeysWithValues(data, fieldsDataForUpdate)
+      });
+    } else {
+      const tempInitialData = getObjKeys('', fieldsDataForCreate);
+      setInitialData({
+        fields: fieldsDataForCreate,
+        values: tempInitialData
+      });
+    }
   };
 
   const handleSubmit = (values) => {
@@ -178,11 +179,11 @@ const ManageVolumeData = ({ onClose, onSuccess, data = null, assetId }) => {
       minid: parseInt(values.minid) || 0,
       date: values.date,
       asset: assetId
-    }
-  
+    };
+
     if (data) {
       axiosInstance()
-        .put(`${routes.serializedAsset?.path}/iot-volume`, {_id: data?._id,messageId:data.messageId, ...updatedValues})
+        .put(`${routes.serializedAsset?.path}/iot-volume`, { _id: data?._id, messageId: data.messageId, ...updatedValues })
         .then(({ data }) => {
           setSubmitting(false);
           onSuccess();
@@ -266,33 +267,26 @@ const ManageVolumeData = ({ onClose, onSuccess, data = null, assetId }) => {
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
-                  disabled={submitting}
+                <ThemeButton
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
+                  buttonType='transparent'
                 >
                   Cancel
-                </Button>
-                <Button
-                  disabled={loading || submitting}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
-                  size="small"
+                </ThemeButton>
+                <ThemeButton
                   onClick={submitForm}
-                  endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                  disabled={loading || submitting}
+                  isLoading={submitting}
+                  buttonType='theme'
                 >
-                  {' '}
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

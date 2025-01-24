@@ -1,14 +1,14 @@
 import { useState, useContext, Fragment } from 'react';
-import { Box, Divider, TextField, Typography } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
+import { Box, Divider, TextField, Typography } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, productInventory } from '../../../constants/helpers';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { Formik, Form } from 'formik';
-import { Autocomplete } from '@material-ui/lab';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import Autocomplete from '@mui/material/Autocomplete';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 
@@ -58,7 +58,7 @@ const AddSerialNumber = ({ handleClose, handleSucess, product, warehouse, serial
     >
       <Formik initialValues={{ serialNumber: [] }} onSubmit={handleSubmit} validateOnMount validate={validate}>
         {({ touched, errors, setFieldValue, values, submitForm }) => (
-          <Form autoComplete="off" autoCorrect="off" noValidate className="flex flex-col min-h-full">
+          <Form autoComplete="off" autoCorrect="off" noValidate className="flex min-h-full flex-col">
             <CustomDialogHeader
               title={'Add Serial Numbers'}
               onClose={(e, reason) => {
@@ -89,7 +89,7 @@ const AddSerialNumber = ({ handleClose, handleSucess, product, warehouse, serial
                   onChange={(_, val) => {
                     setFieldValue('serialNumber', val);
                   }}
-                  getOptionSelected={(item, current) => item === current}
+                  isOptionEqualToValue={(item, current) => item === current}
                   getOptionLabel={(option) => option}
                   renderInput={(props) => (
                     <TextField
@@ -106,9 +106,9 @@ const AddSerialNumber = ({ handleClose, handleSucess, product, warehouse, serial
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="button" onClick={submitForm}>
+              <ThemeButton isLoading={loading} disabled={loading} buttonType="theme" onClick={submitForm}>
                 Add
-              </CustomButton>
+              </ThemeButton>
             </CustomDialogFooter>
           </Form>
         )}

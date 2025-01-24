@@ -1,8 +1,8 @@
 import { useAccount, useMsal } from '@azure/msal-react';
-import { AppBar, Box, ButtonBase, Chip, IconButton, Menu, MenuItem, Toolbar, Typography, useMediaQuery } from '@material-ui/core';
-import { Brightness1, Close, ExpandMore, MoreVert as MoreIcon } from '@material-ui/icons';
-import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
-import SyncIcon from '@material-ui/icons/Sync';
+import { Brightness1, Close, ExpandMore, MoreVert as MoreIcon } from '@mui/icons-material';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import SyncIcon from '@mui/icons-material/Sync';
+import { AppBar, Box, ButtonBase, Chip, IconButton, Menu, MenuItem, Toolbar, Typography, useMediaQuery } from '@mui/material';
 import { isEmpty } from 'lodash';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
@@ -13,8 +13,10 @@ import io, { Socket } from 'socket.io-client';
 import { SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON, useStore } from 'src/StateProvider/fastContext';
 import { SVG } from 'src/assets';
 import { MoonIcon, SunIcon } from 'src/assets/svg/svgIcons';
+import NewSearchbar from 'src/components/Header/SearchBar';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { cn } from 'src/constants/helpers';
+import { deleteDatabase } from 'src/constants/indexdbhelper';
 import { useScrollDirection } from 'src/hooks/useScroll';
 import { userManual } from 'src/pages/Home';
 import { CustomChatNotificationCountContext } from '../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
@@ -31,8 +33,6 @@ import UserProfile from './../UserProfile';
 import ChatNotification from './ChatNotifications';
 import styles from './Header.module.scss';
 import Notification from './Notification';
-import { SearchBar } from './SearchBar';
-import { deleteDatabase } from 'src/constants/indexdbhelper';
 
 const Header = () => {
   const [themeColor, toggleThemeColor] = useAppTheme();
@@ -310,21 +310,21 @@ const Header = () => {
     >
       {user?.entity && user.entity.length
         ? user.entity.map((curEntity) => (
-          <MenuItem
-            title={curEntity.entityName}
-            key={curEntity._id}
-            selected={selectedEntity === curEntity._id}
-            onClick={() => {
-              handleSelectedEnity(curEntity._id);
-              closeEntitiesMenu();
-              window.location.reload();
-            }}
-          >
-            <Typography className={`line-clamp-1 max-w-[200px]`}>{curEntity.entityName}</Typography>
-            <Box component="span" marginX={1} />
-            {selectedEntity === curEntity._id && <Chip size="small" label="Current" color="primary" />}
-          </MenuItem>
-        ))
+            <MenuItem
+              title={curEntity.entityName}
+              key={curEntity._id}
+              selected={selectedEntity === curEntity._id}
+              onClick={() => {
+                handleSelectedEnity(curEntity._id);
+                closeEntitiesMenu();
+                window.location.reload();
+              }}
+            >
+              <Typography className={`line-clamp-1 max-w-[200px]`}>{curEntity.entityName}</Typography>
+              <Box component="span" marginX={1} />
+              {selectedEntity === curEntity._id && <Chip size="small" label="Current" color="primary" />}
+            </MenuItem>
+          ))
         : null}
     </Menu>
   );
@@ -458,14 +458,16 @@ const Header = () => {
       </span>
       <AppBar
         position="relative"
-        className={` ${scrollPos?.scrolled ? styles.fixedAppBar : ''} ${styles.toolbar}`}
-        style={{ backgroundColor: themeColor === 'light' ? '#fff' : 'var(--dark-primary)' }}
+        elevation={0}
+        className={` ${scrollPos?.scrolled ? styles.fixedAppBar : ''} ${styles.toolbar}  border-b `}
+        style={{ zIndex: 1200 }}
       >
-        <Toolbar className={` ${styles.mainConainer}`} style={{ color: themeColor === 'light' ? '#3d3d3d' : '#fff' }}>
+        <Toolbar className={`bg-[--dark-primary,white] ${styles.mainConainer}`} style={{ color: themeColor === 'light' ? '#3d3d3d' : '#fff' }}>
           <Box
             component="div"
-            className={`${isSidebarOpen && sidebarOpenedByButton ? styles.drawerOpen : styles.drawerClosed} ${styles.leftContent} ${styles.flexAlignCenter
-              } flex-grow`}
+            className={`${isSidebarOpen && sidebarOpenedByButton ? styles.drawerOpen : styles.drawerClosed} ${styles.leftContent} ${
+              styles.flexAlignCenter
+            } flex-grow`}
           >
             <div className={` ${styles.toggleButton}`}>
               <IconButton
@@ -478,8 +480,12 @@ const Header = () => {
                 {sidebarOpenedByButton && isSidebarOpen ? <Close /> : <HiOutlineMenuAlt1 />}
               </IconButton>
             </div>
-            {/* Searchbar */}
-            {!is768 && <SearchBar user={user} selectedEntity={selectedEntity} history={history} />}
+            {!is768 && (
+              <div className="flex-grow md:ml-[31px]">
+                <NewSearchbar />
+              </div>
+            )}
+            {/* {!is768 && <SearchBar user={user} selectedEntity={selectedEntity} history={history} />} */}
           </Box>
 
           {/* Brand Logo */}
@@ -628,7 +634,11 @@ const Header = () => {
               <MoreIcon />
             </IconButton>
           )}
-          {is768 && <SearchBar user={user} selectedEntity={selectedEntity} history={history} />}
+          {is768 && (
+            <div className="w-full">
+              <NewSearchbar />
+            </div>
+          )}
         </Toolbar>
       </AppBar>
       <DashboardModal

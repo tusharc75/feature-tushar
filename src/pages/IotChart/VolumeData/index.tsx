@@ -1,5 +1,5 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
-import { Delete } from '@material-ui/icons';
+import { Box, IconButton, MenuItem } from '@mui/material';
+import { Delete } from '@mui/icons-material';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -8,13 +8,12 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import { dateTimeFormat, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { displayDateTime, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
-import moment from 'moment';
-import EditIcon from '@material-ui/icons/Edit';
+import EditIcon from '@mui/icons-material/Edit';
 import ManageVolumeData from './ManageVolumeData';
 import { camelCase } from 'lodash';
 
@@ -52,7 +51,7 @@ const VolumeData = ({ assetId }) => {
         Header: 'Date',
         disableFilters: true,
         disableSortBy: true,
-        Cell: ({ row }) => <div>{moment(row?.original?.date)?.format(dateTimeFormat)}</div>
+        Cell: ({ row }) => <div>{displayDateTime(row?.original?.date)}</div>
       },
       {
         accessor: 'TotalVolInBBLs',

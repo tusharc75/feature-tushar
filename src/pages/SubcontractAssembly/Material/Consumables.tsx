@@ -1,8 +1,8 @@
-import Box from '@material-ui/core/Box/Box';
+import Box from '@mui/material/Box/Box';
 import { useState, useEffect, useContext } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
-import Grid from '@material-ui/core/Grid/Grid';
+import Grid from '@mui/material/Grid2';
 import axiosInstance from 'src/axios/axiosInstance';
 import {
   CHILD_RESOURCE,
@@ -13,18 +13,18 @@ import {
   sidebarResource
 } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { IconButton, MenuItem, TextField } from '@material-ui/core';
+import { IconButton, MenuItem, TextField } from '@mui/material';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
-import { Autocomplete } from '@material-ui/lab';
+import Autocomplete from '@mui/material/Autocomplete';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import EditIcon from '@material-ui/icons/Edit';
+import EditIcon from '@mui/icons-material/Edit';
 import { camelCase } from 'lodash';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
@@ -332,7 +332,7 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
             id={'select-product-dropdown'}
             value={selectedProductOption}
             getOptionLabel={(option: any) => option?.optionLabel || ''}
-            getOptionSelected={(option, val) => (option ? option?.optionLabel === val?.optionLabel : false)}
+            isOptionEqualToValue={(option, val) => (option ? option?.optionLabel === val?.optionLabel : false)}
             onChange={(_, val) => {
               let value = val;
               if (!val) {
@@ -352,8 +352,8 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
           />
         </Box>
       )}
-      <CustomTabs value={tabValue} onChange={handleMainTabChange} style={{ marginBottom: -1 }}>
-        <CustomTab value={0} label={'Products/Consumables'} primaryColor={true} />
+      <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
+        <CustomTab value={0} label={'Products/Consumables'} />
       </CustomTabs>
       <TabPanel value={tabValue} index={0}>
         <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
@@ -366,7 +366,7 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
             isActionButtonVisible={allowedToEdit}
           />
           <Grid container spacing={2}>
-            <Grid item xs={12} md={12} sm={12}>
+            <Grid size={{ xs: 12, md: 12, sm: 12 }}>
               {columns ? (
                 <CustomReactTable
                   height={stepFullScreen ? 'calc(100vh - 300px)' : '300px'}

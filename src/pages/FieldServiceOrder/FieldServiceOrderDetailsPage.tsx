@@ -1,5 +1,6 @@
-import { Box, Grid } from '@material-ui/core';
-import { Edit } from '@material-ui/icons';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { Edit } from '@mui/icons-material';
 import queryString from 'query-string';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -226,7 +227,6 @@ const ServiceOrderDetailsPage = () => {
         toastConfig.setToastConfig(error);
       });
   };
-
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -243,13 +243,9 @@ const ServiceOrderDetailsPage = () => {
             <Box className="control-buttons-v1">
               {allowedToEdit && serviceOrderData?.canComplete && SERVICE_ORDER_STATUS.closed !== serviceOrderData.status && (
                 <ButtonWithPulse
-                  variant={'outlined'}
-                  color="default"
-                  size="small"
                   onClick={() => {
                     setShowClosedConfirmBox(true);
                   }}
-                  className={'btn-outline-v1'}
                 >
                   Close
                 </ButtonWithPulse>
@@ -281,9 +277,9 @@ const ServiceOrderDetailsPage = () => {
             {!loadingDetails && serviceOrderData && serviceOrderFields.length > 0 ? (
               <DetailsPage data={serviceOrderData} fields={serviceOrderFields} />
             ) : (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-              </Grid>
+              <div className="p-2">
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+              </div>
             )}
           </Box>
         </TabPanel>
@@ -397,7 +393,7 @@ const ServiceOrderDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.fieldServiceOrder?.titleSingular?.toLowerCase()} : ${serviceOrderData?.customerAccount} ?`}
+          message={`Are you sure you want to delete ${resources?.fieldServiceOrder?.titleSingular?.toLowerCase()} : ${serviceOrderData?.fieldServiceOrderNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

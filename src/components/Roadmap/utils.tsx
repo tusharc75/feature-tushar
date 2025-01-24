@@ -1,19 +1,19 @@
-import moment from 'moment';
+import dayjs, { Dayjs } from "dayjs";
 
 type GetDaysBetweenDatesOutput = string | { [key: string]: string[] };
 
-const getAllDaysInMonthFormatted = (date: moment.Moment): string[] => {
+const getAllDaysInMonthFormatted = (date: Dayjs): string[] => {
   const daysInMonth = date.daysInMonth();
   const days: string[] = [];
 
   for (let day = 1; day <= daysInMonth; day++) {
-    days.push(moment(date).date(day).format('D dd'));
+    days.push(dayjs(date).date(day).format('D dd'));
   }
 
   return days;
 };
 
-const getQuarterDetails = (date: moment.Moment): string => {
+const getQuarterDetails = (date: Dayjs): string => {
   const startOfQuarter = date.clone().startOf('quarter');
   const endOfQuarter = date.clone().endOf('quarter');
 
@@ -24,44 +24,44 @@ const getQuarterDetails = (date: moment.Moment): string => {
   return `${startMonth} - ${endMonth} ${year}`;
 };
 
-const getDifference = (startDate: moment.Moment, endDate: moment.Moment, type: 'quarters' | 'weeks' | 'months') => {
+const getDifference = (startDate: Dayjs, endDate: Dayjs, type: 'quarter' | 'week' | 'month') => {
   const diff = endDate.diff(startDate, type);
   return diff;
 };
 
 export const getDaysBetweenDates = (
   view: 'month' | 'week' | 'quarter',
-  startDate: moment.Moment,
-  endDate: moment.Moment
+  startDate: Dayjs,
+  endDate: Dayjs
 ): GetDaysBetweenDatesOutput[] => {
-  const months: string[] = [];
-  const week: { [key: string]: string[] }[] = [];
-  const quarters: string[] = [];
+  const monthList: string[] = [];
+  const weekList: { [key: string]: string[] }[] = [];
+  const quarterList: string[] = [];
 
   switch (view) {
     case 'month': {
-      const totalMonths = endDate.diff(startDate, 'months');
+      const totalMonths = endDate.diff(startDate, 'month');
       for (let i = 0; i <= totalMonths; i++) {
-        months.push(startDate.clone().add(i, 'months').format('MMM YYYY'));
+        monthList.push(startDate.clone().add(i, 'month').format('MMM YYYY'));
       }
-      return months;
+      return monthList;
     }
     case 'week': {
-      const totalMonths = endDate.diff(startDate, 'months');
+      const totalMonths = endDate.diff(startDate, 'month');
       for (let i = 0; i <= totalMonths; i++) {
-        const date = startDate.clone().add(i, 'months');
+        const date = startDate.clone().add(i, 'month');
         const result = date.format('MMM YYYY');
         const obj = { [result]: getAllDaysInMonthFormatted(date) };
-        week.push(obj);
+        weekList.push(obj);
       }
-      return week;
+      return weekList;
     }
     case 'quarter': {
-      const totalQuarters = endDate.diff(startDate, 'quarters');
+      const totalQuarters = endDate.diff(startDate, 'quarter');
       for (let i = 0; i <= totalQuarters; i++) {
-        quarters.push(getQuarterDetails(startDate.clone().add(i, 'quarters')));
+        quarterList.push(getQuarterDetails(startDate.clone().add(i, 'quarter')));
       }
-      return quarters;
+      return quarterList;
     }
     default:
       throw new Error('Invalid view type');
@@ -69,22 +69,22 @@ export const getDaysBetweenDates = (
 };
 
 export function getTableRow<T>(
-  startDate: moment.Moment,
-  endDate: moment.Moment,
-  dataStartDate: moment.Moment,
-  dataEndDate: moment.Moment,
+  startDate: Dayjs,
+  endDate: Dayjs,
+  dataStartDate: Dayjs,
+  dataEndDate: Dayjs,
   renderer: (data: T) => React.ReactNode,
   data: T,
   view: 'month' | 'week' | 'quarter',
   index: number
 ) {
   const days = getDaysBetweenDates(view, startDate, endDate);
-  let difference = getDifference(startDate, endDate, 'weeks');
+  let difference = getDifference(startDate, endDate, 'week');
   if (view === 'month') {
-    difference = getDifference(startDate, endDate, 'months');
+    difference = getDifference(startDate, endDate, 'month');
   }
   if (view === 'quarter') {
-    difference = getDifference(startDate, endDate, 'quarters');
+    difference = getDifference(startDate, endDate, 'quarter');
   }
 
   const row: React.ReactNode[] = [];

@@ -1,18 +1,19 @@
-import { Box, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Box, IconButton, Menu, MenuItem } from '@mui/material';
 import { useState, useEffect, useContext, Fragment } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Button, Typography } from '@material-ui/core';
-import { MATERIAL_REQUEST_STATUS, PRODUCT_SERIAL_NUMBER_STATUS, dateTimeFormat, sidebarResource } from 'src/constants/helpers';
+import { Typography } from '@mui/material';
+import { MATERIAL_REQUEST_STATUS, PRODUCT_SERIAL_NUMBER_STATUS } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
 import QtyDialog from './QtyDialog';
-import { ExpandMore } from '@material-ui/icons';
+import { ExpandMore } from '@mui/icons-material';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import HistoryIcon from '@material-ui/icons/History';
+import HistoryIcon from '@mui/icons-material/History';
 import ProcessLogs from 'src/pages/WorkOrder/Consumables/ProcessLogs';
 import CustomTableWithCard, { CardInterface, ColumnInterface, createBodyColumns } from 'src/components/CustomTableWithCard';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -156,10 +157,8 @@ const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false
                   <Box display="flex" flexGrow={1}>
                     {row['status'] === MATERIAL_REQUEST_STATUS.requested && (
                       <Fragment>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          size="small"
+                        <ThemeButton
+                          buttonType="theme"
                           style={{ boxShadow: 'unset' }}
                           className="no-shadow"
                           disabled={loading}
@@ -168,19 +167,17 @@ const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false
                           }}
                         >
                           Process
-                        </Button>
+                        </ThemeButton>
                         <Box pl={1} />
-                        <Button
-                          variant="outlined"
-                          color="secondary"
-                          size="small"
+                        <ThemeButton
+                          buttonType="theme"
                           disabled={loading}
                           onClick={() => {
                             setQtyDialog({ open: true, status: MATERIAL_REQUEST_STATUS.closed, data: row });
                           }}
                         >
                           Close
-                        </Button>
+                        </ThemeButton>
                         <Box pl={1} />
                       </Fragment>
                     )}
@@ -266,22 +263,19 @@ const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false
           )}
         </Box>
         <Box>
-          <Button
-            variant={'outlined'}
-            className="new-dropdown-v1"
-            color="default"
-            size="small"
-            aria-controls="action-menu"
+          <ThemeButton
+            mobileTooltip="Actions"
+            buttonType="yellow"
+            iconForMobile={<ExpandMore />}
             onClick={openActions}
             disabled={selectedRecords?.length ? false : true}
             endIcon={<ExpandMore />}
           >
             {'Actions'}
-          </Button>
+          </ThemeButton>
           <Menu
             anchorEl={anchorEl}
             keepMounted
-            getContentAnchorEl={null}
             anchorOrigin={{
               vertical: 'bottom',
               horizontal: 'left'
@@ -293,7 +287,7 @@ const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false
             <MenuItem
               disabled={
                 selectedRecords?.length > 0 &&
-                  selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
+                selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
                   ? false
                   : true
               }
@@ -307,7 +301,7 @@ const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false
             <MenuItem
               disabled={
                 selectedRecords?.length > 0 &&
-                  selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
+                selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
                   ? false
                   : true
               }

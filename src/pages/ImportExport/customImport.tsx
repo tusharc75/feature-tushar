@@ -1,8 +1,6 @@
 import { useContext, useState } from 'react';
 import {
   Dialog,
-  Button,
-  Grid,
   TextField,
   TableBody,
   TableCell,
@@ -14,13 +12,14 @@ import {
   Typography,
   CircularProgress,
   Paper
-} from '@material-ui/core';
+} from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
-import CustomButton from '../../components/Helpers/CustomButton';
-import { Autocomplete } from '@material-ui/lab';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Autocomplete from '@mui/material/Autocomplete';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { AiOutlineImport } from 'react-icons/ai';
@@ -85,8 +84,8 @@ export const CustomImport = ({
       <Dialog open={open} onClose={() => handleClose()} TransitionComponent={CustomDialogTransition} fullScreen={true} fullWidth maxWidth="md">
         <CustomDialogHeader title="Custom File Import" onClose={() => handleClose()} />
         <CustomDialogContent>
-          <Grid container xs={12} lg={12} md={12} spacing={1} style={{ marginTop: '10px' }}>
-            <Grid item>
+          <Grid container size={{xs:12, lg:12, md:12}} spacing={1} style={{ marginTop: '10px' }}>
+            <Grid >
               <input
                 id={`customImportFile`}
                 name={`customImportFile`}
@@ -97,18 +96,18 @@ export const CustomImport = ({
                 accept=".xlsx,.csv"
               />
               <label htmlFor={`customImportFile`}>
-                <Button size="medium" variant="outlined" component="span" disabled={isImgUploading} startIcon={<AiOutlineImport />}>
+                <ThemeButton buttonType="theme" component="span" disabled={isImgUploading} startIcon={<AiOutlineImport />}>
                   Import File
-                </Button>
+                </ThemeButton>
               </label>
             </Grid>
-            <Grid item style={{ display: 'flex' }}>
+            <Grid  style={{ display: 'flex' }}>
               {isImgUploading && (
                 <Grid container spacing={1}>
-                  <Grid item>
+                  <Grid >
                     <CircularProgress variant="determinate" value={excelUploadProgress} size={30} />
                   </Grid>
-                  <Grid item>
+                  <Grid >
                     <Box>
                       <Typography variant="caption" component="div" color="textSecondary">{`${excelUploadProgress}%`}</Typography>
                     </Box>
@@ -166,12 +165,12 @@ export const CustomImport = ({
           )}
         </CustomDialogContent>
         <CustomDialogFooter>
-          <Button color="primary" size="small" onClick={handleClose}>
+          <ThemeButton buttonType="transparent" onClick={handleClose}>
             Cancel
-          </Button>
-          <CustomButton onClick={handleCustomImport} variant="contained" color="primary" disabled={loading} loading={loading}>
+          </ThemeButton>
+          <ThemeButton onClick={handleCustomImport} buttonType="theme" disabled={loading} isLoading={loading}>
             Save
-          </CustomButton>
+          </ThemeButton>
         </CustomDialogFooter>
       </Dialog>
     </>

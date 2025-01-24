@@ -1,5 +1,5 @@
-import { Fragment, useCallback, useContext, useEffect } from 'react';
-import { Box, Button, Dialog, Divider, FormControlLabel, InputAdornment, TextField, Switch } from '@material-ui/core';
+import { Fragment, useContext, useEffect } from 'react';
+import { Box, Dialog, FormControlLabel, InputAdornment, TextField, Switch } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useState } from 'react';
 import { currencyCodeToSymbol, CustomDialogTransition, getUniqueCurrencies, workOrder } from 'src/constants/helpers';
@@ -10,13 +10,14 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { serviceMaster } from 'src/constants/helpers';
 import { Formik, Form } from 'formik';
-import CustomButton from 'src/components/Helpers/CustomButton';
-import Checkbox from '@material-ui/core/Checkbox';
-import { Autocomplete } from '@material-ui/lab';
-import Grid from '@material-ui/core/Grid';
+import Checkbox from '@mui/material/Checkbox';
+import Autocomplete from '@mui/material/Autocomplete';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
 import FieldDialog from './FieldDialog';
+import Grid from '@mui/material/Grid2';
+import CurrencyAutocomplete from 'src/components/Helpers/CurrencyAutocomplete';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export default function StepDialog({
   handleClose, // function to close the dialog
@@ -42,8 +43,6 @@ export default function StepDialog({
   const [loading, setLoading] = useState(false);
   const [services, setServices] = useState([]);
   const [stepOption, setStepOption] = useState([]);
-  const [currencyData, setCurrencyData] = useState([]);
-
   const [openFieldDialog, setOpenFieldDialog] = useState(false);
   const [fields, setFields] = useState(stepData ? stepData?.fields : []);
   const [allFollowingStepToJump, setAllFollowingStepToJump] = useState([]);
@@ -78,13 +77,6 @@ export default function StepDialog({
   }, []);
 
   useEffect(() => {
-    const sortedArr = getUniqueCurrencies().sort((a, b) =>
-      a?.name?.toUpperCase() < b?.name?.toUpperCase() ? -1 : a?.name?.toUpperCase() > b?.name?.toUpperCase() ? 1 : 0
-    );
-    setCurrencyData(sortedArr);
-  }, []);
-
-  useEffect(() => {
     if (stepData) {
       setStepDetails({
         stepName: stepData?.stepName,
@@ -102,9 +94,11 @@ export default function StepDialog({
         isSkipServiceOnFail: stepData?.isSkipServiceOnFail === null ? false : stepData?.isSkipServiceOnFail,
         skipServiceOnFail: stepData?.skipServiceOnFail && Array.isArray(stepData?.skipServiceOnFail) ? stepData?.skipServiceOnFail : [],
         isReperformServicesOnPass: stepData?.isReperformServicesOnPass === null ? false : stepData?.isReperformServicesOnPass,
-        reperformServicesOnPass: stepData?.reperformServicesOnPass && Array.isArray(stepData?.reperformServicesOnPass) ? stepData?.reperformServicesOnPass : [],
+        reperformServicesOnPass:
+          stepData?.reperformServicesOnPass && Array.isArray(stepData?.reperformServicesOnPass) ? stepData?.reperformServicesOnPass : [],
         isReperformServicesOnFail: stepData?.isReperformServicesOnFail === null ? false : stepData?.isReperformServicesOnFail,
-        reperformServicesOnFail: stepData?.reperformServicesOnFail && Array.isArray(stepData?.reperformServicesOnFail) ? stepData?.reperformServicesOnFail : [],
+        reperformServicesOnFail:
+          stepData?.reperformServicesOnFail && Array.isArray(stepData?.reperformServicesOnFail) ? stepData?.reperformServicesOnFail : [],
         isAddStepsOnPass: stepData?.isAddStepsOnPass === null ? false : stepData?.isAddStepsOnPass,
         isAddStepsOnFail: stepData?.isAddStepsOnFail === null ? false : stepData?.isAddStepsOnFail,
         isJumpStepPass: stepData?.isJumpStepPass === null ? false : stepData?.isJumpStepPass,
@@ -138,9 +132,11 @@ export default function StepDialog({
             isSkipServiceOnFail: data?.isSkipServiceOnFail === null ? false : data?.isSkipServiceOnFail,
             skipServiceOnFail: data?.skipServiceOnFail && Array.isArray(data?.skipServiceOnFail) ? data?.skipServiceOnFail : [],
             isReperformServicesOnPass: data?.isReperformServicesOnPass === null ? false : data?.isReperformServicesOnPass,
-            reperformServicesOnPass: data?.reperformServicesOnPass && Array.isArray(data?.reperformServicesOnPass) ? data?.reperformServicesOnPass : [],
+            reperformServicesOnPass:
+              data?.reperformServicesOnPass && Array.isArray(data?.reperformServicesOnPass) ? data?.reperformServicesOnPass : [],
             isReperformServicesOnFail: data?.isReperformServicesOnFail === null ? false : data?.isReperformServicesOnFail,
-            reperformServicesOnFail: data?.reperformServicesOnFail && Array.isArray(data?.reperformServicesOnFail) ? data?.reperformServicesOnFail : [],
+            reperformServicesOnFail:
+              data?.reperformServicesOnFail && Array.isArray(data?.reperformServicesOnFail) ? data?.reperformServicesOnFail : [],
             isAddStepsOnPass: data?.isAddStepsOnPass === null ? false : data?.isAddStepsOnPass,
             isAddStepsOnFail: data?.isAddStepsOnFail === null ? false : data?.isAddStepsOnFail,
             isJumpStepPass: data?.isJumpStepPass === null ? false : data?.isJumpStepPass,
@@ -202,7 +198,7 @@ export default function StepDialog({
     values.listPrice = parseFloat(values.listPrice);
     setLoading(true);
     if (reference === 'workOrder') {
-      if (!workOrderId || !uniqueId) toastConfig.setToast({ open: true, message: 'Something went wrong', severity: 'error' });
+      if (!workOrderId || !uniqueId) toastConfig.setToastConfig({ open: true, message: 'Something went wrong', type: 'error' });
       values.serviceId = serviceId;
       if (stepData?._id) {
         values.stepId = stepData?._id;
@@ -219,7 +215,7 @@ export default function StepDialog({
             toastConfig.setToastConfig({
               open: true,
               message: data.message,
-              severity: 'success'
+              type: 'success'
             });
             setLoading(false);
           })
@@ -236,7 +232,7 @@ export default function StepDialog({
             toastConfig.setToastConfig({
               open: true,
               message: data.message,
-              severity: 'success'
+              type: 'success'
             });
             setLoading(false);
           })
@@ -302,9 +298,10 @@ export default function StepDialog({
                 <CustomDialogContent>
                   <Form autoComplete="off" autoCorrect="off" noValidate>
                     <Grid container spacing={2}>
-                      <Grid xs={12} md={6} sm={6} item>
+                      <Grid size={{ xs: 12, md: 6, sm: 6 }}>
                         <TextField
                           margin="dense"
+                          size="small"
                           type="text"
                           label="Step Name"
                           name="stepName"
@@ -320,9 +317,10 @@ export default function StepDialog({
                           }}
                         />
                       </Grid>
-                      <Grid xs={12} md={6} sm={6} item>
+                      <Grid size={{ xs: 12, md: 6, sm: 6 }}>
                         <TextField
                           margin="dense"
+                          size="small"
                           type="number"
                           onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                           label="Lead Time"
@@ -338,8 +336,23 @@ export default function StepDialog({
                           }}
                         />
                       </Grid>
-                      <Grid xs={12} md={4} sm={4} item>
-                        <Autocomplete
+                      <Grid size={{ xs: 12, md: 6, sm: 6 }}>
+                        <CurrencyAutocomplete
+                          limitTags={2}
+                          value={values['currency']}
+                          name={'currency'}
+                          variant="outlined"
+                          fullWidth={true}
+                          size="small"
+                          margin='none'
+                          onChange={(event, newValue) => {
+                            setFieldValue('currency', newValue && newValue.currencyCode ? newValue.currencyCode : '');
+                          }}
+                          error={touched['currency'] && Boolean(errors['currency'])}
+                          helperText={touched['currency'] && errors['currency']}
+                          disabled={notEditable}
+                        />
+                        {/* <Autocomplete
                           id="currency"
                           value={
                             currencyData.filter((data) => data.currencyCode === values['currency']).length
@@ -351,7 +364,7 @@ export default function StepDialog({
                           getOptionLabel={(option: any) =>
                             option ? `${option?.currencyCode} - ${option?.currencyName} - (${option?.symbolNative})` : ''
                           }
-                          getOptionSelected={(option: any, val) => option.currencyCode === val}
+                          isOptionEqualToValue={(option: any, val) => option.currencyCode === val}
                           onChange={(event, newValue) => {
                             setFieldValue('currency', newValue && newValue.currencyCode ? newValue.currencyCode : '');
                           }}
@@ -373,13 +386,16 @@ export default function StepDialog({
                       </Grid>
                       <Grid xs={12} md={4} sm={4} item>
                         <TextField
-                          InputProps={{
-                            startAdornment: (
-                              <InputAdornment position="start">{`${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
-                                }`}</InputAdornment>
-                            )
+                          slotProps={{
+                            input: {
+                              startAdornment: (
+                                <InputAdornment position="start">{`${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
+                                  }`}</InputAdornment>
+                              )
+                            },
                           }}
                           margin="dense"
+                          size="small"
                           type="number"
                           onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                           label="Cost Price"
@@ -393,18 +409,21 @@ export default function StepDialog({
                           onChange={(e) => {
                             setFieldValue('costPrice', e.target.value);
                           }}
-                        />
+                        /> */}
                       </Grid>
-                      <Grid xs={12} md={4} sm={4} item>
+                      <Grid size={{ xs: 12, md: 6, sm: 6 }}>
                         <TextField
-                          InputProps={{
-                            startAdornment: (
-                              <InputAdornment position="start">{`${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
-                                }`}</InputAdornment>
-                            )
+                          slotProps={{
+                            input: {
+                              startAdornment: (
+                                <InputAdornment position="start">{`${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
+                                  }`}</InputAdornment>
+                              )
+                            },
                           }}
-                          margin="dense"
                           type="number"
+                          margin='none'
+                          size="small"
                           onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                           label="List Price"
                           name="listPrice"
@@ -422,7 +441,7 @@ export default function StepDialog({
                     </Grid>
                     <Box pt={2}>
                       <Grid>
-                        <Grid xs={12} md={6} sm={6} item>
+                        <Grid size={{ xs: 12, md: 6, sm: 6 }}>
                           <Autocomplete
                             options={[
                               { optionValue: 'all', optionLabel: 'Select All Consequent Services' },
@@ -432,9 +451,13 @@ export default function StepDialog({
                             multiple
                             disabled={notEditable}
                             size="small"
-                            value={values?.stepDataCloneFromService ? services?.filter((data: any) => values?.stepDataCloneFromService?.includes(data.optionValue)) : []}
+                            value={
+                              values?.stepDataCloneFromService
+                                ? services?.filter((data: any) => values?.stepDataCloneFromService?.includes(data.optionValue))
+                                : []
+                            }
                             getOptionLabel={(option) => option.optionLabel}
-                            getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                            isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
                             onChange={(_, newVal: any) => {
                               const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
                               const values = isAll
@@ -443,7 +466,13 @@ export default function StepDialog({
                               setFieldValue('stepDataCloneFromService', values);
                             }}
                             renderInput={(params) => (
-                              <TextField {...params} label="Step Data Clone From Service" name="stepDataCloneFromService" disabled={notEditable} variant="outlined" />
+                              <TextField
+                                {...params}
+                                label="Step Data Clone From Service"
+                                name="stepDataCloneFromService"
+                                disabled={notEditable}
+                                variant="outlined"
+                              />
                             )}
                           />
                         </Grid>
@@ -470,7 +499,7 @@ export default function StepDialog({
                       <Box>
                         <Box pt={2}>
                           <Grid container>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               <FormControlLabel
                                 disabled={notEditable}
                                 control={
@@ -488,7 +517,7 @@ export default function StepDialog({
                                 label="Add Services on Pass"
                               />
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               {values['isPassAddon'] && (
                                 <Autocomplete
                                   options={[
@@ -501,7 +530,7 @@ export default function StepDialog({
                                   size="small"
                                   value={values?.passAddon ? services?.filter((data: any) => values?.passAddon?.includes(data.optionValue)) : []}
                                   getOptionLabel={(option) => option.optionLabel}
-                                  getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                                  isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
                                   onChange={(_, newVal: any) => {
                                     const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
                                     const values = isAll
@@ -519,7 +548,7 @@ export default function StepDialog({
                         </Box>
                         <Box pt={2}>
                           <Grid container>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               <FormControlLabel
                                 disabled={notEditable}
                                 control={
@@ -537,7 +566,7 @@ export default function StepDialog({
                                 label="Add Services on Fail"
                               />
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               {values['isFailAddon'] && (
                                 <Autocomplete
                                   options={[
@@ -550,7 +579,7 @@ export default function StepDialog({
                                   size="small"
                                   value={values?.failAddon ? services?.filter((data: any) => values?.failAddon?.includes(data.optionValue)) : []}
                                   getOptionLabel={(option) => option.optionLabel}
-                                  getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                                  isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
                                   onChange={(_, newVal: any) => {
                                     const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
                                     const values = isAll
@@ -569,7 +598,7 @@ export default function StepDialog({
                         </Box>
                         <Box pt={2}>
                           <Grid container>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               <FormControlLabel
                                 disabled={notEditable}
                                 control={
@@ -587,7 +616,7 @@ export default function StepDialog({
                                 label="Skip Services on Pass"
                               />
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               {values['isSkipServiceOnPass'] && (
                                 <Autocomplete
                                   options={[
@@ -604,7 +633,7 @@ export default function StepDialog({
                                       : []
                                   }
                                   getOptionLabel={(option) => option.optionLabel}
-                                  getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                                  isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
                                   onChange={(_, newVal: any) => {
                                     const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
                                     const values = isAll
@@ -628,7 +657,7 @@ export default function StepDialog({
                         </Box>
                         <Box pt={2}>
                           <Grid container>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               <FormControlLabel
                                 disabled={notEditable}
                                 control={
@@ -646,7 +675,7 @@ export default function StepDialog({
                                 label="Skip Services on Fail"
                               />
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               {values['isSkipServiceOnFail'] && (
                                 <Autocomplete
                                   options={[
@@ -663,7 +692,7 @@ export default function StepDialog({
                                       : []
                                   }
                                   getOptionLabel={(option) => option.optionLabel}
-                                  getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                                  isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
                                   onChange={(_, newVal: any) => {
                                     const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
                                     const values = isAll
@@ -687,7 +716,7 @@ export default function StepDialog({
                         </Box>
                         <Box pt={2}>
                           <Grid container>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               <FormControlLabel
                                 disabled={notEditable}
                                 control={
@@ -705,7 +734,7 @@ export default function StepDialog({
                                 label="Reperform Services on Pass"
                               />
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               {values['isReperformServicesOnPass'] && (
                                 <Autocomplete
                                   options={[
@@ -716,9 +745,13 @@ export default function StepDialog({
                                   multiple
                                   disabled={notEditable}
                                   size="small"
-                                  value={values?.reperformServicesOnPass ? services?.filter((data: any) => values?.reperformServicesOnPass?.includes(data.optionValue)) : []}
+                                  value={
+                                    values?.reperformServicesOnPass
+                                      ? services?.filter((data: any) => values?.reperformServicesOnPass?.includes(data.optionValue))
+                                      : []
+                                  }
                                   getOptionLabel={(option) => option.optionLabel}
-                                  getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                                  isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
                                   onChange={(_, newVal: any) => {
                                     const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
                                     const values = isAll
@@ -727,7 +760,13 @@ export default function StepDialog({
                                     setFieldValue('reperformServicesOnPass', values);
                                   }}
                                   renderInput={(params) => (
-                                    <TextField {...params} label="Reperform Services on Pass" name="reperformServicesOnPass" disabled={notEditable} variant="outlined" />
+                                    <TextField
+                                      {...params}
+                                      label="Reperform Services on Pass"
+                                      name="reperformServicesOnPass"
+                                      disabled={notEditable}
+                                      variant="outlined"
+                                    />
                                   )}
                                 />
                               )}
@@ -736,7 +775,7 @@ export default function StepDialog({
                         </Box>
                         <Box pt={2}>
                           <Grid container>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               <FormControlLabel
                                 disabled={notEditable}
                                 control={
@@ -754,7 +793,7 @@ export default function StepDialog({
                                 label="Reperform Services on Fail"
                               />
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               {values['isReperformServicesOnFail'] && (
                                 <Autocomplete
                                   options={[
@@ -765,9 +804,13 @@ export default function StepDialog({
                                   multiple
                                   disabled={notEditable}
                                   size="small"
-                                  value={values?.reperformServicesOnFail ? services?.filter((data: any) => values?.reperformServicesOnFail?.includes(data.optionValue)) : []}
+                                  value={
+                                    values?.reperformServicesOnFail
+                                      ? services?.filter((data: any) => values?.reperformServicesOnFail?.includes(data.optionValue))
+                                      : []
+                                  }
                                   getOptionLabel={(option) => option.optionLabel}
-                                  getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                                  isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
                                   onChange={(_, newVal: any) => {
                                     const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
                                     const values = isAll
@@ -776,7 +819,13 @@ export default function StepDialog({
                                     setFieldValue('reperformServicesOnFail', values);
                                   }}
                                   renderInput={(params) => (
-                                    <TextField {...params} label="Reperform Services on Fail" name="reperformServicesOnFail" disabled={notEditable} variant="outlined" />
+                                    <TextField
+                                      {...params}
+                                      label="Reperform Services on Fail"
+                                      name="reperformServicesOnFail"
+                                      disabled={notEditable}
+                                      variant="outlined"
+                                    />
                                   )}
                                 />
                               )}
@@ -785,7 +834,7 @@ export default function StepDialog({
                         </Box>
                         <Box pt={2}>
                           <Grid container>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               <FormControlLabel
                                 control={
                                   <Checkbox
@@ -805,7 +854,7 @@ export default function StepDialog({
                         </Box>
                         <Box pt={2}>
                           <Grid container>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               <FormControlLabel
                                 control={
                                   <Checkbox
@@ -825,7 +874,7 @@ export default function StepDialog({
                         </Box>
                         <Box pt={2}>
                           <Grid container>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               <FormControlLabel
                                 disabled={notEditable}
                                 control={
@@ -843,7 +892,7 @@ export default function StepDialog({
                                 label="Skip Steps on Pass"
                               />
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               {values['isJumpStepPass'] && (
                                 <Autocomplete
                                   options={[{ optionValue: 'all', optionLabel: 'Select All Consequent Steps' }, ...allFollowingStepToJump]}
@@ -855,7 +904,7 @@ export default function StepDialog({
                                     values?.jumpStepsPass ? stepOption?.filter((data: any) => values?.jumpStepsPass?.includes(data.optionValue)) : []
                                   }
                                   getOptionLabel={(option) => option.optionLabel}
-                                  getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                                  isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
                                   onChange={(_, newVal: any) => {
                                     const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
                                     const values = isAll
@@ -880,7 +929,7 @@ export default function StepDialog({
                         </Box>
                         <Box pt={2}>
                           <Grid container>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               <FormControlLabel
                                 disabled={notEditable}
                                 control={
@@ -898,7 +947,7 @@ export default function StepDialog({
                                 label="Skip Steps on Fail"
                               />
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               {values['isJumpStepFail'] && (
                                 <Autocomplete
                                   options={[{ optionValue: 'all', optionLabel: 'Select All Consequent Steps' }, ...allFollowingStepToJump]}
@@ -910,7 +959,7 @@ export default function StepDialog({
                                     values?.jumpStepsFail ? stepOption?.filter((data: any) => values?.jumpStepsFail?.includes(data.optionValue)) : []
                                   }
                                   getOptionLabel={(option) => option.optionLabel}
-                                  getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                                  isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
                                   onChange={(_, newVal: any[]) => {
                                     const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
                                     const values = isAll ? allFollowingStepToJump?.map((o) => o.optionValue) : newVal?.map((val) => val.optionValue);
@@ -934,7 +983,7 @@ export default function StepDialog({
                         {user?.brandPolicy?.repairOrderQuotation && (
                           <Box pt={2}>
                             <Grid container>
-                              <Grid item xs={12} md={6}>
+                              <Grid size={{ xs: 12, md: 6 }}>
                                 <FormControlLabel
                                   control={
                                     <Checkbox
@@ -955,7 +1004,7 @@ export default function StepDialog({
                         )}
                         <Box pt={2}>
                           <Grid container>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               <FormControlLabel
                                 disabled={notEditable}
                                 control={
@@ -973,7 +1022,7 @@ export default function StepDialog({
                                 label="Return To Step On Fail"
                               />
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               {values['isReturnToStepOnFail'] && (
                                 <Autocomplete
                                   options={stepOption}
@@ -984,7 +1033,7 @@ export default function StepDialog({
                                     values?.returnToStepOnFail ? stepOption?.find((data) => data?.optionValue === values?.returnToStepOnFail) : ''
                                   }
                                   getOptionLabel={(option) => option.optionLabel}
-                                  getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                                  isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
                                   onChange={(_, newVal: any) => {
                                     setFieldValue('returnToStepOnFail', newVal ? newVal?.optionValue : '');
                                   }}
@@ -1004,7 +1053,7 @@ export default function StepDialog({
                         </Box>
                         <Box pt={2}>
                           <Grid container>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               <FormControlLabel
                                 disabled={notEditable}
                                 control={
@@ -1022,7 +1071,7 @@ export default function StepDialog({
                                 label="Return To Service On Fail"
                               />
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               {values['isReturnToServiceOnFail'] && (
                                 <Autocomplete
                                   options={services}
@@ -1031,8 +1080,15 @@ export default function StepDialog({
                                   disabled={notEditable}
                                   value={services?.find((data) => data?.optionValue === values?.returnToServiceOnFail) ?? ''}
                                   getOptionLabel={(option) => option?.optionLabel}
-                                  renderOption={(option) => option?.optionLabel}
-                                  // getOptionSelected={(option: any, val: any) => option?.optionValue === val?.optionValue}
+                                  renderOption={(props, option, state, ownerState) => {
+                                    const { key, ...optionProps } = props;
+                                    return (
+                                      <Box key={key} component="li" {...optionProps}>
+                                        {ownerState.getOptionLabel(option)}
+                                      </Box>
+                                    );
+                                  }}
+                                  // isOptionEqualToValue={(option: any, val: any) => option?.optionValue === val?.optionValue}
                                   onChange={(_, newVal: any) => {
                                     setFieldValue('returnToServiceOnFail', newVal?.optionValue ?? '');
                                   }}
@@ -1056,33 +1112,31 @@ export default function StepDialog({
                 </CustomDialogContent>
                 <CustomDialogFooter>
                   {reference === 'workOrder' && (
-                    <Button size="small" color="primary" variant="contained" onClick={() => setOpenFieldDialog(true)}>
+                    <ThemeButton buttonType="theme" onClick={() => setOpenFieldDialog(true)}>
                       Configure Fields
-                    </Button>
+                    </ThemeButton>
                   )}
                   <div style={{ flex: '1 0 0' }} />
-                  <Button
-                    size="small"
-                    color="primary"
+                  <ThemeButton
+                    buttonType="transparent"
                     onClick={() => {
                       handleClose();
                     }}
                   >
                     Cancel
-                  </Button>
+                  </ThemeButton>
                   {reference === 'workOrder' && notEditable ? null : (
-                    <CustomButton
-                      loading={loading}
+                    <ThemeButton
+                      isLoading={loading}
                       disabled={loading || isSubmitting}
                       onClick={(e) => {
                         e.preventDefault();
                         submitForm();
                       }}
-                      variant="contained"
-                      color="primary"
+                      buttonType="theme"
                     >
                       Save
-                    </CustomButton>
+                    </ThemeButton>
                   )}
                 </CustomDialogFooter>
               </Fragment>

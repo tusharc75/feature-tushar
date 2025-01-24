@@ -1,7 +1,7 @@
-import { Button } from '@material-ui/core';
 import { useContext } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 
 export default function RequestButton({ resource, id, entity, processStatus, fetchParentData = null }) {
@@ -31,8 +31,8 @@ export default function RequestButton({ resource, id, entity, processStatus, fet
   };
 
   return (
-    <Button variant="contained" size="small" color="primary" onClick={handleSendForDOA}>
+    <ThemeButton buttonType='theme' onClick={handleSendForDOA}>
       Send for DOA
-    </Button>
+    </ThemeButton>
   );
 }

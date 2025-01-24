@@ -1,17 +1,17 @@
-import { Box, Grid, Typography } from '@material-ui/core';
-import { Skeleton } from '@material-ui/lab';
+import { Box, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { Skeleton } from '@mui/material';
 import { orderBy, startCase } from 'lodash';
-import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import { dateFormat, formatAmountWithCurrency, getUniqueCurrencies, MATERIAL_TYPE, quotation } from '../../../constants/helpers';
+import { displayDate, formatAmountWithCurrency, getUniqueCurrencies, MATERIAL_TYPE, quotation } from '../../../constants/helpers';
 import QCcomment from './QCcomment';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import axios from 'axios';
@@ -114,8 +114,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
           accessor: element.fieldName,
           Header: element.fieldLabel,
           disableFilters: true,
-          Cell: ({ row }) =>
-            row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
+          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{displayDate(row.original[element.fieldName])}</p> : <NoDataCell />)
         });
       } else if (element.fieldName === 'supplierAccount') {
         coloum.push({
@@ -224,15 +223,14 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === MATERIAL_TYPE.serializedAsset
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === MATERIAL_TYPE.product
-            ? parent.productDetail?.productName
-            : parent.type === MATERIAL_TYPE.service
-              ? parent.serviceDetail?.serviceName
-              : parent.packageDetail?.packageName
-      }`;
+      parent.detail = `${parent.type === MATERIAL_TYPE.serializedAsset
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.service
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+        }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -262,15 +260,14 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
 
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow.type === MATERIAL_TYPE.serializedAsset
-          ? _subRow.serializedAssetDetail?.assetNumber
-          : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow.productDetail?.productName
-            : _subRow.type === MATERIAL_TYPE.service
-              ? _subRow.serviceDetail?.serviceName
-              : _subRow.packageDetail?.packageName
-      }`;
+      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.serializedAsset
+        ? _subRow.serializedAssetDetail?.assetNumber
+        : _subRow.type === MATERIAL_TYPE.product
+          ? _subRow.productDetail?.productName
+          : _subRow.type === MATERIAL_TYPE.service
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
@@ -323,7 +320,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
       {!isSubmited && (
         <Box display="flex" pt={1} mx={2}>
           <Grid container justifyContent="space-between" style={{ marginBottom: 0, paddingBottom: 1 }}>
-            <Grid item className="d-flex align-items-center">
+            <Grid className="d-flex align-items-center">
               {loading ? (
                 <Skeleton width={100} />
               ) : (
@@ -343,7 +340,6 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
             </Grid>
             <Grid
               id="detailHeaderPageActions"
-              item
               className={
                 isMobile && !isTablet ? 'd-flex align-items-center justify-flex-end gap-1' : 'd-flex align-items-center justify-flex-end gap-2'
               }
@@ -356,32 +352,28 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
               ) : (
                 <>
                   <HtmlTooltip title="Accept">
-                    <CustomButton
-                      loading={isSubmitting.accept}
-                      variant="contained"
-                      color="primary"
-                      size="small"
+                    <ThemeButton
+                      isLoading={isSubmitting.accept}
+                      buttonType="theme"
                       disabled={isSubmitting.accept}
                       onClick={() => {
                         setIsSubmitting({ accept: true, reject: false });
                       }}
                     >
                       Accept
-                    </CustomButton>
+                    </ThemeButton>
                   </HtmlTooltip>
                   <HtmlTooltip title="Reject">
-                    <CustomButton
-                      loading={isSubmitting.reject}
-                      variant="contained"
-                      color="primary"
-                      size="small"
+                    <ThemeButton
+                      isLoading={isSubmitting.reject}
+                      buttonType="theme"
                       disabled={isSubmitting.reject}
                       onClick={() => {
                         setIsSubmitting({ accept: false, reject: true });
                       }}
                     >
                       Reject
-                    </CustomButton>
+                    </ThemeButton>
                   </HtmlTooltip>
                 </>
               )}

@@ -1,9 +1,11 @@
-import { Box, Button, Grid, Menu, MenuItem } from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
+import { Box, Menu, MenuItem } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { ExpandMore } from '@mui/icons-material';
 import { useState } from 'react';
 import SearchBox from '../../components/Helpers/SearchBox';
 
 import styles from '../Leads/Header.module.scss';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 function DoaHeader(props) {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -19,31 +21,28 @@ function DoaHeader(props) {
   const { onSearch, searchVal, DoaPermissions, showConfirmBox, canDelete, icon, heading } = props;
   return (
     <Grid className={styles.filter_side_container} container>
-      <Grid item xs={6} className="d-flex align-items-center gap-1">
+      <Grid size={{ xs: 6 }} className="d-flex align-items-center gap-1">
         {icon} <span className="listingHeader">{heading}</span>
       </Grid>
-      <Grid item xs={6} className={styles.filter_side}>
+      <Grid size={{ xs: 6 }} className={styles.filter_side}>
         <Box className={styles.filter_side_header} component="div">
           <SearchBox onChange={onSearch} value={searchVal} width="242px" />
 
           {DoaPermissions.isDelete && (
             <>
-              <Button
+              <ThemeButton
                 disabled={canDelete}
-                variant="outlined"
-                color="default"
-                size="small"
+                mobileTooltip="Actions"
+                buttonType="yellow"
                 onClick={openActions}
-                className={`${styles.action_submit_btn} new-dropdown-v1`}
-                aria-controls="action-menu"
                 endIcon={<ExpandMore />}
+                iconForMobile={<ExpandMore />}
               >
                 Actions
-              </Button>
+              </ThemeButton>
               <Menu
                 anchorEl={anchorEl}
                 keepMounted
-                getContentAnchorEl={null}
                 anchorOrigin={{
                   vertical: 'bottom',
                   horizontal: 'left'

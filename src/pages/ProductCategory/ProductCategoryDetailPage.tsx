@@ -1,10 +1,10 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import { Edit } from '@material-ui/icons';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import EditIcon from '@mui/icons-material/Edit';
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -118,14 +118,9 @@ const ProductCategoryDetailPage = () => {
           <Box className="controls-v1">
             <Box className="control-buttons-v1">
               {permissions?.productCategory?.isUpdate && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  size="small"
-                  className={'btn-outline-v1'}
-                  onClick={handleOpenUpdateDialog}
-                >
-                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                </Button>
+                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                  {'Edit'}
+                </ThemeButton>
               )}
               {permissions?.productCategory?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               <ActivityButton
@@ -139,9 +134,9 @@ const ProductCategoryDetailPage = () => {
         <Box className={`detail-container-v1`}>
           <DetailsPageHeader mainPoints={mainPoints} />
           {loading || !productCategoryFields.length ? (
-            <Grid container spacing={2} style={{ padding: '8px' }}>
-              <CommonSkeleton lenArray={[...Array(7).keys()]} />
-            </Grid>
+            <div className="p-2">
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </div>
           ) : (
             <DetailsPage data={productCategoryData} fields={productCategoryFields} />
           )}
@@ -166,8 +161,12 @@ const ProductCategoryDetailPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.warehouse?.titleSingular?.toLowerCase()} :
-            ${headingLbl}` : `selected ${resources?.warehouse?.titlePlural?.toLowerCase()}`} ?`}
+          message={`Are you sure you want to delete ${
+            selectedRecords?.length
+              ? `${resources?.warehouse?.titleSingular?.toLowerCase()} :
+            ${headingLbl}`
+              : `selected ${resources?.warehouse?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

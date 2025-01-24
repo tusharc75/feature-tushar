@@ -7,8 +7,9 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { MdZoomOutMap } from 'react-icons/md';
-import { ExpandLess, ExpandMore } from '@material-ui/icons';
-import { Box, Button, Paper, Typography } from '@material-ui/core';
+import { ExpandLess, ExpandMore } from '@mui/icons-material';
+import { Box, Paper, Typography } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const customNodeStyles = {
   repairOrder: {
@@ -250,20 +251,16 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
 
   return (
     <ContentFullScreen fullScreen={fullScreenOpen} setFullScreen={setFullScreenOpen}>
-      <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
+      <Box display="flex" flexDirection="column">
         <Box>
-          <Button
-            variant={'outlined'}
-            color="default"
-            size="small"
+          <ThemeButton
             onClick={() => {
               setColorInfo(!colorInfo);
             }}
-            aria-controls="action-menu"
             endIcon={colorInfo ? <ExpandLess /> : <ExpandMore />}
           >
             {'Color Info'}
-          </Button>
+          </ThemeButton>
         </Box>
         {colorInfo && (
           <Box>
@@ -294,7 +291,7 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
           </Box>
         )}
       </Box>
-      <div style={fullScreenOpen ? { height: '95vh' } : { height: '68vh' }}>
+      <div style={fullScreenOpen ? { height: '95vh' } : { height: '75vh' }}>
         {!loading ? (
           flowData.length ? (
             <Fragment>

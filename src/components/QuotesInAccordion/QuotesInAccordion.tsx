@@ -1,21 +1,19 @@
-import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@material-ui/core';
-import { MoreVert } from '@material-ui/icons';
-import BusinessOutlinedIcon from '@material-ui/icons/BusinessOutlined';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
-import TrendingUpOutlinedIcon from '@material-ui/icons/TrendingUpOutlined';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import { MoreVert } from '@mui/icons-material';
+import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import TrendingUpOutlinedIcon from '@mui/icons-material/TrendingUpOutlined';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { IoCalendarOutline } from 'react-icons/io5';
 import { Link, useHistory } from 'react-router-dom';
 import DisplayData from 'src/components/CardDisplayData';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
+import { displayDate } from 'src/constants/helpers';
 import { useData } from '../../StateProvider/Provider';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import { formatAmountWithCurrency } from '../../constants/helpers';
 import ManageQuoteDialog from '../../pages/QuoteBuilderCombined/ManageQuote/ManageQuoteDialog';
-import { displayDate } from '../../services/util';
 import HtmlTooltip from '../CustomTooltipTitle';
 import routes from '../Helpers/Routes';
 import AssignQuoteDialog from './AssignQuoteDialog';
@@ -131,7 +129,7 @@ export default function QuotesInAccordion({
         </Link>
       )
     ) : (
-      <span className="d-flex gap-2 align-items-center">
+      <span className="d-flex align-items-center gap-2">
         <Typography className="detailName">{obj.quoteName}</Typography>{' '}
         <HtmlTooltip title={`${obj.quoteName} belongs to different entity`}>
           <InfoOutlinedIcon fontSize="small" />
@@ -170,57 +168,50 @@ export default function QuotesInAccordion({
     <>
       <Accordion expanded={expandQuote} className="omsAccordian" onChange={() => setExpandQuote(!expandQuote)}>
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
-          <Grid container>
-            <Grid item xs={8} alignItems="center">
-              <Box component="div" display="flex" alignItems="center" flexGrow={1}>
-                <IconButton size="small">{expandQuote === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
-                <Box padding="5px">
-                  <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }}>
-                    Quotes ({quotes?.length || 0})
-                  </Typography>
-                </Box>
-              </Box>
-            </Grid>
-            <Grid item xs={4} container justify="flex-end" alignItems="center">
-              {allowedToEdit && (
-                <>
-                  <IconButton
-                    aria-haspopup="true"
-                    color="primary"
-                    size="small"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleOpenMenu(e);
+          <div className="flex items-center justify-between">
+            <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }}>
+              Quotes ({quotes?.length || 0})
+            </Typography>
+
+            {allowedToEdit && (
+              <>
+                <IconButton
+                  aria-haspopup="true"
+                  color="primary"
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    handleOpenMenu(e);
+                  }}
+                >
+                  <MoreVert />
+                </IconButton>
+                <Menu id="menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
+                  <MenuItem
+                    disabled={!quoteBuilderPermission.isCreate}
+                    onClick={() => {
+                      setShowCreateDialog(true);
+                      handleCloseMenu();
                     }}
                   >
-                    <MoreVert />
-                  </IconButton>
-                  <Menu id="menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
+                    Create New
+                  </MenuItem>
+                  {isRenderedInCustomerContact && (
                     <MenuItem
-                      disabled={!quoteBuilderPermission.isCreate}
+                      disabled={!quoteBuilderPermission.isUpdate}
                       onClick={() => {
-                        setShowCreateDialog(true);
+                        setShowAddExistingDialog(true);
                         handleCloseMenu();
                       }}
                     >
-                      Create New
+                      Add Exisiting
                     </MenuItem>
-                    {isRenderedInCustomerContact && (
-                      <MenuItem
-                        disabled={!quoteBuilderPermission.isUpdate}
-                        onClick={() => {
-                          setShowAddExistingDialog(true);
-                          handleCloseMenu();
-                        }}
-                      >
-                        Add Exisiting
-                      </MenuItem>
-                    )}
-                  </Menu>
-                </>
-              )}
-            </Grid>
-          </Grid>
+                  )}
+                </Menu>
+              </>
+            )}
+          </div>
         </AccordionSummary>
         <AccordionDetails>
           <Box>
@@ -239,7 +230,7 @@ export default function QuotesInAccordion({
                               [...obj.collaborator, obj.owner].includes(user.user?._id) ? (
                                 quoteNameWithRedirect(obj)
                               ) : (
-                                <span className="d-flex gap-2 align-items-center">
+                                <span className="d-flex align-items-center gap-2">
                                   <Typography className="detailName">{obj.quoteName}</Typography>{' '}
                                   <HtmlTooltip title={`${obj.quoteName} is a Private Quote`}>
                                     <InfoOutlinedIcon fontSize="small" />

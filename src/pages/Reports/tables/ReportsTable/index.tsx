@@ -10,12 +10,11 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { cn, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, primaryFields, sidebarResource } from 'src/constants/helpers';
+import { cn, dateFormatToSend, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, primaryFields, sidebarResource } from 'src/constants/helpers';
 import { TableCommonProps } from 'src/pages/Reports/types';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import MomentUtils from '@date-io/moment';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DisplayFilterChip from 'src/pages/Reports/tables/DisplayFilterChip';
+import dayjs from 'dayjs';
 
 let cancelTokenSource = null;
 
@@ -33,6 +32,8 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
     isColumnsLoading,
     navigateToMainPage
   } = reportState;
+
+  const customReportData = selectedReport?.customReportData ? selectedReport?.customReportData : null;
   const resourceCamelCase = camelCase(selectedReport.resource);
   const resourceStartCase = startCase(selectedReport.resource);
   const renderedFrom = `${selectedReport.resource}_report_new`;
@@ -117,7 +118,6 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
       }
     }
     setResourceColumns(resourceColumns);
-    setIsColumnsLoading(false);
     let columns = [];
     data.forEach((o) => {
       if (o?.fieldData?.fieldName === primaryFields[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]) {
@@ -240,12 +240,12 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
       if (search) {
         filterQuery = `${filterQuery}search=${encodeURIComponent(search)}&`;
       }
-
       if (!isObjectEmpty(filters)) {
         for (let i = 0; i < deepFiltersP.length; i++) {
           const tempFilter = deepFiltersP[i];
           if (filters[tempFilter.field]) {
             newDeepFilter = newDeepFilter.filter((d) => d.field !== tempFilter.field);
+            deepFiltersP = newDeepFilter;
           }
         }
         Object.keys(filters).forEach((field) => {
@@ -281,23 +281,30 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
           ...deepFilter,
           ...deepFiltersP
             ?.filter((d) => {
-              const hasTermLength = d?.term?.length ? true : false;
+              const isoDate = dayjs(d?.term);
+              const hasTermLength = isoDate.isValid() ? true : d?.term?.length ? true : false;
               if (isStatusPeriod) {
                 return hasTermLength && !['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field);
               }
               return hasTermLength;
             })
             ?.map((d) => {
-              if (filterTerm[d?.field] === '$nin' && Array.isArray(d?.term)) {
+              const isoDate = dayjs(d?.term);
+              const term = isoDate.isValid() ? dateFormatToSend(d?.term) : d?.term;
+              if (filterTerm[d?.field] === '$nin' && Array.isArray(term)) {
                 return {
                   ...d,
-                  term: { $nin: d?.term }
+                  term: { $nin: term }
                 };
               }
-              return d;
+              return {
+                ...d,
+                term
+              };
             })
         ];
       }
+
       if (isStatusPeriod && deepFiltersP?.filter((d) => d?.term && ['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field))?.length) {
         deepFiltersP
           ?.filter((d) => d?.term && ['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field))
@@ -305,6 +312,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
             filterQuery = `${filterQuery}${ele?.field}=${ele?.term}&`;
           });
       }
+
       if (deepFilter && deepFilter.length > 0) {
         filterQuery = `${filterQuery}deepFilter=${encodeURIComponent(JSON.stringify(deepFilter))}&`;
       }
@@ -383,6 +391,31 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
   };
 
   useEffect(() => {
+    if (customReportData && selectedReport?.type === 'custom-report') {
+      if (customReportData?.filters?.length > 0) {
+        const filterById: any = [];
+        const deepFilter: any = [];
+        customReportData?.filters?.forEach((f) => {
+          if (f?.lookup) {
+            filterById.push({
+              field: f?.term,
+              term: f?.value
+            });
+          } else {
+            deepFilter.push({
+              field: f?.term,
+              term: f?.value
+            });
+          }
+        });
+        setFilterByIds(filterById);
+        setDeepFilters(deepFilter);
+      }
+      setShowGrid(true);
+    }
+  }, []);
+
+  useEffect(() => {
     fetchGridColumns();
   }, []);
 
@@ -393,24 +426,24 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
   }, [page, sorting, search, limit, filters, pageSizes, showGrid]);
 
   return (
-    <MuiPickersUtilsProvider utils={MomentUtils}>
+    <>
       <div className={cn('inline-flex justify-between gap-2', !isSidebarOpen ? 'w-[calc(100%-40px)]' : 'w-full')}>
         {showGrid && (
           <>
-            <ThemeButton
-              iconForMobile={<MdFilterList />}
-              size="small"
-              variant="outlined"
-              color="primary"
-              disableElevation
-              onClick={() => {
-                setShowGrid(false);
-                dispatch({ type: 'onlyFilter', filters: {} });
-              }}
-              startIcon={<MdFilterList />}
-            >
-              Show Filters
-            </ThemeButton>
+            {selectedReport?.type === 'custom-report' && customReportData ? (
+              <div></div>
+            ) : (
+              <ThemeButton
+                iconForMobile={<MdFilterList />}
+                onClick={() => {
+                  setShowGrid(false);
+                  dispatch({ type: 'onlyFilter', filters: {} });
+                }}
+                startIcon={<MdFilterList />}
+              >
+                Show Filters
+              </ThemeButton>
+            )}
             <AsynImportExportMenu
               resource={sidebarResource[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
               subResource={'report'}
@@ -434,11 +467,17 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
               fetchResourceData={fetchResourceData}
               setDeepFilters={setDeepFilters}
               setFilterByIds={setFilterByIds}
+              disableClear={customReportData && selectedReport?.type === 'custom-report' ? true : false}
             />
           }
           height={'calc(100vh - 270px)'}
-          columns={columns}
+          columns={
+            selectedReport?.type === 'custom-report' && customReportData && customReportData?.column?.length > 0
+              ? columns?.filter((t) => customReportData?.column?.includes(t?.accessor))
+              : columns
+          }
           state={state}
+          resource={sidebarResource[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
           dispatch={dispatch}
           renderedFrom={renderedFrom}
           refreshGrid={fetchResourceData}
@@ -451,7 +490,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </div>
       )}
-      {!showGrid && (
+      {!showGrid && !customReportData && selectedReport?.type != 'custom-report' && (
         <Filter
           onClose={() => {
             dispatch({ type: 'onlyFilter', filters: {} });
@@ -471,7 +510,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
           onCloseWithErrors={navigateToMainPage}
         />
       )}
-    </MuiPickersUtilsProvider>
+    </>
   );
 };
 

@@ -1,9 +1,9 @@
-import { Checkbox, FormControlLabel, InputAdornment, TextField } from '@material-ui/core';
-import DateUtils from '@date-io/date-fns';
-import { KeyboardDatePicker, KeyboardDateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import { arrayToDropwdownOption, dateFormatForInputControl, getUniqueCurrencies } from 'src/constants/helpers';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, Checkbox, FormControlLabel, InputAdornment, TextField } from '@mui/material';
+import { arrayToDropwdownOption, getUniqueCurrencies } from 'src/constants/helpers';
+import Autocomplete from '@mui/material/Autocomplete';
 import { useEffect, useState } from 'react';
+import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const FormTypes = (props) => {
   const tempProps = { ...props, id: props.id ? props.id : props.fieldData ? props.fieldData.split(' ').join('-') : 'field' };
@@ -34,6 +34,7 @@ const FormTypes = (props) => {
       error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
       helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
       margin="dense"
+      size="small"
       onChange={(e) => onChange(fieldData?.fieldName, e.target.value.trimStart())}
       {...others}
     />
@@ -49,6 +50,7 @@ const FormTypes = (props) => {
       rows={3}
       value={values[fieldData?.fieldName]}
       margin="dense"
+      size="small"
       error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
       helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
       onChange={(e) => onChange(fieldData?.fieldName, e.target.value)}
@@ -63,12 +65,15 @@ const FormTypes = (props) => {
       required={fieldData?.required}
       name={`${fieldData?.fieldName}`}
       value={values[fieldData?.fieldName]}
-      InputProps={{
-        endAdornment: '% ',
-        inputProps: { min: 0 },
-        readOnly: fieldData && fieldData?.isUneditable ? true : false
+      slotProps={{
+        input: {
+          endAdornment: '% ',
+          inputProps: { min: 0 },
+          readOnly: fieldData && fieldData?.isUneditable ? true : false
+        }
       }}
       margin="dense"
+      size="small"
       error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
       helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
       onChange={(e) => onChange(fieldData?.fieldName, parseFloat(e.target.value))}
@@ -83,12 +88,15 @@ const FormTypes = (props) => {
       required={fieldData?.required}
       name={`${fieldData?.fieldName}`}
       value={values[fieldData?.fieldName]}
-      InputProps={{
-        startAdornment: (
-          <InputAdornment position="start">{getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative}</InputAdornment>
-        )
+      slotProps={{
+        input: {
+          startAdornment: (
+            <InputAdornment position="start">{getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative}</InputAdornment>
+          )
+        }
       }}
       margin="dense"
+      size="small"
       error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
       helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
       onChange={(e) => onChange(fieldData?.fieldName, parseFloat(e.target.value))}
@@ -105,7 +113,7 @@ const FormTypes = (props) => {
           : ''
       }
       getOptionLabel={(option: any) => option?.optionLabel || ''}
-      getOptionSelected={(option: any, val) => (option ? option?.optionValue == val?.optionValue : false)}
+      isOptionEqualToValue={(option: any, val) => (option ? option?.optionValue == val?.optionValue : false)}
       onChange={(e, val) => onChange(fieldData?.fieldName, val?.optionValue)}
       renderInput={(params) => (
         <TextField
@@ -114,6 +122,7 @@ const FormTypes = (props) => {
           error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
           helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
           margin="dense"
+          size="small"
           label={fieldData?.label}
           variant="outlined"
           {...others}
@@ -130,12 +139,15 @@ const FormTypes = (props) => {
       name={`${fieldData?.fieldName}`}
       value={values[fieldData?.fieldName]}
       margin="dense"
+      size="small"
       error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
       helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
       onChange={(e) => onChange(fieldData?.fieldName, parseFloat(e.target.value))}
-      InputProps={{
-        inputProps: { min: 0 },
-        readOnly: fieldData && fieldData?.isUneditable ? true : false
+      slotProps={{
+        input: {
+          inputProps: { min: 0 },
+          readOnly: fieldData && fieldData?.isUneditable ? true : false
+        }
       }}
       {...others}
     />
@@ -147,61 +159,42 @@ const FormTypes = (props) => {
           name={`${fieldData?.fieldName}`}
           checked={values[fieldData?.fieldName]}
           onChange={(e) => onChange(fieldData?.fieldName, e.target.value)}
-          color="secondary"
+          className="!text-[--new-theme-color] "
         />
       }
       label={fieldData?.label}
       {...others}
     />
   ) : fieldData?.type === 'date' ? (
-    <MuiPickersUtilsProvider utils={DateUtils}>
-      <KeyboardDatePicker
-        style={{ paddingRight: 1 }}
+    <Box className="pr-1">
+      <CustomDatePicker
         disabled={fieldData?.isUneditable}
-        clearable
-        autoOk
         required={fieldData?.required}
-        variant="inline"
-        inputVariant="outlined"
         value={values[fieldData?.fieldName]}
         name={`${fieldData?.fieldName}`}
         label={fieldData?.label}
         onChange={(date) => onChange(fieldData?.fieldName, date)}
-        format={dateFormatForInputControl}
-        InputLabelProps={{
-          shrink: true
-        }}
         margin="dense"
         error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
         helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
         {...others}
       />
-    </MuiPickersUtilsProvider>
+    </Box>
   ) : fieldData?.type === 'dateTime' ? (
-    <MuiPickersUtilsProvider utils={DateUtils}>
-      <KeyboardDateTimePicker
-        autoOk
-        clearable
-        style={{ paddingRight: 1 }}
+    <Box className="pr-1">
+      <CustomDateTimePicker
         required={fieldData?.required}
-        variant="inline"
-        inputVariant="outlined"
-        ampm={false}
         value={values[fieldData?.fieldName]}
         name={`${fieldData?.fieldName}`}
         label={fieldData?.label}
         onChange={(date) => onChange(fieldData?.fieldName, date)}
         onError={console.error}
-        format={dateFormatForInputControl + ' HH:mm'}
-        InputLabelProps={{
-          shrink: true
-        }}
         margin="dense"
         error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
         helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
         {...others}
       />
-    </MuiPickersUtilsProvider>
+    </Box>
   ) : null;
 };
 

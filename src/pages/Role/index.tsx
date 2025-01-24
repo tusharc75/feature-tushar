@@ -1,6 +1,6 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
-import { Delete as DeleteIcon } from '@material-ui/icons';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { Box, IconButton, MenuItem } from '@mui/material';
+import { Delete as DeleteIcon } from '@mui/icons-material';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
 import { FC, useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -17,12 +17,10 @@ import AssignRegionalRolesUserDialog from '../../components/AssignRolesDialog/As
 import AssignUserDialog from '../../components/AssignRolesDialog/AssignUserDialog';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import MessageDialog from '../../components/Helpers/MessageDialog';
 import { PERMISSION } from '../../constants/Roles';
 import {
   ROLE_TIER,
   gridLoadingTimeout,
-  isObjectEmpty,
   localStorageKeys,
   prepareDataForGrid,
   roleTypes,
@@ -290,12 +288,12 @@ const Roles: FC = () => {
         <MenuItem
           disabled={!(permissions.role.isDelete && Boolean(!disableDelete))}
           onClick={() => {
-            if (selectedRecords.length === 1){
+            if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-              }else{
-                setDeleteRecord(null);
-              }
-              setIsConformDialogVisible(true);
+            } else {
+              setDeleteRecord(null);
+            }
+            setIsConformDialogVisible(true);
           }}
         >
           {`Delete (${selectedRecords.length})`}
@@ -311,8 +309,8 @@ const Roles: FC = () => {
         <MenuItem
           disabled={
             permissions?.role?.isUpdate &&
-              permissions?.role?.isDelete &&
-              selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
+            permissions?.role?.isDelete &&
+            selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
               ? true
               : false
           }
@@ -325,8 +323,8 @@ const Roles: FC = () => {
         <MenuItem
           disabled={
             permissions?.role?.isUpdate &&
-              permissions?.role?.isDelete &&
-              selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
+            permissions?.role?.isDelete &&
+            selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
               ? true
               : false
           }
@@ -338,7 +336,7 @@ const Roles: FC = () => {
         </MenuItem>
       </>
     );
-  };  
+  };
 
   return (
     <>

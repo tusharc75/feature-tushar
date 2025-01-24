@@ -1,9 +1,9 @@
-import { Box, Button, Grid, Typography } from '@material-ui/core';
-import { Edit } from '@material-ui/icons';
+import { Box, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import EditIcon from '@mui/icons-material/Edit';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -77,15 +77,15 @@ const RepairTypeDetailsPage = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {permissions?.repairType?.isUpdate && (
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
+              <ThemeButton
+                iconForMobile={<EditIcon />}
                 onClick={() => {
                   setOpenUpdateDialog(true);
                 }}
-                className={'btn-outline-v1'}
+                mobileTooltip={'Edit'}
               >
-                {isMobile && !isTablet ? <Edit /> : 'Edit'}
-              </Button>
+                {'Edit'}
+              </ThemeButton>
             )}
             {permissions?.repairType?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
           </Box>
@@ -93,20 +93,20 @@ const RepairTypeDetailsPage = () => {
       </Box>
       <Box className="detail-container-v1">
         <Grid container spacing={1}>
-          <Grid item xs={12} sm={12} md={8} lg={8}>
+          <Grid size={{ xs: 12, sm: 12, md: 8, lg: 8 }}>
             <div style={{ height: '650px' }}>
               <Box>
                 {repairTypeData && fields.length ? (
                   <DetailsPage data={repairTypeData} fields={fields} />
                 ) : (
-                  <Grid container spacing={2} style={{ padding: '8px' }}>
-                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                  </Grid>
+                  <div className="p-2">
+                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                  </div>
                 )}
               </Box>
             </div>
           </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4}>
+          <Grid size={{ xs: 12, sm: 12, md: 4, lg: 4 }}>
             <div className="single-form-v1">
               <Box className="form-head-v1">
                 <Typography component={'h3'}>Repair Steps</Typography>
@@ -116,10 +116,10 @@ const RepairTypeDetailsPage = () => {
                   <>
                     <Box key={index} p={1} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
                       <Grid container>
-                        <Grid item xs={2} sm={2} md={2} lg={2}>
+                        <Grid size={{ xs: 2, sm: 2, md: 2, lg: 2 }}>
                           <Typography variant="body2">{steps.order}</Typography>
                         </Grid>
-                        <Grid item xs={10} sm={10} md={10} lg={10}>
+                        <Grid size={{ xs: 10, sm: 10, md: 10, lg: 10 }}>
                           <Typography variant="body2">{steps.name}</Typography>
                         </Grid>
                       </Grid>

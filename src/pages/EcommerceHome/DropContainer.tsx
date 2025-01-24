@@ -1,8 +1,9 @@
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Grid, IconButton } from '@material-ui/core';
-import { Delete, DragIndicator, Edit } from '@material-ui/icons';
+import { IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { Delete, DragIndicator, Edit } from '@mui/icons-material';
 import React, { useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ConfigureItemDialog from './ConfigureItemDialog';
@@ -36,14 +37,14 @@ const DropContainer = ({ formData, setFormData, handleRemove }: DropContainerPro
   });
 
   return (
-    <Grid component={'ul'} container className=" min-h-[200px] list-none" ref={setNodeRef} spacing={1}>
+    <Grid container className="min-h-[200px]" ref={setNodeRef} spacing={1}>
       <SortableContext items={formData?.map((d) => d._id) || []} strategy={verticalListSortingStrategy}>
         {formData.map((d, index) => {
           return <SingleSection key={d._id} itemData={d} index={index} setFormData={setFormData} handleRemove={handleRemove} />;
         })}
       </SortableContext>
       {isOver && (
-        <Grid item xs={12} className="bg-[var(--dark-secondary, white)]">
+        <Grid size={12} className="bg-[var(--dark-secondary, white)]">
           <div className="p-10  text-center text-4xl font-bold text-gray-400 [border:4px_dashed_var(--common-border-color)] dark:text-gray-600">
             Drop here
           </div>
@@ -67,17 +68,12 @@ export const SingleSection = ({ itemData, index, handleRemove, setFormData }) =>
     }
   });
 
-  const style = {
-    transform: CSS.Translate.toString(transform),
-    transition
-  };
   return (
     <>
-      <Grid item component={'li'} xs={itemData.column} ref={setNodeRef} style={style} className=" list-none">
+      <Grid size={parseInt(itemData.column)} ref={setNodeRef} >
         <div
-          className={`flex items-center justify-between gap-2 ${
-            isDragging ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,white)] '
-          } list-none p-4 [border:1px_solid_var(--common-border-color)]`}
+          className={`flex items-center justify-between gap-2 ${isDragging ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,white)] '
+            } list-none p-4 [border:1px_solid_var(--common-border-color)]`}
         >
           <div className="flex items-center gap-2">
             <IconButton size="small" {...attributes} {...listeners} className="drag-handle !cursor-grab">
@@ -94,12 +90,12 @@ export const SingleSection = ({ itemData, index, handleRemove, setFormData }) =>
                 style={{ display: 'flex', justifyContent: 'flex-end' }}
                 size="small"
               >
-                <Edit color="primary" />
+                <Edit color="primary" fontSize='small' />
               </IconButton>
             </HtmlTooltip>
             <HtmlTooltip title="Delete">
               <IconButton onClick={() => handleRemove(itemData._id)} style={{ display: 'flex', justifyContent: 'flex-end' }} size="small">
-                <Delete color="error" />
+                <Delete color="error" fontSize='small' />
               </IconButton>
             </HtmlTooltip>
           </div>

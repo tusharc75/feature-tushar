@@ -1,30 +1,28 @@
 import { useState } from 'react';
-import { Box } from '@material-ui/core';
-import moment from 'moment';
+import { Box } from '@mui/material';
 import FilterModel from '../Helper/FilterModel';
 import TimleineChart from '../Helper/TimelineChart';
+import dayjs from 'dayjs';
 
 const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
-
   const [dateFilters, setDateFilters] = useState({
-    from: new Date(moment().subtract(8, 'days').startOf('day').toJSON()),
+    from: new Date(dayjs().subtract(8, 'day').startOf('day').toJSON()),
     to: new Date(),
     intervals: 'perCycle'
   });
 
   return (
     <>
-      {dataPoints?.filter((e) => e.type === 'Digital')?.length ?
+      {dataPoints?.filter((e) => e.type === 'Digital')?.length ? (
         <>
           <FilterModel dateFilters={dateFilters} setDateFilters={setDateFilters} />
-          <Box mt={2} >
-            <TimleineChart
-              assetId={assetId}
-              dateFilters={dateFilters}
-              dataPoints={dataPoints?.filter((e) => e.type === 'Digital')} />
+          <Box mt={2}>
+            <TimleineChart assetId={assetId} dateFilters={dateFilters} dataPoints={dataPoints?.filter((e) => e.type === 'Digital')} />
           </Box>
         </>
-        : <span>Status Data Point Not Configured Yet</span>}
+      ) : (
+        <span>Status Data Point Not Configured Yet</span>
+      )}
     </>
   );
 };

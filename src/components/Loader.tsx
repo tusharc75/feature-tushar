@@ -1,5 +1,5 @@
-import { Box, Typography, BoxProps } from '@material-ui/core';
-import { CircularProgress } from '@material-ui/core';
+import { Box, Typography, BoxProps } from '@mui/material';
+import { CircularProgress } from '@mui/material';
 
 interface Props extends BoxProps {
   text?: string;

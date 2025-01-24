@@ -1,13 +1,15 @@
-import { IconButton, Menu, MenuItem, makeStyles, useMediaQuery } from '@material-ui/core';
+import { IconButton, Menu, MenuItem, Theme, useMediaQuery } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import { useContext, useMemo, useState } from 'react';
 import { IoIosArrowDropdown } from 'react-icons/io';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
-import { downloadExcel } from '../../constants/helpers';
+import { downloadExcel, IMPORT_EXPORT_TYPE, sidebarResource } from '../../constants/helpers';
 
 import { DownloadIcon, ExportIcon, ImportIcon, MobileDownloadIcon, MobileExportIcon, MobileImportIcon } from 'src/assets/svg/svgIcons';
+import ImportExportDialog from 'src/components/AsynImportExportMenu/ImportExportDialog';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     flexGrow: 1,
     display: 'flex',
@@ -17,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'flex-end',
-    ['@media (max-width: 960px)']: {
+    "['@media (max-width: 960px)']": {
       display: 'none'
     }
   },
@@ -47,13 +49,17 @@ export default function ImportExportLinks({
   headers = null,
   hideDefaultImportExport = false,
   small = false,
-  visibleColumns = {}
+  visibleColumns = {},
+  asyncExport = false,
+  resource = null
 }) {
   const classes = useStyles();
   const isMobile = useMediaQuery('(max-width: 960px)');
 
   const toastConfig = useContext(CustomToastContext);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [openAsyncImpExpDialog, setOpenAsyncImpExpDialog] = useState({ open: false, type: null, api: null });
+  const [refresh, setRefresh] = useState(false);
   const open = Boolean(anchorEl);
   const [imptExptDnldMenuDta, setImptExptDnldMenuDta] = useState({ anchorEl: null, action: null, open: false });
 
@@ -84,6 +90,7 @@ export default function ImportExportLinks({
   };
 
   const uploadData = (event, apiUrl = null) => {
+    handleCloseMenu();
     if (event.target.files && event.target.files.length) {
       toastConfig.setToastConfig({
         hideDuration: null,
@@ -170,6 +177,7 @@ export default function ImportExportLinks({
 
       exportApi = exportApi + `&ids=${JSON.stringify(ids)}`;
     }
+
     axiosInstance()
       .get(exportApi, {
         responseType: 'arraybuffer',
@@ -178,17 +186,26 @@ export default function ImportExportLinks({
         }
       })
       .then((response) => {
-        const fileName = response.headers['content-disposition'].split('filename=')[1];
-        downloadExcel(response.data, fileName);
+        if (asyncExport && resource) {
+          setRefresh(!refresh);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: 'Export to excel added in queue successfully.'
+          });
+        } else {
+          const fileName = response.headers['content-disposition'].split('filename=')[1];
+          downloadExcel(response.data, fileName);
 
-        if (recordsToExport > 0) {
-          onExportToExcelSuccess();
+          if (recordsToExport > 0) {
+            onExportToExcelSuccess();
+          }
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: 'Exported to excel successfully.'
+          });
         }
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: 'Exported to excel successfully.'
-        });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -198,11 +215,13 @@ export default function ImportExportLinks({
   /**
    * DOWNLOAD TEMPLATE
    */
-  const downloadTemplate = () => {
-    let exportApi = `${api}/template`;
-
+  const downloadTemplate = (apiUrl = null) => {
+    let exportApi = apiUrl ? apiUrl : `${api}/template`;
     if (additionalParams) {
-      exportApi = `${exportApi}?${additionalParams}`;
+      if (exportApi?.includes('?') && additionalParams?.includes('?')) {
+        additionalParams = additionalParams?.replace(`?`, `&`);
+      }
+      exportApi = `${exportApi}${additionalParams}`;
     }
 
     axiosInstance()
@@ -241,7 +260,6 @@ export default function ImportExportLinks({
         keepMounted
         open={true}
         onClose={handleCloseMenu}
-        getContentAnchorEl={null}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'right'
@@ -262,7 +280,7 @@ export default function ImportExportLinks({
         {imptExptDnldMenuDta.action === 'export' && !hideDefaultImportExport && (
           <MenuItem
             onClick={() => {
-              exportToExcel();
+              asyncExport && resource ? setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.export, api: null }) : exportToExcel();
               handleCloseMenu();
             }}
           >
@@ -307,7 +325,9 @@ export default function ImportExportLinks({
               <MenuItem
                 key={d.title}
                 onClick={() => {
-                  exportToExcel(d.api);
+                  asyncExport && resource
+                    ? setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.export, api: d.api })
+                    : exportToExcel(d.api);
                   handleCloseMenu();
                 }}
               >
@@ -320,7 +340,11 @@ export default function ImportExportLinks({
               <MenuItem
                 key={d.title}
                 onClick={() => {
-                  exportToExcel(d.api);
+                  if (resource === sidebarResource.rentalManagement) {
+                    downloadTemplate(d.api);
+                  } else {
+                    exportToExcel(d.api);
+                  }
                   handleCloseMenu();
                 }}
               >
@@ -341,7 +365,6 @@ export default function ImportExportLinks({
           anchorEl={anchorEl}
           open={open}
           onClose={handleClose}
-          getContentAnchorEl={null}
           anchorOrigin={{
             vertical: 'bottom',
             horizontal: 'right'
@@ -419,7 +442,7 @@ export default function ImportExportLinks({
               if (extraImportExportLinks.length > 0) {
                 handleOpenMenu(e, 'export');
               } else {
-                exportToExcel();
+                asyncExport && resource ? setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.export, api: null }) : exportToExcel();
               }
             }}
             className={`new-headerbox-button-v1 ${small ? 'small' : ''}`}
@@ -493,6 +516,24 @@ export default function ImportExportLinks({
         </>
       )}
       {imptExptDnldMenuDta.open && <RenderButtonMenu />}
+      {openAsyncImpExpDialog.open && (
+        <ImportExportDialog
+          handleClose={() => {
+            setOpenAsyncImpExpDialog({ open: false, type: null, api: null });
+            setAnchorEl(null);
+          }}
+          type={openAsyncImpExpDialog.type}
+          resource={resource}
+          subResource={null}
+          referenceId={null}
+          handleExport={() => {
+            exportToExcel(openAsyncImpExpDialog.api);
+          }}
+          refresh={refresh}
+          api={api}
+          additionalParams={additionalParams}
+        />
+      )}
     </div>
   );
 }

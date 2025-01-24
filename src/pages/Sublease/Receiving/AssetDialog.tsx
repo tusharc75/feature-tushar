@@ -1,10 +1,9 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Dialog, Box, TextField, Table, TableHead, Paper, TableContainer, TableBody, TableCell, TableRow, Link } from '@material-ui/core';
+import { Dialog, Box, TextField, Table, TableHead, Paper, TableContainer, TableBody, TableCell, TableRow, Link } from '@mui/material';
 import { ASSET_NUMBER_TYPE, CustomDialogTransition, sublease } from '../../../constants/helpers';
 import { Formik, Form, FieldArray } from 'formik';
-import CustomButton from 'src/components/Helpers/CustomButton';
 import { read, utils, writeFile } from 'xlsx';
-import { Autocomplete } from '@material-ui/lab';
+import Autocomplete from '@mui/material/Autocomplete';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -12,6 +11,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import axiosInstance from 'src/axios/axiosInstance';
 import { uniqBy } from 'lodash';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const AssetDialog = ({ products, loading, handleClose, handleSuccess, subleaseId }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -245,7 +245,7 @@ const AssetDialog = ({ products, loading, handleClose, handleSuccess, subleaseId
                                         fullWidth
                                         options={existingAssets ? existingAssets?.filter((e) => e?.product === data?.product) : []}
                                         getOptionLabel={(option: any) => (option ? option?.assetNumber : '')}
-                                        getOptionSelected={(option: any, val) => option.assetNumber === val}
+                                        isOptionEqualToValue={(option: any, val) => option.assetNumber === val}
                                         value={
                                           existingAssets?.filter((e) => e?.assetNumber === data.assetNumber)?.length > 0
                                             ? existingAssets?.filter((e) => e?.assetNumber === data.assetNumber)[0]
@@ -261,6 +261,7 @@ const AssetDialog = ({ products, loading, handleClose, handleSuccess, subleaseId
                                           <TextField
                                             {...params}
                                             margin="dense"
+                                            size="small"
                                             name={`assetNumber_${index}`}
                                             label=""
                                             variant="outlined"
@@ -305,16 +306,15 @@ const AssetDialog = ({ products, loading, handleClose, handleSuccess, subleaseId
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <CustomButton
+                <ThemeButton
                   id="receive-dialog-submit-button"
                   onClick={submitForm}
-                  variant="contained"
-                  color="primary"
+                   buttonType="theme"
                   disabled={loading}
-                  loading={loading}
+                  isLoading={loading}
                 >
                   Submit
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
             </>
           )}

@@ -1,9 +1,9 @@
 import { AuthenticatedTemplate, UnauthenticatedTemplate, useAccount, useMsal } from '@azure/msal-react';
-import { Box, Button, CircularProgress, CssBaseline, Link as MuiLink, TextField, Typography } from '@material-ui/core';
-import IconButton from '@material-ui/core/IconButton';
-import InputAdornment from '@material-ui/core/InputAdornment';
-import Visibility from '@material-ui/icons/Visibility';
-import VisibilityOff from '@material-ui/icons/VisibilityOff';
+import { Box, CssBaseline, Link as MuiLink, TextField, Typography } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { Form, Formik } from 'formik';
 import { isEmpty } from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';
@@ -18,6 +18,7 @@ import BrandNotFound from 'src/pages/Auth/Login/BrandNotFound';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AuthSlider from '../AuthSlider';
 import styles from '../index.module.scss';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export type BrandData = {
   companyName: string;
@@ -167,7 +168,7 @@ const Login = () => {
                           size="medium"
                           label="Email"
                           name="email"
-                          value={values['email']}
+                          value={values['email'] || null}
                           error={touched['email'] && Boolean(errors['email'])}
                           helperText={touched['email'] && errors['email']}
                           fullWidth
@@ -182,19 +183,21 @@ const Login = () => {
                           size="medium"
                           label="Password"
                           name="password"
-                          value={values['password']}
+                          value={values['password'] || null}
                           error={touched['password'] && Boolean(errors['password'])}
                           helperText={touched['password'] && errors['password']}
                           onChange={(e) => setFieldValue('password', e.target.value)}
                           fullWidth
-                          InputProps={{
-                            endAdornment: (
-                              <InputAdornment position="end">
-                                <IconButton className="p-0" onClick={() => setShowPassword(!showPassword)}>
-                                  {showPassword ? <Visibility /> : <VisibilityOff />}
-                                </IconButton>
-                              </InputAdornment>
-                            )
+                          slotProps={{
+                            input: {
+                              endAdornment: (
+                                <InputAdornment position="end">
+                                  <IconButton className="p-0" onClick={() => setShowPassword(!showPassword)}>
+                                    {showPassword ? <Visibility /> : <VisibilityOff />}
+                                  </IconButton>
+                                </InputAdornment>
+                              )
+                            }
                           }}
                         />
                       </div>
@@ -204,35 +207,24 @@ const Login = () => {
                         Forgot Password?
                       </MuiLink>
                     </Box>
-
                     <Box>
-                      <Button
-                        disabled={isSubmitting}
+                      <ThemeButton
                         fullWidth
-                        variant="contained"
-                        color="primary"
+                        buttonType="theme"
                         type="submit"
-                        className={styles.submitButton}
-                        onClick={submitForm}
-                        startIcon={isSubmitting && <CircularProgress color="inherit" size={20} />}
+                        disabled={isSubmitting}
+                        isLoading={isSubmitting}
+                        sx={{ height: 40 }}
                       >
                         Sign In
-                      </Button>
-
+                      </ThemeButton>
                       <AuthenticatedTemplate>
                         {invalidAzureLogin ? (
                           <span>Not authorized loging out in {counter}</span>
                         ) : (
-                          <Button
-                            className="logo-bg-color"
-                            variant="contained"
-                            fullWidth
-                            startIcon={<TbBrandOffice />}
-                            disabled={isSubmitting}
-                            onClick={() => instance.logoutPopup()}
-                          >
+                          <ThemeButton onClick={() => instance.logoutPopup()} buttonType="theme">
                             Office 365 Log Out
-                          </Button>
+                          </ThemeButton>
                         )}
                       </AuthenticatedTemplate>
                     </Box>

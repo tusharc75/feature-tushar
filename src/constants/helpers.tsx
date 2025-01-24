@@ -1,20 +1,20 @@
-import { Grow, Zoom } from '@material-ui/core';
-import { TransitionProps } from '@material-ui/core/transitions';
+import { CalendarMonth, CheckCircleOutline, PushPin, Sync } from '@mui/icons-material';
+import { Fade } from '@mui/material';
+import { TransitionProps } from '@mui/material/transitions';
+import { GoogleMapProps } from '@react-google-maps/api';
 import clsx, { ClassValue } from 'clsx';
-import { camelCase, cloneDeep, isArray, isEmpty, isString, lowerFirst, orderBy, uniqBy } from 'lodash';
+import dayjs, { Dayjs } from 'dayjs';
+import { camelCase, cloneDeep, isArray, isString, lowerFirst, orderBy, uniqBy } from 'lodash';
 import mimeDb from 'mime-db';
-import moment from 'moment';
 import React from 'react';
 import { FileIcon, fileIcons } from 'src/assets/fileIcons';
-import axiosInstance from 'src/axios/axiosInstance';
 import { LOGIC, OPERATOR } from 'src/components/FormBuilder/helper';
 import { stepIconInterface } from 'src/components/Steps/icons';
+import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { twMerge } from 'tailwind-merge';
 import { v4 as uuid } from 'uuid';
 import { array, boolean, number, object, string } from 'yup';
 import currencies from './currency_with_country.json';
-import { GoogleMapProps } from '@react-google-maps/api';
-import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 
 interface stepInterface extends stepIconInterface {
   name: string;
@@ -290,6 +290,8 @@ export const sidebarResource = {
   deliveryTicket: 'Delivery Ticket',
   pricingCondition: 'Pricing Condition',
   repairJob: 'Repair Job',
+  expenses: 'Expenses',
+  expenseReport: 'Expense Report',
   salesOrder: 'Sales Order',
   invoice: 'Invoice',
   eCommercePolicy: 'e-Commerce Policy',
@@ -505,6 +507,16 @@ export const deliveryTicket = {
 export const repairJob = {
   resource: 'repairJob',
   api: '/repair-job'
+};
+
+export const expenses = {
+  resource: 'expenses',
+  api: '/expenses'
+};
+
+export const expenseReport = {
+  resource: 'expenseReport',
+  api: '/expense-report'
 };
 
 export const repairOrder = {
@@ -1041,11 +1053,11 @@ export const checkValue = (fields, fieldName, value1, value2) => {
         return false;
       }
     } else if (input?.type === 'year') {
-      return moment(new Date(value1)).year() == value2;
+      return dayjs(new Date(value1)).year() == value2;
     } else if (input?.type === 'date') {
-      return moment(value1).format('DD/MM/YYYY') == value2;
+      return dayjs(value1).format('DD/MM/YYYY') == value2;
     } else if (input?.type === 'dateTime') {
-      return moment(new Date(value1))?.isSame(moment(value2, 'DD/MM/YYYY HH:mm'));
+      return dayjs(new Date(value1))?.isSame(dayjs(value2, 'DD/MM/YYYY HH:mm'));
     } else if (input?.type === 'number' || input?.type === 'percent' || input?.type === 'decimal' || input?.type === 'formula') {
       if (+value2 === +value1) {
         return true;
@@ -1077,11 +1089,11 @@ const validateDateWithOperator = (date1, date2, operator, type) => {
   if (!date2) {
     return true;
   }
-  let newDate1 = moment(date1);
-  let newDate2 = moment(date2);
+  let newDate1 = dayjs(date1);
+  let newDate2 = dayjs(date2);
   if (type === 'date') {
-    newDate1 = moment(moment(date1).format('YYYY-MM-DD'), 'YYYY-MM-DD');
-    newDate2 = moment(moment(date2).format('YYYY-MM-DD'), 'YYYY-MM-DD');
+    newDate1 = dayjs(dayjs(date1).format('YYYY-MM-DD'), 'YYYY-MM-DD');
+    newDate2 = dayjs(dayjs(date2).format('YYYY-MM-DD'), 'YYYY-MM-DD');
   }
 
   if (operator === 'lessThan') {
@@ -1147,7 +1159,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
 
       validation = (...args) => {
         let validate = false;
-        for (let i = 0; i < validationFields?.length; ) {
+        for (let i = 0; i < validationFields?.length;) {
           const field = validationFields[i];
           const condition =
             field?.type === 'section'
@@ -1179,78 +1191,78 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: string().required(message),
-                otherwise: string()
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().required(message),
+              otherwise: string()
+            }
+          )
           : string().required(message)
         : string();
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: string().matches(nameRegex, "Numbers aren't allowed").required(message),
-                otherwise: string().matches(nameRegex, "Numbers aren't allowed")
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().matches(nameRegex, "Numbers aren't allowed").required(message),
+              otherwise: string().matches(nameRegex, "Numbers aren't allowed")
+            }
+          )
           : string().matches(nameRegex, "Numbers aren't allowed").required(message)
         : string().matches(nameRegex, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: string().matches(urlRegex, 'Enter valid URL').required(message),
-                otherwise: string().matches(urlRegex, 'Enter valid URL')
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().matches(urlRegex, 'Enter valid URL').required(message),
+              otherwise: string().matches(urlRegex, 'Enter valid URL')
+            }
+          )
           : string().matches(urlRegex, 'Enter valid URL').required(message)
         : string().matches(urlRegex, 'Enter valid URL');
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: string().min(10, 'Mobile number is too short').required(message),
-                otherwise: string().min(10, 'Mobile number is too short')
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().min(10, 'Mobile number is too short').required(message),
+              otherwise: string().min(10, 'Mobile number is too short')
+            }
+          )
           : string().min(10, 'Mobile number is too short').required(message)
         : string().min(10, 'Mobile number is too short');
     } else if (input.type === 'multiSelect' || input?.type === 'freeStyleMultiSelect') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? array().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: array().min(1, message),
-                otherwise: array()
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: array().min(1, message),
+              otherwise: array()
+            }
+          )
           : array().min(1, message)
         : array();
     } else if (input.type === 'percent' || input.type === 'number' || input.type === 'decimal' || input.type === 'formula') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? number().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: number().required(message).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable(),
-                otherwise: number().nullable()
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: number().required(message).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable(),
+              otherwise: number().nullable()
+            }
+          )
           : number().required(message).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable()
         : number().nullable();
     } else if (input.type === 'email') {
@@ -1258,26 +1270,26 @@ export const yupSchema = (fields: any[], validEmail = true) => {
         input.required && validEmail
           ? validationFields?.length && validation
             ? string().when(
-                validationFields?.map((f) => f?.fieldName),
-                {
-                  is: validation,
-                  then: string().email().required(message),
-                  otherwise: string().email(`${input.fieldLabel} must be a valid email`)
-                }
-              )
+              validationFields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: string().email().required(message),
+                otherwise: string().email(`${input.fieldLabel} must be a valid email`)
+              }
+            )
             : string().email().required(message)
           : string().email(`${input.fieldLabel} must be a valid email`);
     } else if (input.type === 'switch' || input.type === 'checkBox') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? boolean().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: boolean().required(message),
-                otherwise: boolean()
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: boolean().required(message),
+              otherwise: boolean()
+            }
+          )
           : boolean().required(message)
         : boolean();
     } else if (input.type !== 'currencyAmount' && (input.type === 'converter' || input.isConverter === true)) {
@@ -1306,13 +1318,13 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: string().required(`${input.fieldLabel} is required`).nullable(),
-                otherwise: string().nullable()
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().required(`${input.fieldLabel} is required`).nullable(),
+              otherwise: string().nullable()
+            }
+          )
           : dateValidation
         : dateValidation;
     } else if (input.type === 'colorPicker') {
@@ -1333,13 +1345,13 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: string().required(message),
-                otherwise: string()
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().required(message),
+              otherwise: string()
+            }
+          )
           : string().required(message)
         : string();
     }
@@ -1405,65 +1417,35 @@ export const initializeDropdownById = (field, fieldName, id) => {
 };
 export const dateFormat = localStorage.getItem('dateFormat') ?? 'MM/DD/YYYY';
 export const dateTimeFormat = localStorage.getItem('dateTimeFormat') ?? 'MM/DD/YYYY hh:mm A';
-export const cardDateFormat = localStorage.getItem('cardDateFormat') ?? 'MMM DD, YYYY';
+export const cardDateFormat = 'MMM DD, YYYY';
 export const dateTimeFormat24Hours = `${dateFormat} HH:mm:ss`;
 
-export const dateFormatForInputControl = localStorage.getItem('dateFormatForInputControl') ?? 'MM/dd/yyyy';
-// export const dateTimeFormat = "MM/dd/yyyy hh:mm A"
-// export const cardDateFormat = "MMM,dd yyyy"
+export const dateFormatForInputControl = localStorage.getItem('dateFormatForInputControl') ?? 'MM/DD/YYYY';
 
-export const yyyyMMDD = (dateToBeFormatted) => {
-  return dateToBeFormatted ? moment(dateToBeFormatted).format(cardDateFormat) : dateToBeFormatted;
-};
+export const dayNamesShort = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export const displayDate = (date) => {
-  return date ? moment(date).format(dateFormat) : date;
+  return date ? dayjs.utc(date).tz().format(dateFormat) : date;
 };
 
-export const displayDateTime = (date) => {
-  return date ? moment(date).format(dateTimeFormat) : date;
+export const displayDateTime = (date, format = null) => {
+  format = format ? format : dateTimeFormat;
+  return date ? dayjs.utc(date).tz().format(format) : date;
 };
 
 export const displayCardDate = (date) => {
-  return date ? moment(date).format(cardDateFormat) : date;
+  return date ? dayjs.utc(date).tz().format(cardDateFormat) : date;
 };
 
-export const convertDateInDateTime = (date) => {
+export const dateFormatToSend = (date) => {
+  return date ? dayjs.utc(date).tz().format('MM/DD/YYYY') : date;
+};
+
+export const convertDateTimToDate = (date): Dayjs => {
   if (!date) {
     return date;
   }
-  var newDate = new Date(date);
-  var currentDate = new Date();
-  newDate.setHours(currentDate.getHours(), currentDate.getMinutes(), currentDate.getSeconds());
-  return newDate;
-};
-
-export const materialTableIcons: any = {
-  // Add: forwardRef((props: any, ref: any) => <AddBox {...props} ref={ref} />),
-  // Check: forwardRef((props: any, ref: any) => <Check {...props} ref={ref} />),
-  // Clear: forwardRef((props: any, ref: any) => <Clear {...props} ref={ref} />),
-  // Delete: forwardRef((props: any, ref: any) => <DeleteOutline {...props} ref={ref} />),
-  // DetailPanel: forwardRef((props: any, ref: any) => <ChevronRight {...props} ref={ref} />),
-  // Edit: forwardRef((props: any, ref: any) => <Edit {...props} ref={ref} />),
-  // Export: forwardRef((props: any, ref: any) => <SaveAlt {...props} ref={ref} />),
-  // Filter: forwardRef((props: any, ref: any) => <FilterList {...props} ref={ref} />),
-  // FirstPage: forwardRef((props: any, ref: any) => <FirstPage {...props} ref={ref} />),
-  // LastPage: forwardRef((props: any, ref: any) => <LastPage {...props} ref={ref} />),
-  // NextPage: forwardRef((props: any, ref: any) => <ChevronRight {...props} ref={ref} />),
-  // PreviousPage: forwardRef((props: any, ref: any) => <ChevronLeft {...props} ref={ref} />),
-  // ResetSearch: forwardRef((props: any, ref: any) => <Clear {...props} ref={ref} />),
-  // Search: forwardRef((props: any, ref: any) => <Search {...props} ref={ref} />),
-  // SortArrow: forwardRef((props: any, ref: any) => <ArrowDownward {...props} ref={ref} />),
-  // ThirdStateCheck: forwardRef((props: any, ref: any) => <Remove {...props} ref={ref} />),
-  // ViewColumn: forwardRef((props: any, ref: any) => <ViewColumn {...props} ref={ref} />)
-};
-
-export const convertDateTimToDate = (date) => {
-  if (!date) {
-    return date;
-  }
-  var newDate = moment(date);
-  newDate.set({ hour: 0, minute: 0, second: 0 });
+  var newDate = dayjs(date).set('hour', 0).set('minute', 0).set('second', 0);
   return newDate;
 };
 
@@ -1842,10 +1824,12 @@ export const graphOptions = {
 };
 
 export const CustomDialogTransition = React.forwardRef(function Transition(
-  props: TransitionProps & { children?: React.ReactElement<any, any> },
+  props: TransitionProps & {
+    children: React.ReactElement<any, any>;
+  },
   ref: React.Ref<unknown>
 ) {
-  return <Grow ref={ref} {...props} />;
+  return <Fade ref={ref} {...props} />;
 });
 
 //  Don't use this for details screen as the model being passed is different
@@ -2893,6 +2877,7 @@ export const WORKORDER_SERVICE_COLOR = {
 };
 
 export const WORKORDER_SERVICE_STATUS = {
+  planned: 'Planned',
   pending: 'Pending',
   backlog: 'Backlog',
   inProgress: 'In-Progress',
@@ -3103,6 +3088,17 @@ export const SALES_ORDER_STATUS = {
   closed: 'Closed'
 };
 
+export const EXPENSE_STATUS = {
+  unreported: 'Unreported',
+  unSubmitted: 'Unsubmitted',
+  awaitingApproval: 'Awaiting Approval',
+  approved: 'Approved',
+  rejected: 'Rejected',
+  reimbursed: 'Reimbursed',
+  draft: 'Draft',
+  recalled: 'Recalled'
+};
+
 export const PRICING_TYPE = [
   { optionLabel: 'Rent', optionValue: 'Rent' },
   { optionLabel: 'Sell', optionValue: 'Price' }
@@ -3131,6 +3127,22 @@ export const QUOTE_PROCESS_STATUS = {
   sendToCustomer: 'Send To Customer',
   end: 'End'
 };
+
+export const QUOTE_STATUS = {
+  new: 'New',
+  buildingQuote: 'Building Quote',
+  waitingForSupplierPrice: 'Waiting for Supplier Price',
+  sentToCustomer: 'Sent to Customer',
+  acceptByCustomer: 'Accepted by Customer',
+  rejectByCustomer: 'Rejected by Customer',
+  notBookedbyCustomer: 'Not Booked by Customer',
+  others: 'Others',
+  bookedbyCustomer: 'Booked by Customer',
+  sentforDOA: 'Sent for DOA',
+  acceptedbyDOA: 'Accepted by DOA',
+  rejectedbyDOA: 'Rejected by DOA',
+};
+
 
 export const convertMsToTime = (milliseconds: any) => {
   function padTo2Digits(num) {
@@ -3616,8 +3628,8 @@ function fallbackCopyTextToClipboard(text: string, callBack: (text: string) => v
   document.body.removeChild(textArea);
 }
 
-export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => {}) {
-  if (typeof callBack !== 'function') callBack = (text) => {};
+export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => { }) {
+  if (typeof callBack !== 'function') callBack = (text) => { };
 
   if (!navigator.clipboard) {
     fallbackCopyTextToClipboard(text, callBack);
@@ -3811,17 +3823,59 @@ export function filterDataByDateIntersection<D>(
   endAccessor: (data: D) => string = (d) => d['end']
 ): D[] {
   return data.filter((item) => {
-    const itemStart = moment(startAccessor(item));
-    const itemEnd = moment(endAccessor(item));
+    const itemStart = dayjs(startAccessor(item));
+    const itemEnd = dayjs(endAccessor(item));
     return datesList.some((date) => {
-      const currentDate = moment(date);
+      const currentDate = dayjs(date);
       return currentDate.isBetween(itemStart, itemEnd, undefined, '[]') || currentDate.isSame(itemStart, 'date');
     });
   });
 }
 export const workOrderColormap = {
-  [WORKORDER_SERVICE_STATUS.pending]: { color: 'text-[#CA8A04]', background: 'bg-[#F6F2E2]', indicator: 'bg-[#EEBA6C]' },
-  [WORKORDER_SERVICE_STATUS.inProgress]: { color: 'text-[#3772FF]', background: 'bg-[#3772FF33]', indicator: 'bg-[#0095FF]' },
-  [WORKORDER_SERVICE_STATUS.completed]: { color: 'text-[#0FBE00]', background: 'bg-[#0FBE0033]', indicator: 'bg-[#03781D]' },
-  [WORKORDER_SERVICE_STATUS.inProgressByOther]: { color: 'text-[#3772FF]', background: 'bg-[#3772FF33]', indicator: 'bg-[#0095FF]' }
+  [WORKORDER_SERVICE_STATUS.planned]: {
+    color: 'dark:text-white text-[#ff6436]',
+    background: 'dark:bg-[#ff5b2b] bg-[#ffe8e1]',
+    indicatorBackground: 'bg-[#ff6436] dark:bg-[#ff6436]',
+    indicatorColor: 'text-[#ff6436]'
+  },
+  [WORKORDER_SERVICE_STATUS.pending]: {
+    color: 'dark:text-white text-[#B66A11]',
+    background: 'dark:bg-[#fba84a] bg-[#FFF1E0]',
+    indicatorBackground: 'bg-[#B66A11] dark:bg-[#fba84a] ',
+    indicatorColor: 'text-[#B66A11]'
+  },
+  [WORKORDER_SERVICE_STATUS.inProgress]: {
+    color: 'dark:text-white text-[#0273FF]',
+    background: 'dark:bg-[#0c68e9] bg-[#D6F1FF]',
+    indicatorBackground: 'bg-[#0273FF] dark:bg-[#0c68e9]',
+    indicatorColor: 'text-[#0273FF]'
+  },
+  [WORKORDER_SERVICE_STATUS.completed]: {
+    color: 'dark:text-white text-[#0A983E]',
+    background: 'bg-[#E2FDEC] dark:bg-[#2fa959]',
+    indicatorBackground: 'bg-[#0A983E] dark:bg-[#2fa959]',
+    indicatorColor: 'text-[#0A983E]'
+  },
+  [WORKORDER_SERVICE_STATUS.inProgressByOther]: {
+    color: 'dark:text-white text-cyan-700',
+    background: 'dark:bg-cyan-600 bg-cyan-100',
+    indicatorBackground: 'bg-cyan-700 dark:bg-cyan-700',
+    indicatorColor: 'text-cyan-700'
+  }
+};
+
+export const workOrderIconMap = {
+  [WORKORDER_SERVICE_STATUS.planned]: (
+    <CalendarMonth fontSize="small" className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.planned].indicatorColor}`} />
+  ),
+  [WORKORDER_SERVICE_STATUS.pending]: <Sync fontSize="small" className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.pending].indicatorColor}`} />,
+  [WORKORDER_SERVICE_STATUS.inProgress]: (
+    <PushPin fontSize="small" className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.inProgress].indicatorColor}`} />
+  ),
+  [WORKORDER_SERVICE_STATUS.completed]: (
+    <CheckCircleOutline fontSize="small" className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.completed].indicatorColor}`} />
+  ),
+  [WORKORDER_SERVICE_STATUS.inProgressByOther]: (
+    <PushPin fontSize="small" className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.inProgressByOther].indicatorColor}`} />
+  )
 };

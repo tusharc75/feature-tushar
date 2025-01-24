@@ -1,6 +1,7 @@
 import { useEffect, useState, useContext } from 'react';
-import { Dialog, Button, CircularProgress, Grid, useTheme, useMediaQuery, Box, TextField } from '@material-ui/core';
-import { Autocomplete, Skeleton } from '@material-ui/lab';
+import { Dialog, useTheme, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { Autocomplete, Skeleton } from '@mui/material';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
@@ -8,18 +9,14 @@ import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useHistory } from 'react-router-dom';
 import {
-  getObjKeys,
-  yupSchema,
-  setFieldsInAscendingOrder,
-  getObjKeysWithValues,
   cycleCountPhysicalInventory,
   CustomDialogTransition
 } from '../../constants/helpers';
 import { useData } from '../../StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { Formik } from 'formik';
 import { object, string } from 'yup';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ManageCycleCountPInventorSchema = object().shape({
   inventoryCycle: string().required('Please enter inventory cycle'),
@@ -104,19 +101,19 @@ const ManageCycleCountPInventory = ({ open, close, onSuccess }) => {
             <Skeleton width="100%" height="70px" />
             <Grid container spacing={2}>
               {[1, 2, 3, 4, 5, 6, 7].map((i) => (
-                <Grid key={i} item xs={12} sm={6} md={6}>
+                <Grid key={i} size={{ xs: 12, sm: 6, md: 6 }}>
                   <Skeleton width="100%" height="60px" />
                 </Grid>
               ))}
             </Grid>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button variant="outlined" size="small" color="primary" disabled={loading}>
+            <ThemeButton buttonType='transparent'>
               Cancel
-            </Button>
-            <Button variant="contained" size="small" color="primary" disabled={loading}>
+            </ThemeButton>
+            <ThemeButton buttonType='theme' disabled={loading}>
               Submit
-            </Button>
+            </ThemeButton>
           </CustomDialogFooter>
         </>
       ) : (
@@ -125,7 +122,7 @@ const ManageCycleCountPInventory = ({ open, close, onSuccess }) => {
             <>
               <CustomDialogContent>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6} md={6}>
+                  <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                     <Autocomplete
                       options={optionsArray['Inventory Cycle']}
                       getOptionLabel={(option) => option.optionLabel}
@@ -147,7 +144,7 @@ const ManageCycleCountPInventory = ({ open, close, onSuccess }) => {
                       )}
                     />
                   </Grid>
-                  <Grid item xs={12} sm={6} md={6}>
+                  <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                     <Autocomplete
                       options={optionsArray['User']}
                       getOptionLabel={(option) => option.optionLabel}
@@ -169,7 +166,7 @@ const ManageCycleCountPInventory = ({ open, close, onSuccess }) => {
                       )}
                     />
                   </Grid>
-                  <Grid item xs={12} sm={6} md={6}>
+                  <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                     <Autocomplete
                       options={optionsArray['Product Category']}
                       getOptionLabel={(option) => option.optionLabel}
@@ -191,7 +188,7 @@ const ManageCycleCountPInventory = ({ open, close, onSuccess }) => {
                       )}
                     />
                   </Grid>
-                  <Grid item xs={12} sm={6} md={6}>
+                  <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                     <Autocomplete
                       options={optionsArray['Warehouse']}
                       getOptionLabel={(option) => option.optionLabel}
@@ -216,12 +213,12 @@ const ManageCycleCountPInventory = ({ open, close, onSuccess }) => {
                 </Grid>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button size="small" variant="outlined" color="primary" onClick={close}>
+                <ThemeButton buttonType='transparent' onClick={close}>
                   Cancel
-                </Button>
-                <Button size="small" variant="contained" color="primary" onClick={submitForm}>
-                  {'Submit'}
-                </Button>
+                </ThemeButton>
+                <ThemeButton buttonType='theme' onClick={submitForm}>
+                  Submit
+                </ThemeButton>
               </CustomDialogFooter>
             </>
           )}

@@ -1,9 +1,8 @@
-import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@material-ui/core';
-import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
-import MoreVert from '@material-ui/icons/MoreVert';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import MoreVert from '@mui/icons-material/MoreVert';
+import { Box, Button, Card, CardContent, IconButton, Menu, MenuItem, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useContext, useState } from 'react';
 import { BiCustomize } from 'react-icons/bi';
 import { FaArrowAltCircleDown } from 'react-icons/fa';
@@ -13,13 +12,13 @@ import { useHistory } from 'react-router-dom';
 import DisplayData from 'src/components/CardDisplayData';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { displayDate } from 'src/constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import axiosInstance from '../../axios/axiosInstance';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { formatAmountWithCurrency } from '../../constants/helpers';
-import { displayDate } from '../../services/util';
 import routes from './../../components/Helpers/Routes';
 import NewOpportunityProjectSales from './NewOpportunityProjectSales';
 import styles from './ProjectSales.module.scss';
@@ -146,27 +145,26 @@ export default function OpportunityAccordianProjectSales({
       </Menu>
       <Accordion expanded={expandOpportunity} onChange={() => setExpandOpportunity(!expandOpportunity)}>
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
-          <Grid container>
-            <Grid item xs={8}>
-              <Box component="div" display="flex" alignItems="center" flexGrow={1}>
-                <IconButton size="small" onClick={(e) => e.preventDefault()}>
-                  {expandOpportunity === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+          <div className="flex items-center justify-between">
+            <Typography variant="subtitle2">Opportunity ({opportunities.length})</Typography>
+
+            <Typography variant="subtitle2">
+              {(permissions.isUpdate && isTeamMember) || isManager ? (
+                <IconButton
+                  aria-haspopup="true"
+                  color="primary"
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    handleClick(e);
+                  }}
+                >
+                  <MoreVert />
                 </IconButton>
-                <Box>
-                  <Typography variant="subtitle2">Opportunity ({opportunities.length})</Typography>
-                </Box>
-              </Box>
-            </Grid>
-            <Grid item xs={4} container justify="flex-end" alignItems="center">
-              <Typography variant="subtitle2">
-                {(permissions.isUpdate && isTeamMember) || isManager ? (
-                  <IconButton aria-haspopup="true" color="primary" size="small" onClick={handleClick}>
-                    <MoreVert />
-                  </IconButton>
-                ) : null}
-              </Typography>
-            </Grid>
-          </Grid>
+              ) : null}
+            </Typography>
+          </div>
         </AccordionSummary>
         <AccordionDetails>
           <>
@@ -176,7 +174,6 @@ export default function OpportunityAccordianProjectSales({
                   <Grid container className={styles.opportunity_layout}>
                     {opportunities.slice(0, maxRecordsToShow).map((obj, index) => (
                       <Grid
-                        item
                         // xs={12}
                         // sm={12}
                         // md={recordsPerLineInLargeScreen}
@@ -185,9 +182,9 @@ export default function OpportunityAccordianProjectSales({
                       >
                         <Card className="detailCard  card-v1" variant="outlined">
                           <CardContent className="card-link">
-                            <Grid item xs={12}>
+                            <Grid size={{ xs: 12 }}>
                               <Grid container className="detailCardHeader">
-                                <Grid item xs={7} sm={8}>
+                                <Grid size={{ xs: 7, sm: 8 }}>
                                   {hasAccessToEntity(obj.entity) ? (
                                     obj.entity === selectedEntity ? (
                                       <p className="link text-truncate" onClick={() => window.open(`${routes.opportunityDetail.path}/${obj._id}`)}>
@@ -205,7 +202,7 @@ export default function OpportunityAccordianProjectSales({
                                       </p>
                                     )
                                   ) : (
-                                    <span className="d-flex gap-2 align-items-center">
+                                    <span className="d-flex align-items-center gap-2">
                                       <Typography className="detailName">{obj.opportunityName}</Typography>{' '}
                                       <HtmlTooltip title={`${obj.opportunityName} belongs to different entity`}>
                                         <InfoOutlinedIcon fontSize="small" />
@@ -213,7 +210,7 @@ export default function OpportunityAccordianProjectSales({
                                     </span>
                                   )}
                                 </Grid>
-                                <Grid item xs={5} sm={4}>
+                                <Grid size={{ xs: 5, sm: 4 }}>
                                   <Box display="flex" alignItems="center" justifyContent="flex-end">
                                     {obj?.estimatedAmount ? (
                                       <Typography
@@ -241,14 +238,14 @@ export default function OpportunityAccordianProjectSales({
                                 </Grid>
                               </Grid>
                               <Grid container className={styles.opportunity_layout_box}>
-                                <Grid item xs={12} sm={6} md={6}>
+                                <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                                   {obj?.stage ? (
                                     <DisplayData key={index} label="Stage" value={obj?.stage ?? ''} icon={<BiCustomize size={15} />} />
                                   ) : (
                                     ''
                                   )}
                                 </Grid>
-                                <Grid item xs={12} sm={6} md={6} className={styles.opportunity_closed_date}>
+                                <Grid size={{ xs: 12, sm: 6, md: 6 }} className={styles.opportunity_closed_date}>
                                   {obj.closeDate ? (
                                     <DisplayData
                                       key={index}

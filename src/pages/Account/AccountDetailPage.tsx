@@ -1,10 +1,10 @@
-import { Box, Button, Card, CardContent, Grid, IconButton, List, ListItemIcon, ListItemText, Typography, useMediaQuery } from '@material-ui/core';
-import ListItem from '@material-ui/core/ListItem/ListItem';
-import { Edit } from '@material-ui/icons';
-import AddIcon from '@material-ui/icons/Add';
-import { Skeleton } from '@material-ui/lab';
+import { Box, Card, CardContent, IconButton, List, ListItemIcon, ListItemText, Typography, useMediaQuery } from '@mui/material';
+import ListItem from '@mui/material/ListItem/ListItem';
+import Grid from '@mui/material/Grid2';
+import EditIcon from '@mui/icons-material/Edit';
+import AddIcon from '@mui/icons-material/Add';
+import { Skeleton } from '@mui/material';
 import { reverse as _reverse } from 'lodash';
-import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
 import { BsPerson } from 'react-icons/bs';
 import { FcApproval, FcDisapprove } from 'react-icons/fc';
@@ -24,7 +24,6 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import FullScreenDialog from '../../components/Helpers/FullScreenDialog';
 import OpportunityInAccordian from '../../components/OpportunityInAccordian/OpportunityInAccordian';
-import ProcessFlow from '../../components/ProcessFlow';
 import ProjectInAccordion from '../../components/ProjectInAccordion/ProjectInAccordion';
 import QuickLinks, { IQuickLinks } from '../../components/QuickLinks/QuickLinks';
 import QuotesInAccordion from '../../components/QuotesInAccordion/QuotesInAccordion';
@@ -444,20 +443,22 @@ export default function AccountDetailPage(props) {
   ].filter((d) => d.show);
 
   const handleDeleteAccout = () => {
-    axiosInstance().put(`/${accountApi}/remove`, { ids: [deleteRecord?._id] }).then(({ data }) => {
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
-      });
-      if (deleteRecord?._id !== accountData?._id) {
-        fetchAccountData();
-      } else {
-        goBackToListing();
-      }
-      setShowDeleteConfirmBox(false);
-      setDeleteRecord(null);
-    })
+    axiosInstance()
+      .put(`/${accountApi}/remove`, { ids: [deleteRecord?._id] })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        if (deleteRecord?._id !== accountData?._id) {
+          fetchAccountData();
+        } else {
+          goBackToListing();
+        }
+        setShowDeleteConfirmBox(false);
+        setDeleteRecord(null);
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
         setShowDeleteConfirmBox(false);
@@ -565,40 +566,6 @@ export default function AccountDetailPage(props) {
       });
   };
 
-  const handleMarkAsCompleted = (data) => {
-    setShowAtLast(false);
-    setIsProcessing(true);
-    let tempActiveStep = data && data?.isSetBackStep ? activeStep - 1 : activeStep < steps.length - 1 ? activeStep + 1 : activeStep;
-    if (tempActiveStep == steps.length - 1 && showAdditionalField) {
-      setOpenAdditionalDialog(true);
-    } else {
-      let processFieldName = '';
-      const accountFieldData = accountFields.map((f) => {
-        if (f.fieldData.type == 'process') {
-          processFieldName = f.fieldData.fieldName;
-        }
-        return f.fieldData;
-      });
-
-      const updatedData = {
-        ...getObjKeysWithValues(accountData, accountFieldData),
-        [processFieldName]: steps[tempActiveStep].text,
-        _id: accountData._id
-      };
-
-      axiosInstance()
-        .put(`${accountApi}`, updatedData)
-        .then(() => {
-          fetchAccountData();
-          setIsProcessing(false);
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-          setIsProcessing(false);
-        });
-    }
-  };
-
   const handleEntityChange = (id) => {
     dispatch({ type: SET_SELECTED_ENTITY, payload: id });
   };
@@ -638,42 +605,37 @@ export default function AccountDetailPage(props) {
                 onClick={() => {
                   setShowApproveDisapproveConfirmBox(true);
                 }}
-                borderColor={accountData.staticData?.approved ? 'red' : 'none'}
                 iconForMobile={accountData.staticData?.approved ? <FcDisapprove size={21} /> : <FcApproval size={21} />}
-                color={accountData.staticData?.approved ? 'secondary' : 'primary'}
+                buttonType={accountData.staticData?.approved ? 'red' : 'none'}
+                textColor={accountData.staticData?.approved ? 'red' : 'white'}
+                backgroundColor={accountData.staticData?.approved ? 'none' : 'theme'}
               >
                 {accountData.staticData?.approved ? 'Disapprove' : 'Approve'}
               </ThemeButton>
             )}
-
             {permissions && permissions[accountResource] && permissions[accountResource].isUpdate && allowedToEdit && (
-              <Button variant={isMobile ? 'text' : 'contained'} size="small" onClick={handleOpneUpdateDialog} className={'btn-outline-v1'}>
-                {isMobile ? <Edit /> : 'Edit'}
-              </Button>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpneUpdateDialog} mobileTooltip={'Edit'}>
+                {'Edit'}
+              </ThemeButton>
             )}
             {permissions && permissions[accountResource] && permissions[accountResource].isDelete && allowedToDelete && (
               <DeleteButton
                 text="Delete"
                 onClick={() => {
-                  setDeleteRecord(accountData)
-                  setShowDeleteConfirmBox(true)
-                }} />
+                  setDeleteRecord(accountData);
+                  setShowDeleteConfirmBox(true);
+                }}
+              />
             )}
             <ActivityButton referenceId={accountData?._id} resource={accountResource} resourceLabel={accountData?.accountName} />
           </Box>
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <ProcessFlow
-          disableBackNext={permissions && permissions[accountResource] && permissions[accountResource].isUpdate && allowedToEdit ? false : true}
-          steps={steps}
-          activeStep={activeStep}
-          handleMarkAsCompleted={handleMarkAsCompleted}
-        />
         {loading ? (
           <Grid container spacing={2}>
             {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
-              <Grid item sm={6} md={6}>
+              <Grid size={{ sm: 6, md: 6 }}>
                 <Skeleton variant="text" width="100px" height="16px" />
                 <Box marginY={1} />
                 <Skeleton width="100%" height="50px" />
@@ -754,7 +716,7 @@ export default function AccountDetailPage(props) {
                   )}
                 </div>
                 <Box mb={2}>
-                  <Grid item xs={12}>
+                  <Grid size={{ xs: 12 }}>
                     <QuickLinks quickLinks={quickLinks} />
                   </Grid>
                 </Box>
@@ -796,7 +758,7 @@ export default function AccountDetailPage(props) {
                                   {relatedContactsLoading ? (
                                     <CommonSkeleton lenArray={[...Array(4).keys()]} />
                                   ) : (
-                                    <Grid item xs={12} sm={12} md={6} lg={4}>
+                                    <Grid size={{ xs: 12, sm: 12, md: 6, lg: 4 }}>
                                       <Card className="detailCard card-v1" variant="outlined">
                                         <CardContent className="card-link">
                                           <Box>
@@ -839,7 +801,7 @@ export default function AccountDetailPage(props) {
                                             </Typography>
                                           </Box>
                                           <Grid container>
-                                            <Grid item xs={12} sm={6}>
+                                            <Grid size={{ xs: 12, sm: 6 }}>
                                               <DisplayData
                                                 label="Title"
                                                 value={accountData?.staticData?.lead?.title || '-'}
@@ -875,7 +837,7 @@ export default function AccountDetailPage(props) {
                   canDelete={permissions && permissions[accountResource] && permissions[accountResource].isDelete}
                   handleDelete={(data) => {
                     setDeleteRecord(data);
-                    setShowDeleteConfirmBox(true)
+                    setShowDeleteConfirmBox(true);
                   }}
                   accountResource={accountResource}
                 />

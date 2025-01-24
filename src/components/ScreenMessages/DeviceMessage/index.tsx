@@ -1,8 +1,8 @@
-import { Button } from '@material-ui/core';
-import { ArrowBack } from '@material-ui/icons';
+import { ArrowBack } from '@mui/icons-material';
 import { FC, useEffect, useMemo, useState } from 'react';
 import { isDesktop, isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 interface DeviceMessageProps {
   devices?: TDevices[];
@@ -55,17 +55,16 @@ const DeviceMessage: FC<DeviceMessageProps> = ({
         <div className="px-2 text-center">
           <h1 className="mb-2 text-[20px] font-bold">{message}</h1>
           <p className="mb-3 text-[14px]">{description}</p>
-          <Button
-            startIcon={<ArrowBack className="mr-2" />}
+          <ThemeButton
             onClick={() => {
               history.replace(prvPathname);
             }}
-            variant="contained"
+            buttonType="theme"
             className="no-shadow"
             style={{ background: 'var(--primary)', color: 'white' }}
           >
-            Back
-          </Button>
+            <ArrowBack className="mr-2" /> Back
+          </ThemeButton>
         </div>
       </div>
     </div>

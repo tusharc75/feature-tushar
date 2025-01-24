@@ -1,5 +1,5 @@
-import { IconButton, IconButtonProps } from '@material-ui/core';
-import { MoreVert } from '@material-ui/icons';
+import { IconButton, IconButtonProps } from '@mui/material';
+import { MoreVert } from '@mui/icons-material';
 import ButtonMenu, { ButtonMenuProps } from 'src/components/ButtonMenu';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
@@ -17,7 +17,7 @@ const NewActionButton = <D,>({ items, itemsVisibleCount = 2, disabled, ...rest }
       {visibleItems.map((item) => {
         const { label, ...rest } = item;
         return (
-          <ThemeButton borderColor="theme" key={item.label} iconForMobile={false} {...(rest as any)}>
+          <ThemeButton buttonType="themeBorder" key={item.label} iconForMobile={false} {...(rest as any)}>
             {label}
           </ThemeButton>
         );
@@ -29,7 +29,12 @@ const NewActionButton = <D,>({ items, itemsVisibleCount = 2, disabled, ...rest }
           slot={
             ((props) => (
               <HtmlTooltip title="More Actions">
-                <IconButton {...(props as IconButtonProps)} size="small" style={{ width: 32, height: 32 }} className="new-dropdown-v1">
+                <IconButton
+                  {...(props as IconButtonProps)}
+                  sx={{ width: 32, height: 32, borderRadius: '4px', ...props?.sx }}
+                  size="small"
+                  className="new-dropdown-v1"
+                >
                   <MoreVert />
                 </IconButton>
               </HtmlTooltip>

@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Box, IconButton, Menu, MenuItem } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
@@ -8,10 +9,10 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { CHILD_RESOURCE } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
-import AddIcon from '@material-ui/icons/Add';
-import { KeyboardArrowDown } from '@material-ui/icons';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import AddIcon from '@mui/icons-material/Add';
+import { KeyboardArrowDown } from '@mui/icons-material';
 import { flattenArray } from 'src/constants/columns';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import MaterialDialog from './MaterialDialog';
@@ -19,6 +20,7 @@ import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -264,36 +266,32 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1}>
         <Box display="flex" alignItems="center">
-          <Button
-            variant="outlined"
-            size="small"
+          <ThemeButton
+            mobileTooltip="Add"
+            iconForMobile={<AddIcon />}
             onClick={() => setAddDialog({ open: true, type: 'serializedAsset' })}
             startIcon={<AddIcon />}
-            color="primary"
           >
             Add
-          </Button>
+          </ThemeButton>
         </Box>
         <Box display="flex">
           <HtmlTooltip title={Boolean(selectedRecords && selectedRecords.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
             <span>
-              <Button
-                variant="outlined"
-                color="primary"
-                size="small"
+              <ThemeButton
                 disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)}
                 onClick={openActions}
                 endIcon={<KeyboardArrowDown fontSize="small" />}
-                className="new-dropdown-v1"
+                mobileTooltip="Actions"
+                buttonType="yellow"
               >
                 Actions
-              </Button>
+              </ThemeButton>
             </span>
           </HtmlTooltip>
           <Menu
             anchorEl={anchorActionEl}
             keepMounted
-            getContentAnchorEl={null}
             anchorOrigin={{
               vertical: 'bottom',
               horizontal: 'left'

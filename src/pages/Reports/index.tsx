@@ -1,5 +1,6 @@
-import { Box, Button } from '@material-ui/core';
-import { AiFillCalendar } from 'react-icons/ai';
+import { Box } from '@mui/material';
+import PhotoFilterIcon from '@mui/icons-material/PhotoFilter';
+import DateRangeIcon from '@mui/icons-material/DateRange';
 import { Link } from 'react-router-dom';
 import Layout from 'src/pages/Reports/Layout';
 import SidebarContent from 'src/pages/Reports/SidebarContent';
@@ -9,6 +10,7 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ReportsContent from 'src/pages/Reports/ReportsContent';
 import routes from 'src/components/Helpers/Routes';
 import { useMemo } from 'react';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ReportsCenter = () => {
   const state = useReport();
@@ -33,21 +35,20 @@ const ReportsCenter = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <Link to="/custom-report">
-              <Button variant="outlined" className="btn-outline-v1" size="small" endIcon={<AiFillCalendar />}>
+              <ThemeButton iconForMobile={<PhotoFilterIcon />} startIcon={<PhotoFilterIcon />} mobileTooltip={`Custom Report`}>
                 Custom Report
-              </Button>
+              </ThemeButton>
             </Link>
             {permissions?.scheduleReport?.isRead && (
               <Link to={`/schedule-report`}>
-                <Button variant="outlined" className="btn-outline-v1" size="small" endIcon={<AiFillCalendar />}>
+                <ThemeButton iconForMobile={<DateRangeIcon />} startIcon={<DateRangeIcon />} mobileTooltip={`Schedule Report`}>
                   Schedule Report
-                </Button>
+                </ThemeButton>
               </Link>
             )}
           </Box>
         </Box>
       </Box>
-
       <Layout sidebarHead={<SidebarHead state={state} />} sidebarContent={<SidebarContent state={state} />}>
         {({ isSidebarOpen, isMobile }) => <ReportsContent state={state} isSidebarOpen={isSidebarOpen} isMobile={isMobile} />}
       </Layout>

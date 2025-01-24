@@ -1,7 +1,7 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { Box, IconButton, MenuItem } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -23,7 +23,7 @@ import {
   prepareDataForGrid,
   sidebarResource
 } from 'src/constants/helpers';
-import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import { cloneDisable, deleteDisable, ownerAndColaborator } from 'src/constants/messageHelpers';
 import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { findAll, findOne, objectStore } from 'src/constants/indexdbhelper';
@@ -59,7 +59,7 @@ const FieldTicket = ({
   const [allFields, setAllFields] = useState([]);
 
   const {
-    state: { user, permissions, selectedEntity,resources }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   const [columns, setColumns] = useState(null);
   const { isOffline } = useContext(CustomOfflineContext);
@@ -218,8 +218,14 @@ const FieldTicket = ({
   };
 
   const handleDelete = () => {
+    let ids = [];
+    if (deleteRecord) {
+      ids.push(deleteRecord._id);
+    } else {
+      ids = selectedRecords.map((m) => m._id);
+    }
     axiosInstance()
-      .put(`${routes.fieldTicket.path}/remove`, { ids: deleteRecord })
+      .put(`${routes.fieldTicket.path}/remove`, { ids })
       .then(() => {
         fetchData();
         fetchServiceOrderData();
@@ -284,7 +290,7 @@ const FieldTicket = ({
                 size="small"
                 aria-label="Delete"
                 onClick={() => {
-                  setDeleteRecord([row?.original?._id]);
+                  setDeleteRecord(row?.original);
                   setShowDeleteConfirmBox(true);
                 }}
               >
@@ -319,7 +325,7 @@ const FieldTicket = ({
           disabled={!selectedRecords?.every((s) => s.canDelete)}
           onClick={() => {
             setShowDeleteConfirmBox(true);
-            setDeleteRecord(selectedRecords.map((d) => d._id));
+            setDeleteRecord(null);
           }}
           id={'delete-menu-item'}
         >
@@ -344,7 +350,11 @@ const FieldTicket = ({
     <Fragment>
       {resource === sidebarResource.fieldServiceOrder && (
         <DetailsPageHeader
-          isAddButtonVisible={allowedToEdit && !serviceOrderData?.quotation}
+          isAddButtonVisible={true}
+          addButtonProps={{
+            disabled: allowedToEdit && !serviceOrderData?.quotation ? false : true,
+            tooltip: !allowedToEdit ? ownerAndColaborator : serviceOrderData?.quotation ? `Converted from ${resources?.quotation?.titleSingular} you can not perform this action` : ''
+          }}
           addButtonMenuItems={addButtonMenuItems()}
           isActionButtonVisible={!isOffline}
           actionButtonMenuItems={actionButtonMenuItems()}
@@ -389,7 +399,7 @@ const FieldTicket = ({
       {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.fieldTicket?.titleSingular?.toLowerCase()} : ${deleteRecord?.fieldTicketNumber}` : `selected ${resources?.fieldTicket?.titlePlural?.toLowerCase()}`} ?`}              
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.fieldTicket?.titleSingular?.toLowerCase()} : ${deleteRecord?.fieldTicketNumber}` : `selected ${resources?.fieldTicket?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

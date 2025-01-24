@@ -1,8 +1,7 @@
-import { IconButton, TextField } from '@material-ui/core';
-import Box from '@material-ui/core/Box/Box';
-import Grid from '@material-ui/core/Grid/Grid';
+import { IconButton, TextField } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Grid from '@mui/material/Grid2';
 import { camelCase, capitalize } from 'lodash';
-import { Link } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -11,7 +10,8 @@ import DurationFilter from 'src/components/DurationFilter';
 import { useAppTheme } from 'src/constants/AppConfig';
 import {
   PRODUCT_SERIAL_NUMBER_STATUS,
-  dateTimeFormat,
+  dateFormatToSend,
+  displayDateTime,
   gridLoadingTimeout,
   prepareDataForGrid,
   productInventory,
@@ -23,11 +23,11 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import RevertQtyDialog from './RevertQtyDialog';
-import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
-import { Autocomplete } from '@material-ui/lab';
-import { Autorenew } from '@material-ui/icons';
+import Autocomplete from '@mui/material/Autocomplete';
+import { Autorenew } from '@mui/icons-material';
 import { FiExternalLink } from 'react-icons/fi';
+import dayjs from 'dayjs';
 
 export const ReferenceRenderer = (row) => {
   return (
@@ -100,7 +100,7 @@ const History = ({ product, warehouse, storageLocation }) => {
     serialNumber: []
   });
   const [duration, setDuration] = useState({
-    from: new Date(moment().subtract('1', 'year').calendar()),
+    from: new Date(dayjs().subtract(1, 'year').toDate()),
     to: new Date()
   });
 
@@ -159,8 +159,8 @@ const History = ({ product, warehouse, storageLocation }) => {
       deepFilters.push({
         field: 'date',
         term: {
-          from: moment(duration?.from).format('MM/DD/YYYY'),
-          to: moment(duration?.to).format('MM/DD/YYYY')
+          from: dateFormatToSend(duration?.from),
+          to: dateFormatToSend(duration?.to)
         }
       });
     }
@@ -197,8 +197,8 @@ const History = ({ product, warehouse, storageLocation }) => {
       Cell: ({ row }) => (
         <div>
           {row?.original?.date ? (
-            <h5 className="text-truncate" title={moment(row?.original?.date)?.format(dateTimeFormat)}>
-              {moment(row?.original?.date)?.format(dateTimeFormat)}
+            <h5 className="text-truncate" title={displayDateTime(row?.original?.date)}>
+              {displayDateTime(row?.original?.date)}
             </h5>
           ) : (
             <NoDataCell />
@@ -473,8 +473,8 @@ const History = ({ product, warehouse, storageLocation }) => {
       Cell: ({ row }) => (
         <div>
           {row?.original?.transactionDate ? (
-            <h5 className="text-truncate" title={moment(row?.original?.transactionDate)?.format(dateTimeFormat)}>
-              {moment(row?.original?.transactionDate)?.format(dateTimeFormat)}
+            <h5 className="text-truncate" title={displayDateTime(row?.original?.transactionDate)}>
+              {displayDateTime(row?.original?.transactionDate)}
             </h5>
           ) : (
             <NoDataCell />
@@ -549,12 +549,12 @@ const History = ({ product, warehouse, storageLocation }) => {
       {warehouseOptions ? (
         <div className="md:pr-[82px]">
           <Grid container spacing={2} justifyContent="space-between">
-            <Grid item md={3} sm={6} xs={12}>
+            <Grid size={{ md: 3, sm: 6, xs: 12 }}>
               <Autocomplete
                 options={warehouseOptions}
                 getOptionLabel={(option: any) => option.optionLabel}
                 disableClearable
-                getOptionSelected={(option: any, val) => option.optionValue === val}
+                isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                 value={
                   warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
                     ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
@@ -567,16 +567,16 @@ const History = ({ product, warehouse, storageLocation }) => {
                   }
                 }}
                 renderInput={(params) => (
-                  <TextField {...params} margin="dense" name="plant" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
+                  <TextField {...params} margin="dense" size="small" name="plant" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
                 )}
               />
             </Grid>
-            <Grid item md={3} sm={6} xs={12}>
+            <Grid size={{ md: 3, sm: 6, xs: 12 }}>
               {user?.user?.brandPolicy?.storageLocation && (
                 <Autocomplete
                   options={storageLocationOptions.filter((item) => item.warehouse === selectedWarehouse)}
                   getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                  getOptionSelected={(option: any, val) => option.optionValue === val}
+                  isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                   value={
                     storageLocationOptions.filter((data) => data.optionValue === selectedStorageLocation).length
                       ? storageLocationOptions.filter((data) => data.optionValue === selectedStorageLocation)[0]
@@ -586,12 +586,12 @@ const History = ({ product, warehouse, storageLocation }) => {
                     setSelectedStorageLocation(val?.optionValue);
                   }}
                   renderInput={(params) => (
-                    <TextField {...params} margin="dense" name="storageLocation" label="Storage Location" variant="outlined" fullWidth />
+                    <TextField {...params} margin="dense" size="small" name="storageLocation" label="Storage Location" variant="outlined" fullWidth />
                   )}
                 />
               )}
             </Grid>
-            <Grid item md={6} sm={12} xs={12}>
+            <Grid size={{ md: 6, sm: 12, xs: 12 }}>
               <Box mt={1}>
                 <DurationFilter label={''} defaultTimeFrame="1-year" duration={duration} setDuration={setDuration} />
               </Box>
@@ -601,7 +601,7 @@ const History = ({ product, warehouse, storageLocation }) => {
       ) : (
         <div className="min-h-[50px]" />
       )}
-      <Grid item xs={12} md={12} sm={12}>
+      <Grid size={{ xs: 12, md: 12, sm: 12 }}>
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 300px)'}

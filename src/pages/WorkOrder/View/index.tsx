@@ -1,17 +1,17 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
 import ReactFlow, { ControlButton, Controls, ReactFlowProvider } from 'react-flow-renderer';
-import { useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { COLOUR_MASTER, WORKORDER_SERVICE_COLOR, WORKORDER_SERVICE_STEP_STATUS, WORK_ORDER_STATUS } from 'src/constants/helpers';
+import { COLOUR_MASTER, WORKORDER_SERVICE_STEP_STATUS, WORK_ORDER_STATUS } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { MdZoomOutMap } from 'react-icons/md';
-import { ExpandLess, ExpandMore } from '@material-ui/icons';
-import { Box, Button, Paper, Typography } from '@material-ui/core';
+import { ExpandLess, ExpandMore } from '@mui/icons-material';
+import { Box, Paper, Typography } from '@mui/material';
 import _, { capitalize } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const customNodeStyles = {
   workOrder: {
@@ -56,7 +56,6 @@ const WorkOrderViews = (props) => {
 
   const [flowData, setFlowData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const [fullScreenOpen, setFullScreenOpen] = useState(false);
   const [colorInfo, setColorInfo] = useState(false);
@@ -252,20 +251,16 @@ const WorkOrderViews = (props) => {
 
   return (
     <ContentFullScreen fullScreen={fullScreenOpen} setFullScreen={setFullScreenOpen}>
-      <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
+      <Box display="flex" flexDirection="column">
         <Box>
-          <Button
-            variant={'outlined'}
-            color="default"
-            size="small"
+          <ThemeButton
             onClick={() => {
               setColorInfo(!colorInfo);
             }}
-            aria-controls="action-menu"
             endIcon={colorInfo ? <ExpandLess /> : <ExpandMore />}
           >
-            {'Color Info'}
-          </Button>
+            Color Info
+          </ThemeButton>
         </Box>
         {colorInfo && (
           <Box>
@@ -296,7 +291,7 @@ const WorkOrderViews = (props) => {
           </Box>
         )}
       </Box>
-      <div style={fullScreenOpen ? { height: '95vh' } : { height: '68vh' }}>
+      <div style={fullScreenOpen ? { height: '95vh' } : { height: '75vh' }}>
         {!loading ? (
           flowData.length ? (
             <Fragment>

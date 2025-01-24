@@ -1,8 +1,7 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import { Edit } from '@material-ui/icons';
-import { camelCase } from 'lodash';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import EditIcon from '@mui/icons-material/Edit';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -11,7 +10,7 @@ import ActivityButton from 'src/components/Activity/ActivityButton';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import Steps, { getIndex } from 'src/components/Steps';
 import {
@@ -205,22 +204,19 @@ const PurchaseRequisitionDetail = () => {
           <Box className="control-buttons-v1">
             <>
               {purchaseRequisitionData?.material?.length > 0 && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  disabled={purchaseRequisitionData?.status === PURCHASE_REQUISITION_STATUS.converted ? true : false}
-                  className="btn-outline-v1"
+                <ThemeButton
                   onClick={() => {
                     setOrderDialog({ open: true });
                   }}
-                  style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                  disabled={purchaseRequisitionData?.status === PURCHASE_REQUISITION_STATUS.converted ? true : false}
                 >
                   {purchaseRequisitionData?.status === PURCHASE_REQUISITION_STATUS.converted ? PURCHASE_REQUISITION_STATUS.converted : 'Convert'}
-                </Button>
+                </ThemeButton>
               )}
               {permissions?.purchaseRequisition?.isUpdate && allowedToEdit && (
-                <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
-                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                </Button>
+                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                  {'Edit'}
+                </ThemeButton>
               )}
               {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               <ActivityButton
@@ -241,9 +237,9 @@ const PurchaseRequisitionDetail = () => {
         <TabPanel value={tabValue} index={0}>
           <Box>
             {loading || !fields?.length ? (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-              </Grid>
+              <div className="p-2">
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+              </div>
             ) : (
               <DetailsPage data={purchaseRequisitionData} fields={fields} />
             )}
@@ -251,11 +247,11 @@ const PurchaseRequisitionDetail = () => {
         </TabPanel>
         <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
           <TabPanel value={tabValue} index={1}>
-            <Grid item xs={12} sm={12} md={12} lg={12}>
+            <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
               {!purchaseRequisitionData ? (
-                <Grid container spacing={2} style={{ padding: '8px' }}>
-                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                </Grid>
+                <div className="p-2">
+                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                </div>
               ) : (
                 <>
                   {stepList[currentStep]?.name === 'DOA' && (
@@ -269,7 +265,7 @@ const PurchaseRequisitionDetail = () => {
                       <ShowDoa status={purchaseRequisitionData?.doa_status} data={DOAData} />
                     </Box>
                   )}
-                  <Grid item xs={12} sm={12} md={12} lg={12}>
+                  <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
                     <Steps
                       isNextStep={false}
                       nextStep={nextStep}

@@ -1,9 +1,9 @@
-import { Box, MenuItem } from '@material-ui/core';
-import IconButton from '@material-ui/core/IconButton';
-import TextField from '@material-ui/core/TextField';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, MenuItem } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
+import TextField from '@mui/material/TextField';
+import DeleteIcon from '@mui/icons-material/Delete';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
+import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { RiBillLine } from 'react-icons/ri';
@@ -27,6 +27,8 @@ import { gridLoadingTimeout, prepareDataForGrid, product, sidebarResource } from
 import axios, { CancelTokenSource } from 'axios';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createResourceFlow } from 'src/components/CustomIntro/walkmeSteps';
+import ScheduledMaintenance from 'src/pages/Product/ScheduledMaintenance';
+import HandymanIcon from '@mui/icons-material/Handyman';
 
 const ignoreField = ['qty', 'priceTemplate'];
 
@@ -57,6 +59,7 @@ const Product = () => {
   const [productTypeList, setProductTypeList] = useState([]);
   const [isProductType, setIsProductType] = useState(false);
   const [productColumns, setProductColumns] = useState(null);
+  const [openScheduledMaintenance, setOpenScheduledMaintenance] = useState(false);
   const {
     state: { permissions, selectedEntity, resources }
   }: any = useData();
@@ -296,11 +299,11 @@ const Product = () => {
         <MenuItem
           disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
           onClick={() => {
-            if (selectedRecords.length === 1){
+            if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-              }else{
-                setDeleteRecord(null)
-              }
+            } else {
+              setDeleteRecord(null);
+            }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -346,74 +349,83 @@ const Product = () => {
     <section className="main-container-v1">
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ title: resources?.product?.titlePlural }]} />
-        <ImportExportLinks
-          module={resources?.product?.titlePlural}
-          permission={permissions.product}
-          api={product.api}
-          refrenceId={null}
-          onSuccessfulImport={(isImportedSuccessfully) => {
-            if (isImportedSuccessfully) {
+        <div className="flex items-center gap-2">
+          <ImportExportLinks
+            module={resources?.product?.titlePlural}
+            permission={permissions.product}
+            api={product.api}
+            refrenceId={null}
+            onSuccessfulImport={(isImportedSuccessfully) => {
+              if (isImportedSuccessfully) {
+                fetchData();
+              }
+            }}
+            isExportAllOrSomeFeature={true}
+            total={rowCount}
+            recordsToExport={selectedRecords?.length}
+            ids={selectedRecords?.map((obj) => obj._id)}
+            onExportToExcelSuccess={() => {
               fetchData();
-            }
-          }}
-          isExportAllOrSomeFeature={true}
-          total={rowCount}
-          recordsToExport={selectedRecords?.length}
-          ids={selectedRecords?.map((obj) => obj._id)}
-          onExportToExcelSuccess={() => {
-            fetchData();
-          }}
-          additionalParams={getQueryString(true)}
-          extraImportExportLinks={[
-            {
-              title: 'Child Product Template',
-              api: `${product.api}/unknown/bom/template`,
-              type: 'download'
-            },
-            {
-              title: 'Child Product Export',
-              api: `${product.api}/unknown/bom/template?export=true${selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''}`,
-              type: 'export'
-            },
-            {
-              title: 'Child Product Import',
-              api: `${product.api}/unknown/bom/import`,
-              type: 'import'
-            },
-            {
-              title: 'Service/Consumable Template',
-              api: `${product.api}/unknown/service-master/template`,
-              type: 'download'
-            },
-            {
-              title: 'Service/Consumable Export',
-              api: `${product.api}/unknown/service-master/template?export=true${selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
+            }}
+            additionalParams={getQueryString(true)}
+            extraImportExportLinks={[
+              {
+                title: 'Child Product Template',
+                api: `${product.api}/unknown/bom/template`,
+                type: 'download'
+              },
+              {
+                title: 'Child Product Export',
+                api: `${product.api}/unknown/bom/template?export=true${selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''}`,
+                type: 'export'
+              },
+              {
+                title: 'Child Product Import',
+                api: `${product.api}/unknown/bom/import`,
+                type: 'import'
+              },
+              {
+                title: 'Service/Consumable Template',
+                api: `${product.api}/unknown/service-master/template`,
+                type: 'download'
+              },
+              {
+                title: 'Service/Consumable Export',
+                api: `${product.api}/unknown/service-master/template?export=true${
+                  selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
                 }`,
-              type: 'export'
-            },
-            {
-              title: 'Service/Consumable Import',
-              api: `${product.api}/unknown/service-master/import`,
-              type: 'import'
-            },
-            {
-              title: 'Service Package Template',
-              api: `${product.api}/unknown/package/template`,
-              type: 'download'
-            },
-            {
-              title: 'Service Package Export',
-              api: `${product.api}/unknown/package/template?export=true${selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
+                type: 'export'
+              },
+              {
+                title: 'Service/Consumable Import',
+                api: `${product.api}/unknown/service-master/import`,
+                type: 'import'
+              },
+              {
+                title: 'Service Package Template',
+                api: `${product.api}/unknown/package/template`,
+                type: 'download'
+              },
+              {
+                title: 'Service Package Export',
+                api: `${product.api}/unknown/package/template?export=true${
+                  selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
                 }`,
-              type: 'export'
-            },
-            {
-              title: 'Service Package Import',
-              api: `${product.api}/unknown/package/import`,
-              type: 'import'
-            }
-          ]}
-        />
+                type: 'export'
+              },
+              {
+                title: 'Service Package Import',
+                api: `${product.api}/unknown/package/import`,
+                type: 'import'
+              }
+            ]}
+          />
+          <HtmlTooltip title={'Schedule Maintenance'}>
+            <IconButton size="small" aria-label="Schedule Maintenance" onClick={() => setOpenScheduledMaintenance(true)}>
+              <HandymanIcon fontSize="small" color={'primary'} />
+            </IconButton>
+          </HtmlTooltip>
+        </div>
       </div>
       <CustomContainer>
         <ListingPageHeader
@@ -431,7 +443,7 @@ const Product = () => {
                 isProductType,
                 productTypeList,
                 productType,
-                setProductType,
+                setProductType
               }}
             />
           }
@@ -492,12 +504,20 @@ const Product = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.product?.titleSingular?.toLowerCase()} : ${deleteRecord?.productName || ''}` : `selected ${resources?.product?.titlePlural?.toLowerCase()}`} ?`}              
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.product?.titleSingular?.toLowerCase()} : ${deleteRecord?.productName || ''}` : `selected ${resources?.product?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
           }}
           onOk={handleDelete}
+        />
+      )}
+
+      {openScheduledMaintenance && (
+        <ScheduledMaintenance
+          onClose={() => {
+            setOpenScheduledMaintenance(false);
+          }}
         />
       )}
     </section>
@@ -518,7 +538,7 @@ const LeftSideContent = ({
   isProductType,
   productTypeList,
   productType,
-  setProductType,
+  setProductType
 }) => {
   return (
     <>
@@ -529,7 +549,7 @@ const LeftSideContent = ({
             options={productCategoryList}
             getOptionLabel={(option: any) => (option ? option.name : '')}
             size="small"
-            getOptionSelected={(option: any, val) => option._id === val}
+            isOptionEqualToValue={(option: any, val) => option._id === val}
             value={
               productCategoryList.filter((data) => data._id === productCategory).length
                 ? productCategoryList.filter((data) => data._id === productCategory)[0]
@@ -549,7 +569,7 @@ const LeftSideContent = ({
           className="flex-grow sm:max-w-[250px] md:min-w-[250px] md:flex-grow-0"
           options={productTemplateList}
           getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-          getOptionSelected={(option: any, val) => option.optionValue === val}
+          isOptionEqualToValue={(option: any, val) => option.optionValue === val}
           value={
             productTemplateList.filter((data) => data.optionValue === productTemplate).length
               ? productTemplateList.filter((data) => data.optionValue === productTemplate)[0]
@@ -568,7 +588,7 @@ const LeftSideContent = ({
           className="flex-grow sm:max-w-[250px] md:min-w-[250px] md:flex-grow-0"
           options={productTypeList}
           getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-          getOptionSelected={(option: any, val) => option.optionValue === val}
+          isOptionEqualToValue={(option: any, val) => option.optionValue === val}
           value={
             productTypeList.filter((data) => data.optionValue === productType).length
               ? productTypeList.filter((data) => data.optionValue === productType)[0]

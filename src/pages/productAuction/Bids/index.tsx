@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import { dateTimeFormat, gridLoadingTimeout } from 'src/constants/helpers';
+import { displayDateTime, gridLoadingTimeout } from 'src/constants/helpers';
 import { isMobile } from 'react-device-detect';
-import moment from 'moment';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 
 const renderedFrom = 'bids';
 
@@ -37,7 +36,7 @@ const BidsPage = ({ bids }) => {
         Header: 'Date',
         width: 120,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{moment(row?.original?.date)?.format(dateTimeFormat)}</p>
+        Cell: ({ row }) => <p className="text-truncate">{displayDateTime(row?.original?.date)}</p>
       }
     ];
     setColumns(columns);

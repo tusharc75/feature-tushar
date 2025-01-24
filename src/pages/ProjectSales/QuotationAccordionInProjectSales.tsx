@@ -1,17 +1,17 @@
-import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@material-ui/core';
-import { MoreVert } from '@material-ui/icons';
-import BusinessOutlinedIcon from '@material-ui/icons/BusinessOutlined';
-import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
-import TrendingUpOutlinedIcon from '@material-ui/icons/TrendingUpOutlined';
+import { MoreVert } from '@mui/icons-material';
+import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import TrendingUpOutlinedIcon from '@mui/icons-material/TrendingUpOutlined';
+import { Box, Button, Card, CardContent, IconButton, Menu, MenuItem, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import React, { useContext, useEffect, useState } from 'react';
 import { FaArrowAltCircleDown } from 'react-icons/fa';
 import { IoCalendarOutline } from 'react-icons/io5';
 import DisplayData from 'src/components/CardDisplayData';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { displayDate } from 'src/constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
@@ -20,7 +20,6 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import { formatAmountWithCurrency } from '../../constants/helpers';
 import ManageQuotationDialog from '../../pages/Quotation/ManageQuotationDialog';
-import { displayDate } from '../../services/util';
 import styles from './ProjectSales.module.scss';
 
 export default function QuotationAccordionInProjectSales({
@@ -138,7 +137,7 @@ export default function QuotationAccordionInProjectSales({
         </p>
       )
     ) : (
-      <span className="d-flex gap-2 align-items-center">
+      <span className="d-flex align-items-center gap-2">
         <Typography className="detailName">{obj.quotationNumber}</Typography>{' '}
         <HtmlTooltip title={`${obj.quotationNumber} belongs to different entity`}>
           <InfoOutlinedIcon fontSize="small" />
@@ -167,25 +166,23 @@ export default function QuotationAccordionInProjectSales({
       </Menu>
       <Accordion expanded={expandQuotation} onChange={() => setExpandQuotation(!expandQuotation)}>
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header pos_rel">
-          <Grid container>
-            <Grid item xs={8} alignItems="center">
-              <Box component="div" display="flex" alignItems="center" flexGrow={1}>
-                <IconButton size="small" onClick={() => setExpandQuotation(!expandQuotation)}>
-                  {expandQuotation === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                </IconButton>
-                <Box padding="5px">
-                  <Typography variant="subtitle2">Quotations ({quotations?.length || 0})</Typography>
-                </Box>
-              </Box>
-            </Grid>
-            <Grid item xs={4} container justify="flex-end" alignItems="center">
-              {(permissions?.isUpdate && isTeamMember) || isManager ? (
-                <IconButton aria-haspopup="true" color="primary" size="small" onClick={handleClick}>
-                  <MoreVert />
-                </IconButton>
-              ) : null}
-            </Grid>
-          </Grid>
+          <div className="flex items-center justify-between">
+            <Typography variant="subtitle2">Quotations ({quotations?.length || 0})</Typography>
+            {(permissions?.isUpdate && isTeamMember) || isManager ? (
+              <IconButton
+                aria-haspopup="true"
+                color="primary"
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  handleClick(e);
+                }}
+              >
+                <MoreVert />
+              </IconButton>
+            ) : null}
+          </div>
         </AccordionSummary>
         <AccordionDetails>
           <>
@@ -194,19 +191,19 @@ export default function QuotationAccordionInProjectSales({
                 {quotations && quotations?.length ? (
                   <Grid container className={styles.opportunity_layout}>
                     {quotations.slice(0, maxRecordsToShow).map((obj, i) => (
-                      <Grid item className={styles.opportunity_layout_container}>
+                      <Grid className={styles.opportunity_layout_container}>
                         <Card className="detailCard  card-v1" variant="outlined">
                           <CardContent className="card-link">
-                            <Grid item xs={12}>
+                            <Grid size={{ xs: 12 }}>
                               <Grid container className="detailCardHeader">
-                                <Grid item xs={6}>
+                                <Grid size={{ xs: 6 }}>
                                   {!isQuotationPrivate(obj) ? (
                                     quotationNameWithRedirect(obj)
                                   ) : obj?.privateAccess === true ? (
                                     [...obj.collaborator, obj.owner].includes(user.user?._id) ? (
                                       quotationNameWithRedirect(obj)
                                     ) : (
-                                      <span className="d-flex gap-2 align-items-center">
+                                      <span className="d-flex align-items-center gap-2">
                                         <Typography className="detailName">{obj.quotationNumber}</Typography>{' '}
                                         <HtmlTooltip title={`${obj.quotationNumber} is a Private Quotation`}>
                                           <InfoOutlinedIcon fontSize="small" />
@@ -217,7 +214,7 @@ export default function QuotationAccordionInProjectSales({
                                     quotationNameWithRedirect(obj)
                                   )}
                                 </Grid>
-                                <Grid item xs={6}>
+                                <Grid size={{ xs: 6 }}>
                                   <Box display="flex" alignItems="center" justifyContent="flex-end">
                                     {obj?.estimatedAmount ? (
                                       <Typography
@@ -242,7 +239,7 @@ export default function QuotationAccordionInProjectSales({
                               </Grid>
 
                               <Grid container>
-                                <Grid item xs={12} sm={6} md={6}>
+                                <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                                   {obj.expiryDate ? (
                                     <DisplayData
                                       key={i}
@@ -254,14 +251,14 @@ export default function QuotationAccordionInProjectSales({
                                     ''
                                   )}
                                 </Grid>
-                                <Grid item xs={12} sm={6} md={6} className={styles.opportunity_closed_date}>
+                                <Grid size={{ xs: 12, sm: 6, md: 6 }} className={styles.opportunity_closed_date}>
                                   {obj.incoTerms ? (
                                     <DisplayData key={i} label="Inco Terms" value={obj.incoTerms} icon={<BusinessOutlinedIcon />} />
                                   ) : (
                                     ''
                                   )}
                                 </Grid>
-                                <Grid item xs={12} sm={6} md={6}>
+                                <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                                   {obj.probability ? (
                                     <DisplayData key={i} label="Probability" value={`${obj.probability} %`} icon={<TrendingUpOutlinedIcon />} />
                                   ) : (

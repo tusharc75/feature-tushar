@@ -1,11 +1,12 @@
 import React from 'react';
-import { Grid, FormControl, InputLabel, Select, MenuItem, AppBar, Box, makeStyles } from '@material-ui/core';
-import { KeyboardDatePicker } from '@material-ui/pickers';
-import moment from 'moment';
+import { FormControl, InputLabel, Select, MenuItem, AppBar, Box, Theme } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { makeStyles } from '@mui/styles';
 import FormTypes from '../../components/Helpers/FormTypes';
-import { dateFormatForInputControl } from '../../constants/helpers';
+import CustomDatePicker from 'src/components/CustomDatePicker';
+import dayjs from 'dayjs';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   appBar: {
     padding: 0,
     height: '70px',
@@ -43,7 +44,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
   const [timeFrame, setTimeFrame] = React.useState<any>(null);
 
   React.useEffect(() => {
-    setTimeFrame(globalFilters.timeFrame)
+    setTimeFrame(globalFilters.timeFrame);
   }, [globalFilters.timeFrame]);
 
   React.useEffect(() => {
@@ -52,7 +53,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
         setGlobalFilters({
           ...globalFilters,
           between: {
-            from: new Date(moment().subtract('1', 'month').calendar()),
+            from: new Date(dayjs().subtract(1, 'month').toDate()),
             to: new Date()
           }
         });
@@ -62,7 +63,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
         setGlobalFilters({
           ...globalFilters,
           between: {
-            from: new Date(moment().subtract('3', 'months').calendar()),
+            from: new Date(dayjs().subtract(3, 'month').toDate()),
             to: new Date()
           }
         });
@@ -72,7 +73,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
         setGlobalFilters({
           ...globalFilters,
           between: {
-            from: new Date(moment().subtract('6', 'months').calendar()),
+            from: new Date(dayjs().subtract(6, 'month').toDate()),
             to: new Date()
           }
         });
@@ -82,7 +83,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
         setGlobalFilters({
           ...globalFilters,
           between: {
-            from: new Date(moment().subtract('1', 'year').calendar()),
+            from: new Date(dayjs().subtract(1, 'year').toDate()),
             to: new Date()
           }
         });
@@ -91,8 +92,8 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
         setGlobalFilters({
           ...globalFilters,
           between: {
-            from: new Date(moment().startOf('year').calendar()),
-            to: new Date(moment().endOf('year').calendar()),
+            from: new Date(dayjs().startOf('year').toDate()),
+            to: new Date(dayjs().endOf('year').toDate())
           }
         });
         break;
@@ -107,21 +108,21 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
     localStorage.setItem('selectedDashboard', selectedDashboard);
     setGlobalFilters((prevState: GlobalFiltersType) => ({ ...prevState, dashboardType: selectedDashboard }));
     if (dashboardList?.find((e) => e?.name === selectedDashboard)?.defaultDuration) {
-      setTimeFrame(dashboardList?.find((e) => e?.name === selectedDashboard)?.defaultDuration)
+      setTimeFrame(dashboardList?.find((e) => e?.name === selectedDashboard)?.defaultDuration);
     }
   };
 
   return (
-    <AppBar className={classes.appBar} position="sticky" elevation={0} style={{ zIndex: 1 }}>
+    <AppBar className={classes.appBar} position="sticky" elevation={0} sx={{ zIndex: 1, '--AppBar-background': 'var(--dark-primary, white)' }}>
       <Box pt={1}>
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <Grid container spacing={2}>
               {dashboardList.length !== 0 && (
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                   <FormControl disabled={disabled} fullWidth size="small" variant="outlined">
                     <InputLabel id="dashboard-type">Dashboard</InputLabel>
-                    <Select labelId="dashboard-type" id="type" value={globalFilters.dashboardType} onChange={handleSelectDashboard} label="Dashboard">
+                    <Select labelId="dashboard-type" id="type" value={globalFilters.dashboardType} onChange={handleSelectDashboard} label="Dashboard" size="small">
                       {dashboardList.map((d: { name: string; id: string }) => (
                         <MenuItem key={d.id} value={d.name}>
                           {d.name}
@@ -131,7 +132,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
                   </FormControl>
                 </Grid>
               )}
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <FormTypes
                   disabled={disabled}
                   fullWidth
@@ -153,10 +154,10 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
               </Grid>
             </Grid>
           </Grid>
-          {globalFilters?.timeFrame && globalFilters?.between &&
-            <Grid item xs={12} sm={12} md={6}>
+          {globalFilters?.timeFrame && globalFilters?.between && (
+            <Grid size={{ xs: 12, sm: 12, md: 6 }}>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={4}>
+                <Grid size={{ xs: 12, sm: 4 }}>
                   <FormControl disabled={disabled} fullWidth size="small" variant="outlined">
                     <InputLabel id="duration">Select Duration</InputLabel>
                     <Select
@@ -165,6 +166,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
                       value={timeFrame}
                       onChange={(e) => setTimeFrame(e.target.value)}
                       label="Select Duration"
+                      size="small"
                     >
                       <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
                       <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
@@ -175,38 +177,26 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
                     </Select>
                   </FormControl>
                 </Grid>
-                <Grid item xs={6} sm={4}>
-                  <KeyboardDatePicker
+                <Grid size={{ xs: 6, sm: 4 }}>
+                  <CustomDatePicker
                     disabled={timeFrame !== 'custom' || disabled}
-                    inputVariant="outlined"
-                    variant="inline"
                     fullWidth
                     size="small"
-                    openTo="year"
-                    autoOk
-                    format={dateFormatForInputControl}
                     maxDate={globalFilters.between.to}
                     label="From"
-                    views={['year', 'month', 'date']}
                     value={globalFilters.between.from}
                     onChange={(date) => {
                       setGlobalFilters({ ...globalFilters, between: { ...globalFilters.between, from: date } });
                     }}
                   />
                 </Grid>
-                <Grid item xs={6} sm={4}>
-                  <KeyboardDatePicker
+                <Grid size={{ xs: 6, sm: 4 }}>
+                  <CustomDatePicker
                     disabled={timeFrame !== 'custom' || disabled}
-                    inputVariant="outlined"
-                    variant="inline"
                     fullWidth
                     size="small"
                     minDate={globalFilters.between.from}
-                    openTo="year"
-                    autoOk
-                    format={dateFormatForInputControl}
                     label="To"
-                    views={['year', 'month', 'date']}
                     value={globalFilters.between.to}
                     onChange={(date) => {
                       setGlobalFilters({ ...globalFilters, between: { ...globalFilters.between, to: date } });
@@ -215,7 +205,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
                 </Grid>
               </Grid>
             </Grid>
-          }
+          )}
         </Grid>
       </Box>
     </AppBar>

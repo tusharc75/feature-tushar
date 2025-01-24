@@ -1,16 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
-import TextField from '@material-ui/core/TextField';
-import Box from '@material-ui/core/Box';
-import FormControl from '@material-ui/core/FormControl';
-import Chip from '@material-ui/core/Chip';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import { Button, Typography } from '@material-ui/core';
+import TextField from '@mui/material/TextField';
+import Box from '@mui/material/Box';
+import FormControl from '@mui/material/FormControl';
+import Chip from '@mui/material/Chip';
+import Autocomplete from '@mui/material/Autocomplete';
+import { Typography } from '@mui/material';
 import { checkFormula } from '../../../constants/formulaUtility';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { IconButton } from '@material-ui/core';
+import { IconButton } from '@mui/material';
 import { FiMaximize2 } from 'react-icons/fi';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import Grid from '@material-ui/core/Grid';
+import Grid from '@mui/material/Grid2';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export const MultipleFormula = ({ fields, values, setFieldValue, _id, touched, errors }) => {
   useEffect(() => {
@@ -142,7 +143,7 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id, touched, e
                     return _field.fieldLabel;
                   })
               }
-              getOptionLabel={(option) => option}
+              getOptionLabel={(option) => option || ''}
               value={values['formulaFields'] ? convertValuetoLabel(values['formulaFields']) : []}
               renderTags={(value: string[], getTagProps) =>
                 value.map((option: string, index: number) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
@@ -152,6 +153,7 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id, touched, e
                 <TextField
                   {...params}
                   margin="dense"
+                  size="small"
                   variant="outlined"
                   label="Formula Fields"
                   placeholder="Formula Fields"
@@ -183,6 +185,7 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id, touched, e
                 <TextField
                   {...params}
                   margin="dense"
+                  size="small"
                   variant="outlined"
                   label="Input Parameters"
                   placeholder="Input Parameters"
@@ -217,6 +220,7 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id, touched, e
                               id={'formulaoption_' + _field}
                               variant="outlined"
                               margin="dense"
+                              size="small"
                               fullWidth
                               multiline
                               rows={stepFullScreen ? 20 : 2}
@@ -244,9 +248,9 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id, touched, e
                               {formulaError}
                             </Typography>
                           )}
-                          <Button size="small" onClick={handleCheckSyntax} color="primary">
+                          <ThemeButton onClick={handleCheckSyntax} buttonType='transparent'>
                             Check Syntax
-                          </Button>
+                          </ThemeButton>
                         </td>
                       </tr>
                     }

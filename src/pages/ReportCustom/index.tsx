@@ -1,28 +1,24 @@
-import { Button, IconButton } from '@material-ui/core';
-import { isMobile } from 'react-device-detect';
+import { AddOutlined, ExpandMore } from '@mui/icons-material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { Box, IconButton, Menu, MenuItem } from '@mui/material';
+import axios, { CancelTokenSource } from 'axios';
+import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
+import { isMobile } from 'react-device-detect';
+import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import MomentUtils from '@date-io/moment';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { gridLoadingTimeout, prepareDataForGrid, } from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import { camelCase, startCase } from 'lodash';
-import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
 import ManageCustomReport from './ManageCustomReport';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import { Menu, MenuItem, Box } from '@material-ui/core';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@material-ui/icons/Delete';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import axios, { CancelTokenSource } from 'axios';
-
 
 const CustomReport = () => {
-
   const renderedFrom = 'custom-report';
 
   const toastConfig = useContext(CustomToastContext);
@@ -59,14 +55,16 @@ const CustomReport = () => {
         width: 120,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
-          <p
-            className="text-truncate link"
-            onClick={() => {
-              setShowManageDialog({ open: true, id: row?.original?._id });
-            }}
-          >
-            {row.original.customReportName}
-          </p>
+          <div>
+            <p
+              className="text-truncate link"
+              onClick={() => {
+                setShowManageDialog({ open: true, id: row?.original?._id });
+              }}
+            >
+              {row.original.customReportName}
+            </p>
+          </div>
         )
       },
       {
@@ -102,7 +100,7 @@ const CustomReport = () => {
               setShowDeleteConfirmBox(true);
             }}
           >
-            <DeleteIcon color="error" fontSize='small' />
+            <DeleteIcon color="error" fontSize="small" />
           </IconButton>
         </HtmlTooltip>
       </>
@@ -147,25 +145,22 @@ const CustomReport = () => {
     } else {
       ids = selectedRecords?.map((d) => d._id);
     }
-    axiosInstance()
-      .put(`custom-report/remove`, { ids: ids })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          type: 'success',
-          message: data.message,
-          open: true
-        });
-        dispatch({ type: 'selection', selectedRecords: [] });
-        fetchData();
-        setShowDeleteConfirmBox(false);
-        setDeleteRecord(null);
-        setAnchorEl(null);
-        setIsSubmitting(false);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setIsSubmitting(false);
+    axiosInstance().put(`custom-report/remove`, { ids: ids }).then(({ data }) => {
+      toastConfig.setToastConfig({
+        type: 'success',
+        message: data.message,
+        open: true
       });
+      dispatch({ type: 'selection', selectedRecords: [] });
+      fetchData();
+      setShowDeleteConfirmBox(false);
+      setDeleteRecord(null);
+      setAnchorEl(null);
+      setIsSubmitting(false);
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+      setIsSubmitting(false);
+    });
   };
 
   const openActions = (event) => {
@@ -177,122 +172,111 @@ const CustomReport = () => {
   };
 
   return (
-    <MuiPickersUtilsProvider utils={MomentUtils}>
-      <section className="main-container-v1">
-        <div className="headerbox-v1">
-          <CustomBreadCrumbs
-            routes={[
-              { title: 'Reports', path: '/reports' },
-              { title: 'Custom Report', path: '' }
-            ]}
-          />
-        </div>
-        <CustomContainer>
-          <div className="header-panel">
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              <div className={'align-items-center flex w-full justify-between gap-1'}></div>
-              <div className="flex flex-wrap justify-end gap-[8px]">
-                <div className="flex flex-wrap items-center gap-[8px]">
-                  <Button
-                    variant={'contained'}
-                    color="primary"
-                    size="small"
-                    className={`no-shadow`}
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs
+          routes={[
+            { title: 'Reports', path: '/reports' },
+            { title: 'Custom Report', path: '' }
+          ]}
+        />
+      </div>
+      <CustomContainer>
+        <div className="header-panel">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div className={'align-items-center flex w-full justify-between gap-1'}></div>
+            <div className="flex flex-wrap justify-end gap-[8px]">
+              <div className="flex flex-wrap items-center gap-[8px]">
+                <ThemeButton
+                  mobileTooltip="Add"
+                  iconForMobile={<AddOutlined />}
+                  onClick={() => {
+                    setShowManageDialog({ open: true, id: null });
+                  }}
+                  startIcon={<AddOutlined />}
+                >
+                  Add
+                </ThemeButton>
+                <ThemeButton
+                  mobileTooltip="Actions"
+                  buttonType="yellow"
+                  iconForMobile={<ExpandMore />}
+                  onClick={openActions}
+                  endIcon={<ExpandMore />}
+                  disabled={selectedRecords?.length ? false : true}
+                >
+                  Actions
+                </ThemeButton>
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  <MenuItem
                     onClick={() => {
-                      setShowManageDialog({ open: true, id: null });
+                      if (selectedRecords.length === 1) {
+                        setDeleteRecord(selectedRecords[0]);
+                      } else {
+                        setDeleteRecord(null);
+                      }
+                      closeActions();
+                      setShowDeleteConfirmBox(true);
                     }}
-                    startIcon={<AddOutlined />}
                   >
-                    Add
-                  </Button>
-
-                  <>
-                    <Button
-                      variant={'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      className={`new-dropdown-v1`}
-                      aria-controls="action-menu"
-                      endIcon={<ExpandMore />}
-                      disabled={selectedRecords?.length ? false : true}
-                    >
-                      Actions
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
-                    >
-                      <MenuItem
-                        disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
-                        onClick={() => {
-                          if (selectedRecords.length === 1) {
-                            setDeleteRecord(selectedRecords[0]);
-                          } else {
-                            setDeleteRecord(null)
-                          }
-                          closeActions();
-                          setShowDeleteConfirmBox(true);
-                        }}
-                      >
-                        {`Delete (${selectedRecords?.length})`}
-                      </MenuItem>
-                    </Menu>
-                  </>
-                </div>
+                    {`Delete (${selectedRecords?.length})`}
+                  </MenuItem>
+                </Menu>
               </div>
             </div>
           </div>
-          {columns ? (
-            <CustomReactTable
-              height={'calc(100vh - 200px)'}
-              columns={columns}
-              state={state}
-              dispatch={dispatch}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchData}
-              isClientSideGrid={true}
-              showOnlyShowFilteredRecordSwitch={false}
-              showFilters={false}
-            />
-          ) : (
-            <Box p={2} height={500}>
-              <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>
-          )}
-        </CustomContainer>
-        {showDeleteConfirmBox && (
-          <ConfirmationDialog
-            open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord ? `${deleteRecord?.customReportName || ''}` : `selected records`} ?`}
-            onClose={() => {
-              setDeleteRecord(null);
-              setShowDeleteConfirmBox(false);
-            }}
-            okBtnLoading={isSubmitting}
-            onOk={handleDelete}
+        </div>
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            refreshGrid={fetchData}
+            isClientSideGrid={true}
+            showOnlyShowFilteredRecordSwitch={false}
+            showFilters={false}
           />
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
         )}
-        {showManageDialog.open && (
-          <ManageCustomReport
-            id={showManageDialog.id}
-            handleClose={() => setShowManageDialog({ open: false, id: null })}
-            onSuccess={() => {
-              fetchData();
-              setShowManageDialog({ open: false, id: null });
-            }}
-          />
-        )}
-      </section>
-    </MuiPickersUtilsProvider>
+      </CustomContainer>
+      {showDeleteConfirmBox && (
+        <ConfirmationDialog
+          open={showDeleteConfirmBox}
+          message={`Are you sure you want to delete ${deleteRecord ? `${deleteRecord?.customReportName || ''}` : `selected records`} ?`}
+          onClose={() => {
+            setDeleteRecord(null);
+            setShowDeleteConfirmBox(false);
+          }}
+          okBtnLoading={isSubmitting}
+          onOk={handleDelete}
+        />
+      )}
+      {showManageDialog.open && (
+        <ManageCustomReport
+          id={showManageDialog.id}
+          handleClose={() => setShowManageDialog({ open: false, id: null })}
+          onSuccess={() => {
+            fetchData();
+            setShowManageDialog({ open: false, id: null });
+          }}
+        />
+      )}
+    </section>
   );
 };
 

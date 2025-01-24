@@ -1,14 +1,13 @@
-import { Box, Toolbar, useMediaQuery, withWidth } from '@material-ui/core';
+import { Box, Toolbar, useMediaQuery } from '@mui/material';
 import { motion } from 'framer-motion';
 import { useRef, useState } from 'react';
 import { isMobile } from 'react-device-detect';
+import { cn } from 'src/constants/helpers';
+import { SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON, useStore } from 'src/StateProvider/fastContext';
 import GlobalUserChat from './GlobalUserChat';
 import Sidebar from './Sidebar/Sidebar';
-import { useAppTheme } from 'src/constants/AppConfig';
-import { useStore, SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON } from 'src/StateProvider/fastContext';
 
-const Layout = ({ children, width }) => {
-  const [theme] = useAppTheme();
+const Layout = ({ children }) => {
   const contentRef = useRef(null);
   const bodyRef = useRef(null);
   const isSidebarOutsideScreen = useMediaQuery('(max-width:959px)');
@@ -16,7 +15,7 @@ const Layout = ({ children, width }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useStore((store) => store[SIDEBAR_OPEN]);
   const [sidebarOpenedByButton] = useStore((store) => store[SIDEBAR_OPENED_BY_BUTTON]);
   const [showChat, setShowChat] = useState({ show: true, oldScrollPosition: 0 });
-  const mobileWidths = ['xs', 'sm'];
+  const isMobileWidth = useMediaQuery('(max-width:959px)');
 
   const handleSidebarClose = () => {
     if (!isSidebarOutsideScreen) return;
@@ -40,14 +39,14 @@ const Layout = ({ children, width }) => {
       <div ref={contentRef}>
         <Toolbar />
         <Box display="flex">
-          {!mobileWidths.includes(width) && <Toolbar style={{ width: '66px' }} />}
+          {!isMobileWidth && <Toolbar style={{ width: '66px' }} />}
           <motion.div
             animate={{ opacity: 1 }}
             initial={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
             exit={{ opacity: 0 }}
-            className={`f-full min-h-[calc(100vh-64px)] flex-grow overflow-hidden max-[768px]:min-h-[calc(100vh-108px)]`}
-            style={{ backgroundColor: theme === 'light' ? '#f1f5ff' : 'var(--dark-secondary)' }}
+            className={cn(`f-full min-h-[calc(100vh-64px)] flex-grow overflow-hidden max-[768px]:min-h-[calc(100vh-108px)]`)}
+            // style={{ backgroundColor: theme === 'light' ? '#f1f5ff' : 'var(--dark-secondary)' }}
             onClick={handleSidebarClose}
           >
             <div
@@ -67,4 +66,4 @@ const Layout = ({ children, width }) => {
   );
 };
 
-export default withWidth()(Layout);
+export default Layout;

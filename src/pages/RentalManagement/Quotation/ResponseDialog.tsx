@@ -1,11 +1,12 @@
 import React, { useState, useContext } from 'react';
-import { Dialog, List, ListItem, ListItemIcon, ListItemText, Box, Checkbox, Button, TextField, CircularProgress } from '@material-ui/core';
+import { Dialog, List, ListItem, ListItemIcon, ListItemText, Box, Checkbox, TextField } from '@mui/material';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomDialogTransition, QUOTATION_STATUS, rentalManagement } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ReponseDialog = ({ rentalId, onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -94,19 +95,20 @@ const ReponseDialog = ({ rentalId, onClose, onSuccess }) => {
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button onClick={closeManualDiaog} color="primary" size="small" disabled={submitting}>
+        <ThemeButton
+          onClick={closeManualDiaog}
+          buttonType='transparent'
+        >
           Cancel
-        </Button>
-        <Button
+        </ThemeButton>
+        <ThemeButton
           disabled={!Boolean(selectedOption) || submitting}
           onClick={manualSendToCustomer}
-          color="primary"
-          size="small"
-          variant="contained"
-          endIcon={submitting && <CircularProgress size={20} />}
+          buttonType='theme'
+          isLoading={submitting}
         >
           Save
-        </Button>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

@@ -1,5 +1,5 @@
-import { Box, Button, Dialog, TableBody, TableCell, TableFooter, TableHead, TableRow } from '@material-ui/core';
-import MaUTable from '@material-ui/core/Table';
+import { Box, Dialog, TableBody, TableCell, TableFooter, TableHead, TableRow } from '@mui/material';
+import MaUTable from '@mui/material/Table';
 import { isEmpty } from 'lodash';
 import { useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -22,7 +22,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { flattenArray } from 'src/constants/columns';
 import { CustomDialogTransition, getObjKeysWithValues } from 'src/constants/helpers';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
-import CustomButton from '../Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { calculateRowsField } from '../RentalManagment/helper';
 import FormTypes from './FormTypes';
 import { yupSchemaForBulkEdit } from './helper';
@@ -285,14 +285,12 @@ const CustomEditableGrid = ({ onClose, data, fields, columns, currency, handleSa
           </CustomDialogContent>
 
           <CustomDialogFooter>
-            <Button size="small" color="primary" onClick={onClose}>
+            <ThemeButton buttonType="transparent" onClick={onClose}>
               {'Close'}
-            </Button>
-            <CustomButton
-              loading={false}
-              variant="contained"
-              color="primary"
-              type="submit"
+            </ThemeButton>
+            <ThemeButton
+              isLoading={false}
+              buttonType="theme"
               onClick={() => {
                 if (isEmpty(error)) {
                   handleSave(flatRows);
@@ -301,7 +299,7 @@ const CustomEditableGrid = ({ onClose, data, fields, columns, currency, handleSa
             >
               {' '}
               Save
-            </CustomButton>
+            </ThemeButton>
           </CustomDialogFooter>
         </>
       ) : (

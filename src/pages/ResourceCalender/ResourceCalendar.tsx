@@ -1,7 +1,7 @@
+import dayjs from 'dayjs';
 import { camelCase, startCase } from 'lodash';
-import moment from 'moment';
 import { useCallback, useEffect, useState } from 'react';
-import { momentLocalizer, View } from 'react-big-calendar';
+import { dayjsLocalizer, View } from 'react-big-calendar';
 import { useHistory, useParams } from 'react-router-dom';
 
 import axiosInstance from 'src/axios/axiosInstance';
@@ -9,8 +9,6 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomCalendar from 'src/components/CustomCalendar';
 import CustomContainer from 'src/components/CustomContainer';
 import routes from 'src/components/Helpers/Routes';
-
-const localizer = momentLocalizer(moment);
 
 type Props = {};
 
@@ -26,8 +24,8 @@ const MyCalendar = (props: Props) => {
   const [events, setEvents] = useState([]);
   const [range, setRange] = useState();
   const [dateRange, setDateRange] = useState({
-    estimateStartDate: moment().startOf('month').format('MM/DD/YYYY'),
-    estimateEndDate: moment().endOf('month').format('MM/DD/YYYY')
+    estimateStartDate: dayjs().startOf('month').format('MM/DD/YYYY'),
+    estimateEndDate: dayjs().endOf('month').format('MM/DD/YYYY')
   });
   const [view, setView] = useState<View>('month');
 
@@ -72,6 +70,8 @@ const MyCalendar = (props: Props) => {
     [setView]
   );
 
+  const localizer = dayjsLocalizer(dayjs);
+
   return (
     <>
       <div className="headerbox">
@@ -88,7 +88,7 @@ const MyCalendar = (props: Props) => {
       <CustomContainer styles={{ minHeight: 'calc(100vh-200px)' }}>
         <div className="relative">
           <CustomCalendar
-            defaultDate={moment().toDate()}
+            defaultDate={dayjs().toDate()}
             defaultView="day"
             events={events}
             localizer={localizer}
@@ -97,8 +97,8 @@ const MyCalendar = (props: Props) => {
             onNavigate={(date) => {
               if (view === 'month') {
                 setDateRange({
-                  estimateStartDate: moment(date).startOf('month').format('MM/DD/YYYY'),
-                  estimateEndDate: moment(date).endOf('month').format('MM/DD/YYYY')
+                  estimateStartDate: dayjs(date).startOf('month').format('MM/DD/YYYY'),
+                  estimateEndDate: dayjs(date).endOf('month').format('MM/DD/YYYY')
                 });
               }
             }}

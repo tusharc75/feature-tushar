@@ -1,4 +1,4 @@
-import { Box, MenuItem, TextField } from '@material-ui/core';
+import { Box, MenuItem, TextField } from '@mui/material';
 import { camelCase, map, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -21,10 +21,10 @@ import {
   workOrder
 } from 'src/constants/helpers';
 import ManageRepairOrder from '../RepairOrder/ManageRepairOrder';
-import { Autocomplete } from '@material-ui/lab';
+import Autocomplete from '@mui/material/Autocomplete';
 import { Link } from 'react-router-dom';
-import moment from 'moment';
 import axios, { CancelTokenSource } from 'axios';
+import dayjs from 'dayjs';
 
 const renderedFrom = camelCase(sidebarResource?.workOrderPlanning);
 const WorkOrderPlanning = () => {
@@ -52,9 +52,9 @@ const WorkOrderPlanning = () => {
     newColumns?.forEach((o) => {
       if (o?.accessor === 'asset') {
         const getBackgroundColor = (row) => {
-          const today = moment();
-          const dueDate = moment(row?.original?.dueDate);
-          const days = dueDate.diff(today, 'days');
+          const today = dayjs();
+          const dueDate = dayjs(row?.original?.dueDate);
+          const days = dueDate.diff(today, 'day');
           let color = '';
           if (row?.original?.status === 'Pending') {
             if (days <= 1) {
@@ -192,11 +192,11 @@ const WorkOrderPlanning = () => {
         style={{ minWidth: '300px' }}
         value={selectedStatus}
         getOptionLabel={(option) => option || ''}
-        getOptionSelected={(option: any, val: any) => option === val}
+        isOptionEqualToValue={(option: any, val: any) => option === val}
         onChange={(_, newVal) => {
           setSelectedStatus(newVal ? newVal : 'Pending');
         }}
-        renderInput={(params) => <TextField {...params} margin="dense" label="Status" name="status" variant="outlined" />}
+        renderInput={(params) => <TextField {...params} margin="dense" size="small" label="Status" name="status" variant="outlined" />}
       />
     );
   };

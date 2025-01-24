@@ -1,5 +1,6 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import EditIcon from '@material-ui/icons/Edit';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import EditIcon from '@mui/icons-material/Edit';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
@@ -35,7 +36,7 @@ import Tickets from './Tickets';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Step from '../DynamicForm/Step';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 
 const RepairJobDetails = () => {
   const renderedFrom = camelCase(sidebarResource?.repairJob);
@@ -220,9 +221,9 @@ const RepairJobDetails = () => {
           <Box className="control-buttons-v1">
             <>
               {permissions?.repairJob?.isUpdate && allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
-                <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className={'btn-outline-v1'} onClick={handleOpenUpdateDialog}>
-                  {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
-                </Button>
+                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                  {'Edit'}
+                </ThemeButton>
               )}
               {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               <ActivityButton referenceId={repairJobData?._id} resource={ACTIVITY_RESOURCE.repairJob} resourceLabel={repairJobData?.repairJobName} />
@@ -243,9 +244,9 @@ const RepairJobDetails = () => {
             {repairJobData && repairJobFields.length ? (
               <DetailsPage data={repairJobData} fields={repairJobFields} />
             ) : (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-              </Grid>
+              <div className="p-2">
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+              </div>
             )}
           </Box>
         </TabPanel>
@@ -293,7 +294,7 @@ const RepairJobDetails = () => {
           </TabPanel>
         </ContentFullScreen>
         <TabPanel value={tabValue} index={2}>
-          <Grid item xs={12} sm={12} md={12} lg={12}>
+          <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
             {repairJobData && <Tickets repairJobData={repairJobData} renderedFrom={`${renderedFrom}_grid-3`} />}
           </Grid>
         </TabPanel>

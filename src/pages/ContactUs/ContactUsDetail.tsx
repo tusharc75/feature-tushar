@@ -1,5 +1,6 @@
-import { Box, Button, Grid, Paper } from '@material-ui/core';
-import { Edit } from '@material-ui/icons';
+import { Box, Paper } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import EditIcon from '@mui/icons-material/Edit';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
@@ -7,13 +8,12 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageContactUs from './ManageContactUs';
-
 
 const BlogDetail = () => {
   const { id } = useParams();
@@ -101,22 +101,10 @@ const BlogDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="controls-buttons-v1">
-            <>
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                className="btn-outline-v1"
-                onClick={handleOpenUpdateDialog}
-                style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-              >
-                {isMobile && !isTablet ? <Edit /> : 'Edit'}
-              </Button>
-
-              <Box component="span" marginX={1} />
-
-              <span title={id ? "Primarily selected  can't be deleted" : 'Permanently delete'}>
-                <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />
-              </span>
-            </>
+            <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+              {'Edit'}
+            </ThemeButton>
+            <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />
           </Box>
         </Box>
       </Box>
@@ -124,9 +112,9 @@ const BlogDetail = () => {
         <Paper>
           <Box>
             {loading || !fields?.length ? (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-              </Grid>
+              <div className="p-2">
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+              </div>
             ) : (
               <DetailsPage data={contactUsData} fields={fields} />
             )}

@@ -1,4 +1,4 @@
-import { CssBaseline } from '@material-ui/core';
+import { CssBaseline } from '@mui/material';
 import { AnimatePresence } from 'framer-motion';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
@@ -138,7 +138,6 @@ import Job from './pages/Job';
 import JobDetail from './pages/Job/JobDetail';
 import Leads from './pages/Leads';
 import LeadDetailsPage from './pages/Leads/LeadDetailsPage';
-import NewLead from './pages/Leads/NewLead';
 import MarketSegment from './pages/MarketSegment';
 import MarketSegmentDetail from './pages/MarketSegment/MarketSegmentDetail';
 import MaterialHandling from './pages/MaterialHandling';
@@ -276,6 +275,10 @@ import PackageInventory from 'src/pages/PackageInventory';
 import UserManual from './pages/UserManual';
 import ScheduleAndDispatch from 'src/pages/ScheduleAndDispatch';
 import ReportsCenter from 'src/pages/Reports';
+import Expenses from 'src/pages/Expenses';
+import ExpenseDetailsPage from 'src/pages/Expenses/ExpenseDetailsPage';
+import ExpenseReport from 'src/pages/ExpensesReport';
+import ExpenseReportDetailsPage from 'src/pages/ExpensesReport/ExpenseReportDetailPage';
 
 var notificationInterval: any = null;
 
@@ -287,6 +290,7 @@ function App() {
   }, []);
 
   const toast = useContext(CustomToastContext);
+
   const notification = useContext(CustomNotificationCountContext);
   const chatNotification = useContext(CustomChatNotificationCountContext);
 
@@ -294,7 +298,7 @@ function App() {
 
   const { isOffline } = useContext(CustomOfflineContext);
   const {
-    state: { user, resources },
+    state: { user, permissions, resources },
     dispatch
   }: any = useData();
 
@@ -315,22 +319,6 @@ function App() {
     }
   };
 
-  history.listen(() => {
-    let isSlowInternetConnection = localStorage.getItem('slowInternetConnection');
-    if (isSlowInternetConnection === 'true') {
-      toast.setToastConfig({
-        open: true,
-        type: 'error',
-        message: 'Slow or no internet connection.',
-        anchorOrigin: {
-          vertical: 'bottom',
-          horizontal: 'right'
-        }
-      });
-      localStorage.setItem('slowInternetConnection', 'false');
-    }
-  });
-
   useEffect(() => {
     try {
       if (!isOffline) {
@@ -346,7 +334,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
     return () => {
       clearInterval(notificationInterval);
     };
@@ -490,9 +478,6 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.leadDetail.path}/:id`}>
               <LeadDetailsPage />
-            </PrivateRoute>
-            <PrivateRoute exact path="/new-lead">
-              <NewLead />
             </PrivateRoute>
             <PrivateRoute exact path={routes.opportunity.path}>
               <Opportunities />
@@ -945,6 +930,18 @@ function App() {
             <PrivateRoute exact path={`${routes.demandOrderDetail.path}/:id`}>
               <DemandOrderDetails />
             </PrivateRoute>
+            <PrivateRoute exact path={`${routes.expenses.path}`}>
+              <Expenses />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.expensesDetail.path}/:id`}>
+              <ExpenseDetailsPage />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.expenseReport.path}`}>
+              <ExpenseReport />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.expenseReportDetail.path}/:id`}>
+              <ExpenseReportDetailsPage />
+            </PrivateRoute>
             <PrivateRoute exact path={routes.employeeMaster.path}>
               <EmployeeMaster />
             </PrivateRoute>
@@ -1232,20 +1229,18 @@ function App() {
           <ScreenOrientationOverlay displayOn="portrait" device="tablet" />
           <ScreenOrientationOverlay displayOn="landscape" device="mobile" />
           <CustomIntro />
-          <AgentChat />
+          {permissions?.equiptAi?.isRead && <AgentChat />}
         </ErrorBoundaryComponent>
       </AnimatePresence>
-      {/* <ForceUpdatePopup data={isUpdateModalOpen.data} onClose={handleCloseUpdateModal} /> */}
       {isUpdateModalOpen.open && <ForceUpdatePopup data={isUpdateModalOpen.data} onClose={handleCloseUpdateModal} />}
       {toast?.toastConfig?.open &&
         (['notFoundError'].some((s) => s !== toast?.toastConfig?.type) ? (
           <CustomToaster
             type={toast.toastConfig.type}
             message={toast.toastConfig.message}
-            anchorOrigin={toast.toastConfig?.anchorOrigin || null}
             open={toast.toastConfig.open}
             close={() => {
-              toast.setToastConfig({ open: false });
+              toast.setToastConfig((prev) => ({ message: '', type: null, open: false }));
             }}
           />
         ) : toast.toastConfig.type === 'notFoundError' ? (

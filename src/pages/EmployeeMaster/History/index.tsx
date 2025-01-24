@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { Box, IconButton, TextField } from '@material-ui/core';
+import { Box, IconButton, TextField } from '@mui/material';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
@@ -7,10 +7,9 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { camelCase } from 'lodash';
-import { dateTimeFormat, employeeMaster, sidebarResource } from 'src/constants/helpers';
-import moment from 'moment';
+import { displayDateTime, employeeMaster, sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
-import { Autocomplete } from '@material-ui/lab';
+import Autocomplete from '@mui/material/Autocomplete';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { FiExternalLink } from 'react-icons/fi';
 
@@ -19,7 +18,7 @@ const renderedFrom = `${camelCase(sidebarResource.employeeMaster)}_History`;
 const History = ({ id }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { permissions,resources }
+    state: { permissions, resources }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -28,25 +27,25 @@ const History = ({ id }) => {
   const [resourceList, setResourceList] = useState([]);
 
   const TECHNICIAN_RESOURCE = [
-  {
-    key: 'fieldTicket',
-    resource: sidebarResource.fieldTicket,
-    path: routes.fieldTicketDetail.path,
-    title: resources?.fieldTicket?.titlePlural
-  },
-  {
-    key: 'workOrder',
-    resource: sidebarResource.workOrder,
-    path: routes.workOrderDetail.path,
-    title: resources?.workOrder?.titlePlural
-  },
-  {
-    key: 'rentalManagement',
-    resource: sidebarResource.rentalManagement,
-    path: routes.rentalManagementDetail.path,
-    title: resources?.rentalManagement?.titlePlural
-  }
-];
+    {
+      key: 'fieldTicket',
+      resource: sidebarResource.fieldTicket,
+      path: routes.fieldTicketDetail.path,
+      title: resources?.fieldTicket?.titleSingular
+    },
+    {
+      key: 'workOrder',
+      resource: sidebarResource.workOrder,
+      path: routes.workOrderDetail.path,
+      title: resources?.workOrder?.titleSingular
+    },
+    {
+      key: 'rentalManagement',
+      resource: sidebarResource.rentalManagement,
+      path: routes.rentalManagementDetail.path,
+      title: resources?.rentalManagement?.titleSingular
+    }
+  ];
 
   const columns = [
     {
@@ -127,8 +126,8 @@ const History = ({ id }) => {
       Cell: ({ row }) => (
         <>
           {row?.original?.startDate ? (
-            <h5 className="text-truncate" title={moment(row?.original?.startDate)?.format(dateTimeFormat)}>
-              {moment(row?.original?.startDate)?.format(dateTimeFormat)}
+            <h5 className="text-truncate" title={displayDateTime(row?.original?.startDate)}>
+              {displayDateTime(row?.original?.startDate)}
             </h5>
           ) : (
             <NoDataCell />
@@ -147,8 +146,8 @@ const History = ({ id }) => {
       Cell: ({ row }) => (
         <>
           {row?.original?.endDate ? (
-            <h5 className="text-truncate" title={moment(row?.original?.endDate)?.format(dateTimeFormat)}>
-              {moment(row?.original?.endDate)?.format(dateTimeFormat)}
+            <h5 className="text-truncate" title={displayDateTime(row?.original?.endDate)}>
+              {displayDateTime(row?.original?.endDate)}
             </h5>
           ) : (
             <NoDataCell />
@@ -162,7 +161,7 @@ const History = ({ id }) => {
     const options: any = [];
     TECHNICIAN_RESOURCE?.forEach((item) => {
       if (permissions[item.key] && permissions[item.key]?.isRead === true) {
-        options.push({ ...item, title: routes[item.key] ? routes[item.key]?.title : item.title });
+        options.push(item);
       }
     });
     setResourceList(options);

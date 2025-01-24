@@ -1,5 +1,6 @@
-import { Box, Grid } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import Dialog from '@mui/material/Dialog';
 import { map, uniq } from 'lodash';
 import { useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -104,7 +105,7 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
           {tabs?.map((row, index) => <CustomTab value={index} label={row} />)}
         </CustomTabs>
 
-        <Grid item xs={12} md={12} sm={12}>
+        <Grid size={{xs:12, md:12, sm:12}}>
           {columns ? (
             <CustomReactTable
               height={'calc(100vh - 200px)'}

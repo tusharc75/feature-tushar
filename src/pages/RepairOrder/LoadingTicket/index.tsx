@@ -1,7 +1,7 @@
-import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import Box from '@material-ui/core/Box/Box';
-import Grid from '@material-ui/core/Grid/Grid';
-import { ExpandMore } from '@material-ui/icons';
+import { IconButton, Menu, MenuItem } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Grid from '@mui/material/Grid2';
+import { ExpandMore } from '@mui/icons-material';
 import { map, uniq } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
@@ -25,6 +25,7 @@ import {
   repairOrder
 } from '../../../constants/helpers';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -298,26 +299,23 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
   return (
     <>
       <Box display="flex" justifyContent="flex-end" pt={1}>
-        <Box display="flex" alignItems="center" gridGap={8}>
+        <Box display="flex" alignItems="center">
           {allowedToEdit && (
             <Fragment>
-              <Button
-                variant="outlined"
-                color="default"
-                size="small"
+              <ThemeButton
+                mobileTooltip="Actions"
+                buttonType="yellow"
+                iconForMobile={<ExpandMore />}
                 onClick={openActions}
-                aria-controls="action-menu"
                 disabled={selectedRecords.length === 0}
                 endIcon={<ExpandMore />}
-                className="new-dropdown-v1"
                 id={'details-page-action-button'}
               >
                 Actions
-              </Button>
+              </ThemeButton>
               <Menu
                 anchorEl={anchorActionEl}
                 keepMounted
-                getContentAnchorEl={null}
                 anchorOrigin={{
                   vertical: 'bottom',
                   horizontal: 'left'
@@ -353,7 +351,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
           )}
         </Box>
       </Box>
-      <Grid item xs={12} md={12} sm={12} className="mt-3">
+      <Grid size={{ xs: 12, md: 12, sm: 12 }} className="mt-3">
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 393px)'}

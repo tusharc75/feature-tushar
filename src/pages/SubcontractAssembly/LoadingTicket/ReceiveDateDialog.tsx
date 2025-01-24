@@ -1,25 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import Button from '@material-ui/core/Button';
-import { Box } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
-import DateUtils from '@date-io/date-fns';
+import { useEffect, useState } from 'react';
+import { Box } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
 import { Form, Formik } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import { convertDateInDateTime, CustomDialogTransition, dateFormatForInputControl, productInventory } from 'src/constants/helpers';
+import { CustomDialogTransition, productInventory } from 'src/constants/helpers';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import CustomButton from 'src/components/Helpers/CustomButton';
-import moment from 'moment';
-import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
 import { useData } from 'src/StateProvider/Provider';
+import CustomDatePicker from 'src/components/CustomDatePicker';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 const ReceiveDateDialog = ({ handleClose, handleSucess, loading, refrenceData }) => {
   const [lockDate, setLockDate] = useState(null);
 
   const {
-    state: {resources }
+    state: { resources }
   }: any = useData();
 
   useEffect(() => {
@@ -40,11 +37,11 @@ const ReceiveDateDialog = ({ handleClose, handleSucess, loading, refrenceData })
   const validate = (values) => {
     const errors = {};
     if (lockDate) {
-      if (!moment(values['receiveDate']).isSameOrAfter(moment(lockDate))) {
+      if (!dayjs(values['receiveDate']).isSameOrAfter(dayjs(lockDate))) {
         errors['receiveDate'] = `Date entered prior to the locked date`;
       }
     }
-    if (moment(values['receiveDate']).isAfter(moment())) {
+    if (dayjs(values['receiveDate']).isAfter(dayjs())) {
       errors['receiveDate'] = `Please select valid date`;
     }
     return errors;
@@ -66,47 +63,40 @@ const ReceiveDateDialog = ({ handleClose, handleSucess, loading, refrenceData })
       <Formik initialValues={{ receiveDate: new Date() }} onSubmit={handleSubmit} validateOnMount validate={validate}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
           <Form autoComplete="off" autoCorrect="off" noValidate>
-            <MuiPickersUtilsProvider utils={DateUtils}>
-              <CustomDialogHeader title={`Deliver ${resources?.subcontractAssembly?.titleSingular}`} showRequiredLabel={true} onClose={handleClose} />
-              <CustomDialogContent>
-                <Box p={1}>
-                  <KeyboardDatePicker
-                    {...(lockDate ? { minDate: lockDate } : {})}
-                    fullWidth
-                    size="small"
-                    margin="dense"
-                    autoOk
-                    required
-                    variant="inline"
-                    inputVariant="outlined"
-                    value={values.receiveDate}
-                    name="receiveDate"
-                    placeholder={'Receive Date'}
-                    label="Receive Date"
-                    format={dateFormatForInputControl}
-                    maxDate={new Date()}
-                    onChange={(value) => {
-                      var newDate = convertDateInDateTime(value);
-                      setFieldValue('receiveDate', newDate);
-                    }}
-                    error={touched['receiveDate'] && Boolean(errors['receiveDate'])}
-                    helperText={touched['receiveDate'] && errors['receiveDate']}
-                  />
-                </Box>
-              </CustomDialogContent>
-              <CustomDialogFooter>
-                <Button color="primary" size="small" onClick={handleClose}>
-                  Cancel
-                </Button>
-                <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit" onClick={submitForm}>
-                  {'Deliver'}
-                </CustomButton>
-              </CustomDialogFooter>
-            </MuiPickersUtilsProvider>
+            <CustomDialogHeader title={`Deliver ${resources?.subcontractAssembly?.titleSingular}`} showRequiredLabel={true} onClose={handleClose} />
+            <CustomDialogContent>
+              <Box p={1}>
+                <CustomDatePicker
+                  {...(lockDate ? { minDate: lockDate } : {})}
+                  fullWidth
+                  size="small"
+                  margin="dense"
+                  required
+                  value={values.receiveDate}
+                  name="receiveDate"
+                  placeholder={'Receive Date'}
+                  label="Receive Date"
+                  maxDate={new Date()}
+                  onChange={(value) => {
+                    setFieldValue('receiveDate', value);
+                  }}
+                  error={touched['receiveDate'] && Boolean(errors['receiveDate'])}
+                  helperText={touched['receiveDate'] && errors['receiveDate']}
+                />
+              </Box>
+            </CustomDialogContent>
+            <CustomDialogFooter>
+              <ThemeButton buttonType="transparent" onClick={handleClose}>
+                Cancel
+              </ThemeButton>
+              <ThemeButton isLoading={loading} disabled={loading} buttonType="theme" onClick={submitForm}>
+                {'Deliver'}
+              </ThemeButton>
+            </CustomDialogFooter>
           </Form>
         )}
       </Formik>
-    </Dialog>
+    </Dialog >
   );
 };
 

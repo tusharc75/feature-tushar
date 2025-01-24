@@ -1,11 +1,11 @@
-import { Chip, IconButton, useMediaQuery } from '@material-ui/core';
+import { Chip, IconButton, useMediaQuery } from '@mui/material';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import Chatbox, { Topics, useChatboxReducer } from 'src/components/AiChatbox';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Chat } from '@material-ui/icons';
+import { Chat } from '@mui/icons-material';
 import { isArray } from 'lodash';
 import { FiSidebar } from 'react-icons/fi';
 import { DownloadIcon } from 'src/assets/svg/svgIcons';
@@ -74,8 +74,8 @@ const EquiptAi = () => {
         const selectedTopics =
           isArray(data?.topics) && data?.topics?.length
             ? data?.topics?.map((e) => {
-              return { _id: e.optionValue, aiModelTopicName: e.optionLabel };
-            })
+                return { _id: e.optionValue, aiModelTopicName: e.optionLabel };
+              })
             : [];
         setState({ type: 'setSelectedTopics', payload: selectedTopics });
         setState({ type: 'setMessageFromHistory', payload: data });
@@ -164,7 +164,7 @@ const EquiptAi = () => {
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ title: 'Equipt Genie' }]} />
       </div>
-      <CustomContainer className="!min-h-[var(--container-height)] !p-0 [--container-height:calc(100vh-150px)] max-[768px]:[--container-height:calc(100vh-179px)]">
+      <CustomContainer className="border !min-h-[var(--container-height)] !p-0 [--container-height:calc(100vh-150px)] max-[768px]:[--container-height:calc(100vh-179px)]">
         <div className="relative flex h-[var(--container-height)] min-h-[400px] gap-3 overflow-hidden [--head-h:56px] [--sidebar-w:280px]">
           <HistorySidebar
             chatHistory={chatHistory}
@@ -193,10 +193,8 @@ const EquiptAi = () => {
                   <ThemeButton
                     mobileTooltip="New Chat"
                     iconForMobile={<Chat fontSize={'small'} />}
-                    color="primary"
-                    borderColor="none"
+                    buttonType="theme"
                     startIcon={<Chat fontSize={'small'} />}
-                    size="small"
                     onClick={() => hadleNewChat()}
                     style={{ padding: 8, minWidth: 'max-content' }}
                   >

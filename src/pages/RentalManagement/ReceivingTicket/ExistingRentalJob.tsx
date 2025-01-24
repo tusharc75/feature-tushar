@@ -1,8 +1,8 @@
-import Box from '@material-ui/core/Box/Box';
+import Box from '@mui/material/Box/Box';
 import { useState, useEffect, useContext } from 'react';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import Grid from '@material-ui/core/Grid/Grid';
-import { Button, CircularProgress, Dialog } from '@material-ui/core';
+import Grid from '@mui/material/Grid2';
+import { Dialog } from '@mui/material';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomDialogTransition, gridLoadingTimeout, rentalManagement, ASSET_STATUS } from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
@@ -14,6 +14,7 @@ import ManageRentalManagementDialog from '../ManageRental';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import AssetDetailsChangeDialog from 'src/pages/RentalManagement/ReceivingTicket/AssetDetailsChangeDialog';
 import PackageDialog from 'src/pages/RentalManagement/ReceivingTicket/PackageDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const renderedFrom = 'rental_management_existing';
 
@@ -174,30 +175,25 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
       <CustomDialogHeader title={`Select ${resources?.rentalManagement?.titleSingular}`} onClose={onClose}></CustomDialogHeader>
       <div className="listing-grid p-3">
         <Box mb={2}>
-          <Grid item xs={12} sm={12} md={12} container justify={'flex-end'}>
-            <Button
-              size="small"
-              color="primary"
+          <Grid size={{xs:12, sm:12, md:12}} container justifyContent={'flex-end'}>
+            <ThemeButton
               onClick={() => {
                 setShowRentalDialog(true);
               }}
-              variant="contained"
+              buttonType='transparent'
             >
               {`Create ${resources?.rentalManagement?.titleSingular}`}
-            </Button>
-            <Box mx={1} />
-            <Button
-              size="small"
-              color="primary"
+            </ThemeButton>
+            <ThemeButton
+              disabled={isSubmitting || selectedRecords.length > 1 || selectedRecords.length === 0}
+              buttonType='theme'
+              isLoading={isSubmitting}
               onClick={() => {
                 setOpenPackageDialog(true);
               }}
-              variant={'contained'}
-              disabled={isSubmitting || selectedRecords.length > 1 || selectedRecords.length === 0}
-              endIcon={isSubmitting && <CircularProgress color="inherit" size={18} />}
             >
               {`Perform Transfer`}
-            </Button>
+            </ThemeButton>
           </Grid>
         </Box>
         {columns ? (
@@ -241,7 +237,7 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
           rentalManagementData={selectedRecords[0]}
           onSuccess={(_selectedPackage) => {
             setSelectedPackage(_selectedPackage);
-            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingAvailableStatus ? ASSET_STATUS.available : ASSET_STATUS.underReview
+            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingAvailableStatus ? ASSET_STATUS.available : ASSET_STATUS.underReview;
             const statusPolicy = checkAssetPolicy(receivingStatus);
             if (statusPolicy && ![ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(productInventory[0]?.status)) {
               setOpenAssetDataDialog({
@@ -263,7 +259,7 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
         <AssetDetailsChangeDialog
           ids={openAssetDataDialog._ids}
           statusPolicy={openAssetDataDialog.statusPolicy}
-          setAssetsData={() => { }}
+          setAssetsData={() => {}}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: null, data: null })}
           onSuccess={(_assetData) => {
             if (openAssetDataDialog.type === 'underReview') {

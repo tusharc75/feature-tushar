@@ -1,14 +1,16 @@
-import { Box, Grid, IconButton, makeStyles, Typography } from '@material-ui/core';
-import { Fragment, useState } from 'react';
+import DeleteIcon from '@mui/icons-material/Delete';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
+import { Box, IconButton, Theme, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { makeStyles } from '@mui/styles';
+import { Fragment } from 'react';
 import { useHistory } from 'react-router-dom';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useData } from 'src/StateProvider/Provider';
-import routes from 'src/components/Helpers/Routes';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import routes from 'src/components/Helpers/Routes';
 import MetricsWithIcon from 'src/components/MetricsWithIcon';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   cardBox: {
     borderRadius: '12px',
     border: '1px solid var(--common-border-color,#ebebeb)',
@@ -86,7 +88,7 @@ const CardView = ({ data, fields, setShowManageDialog, setDeleteRecord, setShowD
       <Grid container spacing={2}>
         {data.map((trailerMaster, index) => {
           return (
-            <Grid item lg={4} md={4} sm={6} xs={12} key={index}>
+            <Grid size={{lg:4, md:4, sm:6, xs:12}} key={index}>
               <Box
                 className={`${classes.cardBox}`}
                 onClick={(e) => {
@@ -115,7 +117,7 @@ const CardView = ({ data, fields, setShowManageDialog, setDeleteRecord, setShowD
                         aria-label="Clone"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setShowManageDialog({open: true, isClone: true, idToClone:trailerMaster?._id })
+                          setShowManageDialog({ open: true, isClone: true, idToClone: trailerMaster?._id });
                         }}
                       >
                         <FileCopyIcon />

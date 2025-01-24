@@ -1,38 +1,39 @@
 import { useEffect, useState } from 'react';
 import { Form, Formik } from 'formik';
-import { Button, CircularProgress, Dialog, Grid, Box, Typography, FormControl, RadioGroup, FormControlLabel, Radio } from '@material-ui/core';
+import { Dialog, Box, Typography, FormControl, RadioGroup, FormControlLabel, Radio } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import { ASSET_STATUS, CustomDialogTransition, convertDateInDateTime, dateFormatForInputControl } from 'src/constants/helpers';
-import moment from 'moment';
+import { ASSET_STATUS, CustomDialogTransition } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import DateUtils from '@date-io/date-fns';
+import CustomDatePicker from 'src/components/CustomDatePicker';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 const DateDialog = ({ title, type, status, onClose, handleSubmit, loading, assets = [] }) => {
-
-  const [minDate, setMinDate] = useState(new Date())
+  const [minDate, setMinDate] = useState(new Date());
 
   useEffect(() => {
-    findValidationDate()
-  }, [assets])
+    findValidationDate();
+  }, [assets]);
 
   const findValidationDate = async () => {
-    const last = type === 'changeStatus' ? 1 : 2
-    const { data: { data } } = await axiosInstance().put(`/rental-management/assets-last-date`, { assets, last })
+    const last = type === 'changeStatus' ? 1 : 2;
+    const {
+      data: { data }
+    } = await axiosInstance().put(`/rental-management/assets-last-date`, { assets, last });
     var lastDate: any = new Date();
     if (data?.date) {
       lastDate = new Date(data?.date);
     }
     lastDate.setHours(0, 0, 0);
-    setMinDate(lastDate)
-  }
-
+    setMinDate(lastDate);
+  };
 
   function validate(values) {
     const errors = {};
-    if (!moment(values['date']).isSameOrAfter(moment(minDate))) {
+    if (!dayjs(values['date']).isSameOrAfter(dayjs(minDate))) {
       errors['date'] = `Please select valid date`;
     }
     return errors;
@@ -48,74 +49,81 @@ const DateDialog = ({ title, type, status, onClose, handleSubmit, loading, asset
         }
       }}
       maxWidth="sm"
-      fullWidth>
+      fullWidth
+    >
       <Formik
         initialValues={{ date: new Date() }}
         validate={validate}
         onSubmit={(values) => {
-          handleSubmit(moment(values.date).format('MM/DD/YYYY'), values?.status);
-        }}>
-        {({ values, errors, touched, setFieldValue }) => (
-          <Form >
+          handleSubmit(values.date, values?.status);
+        }}
+      >
+        {({ values, errors, touched, setFieldValue, submitForm }) => (
+          <Form>
             <CustomDialogHeader title={title} onClose={onClose} />
             <CustomDialogContent>
               <Box p={2}>
                 <Grid container spacing={2}>
-                  <MuiPickersUtilsProvider utils={DateUtils}>
-                    <KeyboardDatePicker
-                      fullWidth
-                      size="small"
-                      margin="dense"
-                      autoOk
-                      required
-                      variant="inline"
-                      inputVariant="outlined"
-                      value={values.date}
-                      name="date"
-                      placeholder={`${type === 'changeStatus' ? status : ''} Date`}
-                      label={`${type === 'changeStatus' ? status : ''} Date`}
-                      format={dateFormatForInputControl}
-                      minDate={minDate}
-                      error={touched['date'] && Boolean(errors['date'])}
-                      helperText={touched['date'] && errors['date']}
-                      onChange={(value) => {
-                        setFieldValue('date', convertDateInDateTime(value));
-                      }}
-                    />
-                    {status === ASSET_STATUS.delivered &&
-                      <Box pt={2}>
-                        <Typography>Would you like to change status ?</Typography>
-                        <Box pt={1}>
-                          <FormControl component="fieldset">
-                            <RadioGroup row aria-label="status" name="status" value={values['status']} onChange={(e) => {
+                  <CustomDatePicker
+                    fullWidth
+                    size="small"
+                    margin="dense"
+                    required
+                    value={values.date}
+                    name="date"
+                    placeholder={`${type === 'changeStatus' ? status : ''} Date`}
+                    label={`${type === 'changeStatus' ? status : ''} Date`}
+                    minDate={minDate}
+                    error={touched['date'] && Boolean(errors['date'])}
+                    helperText={touched['date'] && errors['date']}
+                    onChange={(value) => {
+                      setFieldValue('date', value);
+                    }}
+                  />
+                  {status === ASSET_STATUS.delivered && (
+                    <Box pt={2}>
+                      <Typography>Would you like to change status ?</Typography>
+                      <Box pt={1}>
+                        <FormControl component="fieldset">
+                          <RadioGroup
+                            row
+                            aria-label="status"
+                            name="status"
+                            value={values['status']}
+                            onChange={(e) => {
                               setFieldValue('status', e.target.value);
-                            }}>
-                              <FormControlLabel value={ASSET_STATUS.standByNotChargeable} control={<Radio />} label={ASSET_STATUS.standByNotChargeable} />
-                              <FormControlLabel value={ASSET_STATUS.standBy} control={<Radio />} label={ASSET_STATUS.standBy} />
-                              <FormControlLabel value={ASSET_STATUS.inUse} control={<Radio />} label={ASSET_STATUS.inUse} />
-                            </RadioGroup>
-                          </FormControl>
-                        </Box>
+                            }}
+                          >
+                            <FormControlLabel
+                              value={ASSET_STATUS.standByNotChargeable}
+                              control={<Radio />}
+                              label={ASSET_STATUS.standByNotChargeable}
+                            />
+                            <FormControlLabel value={ASSET_STATUS.standBy} control={<Radio />} label={ASSET_STATUS.standBy} />
+                            <FormControlLabel value={ASSET_STATUS.inUse} control={<Radio />} label={ASSET_STATUS.inUse} />
+                          </RadioGroup>
+                        </FormControl>
                       </Box>
-                    }
-                  </MuiPickersUtilsProvider>
+                    </Box>
+                  )}
                 </Grid>
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button disabled={loading} size="small" variant="outlined" color="primary" onClick={onClose}>
+              <ThemeButton
+                onClick={onClose}
+                buttonType='transparent'
+              >
                 Close
-              </Button>
-              <Button
+              </ThemeButton>
+              <ThemeButton
+                onClick={submitForm}
                 disabled={loading}
-                startIcon={loading && <CircularProgress size={18} color="inherit" />}
-                size="small"
-                variant="contained"
-                color="primary"
-                type="submit"
+                buttonType='theme'
+                isLoading={loading}
               >
                 Save
-              </Button>
+              </ThemeButton>
             </CustomDialogFooter>
           </Form>
         )}

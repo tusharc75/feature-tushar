@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, useMediaQuery } from '@material-ui/core';
+import { Box, Dialog, useMediaQuery } from '@mui/material';
 import { useContext, useState } from 'react';
 import { MdEmail } from 'react-icons/md';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -7,7 +7,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import { CreateEmail } from '../Activity/Email/CreateEmail';
 import { PreviewDialog } from './PreviewDialog';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { isTablet } from 'react-device-detect';
 import { ThemeButton } from '../Helpers/Buttons';
 
@@ -62,13 +62,15 @@ function PreviewDownload({
     setLoadingType(subType);
     setBtnLoading(operation);
 
-    let showColumns = JSON.stringify(visibleColumns?.map((e) => {
-      return ({
-        name: e?.fieldName,
-        width: e?.width,
-        customLabel: e?.customLabel
+    let showColumns = JSON.stringify(
+      visibleColumns?.map((e) => {
+        return {
+          name: e?.fieldName,
+          width: e?.width,
+          customLabel: e?.customLabel
+        };
       })
-    }));
+    );
 
     let api = '';
     if (type === 'Excel') {
@@ -169,11 +171,10 @@ function PreviewDownload({
   return (
     <Box display="flex" justifyContent="space-between">
       <Box display="flex" alignItems="center">
-        <Box display="flex" flexWrap={'wrap'} gridGap={8}>
+        <div className="flex flex-wrap gap-2">
           <ThemeButton
-            size="small"
             id={'details-page-preview-button'}
-            tooltip="Preview"
+            mobileTooltip="Preview"
             iconForMobile={<VisibilityIcon />}
             startIcon={<VisibilityIcon />}
             disabled={btnLoading === 'Preview'}
@@ -190,7 +191,7 @@ function PreviewDownload({
           <ThemeButton
             iconForMobile={<DownloadIcon />}
             id={'details-page-download-button'}
-            tooltip="Download"
+            mobileTooltip="Download"
             startIcon={<DownloadIcon />}
             disabled={btnLoading === 'Download'}
             onClick={(e) => {
@@ -203,12 +204,11 @@ function PreviewDownload({
           >
             {btnLoading === 'Download' ? 'Please wait...' : 'Download'}
           </ThemeButton>
-
           {isExcelDownload && (
             <ThemeButton
               id={'details-page-export-to-excel-button'}
               iconForMobile={<ExportIcon />}
-              tooltip="Export To Excel"
+              mobileTooltip="Export To Excel"
               startIcon={<ExportIcon />}
               disabled={btnLoading === 'Download'}
               onClick={(e) => {
@@ -224,7 +224,7 @@ function PreviewDownload({
               id={'details-page-send-email-button'}
               disabled={btnLoading === 'Send Email'}
               startIcon={<MdEmail />}
-              tooltip="Send Email"
+              mobileTooltip="Send Email"
               onClick={() => {
                 if (isAsyncDownload) {
                   setSendEmail(true);
@@ -236,7 +236,7 @@ function PreviewDownload({
               {btnLoading === 'Send Email' ? 'Please wait...' : `Send Email`}
             </ThemeButton>
           )}
-        </Box>
+        </div>
       </Box>
       {showColumnsDialog.open && (
         <PreviewDialog

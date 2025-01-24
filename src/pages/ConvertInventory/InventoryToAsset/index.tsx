@@ -1,15 +1,15 @@
 import { Fragment, useState, useEffect, useContext } from 'react';
-import { Box, Button, Dialog, Divider, List, ListItem, ListItemAvatar, ListItemText, TextField } from '@material-ui/core';
+import { Box, Dialog, Divider, List, ListItem, ListItemText, TextField } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Formik, Form } from 'formik';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import axiosInstance from 'src/axios/axiosInstance';
 import { convertInventory, CustomDialogTransition, productInventory, sidebarResource } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { Autocomplete } from '@material-ui/lab';
+import Autocomplete from '@mui/material/Autocomplete';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomAssetDialog from './CustomAssetDialog';
@@ -214,7 +214,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
     >
       {!loadingInitialData ? (
         <Formik initialValues={initialData} onSubmit={handleSubmit} validateOnMount validate={validate}>
-          {({ touched, errors, setFieldValue, values }) => (
+          {({ touched, errors, setFieldValue, values, submitForm }) => (
             <Form autoComplete="off" autoCorrect="off" className="flex min-h-full flex-col">
               <CustomDialogHeader
                 title={`Convert Inventory`}
@@ -236,6 +236,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
                     )}
                     <TextField
                       margin="dense"
+                      size="small"
                       type="number"
                       label="Qty"
                       name="qty"
@@ -256,7 +257,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
                       disableClearable
                       options={storageLocationOptions}
                       getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                      getOptionSelected={(option: any, val) => option.optionValue === val}
+                      isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                       value={
                         storageLocationOptions.filter((data) => data.optionValue === values['storageLocation']).length
                           ? storageLocationOptions.filter((data) => data.optionValue === values['storageLocation'])[0]
@@ -270,6 +271,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
                         <TextField
                           {...params}
                           margin="dense"
+                          size="small"
                           name="storageLocation"
                           label="Storage Location"
                           variant="outlined"
@@ -297,7 +299,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
                         onChange={(_, val) => {
                           setFieldValue('serialNumbers', val);
                         }}
-                        getOptionSelected={(item, current) => item === current}
+                        isOptionEqualToValue={(item, current) => item === current}
                         getOptionLabel={(option) => option}
                         renderInput={(props) => (
                           <TextField
@@ -317,12 +319,12 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
                 ) : null}
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button color="primary" size="small" onClick={handleClose}>
+                <ThemeButton buttonType="transparent" onClick={handleClose}>
                   Cancel
-                </Button>
-                <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit">
+                </ThemeButton>
+                <ThemeButton onClick={submitForm} isLoading={loading} disabled={loading} buttonType="theme">
                   Convert
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
             </Form>
           )}

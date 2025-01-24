@@ -1,7 +1,7 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
-import { Add } from '@material-ui/icons';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
+import { Box, IconButton, MenuItem } from '@mui/material';
+import { Add } from '@mui/icons-material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -28,7 +28,7 @@ import { FiExternalLink } from 'react-icons/fi';
 
 const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData, setReserveAssetWarning }) => {
   const {
-    state: { user, permissions,resources }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const toastConfig = useContext(CustomToastContext);
@@ -177,16 +177,18 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
       canDrag: false,
       Cell: ({ row, table }) => (
         <>
-          {row?.original?.type !== MATERIAL_TYPE.serializedAsset && <IconButton
-            size="small"
-            aria-label="Details"
-            disabled={!allowedToEdit}
-            onClick={() => {
-              onMaterialEdit(row, table.getRowModel().rows);
-            }}
-          >
-            <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
-          </IconButton>}
+          {row?.original?.type !== MATERIAL_TYPE.serializedAsset && (
+            <IconButton
+              size="small"
+              aria-label="Details"
+              disabled={!allowedToEdit}
+              onClick={() => {
+                onMaterialEdit(row, table.getRowModel().rows);
+              }}
+            >
+              <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+            </IconButton>
+          )}
           <IconButton
             size="small"
             aria-label="Details"

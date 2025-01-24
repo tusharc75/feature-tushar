@@ -1,8 +1,8 @@
-import Box from '@material-ui/core/Box/Box';
+import Box from '@mui/material/Box/Box';
 import { useState, useEffect, useContext } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
-import Grid from '@material-ui/core/Grid/Grid';
+import Grid from '@mui/material/Grid2';
 import axiosInstance from 'src/axios/axiosInstance';
 import {
   CHILD_RESOURCE,
@@ -18,21 +18,21 @@ import {
 } from 'src/constants/helpers';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { IconButton, Menu, MenuItem } from '@mui/material';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import ConsumablesQtyDialog from './ConsumablesQtyDialog';
 import QtyRequestLog from './QtyRequestLog';
-import HistoryIcon from '@material-ui/icons/History';
+import HistoryIcon from '@mui/icons-material/History';
 import { useData } from 'src/StateProvider/Provider';
 import History from '../../ProductInventory/LedgerHistory';
-import FormatListBulletedIcon from '@material-ui/icons/FormatListBulleted';
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import { BiChevronDown } from 'react-icons/bi';
 import UpdateProductDialog from './UpdateProductDialog';
-import EditIcon from '@material-ui/icons/Edit';
+import EditIcon from '@mui/icons-material/Edit';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import { camelCase, orderBy } from 'lodash';
@@ -40,6 +40,7 @@ import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import AssignSerialNumbersDialog from 'src/components/AssignRolesDialog/AssignSerialNumbersDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const Consumables = ({
   isCreate,
@@ -98,7 +99,7 @@ const Consumables = ({
     fetchColumns();
     fetchData();
     fetchRepairOrderData();
-  }, [allowedToEdit, workOrderId, consumeRequest]);
+  }, [allowedToEdit, workOrderId]);
 
   const handleUpdate = async (row: any) => {
     setUpdating(true);
@@ -145,8 +146,8 @@ const Consumables = ({
             return row.original[e?.fieldName] ? (
               <div className="flex items-center gap-2">
                 {hasChildFields &&
-                allowedToEdit &&
-                ![MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(row?.original?.type) ? (
+                  allowedToEdit &&
+                  ![MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(row?.original?.type) ? (
                   <p
                     className={'link text-truncate'}
                     onClick={() => {
@@ -248,24 +249,24 @@ const Consumables = ({
       },
       ...(user?.user?.brandPolicy?.workOrderConsumableRequest && !user?.user?.brandPolicy?.workOrderConsumableConsumeHide
         ? [
-            {
-              accessor: 'requestedQty',
-              Header: 'Requested Qty',
-              width: 150,
-              Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
-            }
-          ]
+          {
+            accessor: 'requestedQty',
+            Header: 'Requested Qty',
+            width: 150,
+            Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
+          }
+        ]
         : []),
       ...(!user?.user?.brandPolicy?.workOrderConsumableConsumeHide
         ? [
-            {
-              accessor: 'consumedQty',
-              Header: 'Consumed Qty',
-              primaryField: true,
-              width: 150,
-              Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
-            }
-          ]
+          {
+            accessor: 'consumedQty',
+            Header: 'Consumed Qty',
+            primaryField: true,
+            width: 150,
+            Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
+          }
+        ]
         : [])
     ];
     extracolumns.push({
@@ -466,7 +467,7 @@ const Consumables = ({
   const createNewVersionQuote = async (quoteId, quoteVersionId) => {
     axiosInstance()
       .post(`/quotation/clone-version/${quoteId}/${quoteVersionId}`)
-      .then(() => {})
+      .then(() => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -554,9 +555,9 @@ const Consumables = ({
       {allowedToEdit && (
         <Box className="mb-3 flex flex-wrap justify-between gap-2">
           {isCreate && permissions?.product?.isRead && (
-            <Button variant={'contained'} color="primary" size="small" onClick={() => setConsumablesDialog(true)}>
+            <ThemeButton buttonType="theme" onClick={() => setConsumablesDialog(true)}>
               {materialSubType === MATERIAL_SUB_TYPE.bom ? `Add BOM` : `Add Products/Consumables`}
-            </Button>
+            </ThemeButton>
           )}
           <Box display="flex" ml={'auto'}>
             <Box ml={1}></Box>
@@ -573,40 +574,36 @@ const Consumables = ({
             />
             <Box ml={1}></Box>
             {!user?.user?.brandPolicy?.workOrderConsumableConsumeHide && (
-              <Button
+              <ThemeButton
                 disabled={
                   selectedRecords?.length &&
-                  selectedRecords?.every((r) => !r?.serializedProduct && !r?.hideSelection && r?.type === MATERIAL_TYPE.product)
+                    selectedRecords?.every((r) => !r?.serializedProduct && !r?.hideSelection && r?.type === MATERIAL_TYPE.product)
                     ? false
                     : true
                 }
                 onClick={() => setOpenConsumablesQtyDialog(true)}
-                color="primary"
-                size="small"
-                variant="contained"
+                buttonType="theme"
               >
                 {consumeRequest ? 'Request ' : 'Consume '}{' '}
                 {selectedRecords?.filter((e) => !e?.hideSelection && !e?.serializedProduct && e?.type === MATERIAL_TYPE.product).length > 0
                   ? '(' + selectedRecords?.filter((e) => !e?.hideSelection && !e?.serializedProduct && e?.type === MATERIAL_TYPE.product).length + ')'
                   : ''}
-              </Button>
+              </ThemeButton>
             )}
             <Box ml={1}></Box>
-            <Button
-              variant={'outlined'}
-              color="primary"
-              size="small"
+            <ThemeButton
+              mobileTooltip="Actions"
+              buttonType="yellow"
+              iconForMobile={<BiChevronDown />}
               onClick={handleClickAction}
               disabled={selectedRecords?.length ? false : true}
               endIcon={<BiChevronDown />}
-              className="new-dropdown-v1"
             >
               Actions
-            </Button>
+            </ThemeButton>
             <Menu
               anchorEl={anchorEl}
               open={open}
-              getContentAnchorEl={null}
               anchorOrigin={{
                 vertical: 'bottom',
                 horizontal: 'left'
@@ -655,7 +652,7 @@ const Consumables = ({
         </Box>
       )}
       <Grid container spacing={2}>
-        <Grid item xs={12} md={12} sm={12}>
+        <Grid size={{ xs: 12, md: 12, sm: 12 }}>
           {columns ? (
             <CustomReactTable
               height={isCreate ? 'calc(100vh - 140px)' : 'calc(100vh - 345px)'}

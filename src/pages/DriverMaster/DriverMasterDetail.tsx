@@ -1,15 +1,14 @@
-import { Box, Button, Grid, Menu, MenuItem } from '@material-ui/core';
-import { Edit } from '@material-ui/icons';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import { Box, Menu, MenuItem } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import EditIcon from '@mui/icons-material/Edit';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import { sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -17,6 +16,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import History from './History';
 import ManageDriverMaster from './ManageDriverMaster';
+import { ExpandMore } from '@mui/icons-material';
 
 const DriverMasterDetail = () => {
   const { id } = useParams();
@@ -146,78 +146,62 @@ const DriverMasterDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            <>
-              {permissions?.driverMaster?.isUpdate && (
-                <Button
-                  variant={'outlined'}
-                  color="primary"
-                  aria-controls="simple-menu"
-                  aria-haspopup="true"
-                  size="small"
-                  onClick={handleClick}
-                  endIcon={<ArrowDropDownIcon />}
-                  className="btn-outline-v1"
-                >
-                  {'Change Status'}
-                </Button>
-              )}
-              <Menu
-                id="simple-menu"
-                anchorEl={anchorEl}
-                keepMounted
-                open={Boolean(anchorEl)}
-                onClose={handleClose}
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'right'
-                }}
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right'
-                }}
-              >
-                {driverMasterData &&
-                  statusOptions?.map((o, index) => {
-                    return (
-                      <MenuItem
-                        disabled={o?.optionLabel === driverMasterData?.status ? true : false}
-                        onClick={() => {
-                          handleClose();
-                          handleChangeStatus(o?.optionLabel);
-                        }}
-                        value={o}
-                      >
-                        {o?.optionLabel}
-                      </MenuItem>
-                    );
-                  })}
-              </Menu>
-              {permissions?.driverMaster?.isUpdate && (
-                <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
-                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                </Button>
-              )}
-              {permissions?.driverMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-            </>
+            {permissions?.driverMaster?.isUpdate && (
+              <ThemeButton onClick={handleClick} endIcon={<ExpandMore />} iconForMobile={false}>
+                {'Change Status'}
+              </ThemeButton>
+            )}
+            <Menu
+              id="simple-menu"
+              anchorEl={anchorEl}
+              keepMounted
+              open={Boolean(anchorEl)}
+              onClose={handleClose}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right'
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right'
+              }}
+            >
+              {driverMasterData &&
+                statusOptions?.map((o, index) => {
+                  return (
+                    <MenuItem
+                      disabled={o?.optionLabel === driverMasterData?.status ? true : false}
+                      onClick={() => {
+                        handleClose();
+                        handleChangeStatus(o?.optionLabel);
+                      }}
+                      value={o}
+                    >
+                      {o?.optionLabel}
+                    </MenuItem>
+                  );
+                })}
+            </Menu>
+            {permissions?.driverMaster?.isUpdate && (
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                {'Edit'}
+              </ThemeButton>
+            )}
+            {permissions?.driverMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
           </Box>
         </Box>
       </Box>
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0}>
-            Details
-          </CustomTab>
-          <CustomTab value={1}>
-            History
-          </CustomTab>
+          <CustomTab value={0}>Details</CustomTab>
+          <CustomTab value={1}>History</CustomTab>
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
             {loading || !fields?.length ? (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-              </Grid>
+              <div className="p-2">
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+              </div>
             ) : (
               <DetailsPage data={driverMasterData} fields={fields} />
             )}
@@ -230,7 +214,7 @@ const DriverMasterDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.driverMaster?.titleSingular?.toLowerCase()} : ${driverMasterData?.driverName} ?`} 
+          message={`Are you sure you want to delete ${resources?.driverMaster?.titleSingular?.toLowerCase()} : ${driverMasterData?.driverName} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

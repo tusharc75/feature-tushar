@@ -1,5 +1,5 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
-import { LocalShipping } from '@material-ui/icons';
+import { Box, IconButton, MenuItem } from '@mui/material';
+import { LocalShipping } from '@mui/icons-material';
 import { map, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -21,6 +21,7 @@ import {
   DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
   MATERIAL_TYPE,
+  dateFormatToSend,
   deliveryTicket,
   sidebarResource
 } from 'src/constants/helpers';
@@ -277,7 +278,7 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, a
       data['status'] = DELIVERY_TICKET_STATUS.delivered;
       data['signatures'] = [];
       data['warehouse'] = subcontractAssemblyData?.warehouse?.optionValue;
-      data['receiveDate'] = receiveDate;
+      data['receiveDate'] = dateFormatToSend(receiveDate);
       setLoading(true);
       axiosInstance()
         .post(`${deliveryTicket.api}/updatebulk`, data)

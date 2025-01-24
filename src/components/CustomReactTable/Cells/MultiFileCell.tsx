@@ -1,4 +1,4 @@
-import { Popover } from '@material-ui/core';
+import { Popover } from '@mui/material';
 import { useState } from 'react';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { PreviewFile } from 'src/components/PreviewFile';

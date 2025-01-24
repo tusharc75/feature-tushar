@@ -1,8 +1,7 @@
-import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@material-ui/core';
-import { MoreVert } from '@material-ui/icons';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
+import { MoreVert } from '@mui/icons-material';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { Box, Button, Card, CardContent, IconButton, Menu, MenuItem, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useEffect, useState } from 'react';
 import { BiCustomize } from 'react-icons/bi';
 import { FaArrowAltCircleDown } from 'react-icons/fa';
@@ -11,10 +10,10 @@ import { Link, useHistory } from 'react-router-dom';
 import DisplayData from 'src/components/CardDisplayData';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { displayDate } from 'src/constants/helpers';
 import { useData } from '../../StateProvider/Provider';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import { formatAmountWithCurrency } from '../../constants/helpers';
-import { displayDate } from '../../services/util';
 import routes from './../../components/Helpers/Routes';
 import ManageOpportunityDialog from './../Opportunities/ManageOpportunityDialog';
 
@@ -79,52 +78,48 @@ export default function OpportunityAccordionInUserDetail({ opportunities, expand
     <>
       <Accordion expanded={expandOpportunity} className="accordOpportunity" onChange={(event) => setExpandOpportunity(!expandOpportunity)}>
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
-          <Grid container className="pos_rel">
-            <Grid item xs={8}>
-              <Box display="flex" alignItems="center">
-                <Box>
-                  <IconButton size="small">{expandOpportunity === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
-                </Box>
-                <Box padding="5px">
-                  <Typography variant="subtitle2">Opportunity ({opportunities?.length ? opportunities.length : 0})</Typography>
-                </Box>
-              </Box>
-            </Grid>
-            <Grid item xs={4} container justify="flex-end" alignItems="center">
-              <Typography variant="subtitle2">
-                {isAllowedToEdit && (
-                  <>
-                    {
-                      // permissions?.opportunity?.isCreate && <IconButton
-                      //     color="primary"
-                      //     size="small"
-                      //     onClick={() => { setShowCreateOpportunityDialog(true) }}
-                      // >
-                      //     <ControlPointIcon />
-                      // </IconButton>
-                      permissions?.opportunity?.isCreate && (
-                        <>
-                          <IconButton aria-haspopup="true" color="primary" size="small" onClick={handleOpenMenu}>
-                            <MoreVert />
-                          </IconButton>
-                          <Menu id="menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
-                            <MenuItem
-                              onClick={() => {
-                                setShowCreateOpportunityDialog(true);
-                                handleCloseMenu();
-                              }}
-                            >
-                              Create New
-                            </MenuItem>
-                          </Menu>
-                        </>
-                      )
-                    }
-                  </>
-                )}
-              </Typography>
-            </Grid>
-          </Grid>
+          <div className="flex items-center justify-between">
+            <Typography variant="subtitle2">Opportunity ({opportunities?.length ? opportunities.length : 0})</Typography>
+            {isAllowedToEdit && (
+              <>
+                {
+                  // permissions?.opportunity?.isCreate && <IconButton
+                  //     color="primary"
+                  //     size="small"
+                  //     onClick={() => { setShowCreateOpportunityDialog(true) }}
+                  // >
+                  //     <ControlPointIcon />
+                  // </IconButton>
+                  permissions?.opportunity?.isCreate && (
+                    <>
+                      <IconButton
+                        aria-haspopup="true"
+                        color="primary"
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          handleOpenMenu(e);
+                        }}
+                      >
+                        <MoreVert />
+                      </IconButton>
+                      <Menu id="menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
+                        <MenuItem
+                          onClick={() => {
+                            setShowCreateOpportunityDialog(true);
+                            handleCloseMenu();
+                          }}
+                        >
+                          Create New
+                        </MenuItem>
+                      </Menu>
+                    </>
+                  )
+                }
+              </>
+            )}
+          </div>
         </AccordionSummary>
         <AccordionDetails>
           <>
@@ -133,11 +128,11 @@ export default function OpportunityAccordionInUserDetail({ opportunities, expand
                 {opportunities && opportunities?.length ? (
                   <Grid container spacing={1}>
                     {opportunities.slice(0, maxRecordsToShow).map((obj, index) => (
-                      <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index}>
+                      <Grid size={{ xs: 12, sm: 12, md: recordsPerLineInLargeScreen }} key={index}>
                         <Card className="detailCard  card-v1" variant="outlined">
                           <CardContent className="card-link">
                             <Grid container className="detailCardHeader">
-                              <Grid item xs={7} sm={8}>
+                              <Grid size={{ xs: 7, sm: 8 }}>
                                 {hasAccessToEntity(obj.entity) ? (
                                   obj.entity === selectedEntity ? (
                                     <Link
@@ -162,7 +157,7 @@ export default function OpportunityAccordionInUserDetail({ opportunities, expand
                                     </Link>
                                   )
                                 ) : (
-                                  <span className="d-flex gap-2 align-items-center">
+                                  <span className="d-flex align-items-center gap-2">
                                     <Typography className="detailName">{obj.opportunityName}</Typography>{' '}
                                     <HtmlTooltip title={`${obj.opportunityName} belongs to different entity`}>
                                       <InfoOutlinedIcon fontSize="small" />
@@ -170,7 +165,7 @@ export default function OpportunityAccordionInUserDetail({ opportunities, expand
                                   </span>
                                 )}
                               </Grid>
-                              <Grid item xs={5} sm={4}>
+                              <Grid size={{ xs: 5, sm: 4 }}>
                                 <Typography
                                   className="amount"
                                   title={formatAmountWithCurrency(obj['currency'], obj?.estimatedAmount).fullFormatAmount}
@@ -180,14 +175,14 @@ export default function OpportunityAccordionInUserDetail({ opportunities, expand
                               </Grid>
                             </Grid>
                             <Grid container>
-                              <Grid item xs={12} sm={6} md={6}>
+                              <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                                 {obj?.stage ? (
                                   <DisplayData key={index} label="Stage" value={obj?.stage ?? ''} icon={<BiCustomize size={15} />} />
                                 ) : (
                                   ''
                                 )}
                               </Grid>
-                              <Grid item xs={12} sm={6} md={6}>
+                              <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                                 {obj.closeDate ? (
                                   <DisplayData
                                     key={index}

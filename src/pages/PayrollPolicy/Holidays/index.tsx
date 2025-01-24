@@ -1,6 +1,6 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
+import { Box, IconButton, MenuItem } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -16,7 +16,6 @@ import { CHILD_RESOURCE, gridLoadingTimeout, prepareDataForGrid, sidebarResource
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import ManageHolidays from './ManageHolidays';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
-import { sidebarItems } from 'src/components/FormBuilder/FieldList';
 
 const Holidays = ({ payrollPolicyData }) => {
   const renderedFrom = `${camelCase(sidebarResource.payrollPolicy)}_holidays`;
@@ -138,11 +137,11 @@ const Holidays = ({ payrollPolicyData }) => {
       <>
         <MenuItem
           onClick={() => {
-            if (selectedRecords.length === 1){
+            if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-              }else{
-                setDeleteRecord(null)
-              }
+            } else {
+              setDeleteRecord(null);
+            }
             setManageHolidays({ open: true, id: null });
           }}
         >
@@ -235,7 +234,7 @@ const Holidays = ({ payrollPolicyData }) => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.holiday?.titleSingular?.toLowerCase()} : ${deleteRecord?.name || ''}` : `selected ${resources?.holiday?.titlePlural?.toLowerCase()}`} ?`}              
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.holiday?.titleSingular?.toLowerCase()} : ${deleteRecord?.name || ''}` : `selected ${resources?.holiday?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowConfirmBox(false);

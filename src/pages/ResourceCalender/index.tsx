@@ -1,4 +1,5 @@
-import { Grid, Typography, Box, Container } from '@material-ui/core';
+import { Typography, Box, Container } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import styles from '../Leads/Header.module.scss';
 import routes from './../../components/Helpers/Routes';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
@@ -15,14 +16,14 @@ const ResourceCalendar = () => {
   return (
     <div>
       <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
+        <Grid size={{md:4, sm:11, xs:10}}>
           <CustomBreadCrumbs routes={[{ ...routes.resourceCalendar, title: resources?.resourceCalendar?.titlePlural }]} />
         </Grid>
       </Grid>
       <div className="main-container">
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} className="d-flex align-items-center gap-1 layout-for-tablet">
+            <Grid size={{xs:12}} className="d-flex align-items-center layout-for-tablet gap-1">
               <Grid style={{ display: 'flex', justifyContent: 'center' }}>
                 <MdDescription size={22} className="headerLogo" />
                 <span className="listingHeader">Resource Calendar</span>
@@ -36,7 +37,7 @@ const ResourceCalendar = () => {
               {RESOURCE_CALENDAR.map((resource: any) => {
                 return (
                   permissions[resource.key]?.isRead && (
-                    <Grid key={resource.key} item xs={12} sm={2} md={3} lg={4}>
+                    <Grid key={resource.key} size={{xs:12, sm:2, md:3, lg:4}}>
                       <Link to={`/resource-calendar${routes[resource.key]?.path}`}>
                         <Box border={1} borderColor="var(--common-border-color)" borderRadius={1} p={2}>
                           <Typography variant="h6">

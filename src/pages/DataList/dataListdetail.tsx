@@ -1,4 +1,5 @@
-import { Box, Grid } from '@material-ui/core';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useContext, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -53,15 +54,13 @@ const DataListDetail = () => {
       </Box>
       <Box className={'detail-container-v1'}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0}>
-            Data List Items
-          </CustomTab>
+          <CustomTab value={0}>Data List Items</CustomTab>
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading ? (
-            <Grid container spacing={2} style={{ padding: '8px' }}>
+            <div className="p-2">
               <CommonSkeleton lenArray={[...Array(13).keys()]} />
-            </Grid>
+            </div>
           ) : (
             <DataListItems dataListId={id} />
           )}

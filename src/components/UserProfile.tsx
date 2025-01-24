@@ -1,5 +1,5 @@
 import React from 'react';
-import { IconButton, MenuItem, Paper, Grow, MenuList, ClickAwayListener, Popper, ListItemIcon, Typography, Avatar } from '@material-ui/core';
+import { IconButton, MenuItem, Paper, Grow, MenuList, ClickAwayListener, Popper, ListItemIcon, Typography, Avatar } from '@mui/material';
 import { useData } from './../StateProvider/Provider';
 import { FiLogOut, FiUser, FiSettings } from 'react-icons/fi';
 import './sidebar.scss';

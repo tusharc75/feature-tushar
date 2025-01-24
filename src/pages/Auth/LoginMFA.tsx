@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, CssBaseline, FormControl, MenuItem, Select } from '@material-ui/core';
+import { Box, CssBaseline, FormControl, MenuItem, Select } from '@mui/material';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useCallback, useContext, useEffect, useState } from 'react';
@@ -10,6 +10,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { SET_SELECTED_ENTITY, SET_USER } from 'src/StateProvider/actionTypes';
 import { SVG } from 'src/assets';
 import axiosInstance from 'src/axios/axiosInstance';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import OtpInput from 'src/components/OtpInput';
@@ -89,71 +90,68 @@ const LoginMFA = () => {
       });
   };
 
-  const handleSubmit = useCallback(async () => {
-    setIsSubmitting(true);
-    axiosInstance()
-      .post('/user/mfa-auth/verify-otp', {
-        otp: otp,
-        token: token,
-        method: selectedMethod
-      })
-      .then(async ({ data: { data } }) => {
-        localStorage.setItem('token', data.token);
-        if (data?.hasExistingSession) {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.existingSessionMessage
-          });
-        }
-        const res = await axiosInstance().get(`/user/me`);
-        const {
-          data: { data: meData }
-        } = res;
-
-        dispatch({ type: SET_USER, payload: meData });
-        if (meData?.role?.selectedEntity?._id) {
-          dispatch({
-            type: SET_SELECTED_ENTITY,
-            payload: data.role.selectedEntity._id
-          });
-        }
-        if (data?.user?.defaultResource) {
-          if (routes[camelCase(data?.user?.defaultResource)]?.path) {
-            history.push({ pathname: routes[camelCase(data?.user?.defaultResource)]?.path });
+  const handleSubmit = useCallback(
+    async (otpProp = otp) => {
+      setIsSubmitting(true);
+      axiosInstance()
+        .post('/user/mfa-auth/verify-otp', {
+          otp: otpProp,
+          token: token,
+          method: selectedMethod
+        })
+        .then(async ({ data: { data } }) => {
+          localStorage.setItem('token', data.token);
+          if (data?.hasExistingSession) {
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: data.existingSessionMessage
+            });
           }
-        }
-        axiosInstance()
-          .get(`/user/notification/unseen`)
-          .then(({ data: { count } }) => {
-            notification.setCount(count);
-          })
-          .catch((error) => {
-            toastConfig.setToastConfig(error);
-          });
+          const res = await axiosInstance().get(`/user/me`);
+          const {
+            data: { data: meData }
+          } = res;
 
-        axiosInstance()
-          .get(`/user/user-notification/unseen`)
-          .then(({ data: { count } }) => {
-            chatNotification.setCount(count);
-          })
-          .catch((error) => {
-            toastConfig.setToastConfig(error);
-          });
-        setIsSubmitting(false);
-      })
-      .catch((error) => {
-        setOtp('');
-        setIsSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
-  }, [chatNotification, dispatch, history, notification, otp, selectedMethod, toastConfig, token]);
+          dispatch({ type: SET_USER, payload: meData });
+          if (meData?.role?.selectedEntity?._id) {
+            dispatch({
+              type: SET_SELECTED_ENTITY,
+              payload: data.role.selectedEntity._id
+            });
+          }
+          if (data?.user?.defaultResource) {
+            if (routes[camelCase(data?.user?.defaultResource)]?.path) {
+              history.push({ pathname: routes[camelCase(data?.user?.defaultResource)]?.path });
+            }
+          }
+          axiosInstance()
+            .get(`/user/notification/unseen`)
+            .then(({ data: { count } }) => {
+              notification.setCount(count);
+            })
+            .catch((error) => {
+              toastConfig.setToastConfig(error);
+            });
 
-  useEffect(() => {
-    if (otp.length === 6) {
-      handleSubmit();
-    }
-  }, [otp, handleSubmit]);
+          axiosInstance()
+            .get(`/user/user-notification/unseen`)
+            .then(({ data: { count } }) => {
+              chatNotification.setCount(count);
+            })
+            .catch((error) => {
+              toastConfig.setToastConfig(error);
+            });
+          setIsSubmitting(false);
+        })
+        .catch((error) => {
+          setOtp('');
+          setIsSubmitting(false);
+          toastConfig.setToastConfig(error);
+        });
+    },
+    [chatNotification, dispatch, history, notification, otp, selectedMethod, toastConfig, token]
+  );
 
   return (
     <>
@@ -174,6 +172,7 @@ const LoginMFA = () => {
                   id="demo-simple-select"
                   value={selectedMethod}
                   onChange={(e) => setSelectedMethod(e.target.value)}
+                  size="small"
                 >
                   <MenuItem value={MFA_METHOD.emailOtp}>Email Code</MenuItem>
                   {tokenData?.isMFASetup && <MenuItem value={MFA_METHOD.totp}>Authenticator App</MenuItem>}
@@ -181,9 +180,9 @@ const LoginMFA = () => {
               </FormControl>
               {selectedMethod === MFA_METHOD.emailOtp && tokenData?.authenticationMethod === MFA_METHOD.totp ? (
                 <Box mt={2} mb={2}>
-                  <Button disableElevation variant="contained" color="primary" onClick={handleResendCode}>
+                  <ThemeButton onClick={handleResendCode} buttonType="theme">
                     Send Code
-                  </Button>
+                  </ThemeButton>
                 </Box>
               ) : (
                 <form
@@ -193,7 +192,8 @@ const LoginMFA = () => {
                   }}
                 >
                   <p className="info mx-auto mb-7 mt-7 max-w-[400px] text-[13px] font-normal leading-[1.5] text-gray-500">
-                    A verification code has been sent to your {selectedMethod === 'totp' ? 'device' : 'email'}. Please enter the code below to proceed.
+                    A verification code has been sent to your {selectedMethod === 'totp' ? 'device' : 'email'}. Please enter the code below to
+                    proceed.
                   </p>
                   <div className="mb-6 md:px-5">
                     <OtpInput
@@ -201,8 +201,8 @@ const LoginMFA = () => {
                       value={otp}
                       onChange={(value) => {
                         setOtp(value);
-                        if (otp.length === 6) {
-                          handleSubmit();
+                        if (value.length === 6) {
+                          handleSubmit(value);
                         }
                       }}
                       TextFieldsProps={{ size: 'small', inputProps: { pattern: '[0-9]*', autoComplete: 'one-time-code', inputMode: 'numeric' } }}
@@ -224,19 +224,16 @@ const LoginMFA = () => {
                       {timeLeft ? <span>{formatTime(timeLeft)}</span> : null}
                     </div>
                   )}
-                  <Button
-                    disableElevation
-                    variant="contained"
-                    color="primary"
+                  <ThemeButton
+                    buttonType="theme"
                     type="submit"
                     fullWidth
-                    style={{ paddingBlock: 10, borderRadius: 9 }}
+                    sx={{ paddingBlock: 10, height: 40 }}
                     disabled={otp.length < 6 || isSubmitting}
-                    onClick={handleSubmit}
-                    startIcon={isSubmitting && <CircularProgress color="inherit" size={20} />}
+                    isLoading={isSubmitting}
                   >
                     Submit
-                  </Button>
+                  </ThemeButton>
                 </form>
               )}
             </div>

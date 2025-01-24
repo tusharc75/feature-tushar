@@ -1,6 +1,6 @@
-import { Box, CircularProgress, TableBody } from '@material-ui/core';
-import MaUTable from '@material-ui/core/Table';
-import { Error } from '@material-ui/icons';
+import { Box, CircularProgress, TableBody } from '@mui/material';
+import MaUTable from '@mui/material/Table';
+import { Error } from '@mui/icons-material';
 import { Column, flexRender } from '@tanstack/react-table';
 import { defaultRangeExtractor, Range, useVirtualizer } from '@tanstack/react-virtual';
 import React, { ForwardedRef, forwardRef, Fragment, useEffect } from 'react';
@@ -46,7 +46,8 @@ export const VirtualTable = forwardRef(function (
     vtableData,
     expanderWithCustomContent = false,
     customContentHeight = 300,
-    customContent = () => null
+    customContent = () => null,
+    renderedFrom = ''
   }: RnderTableProps & {
     columns: Column<any, unknown>[];
     sizes: number[];
@@ -58,14 +59,9 @@ export const VirtualTable = forwardRef(function (
   },
   ref: ForwardedRef<HTMLTableElement>
 ) {
-  // console.count('virtual');
-  // virtualization
-  const parentRef = React.useRef();
-
-  // if footer present then + 2 for header and footer height
-  // else + 1 for only header height
+  const parentRef = React.useRef<HTMLDivElement>(null);
   const rowVirtualizer = useVirtualizer({
-    count: isFooterVisible ? rows.length + 2 : rows.length + 1,
+    count: rows.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 45,
     overscan: 2,
@@ -93,12 +89,9 @@ export const VirtualTable = forwardRef(function (
   useEffect(() => {
     columnVirtualizer.measure();
   }, [columns.length]);
-
   useEffect(() => {
-    setTimeout(() => {
-      rowVirtualizer.measure();
-    }, 0);
-  }, []);
+    rowVirtualizer.measure();
+  }, [rows.length]);
 
   const virtualColumns = columnVirtualizer.getVirtualItems();
   const virtualrows = rowVirtualizer.getVirtualItems();
@@ -161,12 +154,7 @@ export const VirtualTable = forwardRef(function (
           </Box>
         )}
 
-        <MaUTable
-          ref={tableRef}
-          size="small"
-          className="tableWrap sticky table"
-          style={{ height: `${rowVirtualizer.getTotalSize()}px`, width: `max(${totalColumnSize}px, 100%)` }}
-        >
+        <MaUTable ref={tableRef} size="small" className="tableWrap sticky table" style={{ width: `max(${totalColumnSize}px, 100%)` }}>
           <VirtualTableHead
             table={table}
             virtualColumns={virtualColumns}
@@ -180,10 +168,12 @@ export const VirtualTable = forwardRef(function (
             vtableData={vtableData}
             virtualPaddingLeft={virtualPaddingLeft}
             virtualPaddingRight={virtualPaddingRight}
+            renderedFrom={renderedFrom}
           />
           <TableBody
             style={{
-              overflow: 'hidden'
+              display: 'block',
+              height: `${rowVirtualizer.getTotalSize()}px`
             }}
             className={`body relative ${isClientSideGrid && footerRowFound ? 'with-footer' : ''}`}
           >
@@ -234,7 +224,7 @@ export const VirtualTable = forwardRef(function (
                               <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingRight }} />
                             ) : null}
                             <th
-                              className={`sticky bottom-0 bg-[var(--dark-primary,_white)]`}
+                              className={`sticky bottom-0 bg-[var(--dark-primary,_white)] text-[13px]`}
                               style={{
                                 ...style,
                                 position: 'sticky',

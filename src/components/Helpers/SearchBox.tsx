@@ -1,5 +1,5 @@
-import { Close } from '@material-ui/icons';
-import React, { memo, useRef, useState } from 'react';
+import { Close } from '@mui/icons-material';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FiSearch } from 'react-icons/fi';
 import { cn, DebounceCallBack, debounceCallBack } from 'src/constants/helpers';
@@ -12,7 +12,7 @@ type SerachBoxProps = React.InputHTMLAttributes<HTMLInputElement> & {
 };
 
 function SearchBox({ onChange, value, size, width, placeholder, className, containerProps = {}, fullWidth, ...otherProps }: SerachBoxProps) {
-  const [inputvalue, setInputValue] = useState<string>(value ?? '');
+  const [inputvalue, setInputValue] = useState<string>('');
   const { className: containerClassName, ...restOfContainerProps } = containerProps;
   const debounceRef = useRef<DebounceCallBack>(null);
 
@@ -31,6 +31,10 @@ function SearchBox({ onChange, value, size, width, placeholder, className, conta
     const [debouncedTracker, _] = debounceRef.current;
     debouncedTracker(e);
   };
+
+  useEffect(() => {
+    setInputValue(value ? value : '');
+  }, [value]);
 
   return (
     <>
@@ -52,7 +56,7 @@ function SearchBox({ onChange, value, size, width, placeholder, className, conta
           placeholder={placeholder || 'Search..'}
           type={isMobile || isTablet ? 'text' : 'search'}
           className={cn(
-            `small-searchbar h-[32px] w-full min-w-0 flex-grow rounded-[4px] bg-transparent p-[10px_5px_10px_32px] shadow-none outline-transparent [border:1px_solid_var(--common-border-color)] placeholder:text-[#737373] focus-within:[outline:1px_solid_var(--new-theme-color)] focus:[outline:1px_solid_var(--new-theme-color)] dark:bg-[var(--dark-secondary)] dark:text-white sm:min-w-[150px] `,
+            `small-searchbar h-[32px] w-full min-w-0 flex-grow rounded-[4px] bg-transparent p-[10px_5px_10px_32px] text-[13px] shadow-none outline-transparent [border:1px_solid_var(--common-border-color)] placeholder:text-[#737373] focus-within:[outline:1px_solid_var(--new-theme-color)] focus:[outline:1px_solid_var(--new-theme-color)] dark:bg-[var(--dark-secondary)] dark:text-white sm:min-w-[150px] `,
             className,
             fullWidth ? 'w-full' : 'sm:max-w-[300px]',
             isMobile || isTablet ? 'pr-6' : ''
@@ -64,7 +68,7 @@ function SearchBox({ onChange, value, size, width, placeholder, className, conta
             className={cn('absolute right-[5px] cursor-pointer [top:50%] [transform:translateY(-50%)]', isMobile || isTablet ? 'block' : 'hidden')}
             onClick={(e) => {
               setInputValue('');
-              onChangeWrapper({ ...e, target: { ...e.target, value: '' }, currentTarget: { ...e.currentTarget, value: '' } });
+              onChangeWrapper({ ...e, target: { ...e.target, value: '' } as any, currentTarget: { ...e.currentTarget, value: '' } as any });
             }}
           >
             <Close className="!text-[18px]" />

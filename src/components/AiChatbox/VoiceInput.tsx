@@ -1,5 +1,5 @@
-import { IconButton, Popover } from '@material-ui/core';
-import { Mic } from '@material-ui/icons';
+import { IconButton, Popover } from '@mui/material';
+import { Mic } from '@mui/icons-material';
 import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
 import { cn, CustomDialogTransition } from 'src/constants/helpers';
 import { useVoiceRecognition } from 'src/hooks';

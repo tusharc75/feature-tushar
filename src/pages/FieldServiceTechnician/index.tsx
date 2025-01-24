@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { Box, IconButton, MenuItem, useMediaQuery } from '@material-ui/core';
+import { Box, IconButton, MenuItem, useMediaQuery } from '@mui/material';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -21,19 +21,21 @@ import {
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { camelCase } from 'lodash';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useData } from 'src/StateProvider/Provider';
 import { cloneDisable } from 'src/constants/messageHelpers';
 import ViewFieldTicketDialog from './ViewFieldTicketDialog';
-import NoteAddIcon from '@material-ui/icons/NoteAdd';
+import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { findAll, findOne, insertUpdate, objectStore, setUpindexDB } from 'src/constants/indexdbhelper';
 import { fieldServiceOrderAddOffline, fieldServiceOrderClearOffline } from '../FieldServiceOrder/Services/OfflineHelper';
 import axios, { CancelTokenSource } from 'axios';
-import { Apps, FormatListNumbered } from '@material-ui/icons';
 import FieldTicket from '../FieldServiceOrder/FieldTicket';
 import { useHistory } from 'react-router-dom';
+import IconButtonTabs from 'src/components/IconButtonTabs';
+import { MdViewWeek } from 'react-icons/md';
+import { TfiLayoutListThumbAlt } from 'react-icons/tfi';
 
 type Views = 'card' | 'table';
 
@@ -94,15 +96,18 @@ const FieldServiceTechnician = () => {
   const isMobileView = useMediaQuery('(max-width:768px)');
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = camelCase(sidebarResource.fieldServiceTechnician);
-  const [view, setView] = useState<Views>('table');
-  const [selectedData, setSelectedData] = useState(null);
+  const [view, setView] = useState('table');
   const [colData, setColData] = useState(null);
   const {
     state: { user, permissions, resources }
   }: any = useData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-
+  const { dispatch: tableDispatch } = useTableReducer();
+  const resetSelectedRecords = () => {
+    dispatch({ type: 'selection', selectedRecords: [] });
+    tableDispatch({ type: 'selection', selectedRecords: [] });
+  };
   const [columns, setColumns] = useState(null);
   const [viewFieldTicket, setViewFieldTicket] = useState({ open: false, data: null });
 
@@ -110,6 +115,7 @@ const FieldServiceTechnician = () => {
   const { isOffline } = useContext(CustomOfflineContext);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [selectedData, setSelectedData] = useState(null);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const history = useHistory();
 
@@ -215,7 +221,7 @@ const FieldServiceTechnician = () => {
           });
       }
     },
-    [handleChangeFieldServiceOrderStatus, history, toastConfig, user.user?.brandCurrency]
+    [handleChangeFieldServiceOrderStatus, history, toastConfig]
   );
 
   useEffect(() => {
@@ -280,6 +286,8 @@ const FieldServiceTechnician = () => {
   };
 
   const handleSearch = (e) => {
+    setSelectedData(null);
+    setAllowedToEdit(false)
     dispatch({ type: 'search', search: e.target.value });
   };
 
@@ -319,9 +327,6 @@ const FieldServiceTechnician = () => {
         checkIsAllowedToEdit(user, sidebarResource.fieldTicket, row?.originaData) &&
         ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status)
       );
-    } else {
-      setSelectedData(null);
-      setAllowedToEdit(false);
     }
   };
 
@@ -329,7 +334,9 @@ const FieldServiceTechnician = () => {
     (view: Views) => {
       setView(view);
       const updatedColumns = columns?.filter((c) => c.accessor !== 'action');
-      updatedColumns.push(getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data: colData, resources }));
+      updatedColumns.push(
+        getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data: colData, resources })
+      );
       setColumns(updatedColumns);
     },
     [colData, columns, handleCreateFieldTicket, isSubmitting, permissions]
@@ -340,6 +347,7 @@ const FieldServiceTechnician = () => {
       handleViewChange('table');
     }
   }, [isMobileView, view, handleViewChange]);
+
 
   return (
     <section className="main-container-v1">
@@ -352,7 +360,7 @@ const FieldServiceTechnician = () => {
           onSearch={handleSearch}
           isActionButtonVisible={true}
           isAddButtonVisible={false}
-          rightSideContents={isMobileView ? null : <ViewButtons handleViewChange={handleViewChange} view={view} />}
+          rightSideContents={isMobileView ? null : <ViewButtons view={view} setView={setView} resetSelectedRecords={resetSelectedRecords} />}
           actionMenuItems={<ActionMenuItems />}
         />
         {columns ? (
@@ -434,23 +442,28 @@ const FieldServiceTechnician = () => {
 
 export default FieldServiceTechnician;
 
-const ViewButtons = ({ view, handleViewChange }) => {
+const ViewButtons = ({ view, setView, resetSelectedRecords }) => {
   return (
     <div className="flex flex-nowrap gap-2">
-      <HtmlTooltip title={'Card View'} placement="top" arrow enterTouchDelay={0}>
-        <span>
-          <IconButton size="small" onClick={() => handleViewChange('card')} disabled={view === 'card'}>
-            <Apps color="primary" className={`${view === 'card' ? ' opacity-45' : ''}`} />
-          </IconButton>
-        </span>
-      </HtmlTooltip>
-      <HtmlTooltip title={'List View'} placement="top" arrow enterTouchDelay={0}>
-        <span>
-          <IconButton size="small" onClick={() => handleViewChange('table')} disabled={view === 'table'}>
-            <FormatListNumbered color="primary" className={`${view === 'table' ? ' opacity-45' : ''}`} />
-          </IconButton>
-        </span>
-      </HtmlTooltip>
+      <IconButtonTabs
+        onItemClick={resetSelectedRecords}
+        items={
+          [
+            {
+              value: 'card',
+              icon: <MdViewWeek />,
+              tooltip: 'Card View'
+            },
+            {
+              value: 'table',
+              icon: <TfiLayoutListThumbAlt />,
+              tooltip: 'List View'
+            }
+          ] as const
+        }
+        setValue={setView}
+        value={view}
+      />
     </div>
   );
 };

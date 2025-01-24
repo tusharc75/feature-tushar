@@ -1,8 +1,7 @@
-import { MenuProps } from '@aws-amplify/ui-react';
-import { ButtonProps, IconButtonProps, Menu, MenuItem, MenuItemProps } from '@material-ui/core';
+import { ButtonProps, IconButtonProps, Menu, MenuItem, MenuItemProps, MenuProps } from '@mui/material';
 import React from 'react';
 import { BiChevronDown } from 'react-icons/bi';
-import { ButtonType, ThemeButton } from 'src/components/Helpers/Buttons';
+import { ThemeButtonProps, ThemeButton } from 'src/components/Helpers/Buttons';
 import { cn } from 'src/constants/helpers';
 
 export type ButtonMenuProps<D> = {
@@ -13,14 +12,15 @@ export type ButtonMenuProps<D> = {
   slot?: (props: any) => JSX.Element;
   showChevron?: boolean;
   horizontal?: 'left' | 'right' | 'center';
-} & Omit<ButtonType, 'iconForMobile'>;
+} & Omit<ThemeButtonProps, 'iconForMobile'>;
 
 export type Items<D> = {
   label: React.ReactNode;
   startIcon?: React.ReactNode;
   endIcon?: React.ReactNode;
   value?: D;
-} & Omit<MenuItemProps, 'children' | 'button'>;
+  visible?: boolean;
+} & Omit<MenuItemProps, 'children'>;
 
 const ButtonMenu = <D,>({
   items,
@@ -59,7 +59,6 @@ const ButtonMenu = <D,>({
     <>
       <Slot {...(slotProps as any)}>{children}</Slot>
       <Menu
-        getContentAnchorEl={null}
         open={open}
         anchorEl={anchorEl}
         onClose={handleClose}
@@ -75,11 +74,11 @@ const ButtonMenu = <D,>({
         {...menuProps}
       >
         {items.map((item, index) => {
-          const { onClick = () => {}, ...rest } = item;
+          const { onClick = () => {}, startIcon, endIcon, visible = true, ...rest } = item;
+          if (!visible) return null;
           return (
             <MenuItem
               key={index}
-              button={true}
               onClick={(e) => {
                 onClick?.(e);
                 onItemClick?.(e, item);
@@ -87,7 +86,11 @@ const ButtonMenu = <D,>({
               }}
               {...rest}
             >
-              {item.label}
+              <span className="flex items-center gap-2">
+                {startIcon}
+                {item.label}
+                {endIcon}
+              </span>
             </MenuItem>
           );
         })}

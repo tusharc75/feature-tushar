@@ -1,4 +1,5 @@
-import { Box, Button, Dialog, Grid, TextField } from '@material-ui/core';
+import { Box, Dialog, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from 'src/constants/helpers';
@@ -6,13 +7,13 @@ import { Form, Formik } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import CustomButton from 'src/components/Helpers/CustomButton';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { Autocomplete } from '@material-ui/lab';
+import Autocomplete from '@mui/material/Autocomplete';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { uniqBy } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -136,12 +137,12 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
                   <Grid container spacing={2}>
-                    <Grid item md={12} lg={12} sm={12}>
+                    <Grid size={{ md: 12, lg: 12, sm: 12 }}>
                       <Autocomplete
                         disabled={assetId ? true : false}
                         options={serializedAssetOptions}
                         getOptionLabel={(option: any) => option?.optionLabel || ''}
-                        getOptionSelected={(option: any, val) => option?.optionValue === val}
+                        isOptionEqualToValue={(option: any, val) => option?.optionValue === val}
                         value={
                           serializedAssetOptions?.filter((data) => values['serializedAsset'] === data?.optionValue).length
                             ? serializedAssetOptions?.find((data) => values['serializedAsset'] === data?.optionValue)
@@ -154,6 +155,7 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                           <TextField
                             {...params}
                             margin="dense"
+                            size="small"
                             name="serializedAsset"
                             label={resources?.serializedAsset?.titleSingular}
                             variant="outlined"
@@ -165,7 +167,7 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                         )}
                       />
                     </Grid>
-                    <Grid item md={12} lg={12} sm={12}>
+                    <Grid size={{ md: 12, lg: 12, sm: 12 }}>
                       <Autocomplete
                         options={outBoundMessageTypeOptions}
                         getOptionLabel={(option: any) => option || ''}
@@ -185,6 +187,7 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                           <TextField
                             {...params}
                             margin="dense"
+                            size="small"
                             name="messageType"
                             label="Type"
                             required={true}
@@ -196,13 +199,13 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                         )}
                       />
                     </Grid>
-                    <Grid item md={12} lg={12} sm={12}>
+                    <Grid size={{ md: 12, lg: 12, sm: 12 }}>
                       <Autocomplete
                         options={
                           values?.messageType ? outBoundMessageOptions?.filter((o) => o?.type === values?.messageType) : outBoundMessageOptions
                         }
                         getOptionLabel={(option: any) => option?.optionLabel || ''}
-                        getOptionSelected={(option: any, val) => option?.optionValue === val}
+                        isOptionEqualToValue={(option: any, val) => option?.optionValue === val}
                         value={
                           outBoundMessageOptions?.filter((data) => values['messageId'] === data?.optionValue).length
                             ? outBoundMessageOptions?.find((data) => values['messageId'] === data?.optionValue)
@@ -218,6 +221,7 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                           <TextField
                             {...params}
                             margin="dense"
+                            size="small"
                             name="messageId"
                             label="Description"
                             variant="outlined"
@@ -230,9 +234,10 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                       />
                     </Grid>
                     {values['messageType'] === 'Set Parameter' && (
-                      <Grid item md={12} lg={12} sm={12}>
+                      <Grid size={{ md: 12, lg: 12, sm: 12 }}>
                         <TextField
                           margin="dense"
+                          size="small"
                           name="messageValue"
                           label="Value"
                           variant="outlined"
@@ -252,21 +257,20 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button type="button" variant="outlined" color="primary" size="small" onClick={onClose}>
+                <ThemeButton buttonType="transparent" onClick={onClose}>
                   Cancel
-                </Button>
-                <CustomButton
-                  loading={isSubmitting}
+                </ThemeButton>
+                <ThemeButton
+                  isLoading={isSubmitting}
                   disabled={isSubmitting}
-                  variant="contained"
-                  color="primary"
+                  buttonType="theme"
                   onClick={(e) => {
                     e.preventDefault();
                     submitForm();
                   }}
                 >
                   Send
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
             </Fragment>
           )}

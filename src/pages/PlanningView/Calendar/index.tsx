@@ -1,3 +1,4 @@
+import CloseIcon from '@mui/icons-material/Close';
 import {
   Box,
   Checkbox,
@@ -11,13 +12,12 @@ import {
   TableHead,
   TableRow,
   TextField
-} from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
-import { Autocomplete } from '@material-ui/lab';
+} from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
+import dayjs from 'dayjs';
 import { camelCase, groupBy } from 'lodash';
-import moment from 'moment';
-import React, { forwardRef, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
-import { View, momentLocalizer } from 'react-big-calendar';
+import { forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import { View, dayjsLocalizer } from 'react-big-calendar';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -25,115 +25,158 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import CustomCalendar from 'src/components/CustomCalendar';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { useAppTheme } from 'src/constants/AppConfig';
-import { cn, dateFormat, sidebarResource } from 'src/constants/helpers';
+import { cn, displayDate, sidebarResource } from 'src/constants/helpers';
 import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
 import './calendarView.scss';
-import CloseIcon from '@material-ui/icons/Close';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import RenderFilter from 'src/pages/PlanningView/Calendar/RenderFilter';
+import axios, { CancelToken } from 'axios';
 
-const localizer = momentLocalizer(moment);
 const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
+
+const mapObjectToList = (obj: { [key: string]: OnSelectDataType[] }) => {
+  const data: { items: OnSelectDataType[]; key: string; heading: string }[] = [];
+  for (const key in obj) {
+    data.push({
+      items: obj[key],
+      key: key,
+      heading: routes[camelCase(key)].title || key
+    });
+  }
+  return data;
+};
+
+const localizer = dayjsLocalizer(dayjs);
 
 function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString }, ref) {
   const {
     state: { permissions, resources }
   }: any = useData();
 
-  const FILTERS = [
-    ...(permissions?.warehouse?.isRead
-      ? [
-          {
-            label: resources?.warehouse?.titlePlural,
-            value: 'Warehouse',
-            key: 'warehouse'
-          }
-        ]
-      : []),
-    ...(permissions?.product?.isRead
-      ? [
-          {
-            label: resources?.product?.titlePlural,
-            value: 'Product',
-            key: 'product'
-          }
-        ]
-      : []),
-    ...(permissions?.serializedAsset?.isRead
-      ? [
-          {
-            label: resources?.serializedAsset?.titlePlural,
-            value: 'Serialized Asset',
-            key: 'asset'
-          }
-        ]
-      : []),
-    ...(permissions?.serviceMaster?.isRead
-      ? [
-          {
-            label: resources?.serviceMaster?.titlePlural,
-            value: 'Service Master',
-            key: 'service'
-          }
-        ]
-      : []),
-    ...(permissions?.customerAccount?.isRead
-      ? [
-          {
-            label: resources?.customerAccount?.titlePlural,
-            value: 'Customer Account',
-            key: 'customerAccount'
-          }
-        ]
-      : []),
-    ...(permissions?.competencies?.isRead
-      ? [
-          {
-            label: resources?.competencies?.titlePlural,
-            value: 'Competencies',
-            key: 'competencies'
-          }
-        ]
-      : [])
-  ];
+  const FILTERS = useMemo(
+    () => [
+      ...(permissions?.warehouse?.isRead
+        ? [
+            {
+              label: resources?.warehouse?.titlePlural,
+              value: 'Warehouse',
+              key: 'warehouse'
+            }
+          ]
+        : []),
+      ...(permissions?.product?.isRead
+        ? [
+            {
+              label: resources?.product?.titlePlural,
+              value: 'Product',
+              key: 'product'
+            }
+          ]
+        : []),
+      ...(permissions?.serializedAsset?.isRead
+        ? [
+            {
+              label: resources?.serializedAsset?.titlePlural,
+              value: 'Serialized Asset',
+              key: 'asset'
+            }
+          ]
+        : []),
+      ...(permissions?.serviceMaster?.isRead
+        ? [
+            {
+              label: resources?.serviceMaster?.titlePlural,
+              value: 'Service Master',
+              key: 'service'
+            }
+          ]
+        : []),
+      ...(permissions?.customerAccount?.isRead
+        ? [
+            {
+              label: resources?.customerAccount?.titlePlural,
+              value: 'Customer Account',
+              key: 'customerAccount'
+            }
+          ]
+        : []),
+      ...(permissions?.competencies?.isRead
+        ? [
+            {
+              label: resources?.competencies?.titlePlural,
+              value: 'Competencies',
+              key: 'competencies'
+            }
+          ]
+        : [])
+    ],
+    [
+      permissions?.competencies?.isRead,
+      permissions?.customerAccount?.isRead,
+      permissions?.product?.isRead,
+      permissions?.serializedAsset?.isRead,
+      permissions?.serviceMaster?.isRead,
+      permissions?.warehouse?.isRead,
+      resources?.competencies?.titlePlural,
+      resources?.customerAccount?.titlePlural,
+      resources?.product?.titlePlural,
+      resources?.serializedAsset?.titlePlural,
+      resources?.serviceMaster?.titlePlural,
+      resources?.warehouse?.titlePlural
+    ]
+  );
 
-  const ASSET_FILTERS = [
-    {
-      label: resources?.serializedAsset?.titlePlural,
-      value: 'Serialized Asset',
-      key: 'assetIds'
-    }
-  ];
+  const ASSET_FILTERS = useMemo(
+    () => [
+      {
+        label: resources?.serializedAsset?.titlePlural,
+        value: 'Serialized Asset',
+        key: 'assetIds'
+      }
+    ],
+    [resources?.serializedAsset?.titlePlural]
+  );
 
-  const PRODUCT_FILTERS = [
-    {
-      label: resources?.product?.titlePlural,
-      value: 'Product',
-      key: 'product'
-    },
-    {
-      label: resources?.warehouse?.titlePlural,
-      value: 'Warehouse',
-      key: 'warehouse'
-    }
-  ];
+  const PRODUCT_FILTERS = useMemo(
+    () => [
+      {
+        label: resources?.product?.titlePlural,
+        value: 'Product',
+        key: 'product'
+      },
+      {
+        label: resources?.warehouse?.titlePlural,
+        value: 'Warehouse',
+        key: 'warehouse'
+      }
+    ],
+    [resources?.product?.titlePlural, resources?.warehouse?.titlePlural]
+  );
 
-  const RENTAL_JOB_FILTERS = [
-    {
-      label: resources?.rentalManagement?.titlePlural,
-      value: 'Rental Management',
-      key: 'rentalJob'
-    },
-    {
-      label: resources?.padMaster?.titlePlural,
-      value: 'Pad Master',
-      key: 'padMaster'
-    }
-  ];
+  const RENTAL_JOB_FILTERS = useMemo(
+    () => [
+      {
+        label: resources?.rentalManagement?.titlePlural,
+        value: 'Rental Management',
+        key: 'rentalJob'
+      },
+      ...(resources?.padMaster
+        ? [
+            {
+              label: resources?.padMaster?.titlePlural,
+              value: 'Pad Master',
+              key: 'padMaster'
+            }
+          ]
+        : [])
+    ],
+    [resources?.padMaster?.titlePlural, resources?.rentalManagement?.titlePlural]
+  );
 
   const [themeMode] = useAppTheme();
   const toastConfig = useContext(CustomToastContext);
@@ -148,31 +191,13 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const [selectedFilters, setSelectedFilters] = useState([]);
 
   const [renderCount, setRenderCount] = useState(0);
-  const defaultDate = useMemo(() => moment().toDate(), []);
+  const defaultDate = useMemo(() => dayjs().toDate(), []);
 
   const [staticEvents, setStaticEvents] = useState([]);
 
   const [dateRange, setDateRange] = useState({
-    estimateStartDate: moment().startOf('month').format('MM/DD/YYYY'),
-    estimateEndDate: moment().endOf('month').format('MM/DD/YYYY')
-  });
-
-  const [month, setMonth] = useState({
-    startDate: moment().startOf('month').format('MM/DD/YYYY'),
-    endDate: moment().endOf('month').format('MM/DD/YYYY')
-  });
-  const [week, setWeek] = useState({
-    startDate: moment().startOf('week').format('MM/DD/YYYY'),
-    endDate: moment().endOf('week').format('MM/DD/YYYY')
-  });
-  const [day, setDay] = useState({
-    startDate: moment().startOf('day').format('MM/DD/YYYY'),
-    endDate: moment().endOf('day').format('MM/DD/YYYY')
-  });
-
-  const [agenda, setAgenda] = useState({
-    startDate: moment().startOf('day').format('MM/DD/YYYY'),
-    endDate: moment().add(1, 'months').format('MM/DD/YYYY')
+    estimateStartDate: dayjs().startOf('month').format('MM/DD/YYYY'),
+    estimateEndDate: dayjs().endOf('month').format('MM/DD/YYYY')
   });
 
   const [isOpen, setOpen] = useState({ open: false, data: [], eventData: null });
@@ -180,34 +205,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   const [lookupLoading, setLookupLoading] = useState(false);
   const [isDataFetching, setIsDataFetching] = useState(false);
-
-  useImperativeHandle(ref, () => ({
-    fetchData
-  }));
-
-  useEffect(() => {
-    if (view === 'month') {
-      setMonth({
-        startDate: dateRange.estimateStartDate,
-        endDate: dateRange.estimateEndDate
-      });
-    } else if (view === 'week') {
-      setWeek({
-        startDate: dateRange.estimateStartDate,
-        endDate: dateRange.estimateEndDate
-      });
-    } else if (view === 'day') {
-      setDay({
-        startDate: dateRange.estimateStartDate,
-        endDate: dateRange.estimateEndDate
-      });
-    } else if (view === 'agenda') {
-      setAgenda({
-        startDate: dateRange.estimateStartDate,
-        endDate: dateRange.estimateEndDate
-      });
-    }
-  }, [dateRange]);
 
   useEffect(() => {
     let lookupResource = [...FILTERS, ...ASSET_FILTERS, ...PRODUCT_FILTERS, ...RENTAL_JOB_FILTERS]?.map((e) => e.value)?.toString();
@@ -268,15 +265,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     setSelectedLookUpResourceData(null);
   }, [selectedResource]);
 
-  useEffect(() => {
-    if (selectedResource) {
-      fetchData();
-    } else {
-      setEvents([]);
-    }
-  }, [selectedResource, selectedLookUpResourceData, dateRange]);
-
-  const getQueryString = () => {
+  const getQueryString = useCallback(() => {
     const date = `{"from": "${dateRange.estimateStartDate}", "to": "${dateRange.estimateEndDate}"}`;
     let query = `?date=${date}`;
     if (selectedResource) {
@@ -289,149 +278,181 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       });
     }
     return query;
-  };
+  }, [dateRange?.estimateEndDate, dateRange?.estimateStartDate, selectedLookUpResourceData, selectedResource]);
 
-  const fetchData = () => {
-    setIsDataFetching(true);
-    const queryString = getQueryString();
-    setQueryString(queryString);
-    axiosInstance()
-      .get(`/planning-view${queryString}`)
-      .then(({ data: { data } }) => {
-        const otherData = [];
-        const rows = data?.map((d: any) => {
-          if (selectedResource.resource === sidebarResource.serializedAsset) {
-            return {
-              id: d._id,
-              title: d?.quotationNumber || d?.planningNumber || d?.rentalJobName,
-              start: new Date(d['estimateStartDate'] || d['startDate']),
-              end: new Date(d['estimateEndDate'] || d['endDate']),
-              allDay: true,
-              resource: d.resource,
-              fulfillStatus: d?.fulfillStatus
-            };
-          }
-          if (selectedResource.resource === sidebarResource.product) {
-            for (const property in d) {
-              if (property === 'debit') {
-                if (d?.debit?.length) {
-                  const debitQty = d?.debit.reduce((sum, row) => Number(row.qty) + sum, 0);
+  const fetchData = useCallback(
+    (cancelToken?: CancelToken) => {
+      setIsDataFetching(true);
+      const queryString = getQueryString();
+      setQueryString(queryString);
+      axiosInstance()
+        .get(`/planning-view${queryString}`, { cancelToken })
+        .then(({ data: { data } }) => {
+          const otherData = [];
+          const rows = data?.map((d: any) => {
+            if (selectedResource.resource === sidebarResource.serializedAsset) {
+              return {
+                id: d._id,
+                title: d?.quotationNumber || d?.planningNumber || d?.rentalJobName,
+                start: new Date(d['estimateStartDate'] || d['startDate']),
+                end: new Date(d['estimateEndDate'] || d['endDate']),
+                allDay: true,
+                resource: d.resource,
+                fulfillStatus: d?.fulfillStatus
+              };
+            }
+            if (selectedResource.resource === sidebarResource.product) {
+              for (const property in d) {
+                if (property === 'debit') {
+                  if (d?.debit?.length) {
+                    const debitQty = d?.debit.reduce((sum, row) => Number(row.qty) + sum, 0);
+                    otherData.push({
+                      title: `↓ Planned ${debitQty}`,
+                      start: new Date(d['date']),
+                      end: new Date(d['date']),
+                      allDay: true,
+                      resource: selectedResource.resource,
+                      type: 'debit',
+                      data: d?.debit
+                      //isRedAlert: debitQty > d?.availableByPlanning ? true : false
+                    });
+                  }
+                } else if (property === 'credit') {
+                  if (d?.credit?.length) {
+                    otherData.push({
+                      title: `↑ Incoming ${d?.credit.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
+                      start: new Date(d['date']),
+                      end: new Date(d['date']),
+                      allDay: true,
+                      resource: selectedResource.resource,
+                      type: 'credit',
+                      data: d?.credit
+                    });
+                  }
+                } else if (property === 'reserved') {
+                  if (d?.reserved?.length) {
+                    otherData.push({
+                      title: `Reserved ${d?.reserved.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
+                      start: new Date(d['date']),
+                      end: new Date(d['date']),
+                      allDay: true,
+                      resource: selectedResource.resource,
+                      type: 'reserved',
+                      data: d?.reserved
+                    });
+                  }
+                } else if (property === 'inventory') {
+                  if (d?.inventory) {
+                    otherData.push({
+                      title: `Inventory ${d?.inventory}`,
+                      start: new Date(d['date']),
+                      end: new Date(d['date']),
+                      allDay: true,
+                      resource: selectedResource.resource
+                    });
+                  }
+                } else if (property === 'availableByPlanning') {
                   otherData.push({
-                    title: `↓ Planned ${debitQty}`,
+                    title: `Planned Available ${d?.availableByPlanning || 0}`,
                     start: new Date(d['date']),
                     end: new Date(d['date']),
                     allDay: true,
+                    type: 'availableByPlanning',
                     resource: selectedResource.resource,
-                    type: 'debit',
-                    data: d?.debit
-                    //isRedAlert: debitQty > d?.availableByPlanning ? true : false
+                    isRedAlert: d?.availableByPlanning < 0 ? true : false
                   });
-                }
-              } else if (property === 'credit') {
-                if (d?.credit?.length) {
+                } else if (['assetCount', 'date']?.includes(property)) {
+                } else if (d[property]) {
                   otherData.push({
-                    title: `↑ Incoming ${d?.credit.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
+                    title: `${property} ${d[property]}`,
                     start: new Date(d['date']),
                     end: new Date(d['date']),
                     allDay: true,
-                    resource: selectedResource.resource,
-                    type: 'credit',
-                    data: d?.credit
-                  });
-                }
-              } else if (property === 'reserved') {
-                if (d?.reserved?.length) {
-                  otherData.push({
-                    title: `Reserved ${d?.reserved.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
-                    start: new Date(d['date']),
-                    end: new Date(d['date']),
-                    allDay: true,
-                    resource: selectedResource.resource,
-                    type: 'reserved',
-                    data: d?.reserved
-                  });
-                }
-              } else if (property === 'inventory') {
-                if (d?.inventory) {
-                  otherData.push({
-                    title: `Inventory ${d?.inventory}`,
-                    start: new Date(d['date']),
-                    end: new Date(d['date']),
-                    allDay: true,
+                    type: 'assetStatus',
+                    status: property,
                     resource: selectedResource.resource
                   });
                 }
-              } else if (property === 'availableByPlanning') {
-                otherData.push({
-                  title: `Planned Available ${d?.availableByPlanning || 0}`,
-                  start: new Date(d['date']),
-                  end: new Date(d['date']),
-                  allDay: true,
-                  type: 'availableByPlanning',
-                  resource: selectedResource.resource,
-                  isRedAlert: d?.availableByPlanning < 0 ? true : false
-                });
-              } else if (['assetCount', 'date']?.includes(property)) {
-              } else if (d[property]) {
-                otherData.push({
-                  title: `${property} ${d[property]}`,
-                  start: new Date(d['date']),
-                  end: new Date(d['date']),
-                  allDay: true,
-                  type: 'assetStatus',
-                  status: property,
-                  resource: selectedResource.resource
-                });
               }
             }
-          }
-          let title = d[selectedResource.fieldName];
-          let start = new Date(d[selectedResource.start]);
-          let end = new Date(d[selectedResource.end]);
-          let fulfillStatus = d?.fulfillStatus;
-          let startDraggable = true;
-          let endDraggable = true;
+            let title = d[selectedResource.fieldName];
+            let start = new Date(d[selectedResource.start]);
+            let end = new Date(d[selectedResource.end]);
+            let fulfillStatus = d?.fulfillStatus;
+            let startDraggable = true;
+            let endDraggable = true;
 
-          if (selectedResource.resource === sidebarResource.rentalManagement) {
-            if (d?.parentAccount?.optionLabel) {
-              title = `${title} (Parent-${d?.parentAccount?.optionLabel})`;
+            if (selectedResource.resource === sidebarResource.rentalManagement) {
+              if (d?.parentAccount?.optionLabel) {
+                title = `${title} (Parent-${d?.parentAccount?.optionLabel})`;
+              }
+              if (d?.padName?.optionLabel) {
+                title = `${title}(Pad-${d?.padName?.optionLabel})`;
+              }
+              if (d?.actualStartDate) {
+                start = new Date(d?.actualStartDate);
+                startDraggable = false;
+              }
+              if (d?.actualEndDate) {
+                end = new Date(d?.actualEndDate);
+                end = dayjs.tz(end).endOf('day').toDate();
+                endDraggable = false;
+              }
+              if (!d?.actualEndDate && dayjs(new Date()).isAfter(dayjs(d?.estimateEndDate))) {
+                fulfillStatus = 'ERROR';
+              }
             }
-            if (d?.padName?.optionLabel) {
-              title = `${title}(Pad-${d?.padName?.optionLabel})`;
-            }
-            if (d?.actualStartDate) {
-              start = new Date(d?.actualStartDate);
-              startDraggable = false;
-            }
-            if (d?.actualEndDate) {
-              end = new Date(d?.actualEndDate);
-              endDraggable = false;
-            }
-            if (!d?.actualEndDate && moment(new Date()).isAfter(moment(d?.estimateEndDate))) {
-              fulfillStatus = 'ERROR';
-            }
+            return {
+              id: d._id,
+              title: title,
+              start: start,
+              end: end,
+              allDay: true,
+              resource: selectedResource.resource,
+              fulfillStatus: fulfillStatus,
+              startDraggable: startDraggable,
+              endDraggable: endDraggable
+            };
+          });
+
+          setEvents([...rows, ...otherData]);
+          setStaticEvents([...rows, ...otherData]);
+          setIsDataFetching(false);
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+          if (cancelToken?.reason.message !== 'Operation canceled due to new request.') {
+            setIsDataFetching(false);
           }
-          return {
-            id: d._id,
-            title: title,
-            start: start,
-            end: end,
-            allDay: true,
-            resource: selectedResource.resource,
-            fulfillStatus: fulfillStatus,
-            startDraggable: startDraggable,
-            endDraggable: endDraggable
-          };
         });
+    },
+    [
+      getQueryString,
+      selectedResource?.end,
+      selectedResource?.fieldName,
+      selectedResource?.resource,
+      selectedResource?.start,
+      setQueryString,
+      toastConfig
+    ]
+  );
 
-        setEvents([...rows, ...otherData]);
-        setStaticEvents([...rows, ...otherData]);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      })
-      .finally(() => setIsDataFetching(false));
-  };
+  useEffect(() => {
+    const cancelTokenSource = axios.CancelToken.source();
+    const cancelToken = cancelTokenSource.token;
+    if (selectedResource) {
+      fetchData(cancelToken);
+    } else {
+      setEvents([]);
+    }
+    return () => {
+      cancelTokenSource.cancel('Operation canceled due to new request.');
+    };
+  }, [selectedResource, selectedLookUpResourceData, dateRange]);
+
+  useImperativeHandle(ref, () => ({
+    fetchData
+  }));
 
   useEffect(() => {
     if (selectedLookUpResourceData) {
@@ -520,27 +541,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   useEffect(() => {
     if (renderCount !== 0) {
-      if (view === 'month') {
-        setDateRange({
-          estimateStartDate: month.startDate,
-          estimateEndDate: month.endDate
-        });
-      } else if (view === 'week') {
-        setDateRange({
-          estimateStartDate: week.startDate,
-          estimateEndDate: week.endDate
-        });
-      } else if (view === 'day') {
-        setDateRange({
-          estimateStartDate: day.startDate,
-          estimateEndDate: day.endDate
-        });
-      } else if (view === 'agenda') {
-        setDateRange({
-          estimateStartDate: agenda.startDate,
-          estimateEndDate: agenda.endDate
-        });
-      }
+      onNavigate(new Date());
     } else {
       setRenderCount(renderCount + 1);
     }
@@ -589,13 +590,13 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   const resizeEvent = ({ event, start, end }) => {
     if (event?.resource === sidebarResource?.rentalManagement) {
-      if (!event?.startDraggable && !moment(event?.start).isSame(moment(start))) {
+      if (!event?.startDraggable && !dayjs(event?.start).isSame(dayjs(start))) {
         toastConfig.setToastConfig({
           open: true,
           type: 'warning',
           message: `can't change start date`
         });
-      } else if (!event?.endDraggable && !moment(event?.end).isSame(moment(end))) {
+      } else if (!event?.endDraggable && !dayjs(event?.end).isSame(dayjs(end))) {
         toastConfig.setToastConfig({
           open: true,
           type: 'warning',
@@ -609,130 +610,83 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     }
   };
 
-  const onNavigate = (date) => {
-    if (view === 'month') {
-      setDateRange({
-        estimateStartDate: moment(date).startOf('month').format('MM/DD/YYYY'),
-        estimateEndDate: moment(date).endOf('month').format('MM/DD/YYYY')
-      });
-    } else if (view === 'week') {
-      setDateRange({
-        estimateStartDate: moment(date).startOf('week').format('MM/DD/YYYY'),
-        estimateEndDate: moment(date).endOf('week').format('MM/DD/YYYY')
-      });
-    } else if (view === 'day') {
-      setDateRange({
-        estimateStartDate: moment(date).format('MM/DD/YYYY'),
-        estimateEndDate: moment(date).format('MM/DD/YYYY')
-      });
-    } else if (view === 'agenda') {
-      setDateRange({
-        estimateStartDate: moment(date).format('MM/DD/YYYY'),
-        estimateEndDate: moment(date).add(1, 'months').format('MM/DD/YYYY')
-      });
-    }
-  };
-
-  const setEventStyle = (obj) => {
-    let backgroundColor = themeMode === 'light' ? 'rgb(234, 239, 254)' : 'rgb(185, 183, 219)';
-    let color = '#000';
-
-    if (obj?.resource === sidebarResource.planning) {
-      if (obj?.fulfillStatus === 'Yes') {
-        backgroundColor = themeMode === 'light' ? 'rgb(207, 244, 168)' : '#048e0a';
-        color = themeMode === 'light' ? 'rgb(7, 61, 1)' : 'white';
-      } else if (obj?.fulfillStatus === 'No') {
-        backgroundColor = themeMode === 'light' ? 'rgb(255, 204, 204)' : 'rgb(156 1 22)';
-        color = themeMode === 'light' ? 'rgb(203 0 0)' : 'white';
-      } else if (obj?.fulfillStatus === 'Partially') {
-        backgroundColor = themeMode === 'light' ? 'rgb(255 236 204)' : 'rgb(217 138 42)';
-        color = themeMode === 'light' ? 'rgb(255 92 0)' : 'white';
+  const onNavigate = useCallback(
+    (date) => {
+      if (view === 'month') {
+        setDateRange({
+          estimateStartDate: dayjs(date).startOf('month').format('MM/DD/YYYY'),
+          estimateEndDate: dayjs(date).endOf('month').format('MM/DD/YYYY')
+        });
+      } else if (view === 'week') {
+        setDateRange({
+          estimateStartDate: dayjs(date).startOf('week').format('MM/DD/YYYY'),
+          estimateEndDate: dayjs(date).endOf('week').format('MM/DD/YYYY')
+        });
+      } else if (view === 'day') {
+        setDateRange({
+          estimateStartDate: dayjs(date).format('MM/DD/YYYY'),
+          estimateEndDate: dayjs(date).format('MM/DD/YYYY')
+        });
+      } else if (view === 'agenda') {
+        setDateRange({
+          estimateStartDate: dayjs(date).format('MM/DD/YYYY'),
+          estimateEndDate: dayjs(date).add(1, 'month').format('MM/DD/YYYY')
+        });
       }
-    }
-    if (obj?.resource === sidebarResource.product) {
-      if (obj?.type === 'credit') {
-        backgroundColor = 'var(--success-light) ';
-      } else if (obj?.type === 'reserved') {
-        backgroundColor = 'var(--warning-light)';
-      } else if (obj?.type === 'availableByPlanning' && obj?.isRedAlert) {
-        backgroundColor = 'var(--danger-light)';
-        color = 'white';
-      } else if (obj?.type === 'debit' && obj?.isRedAlert) {
-        backgroundColor = 'var(--danger-light)';
-        color = 'white';
-      } else if (obj?.type === 'debit') {
-        backgroundColor = themeMode === 'light' ? 'rgb(255 236 204)' : 'rgb(217 138 42)';
+    },
+    [view]
+  );
+
+  const setEventStyle = useCallback(
+    (obj) => {
+      let backgroundColor = themeMode === 'light' ? 'rgb(234, 239, 254)' : 'rgb(185, 183, 219)';
+      let color = '#000';
+
+      if (obj?.resource === sidebarResource.planning) {
+        if (obj?.fulfillStatus === 'Yes') {
+          backgroundColor = themeMode === 'light' ? 'rgb(207, 244, 168)' : '#048e0a';
+          color = themeMode === 'light' ? 'rgb(7, 61, 1)' : 'white';
+        } else if (obj?.fulfillStatus === 'No') {
+          backgroundColor = themeMode === 'light' ? 'rgb(255, 204, 204)' : 'rgb(156 1 22)';
+          color = themeMode === 'light' ? 'rgb(203 0 0)' : 'white';
+        } else if (obj?.fulfillStatus === 'Partially') {
+          backgroundColor = themeMode === 'light' ? 'rgb(255 236 204)' : 'rgb(217 138 42)';
+          color = themeMode === 'light' ? 'rgb(255 92 0)' : 'white';
+        }
       }
-    }
-
-    if (obj?.resource === sidebarResource.rentalManagement) {
-      if (obj?.fulfillStatus === 'ERROR') {
-        backgroundColor = 'rgb(220, 53, 69)';
-        color = 'white';
+      if (obj?.resource === sidebarResource.product) {
+        if (obj?.type === 'credit') {
+          backgroundColor = 'var(--success-light) ';
+        } else if (obj?.type === 'reserved') {
+          backgroundColor = 'var(--warning-light)';
+        } else if (obj?.type === 'availableByPlanning' && obj?.isRedAlert) {
+          backgroundColor = 'var(--danger-light)';
+          color = 'white';
+        } else if (obj?.type === 'debit' && obj?.isRedAlert) {
+          backgroundColor = 'var(--danger-light)';
+          color = 'white';
+        } else if (obj?.type === 'debit') {
+          backgroundColor = themeMode === 'light' ? 'rgb(255 236 204)' : 'rgb(217 138 42)';
+        }
       }
-    }
 
-    return {
-      backgroundColor,
-      color,
-      borderRadius: '4px',
-      border: 'none',
-      padding: '8px 16px'
-    };
-  };
+      if (obj?.resource === sidebarResource.rentalManagement) {
+        if (obj?.fulfillStatus === 'ERROR') {
+          backgroundColor = 'rgb(220, 53, 69)';
+          color = 'white';
+        }
+      }
 
-  const renderFilter = (filtered) => {
-    return (
-      <Autocomplete
-        options={lookupResource ? lookupResource[filtered?.value] : []}
-        multiple
-        disableCloseOnSelect
-        style={{ width: '300px' }}
-        getOptionLabel={(option: any) => option?.optionLabel}
-        value={selectedLookUpResourceData && selectedLookUpResourceData[filtered.key] ? selectedLookUpResourceData[filtered.key] : []}
-        onChange={(event, newValue) => {
-          if (newValue?.length > 0) {
-            setSelectedLookUpResourceData((preVal) => ({
-              ...preVal,
-              [filtered.key]: newValue
-            }));
-          } else {
-            const { [filtered.key]: _, ...remainObj } = selectedLookUpResourceData;
-            setSelectedLookUpResourceData(remainObj);
-          }
-        }}
-        size="small"
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label={`Select ${filtered?.label}`}
-            variant="outlined"
-            InputProps={{
-              ...params.InputProps,
-              endAdornment: (
-                <>
-                  {lookupLoading ? <CircularProgress color="inherit" size={20} /> : null}
-                  {params.InputProps.endAdornment}
-                </>
-              )
-            }}
-          />
-        )}
-      />
-    );
-  };
-
-  const mapObjectToList = (obj: { [key: string]: OnSelectDataType[] }) => {
-    const data: { items: OnSelectDataType[]; key: string; heading: string }[] = [];
-    for (const key in obj) {
-      data.push({
-        items: obj[key],
-        key: key,
-        heading: routes[camelCase(key)].title || key
-      });
-    }
-    return data;
-  };
+      return {
+        backgroundColor,
+        color,
+        borderRadius: '4px',
+        border: 'none',
+        padding: '8px 16px'
+      };
+    },
+    [themeMode]
+  );
 
   return (
     <>
@@ -757,12 +711,23 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 disableCloseOnSelect
                 style={{ width: '300px' }}
                 getOptionLabel={(option) => option?.label}
-                renderOption={(option: any) => (
-                  <React.Fragment>
-                    <Checkbox checked={selectedFilters?.some((_s) => _s.key === option.key)} />
-                    {option?.label}
-                  </React.Fragment>
-                )}
+                renderOption={(props, option, state, ownerState) => {
+                  const { key, ...optionProps } = props;
+                  return (
+                    <Box
+                      component="li"
+                      key={key}
+                      {...optionProps}
+                      display={'flex'}
+                      alignItems={'center'}
+                      justifyContent={'space-between'}
+                      width={'100%'}
+                    >
+                      <Checkbox style={{ marginRight: 8 }} checked={selectedFilters?.some((_s) => _s.key === option.key)} />
+                      {ownerState.getOptionLabel(option)}
+                    </Box>
+                  );
+                }}
                 size="small"
                 renderInput={(params) => <TextField {...params} label="Filters" variant="outlined" />}
                 value={selectedFilters}
@@ -773,13 +738,29 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             )}
             {[sidebarResource.serializedAsset, sidebarResource.product].includes(selectedResource?.resource) &&
               selectedFilters?.map((filtered) => {
-                return renderFilter(filtered);
+                return (
+                  <RenderFilter
+                    filtered={filtered}
+                    lookupResource={lookupResource}
+                    selectedLookUpResourceData={selectedLookUpResourceData}
+                    setSelectedLookUpResourceData={setSelectedLookUpResourceData}
+                    lookupLoading={lookupLoading}
+                  />
+                );
               })}
           </div>
           <Box display="flex" flexDirection="row" className="gap-1" ml={1} mt={2}>
             {![sidebarResource.serializedAsset, sidebarResource.product].includes(selectedResource?.resource) &&
               selectedFilters?.map((filtered) => {
-                return renderFilter(filtered);
+                return (
+                  <RenderFilter
+                    filtered={filtered}
+                    lookupResource={lookupResource}
+                    selectedLookUpResourceData={selectedLookUpResourceData}
+                    setSelectedLookUpResourceData={setSelectedLookUpResourceData}
+                    lookupLoading={lookupLoading}
+                  />
+                );
               })}
           </Box>
         </Box>
@@ -861,7 +842,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
           >
             <Box className="max-h-[600px] space-y-2  overflow-y-auto overflow-x-hidden p-2">
               <div className="flex items-center justify-between pb-1 pr-1 pt-1">
-                <h5 className="text-sm">{`${isOpen?.eventData?.title} - ${moment(isOpen?.eventData?.start).format(dateFormat)}`}</h5>
+                <h5 className="text-sm">{`${isOpen?.eventData?.title} - ${displayDate(isOpen?.eventData?.start)}`}</h5>
                 <HtmlTooltip title="Close">
                   <IconButton size="small" onClick={() => setOpen({ open: false, data: [], eventData: null })} className="close-icon-v1">
                     <CloseIcon fontSize="small" />
@@ -870,7 +851,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               </div>
               {isOpen.data?.map((d) => (
                 <Accordion key={d.key} defaultExpanded>
-                  <AccordionSummary expandIcon={<ExpandMore />}>
+                  <AccordionSummary>
                     <h6 className=" text-sm font-semibold">{d.heading}</h6>
                   </AccordionSummary>
                   <AccordionDetails>

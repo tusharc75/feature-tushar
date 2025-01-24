@@ -1,7 +1,7 @@
-import { Box, IconButton, MenuItem, MenuList, Popover } from '@material-ui/core';
-import Add from '@material-ui/icons/Add';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
+import { Box, IconButton, MenuItem, MenuList, Popover } from '@mui/material';
+import Add from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { camelCase, isArray, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -33,7 +33,7 @@ const Material = ({ creditMemoData, allowedToEdit, fetchCreditMemoData }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions,resources }
+    state: { user, permissions, resources }
   }: any = useData();
   const [isUpdating, setUpdating] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
@@ -590,7 +590,8 @@ const Material = ({ creditMemoData, allowedToEdit, fetchCreditMemoData }) => {
   };
 
   const handleAddInvoiceLineItems = () => {
-    axiosInstance().put(`${routes.creditMemo?.path}/clone-invoice-line-items`, { creditMemo: creditMemoData?._id })
+    axiosInstance()
+      .put(`${routes.creditMemo?.path}/clone-invoice-line-items`, { creditMemo: creditMemoData?._id })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -634,7 +635,7 @@ const Material = ({ creditMemoData, allowedToEdit, fetchCreditMemoData }) => {
         <MenuItem
           color="primary"
           onClick={() => {
-            handleAddInvoiceLineItems()
+            handleAddInvoiceLineItems();
           }}
         >
           {`Add Invoice Line Items`}

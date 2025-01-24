@@ -1,96 +1,109 @@
-import { useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react';
 import axiosInstance from '../../axios/axiosInstance';
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import SendIcon from '@material-ui/icons/Send';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import SendIcon from '@mui/icons-material/Send';
 import { CgSearchLoading } from 'react-icons/cg';
-import { makeStyles } from '@material-ui/core';
+import { makeStyles } from '@mui/styles';
+import { Theme } from '@mui/material';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   loadingContent: {
-    display: "flex",
-    alignItems: "center",
-    fontSize: "1.5rem",
-    flexDirection: "column",
-    justifyContent: "center",
-    paddingTop: "20vh",
-    color: "#ccc6c6"
+    display: 'flex',
+    alignItems: 'center',
+    fontSize: '1.5rem',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    paddingTop: '20vh',
+    color: '#ccc6c6'
   }
 }));
 
-
 export default function ChatRender({ id, isLoaded }) {
   const classes = useStyles();
-  const toastConfig = useContext(CustomToastContext)
+  const toastConfig = useContext(CustomToastContext);
   const [messages, setMessages] = useState([]);
-  const [user, setUser] = useState("");
-  const [newMessage, setNewMessage] = useState("");
+  const [user, setUser] = useState('');
+  const [newMessage, setNewMessage] = useState('');
 
   useEffect(() => {
     fetchMessages();
-  }, [id])
+  }, [id]);
 
   const fetchMessages = () => {
-    axiosInstance().get(`/chatter/` + id).then(({ data: { data } }) => {
-      setMessages(data.Messages);
-      setUser(data.currentUser)
-    }).catch((error) => {
-    });
-  }
+    axiosInstance()
+      .get(`/chatter/` + id)
+      .then(({ data: { data } }) => {
+        setMessages(data.Messages);
+        setUser(data.currentUser);
+      })
+      .catch((error) => {});
+  };
 
   const sendMessage = () => {
-    const message = { message: newMessage }
-    axiosInstance().put(`/chatter/` + id, message).then(({ data: { data } }) => {
-      setNewMessage("");
-      fetchMessages();
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-    });
+    const message = { message: newMessage };
+    axiosInstance()
+      .put(`/chatter/` + id, message)
+      .then(({ data: { data } }) => {
+        setNewMessage('');
+        fetchMessages();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const handleChange = (event) => {
     setNewMessage(event.target.value);
-  }
+  };
 
-  return (<>
-    <div className="chat-box" id="chatList">
-      <div className="chat-box-header">
-        Chat Support
-      </div>
-      <div className="chat-box-body">
-        <div className="chat-logs">
-          {
-            isLoaded ?
-              messages.length > 0 ? messages.map(data => (
-                <div key={data.userid + data.date}>
-                  {user === data.userid ? (
-                    <div className="chat-msg self">
-                      <div className="cm-msg-text self">
-                        <p className="chat-user">{data.userName}</p>
-                        <div className="message"> {data.message}</div>
+  return (
+    <>
+      <div className="chat-box" id="chatList">
+        <div className="chat-box-header">Chat Support</div>
+        <div className="chat-box-body">
+          <div className="chat-logs">
+            {isLoaded ? (
+              messages.length > 0 ? (
+                messages.map((data) => (
+                  <div key={data.userid + data.date}>
+                    {user === data.userid ? (
+                      <div className="chat-msg self">
+                        <div className="cm-msg-text self">
+                          <p className="chat-user">{data.userName}</p>
+                          <div className="message"> {data.message}</div>
+                        </div>
                       </div>
-                    </div>
-                  ) : (
-                    <div className="chat-msg user">
-                      <div className="cm-msg-text user">
-                        <p className="chat-user">{data.userName}</p>
-                        <div className="message"> {data.message} </div>
+                    ) : (
+                      <div className="chat-msg user">
+                        <div className="cm-msg-text user">
+                          <p className="chat-user">{data.userName}</p>
+                          <div className="message"> {data.message} </div>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
-              )) : <span className={`gap-2 ${classes.loadingContent}`}>No message to display!</span>
-              : <span className={classes.loadingContent}><CgSearchLoading />Loading...</span>
-          }
+                    )}
+                  </div>
+                ))
+              ) : (
+                <span className={`gap-2 ${classes.loadingContent}`}>No message to display!</span>
+              )
+            ) : (
+              <span className={classes.loadingContent}>
+                <CgSearchLoading />
+                Loading...
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="chat-input">
+          <form>
+            <input type="text" id="chat-input" placeholder="Send a message..." value={newMessage} onChange={handleChange} />
+            <button type="button" className="chat-submit" id="chat-submit" onClick={() => sendMessage()} disabled={newMessage === ''}>
+              <SendIcon />
+            </button>
+          </form>
         </div>
       </div>
-      <div className="chat-input">
-        <form>
-          <input type="text" id="chat-input" placeholder="Send a message..." value={newMessage} onChange={handleChange} />
-          <button type="button" className="chat-submit" id="chat-submit" onClick={() => sendMessage()} disabled={newMessage === ""}><SendIcon /></button>
-        </form>
-      </div>
-    </div>
-    {/* <div className="chatWindow">
+      {/* <div className="chatWindow">
       <ul className="chat" id="chatList">
         {messages.map(data => (
           <div key={data.userid + data.date}>
@@ -126,7 +139,6 @@ export default function ChatRender({ id, isLoaded }) {
         <SendIcon />
       </button> 
        </div>*/}
-  </>
+    </>
   );
-
 }

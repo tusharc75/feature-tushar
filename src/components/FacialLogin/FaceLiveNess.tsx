@@ -1,11 +1,11 @@
 import { useState, useEffect, useContext } from 'react';
 import { CustomDialogTransition } from 'src/constants/helpers';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import FaceLiveNess from '../FaceLiveness/AWS';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 

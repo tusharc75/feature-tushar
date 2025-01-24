@@ -1,13 +1,13 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import { Edit } from '@material-ui/icons';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import EditIcon from '@mui/icons-material/Edit';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import { checkIsAllowedToDelete, checkIsAllowedToEdit, sidebarResource, termsAndCondition } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -27,7 +27,9 @@ const TermsAndConditionDetail = () => {
   const {
     state: { permissions, user, resources }
   }: any = useData();
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.termsAndConditions, title: resources?.termsAndConditions?.titlePlural }]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([
+    { ...routes.termsAndConditions, title: resources?.termsAndConditions?.titlePlural }
+  ]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
 
@@ -57,7 +59,9 @@ const TermsAndConditionDetail = () => {
       } = await axiosInstance().get(`${termsAndCondition.api}/${id}`);
 
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.termsAndConditions, data));
-      setAllowedToDelete(permissions?.termsAndConditions?.isDelete && checkIsAllowedToDelete(user, sidebarResource.termsAndConditions, data.owner.optionValue));
+      setAllowedToDelete(
+        permissions?.termsAndConditions?.isDelete && checkIsAllowedToDelete(user, sidebarResource.termsAndConditions, data.owner.optionValue)
+      );
 
       setTermsAndConditionData(data);
       setCustomizedRoutes([{ ...routes.termsAndConditions, title: resources?.termsAndConditions?.titlePlural }, { title: data?.name }]);
@@ -100,23 +104,21 @@ const TermsAndConditionDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            <>
-              {permissions?.termsAndConditions?.isUpdate && allowedToEdit && (
-                <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
-                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                </Button>
-              )}
-              {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-            </>
+            {permissions?.termsAndConditions?.isUpdate && allowedToEdit && (
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                {'Edit'}
+              </ThemeButton>
+            )}
+            {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
           </Box>
         </Box>
       </Box>
       <Box className="detail-container-v1">
         <Box>
           {loading || !fields?.length ? (
-            <Grid container spacing={2} style={{ padding: '8px' }}>
-              <CommonSkeleton lenArray={[...Array(7).keys()]} />
-            </Grid>
+            <div className="p-2">
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </div>
           ) : (
             <DetailsPage data={termsAndConditionData} fields={fields} />
           )}

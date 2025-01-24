@@ -1,5 +1,5 @@
-import { Box, Button, Checkbox, Dialog, FormControlLabel, Radio, RadioGroup, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, Checkbox, Dialog, FormControlLabel, Radio, RadioGroup, TextField } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { Form, Formik } from 'formik';
 import { startCase } from 'lodash';
 import { Fragment, useContext, useState } from 'react';
@@ -8,7 +8,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { boolean, object, string } from 'yup';
 
@@ -38,7 +38,7 @@ const ACCESS_OPTIONS = {
   everyone: 'everyone'
 };
 
-function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, filterData, columns }) {
+function SaveFilterDialog({ handleClose, handleSucess, resource, columns, filterData, deepFilters, filterByIds, filterTerm }) {
   const toastConfig = useContext(CustomToastContext);
   const [loading, setLoading] = useState(false);
 
@@ -52,28 +52,31 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
   });
 
   const handleSubmit = (values) => {
-    const updatedFilterValue = filterValue;
-    const colNames = Object.keys(filterValue);
-    for (const col of columns) {
-      const fieldName = col.fieldName;
-      if (colNames.includes(fieldName) && col.lookup) {
-        if (updatedFilterValue[fieldName]?.length) {
-          updatedFilterValue[fieldName] = filterValue[fieldName]?.map((e) => e.optionValue);
-        } else {
-          delete updatedFilterValue[fieldName];
-        }
-      }
-    }
+    const obj: any = {};
+    filterByIds
+      ?.filter((f) => f?.term?.length > 0)
+      ?.map((f) => {
+        obj[f?.field] = Array.isArray(f?.term) ? f?.term?.map((t) => t?.optionValue) : f?.term?.optionValue;
+      });
+
+    deepFilters
+      ?.filter((f) => f?.term?.length > 0)
+      ?.map((f) => {
+        obj[f?.field] = f?.term;
+      });
+
     const data = {
       title: values?.title,
       resource: resource,
-      filterValue: updatedFilterValue,
+      filterValue: obj,
+      filterTerm: filterTerm,
       default: values.default,
       sorting: values.sorting || false,
       sortBy: values.sortBy,
       orderBy: values.orderBy,
       access: values.access
     };
+
     setLoading(true);
     if (filterData) {
       axiosInstance()
@@ -132,6 +135,7 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
                 <TextField
                   fullWidth
                   margin="dense"
+                  size="small"
                   type="text"
                   required
                   label="Title"
@@ -163,11 +167,11 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
                       id="sorting"
                       options={columns}
                       size="small"
-                      value={columns.find((column) => column.fieldName === values['sortBy'])}
+                      value={columns.find((column) => column?.fieldData?.fieldName === values['sortBy'])}
                       onChange={(event: any, newValue: any) => {
-                        setFieldValue('sortBy', newValue?.fieldName || '');
+                        setFieldValue('sortBy', newValue?.fieldData?.fieldName || '');
                       }}
-                      getOptionLabel={(option: any) => option.fieldLabel}
+                      getOptionLabel={(option: any) => option?.fieldData?.fieldLabel || ''}
                       style={{ flexGrow: 1, minWidth: 200 }}
                       renderInput={(params) => (
                         <TextField
@@ -190,7 +194,7 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
                       value={values['orderBy']}
                       id="order-by"
                       options={orderByOptions}
-                      getOptionLabel={(option: any) => startCase(option)}
+                      getOptionLabel={(option: any) => startCase(option) || ''}
                       style={{ flexGrow: 1, minWidth: 200 }}
                       renderInput={(params) => (
                         <TextField
@@ -235,12 +239,12 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button size="small" color="primary" onClick={handleClose}>
+              <ThemeButton buttonType="transparent" onClick={handleClose}>
                 Cancel
-              </Button>
-              <CustomButton loading={loading} variant="contained" color="primary" type="submit" onClick={submitForm} disabled={loading}>
+              </ThemeButton>
+              <ThemeButton isLoading={loading} buttonType="theme" onClick={submitForm} disabled={loading}>
                 Save
-              </CustomButton>
+              </ThemeButton>
             </CustomDialogFooter>
           </Fragment>
         )}

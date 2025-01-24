@@ -1,16 +1,17 @@
-import { Button, IconButton } from '@material-ui/core';
-import { AttachFile, Close, Send } from '@material-ui/icons';
+import { IconButton } from '@mui/material';
+import { AttachFile, Send, Mic, MicOff, Cancel, Close } from '@mui/icons-material';
 import { Editor } from '@tinymce/tinymce-react';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomButton from 'src/components/Helpers/CustomButton';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { cn, getFileIconSrc } from 'src/constants/helpers';
 import Mention from 'src/pages/WorkSpace/MessagePanel/Mention';
 import { ChannelData } from 'src/pages/WorkSpace/types';
 import { fileToBase64, isImageFile } from 'src/pages/WorkSpace/utils';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 type SendMessageProps = {
   channelId: string;
@@ -21,6 +22,10 @@ type SendMessageProps = {
   editorId?: string;
   channelData?: ChannelData;
   disabled?: boolean;
+  parentMessageId?: string | null;
+  newChat?: boolean;
+  toUsers?: any[];
+  refreshNewChat?: () => void;
 };
 
 const SendMessage = ({
@@ -28,10 +33,14 @@ const SendMessage = ({
   socket,
   messageId = null,
   initialMessage = '',
-  onEditComplete = () => {},
+  onEditComplete = () => { },
   editorId = '',
   channelData,
-  disabled = false
+  disabled = false,
+  parentMessageId = null,
+  newChat = false,
+  toUsers = [],
+  refreshNewChat = () => { },
 }: SendMessageProps) => {
   const toastConfig = useContext(CustomToastContext);
   const [themeColor] = useAppTheme();
@@ -51,15 +60,28 @@ const SendMessage = ({
   const [selectedIndex, setSelectedIndex] = useState(0);
   const applySelectedRef = useRef(null);
 
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioBlobs, setAudioBlobs] = useState([]);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const chunks = useRef<Blob[]>([]);
+
   useEffect(() => {
     numberOfMentions.current = 0;
+    if (!initialMessage) {
+      setMessage('');
+      setFiles([]);
+      setAudioBlobs([]);
+      setFilesWithUrl([]);
+    }
   }, [channelId]);
 
   const postMessage = async () => {
     setIsLoading(true);
     try {
       if (initialMessage) {
-        await axiosInstance().put(`/work-space/channel/message`, { message, messageId });
+        await axiosInstance().put(`/work-space/channel/message`, { message, messageId }).then(() => {
+          socket.emit('messageUpdated', { channelId, messageId });
+        });
         onEditComplete();
       } else {
         let formData = new FormData();
@@ -67,13 +89,26 @@ const SendMessage = ({
         files.forEach((file) => {
           formData.append('files', file);
         });
-        formData.append('channelId', channelId);
-        if (messageId) formData.append('parentId', messageId);
-        await axiosInstance().post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+        audioBlobs?.forEach((audioBlob, index) => {
+          formData.append('files', new File([audioBlob], `recording-${index}.webm`, { type: 'audio/webm' }));
+        });
+        if (newChat && toUsers.length > 0) {
+          formData.append('toUsers', JSON.stringify(toUsers?.map((user) => user?.optionValue)));
+          await axiosInstance().post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(() => {
+            socket.emit('newChat', { channelId: 'directMessaging' });
+            refreshNewChat();
+          });
+        } else {
+          formData.append('channelId', channelId);
+          if (parentMessageId) formData.append('parentId', parentMessageId);
+          await axiosInstance().post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(() => {
+            socket.emit('newMessagePosted', { channelId, messageId });
+          });
+        }
       }
       setMessage('');
       setFiles([]);
-      socket.emit('newMessagePosted', { channelId, messageId });
+      setAudioBlobs([]);
     } catch (error) {
       toastConfig.setToastConfig(error);
     } finally {
@@ -135,7 +170,7 @@ const SendMessage = ({
           top: elementRect.top + frameRect.top,
           x: elementRect.x + frameRect.x,
           y: elementRect.y + frameRect.y,
-          toJSON: () => {}
+          toJSON: () => { }
         })
       });
     }
@@ -158,9 +193,39 @@ const SendMessage = ({
         return;
       }
     }
-    if (key === 'Enter' && !e.ctrlKey) {
+    if (key === 'Enter' && !e.ctrlKey && !e.metaKey) {
       e.preventDefault();
-      postMessage();
+      if (message && message !== initialMessage && !isLoading) postMessage();
+    }
+  };
+
+  const getAudio = async () => {
+    if (isRecording) {
+      recorderRef.current?.stop();
+      setIsRecording(false);
+    } else {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const recorder = new MediaRecorder(stream);
+
+        recorderRef.current = recorder;
+        chunks.current = [];
+
+        recorder.ondataavailable = (e: BlobEvent) => {
+          chunks.current.push(e.data);
+        };
+
+        recorder.onstop = () => {
+          const blob = new Blob(chunks.current, { type: 'audio/webm' });
+          setAudioBlobs((prev) => [...prev, blob]);
+          stream.getTracks().forEach((track) => track.stop());
+        };
+
+        recorder.start();
+        setIsRecording(true);
+      } catch (e) {
+        toastConfig.setToastConfig({ open: true, type: 'error', message: 'Error accessing microphone' });
+      }
     }
   };
 
@@ -209,7 +274,25 @@ const SendMessage = ({
             })}
           </div>
         )}
-
+        <div className="flex flex-wrap gap-1">
+          {audioBlobs?.map((audioBlob, index) => (
+            <div key={index} className='relative'>
+                <audio controls src={URL.createObjectURL(audioBlob)} style={{ width: '200px' }}>
+                </audio>
+              <HtmlTooltip title="Remove" placement="top" className='absolute top-0 right-0'>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    setAudioBlobs((prev) => prev.filter((_, i) => i !== index));
+                  }}
+                  style={{ padding: 4 }}
+                >
+                  <Cancel fontSize="small" />
+                </IconButton>
+              </HtmlTooltip>
+            </div>
+          ))}
+        </div>
         <div className="editor" key={themeColor}>
           <Editor
             key={themeColor}
@@ -228,7 +311,7 @@ const SendMessage = ({
               }
             }}
             initialValue=""
-            disabled={!channelId || disabled}
+            disabled={!(channelId || newChat) || disabled}
             init={{
               skin: themeColor === 'dark' ? 'oxide-dark' : 'oxide',
               content_css: themeColor === 'dark' ? 'dark' : 'default',
@@ -252,10 +335,23 @@ const SendMessage = ({
                 'media',
                 'table',
                 'code',
-                'wordcount'
+                'wordcount',
+                'help',
+                'emoticons',
               ],
-              toolbar: `undo redo | blocks | bold italic link | bullist numlist| removeformat | help`,
-              content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+              toolbar: `undo redo | blocks | bold italic link | bullist numlist| removeformat | emoticons | help`,
+              content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+              setup: (editor) => {
+                editor.on('BeforeSetContent', (e) => {
+                  // Adding 'link' class to <a> tags
+                  if (e?.content) {
+                    e.content = e.content.replace(
+                      /<a(?![^>]*\bclass\b)([^>]*)>/g,
+                      '<a class="link"$1>'
+                    );
+                  }
+                });
+              },
             }}
           />
         </div>
@@ -271,10 +367,17 @@ const SendMessage = ({
                 onChange={handleFileChange}
               />
               <label htmlFor="file-upload">
-                <IconButton color="primary" aria-label="upload" component="span" style={{ padding: 5, borderRadius: 0 }}>
-                  <AttachFile />
-                </IconButton>
+                <HtmlTooltip title="Attach file(s)" placement="top">
+                  <IconButton color="primary" aria-label="upload" component="span" style={{ padding: 5, borderRadius: 0 }} disabled={disabled}>
+                    <AttachFile />
+                  </IconButton>
+                </HtmlTooltip>
               </label>
+              <HtmlTooltip title={isRecording ? "Stop Recording Audio" : "Record Audio"} placement="top">
+                <IconButton color="primary" aria-label="upload-audio" component="span" style={{ padding: 5, borderRadius: 0 }} disabled={disabled} onClick={getAudio}>
+                  {isRecording ? <MicOff /> : <Mic />}
+                </IconButton>
+              </HtmlTooltip>
               <IconButton
                 style={{ padding: 5 }}
                 disabled={!message || isLoading}
@@ -287,24 +390,22 @@ const SendMessage = ({
             </>
           ) : (
             <>
-              <Button size="small" color="primary" onClick={onEditComplete}>
+              <ThemeButton buttonType="transparent" onClick={onEditComplete}>
                 Cancel
-              </Button>
-              <CustomButton
-                loading={isLoading}
+              </ThemeButton>
+              <ThemeButton
+                isLoading={isLoading}
+                buttonType="theme"
                 disabled={!message || message === initialMessage || isLoading}
-                variant="contained"
-                color="primary"
-                type="submit"
                 onClick={postMessage}
               >
                 Save
-              </CustomButton>
+              </ThemeButton>
             </>
           )}
         </div>
       </div>
-      {mentionInitialPosition && (
+      {mentionInitialPosition && !newChat && (
         <Mention
           editor={editorRef.current}
           mentionInitialPosition={mentionInitialPosition}

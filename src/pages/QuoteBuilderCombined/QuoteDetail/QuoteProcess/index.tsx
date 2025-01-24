@@ -1,4 +1,5 @@
-import { Button, Dialog, Grid, MenuItem, Typography } from '@material-ui/core';
+import { Dialog, MenuItem, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AiFillEdit } from 'react-icons/ai';
@@ -6,7 +7,6 @@ import { BiMailSend } from 'react-icons/bi';
 import { GiVintageRobot } from 'react-icons/gi';
 import { useHistory } from 'react-router-dom';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { stepIconInterface } from 'src/components/Steps/icons';
 import { CustomToastContext } from '../../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../../StateProvider/Provider';
@@ -20,6 +20,7 @@ import ProductBuilder from '../../../../components/productBuilder';
 import {
   CustomDialogTransition,
   QUOTE_PROCESS_STATUS,
+  QUOTE_STATUS,
   currencyCodeToSymbol,
   customerAccount,
   customerContact,
@@ -29,6 +30,7 @@ import {
 } from '../../../../constants/helpers';
 import DOAReasonDialog from '../../../DOA/DOAReasonDialog';
 import Steps from './Steps';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 interface StepInterface extends stepIconInterface {
   key: string;
@@ -226,27 +228,14 @@ export default function QuoteProcess(props) {
               setDOAApproved(data.canApprove);
               setDOARequestId(data.requestId);
             })
-            .catch((err) => {});
+            .catch((err) => { });
         }
       })
-      .catch((error) => {});
+      .catch((error) => { });
   }, [currentVersion]);
 
   useEffect(() => {
     fetchUserEmails();
-    if (processStatus === QUOTE_PROCESS_STATUS.doaProcess) {
-      const currentVersionStatus = quoteData?.versions[currentVersion]?.status;
-      if (currentVersionStatus.includes('Accepted')) {
-        setNextStep(true);
-      } else {
-        setNextStep(false);
-      }
-    }
-    if (processStatus === QUOTE_PROCESS_STATUS.sendToCustomer) {
-      if (ifQuoteApproved.approved || quoteData?.versions[currentVersion]?.offered) {
-        setNextStep(true);
-      }
-    }
   }, [quoteData]);
 
   useEffect(() => {
@@ -278,20 +267,16 @@ export default function QuoteProcess(props) {
           if (DOAsetup && totalSellingPrice > DOAlimit && versionStatus === 'Building Quote') {
             setDOAreq(true);
             setCustomerreq(false);
-          } else if (versionStatus.includes('Rejected by DOA')) {
+          } else if (versionStatus.includes(QUOTE_STATUS.rejectedbyDOA)) {
             setDOAreq(true);
             setCustomerreq(false);
-          } else if (versionStatus === 'Sent for DOA') {
+          } else if (versionStatus === QUOTE_STATUS.sentforDOA) {
             setDOAreq(false);
             setCustomerreq(false);
-          } else if (
-            versionStatus === 'Sent to Customer' ||
-            versionStatus === 'Accepted by Customer' ||
-            versionStatus === 'Rejected by Customer' ||
-            versionStatus === 'Not Booked by Customer' ||
-            versionStatus === 'Others' ||
-            versionStatus === 'Booked by Customer'
-          ) {
+          } else if ([QUOTE_STATUS.sentToCustomer,
+          QUOTE_STATUS.acceptByCustomer,
+          QUOTE_STATUS.rejectByCustomer, QUOTE_STATUS.notBookedbyCustomer,
+          QUOTE_STATUS.others, QUOTE_STATUS.bookedbyCustomer]?.includes(versionStatus)) {
             setDOAreq(false);
             setCustomerreq(false);
           }
@@ -300,7 +285,7 @@ export default function QuoteProcess(props) {
   }, [DOAsetup, DOAlimit]);
 
   const fetchDOAData = () => {
-    if ((processStatus === QUOTE_PROCESS_STATUS.doaProcess && DOAneeded) || (versionStatus.includes('Rejected by DOA') && processStatus === 'End')) {
+    if ((processStatus === QUOTE_PROCESS_STATUS.doaProcess && DOAneeded) || (versionStatus.includes(QUOTE_STATUS.rejectedbyDOA) && processStatus === 'End')) {
       axiosInstance()
         .get(`doa-request/doaFlow/${quoteData._id}/${currentVersion}`)
         .then(({ data: { data } }) => {
@@ -337,7 +322,7 @@ export default function QuoteProcess(props) {
         data['commissionPercentPerUnit'] === null || data['commissionPercentPerUnit'] === undefined ? 0 : data['commissionPercentPerUnit'],
       [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
         data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === null ||
-        data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
+          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
           ? 0
           : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]
     }));
@@ -507,19 +492,16 @@ export default function QuoteProcess(props) {
       if (DOAsetup && totalSellingPrice > DOAlimit && versionStatus === 'Building Quote') {
         setDOAreq(true);
         setCustomerreq(false);
-      } else if (versionStatus.includes('Rejected by DOA')) {
+      } else if (versionStatus.includes(QUOTE_STATUS.rejectedbyDOA)) {
         setDOAreq(true);
         setCustomerreq(false);
-      } else if (versionStatus === 'Sent for DOA') {
+      } else if (versionStatus === QUOTE_STATUS.sentforDOA) {
         setDOAreq(false);
         setCustomerreq(false);
       } else if (
-        versionStatus === 'Sent to Customer' ||
-        versionStatus === 'Accepted by Customer' ||
-        versionStatus === 'Rejected by Customer' ||
-        versionStatus === 'Not Booked by Customer' ||
-        versionStatus === 'Others' ||
-        versionStatus === 'Booked by Customer'
+        [QUOTE_STATUS.sentToCustomer, QUOTE_STATUS.acceptByCustomer, QUOTE_STATUS.rejectByCustomer,
+        QUOTE_STATUS.notBookedbyCustomer, QUOTE_STATUS.others, QUOTE_STATUS.bookedbyCustomer
+        ]?.includes(versionStatus)
       ) {
         setDOAreq(false);
         setCustomerreq(false);
@@ -574,7 +556,7 @@ export default function QuoteProcess(props) {
     axiosInstance()
       .post(`/doa-request/create/${quoteData._id}?version=${currentVersion}`)
       .then(({ data }) => {
-        handleVersionUpdate('Sent for DOA', state?.selectedRecords);
+        handleVersionUpdate(QUOTE_STATUS.sentforDOA, state?.selectedRecords);
         fetchQuoteData(currentVersion);
         fetchDOAData();
         setSendToLoading(false);
@@ -667,36 +649,36 @@ export default function QuoteProcess(props) {
 
   const previewDownloadProps = ![QUOTE_PROCESS_STATUS.new, QUOTE_PROCESS_STATUS.priceBuilder].includes(processStatus)
     ? {
-        resource: sidebarResource.quoteBuilder,
-        referenceId: quoteData?._id,
-        fileName: `${`Quote-${quoteData?.quoteName}-V(${currentVersion})`}`,
-        columns: columns,
-        hideDetailButton: true,
-        isSendEmail:
-          processStatus === QUOTE_PROCESS_STATUS.sendToCustomer &&
+      resource: sidebarResource.quoteBuilder,
+      referenceId: quoteData?._id,
+      fileName: `${`Quote-${quoteData?.quoteName}-V(${currentVersion})`}`,
+      columns: columns,
+      hideDetailButton: true,
+      isSendEmail:
+        processStatus === QUOTE_PROCESS_STATUS.sendToCustomer &&
           versionStatus !== 'Send To Customer' &&
           !ifQuoteApproved.approved &&
           !quoteData?.versions[currentVersion]?.offered &&
           allowedToEdit
-            ? true
-            : false,
-        isExcelDownload: true,
-        extraQueryParams: { uniqueId: quoteData?.versions[currentVersion]?._id },
-        versionNumber: currentVersion,
-        subject: `${user?.user?.brandName ?? 'Brand'} Offer - ${quoteData?.quoteName ?? ''}`,
-        defaultColumns: [
-          'productName',
-          'unit',
-          'qty',
-          `salesPricePerUnit_${quoteData?.currency?.toLowerCase()}`,
-          `totalSalesPrice_${quoteData?.currency?.toLowerCase()}`
-        ],
-        handleRefresh: () => {
-          fetchQuoteData(currentVersion);
-        },
-        toEmails: userEmails?.to,
-        ccEmails: userEmails?.cc ?? []
-      }
+          ? true
+          : false,
+      isExcelDownload: true,
+      extraQueryParams: { uniqueId: quoteData?.versions[currentVersion]?._id },
+      versionNumber: currentVersion,
+      subject: `${user?.user?.brandName ?? 'Brand'} Offer - ${quoteData?.quoteName ?? ''}`,
+      defaultColumns: [
+        'productName',
+        'unit',
+        'qty',
+        `salesPricePerUnit_${quoteData?.currency?.toLowerCase()}`,
+        `totalSalesPrice_${quoteData?.currency?.toLowerCase()}`
+      ],
+      handleRefresh: () => {
+        fetchQuoteData(currentVersion);
+      },
+      toEmails: userEmails?.to,
+      ccEmails: userEmails?.cc ?? []
+    }
     : null;
 
   const leftSideContents = () => {
@@ -704,40 +686,31 @@ export default function QuoteProcess(props) {
       <>
         {[QUOTE_PROCESS_STATUS.sendToCustomer].includes(processStatus) && (
           <>
-            <HtmlTooltip title="AI Suggestion">
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                className="btn-outline-v1"
-                size="small"
-                color="primary"
-                startIcon={<GiVintageRobot />}
-                onClick={() => {
-                  setShowAiDialog(true);
-                }}
-              >
-                {isMobile && !isTablet ? '' : 'AI Suggestion'}
-              </Button>
-            </HtmlTooltip>
+            <ThemeButton
+              onClick={() => {
+                setShowAiDialog(true);
+              }}
+              startIcon={<GiVintageRobot />}
+              mobileTooltip="AI Suggestion"
+              iconForMobile={<GiVintageRobot />}
+            >
+              AI Suggestion
+            </ThemeButton>
             {permissions[qbResource]?.isUpdate &&
               (user?.user?._id === quoteData?.owner?.optionValue || quoteData?.collaborator?.some((d) => d?.optionValue === user?.user?._id)) && (
-                <HtmlTooltip title="Edit Quote PDF Template">
-                  <Button
-                    onClick={() => {
-                      quoteData?.pDFTemplate.optionValue &&
-                        history.push(
-                          `/quote-pdf-template/detail/${quoteData.pDFTemplate.optionValue}?quote=${quoteData._id}&version=${currentVersion}`
-                        );
-                    }}
-                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                    size="small"
-                    className="btn-outline-v1"
-                    startIcon={isMobile && !isTablet ? '' : <AiFillEdit />}
-                    color="primary"
-                  >
-                    {isMobile && !isTablet ? <AiFillEdit size={20} /> : ''}
-                    {isMobile && !isTablet ? '' : 'Quote Template'}
-                  </Button>
-                </HtmlTooltip>
+                <ThemeButton
+                  onClick={() => {
+                    quoteData?.pDFTemplate.optionValue &&
+                      history.push(
+                        `/quote-pdf-template/detail/${quoteData.pDFTemplate.optionValue}?quote=${quoteData._id}&version=${currentVersion}`
+                      );
+                  }}
+                  startIcon={<AiFillEdit />}
+                  mobileTooltip="Quote Template"
+                  iconForMobile={<AiFillEdit />}
+                >
+                  Quote Template
+                </ThemeButton>
               )}
           </>
         )}
@@ -749,33 +722,29 @@ export default function QuoteProcess(props) {
     return (
       <>
         {processStatus === QUOTE_PROCESS_STATUS.doaProcess && versionStatus === 'Building Quote' && DOAneeded ? (
-          <Button
+          <ThemeButton
             onClick={() => {
               handleSendForDOA();
             }}
             disabled={!allowedToEdit || sendToLoading}
             startIcon={<BiMailSend />}
-            variant="contained"
-            size="small"
-            color="primary"
+            buttonType="theme"
           >
             {isMobile && !isTablet ? '' : `Send for DOA`}
-          </Button>
+          </ThemeButton>
         ) : null}
         {processStatus === QUOTE_PROCESS_STATUS.sendToCustomer && versionStatus !== 'Send To Customer' && !ifQuoteApproved.approved ? (
           <>
             {!quoteData?.versions[currentVersion]?.offered && (
-              <Button
+              <ThemeButton
                 onClick={() => {
                   handleOfferToCustomer();
                 }}
                 disabled={!allowedToEdit || sendToLoading}
-                variant="contained"
-                size="small"
-                color="primary"
+                buttonType="theme"
               >
                 {isMobile && !isTablet ? '' : `Process Quote`}
-              </Button>
+              </ThemeButton>
             )}
           </>
         ) : null}
@@ -788,7 +757,7 @@ export default function QuoteProcess(props) {
       <div className={`subDetailModule pt-[12px] `}>
         <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
           <Grid container className="position-relative">
-            <Grid item xs={12} sm={12} md={12} className="mt-1">
+            <Grid size={{ xs: 12, sm: 12, md: 12 }} className="mt-1">
               <Steps
                 steps={DOAneeded ? DOASteps : OtherSteps}
                 currentStep={
@@ -802,12 +771,12 @@ export default function QuoteProcess(props) {
                 version={currentVersion}
                 Refresh={fetchQuoteData}
                 nextStep={nextStep}
-                isPrevStep={['Rejected by Customer', 'Sent for DOA', 'Sent to Customer'].includes(versionStatus) ? false : prevStep}
+                isPrevStep={[QUOTE_STATUS.rejectByCustomer, QUOTE_STATUS.sentforDOA, QUOTE_STATUS.sentToCustomer].includes(versionStatus) ? false : prevStep}
                 versionStatus={versionStatus}
                 loading={loading}
                 approvedQuote={ifQuoteApproved}
                 handleVersionUpdate={() => {
-                  handleVersionUpdate(versionStatus === 'Sent for DOA' && !DOAneeded ? 'Sent to Customer' : versionStatus, state?.selectedRecords);
+                  handleVersionUpdate(versionStatus === QUOTE_STATUS.sentforDOA && !DOAneeded ? QUOTE_STATUS.sentToCustomer : versionStatus, state?.selectedRecords);
                 }}
                 isStepEnded={['End'].includes(processStatus)}
                 allowedToEdit={allowedToEdit}
@@ -842,6 +811,8 @@ export default function QuoteProcess(props) {
                   fullScreen={stepFullScreen}
                   processStatus={processStatus}
                   setNextStep={setNextStep}
+                  ifQuoteApproved={ifQuoteApproved}
+                  currentVersion={currentVersion}
                 />
               ) : (
                 <Loader style={{ minHeight: 300 }} text="Loading..." />
@@ -924,7 +895,7 @@ export default function QuoteProcess(props) {
             showRequiredLabel={false}
           />
           <CustomDialogContent isFooterPresent={false}>
-            <Grid item className="quoteHeader">
+            <Grid className="quoteHeader">
               <div className={redCard ? 'quoteBox quoteRed' : 'quoteBox quoteProfit'}>
                 <span className="quoteAmount" title={totalProfit.fullFormatAmount}>
                   {totalProfit.fullFormatAmount ? totalProfit.fullFormatAmount : defaultTotalValue}{' '}

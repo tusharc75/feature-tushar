@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Box, Dialog, TextField, Typography, useMediaQuery } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, Dialog, TextField, Typography, useMediaQuery } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 
 const renderedFrom = `${sidebarResource?.workOrder}_Service_StepData`;
@@ -111,7 +110,7 @@ const ViewServiceStepDataDialog = ({ servicesData, stepsData, handleClose, selec
             }
           }}
           renderInput={(params) => (
-            <TextField {...params} margin="dense" variant="outlined" label="Select Service" placeholder="Select Service" name="service" />
+            <TextField {...params} margin="dense" size="small" variant="outlined" label="Select Service" placeholder="Select Service" name="service" />
           )}
         />
         <Box className="pt-3 " style={{ overflowY: 'auto', height: 'calc(100% - 70px)' }}>

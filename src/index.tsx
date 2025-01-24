@@ -10,9 +10,9 @@ import { MsalProvider } from '@azure/msal-react';
 import AzureInstance from './AzureInstance';
 import { init } from '@sentry/react';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import './styles/index.scss';
 import './styles/custom-react-table.scss';
 import './styles/common-styles.scss';
+import './styles/index.scss';
 import './styles/material-component.scss';
 import './styles/responsive-styles.scss';
 import './styles/rbc-calender.scss';
@@ -27,6 +27,7 @@ import { GlobalChatProvider } from './StateProvider/GlobalChatContext';
 import { CustomOfflineProvider } from './StateProvider/OfflineContext/OfflineContext';
 import { version } from '../package.json';
 import { VITE_APP_ENV } from 'src/config';
+import TimezoneLocalizationProvider from 'src/StateProvider/TimeLocalizationProvider';
 
 // @ts-ignore
 if (VITE_APP_ENV !== 'local' && navigator.onLine) {
@@ -55,7 +56,9 @@ ReactDOM.render(
                   <GlobalChatProvider>
                     <CustomOfflineProvider>
                       <NewAddressOptionListProvider>
-                        <App />
+                        <TimezoneLocalizationProvider>
+                          <App />
+                        </TimezoneLocalizationProvider>
                       </NewAddressOptionListProvider>
                     </CustomOfflineProvider>
                   </GlobalChatProvider>

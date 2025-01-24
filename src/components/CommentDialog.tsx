@@ -1,11 +1,13 @@
-import { Box, Button, Dialog, TextField, makeStyles } from '@material-ui/core';
+import { Box, Dialog, TextField, Theme } from '@mui/material';
 import CustomDialogHeader from './CustomDialog/CustomDialogHeader';
 import CustomDialogContent from './CustomDialog/CustomDialogContent';
 import CustomDialogFooter from './CustomDialog/CustomDialogFooter';
 import { useState } from 'react';
 import { CustomDialogTransition } from 'src/constants/helpers';
+import { makeStyles } from '@mui/styles';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     width: '100%',
     maxWidth: 360,
@@ -53,12 +55,15 @@ export default function CommentDialog({ required = false, handleSubmit, handleCl
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button size="small" variant="outlined" color="primary" onClick={handleClose}>
+        <ThemeButton
+          buttonType='transparent'
+          onClick={handleClose}
+        >
           Cancel
-        </Button>
-        <Button
+        </ThemeButton>
+        <ThemeButton
           id={'dialog-submit-button'}
-          size="small"
+          buttonType='theme'
           onClick={() => {
             if (comment?.trim()) {
               handleSubmit(comment?.trim());
@@ -66,11 +71,9 @@ export default function CommentDialog({ required = false, handleSubmit, handleCl
               setError('Comment is required');
             }
           }}
-          variant="contained"
-          color="primary"
         >
           Submit
-        </Button>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

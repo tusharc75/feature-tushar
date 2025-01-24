@@ -1,17 +1,16 @@
 import { useState, useEffect, useContext } from 'react';
-import Button from '@material-ui/core/Button';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import axiosInstance from '../../axios/axiosInstance';
-import { Box, Table, TableHead, Paper, TableContainer, TableBody, TableCell, TextField, TableRow } from '@material-ui/core';
+import { Box, Table, TableHead, Paper, TableContainer, TableBody, TableCell, TextField, TableRow } from '@mui/material';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomDialogTransition } from './../../constants/helpers';
-import { Autocomplete } from '@material-ui/lab';
+import Autocomplete from '@mui/material/Autocomplete';
 import { Formik, Form, FieldArray } from 'formik';
-import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ManageCycleCountDetermination = ({ onClose, onSuccess, data, warehouse, warehouseName }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -20,7 +19,7 @@ const ManageCycleCountDetermination = ({ onClose, onSuccess, data, warehouse, wa
   const [inventoryCycle, setInventoryCycle] = useState([]);
 
   const {
-    state: {resources }
+    state: { resources }
   }: any = useData();
 
   useEffect(() => {
@@ -106,7 +105,7 @@ const ManageCycleCountDetermination = ({ onClose, onSuccess, data, warehouse, wa
           }))
         }}
         enableReinitialize={true}
-        onSubmit={() => {}}
+        onSubmit={() => { }}
       >
         {({ values }) => (
           <>
@@ -172,9 +171,13 @@ const ManageCycleCountDetermination = ({ onClose, onSuccess, data, warehouse, wa
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button onClick={() => handleSave(values.categoryArray)} variant={'contained'} size="small" color="primary" disabled={false}>
+              <ThemeButton
+                onClick={() => handleSave(values.categoryArray)}
+                disabled={false}
+                buttonType='theme'
+              >
                 Save
-              </Button>
+              </ThemeButton>
             </CustomDialogFooter>
           </>
         )}

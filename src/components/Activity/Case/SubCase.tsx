@@ -1,13 +1,13 @@
+import { Avatar, Box, Chip, Grid, IconButton, TextField, Theme, Typography } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import React, { useContext, useState } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import { Typography, Button, Grid, Chip, IconButton, TextField, Box, CircularProgress, Avatar } from '@material-ui/core';
+import { MdDelete } from 'react-icons/md';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { MdDelete } from 'react-icons/md';
-import { BsDot } from 'react-icons/bs';
 import { SubCaseColors } from '../Helpers/utils';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   marginLeft: {
     marginLeft: 10
   },
@@ -69,7 +69,7 @@ export const SubCase = ({ setId, openAddSub, setOpenAddSub, fetchCaseDetail, dat
 
     axiosInstance()
       .delete(`/case/${id}`)
-      .then(() => {})
+      .then(() => { })
       .catch((err) => {
         setToastConfig(err);
       });
@@ -134,17 +134,6 @@ export const SubCase = ({ setId, openAddSub, setOpenAddSub, fetchCaseDetail, dat
                   </IconButton>
                 </Grid>
               </Grid>
-              {/* <Grid container justify="flex-end">
-               
-                <Box mr={1} />
-                <IconButton
-                  size="small"
-                  color="default"
-                  onClick={(e) => deleteCase(e, element._id)}
-                >
-                  <DeleteOutline color="error" />
-                </IconButton>
-              </Grid> */}
             </Grid>
           </Box>
         ))}
@@ -161,16 +150,17 @@ export const SubCase = ({ setId, openAddSub, setOpenAddSub, fetchCaseDetail, dat
             onChange={(e) => setCaseName(e.target.value)}
             error={isError && caseName.length < 3}
             helperText={isError && caseName.length < 3 && 'Case name must be at least 3 letters'}
+            size="small"
           />
 
-          <Box mt={1}>
-            <Button color="primary" size="small" variant="contained" disabled={!caseName || isSubmitting} onClick={handleSave}>
-              {isSubmitting ? <CircularProgress size={18} /> : 'Create'}
-            </Button>
-            <Button variant="contained" size="small" className={classes.marginLeft} disableElevation onClick={() => setOpenAddSub(false)}>
+          <div className="mt-2 flex gap-2">
+            <ThemeButton buttonType="theme" disabled={!caseName || isSubmitting} isLoading={isSubmitting} onClick={handleSave}>
+              Create
+            </ThemeButton>
+            <ThemeButton buttonType="transparent" className={classes.marginLeft} onClick={() => setOpenAddSub(false)}>
               Cancel
-            </Button>
-          </Box>
+            </ThemeButton>
+          </div>
         </Box>
       )}
     </Box>

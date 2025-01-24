@@ -1,10 +1,8 @@
-import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
+import { Box, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isArray, isEqual } from 'lodash';
-import moment from 'moment';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { FaDiceOne } from 'react-icons/fa';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
@@ -12,23 +10,22 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import FormTypes from 'src/components/Helpers/FormTypes';
-import routes from '../../components/Helpers/Routes';
+
 import {
   CHILD_RESOURCE,
   CustomDialogTransition,
   getObjKeys,
   serializedAssetsCertification,
   setFieldsInAscendingOrder,
-  sidebarResource,
   yupSchema
 } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import InputField from 'src/components/Helpers/InputField';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiryDate }) => {
-
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const toastConfig = useContext(CustomToastContext);
@@ -64,7 +61,9 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiry
 
   const handleSubmit = (values) => {
     setLoading(true);
-    const attachments = isArray(values?.attachments) ? values?.attachments?.map((file) => ({ name: file?.fileName?.split('_')[3], url: file?.fileName })) : [];
+    const attachments = isArray(values?.attachments)
+      ? values?.attachments?.map((file) => ({ name: file?.fileName?.split('_')[3], url: file?.fileName }))
+      : [];
     const body = { ...values, asset: assetId, attachments: attachments };
     axiosInstance()
       .post(`${serializedAssetsCertification.api}/issue-certificate`, body)
@@ -85,10 +84,10 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiry
 
   function validate(values) {
     const errors = {};
-    if (moment(values.issueDate) > moment(values.expiryDate)) {
+    if (dayjs(values.issueDate) > dayjs(values.expiryDate)) {
       errors['expiryDate'] = 'Expiry date must greater then Issue date';
     }
-    if (certificateExpiryDate && moment(values.issueDate) < moment(certificateExpiryDate)) {
+    if (certificateExpiryDate && dayjs(values.issueDate) < dayjs(certificateExpiryDate)) {
       errors['issueDate'] = 'Issue date must greater then Certificate expiry date';
     }
     return errors;
@@ -142,33 +141,26 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiry
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
-                  disabled={loading}
+                <ThemeButton
+                  buttonType='transparent'
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
                 >
                   Cancel
-                </Button>
-                <Button
+                </ThemeButton>
+                <ThemeButton
+                  buttonType='theme'
                   disabled={loading}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
-                  size="small"
                   onClick={submitForm}
-                  endIcon={loading && <CircularProgress color="inherit" size={18} />}
+                  isLoading={loading}
                 >
-                  {' '}
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);
@@ -191,6 +183,5 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiry
     </Dialog>
   );
 };
-
 
 export default IssueCertificateDialog;

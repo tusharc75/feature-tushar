@@ -1,7 +1,7 @@
-import { Box } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import Grid from '@material-ui/core/Grid';
+import { Box } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Dialog from '@mui/material/Dialog';
+import Grid from '@mui/material/Grid2';
 import { sortBy } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -11,7 +11,7 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import {
   CustomDialogTransition,
-  dateTimeFormat,
+  displayDateTime,
   getLocalStorageArrayData,
   gridLoadingTimeout,
   prepareDataForGrid,
@@ -19,10 +19,7 @@ import {
   sidebarResource
 } from '../../constants/helpers';
 import AskSupplierPriceDialog from './AskSupplierPriceDialog';
-
 import { DeleteButton } from 'src/components/Helpers/Buttons';
-
-import moment from 'moment';
 import CustomReactTable, { useColumns, useTableReducer } from '../CustomReactTable';
 
 const renderedFrom = 'quoteSupplierPrice';
@@ -106,8 +103,8 @@ const SupplierAskPrice = (props) => {
               disabled: false,
               Cell: ({ row }) =>
                 row?.original?.responseDate ? (
-                  <h5 className="createBy" title={`${moment(row?.original?.responseDate)?.format(dateTimeFormat)}`}>
-                    {moment(row?.original?.responseDate)?.format(dateTimeFormat)}
+                  <h5 className="createBy" title={`${displayDateTime(row?.original?.responseDate)}`}>
+                    {displayDateTime(row?.original?.responseDate)}
                   </h5>
                 ) : (
                   <NoDataCell />
@@ -183,17 +180,15 @@ const SupplierAskPrice = (props) => {
       <div className="listing-grid p-3">
         <Box mb={2}>
           <Grid container>
-            <Grid item xs={12} sm={12} md={12} container justify="flex-end">
+            <Grid size={{xs:12, sm:12, md:12}} container justifyContent="flex-end">
               <Box ml={1} mt={1}>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+buttonType='theme'
                   onClick={handleAdd}
-                  variant="contained"
                   disabled={getLocalStorageArrayData(localStorageSelectedRecords).length === 1 ? false : true}
                 >
                   Apply
-                </Button>
+                </ThemeButton>
               </Box>
               <Box ml={1} mt={1}>
                 <DeleteButton

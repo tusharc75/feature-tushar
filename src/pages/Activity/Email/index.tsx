@@ -1,6 +1,6 @@
-import { Box, Chip, IconButton, MenuItem, TextField } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
-import { Delete as DeleteIcon } from '@material-ui/icons';
+import { Box, Chip, IconButton, MenuItem, TextField } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
+import { Delete as DeleteIcon } from '@mui/icons-material';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { convertNodeToElement } from 'react-html-parser';
@@ -14,7 +14,7 @@ import CustomContainer from '../../../components/CustomContainer';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../../components/Helpers/MessageDialog';
 import { isObjectEmpty, sidebarResource } from '../../../constants/helpers';
-import { Autocomplete } from '@material-ui/lab';
+import Autocomplete from '@mui/material/Autocomplete';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -148,7 +148,7 @@ const Email = () => {
                     <IconButton size="small" onClick={() => redirectToResource(d?.type, d?.referenceId)}>
                       <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                     </IconButton>
-                    <Chip color="primary" label={`${routes[d?.type]?.title}`} />
+                    <Chip color="primary" label={`${resources[d?.type]?.titleSingular}`} />
                   </div>
                 );
               })
@@ -184,7 +184,10 @@ const Email = () => {
         Cell: ({ row }) => (
           <HtmlTooltip title={permissions.email.isDelete ? 'Delete' : deleteDisable}>
             <span>
-              <IconButton disabled={!permissions.email.isDelete} size="small" aria-label="Delete" onClick={() => setDeleteRecord(row.original)}>
+              <IconButton disabled={!permissions.email.isDelete} size="small" aria-label="Delete"
+                onClick={() => {
+                  showConfirmBox(row.original)
+                }}>
                 <DeleteIcon fontSize="small" color={permissions.email.isDelete ? 'error' : 'disabled'} />
               </IconButton>
             </span>
@@ -227,8 +230,7 @@ const Email = () => {
     axiosInstance()
       .get(apiUrl, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
-        let inboxEmailsData = [],
-          sentEmails = [];
+        let inboxEmailsData = [], sentEmails = [];
         data = data.forEach((obj) => {
           const { createdBy, ...rest } = obj;
           let isCreatedByMe = obj?.createdBy?.user === user?.user?._id ? true : false;
@@ -365,7 +367,6 @@ const Email = () => {
     return (
       <>
         <MenuItem
-          disabled={selectedRecords?.every((e) => !e.canDelete) ? true : false}
           onClick={() => {
             showConfirmBox(null);
           }}
@@ -540,13 +541,13 @@ const LeftSideContents = ({
 }) => {
   return (
     <>
-      <div className="min-w-[200px] max-sm:flex-grow ">
+      <div className="min-w-[250px] max-sm:flex-grow ">
         <Autocomplete
           fullWidth
           options={resourceOptions}
           getOptionLabel={(option) => option.optionLabel || ''}
           value={resource}
-          className={`flex-grow sm:min-w-[200px] sm:max-w-[250px]`}
+          className={`flex-grow sm:min-w-[250px] sm:max-w-[270px]`}
           onChange={(event, newValue) => {
             setResource(newValue);
             if (newValue) {
@@ -575,7 +576,7 @@ const LeftSideContents = ({
             disabled={loadingResources}
             options={resourceData}
             getOptionLabel={(option: any) => option.optionLabel || ''}
-            getOptionSelected={(option: any, value: any) => option.optionLabel === value.optionLabel}
+            isOptionEqualToValue={(option: any, value: any) => option.optionLabel === value.optionLabel}
             className={`flex-grow sm:min-w-[250px] sm:max-w-[270px]`}
             value={selectedResourceData}
             onChange={(event, newValue) => {

@@ -2,21 +2,6 @@
   position: relative;
   padding-bottom: 15px;
   padding-top: 5px;
-  &::before {
-    content: '';
-    position: absolute;
-    width: 100%;
-    top: -30px;
-    left: 0;
-    right: 0;
-    height: calc(100% + 300px);
-    background: linear-gradient(180deg, #ffffff 0%, #f1f5ff 100%);
-    pointer-events: none;
-    z-index: -1;
-    [data-mode='dark'] & {
-      background: linear-gradient(180deg, var(--dark-secondary) 0%, var(--dark-primary) 100%);
-    }
-  }
 }
 .mainContainer {
   --icon-size: 20px;

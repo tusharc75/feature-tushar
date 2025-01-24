@@ -1,12 +1,11 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { Box, IconButton, MenuItem } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import MessageDialog from 'src/components/Helpers/MessageDialog';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -103,7 +102,7 @@ const PackageList = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" />
+              <DeleteIcon color="error" fontSize='small' />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -202,13 +201,13 @@ const PackageList = () => {
         <MenuItem
           disabled={selectedRecords?.every((e) => !e.canDelete) ? true : false}
           onClick={() => {
-            if (selectedRecords.length === 1){
+            if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-              }else{
-                setDeleteRecord(null)
-              }
-              setShowDeleteConfirmBox(true);
-            }}
+            } else {
+              setDeleteRecord(null);
+            }
+            setShowDeleteConfirmBox(true);
+          }}
         >
           {`Delete (${selectedRecords?.length})`}
         </MenuItem>
@@ -289,7 +288,7 @@ const PackageList = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.packages?.titleSingular?.toLowerCase()} : ${deleteRecord?.packageName || ''}` : `selected ${resources?.packages?.titlePlural?.toLowerCase()}`} ?`}              
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.packages?.titleSingular?.toLowerCase()} : ${deleteRecord?.packageName || ''}` : `selected ${resources?.packages?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

@@ -1,15 +1,15 @@
-import { CircularProgress, Typography } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import { makeStyles } from '@material-ui/core/styles';
+import { Theme, Typography } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import { makeStyles } from '@mui/styles';
 import React from 'react';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomDialogTransition } from 'src/constants/helpers';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     width: '100%',
     maxWidth: 360,
@@ -47,8 +47,6 @@ export default function ConfirmationDialogRaw({
 
   return (
     <Dialog
-      disableBackdropClick
-      disableEscapeKeyDown
       TransitionComponent={CustomDialogTransition}
       transitionDuration={walkmeInstance ? 0 : 250}
       maxWidth="xs"
@@ -60,18 +58,30 @@ export default function ConfirmationDialogRaw({
       id="confirmation-dialog"
       keepMounted
     >
-      <DialogTitle id="confirmation-dialog-title" className="text-white">
+      <DialogTitle
+        id="confirmation-dialog-title"
+        className="flex min-h-[54px] items-center justify-between bg-[#1c1c31] px-4 py-2 text-white dark:bg-[#1a1a26]"
+      >
         {title ? title : 'Confirm'}
       </DialogTitle>
       <DialogContent dividers>{message ? <Typography>{message}</Typography> : null}</DialogContent>
-      <DialogActions>
-        <Button id={'confirmation-dialog-cancel-button'} size="small" autoFocus onClick={onClose} color="primary">
+      <DialogActions className="bg-[#ebebeb] dark:bg-[#1a1a26]">
+        <ThemeButton
+          id={'confirmation-dialog-cancel-button'}
+          buttonType="transparent"
+          onClick={onClose}
+        >
           {!cancelText ? 'Cancel' : cancelText}
-        </Button>
-        <Button id={'confirmation-dialog-confirm-button'} size="small" onClick={onOk} disabled={okBtnLoading} color="primary">
-          {okBtnLoading ? <CircularProgress style={{ marginRight: '8px' }} size={20} color="inherit" /> : null}
+        </ThemeButton>
+        <ThemeButton
+          id={'confirmation-dialog-confirm-button'}
+          disabled={okBtnLoading}
+          buttonType="theme"
+          isLoading={okBtnLoading}
+          onClick={onOk}
+        >
           {!forwardText ? 'Confirm' : forwardText}
-        </Button>
+        </ThemeButton>
       </DialogActions>
     </Dialog>
   );

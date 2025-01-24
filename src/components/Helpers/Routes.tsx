@@ -257,6 +257,18 @@ const routes = {
   repairJobDetail: {
     path: '/repair-job/detail'
   },
+  expenses:{
+    path:'/expenses'
+  },
+  expensesDetail:{
+    path:'/expenses/detail'
+  },
+  expenseReport:{
+    path:'/expense-report'
+  },
+  expenseReportDetail:{
+    path:'/expense-report/detail'
+  },
   salesOrder: {
     path: '/sales-order'
   },
@@ -447,7 +459,8 @@ const routes = {
     path: '/contact-us/detail'
   },
   supportTicket: {
-    path: '/support-ticket'
+    path: '/support-ticket',
+    title: 'Support Ticket'
   },
   supportTicketDetail: {
     path: '/support-ticket/detail'

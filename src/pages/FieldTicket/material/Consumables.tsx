@@ -1,30 +1,30 @@
-import Box from '@material-ui/core/Box/Box';
+import Box from '@mui/material/Box/Box';
 import { useState, useEffect, useContext } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
-import Grid from '@material-ui/core/Grid/Grid';
+import Grid from '@mui/material/Grid2';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CHILD_RESOURCE, MATERIAL_TYPE, asyncForEach, fieldTicket, restoreObjKeysWithValues, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, fieldTicket, restoreObjKeysWithValues, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Button, IconButton, MenuItem, TextField } from '@material-ui/core';
+import { IconButton, MenuItem, TextField } from '@mui/material';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { flattenArray } from 'src/constants/columns';
-import { Autocomplete } from '@material-ui/lab';
+import Autocomplete from '@mui/material/Autocomplete';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import Technicians from './Technicians';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { calculatePrice, calculateRowsField } from 'src/components/RentalManagment/helper';
 import MaterialQtyDialog from './MaterialQtyDialog';
-import EditIcon from '@material-ui/icons/Edit';
-import HistoryIcon from '@material-ui/icons/History';
-import FormatListBulletedIcon from '@material-ui/icons/FormatListBulleted';
+import EditIcon from '@mui/icons-material/Edit';
+import HistoryIcon from '@mui/icons-material/History';
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import ConsumablesQtyDialog from 'src/pages/WorkOrder/Consumables/ConsumablesQtyDialog';
 import History from '../../ProductInventory/LedgerHistory';
 import QtyRequestLog from 'src/pages/WorkOrder/Consumables/QtyRequestLog';
@@ -35,6 +35,7 @@ import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineCo
 import { deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
 import HideWhenOffline from 'src/components/HideWhenOffline';
 import { FiExternalLink } from 'react-icons/fi';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, stepFullScreen, fetchData: fetchFieldTicketData, refreshChild }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Consumables`;
@@ -304,7 +305,9 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
         consumables = await findAll(objectStore.fieldTicketMaterial);
         consumables = consumables?.filter((e) => e?.fieldTicketId === fieldTicketData?._id && e?.type === MATERIAL_TYPE.product && !e?.isRental);
         if (selectedServiceOption && selectedServiceOption?.optionValue !== 'All') {
-          consumables = consumables?.filter((e) => e?.service?.optionValue === selectedServiceOption?.optionValue && e?.uniqueId === selectedServiceOption?._id);
+          consumables = consumables?.filter(
+            (e) => e?.service?.optionValue === selectedServiceOption?.optionValue && e?.uniqueId === selectedServiceOption?._id
+          );
         }
       } else if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) {
         let api = `${fieldTicket.api}/${fieldTicketData?._id}/material?type=${MATERIAL_TYPE.product}`;
@@ -359,11 +362,15 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
         element._id = id;
         await insertUpdate(objectStore.fieldTicketMaterial, id, restoreObjKeysWithValues(element, allFields));
         material.push(element);
-      }      
+      }
       if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) {
         let result = await findOne(objectStore.offlineDataSync, `${fieldTicketData?._id}_material`);
         let updatedData = [...(result?.data || []), ...material];
-        await insertUpdate(objectStore.offlineDataSync, `${fieldTicketData?._id}_material`, { ...result, data: updatedData, type: 'fieldTicketMaterial' });
+        await insertUpdate(objectStore.offlineDataSync, `${fieldTicketData?._id}_material`, {
+          ...result,
+          data: updatedData,
+          type: 'fieldTicketMaterial'
+        });
       } else {
         let result = await findOne(objectStore.offlineDataSync, fieldTicketData?._id);
         let updatedData = { ...result?.data, material: [...(result?.data?.material || []), ...material] };
@@ -463,7 +470,9 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
       if (isOffline) {
         const materialIdsToDelete = rows.map((d) => d.id);
 
-        [...materialIdsToDelete].forEach((id) => { deleteOne(objectStore.fieldTicketMaterial, id) });
+        [...materialIdsToDelete].forEach((id) => {
+          deleteOne(objectStore.fieldTicketMaterial, id);
+        });
 
         if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) {
           let result = await findOne(objectStore.offlineDataSync, `${fieldTicketData?._id}_material`);
@@ -508,7 +517,8 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
     try {
       setUpdating(true);
       if (isOffline) {
-        let alreadyOfflineDataSyncStoredRows = [], result;
+        let alreadyOfflineDataSyncStoredRows = [],
+          result;
         if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) {
           result = await findOne(objectStore.offlineDataSync, `${fieldTicketData?._id}_material`);
           alreadyOfflineDataSyncStoredRows = result?.data || [];
@@ -521,7 +531,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
           row.fieldTicketId = fieldTicketData?._id;
           row.type = MATERIAL_TYPE.product;
           const existingRow = await findOne(objectStore.fieldTicketMaterial, row._id);
-          await insertUpdate(objectStore.fieldTicketMaterial, row._id, { ...existingRow, ...(restoreObjKeysWithValues(row, allFields)) });
+          await insertUpdate(objectStore.fieldTicketMaterial, row._id, { ...existingRow, ...restoreObjKeysWithValues(row, allFields) });
           const foundIndex = alreadyOfflineDataSyncStoredRows.findIndex((d: any) => d._id === row._id);
           if (foundIndex !== -1) {
             alreadyOfflineDataSyncStoredRows[foundIndex] = { ...existingRow, ...row };
@@ -602,15 +612,9 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
     return (
       <>
         <HideWhenOffline>
-          <Button
-            disabled={!Boolean(selectedRecords?.length)}
-            onClick={() => setOpenConsumablesQtyDialog(true)}
-            color="primary"
-            size="small"
-            variant="contained"
-          >
+          <ThemeButton disabled={!Boolean(selectedRecords?.length)} onClick={() => setOpenConsumablesQtyDialog(true)} buttonType="theme">
             {consumeRequest ? 'Request ' : 'Consume '} {selectedRecords?.length > 0 ? '(' + selectedRecords?.length + ')' : ''}
-          </Button>
+          </ThemeButton>
         </HideWhenOffline>
       </>
     );
@@ -659,7 +663,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
             autoHighlight
             value={selectedServiceOption}
             getOptionLabel={(option: any) => option?.optionLabel || ''}
-            getOptionSelected={(option, val) => (option ? option?.optionLabel === val?.optionLabel : false)}
+            isOptionEqualToValue={(option, val) => (option ? option?.optionLabel === val?.optionLabel : false)}
             onChange={(_, val) => {
               let value = val;
               if (!val) {
@@ -672,9 +676,9 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
           />
         </Box>
       )}
-      <CustomTabs value={tabValue} onChange={handleMainTabChange} style={{ marginBottom: -1 }}>
-        <CustomTab value={0} label={'Products/Consumables'} primaryColor={true} id={'products-consumables-tab'} />
-        {!isOffline && <CustomTab value={1} label={'Technicians'} primaryColor={true} id={'technicians-tab'} />}
+      <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
+        <CustomTab value={0} label={'Products/Consumables'} id={'products-consumables-tab'} />
+        {!isOffline && <CustomTab value={1} label={'Technicians'} id={'technicians-tab'} />}
       </CustomTabs>
 
       <TabPanel value={tabValue} index={0}>
@@ -693,7 +697,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
             </>
           )}
           <Grid container spacing={2}>
-            <Grid item xs={12} md={12} sm={12}>
+            <Grid size={{ xs: 12, md: 12, sm: 12 }}>
               {columns ? (
                 <CustomReactTable
                   height={stepFullScreen ? 'calc(100vh - 300px)' : '300px'}

@@ -1,16 +1,17 @@
-import { Chip, IconButton } from '@material-ui/core';
-import { ArrowBackIos, ArrowForwardIos, DeleteOutline, FormatQuote, Message, MoreHoriz, People } from '@material-ui/icons';
-import React, { useEffect, useState } from 'react';
+import { ArrowBackIos, ArrowForwardIos, DeleteOutline, FormatQuote, Message, MoreHoriz, People } from '@mui/icons-material';
+import ApartmentIcon from '@mui/icons-material/Apartment';
+import { Chip, IconButton } from '@mui/material';
+import React, { useState } from 'react';
+import { MdKeyboardDoubleArrowUp } from 'react-icons/md';
 import { PostWorkIcon, PreWorkIcon, WorkStations } from 'src/assets/svg/svgIcons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { ButtonType, ThemeButton } from 'src/components/Helpers/Buttons';
+import { ThemeButton, ThemeButtonProps } from 'src/components/Helpers/Buttons';
 import { WORKORDER_SERVICE_STATUS, cn, getChipColor, sidebarResource } from 'src/constants/helpers';
 import { RenderStatusIcon } from '../index';
 import RenderTotalTime from './RenderTotalTime';
 import useTab from './useTab';
-import { MdKeyboardDoubleArrowUp } from 'react-icons/md';
 
-export type ServicesButtons = { visible: boolean; id: string | number } & ButtonType;
+export type ServicesButtons = { visible: boolean; id: string | number } & ThemeButtonProps;
 
 type RenderServiceProps = {
   isColapsed: boolean;
@@ -156,7 +157,7 @@ const RenderService = ({
                 );
               })}
               <IconButton size={'small'} onClick={handleColapse}>
-                {isColapsed ? <ArrowForwardIos /> : <ArrowBackIos />}
+                <ArrowForwardIos fontSize="small" className={cn('transition-all', isColapsed ? '' : '[transform:rotate(180deg)]')} />
               </IconButton>
             </div>
             <div className={`max-h-[calc(100vh-300px)] overflow-y-auto overflow-x-hidden`}>
@@ -280,25 +281,17 @@ const RenderServices = ({
                   </>
                 )}
                 {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
-                  <HtmlTooltip arrow enterTouchDelay={0} title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
-                    <span>
-                      <People style={{ fontSize: 20 }} />
-                    </span>
+                  <HtmlTooltip title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
+                    <People fontSize='small' />
                   </HtmlTooltip>
                 )}
                 {data?.type === 'service' && data?.assignedWorkStations?.length > 0 && (
-                  <HtmlTooltip
-                    arrow
-                    enterTouchDelay={0}
-                    title={`Work Stations-${data?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString()}`}
-                  >
-                    <span>
-                      <WorkStations className="align-text-top" size={15} />
-                    </span>
+                  <HtmlTooltip title={`Work Stations-${data?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString()}`}  >
+                    <ApartmentIcon fontSize='small' />
                   </HtmlTooltip>
                 )}
                 {data?.comment && (
-                  <HtmlTooltip arrow enterTouchDelay={0} title={data?.comment}>
+                  <HtmlTooltip title={data?.comment}>
                     <span>
                       <Message style={{ fontSize: 18 }} />
                     </span>
@@ -310,7 +303,7 @@ const RenderServices = ({
                 <>
                   {data?.type === 'service' && (
                     <div className="flex flex-grow items-center justify-end gap-1">
-                      <HtmlTooltip title='Actions'>
+                      <HtmlTooltip title="Actions">
                         <IconButton
                           size="small"
                           color="primary"

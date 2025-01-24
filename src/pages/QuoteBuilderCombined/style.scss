@@ -58,23 +58,6 @@
   }
 }
 
-.MuiTab-textColorPrimary.Mui-selected {
-  border-radius: 0;
-  background: white;
-  color: var(--primary) !important;
-  border: 1px solid lightgray;
-  border-top: 4px solid #1b7d1c !important;
-  border-bottom: 0px !important;
-
-  //border-top-right-radius: 12px;
-  //border-top-left-radius: 12px;
-}
-
-.MuiTab-textColorPrimary {
-  border: 1px solid grey !important;
-  border-radius: 0px !important;
-}
-
 .tab-font {
   font-size: 14px;
 }
@@ -89,15 +72,6 @@
   padding: 0px !important;
   margin-right: 20px !important;
   color: #418887 !important;
-}
-
-.MuiButtonBase-root.Mui-disabled {
-  color: grey !important;
-}
-
-.MuiButtonBase-root.Mui-disabled.MuiButton-containedPrimary:not(.btn-outline-red-v1) {
-  color: white !important;
-  opacity: 0.5 !important;
 }
 
 .buttonIconMobile {

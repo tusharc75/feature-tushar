@@ -1,6 +1,6 @@
-import { Box, Button, IconButton, Menu, MenuItem, Typography, useMediaQuery } from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
-import EditIcon from '@material-ui/icons/Edit';
+import { Box, IconButton, Menu, MenuItem, Typography, useMediaQuery } from '@mui/material';
+import { ExpandMore } from '@mui/icons-material';
+import EditIcon from '@mui/icons-material/Edit';
 import { capitalize, isArray } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -36,6 +36,7 @@ import {
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateCompleteStepData, nextButtonStep } from 'src/pages/RepairOrder/walkmeSteps';
 import { flattenArray } from 'src/constants/columns';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const dataAdded = {
   completeDataAdded: false,
@@ -416,7 +417,8 @@ const Quotation = ({
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
     setUpdating(true);
-    axiosInstance().put(`${quotation.api}/productpackage/${quotationData?._id}/${quotationData?.versions[currentVersion]?._id}`, { material: rows })
+    axiosInstance()
+      .put(`${quotation.api}/productpackage/${quotationData?._id}/${quotationData?.versions[currentVersion]?._id}`, { material: rows })
       .then(() => {
         if (saveAndNext) {
           const row = flattenArray(dataRows).find((ele) => ele._id === rows[0]?._id);
@@ -605,7 +607,7 @@ const Quotation = ({
   return (
     <Fragment>
       {invoiceStep ? (
-        <Box p={2}>
+        <Box pl={1}>
           <PreviewDownload
             fileName={`${resources?.repairOrder?.titleSingular}-${repairOrderData?.repairOrderNumber}`}
             resource={sidebarResource.repairOrder}
@@ -659,11 +661,11 @@ const Quotation = ({
             </Box>
           )}
           {allowedToEdit && (
-            <Box display={'flex'} gridGap={8}>
+            <Box display={'flex'} gap={8}>
               {repairOrderData?.addQuotationStep &&
                 (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
                   quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
-                  <Button
+                  <ThemeButton
                     disabled={material
                       .filter((e) => e.parentId === null)
                       .some(
@@ -673,59 +675,50 @@ const Quotation = ({
                           d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined
                       )}
                     onClick={handleSendToCustomer}
-                    variant="contained"
-                    size="small"
-                    color="primary"
+                    buttonType="theme"
                   >
                     Process Quotation
-                  </Button>
+                  </ThemeButton>
                 ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
-                  <Button
+                  <ThemeButton
                     onClick={() => {
                       setCustomerAcceptable(true);
                     }}
-                    variant="contained"
-                    size="small"
+                    buttonType="theme"
                     className="mx-1"
-                    color="primary"
                   >
                     Accept / Reject
-                  </Button>
+                  </ThemeButton>
                 ) : [QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.acceptByCustomer].includes(
                   quotationData?.versions[currentVersion]?.status
                 ) ? (
-                  <Button
+                  <ThemeButton
                     onClick={() => {
                       cloneVersion();
                     }}
-                    variant="contained"
-                    size="small"
+                    buttonType="theme"
                     className="mx-1"
-                    color="primary"
                   >
                     Create New Version
-                  </Button>
+                  </ThemeButton>
                 ) : null)}
               {![QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                 quotationData?.versions[currentVersion]?.status
               ) && (
-                  <Button
-                    variant="outlined"
-                    color="default"
-                    size="small"
+                  <ThemeButton
+                    mobileTooltip="Actions"
+                    buttonType="yellow"
+                    iconForMobile={<ExpandMore />}
                     onClick={openActions}
-                    aria-controls="action-menu"
                     disabled={selectedRecords?.length === 0}
                     endIcon={<ExpandMore />}
-                    className="new-dropdown-v1"
                   >
                     Actions
-                  </Button>
+                  </ThemeButton>
                 )}
               <Menu
                 anchorEl={anchorEl}
                 keepMounted
-                getContentAnchorEl={null}
                 anchorOrigin={{
                   vertical: 'bottom',
                   horizontal: 'left'

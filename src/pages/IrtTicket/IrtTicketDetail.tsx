@@ -1,5 +1,6 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import { Edit } from '@material-ui/icons';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import EditIcon from '@mui/icons-material/Edit';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
@@ -9,7 +10,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import { ACTIVITY_RESOURCE, checkIsAllowedToDelete, checkIsAllowedToEdit, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -113,14 +114,9 @@ const IrtTicketDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {permissions?.irtTicket?.isUpdate && allowedToEdit && (
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                className={'btn-outline-v1'}
-                onClick={handleOpenUpdateDialog}
-                size="small"
-              >
-                {isMobile && !isTablet ? <Edit /> : 'Edit'}
-              </Button>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                {'Edit'}
+              </ThemeButton>
             )}
             {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             <ActivityButton referenceId={irtTicketData?._id} resource={ACTIVITY_RESOURCE.irtTicket} resourceLabel={irtTicketData?.irtTicketNumber} />
@@ -136,9 +132,9 @@ const IrtTicketDetail = () => {
         <TabPanel value={tabValue} index={0}>
           <Box>
             {loading || !fields?.length ? (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-              </Grid>
+              <div className="p-2">
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+              </div>
             ) : (
               <DetailsPage data={irtTicketData} fields={fields} />
             )}
@@ -154,7 +150,7 @@ const IrtTicketDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.irtTicket?.titleSingular?.toLowerCase()} : ${irtTicketData?.irtTicketNumber} ?`}          
+          message={`Are you sure you want to delete ${resources?.irtTicket?.titleSingular?.toLowerCase()} : ${irtTicketData?.irtTicketNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

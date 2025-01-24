@@ -1,6 +1,6 @@
-import { Box, IconButton } from '@material-ui/core';
-import { Info } from '@material-ui/icons';
-import DescriptionIcon from '@material-ui/icons/Description';
+import { Box, IconButton } from '@mui/material';
+import { Info } from '@mui/icons-material';
+import DescriptionIcon from '@mui/icons-material/Description';
 import axios, { CancelTokenSource } from 'axios';
 import React, { useContext, useEffect, useImperativeHandle, useState } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -16,6 +16,7 @@ import routes from 'src/components/Helpers/Routes';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from 'src/constants/helpers';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import TechnicianDialog from '../TechnicianDialog';
+import { FiExternalLink } from 'react-icons/fi';
 
 export type GridViewRef = {
   refreshGrid: () => void;
@@ -92,7 +93,23 @@ const GridView = React.forwardRef<GridViewRef, any>(({ renderedFrom, state, disp
         Header: 'Work Order Number',
         disableFilters: true,
         disableSortBy: true,
-        Cell: ({ row }) => (row.original['workOrderNumber'] ? <h5 className=" text-truncate">{row.original.workOrderNumber}</h5> : <NoDataCell />)
+        Cell: ({ row }) => (
+          <div className="flex items-center gap-1">
+            <p title={row?.original?.workOrderNumber}>{row?.original?.workOrderNumber}</p>
+            {row.original['workOrderNumber'] ? (
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.workOrderDetail.path}/${row?.original?.workOrderId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            ) : (
+              <NoDataCell />
+            )}
+          </div>
+        )
       },
       {
         accessor: 'assignedWorkStations',
@@ -163,14 +180,9 @@ const GridView = React.forwardRef<GridViewRef, any>(({ renderedFrom, state, disp
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&status=${status}`;
     const { filterByIds, deepFilters } = gridFilterParser(filters);
-    if (filterQuery?.filterById?.length) {
-      filterQuery?.filterById?.forEach((e) => {
+    if (filterQuery?.length) {
+      filterQuery?.forEach((e) => {
         filterByIds.push(e);
-      });
-    }
-    if (filterQuery?.deepFilter?.length) {
-      filterQuery?.deepFilter?.forEach((e) => {
-        deepFilters.push(e);
       });
     }
     if (filterByIds?.length) {
@@ -196,7 +208,7 @@ const GridView = React.forwardRef<GridViewRef, any>(({ renderedFrom, state, disp
           let workOrderDetailData: any = prepareDataForGrid(u?.workOrderDetail, user);
           finalObject['serviceName'] = u?.service?.serviceName;
           finalObject['serviceId'] = u?.service?._id;
-          finalObject['serviceStatus'] = u?.status;
+          finalObject['customServiceStatus'] = u?.status;
           finalObject['workOrderId'] = u?.workOrderDetail?._id;
           const matchedTempMaterial = workOrderDetailData?.tempMaterial?.find((t) => t?.materialId === u?.service?._id);
           finalObject['uniqueId'] = matchedTempMaterial?._id;
@@ -227,7 +239,7 @@ const GridView = React.forwardRef<GridViewRef, any>(({ renderedFrom, state, disp
       <div className="[&_.table-container-v1>div]:mt-0">
         {columns ? (
           <CustomReactTable
-            height={'calc(100vh - 300px)'}
+            height={'calc(100vh - 270px)'}
             columns={columns}
             topLeftSlot={tableHead}
             state={state}

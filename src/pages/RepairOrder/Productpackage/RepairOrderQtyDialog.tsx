@@ -1,5 +1,5 @@
 import { FC, useEffect, useState, Fragment, useRef } from 'react';
-import { Button, Dialog, Grid, Box } from '@material-ui/core';
+import { Dialog, Box } from '@mui/material';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -8,11 +8,11 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomButton from '../../../components/Helpers/CustomButton';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import InputField from 'src/components/Helpers/InputField';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -24,16 +24,7 @@ interface EditDialogProps {
   loading: any;
 }
 
-const RepairOrderQtyDialog: FC<EditDialogProps> = ({
-  onClose,
-  handleSaveData,
-  repairOrderData,
-  rowData,
-  material,
-  isBulkedit,
-  loading
-}) => {
-
+const RepairOrderQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, repairOrderData, rowData, material, isBulkedit, loading }) => {
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [allFields, setAllFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -136,7 +127,7 @@ const RepairOrderQtyDialog: FC<EditDialogProps> = ({
               <CustomDialogContent>
                 {isBulkedit && <h6 className="form-label-style mb-2">* Please enter value you want to bulk update.</h6>}
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                <InputField
+                  <InputField
                     errors={errors}
                     values={values}
                     setFieldValue={setFieldValue}
@@ -148,9 +139,8 @@ const RepairOrderQtyDialog: FC<EditDialogProps> = ({
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType="transparent"
                   onClick={() => {
                     if (!isEqual(ref.current.values, initialData.values)) {
                       setShowConfirmDialog(true);
@@ -160,22 +150,18 @@ const RepairOrderQtyDialog: FC<EditDialogProps> = ({
                   }}
                 >
                   {'Close'}
-                </Button>
-                <CustomButton
-                  loading={loading}
-                  disabled={loading || isEqual(ref?.current?.values, initialData.values)}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+                </ThemeButton>
+                <ThemeButton
+                  isLoading={loading}
+                  disabled={loading || isEqual(ref?.current?.values, initialData.values)}  
                   onClick={submitForm}
                 >
                   {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

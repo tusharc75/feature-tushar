@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -15,12 +15,13 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import { useHistory } from 'react-router-dom';
-import moment from 'moment';
 import InputField from 'src/components/Helpers/InputField';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const {
-    state: { user,resources }
+    state: { user, resources }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -58,7 +59,7 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
             }
             setInitialData({
               fields: fields,
-              values: isClone ? { ...getObjKeysWithValues(tempData, fields, true, user) } :getObjKeysWithValues(tempData, fields)
+              values: isClone ? { ...getObjKeysWithValues(tempData, fields, true, user) } : getObjKeysWithValues(tempData, fields)
             });
           })
           .catch((error) => {
@@ -126,9 +127,9 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
 
   function validate(values) {
     const errors = {};
-    const startDate = moment(values?.startDate);
-    const endDate = moment(values?.endDate);
-    if (endDate.diff(startDate, 'days') < 0) {
+    const startDate = dayjs(values?.startDate);
+    const endDate = dayjs(values?.endDate);
+    if (endDate.diff(startDate, 'day') < 0) {
       errors['endDate'] = 'End Date can not be less than the Start date';
     }
     return errors;
@@ -163,13 +164,12 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${
-                  id
-                    ? isClone
-                      ? `Clone - ${cloneHeading}`
-                      : `Update ${initialData.values?.planningNumber ? `(${initialData.values?.planningNumber})` : ''}`
-                    : `Create ${resources?.planning?.titleSingular}`
-                }`}
+                title={`${id
+                  ? isClone
+                    ? `Clone - ${cloneHeading}`
+                    : `Update ${initialData.values?.planningNumber ? `(${initialData.values?.planningNumber})` : ''}`
+                  : `Create ${resources?.planning?.titleSingular}`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -178,7 +178,7 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                <InputField
+                  <InputField
                     errors={errors}
                     values={values}
                     setFieldValue={setFieldValue}
@@ -190,33 +190,26 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
-                  disabled={submitting}
+                <ThemeButton
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
+                  buttonType='transparent'
                 >
                   Cancel
-                </Button>
-                <Button
-                  disabled={loading || submitting}
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  type="submit"
+                </ThemeButton>
+                <ThemeButton
                   onClick={submitForm}
-                  endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                  disabled={loading || submitting}
+                  isLoading={submitting}
+                  buttonType='theme'
                 >
-                  {' '}
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

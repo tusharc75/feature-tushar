@@ -1,9 +1,8 @@
-import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@material-ui/core';
+import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { camelCase, capitalize, isArray, isNumber, isString } from 'lodash';
-import moment from 'moment';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { dateFormat, UnCamelCase } from 'src/constants/helpers';
+import { displayDate, UnCamelCase } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 
 const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
@@ -14,8 +13,8 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
   return (
     <div className="p-3">
       {changes?.length ? (
-        <TableContainer component={Paper} elevation={0} className="">
-          <Table aria-label="customized table" className="mb-3 [border:1px_solid_var(--common-border-color)]">
+        <TableContainer component={Paper} elevation={0} className="border">
+          <Table aria-label="customized table">
             <TableHead>
               <TableRow>
                 <TableCell scope="col" component={'th'} className="min-w-[200px]">
@@ -38,7 +37,7 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                       <TableCell data-th="Old Value">
                         {data?.oldValue || data?.oldValue === 0 ? (
                           data?.type === 'date' ? (
-                            moment(data?.oldValue).format(dateFormat)
+                            displayDate(data?.oldValue)
                           ) : data?.type === 'gpsLocation' ? (
                             data?.oldValue?.locationName || <NoDataCell />
                           ) : data?.type === 'dropDown' && data?.lookup ? (
@@ -47,7 +46,9 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                               title={data?.oldValue?.label}
                               onClick={() => {
                                 if (permissions[`${camelCase(data?.lookupResource)}`]?.isRead)
-                                  window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path || `/${camelCase(data?.lookupResource)}/detail`}/${data?.oldValue?.value}`);
+                                  window.open(
+                                    `${routes[`${camelCase(data?.lookupResource)}Detail`]?.path || `/${camelCase(data?.lookupResource)}/detail`}/${data?.oldValue?.value}`
+                                  );
                               }}
                             >
                               {data?.oldValue?.label}
@@ -60,15 +61,19 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                                   title={oldValue?.label}
                                   onClick={() => {
                                     if (permissions[`${camelCase(data?.lookupResource)}`]?.isRead)
-                                      window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path || `/${camelCase(data?.lookupResource)}/detail`}/${oldValue?.value}`);
+                                      window.open(
+                                        `${routes[`${camelCase(data?.lookupResource)}Detail`]?.path || `/${camelCase(data?.lookupResource)}/detail`}/${oldValue?.value}`
+                                      );
                                   }}
                                 >
                                   {oldValue?.label}
                                 </p>
                               );
                             })
+                          ) : isString(data?.oldValue) || isNumber(data?.oldValue) ? (
+                            data?.oldValue
                           ) : (
-                            isString(data?.oldValue) || isNumber(data?.oldValue) ? data?.oldValue : <NoDataCell />
+                            <NoDataCell />
                           )
                         ) : (
                           <NoDataCell />
@@ -77,7 +82,7 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                       <TableCell data-th="New Value">
                         {data?.newValue || data?.newValue === 0 ? (
                           data?.type === 'date' ? (
-                            moment(data?.newValue).format(dateFormat)
+                            displayDate(data?.newValue)
                           ) : data?.type === 'gpsLocation' ? (
                             data?.newValue?.locationName || <NoDataCell />
                           ) : data?.type === 'dropDown' && data?.lookup ? (
@@ -86,7 +91,9 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                               title={data?.newValue?.label}
                               onClick={() => {
                                 if (permissions[`${camelCase(data?.lookupResource)}`]?.isRead)
-                                  window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path || `/${camelCase(data?.lookupResource)}/detail`}/${data?.newValue?.value}`);
+                                  window.open(
+                                    `${routes[`${camelCase(data?.lookupResource)}Detail`]?.path || `/${camelCase(data?.lookupResource)}/detail`}/${data?.newValue?.value}`
+                                  );
                               }}
                             >
                               {data?.newValue?.label}
@@ -99,10 +106,11 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                                   title={newValue?.label}
                                   onClick={() => {
                                     if (permissions[`${camelCase(data?.lookupResource)}`]?.isRead)
-                                      window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path || `/${camelCase(data?.lookupResource)}/detail`}/${newValue?.value}`);
+                                      window.open(
+                                        `${routes[`${camelCase(data?.lookupResource)}Detail`]?.path || `/${camelCase(data?.lookupResource)}/detail`}/${newValue?.value}`
+                                      );
                                   }}
                                 >
-
                                   {newValue?.label}
                                 </p>
                               );
@@ -121,8 +129,10 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                                 </Typography>
                               );
                             })
+                          ) : isString(data?.newValue) || isNumber(data?.oldValue) ? (
+                            data?.newValue
                           ) : (
-                            isString(data?.newValue) || isNumber(data?.oldValue) ? data?.newValue : <NoDataCell />
+                            <NoDataCell />
                           )
                         ) : (
                           <NoDataCell />
@@ -135,11 +145,9 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
             </TableBody>
           </Table>
         </TableContainer>
-      ) : (
-        null
-      )}
+      ) : null}
       {operations?.length ? (
-        <TableContainer component={Paper}>
+        <TableContainer component={Paper} elevation={0} className="border">
           <Table aria-label="customized table">
             <TableHead>
               <TableRow>
@@ -156,7 +164,7 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                     <TableCell>{`${o?.label} (${UnCamelCase(o?.referenceType)})`}</TableCell>
                     <TableCell>
                       {o?.changes?.length ? (
-                        <TableContainer component={Paper}>
+                        <TableContainer component={Paper} elevation={0} className="border">
                           <Table aria-label="customized table">
                             <TableHead>
                               <TableRow>
@@ -174,14 +182,16 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                                       <TableCell>
                                         {data?.oldValue || data?.oldValue === 0 ? (
                                           data?.type === 'date' ? (
-                                            moment(data?.oldValue).format(dateFormat)
+                                            displayDate(data?.oldValue)
                                           ) : data?.type === 'dropDown' && data?.lookup ? (
                                             <p
                                               className={`${permissions[`${camelCase(data?.lookupResource)}`]?.isRead ? 'link' : ''} text-truncate`}
                                               title={data?.oldValue?.label}
                                               onClick={() => {
                                                 if (permissions[`${camelCase(data?.lookupResource)}`]?.isRead)
-                                                  window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path || `/${camelCase(data?.lookupResource)}/detail`}/${data?.oldValue?.value}`);
+                                                  window.open(
+                                                    `${routes[`${camelCase(data?.lookupResource)}Detail`]?.path || `/${camelCase(data?.lookupResource)}/detail`}/${data?.oldValue?.value}`
+                                                  );
                                               }}
                                             >
                                               {data?.oldValue?.label}
@@ -196,14 +206,16 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                                       <TableCell>
                                         {data?.newValue || data?.newValue === 0 ? (
                                           data?.type === 'date' ? (
-                                            moment(data?.newValue).format(dateFormat)
+                                            displayDate(data?.newValue)
                                           ) : data?.type === 'dropDown' && data?.lookup ? (
                                             <p
                                               className={`${permissions[`${camelCase(data?.lookupResource)}`]?.isRead ? 'link' : ''} text-truncate`}
                                               title={data?.newValue?.label}
                                               onClick={() => {
                                                 if (permissions[`${camelCase(data?.lookupResource)}`]?.isRead)
-                                                  window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path || `/${camelCase(data?.lookupResource)}/detail`}/${data?.newValue?.value}`);
+                                                  window.open(
+                                                    `${routes[`${camelCase(data?.lookupResource)}Detail`]?.path || `/${camelCase(data?.lookupResource)}/detail`}/${data?.newValue?.value}`
+                                                  );
                                               }}
                                             >
                                               {data?.newValue?.label}

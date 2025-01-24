@@ -1,7 +1,6 @@
 import React, { useState, useEffect, Fragment, useContext } from 'react';
-import Box from '@material-ui/core/Box';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid2';
 import { useParams, useHistory } from 'react-router-dom';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { Formik, Form } from 'formik';
@@ -16,7 +15,8 @@ import { BiArrowBack } from 'react-icons/bi';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import FormTypes from '../../components/Helpers/FormTypes';
 import { useData } from '../../StateProvider/Provider';
-import { TextField } from '@material-ui/core';
+import { TextField } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ProductBuilderSchema = object().shape({
   name: string().min(3, 'Too Short!').max(50, 'Too Long').required('name is required')
@@ -53,9 +53,9 @@ const CreateProductBuilder = () => {
       });
   };
 
-  const handleSave = () => { };
+  const handleSave = () => {};
 
-  const refreshProducts = (data) => { };
+  const refreshProducts = (data) => {};
 
   const [isAddNewProduct, setIsAddNewProduct] = useState(false);
   const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
@@ -69,11 +69,11 @@ const CreateProductBuilder = () => {
   return (
     <Box className="main-container-v1">
       <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
+        <Grid size={{md:4, sm:11, xs:10}}>
           <CustomBreadCrumbs
             routes={[
               {
-                title: resources?.productBuilde?.titlePlural,
+                title: resources?.productBuilder?.titlePlural,
                 path: routes.productBuilder.path
               },
               {
@@ -82,7 +82,7 @@ const CreateProductBuilder = () => {
             ]}
           />
         </Grid>
-        <Grid item md={8} sm={1} xs={2}></Grid>
+        <Grid size={{md:8, sm:1, xs:2}}></Grid>
       </Grid>
       <CustomContainer>
         {initialValues ? (
@@ -91,10 +91,11 @@ const CreateProductBuilder = () => {
               <Form>
                 <Box p={1}>
                   <Grid container spacing={1}>
-                    <Grid item xs={12} sm={3}>
+                    <Grid size={{xs:12, sm:3}}>
                       <TextField
                         fullWidth
                         margin="dense"
+                        size="small"
                         type="text"
                         label="Name"
                         name="name"
@@ -103,7 +104,7 @@ const CreateProductBuilder = () => {
                         value={values['name']}
                       />
                     </Grid>
-                    <Grid item xs={12} sm={3}>
+                    <Grid size={{xs:12, sm:3}}>
                       <Box mt={1}>
                         <FormTypes
                           values={values}
@@ -122,12 +123,10 @@ const CreateProductBuilder = () => {
                         />
                       </Box>
                     </Grid>
-                    <Grid item xs={12} sm={6} container justify="flex-end">
+                    <Grid size={{xs:12, sm:6}} container justifyContent="flex-end">
                       <Box ml={1}>
-                        <Button
-                          size="small"
-                          color="primary"
-                          variant="contained"
+                        <ThemeButton
+                          buttonType="theme"
                           onClick={() =>
                             history.push({
                               pathname: routes.productBuilder.path
@@ -136,7 +135,7 @@ const CreateProductBuilder = () => {
                           startIcon={<BiArrowBack />}
                         >
                           Back
-                        </Button>
+                        </ThemeButton>
                       </Box>
                     </Grid>
                   </Grid>
@@ -151,30 +150,26 @@ const CreateProductBuilder = () => {
                 <TabPanel value={tabIndex} index={0}>
                   <Fragment>
                     <Box p={1}>
-                      <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
+                      <Grid size={{xs:12, md:6, sm:6}} className="d-flex align-items-center gap-1">
                         {permissions.isUpdate && (
                           <>
-                            <Button
-                              variant="contained"
-                              size="small"
-                              color="primary"
+                            <ThemeButton
+                              buttonType="theme"
                               onClick={() => {
                                 setIsAddNewProduct(true);
                               }}
                             >
                               New
-                            </Button>
-                            <Button
+                            </ThemeButton>
+                            <ThemeButton
                               className="ml-2"
-                              variant="contained"
-                              size="small"
-                              color="primary"
+                              buttonType="theme"
                               onClick={() => {
                                 setIsAddExistingProduct(true);
                               }}
                             >
                               Add Existing
-                            </Button>
+                            </ThemeButton>
                           </>
                         )}
                       </Grid>
@@ -222,30 +217,26 @@ const CreateProductBuilder = () => {
                 <TabPanel value={tabIndex} index={2}>
                   <Fragment>
                     <Box p={1}>
-                      <Grid item xs={6} className="d-flex align-items-center gap-1">
+                      <Grid size={{xs:6}} className="d-flex align-items-center gap-1">
                         {permissions.isUpdate && (
                           <>
-                            <Button
-                              variant="contained"
-                              size="small"
-                              color="primary"
+                            <ThemeButton
+                              buttonType="theme"
                               onClick={() => {
                                 setIsAddNewProduct(true);
                               }}
                             >
                               New
-                            </Button>
-                            <Button
+                            </ThemeButton>
+                            <ThemeButton
                               className="ml-2"
-                              variant="contained"
-                              size="small"
-                              color="primary"
+                              buttonType="theme"
                               onClick={() => {
                                 setIsAddExistingProduct(true);
                               }}
                             >
                               Add Existing
-                            </Button>
+                            </ThemeButton>
                           </>
                         )}
                       </Grid>

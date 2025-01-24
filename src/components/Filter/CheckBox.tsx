@@ -1,9 +1,9 @@
-import { Checkbox, FormControlLabel } from '@material-ui/core';
+import { Checkbox, FormControlLabel } from '@mui/material';
 
 const CheckBox = ({ fieldData, deepFilters, setDeepFilters, sidebarIcon = null }) => {
   return (
     <>
-      <div className="sticky top-0 z-10 flex min-h-[64px] items-center justify-between bg-[var(--dark-primary,white)] py-[--py,_16px]">
+      <div className="sticky top-0 z-10  flex min-h-[64px] items-center justify-between bg-[var(--dark-primary,white)] py-[--py,_16px]">
         <div className="flex items-center gap-2">
           {sidebarIcon}
           <p className="text-[16px] font-medium leading-[19px]">{fieldData?.fieldLabel}</p>
@@ -24,7 +24,6 @@ const CheckBox = ({ fieldData, deepFilters, setDeepFilters, sidebarIcon = null }
                     setDeepFilters([...deepFilters?.filter((d) => d?.field !== fieldData?.fieldName)]);
                   }
                 }}
-                className="!text-[--new-theme-color] dark:!text-gray-200"
               />
             }
             label={<span className="!text-[14px] !font-medium !leading-[17px] !text-[#6C757D] dark:!text-gray-200">Yes</span>}
@@ -44,7 +43,6 @@ const CheckBox = ({ fieldData, deepFilters, setDeepFilters, sidebarIcon = null }
                   }
                 }}
                 size="small"
-                className="!text-[--new-theme-color] dark:!text-gray-200"
               />
             }
             label={<span className="!text-[14px] !font-medium !leading-[17px] !text-[#6C757D] dark:!text-gray-200">No</span>}

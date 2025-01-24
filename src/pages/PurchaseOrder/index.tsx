@@ -1,8 +1,8 @@
-import { Box, Chip, MenuItem, TextField } from '@material-ui/core';
-import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, Chip, MenuItem, TextField } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/Delete';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
+import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
@@ -287,62 +287,17 @@ const PurchaseOrder = () => {
     fetchPurchaseOrder();
   };
 
-  const LeftSideContents = () => {
-    return (
-      <>
-        <Autocomplete
-          style={{ minWidth: '200px', flexGrow: 1 }}
-          className="md:max-w-[250px]"
-          options={warehouseOptions}
-          getOptionLabel={(option: any) => option.optionLabel}
-          getOptionSelected={(option: any, val) => option.optionValue === val}
-          value={
-            warehouseOptions.filter((data) => data.optionValue === warehouse).length
-              ? warehouseOptions.filter((data) => data.optionValue === warehouse)[0]
-              : ''
-          }
-          onChange={(e, val) => {
-            dispatch({ type: 'selection', selectedRecords: [] });
-            setWarehouse(val && val.optionValue ? val.optionValue : '');
-          }}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              margin="none"
-              size="small"
-              name="plant"
-              label={`${resources?.warehouse?.titleSingular}`}
-              variant="outlined"
-              fullWidth
-            />
-          )}
-        />
-        {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
-        {fromSalesOrder && (
-          <Chip
-            className="ml-3"
-            color="primary"
-            label={`Sales Order : ${fromSalesOrder?.salesOrderNo}`}
-            onDelete={() => {
-              setFromSalesOrder(null);
-            }}
-          />
-        )}
-      </>
-    );
-  };
-
   const ActionMenuItems = () => {
     return (
       <>
         <MenuItem
           disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
           onClick={() => {
-            if (selectedRecords.length === 1){
+            if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-              }else{
-                setDeleteRecord(null)
-              }
+            } else {
+              setDeleteRecord(null);
+            }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -379,7 +334,21 @@ const PurchaseOrder = () => {
           onToggle={handleFilter}
           selectedType={selectedType}
           setSelectedType={setSelectedType}
-          leftSideContents={<LeftSideContents />}
+          leftSideContents={
+            <LeftSideContents
+              {...{
+                warehouseOptions,
+                warehouse,
+                dispatch,
+                setWarehouse,
+                resources,
+                referenceType,
+                updateQueryParams,
+                fromSalesOrder,
+                setFromSalesOrder
+              }}
+            />
+          }
           searchValue={search}
           onSearch={handleSearch}
           // rightSideContents
@@ -441,3 +410,58 @@ const PurchaseOrder = () => {
 };
 
 export default PurchaseOrder;
+
+const LeftSideContents = ({
+  warehouseOptions,
+  warehouse,
+  dispatch,
+  setWarehouse,
+  resources,
+  referenceType,
+  updateQueryParams,
+  fromSalesOrder,
+  setFromSalesOrder
+}) => {
+  return (
+    <>
+      <Autocomplete
+        style={{ minWidth: '200px', flexGrow: 1 }}
+        className="md:max-w-[250px]"
+        options={warehouseOptions}
+        getOptionLabel={(option: any) => option.optionLabel || ''}
+        isOptionEqualToValue={(option: any, val) => option.optionValue === val}
+        value={
+          warehouseOptions.filter((data) => data.optionValue === warehouse).length
+            ? warehouseOptions.filter((data) => data.optionValue === warehouse)[0]
+            : null
+        }
+        onChange={(e, val) => {
+          dispatch({ type: 'selection', selectedRecords: [] });
+          setWarehouse(val && val.optionValue ? val.optionValue : '');
+        }}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            margin="none"
+            size="small"
+            name="plant"
+            label={`${resources?.warehouse?.titleSingular}`}
+            variant="outlined"
+            fullWidth
+          />
+        )}
+      />
+      {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
+      {fromSalesOrder && (
+        <Chip
+          className="ml-3"
+          color="primary"
+          label={`Sales Order : ${fromSalesOrder?.salesOrderNo}`}
+          onDelete={() => {
+            setFromSalesOrder(null);
+          }}
+        />
+      )}
+    </>
+  );
+};

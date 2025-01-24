@@ -1,8 +1,7 @@
-import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@material-ui/core';
-import { MoreVert } from '@material-ui/icons';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
+import { MoreVert } from '@mui/icons-material';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { Box, Button, Card, CardContent, IconButton, Menu, MenuItem, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useEffect, useState } from 'react';
 import { BiCustomize, BiPhone } from 'react-icons/bi';
 import { BsBuilding } from 'react-icons/bs';
@@ -77,43 +76,35 @@ export default function LeadAccordionInUserDetailPage({ leads, expanded = true, 
     <>
       <Accordion expanded={expandLead} className=" accordLead" onChange={(event) => setExpandLead(!expandLead)}>
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
-          <Grid container className="pos_rel">
-            <Grid item xs={8}>
-              <Box display="flex">
-                <Box>
-                  <IconButton size="small">{expandLead === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
-                </Box>
-                <Box padding="5px">
-                  <Typography variant="subtitle2">Leads ({leads?.length ? leads.length : 0})</Typography>
-                </Box>
-              </Box>
-            </Grid>
-            <Grid item xs={4} container justify="flex-end" alignItems="center">
-              <Typography variant="subtitle2">
-                {isAllowedToEdit && (
-                  <>
-                    {permissions?.lead?.isCreate && (
-                      <>
-                        <IconButton aria-haspopup="true" color="primary" size="small" onClick={handleOpenMenu}>
-                          <MoreVert />
-                        </IconButton>
-                        <Menu id="menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
-                          <MenuItem
-                            onClick={() => {
-                              setShowCreateLeadDialog(true);
-                              handleCloseMenu();
-                            }}
-                          >
-                            Create New
-                          </MenuItem>
-                        </Menu>
-                      </>
-                    )}
-                  </>
-                )}
-              </Typography>
-            </Grid>
-          </Grid>
+          <div className="flex items-center justify-between">
+            <Typography variant="subtitle2">Leads ({leads?.length ? leads.length : 0})</Typography>
+            {isAllowedToEdit && permissions?.lead?.isCreate && (
+              <>
+                <IconButton
+                  aria-haspopup="true"
+                  color="primary"
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    handleOpenMenu(e);
+                  }}
+                >
+                  <MoreVert />
+                </IconButton>
+                <Menu id="menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
+                  <MenuItem
+                    onClick={() => {
+                      setShowCreateLeadDialog(true);
+                      handleCloseMenu();
+                    }}
+                  >
+                    Create New
+                  </MenuItem>
+                </Menu>
+              </>
+            )}
+          </div>
         </AccordionSummary>
         <AccordionDetails>
           <>
@@ -122,10 +113,10 @@ export default function LeadAccordionInUserDetailPage({ leads, expanded = true, 
                 {leads && leads?.length ? (
                   <Grid container spacing={1}>
                     {leads.slice(0, maxRecordsToShow).map((obj, index) => (
-                      <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index}>
+                      <Grid size={{ xs: 12, sm: 12, md: recordsPerLineInLargeScreen }} key={index}>
                         <Card className="detailCard  card-v1" variant="outlined">
                           <CardContent className="card-link">
-                            <Grid item xs={12} sm={8}>
+                            <Grid size={{ xs: 12, sm: 8 }}>
                               {hasAccessToEntity(obj.entity) ? (
                                 obj.entity === selectedEntity ? (
                                   <Link className="link" target="_blank" rel="noopener noreferrer" to={`${routes.leadDetail.path}/${obj._id}`}>
@@ -149,7 +140,7 @@ export default function LeadAccordionInUserDetailPage({ leads, expanded = true, 
                                   </Link>
                                 )
                               ) : (
-                                <span className="d-flex gap-2 align-items-center">
+                                <span className="d-flex align-items-center gap-2">
                                   <Typography>
                                     {obj.firstName} {obj.lastName}
                                   </Typography>{' '}
@@ -161,7 +152,7 @@ export default function LeadAccordionInUserDetailPage({ leads, expanded = true, 
                             </Grid>
 
                             <Grid container>
-                              <Grid item xs={12} sm={12} md={12}>
+                              <Grid size={{ xs: 12, sm: 12, md: 12 }}>
                                 {obj.firstName ? (
                                   <DisplayData
                                     label="Name"
@@ -172,13 +163,13 @@ export default function LeadAccordionInUserDetailPage({ leads, expanded = true, 
                                   ''
                                 )}
                               </Grid>
-                              <Grid item xs={12} sm={12} md={12}>
+                              <Grid size={{ xs: 12, sm: 12, md: 12 }}>
                                 {obj.status ? <DisplayData label="Status" icon={<BiCustomize size={15} />} value={obj?.status ?? ''} /> : ''}
                               </Grid>
-                              <Grid item xs={12} sm={12} md={12}>
+                              <Grid size={{ xs: 12, sm: 12, md: 12 }}>
                                 {obj.company ? <DisplayData label="Company" icon={<BsBuilding size={15} />} value={obj.company ?? ''} /> : ''}
                               </Grid>
-                              <Grid item xs={12} sm={12} md={12}>
+                              <Grid size={{ xs: 12, sm: 12, md: 12 }}>
                                 {obj.phone ? <DisplayData label="phone" icon={<BiPhone size={15} />} value={obj.phone ?? ''} /> : ''}
                               </Grid>
                             </Grid>

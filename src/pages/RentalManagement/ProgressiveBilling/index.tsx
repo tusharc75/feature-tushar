@@ -1,4 +1,5 @@
-import { Box, Button, Grid, IconButton } from '@material-ui/core';
+import { Box, IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer, gridFilterParser } from 'src/components/CustomReactTable';
@@ -12,13 +13,13 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ViewBillingDialog from './ViewBillingDialog';
 import { camelCase } from 'lodash';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { deleteDisable } from 'src/constants/messageHelpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ProgressiveBilling = ({ rentalId, allowCreateInvoice }) => {
-
   const renderedFrom = camelCase(sidebarResource.invoice);
 
   const toastConfig = useContext(CustomToastContext);
@@ -42,8 +43,7 @@ const ProgressiveBilling = ({ rentalId, allowCreateInvoice }) => {
       const response: any = await axiosInstance().get(`${rentalManagement.api}/${rentalId}`);
       data = response?.data?.data;
       setRentalManagementData(data);
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   useEffect(() => {
@@ -208,27 +208,27 @@ const ProgressiveBilling = ({ rentalId, allowCreateInvoice }) => {
 
   return (
     <>
-      {rentalManagementData ?
+      {rentalManagementData ? (
         <>
           {allowCreateInvoice && permissions?.invoice?.isCreate && (
             <Box display="flex" justifyContent="flex-end">
               <Box display="flex" alignItems="center" pt={2} pr={2}>
-                <HtmlTooltip title={rentalManagementData?.allowToCreateBill ? '' : 'Invoice can be created only once item delivered or service started'}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
+                <HtmlTooltip
+                  title={rentalManagementData?.allowToCreateBill ? '' : 'Invoice can be created only once item delivered or service started'}
+                >
+                  <ThemeButton
+                    buttonType="theme"
                     onClick={() => setCreateBillDialog({ open: true })}
                     aria-controls="action-menu"
                     disabled={!rentalManagementData?.allowToCreateBill}
                   >
                     Create Billing
-                  </Button>
+                  </ThemeButton>
                 </HtmlTooltip>
               </Box>
             </Box>
           )}
-          <Grid item xs={12} md={12} sm={12} className="mt-3">
+          <Grid size={{xs:12, md:12, sm:12}} className="mt-3">
             {columns ? (
               <CustomReactTable
                 height={'calc(100vh - 250px)'}
@@ -246,9 +246,12 @@ const ProgressiveBilling = ({ rentalId, allowCreateInvoice }) => {
               </Box>
             )}
           </Grid>
-        </> : <Box p={2} height={500}>
+        </>
+      ) : (
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        </Box>
+      )}
       {createBillDialog.open && (
         <CreateBillingDialog
           rentalManagementData={rentalManagementData}

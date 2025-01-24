@@ -1,17 +1,17 @@
-import Avatar from '@material-ui/core/Avatar';
-import Box from '@material-ui/core/Box';
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
+import Avatar from '@mui/material/Avatar';
+import Box from '@mui/material/Box';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Grid from '@mui/material/Grid2';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import { makeStyles } from '@mui/styles';
 import axios, { CancelTokenSource } from 'axios';
-import moment from 'moment';
 import React, { useEffect } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import { PostComment } from '../../../axios/activity';
+import { Theme } from '@mui/material';
+import { displayDateTime } from 'src/constants/helpers';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   marginLeft: {
     marginLeft: 10
   },
@@ -108,15 +108,15 @@ export const Comment = ({ referenceId }) => {
         comment.map((element, index) => (
           <Box key={index} mt={1}>
             <Grid container className={`${classes.comments_wrapper}`}>
-              <Grid item className={` ${classes.comment_avatar}`}>
+              <Grid className={` ${classes.comment_avatar}`}>
                 <Avatar className={` ${avatarClass} `}>{element.firstName[0] + element.lastName[0]}</Avatar>
               </Grid>
-              <Grid item className={`${classes.comments_container} `}>
+              <Grid className={`${classes.comments_container} `}>
                 <Typography variant="body2" className={classes.boldFont}>
                   {element.firstName + ' ' + element.lastName}
                   <Typography variant="caption" className={classes.marginLeft}>
                     {' '}
-                    {moment(element.createdAt).format('MMM DD YYYY hh:mm A')}
+                    {displayDateTime(element.createdAt, 'MMM DD YYYY hh:mm A')}
                   </Typography>
                 </Typography>
                 <Typography variant="body2">{element.content}</Typography>
@@ -127,7 +127,7 @@ export const Comment = ({ referenceId }) => {
       <Box pt={3}>
         <div className="flex flex-wrap items-start gap-2">
           <Avatar className={` ${avatarClass} `}>{currentUser && currentUser.firstName[0] + currentUser.lastName[0]} </Avatar>
-          <div className=" space-y-3 flex-grow">
+          <div className=" flex-grow space-y-3">
             <TextField
               id="outlined-multiline-static"
               label="Comment"
@@ -138,9 +138,9 @@ export const Comment = ({ referenceId }) => {
               onChange={handleChange}
               variant="outlined"
             />
-            <Button color="primary" size="small" variant="contained" onClick={postComment}>
+            <ThemeButton buttonType="theme" onClick={postComment}>
               Send
-            </Button>
+            </ThemeButton>
           </div>
         </div>
       </Box>

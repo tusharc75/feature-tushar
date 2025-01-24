@@ -1,13 +1,12 @@
-import { Box, Typography } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
+import { Box, Typography } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Grid from '@mui/material/Grid2';
 import { sortBy } from 'lodash';
-import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { dateTimeFormat, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../../constants/helpers';
+import { displayDateTime, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../../constants/helpers';
 import CommonSkeleton from '../../Helpers/CommonSkeleton';
 
 const displayColumns = ['qty', 'productName', 'productDescription', 'unit', 'responseDate', 'status'];
@@ -61,38 +60,36 @@ const ProductGridSupplierAskPrice = (props) => {
     <>
       <Box padding={2} style={{ border: '1px solid #D4D6D7', borderRadius: 4 }}>
         <Grid container>
-          <Grid item xs={12} sm={3} md={3} container justify="flex-start">
+          <Grid size={{ xs: 12, sm: 3, md: 3 }} container justifyContent="flex-start">
             {productData?.supplierContact?.optionLabel && (
-              <Grid item xs={12} sm={12} md={12}>
+              <Grid size={{ xs: 12, sm: 12, md: 12 }}>
                 <Typography variant="subtitle2">{`Supplier Contact : ${productData?.supplierContact?.optionLabel}`}</Typography>
               </Grid>
             )}
           </Grid>
-          <Grid item xs={12} sm={3} md={3} container justify="flex-start">
+          <Grid size={{ xs: 12, sm: 3, md: 3 }} container justifyContent="flex-start">
             {productData?.requestDate && (
-              <Grid item xs={12} sm={12} md={12}>
-                <Typography variant="subtitle2">{`Request Date : ${moment(productData?.requestDate)?.format(dateTimeFormat)}`}</Typography>
+              <Grid size={{ xs: 12, sm: 12, md: 12 }}>
+                <Typography variant="subtitle2">{`Request Date : ${displayDateTime(productData?.requestDate)}`}</Typography>
               </Grid>
             )}
             {productData?.responseDate && (
-              <Grid item xs={12} sm={12} md={12}>
-                <Typography variant="subtitle2">{`Response Date : ${moment(productData?.responseDate)?.format(dateTimeFormat)}`}</Typography>
+              <Grid size={{ xs: 12, sm: 12, md: 12 }}>
+                <Typography variant="subtitle2">{`Response Date : ${displayDateTime(productData?.responseDate)}`}</Typography>
               </Grid>
             )}
           </Grid>
           {productData?.status === 'Submit' && (
-            <Grid item xs={12} sm={6} md={6} container justify="flex-end">
+            <Grid size={{ xs: 12, sm: 6, md: 6 }} container justifyContent="flex-end">
               <Box ml={1} mt={1}>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType="theme"
                   onClick={() => {
                     handleAdd(productData?._id);
                   }}
-                  variant="contained"
                 >
                   Apply
-                </Button>
+                </ThemeButton>
               </Box>
               <Box ml={1} mt={1}>
                 <DeleteButton

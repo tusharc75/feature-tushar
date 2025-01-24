@@ -1,17 +1,19 @@
-import { Box, Button } from '@material-ui/core';
+import { Box } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
-import { ACCORDION_TYPE, CollapsibleWrapper } from 'src/pages/ScheduleAndDispatch/Scheduler/helper';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { SchedularComponentProps } from 'src/pages/ScheduleAndDispatch/Scheduler/types';
 
-const AddTechnicians = ({ setSelectedTechnicians, selectedServices, isExpand, resources, handleOpen, submitLoad, selectedWarehouse }) => {
+const AddTechnicians = ({ schedularState }: SchedularComponentProps) => {
+  const { selectedServices, selectedWarehouse, loading, setSelectedTechnicians, setActiveTab, getTabData, toastConfig } = schedularState;
+  const tabData = useMemo(() => getTabData('technicians'), [getTabData]);
+
   const renderedFrom = `${sidebarResource?.scheduleAndDispatch}_${sidebarResource.employeeMaster}`;
-  const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, filters, sorting, selectedRecords } = state;
   const { generateColumns } = useColumns();
@@ -30,15 +32,15 @@ const AddTechnicians = ({ setSelectedTechnicians, selectedServices, isExpand, re
 
   const handleAdd = () => {
     setSelectedTechnicians(selectedRecords);
-    handleOpen(ACCORDION_TYPE.customerDetail);
+    setActiveTab('customerDetail');
   };
 
   useEffect(() => {
-    if (submitLoad || selectedWarehouse) {
+    if (loading || selectedWarehouse) {
       setSelectedTechnicians([]);
       dispatch({ type: 'selection', selectedRecords: [] });
     }
-  }, [submitLoad, selectedWarehouse]);
+  }, [loading, selectedWarehouse]);
 
   const fetchGridColumns = async () => {
     axiosInstance()
@@ -99,45 +101,36 @@ const AddTechnicians = ({ setSelectedTechnicians, selectedServices, isExpand, re
     if (sorting?.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
-    return `${deepFilter}&filterType=and&filterByIdType=and`;
+    return `${deepFilter}`;
   };
 
   return (
     <>
-      <CollapsibleWrapper
-        index={3}
-        title={resources?.employeeMaster?.titlePlural}
-        isExpand={isExpand}
-        accordionType={ACCORDION_TYPE.technician}
-        handleOpen={handleOpen}
-      >
-        {columns ? (
-          selectedServices?.length ? (
-            <CustomReactTable
-              height={'calc(100vh - 393px)'}
-              columns={columns}
-              state={state}
-              dispatch={dispatch}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchData}
-              resource={sidebarResource.employeeMaster}
-            />
-          ) : null
-        ) : (
-          <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )}
+      <h6 className="mb-[18px] text-xl font-semibold leading-6">{tabData?.label}</h6>
+      {columns ? (
+        <CustomReactTable
+          height={'calc(100vh - 393px)'}
+          columns={columns}
+          state={state}
+          dispatch={dispatch}
+          renderedFrom={renderedFrom}
+          refreshGrid={fetchData}
+          resource={sidebarResource.employeeMaster}
+        />
+      ) : (
+        <Box p={2} className="h-[--loader-h]">
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
 
-        <div className="flex justify-end gap-2">
-          <Button variant="outlined" color="secondary" size="small" onClick={() => handleOpen(ACCORDION_TYPE.service)}>
-            Back
-          </Button>
-          <Button disabled={false} variant="contained" size="small" color="primary" onClick={() => handleAdd()}>
-            Save & Next
-          </Button>
-        </div>
-      </CollapsibleWrapper>
+      <div className="flex justify-end gap-2">
+        <ThemeButton buttonType="transparent" onClick={() => setActiveTab('services')}>
+          Back
+        </ThemeButton>
+        <ThemeButton disabled={false} buttonType="theme" onClick={() => handleAdd()}>
+          Save & Next
+        </ThemeButton>
+      </div>
     </>
   );
 };

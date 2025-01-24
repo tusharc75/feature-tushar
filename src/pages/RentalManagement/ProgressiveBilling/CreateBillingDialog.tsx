@@ -1,17 +1,14 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
+import Grid from '@mui/material/Grid2';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import { Box, Checkbox, Dialog, FormControlLabel, FormGroup, IconButton } from '@material-ui/core';
+import { Box, Checkbox, Dialog, FormControlLabel, FormGroup, IconButton } from '@mui/material';
 import { useData } from 'src/StateProvider/Provider';
 import { fetch_rental_cost_fields, fetch_rental_product_fields } from 'src/components/RentalManagment/helper';
 import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
-import moment from 'moment';
 import {
   CustomDialogTransition,
-  dateFormat,
   deliveryTicket,
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_TYPE,
@@ -20,7 +17,9 @@ import {
   MATERIAL_TYPE,
   ASSET_STATUS,
   sidebarResource,
-  getObjKeysWithValues
+  getObjKeysWithValues,
+  displayDate,
+  dateFormatToSend
 } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -28,31 +27,32 @@ import CustomReactTable, { useColumns, useTableReducer } from 'src/components/Cu
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
-import MomentUtils from '@date-io/moment';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { camelCase, isEqual, isObject, startCase } from 'lodash';
-import InfoIcon from '@material-ui/icons/InfoOutlined';
-import EditIcon from '@material-ui/icons/Edit';
+import { camelCase, isEqual, startCase } from 'lodash';
+import InfoIcon from '@mui/icons-material/InfoOutlined';
+import EditIcon from '@mui/icons-material/Edit';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { FiExternalLink } from 'react-icons/fi';
 import InvoiceDataDialog from 'src/pages/RentalManagement/ProgressiveBilling/InvoiceDataDialog';
+import CustomDatePicker from 'src/components/CustomDatePicker';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 const calculateServiceDays = (serviceLog: any[], startDate: any, endDate: any) => {
   const uniqueDates = new Set<string>();
   const logs = [];
-  const newStartDate = moment(startDate).startOf('day');
-  const newEndDate = moment(endDate).startOf('day');
+  const newStartDate = dayjs(startDate).startOf('day');
+  const newEndDate = dayjs(endDate).startOf('day');
   serviceLog?.forEach((log) => {
-    const logStartDate = moment(log.startDate).startOf('day');
-    const logEndDate = moment(log.endDate || endDate).startOf('day');
+    const logStartDate = dayjs(log.startDate).startOf('day');
+    const logEndDate = dayjs(log.endDate || endDate).startOf('day');
     let index = 0;
     let tempStartDate;
     let tempEndDate;
     let count = 0;
-    for (const m = moment(logStartDate); m.diff(logEndDate, 'days') <= 0; m.add(1, 'days')) {
+    for (let m = dayjs(logStartDate); m.diff(logEndDate, 'day') <= 0;) {
       if (m.isBetween(newStartDate, newEndDate, null, '[]')) {
         uniqueDates.add(m.format('MM/DD/YYYY'));
         if (index === 0) {
@@ -62,6 +62,7 @@ const calculateServiceDays = (serviceLog: any[], startDate: any, endDate: any) =
         count++;
         index++;
       }
+      m = m.add(1, 'day')
     }
     if (count) {
       logs.push({ startDate: tempStartDate, endDate: tempEndDate, actualJobDuration: count });
@@ -137,7 +138,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     setMaterialFields(JSON.parse(JSON.stringify(data)));
 
     var costFields = await fetch_rental_cost_fields(rentalManagementData?.currency, false);
-    setCostFields(costFields)
+    setCostFields(costFields);
 
     let newColumns = generateColumns(
       renderedFrom,
@@ -562,8 +563,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         if (e.type === MATERIAL_TYPE.serializedAsset) {
           assetList.push({
             asset: e._id,
-            startDate: moment(e.actualStartDate)?.format('MM/DD/YYYY'),
-            endDate: moment(endDate)?.format('MM/DD/YYYY')
+            startDate: dateFormatToSend(e.actualStartDate),
+            endDate: dateFormatToSend(endDate)
           });
         }
       });
@@ -592,8 +593,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         `${routes.rentalManagement.path}/${rentalManagementData?._id}/inventory/rental-unit-volume-utilization`,
         assetList?.map((d) => ({
           asset: d?._id,
-          fromDate: moment(d?.actualStartDate).format('MM/DD/YYYY'),
-          toDate: moment(endDate).format('MM/DD/YYYY')
+          fromDate: dateFormatToSend(d?.actualStartDate),
+          toDate: dateFormatToSend(endDate)
         }))
       );
     }
@@ -611,13 +612,13 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
         const product = invoicedProducts?.material?.find((p) => p._id === element._id);
 
-        const productStartDateTime = moment(new Date(element.actualStartDate));
-        const selectedEndDateTime = moment(new Date(endDate));
+        const productStartDateTime = dayjs(new Date(element.actualStartDate));
+        const selectedEndDateTime = dayjs(new Date(endDate));
 
         if (productStartDateTime.isAfter(selectedEndDateTime)) {
           element.invalidDate = true;
         } else if (product) {
-          const productEndDateTime = moment(new Date(product?.endDate));
+          const productEndDateTime = dayjs(new Date(product?.endDate));
           if (productEndDateTime.isAfter(selectedEndDateTime)) {
             element.invalidDate = true;
           } else {
@@ -626,7 +627,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         }
 
         if (element?.manualEndDate) {
-          const productManualEndDate = moment(new Date(element?.manualEndDate));
+          const productManualEndDate = dayjs(new Date(element?.manualEndDate));
           if (selectedEndDateTime.isAfter(productManualEndDate)) {
             values.actualEndDate = element?.manualEndDate;
           }
@@ -690,7 +691,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
               ?.data?.map((d) => ({
                 ...d,
                 type: MATERIAL_TYPE.other,
-                detail: moment(d?.date)?.format(dateFormat),
+                detail: displayDate(d?.date),
                 actualJobDuration: d?.DailyEvapBBLs,
                 parentId: element?._id
               }))
@@ -887,8 +888,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
   const handleCreateBill = (invoiceData = null) => {
     setIsSubmitting(true);
-    const material = []
-    const additionalCost = []
+    const material = [];
+    const additionalCost = [];
     rowsApplied?.forEach((element: any) => {
       if (element.type === MATERIAL_TYPE.service && element?.parentId) {
         if (!rowsApplied?.find((e) => e._id === element?.parentId)) {
@@ -901,33 +902,35 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           type: element.type,
           ...getObjKeysWithValues(element, costFields)
         });
-      }
-      else {
+      } else {
         const obj: any = {
           _id: element._id,
           type: element.type,
           parentId: element.parentId,
           materialId: element.materialId,
           ...getObjKeysWithValues(element, materialFields)
-        }
+        };
         if (element?.type === MATERIAL_TYPE.other) {
           obj.detail = element.detail;
         }
         material.push(obj);
       }
     });
-    axiosInstance().post(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing`, {
-      material: material,
-      additionalCost: additionalCost,
-      invoiceData: invoiceData
-    }).then(() => {
-      setIsSubmitting(false);
-      setOpenInvoiceDataDialog(false);
-      onSuccess();
-    }).catch((error) => {
-      setIsSubmitting(false);
-      toastConfig.setToastConfig(error);
-    });
+    axiosInstance()
+      .post(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing`, {
+        material: material,
+        additionalCost: additionalCost,
+        invoiceData: invoiceData
+      })
+      .then(() => {
+        setIsSubmitting(false);
+        setOpenInvoiceDataDialog(false);
+        onSuccess();
+      })
+      .catch((error) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
   };
 
   return (
@@ -936,83 +939,71 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         <CustomDialogHeader title={`Create Billing `} onClose={onClose} showRequiredLabel={false}></CustomDialogHeader>
         <CustomDialogContent>
           <Fragment>
-            <MuiPickersUtilsProvider utils={MomentUtils}>
-              <Grid container className={styles.rental_header_layout}>
-                <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center layout-for-tablet gap-1"></Grid>
-                <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
-                  <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                    <Grid style={{ display: 'flex', flex: 1, gap: '5px', alignItems: 'center' }} className={isMobile ? styles.content_box : ''}>
-                      <div>
-                        <FormGroup>
-                          <FormControlLabel
-                            control={<Checkbox checked={proRata} />}
-                            key="proRata"
-                            placeholder="Pro Rata"
-                            label="Pro Rata"
-                            style={{ whiteSpace: 'nowrap' }}
-                            onChange={() => {
-                              setProRata(!proRata);
+            <Grid container className={styles.rental_header_layout}>
+              <Grid size={{ xs: 12, md: 6, sm: 12 }} className="d-flex align-items-center layout-for-tablet gap-1"></Grid>
+              <Grid size={{ xs: 12, md: 6, sm: 12 }} className={styles.filter_side}>
+                <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
+                  <Grid style={{ display: 'flex', flex: 1, gap: '5px', alignItems: 'center' }} className={isMobile ? styles.content_box : ''}>
+                    <div>
+                      <FormGroup>
+                        <FormControlLabel
+                          control={<Checkbox checked={proRata} />}
+                          key="proRata"
+                          placeholder="Pro Rata"
+                          label="Pro Rata"
+                          style={{ whiteSpace: 'nowrap' }}
+                          onChange={() => {
+                            setProRata(!proRata);
+                          }}
+                        />
+                      </FormGroup>
+                    </div>
+                    <CustomDatePicker
+                      fullWidth
+                      size="small"
+                      value={endDate}
+                      name="endDate"
+                      label="Invoice Closing Date"
+                      onChange={(date: any) => {
+                        setEndDate(date ? date : null);
+                      }}
+                      margin="dense"
+                    />
+                    <Box style={{ display: 'flex', gap: '5px' }}>
+                      <HtmlTooltip
+                        title={
+                          selectedRecords?.length === 0
+                            ? 'Please select items to apply'
+                            : selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry)
+                              ? ''
+                              : !dayjs(endDate)?.isValid()
+                                ? 'Please select valid date'
+                                : ''
+                        }
+                      >
+                        <span>
+                          <ThemeButton
+                            buttonType="theme"
+                            disabled={
+                              isApplingDate ||
+                              !Boolean(
+                                selectedRecords?.length &&
+                                ((endDate && dayjs(endDate)?.isValid()) || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
+                              )
+                            }
+                            onClick={() => {
+                              handleApplyDate();
                             }}
-                          />
-                        </FormGroup>
-                      </div>
-                      <KeyboardDatePicker
-                        autoOk
-                        fullWidth
-                        size="small"
-                        variant="inline"
-                        inputVariant="outlined"
-                        // minDate={endDate || new Date()}
-                        value={endDate}
-                        name="endDate"
-                        label="Invoice Closing Date"
-                        onChange={(date: any) => {
-                          setEndDate(date ? date : null);
-                        }}
-                        format={dateFormat}
-                        InputLabelProps={{
-                          shrink: true
-                        }}
-                        margin="dense"
-                      />
-                      <Box style={{ display: 'flex', gap: '5px' }}>
-                        <HtmlTooltip
-                          title={
-                            selectedRecords?.length === 0
-                              ? 'Please select items to apply'
-                              : selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry)
-                                ? ''
-                                : !moment(endDate)?.isValid()
-                                  ? 'Please select valid date'
-                                  : ''
-                          }
-                        >
-                          <span>
-                            <Button
-                              variant="contained"
-                              color="primary"
-                              disabled={
-                                isApplingDate ||
-                                !Boolean(
-                                  selectedRecords?.length &&
-                                  ((endDate && moment(endDate)?.isValid()) || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
-                                )
-                              }
-                              size="small"
-                              onClick={() => {
-                                handleApplyDate();
-                              }}
-                            >
-                              Apply
-                            </Button>
-                          </span>
-                        </HtmlTooltip>
-                      </Box>
-                    </Grid>
-                  </Box>
-                </Grid>
+                          >
+                            Apply
+                          </ThemeButton>
+                        </span>
+                      </HtmlTooltip>
+                    </Box>
+                  </Grid>
+                </Box>
               </Grid>
-            </MuiPickersUtilsProvider>
+            </Grid>
           </Fragment>
           {columns ? (
             <Box zIndex={5} p={1}>
@@ -1042,17 +1033,14 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           )}
         </CustomDialogContent>
         <CustomDialogFooter>
-          <Button
-            type="button"
-            variant="outlined"
-            color="primary"
-            size="small"
+          <ThemeButton
+            buttonType="transparent"
             onClick={() => {
               onClose();
             }}
           >
             Cancel
-          </Button>
+          </ThemeButton>
           <HtmlTooltip
             title={
               rowsApplied?.length === 0
@@ -1063,11 +1051,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
             }
           >
             <span>
-              <Button
-                type="button"
-                variant="contained"
-                color="primary"
-                size="small"
+              <ThemeButton
+                buttonType="theme"
                 disabled={isSubmitting || rowsApplied?.length === 0 || rowsApplied.some((d) => d.invalidDate === true)}
                 onClick={() => {
                   if (invoiceResourceData?.policy?.rentalInvoiceFields?.length > 0) {
@@ -1078,7 +1063,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                 }}
               >
                 Create Bill
-              </Button>
+              </ThemeButton>
             </span>
           </HtmlTooltip>
         </CustomDialogFooter>

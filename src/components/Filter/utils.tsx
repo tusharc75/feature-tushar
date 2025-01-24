@@ -1,6 +1,7 @@
 import { startCase } from 'lodash';
 import { useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { displayDate } from 'src/constants/helpers';
 
 export const getLabel = (field: ColumnDefaultT, values: { field: string; term: string | any[] }[]) => {
   if (field?.type === 'date') {
@@ -9,9 +10,9 @@ export const getLabel = (field: ColumnDefaultT, values: { field: string; term: s
       let formattedMessage = '';
       found.forEach((d) => {
         if ((d.field as string).startsWith('from_')) {
-          formattedMessage += `From: ${d.term}`;
+          formattedMessage += `From: ${displayDate(d.term)}`;
         } else if ((d.field as string).startsWith('to_')) {
-          formattedMessage += `${found.length === 2 ? ', ' : ''}To: ${d.term}`;
+          formattedMessage += `${found.length === 2 ? ', ' : ''}To: ${displayDate(d.term)}`;
         }
       });
       return (
@@ -40,6 +41,17 @@ export const getLabel = (field: ColumnDefaultT, values: { field: string; term: s
         </HtmlTooltip>
       );
     }
+    if (typeof value === 'object' && !field?.multiple) {
+      if (Object.keys(value).length) {
+        return (
+          <HtmlTooltip title={startCase(value ? value['optionLabel'] : '')}>
+            <span>1</span>
+          </HtmlTooltip>
+        );
+      }
+      return '';
+    }
+
     if (typeof value === 'object' || Object.keys(value).length) {
       return Object.keys(value).length;
     }
@@ -75,6 +87,7 @@ type ColumnDefaultT = {
   resource: string;
   type: string;
   lookup?: boolean;
+  multiple?: boolean;
 };
 
 export const getErrors = (

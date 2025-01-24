@@ -1,11 +1,11 @@
-import { Box, Checkbox, Chip, FormControlLabel, IconButton, MenuItem, TextField } from '@material-ui/core';
-import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import HistoryIcon from '@material-ui/icons/History';
-import InfoIcon from '@material-ui/icons/Info';
-import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
-import SettingsIcon from '@material-ui/icons/Settings';
-import VisibilityOutlinedIcon from '@material-ui/icons/VisibilityOutlined';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, Checkbox, Chip, FormControlLabel, IconButton, MenuItem, TextField } from '@mui/material';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import HistoryIcon from '@mui/icons-material/History';
+import InfoIcon from '@mui/icons-material/Info';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import SettingsIcon from '@mui/icons-material/Settings';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -647,7 +647,7 @@ const LeftSideContents = ({
         options={plantOptions}
         getOptionLabel={(option: any) => option.optionLabel}
         disableClearable
-        getOptionSelected={(option: any, val) => option.optionValue === val}
+        isOptionEqualToValue={(option: any, val) => option.optionValue === val}
         value={
           plantOptions.filter((data) => data.optionValue === plantId).length ? plantOptions.filter((data) => data.optionValue === plantId)[0] : ''
         }
@@ -668,7 +668,7 @@ const LeftSideContents = ({
           className="md:max-w-[250px]"
           options={storageLocationOptions.filter((item) => item.warehouse === plantId)}
           getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-          getOptionSelected={(option: any, val) => option.optionValue === val}
+          isOptionEqualToValue={(option: any, val) => option.optionValue === val}
           value={
             storageLocationOptions.filter((data) => data.optionValue === storageLocationId).length
               ? storageLocationOptions.filter((data) => data.optionValue === storageLocationId)[0]

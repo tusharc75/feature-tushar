@@ -1,19 +1,21 @@
-import { Box, Grid, IconButton, makeStyles, Typography } from '@material-ui/core';
-import { Fragment, useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { useData } from 'src/StateProvider/Provider';
-import { Map } from '@material-ui/icons';
-import MapView from './MapView';
-import routes from 'src/components/Helpers/Routes';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import Activity from '../../components/Activity';
-import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
-import MetricsWithIcon from 'src/components/MetricsWithIcon';
+import { Map } from '@mui/icons-material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
+import { Box, IconButton, Theme, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { makeStyles } from '@mui/styles';
+import { Fragment, useState } from 'react';
 import { ImAttachment } from 'react-icons/im';
+import { useHistory } from 'react-router-dom';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import routes from 'src/components/Helpers/Routes';
+import MetricsWithIcon from 'src/components/MetricsWithIcon';
+import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
+import { useData } from 'src/StateProvider/Provider';
+import Activity from '../../components/Activity';
+import MapView from './MapView';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   cardBox: {
     borderRadius: '12px',
     border: '1px solid var(--common-border-color,#ebebeb)',
@@ -99,7 +101,7 @@ const CardView = ({ data, fields, setShowManageDialog, setDeleteRecord, setShowD
       <Grid container spacing={2}>
         {data.map((truckMaster, index) => {
           return (
-            <Grid item lg={4} md={4} sm={6} xs={12} key={index}>
+            <Grid size={{lg:4, md:4, sm:6, xs:12}} key={index}>
               <Box
                 className={`${classes.cardBox}`}
                 onClick={(e) => {
@@ -158,7 +160,7 @@ const CardView = ({ data, fields, setShowManageDialog, setDeleteRecord, setShowD
                         aria-label="Clone"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setShowManageDialog({open: true, isClone: true, idToClone:truckMaster?._id })
+                          setShowManageDialog({ open: true, isClone: true, idToClone: truckMaster?._id });
                         }}
                       >
                         <FileCopyIcon />
@@ -204,7 +206,7 @@ const CardView = ({ data, fields, setShowManageDialog, setDeleteRecord, setShowD
         {showActivity.open && <div className="backdrop-new-v1" onClick={() => setActivityShow({ open: false, referenceId: '' })}></div>}
         <div className={`activity-new-v1 ${showActivity.open ? 'show-activity-v1' : 'hide-activity-v1'}`}>
           <Grid container>
-            <Grid item xs={12}>
+            <Grid size={{xs:12}}>
               <div>
                 {showActivity.open && (
                   <Activity

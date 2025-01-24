@@ -10,8 +10,8 @@ import {
   TableHead,
   TableRow,
   Typography
-} from '@material-ui/core';
-import { KeyboardArrowDown, KeyboardArrowUp } from '@material-ui/icons';
+} from '@mui/material';
+import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import { camelCase } from 'lodash';
 import React from 'react';
 import routes from 'src/components/Helpers/Routes';
@@ -29,13 +29,14 @@ const PolicyResources = ({
   isEdit
 }) => {
   return (
-    <TableContainer className="border border-[var(--common-border-color)] rounded-[4px] shadow-[0px_20.3165px_40.6331px_rgba(0,0,0,0.03)] mt-[50px]">
-      <Table stickyHeader aria-label="policy" className="roles-table">
+    <TableContainer className="mt-[50px] rounded-[4px] border border-[var(--common-border-color)] shadow-[0px_20.3165px_40.6331px_rgba(0,0,0,0.03)]">
+      <Table stickyHeader size="small" aria-label="policy" className="roles-table">
         <TableHead>
           <TableRow>
-            <TableCell className="bg-[var(--form-head-bg)_!important] dark:text-[white_!important] text-[#2a3042_!important]">Policy</TableCell>
-            <TableCell align="center" className="bg-[var(--form-head-bg)_!important]">
+            <TableCell className="bg-[var(--form-head-bg)_!important] text-[#2a3042_!important] dark:text-[white_!important]">Policy</TableCell>
+            <TableCell className="bg-[var(--form-head-bg)_!important]">
               <FormControlLabel
+                sx={{ m: 0 }}
                 control={
                   <Checkbox
                     disabled={!isEdit}
@@ -56,7 +57,7 @@ const PolicyResources = ({
             .map((resource: string, outerIndex) => (
               <>
                 <TableRow>
-                  <TableCell style={{ minWidth: 300 }}>
+                  <TableCell sx={{ minWidth: 300, py: 0 }}>
                     <Box
                       display="flex"
                       justifyContent={'flex-start'}
@@ -74,7 +75,7 @@ const PolicyResources = ({
                       )}
                     </Box>
                   </TableCell>
-                  <TableCell align="center">
+                  <TableCell sx={{ minWidth: 300, py: 0 }}>
                     <Checkbox
                       checked={resourceCheckbox[camelCase(resource)]}
                       disabled={!isEdit}
@@ -89,12 +90,12 @@ const PolicyResources = ({
                     .filter((item) => item.resource === resource)
                     .map((obj) => (
                       <TableRow key={2}>
-                        <TableCell>
+                        <TableCell sx={{ minWidth: 300, py: 0 }}>
                           <Typography variant="body1" style={{ fontWeight: 400 }}>
                             &emsp; {obj?.fieldLabel}
                           </Typography>
                         </TableCell>
-                        <TableCell align="center">
+                        <TableCell sx={{ minWidth: 300, py: 0, pl: 4 }}>
                           <Checkbox
                             disabled={!isEdit}
                             checked={policyFieldCheckBox[obj.field]}

@@ -1,15 +1,13 @@
 import React, { Fragment, useContext, useEffect, useState } from 'react';
-import { Box, Button, Dialog, Grid } from '@material-ui/core';
+import { Box, Dialog } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Form, Formik } from 'formik';
-import { CustomDialogTransition, getObjKeysWithValues, setFieldsInAscendingOrder, yupSchema } from 'src/constants/helpers';
+import { CustomDialogTransition, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import CustomButton from 'src/components/Helpers/CustomButton';
-import FormTypes from 'src/components/Helpers/FormTypes';
-import { FaDiceOne } from 'react-icons/fa';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ConfirmCancelDialog from 'src/components/ConfirmCancelDialog';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
@@ -290,22 +288,18 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                  <Button
-                    type="button"
-                    variant="outlined"
-                    color="primary"
-                    size="small"
+                  <ThemeButton
+                    buttonType="transparent"
                     onClick={() => {
                       if (isEqual(initialData.values, values)) onClose();
                       else setShowConfirmDialog(true);
                     }}
                   >
                     Cancel
-                  </Button>
-                  <CustomButton
-                    loading={loading}
-                    variant="contained"
-                    color="primary"
+                  </ThemeButton>
+                  <ThemeButton
+                    isLoading={loading}
+                    buttonType="theme"
                     disabled={loading}
                     onClick={(e) => {
                       e.preventDefault();
@@ -313,7 +307,7 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
                     }}
                   >
                     Save
-                  </CustomButton>
+                  </ThemeButton>
                 </CustomDialogFooter>
                 {showConfirmDialog ? (
                   <ConfirmCancelDialog
@@ -322,7 +316,6 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
                       setShowConfirmDialog(false);
                       submitForm();
                     }}
-                    close={() => setShowConfirmDialog(false)}
                     onClose={() => {
                       setShowConfirmDialog(false);
                       onClose();

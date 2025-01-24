@@ -1,5 +1,5 @@
-import { Button, Collapse, IconButton, List, ListItem, ListItemText, Menu, MenuItem } from '@material-ui/core';
-import { Add, ArrowDropDown, ArrowDropUp, Delete, MoreHoriz } from '@material-ui/icons';
+import { Add, ArrowDropDown, ArrowDropUp, MoreVert } from '@mui/icons-material';
+import { Collapse, IconButton, List, ListItem, ListItemButton, ListItemText, Menu, MenuItem } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { VscLayoutSidebarLeft } from 'react-icons/vsc';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -14,29 +14,35 @@ type SidebarProps = {
   channels: TChannel[];
   selectedChannel: TChannel | null;
   setSelectedChannel: React.Dispatch<React.SetStateAction<TChannel>>;
-  setCreateChannelDialog: React.Dispatch<React.SetStateAction<boolean>>;
+  setManageChannelDialog: React.Dispatch<React.SetStateAction<{ open: boolean; _id: string }>>;
   handleDeleteChannels: (ids: string[]) => void;
   mobScreen: boolean;
   isSidebarCollapsed: boolean;
   toggleSidebar: () => void;
   setChannels: React.Dispatch<React.SetStateAction<TChannel[]>>;
+  setNewChat: React.Dispatch<React.SetStateAction<boolean>>;
+  setNewChatUsers: React.Dispatch<React.SetStateAction<string[]>>;
+  setNewChatAddMemberDialog: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const Sidebar = ({
   channels,
   selectedChannel,
   setSelectedChannel,
-  setCreateChannelDialog,
+  setManageChannelDialog,
   handleDeleteChannels,
   mobScreen,
   setChannels,
   isSidebarCollapsed,
-  toggleSidebar
+  toggleSidebar,
+  setNewChat,
+  setNewChatUsers,
+  setNewChatAddMemberDialog,
 }: SidebarProps) => {
-  const [isExpanded, setIsExpanded] = useState(true);
-  const [channelMenuData, setChannelMenuData] = React.useState<{ selected: TChannel; openConfirmDialog: boolean } | null>(null);
   const [filteredChannels, setFilteredChannels] = useState(channels);
   const [searchValue, setSearchValue] = useState('');
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedChannelAction, setSelectedChannelAction] = useState<TChannel>(null);
 
   useEffect(() => {
     setFilteredChannels(channels);
@@ -45,10 +51,21 @@ const Sidebar = ({
   const handleFilter = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     setSearchValue(value);
-    const newValue = value.trim().toLowerCase();
+    const newValue = value?.trim()?.toLowerCase();
     let filtered = channels;
-    if (newValue) filtered = channels.filter((c) => c.title.toLowerCase().includes(newValue));
+    if (newValue) filtered = channels.filter((c) => c?.title?.toLowerCase()?.includes(newValue));
     setFilteredChannels(filtered);
+  };
+
+
+  const handleMenuClick = (event, channel: TChannel) => {
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+    setSelectedChannelAction(channel);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
   };
 
   return (
@@ -62,9 +79,8 @@ const Sidebar = ({
       >
         <div className="flex items-center justify-between gap-2">
           <ThemeButton
-            borderColor="none"
-            color="primary"
-            onClick={() => setCreateChannelDialog(true)}
+            buttonType="theme"
+            onClick={() => setManageChannelDialog({ open: true, _id: null })}
             iconForMobile={<Add />}
             mobileTooltip="New Channel"
             startIcon={<Add />}
@@ -78,98 +94,105 @@ const Sidebar = ({
           </HtmlTooltip>
         </div>
         <SearchBox value={searchValue} onChange={handleFilter} />
-        <div>
-          <Button
-            size={'small'}
-            className="group"
+        <ChannelAndChats
+          type="channel"
+          channels={channels?.filter((f: any) => f.type !== 'chat')}
+          filteredChannels={filteredChannels?.filter((f: any) => f.type !== 'chat')}
+          mobScreen={mobScreen}
+          selectedChannel={selectedChannel}
+          setSelectedChannel={setSelectedChannel}
+          setNewChat={setNewChat}
+          setChannels={setChannels}
+          handleMenuClick={handleMenuClick}
+        />
+        <div className="pt-2">
+          <ThemeButton
+            buttonType="theme"
             onClick={() => {
-              setIsExpanded((prev) => !prev);
+              setSelectedChannel(null);
+              setNewChat(true);
+              setNewChatUsers([]);
+              setNewChatAddMemberDialog(true);
             }}
-            endIcon={isExpanded ? <ArrowDropDown fontSize="large" /> : <ArrowDropUp fontSize="large" />}
+            iconForMobile={<Add />}
+            mobileTooltip="New Chat"
+            startIcon={<Add />}
           >
-            <span className="text-[15px]">Channels</span>
-          </Button>
-          {filteredChannels ? (
-            <Collapse in={isExpanded}>
-              <List dense>
-                {filteredChannels.map((c, index) => (
-                  <>
-                    {mobScreen && <span className="block [border-bottom:1px_solid_var(--common-border-color)]"></span>}
-                    <ListItem
-                      button
-                      key={c._id}
-                      style={{ borderRadius: '6px' }}
-                      selected={selectedChannel?._id === c._id}
-                      onClick={() => {
-                        setSelectedChannel(c);
-                        setChannels((prev) => {
-                          const index = prev.findIndex((ch) => ch._id === c._id);
-                          prev[index] = { ...prev[index], notifications: 0 };
-                          return [...prev];
-                        });
-                      }}
-                      className="group"
-                    >
-                      <ListItemText
-                        id={`channel-${index}`}
-                        primary={
-                          <span className="flex items-center gap-2 ">
-                            <span className=" line-clamp-1 font-semibold">{c.title}</span>
-                            {c?.notifications > 0 && (
-                              <span className="mr-4 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full bg-red-500 text-center text-[8px] text-white">
-                                {c?.notifications}
-                              </span>
-                            )}
-                          </span>
-                        }
-                      />
-
-                      <div
-                        className={cn(
-                          'absolute right-2 pl-6 opacity-0 group-hover:opacity-100  ',
-                          selectedChannel?._id === c._id
-                            ? '[background-image:linear-gradient(270deg,_#ebebeb_66%,_transparent_100%)] dark:[background-image:linear-gradient(270deg,_#353546_60%,_transparent_100%)]'
-                            : '[background-image:linear-gradient(270deg,_#f5f5f5_66%,_transparent_100%)] dark:[background-image:linear-gradient(270deg,_#212134_60%,_transparent_100%)]'
-                        )}
-                      >
-                        <IconButton
-                          edge="end"
-                          aria-label="delete"
-                          size="small"
-                          onClick={(e) => {
-                            setChannelMenuData({ selected: c, openConfirmDialog: true });
-                          }}
-                        >
-                          <Delete fontSize="small" color="error" />
-                        </IconButton>
-                      </div>
-                    </ListItem>
-                  </>
-                ))}
-              </List>
-              {channels?.length === 0 && (
-                <div>
-                  <h6 className="py-[60px] text-center text-[16px] text-gray-400 dark:text-gray-600">No channels found</h6>
-                </div>
-              )}
-            </Collapse>
-          ) : (
-            <div className="m-3">
-              <CommonSkeleton lenArray={[...Array(3).keys()]} xs={12} sm={12} md={12} lg={12} />
-            </div>
-          )}
+            New Chat
+          </ThemeButton>
         </div>
+        <ChannelAndChats
+          type="chat"
+          channels={channels?.filter((f: any) => f.type === 'chat')}
+          filteredChannels={filteredChannels?.filter((f: any) => f.type === 'chat')}
+          mobScreen={mobScreen}
+          selectedChannel={selectedChannel}
+          setSelectedChannel={setSelectedChannel}
+          setNewChat={setNewChat}
+          setChannels={setChannels}
+          handleMenuClick={handleMenuClick}
+        />
       </div>
-      {channelMenuData?.openConfirmDialog && (
+      <ChannelActions
+        anchorEl={anchorEl}
+        handleMenuClose={handleMenuClose}
+        selectedChannel={selectedChannelAction}
+        setManageChannelDialog={setManageChannelDialog}
+        handleDeleteChannels={handleDeleteChannels}
+      />
+    </>
+  );
+};
+
+export default Sidebar;
+
+
+const ChannelActions = ({
+  anchorEl,
+  handleMenuClose,
+  selectedChannel,
+  setManageChannelDialog,
+  handleDeleteChannels,
+}) => {
+
+  const [showConfirmBox, setShowConfirmBox] = useState<boolean>(false);
+
+  return (
+    <>
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left'
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left'
+        }}
+      >
+        <span onClick={handleMenuClose}>
+          {selectedChannel?.type !== 'chat' && (
+            <MenuItem onClick={() => setManageChannelDialog({ open: true, _id: selectedChannel?._id })} disabled={!selectedChannel?.isOwner}>
+              Edit
+            </MenuItem>
+          )}
+          <MenuItem onClick={() => setShowConfirmBox(true)} disabled={!selectedChannel?.isOwner}>
+            Delete
+          </MenuItem>
+        </span>
+      </Menu>
+      {showConfirmBox && (
         <ConfirmationDialog
-          open={channelMenuData?.openConfirmDialog}
-          message={`Are you sure you want to delete ${channelMenuData?.selected?.title} Channel?`}
+          open={showConfirmBox}
+          message={`Are you sure you want to delete ${selectedChannel?.type === 'chat' ? 'this Chat' : `${selectedChannel?.title} Channel`} ?`}
           onClose={() => {
-            setChannelMenuData(null);
+            setShowConfirmBox(false);
           }}
           onOk={() => {
-            handleDeleteChannels([channelMenuData?.selected?._id]);
-            setChannelMenuData(null);
+            setShowConfirmBox(false);
+            handleDeleteChannels([selectedChannel?._id]);
           }}
         />
       )}
@@ -177,4 +200,99 @@ const Sidebar = ({
   );
 };
 
-export default Sidebar;
+const ChannelAndChats = ({
+  type,
+  channels,
+  filteredChannels,
+  mobScreen,
+  selectedChannel,
+  setSelectedChannel,
+  setNewChat,
+  setChannels,
+  handleMenuClick,
+}) => {
+
+  const [isExpanded, setIsExpanded] = useState(true);
+
+  return (
+    <div>
+      <ThemeButton
+        buttonType='transparent'
+        onClick={() => {
+          setIsExpanded((prev) => !prev);
+        }}
+        endIcon={isExpanded ? <ArrowDropDown fontSize="large" /> : <ArrowDropUp fontSize="large" />}
+      >
+        {type === 'chat' ? 'Chats' : 'Channels'}
+      </ThemeButton>
+      {filteredChannels ? (
+        <Collapse in={isExpanded}>
+          <List dense>
+            {filteredChannels?.map((c, index) => (
+              <>
+                {mobScreen && <span className="block [border-bottom:1px_solid_var(--common-border-color)]"></span>}
+                <ListItemButton
+                  key={c._id}
+                  className="group"
+                  style={{ borderRadius: '6px' }}
+                  selected={selectedChannel?._id === c._id}
+                  onClick={() => {
+                    setSelectedChannel(c);
+                    setNewChat(false);
+                    setChannels((prev) => {
+                      const index = prev.findIndex((ch) => ch._id === c._id);
+                      prev[index] = { ...prev[index], notifications: 0 };
+                      return [...prev];
+                    });
+                  }}
+                >
+                  <ListItemText
+                    id={`channel-${index}`}
+                    primary={
+                      <span className="flex items-center gap-2 ">
+                        <span className=" line-clamp-1 font-semibold">{c.title}</span>
+                        {c?.notifications > 0 && (
+                          <span className="mr-4 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full bg-red-500 text-center text-[8px] text-white">
+                            {c?.notifications}
+                          </span>
+                        )}
+                      </span>
+                    }
+                  />
+                  <div
+                    className={cn(
+                      'absolute right-2 pl-6 opacity-0 group-hover:opacity-100  ',
+                      selectedChannel?._id === c._id
+                        ? '[background-image:linear-gradient(270deg,_#ebebeb_66%,_transparent_100%)] dark:[background-image:linear-gradient(270deg,_#353546_60%,_transparent_100%)]'
+                        : '[background-image:linear-gradient(270deg,_#f5f5f5_66%,_transparent_100%)] dark:[background-image:linear-gradient(270deg,_#212134_60%,_transparent_100%)]'
+                    )}
+                  >
+                    <HtmlTooltip title="Actions">
+                      <IconButton
+                        onClick={(e) => {
+                          handleMenuClick(e, c);
+                        }}
+                        size="small"
+                      >
+                        <MoreVert />
+                      </IconButton>
+                    </HtmlTooltip>
+                  </div>
+                </ListItemButton>
+              </>
+            ))}
+          </List>
+          {channels?.length === 0 && (
+            <div>
+              <h6 className="py-[60px] text-center text-[16px] text-gray-400 dark:text-gray-600">No {type === 'chat' ? 'chats' : 'channels'} found</h6>
+            </div>
+          )}
+        </Collapse>
+      ) : (
+        <div className="m-3">
+          <CommonSkeleton lenArray={[...Array(3).keys()]} xs={12} sm={12} md={12} lg={12} />
+        </div>
+      )}
+    </div>
+  )
+}

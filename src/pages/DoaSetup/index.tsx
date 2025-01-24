@@ -1,8 +1,9 @@
 import React, { useContext, useEffect, useState, Fragment } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import { Box, Grid, Checkbox, Button, Dialog } from '@material-ui/core';
+import { makeStyles } from '@mui/styles';
+import { Box, Checkbox, Button, Dialog, Theme } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Link } from 'react-router-dom';
-import { DataGrid } from '@material-ui/data-grid';
+import { DataGrid } from '@mui/x-data-grid';
 import Container from '../../components/CustomContainer';
 import BoxWithBorder from '../../components/BoxWithBorder';
 import NewStepper from '../../components/Helpers/NewStepper';
@@ -16,14 +17,13 @@ import { useCallback } from 'react';
 import { getSearchQuery } from '../../services/util';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import moment from 'moment';
 import { FaUserAltSlash, FaUserCheck } from 'react-icons/fa';
 import CustomDataGridNoDataFound from '../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import CustomDataGridToolbar from '../../components/Helpers/DataGridHelpers/CustomDataGridToolbar';
-import { CustomDialogTransition, dateFormat } from '../../constants/helpers';
+import { CustomDialogTransition, displayDate } from '../../constants/helpers';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   actionBtn: {
     background: theme.palette.primary.light, //  lightBg
     color: theme.palette.error.contrastText,
@@ -199,7 +199,7 @@ export default function Doa() {
         isChecked: false,
         name: `${user.firstName} ${user.lastName}`,
         email: user.email,
-        createdAt: moment(user.createdAt).format(dateFormat),
+        createdAt: displayDate(user.createdAt),
         status: user.blocked ? user.blocked : false
       }))
       : [];

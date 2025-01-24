@@ -1,19 +1,19 @@
 import { useState, Fragment, useRef } from 'react';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormControl from '@material-ui/core/FormControl';
-import MenuItem from '@material-ui/core/MenuItem';
-import Select from '@material-ui/core/Select';
-import InputLabel from '@material-ui/core/InputLabel';
-import Checkbox from '@material-ui/core/Checkbox';
-import Box from '@material-ui/core/Box';
-import Grid from '@material-ui/core/Grid';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Dialog from '@mui/material/Dialog';
+import TextField from '@mui/material/TextField';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormControl from '@mui/material/FormControl';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import InputLabel from '@mui/material/InputLabel';
+import Checkbox from '@mui/material/Checkbox';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid2';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
-import FormHelperText from '@material-ui/core/FormHelperText';
+import FormHelperText from '@mui/material/FormHelperText';
 import { object, string } from 'yup';
 import { Formik, Form } from 'formik';
 import { Vlookup } from './vlookup';
@@ -41,25 +41,25 @@ export const AddField = (props) => {
     fieldData
       ? fieldData
       : {
-          sectionName: '',
-          type: 'singleLine',
-          fieldLabel: '',
-          required: false,
-          isTooltip: false,
-          tooltipMessage: '',
-          returnType: 'decimal',
-          decimalPlaces: 2,
-          inputFields: [],
-          option: [{ optionLabel: 'Option 1', optionValue: 'Option 1' }],
-          formula: 'return ',
-          isvlookupReverse: false,
-          units: [],
-          displayUnits: [],
-          isConverter: false,
-          isFormula: false,
-          isMulitFormula: false,
-          displayCurrency: refrence !== 'formAdd' ? ['CUR'] : ['USD']
-        }
+        sectionName: '',
+        type: 'singleLine',
+        fieldLabel: '',
+        required: false,
+        isTooltip: false,
+        tooltipMessage: '',
+        returnType: 'decimal',
+        decimalPlaces: 2,
+        inputFields: [],
+        option: [{ optionLabel: 'Option 1', optionValue: 'Option 1' }],
+        formula: 'return ',
+        isvlookupReverse: false,
+        units: [],
+        displayUnits: [],
+        isConverter: false,
+        isFormula: false,
+        isMulitFormula: false,
+        displayCurrency: refrence !== 'formAdd' ? ['CUR'] : ['USD']
+      }
   );
 
   let new_fields = [];
@@ -172,7 +172,7 @@ export const AddField = (props) => {
           data.currencyoption = result.data.data.option;
           handleAddField(data);
         })
-        .catch((error) => {});
+        .catch((error) => { });
     } else {
       handleAddField(data);
     }
@@ -237,9 +237,9 @@ export const AddField = (props) => {
       }
     }
 
-    if(refrence === 'formAddInlineEdit') {
+    if (refrence === 'formAddInlineEdit') {
       if (!values.sectionName) {
-        errors['sectionName'] = 'Please select SectionName';
+        errors['sectionName'] = 'Please select Section Name';
       }
     }
 
@@ -268,7 +268,13 @@ export const AddField = (props) => {
             <CustomDialogContent>
               <Form autoComplete="off" autoCorrect="off" noValidate onKeyPress={onKeyPress}>
                 {['formAddInlineEdit', 'builder']?.includes(refrence) && (
-                  <FormControl fullWidth margin="dense" variant="outlined" error={touched['sectionName'] && Boolean(errors['sectionName'])}>
+                  <FormControl
+                    fullWidth
+                    margin="dense"
+                    variant="outlined"
+                    size="small"
+                    error={touched['sectionName'] && Boolean(errors['sectionName'])}
+                  >
                     <InputLabel id="demo-simple-select-outlined-label">Section Name</InputLabel>
                     <Select
                       labelId="demo-simple-select-outlined-label"
@@ -277,13 +283,14 @@ export const AddField = (props) => {
                       onChange={(e) => setFieldValue('sectionName', e.target.value)}
                       label="Section Name"
                       name="sectionName"
+                      size="small"
                     >
                       {section && section.map((_section) => <MenuItem value={_section}>{_section}</MenuItem>)}
                     </Select>
                     <FormHelperText>{errors['sectionName']}</FormHelperText>
                   </FormControl>
                 )}
-                <FormControl fullWidth margin="dense" variant="outlined">
+                <FormControl fullWidth margin="dense" size="small" variant="outlined">
                   <InputLabel id="demo-simple-select-outlined-label">Field Type</InputLabel>
                   <Select
                     labelId="demo-simple-select-outlined-label"
@@ -292,6 +299,7 @@ export const AddField = (props) => {
                     onChange={(e) => setFieldValue('type', e.target.value)}
                     label="Type"
                     name="type"
+                    size="small"
                     error={touched['type'] && Boolean(errors['type'])}
                   >
                     <MenuItem value={'singleLine'}>Single Line</MenuItem>
@@ -313,6 +321,7 @@ export const AddField = (props) => {
                   name="fieldLabel"
                   fullWidth
                   margin="dense"
+                  size="small"
                   value={values['fieldLabel']}
                   error={touched['fieldLabel'] && Boolean(errors['fieldLabel'])}
                   helperText={touched['fieldLabel'] && errors['fieldLabel']}
@@ -322,8 +331,8 @@ export const AddField = (props) => {
                 {(values['type'] === 'decimal' || values['type'] === 'formula' || values['type'] === 'converter') && (
                   <Grid spacing={3} container>
                     {values['type'] === 'formula' && (
-                      <Grid item xs={12} sm={6} md={6}>
-                        <FormControl fullWidth margin="dense" variant="outlined">
+                      <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+                        <FormControl fullWidth margin="dense" variant="outlined" size="small">
                           <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
                           <Select
                             labelId="demo-simple-select-outlined-label"
@@ -332,6 +341,7 @@ export const AddField = (props) => {
                             onChange={(e) => setFieldValue('returnType', e.target.value)}
                             label="Return Type"
                             name="returnType"
+                            size="small"
                           >
                             <MenuItem value="decimal">Decimal</MenuItem>
                             <MenuItem value="string">String</MenuItem>
@@ -341,8 +351,8 @@ export const AddField = (props) => {
                       </Grid>
                     )}
                     {(values['type'] === 'decimal' || values['type'] === 'converter' || values['returnType'] === 'decimal') && (
-                      <Grid item xs={12} sm={6} md={6}>
-                        <FormControl fullWidth margin="dense" variant="outlined">
+                      <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+                        <FormControl fullWidth margin="dense" size="small" variant="outlined">
                           <InputLabel id="demo-simple-select-outlined-label">Number of decimal places</InputLabel>
                           <Select
                             labelId="demo-simple-select-outlined-label"
@@ -351,6 +361,7 @@ export const AddField = (props) => {
                             onChange={(e) => setFieldValue('decimalPlaces', e.target.value)}
                             label="Number of decimal places"
                             name="decimalPlaces"
+                            size="small"
                           >
                             <MenuItem value={0}>0</MenuItem>
                             <MenuItem value={1}>1</MenuItem>
@@ -465,6 +476,7 @@ export const AddField = (props) => {
                       name="tooltipMessage"
                       fullWidth
                       margin="dense"
+                      size="small"
                       value={values['tooltipMessage']}
                       error={touched['tooltipMessage'] && Boolean(errors['tooltipMessage'])}
                       helperText={touched['tooltipMessage'] && errors['tooltipMessage']}
@@ -475,22 +487,20 @@ export const AddField = (props) => {
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button
-                size="small"
+              <ThemeButton
                 onClick={() => {
                   setShowConfirmDialog(true);
                 }}
-                color="primary"
+                buttonType="transparent"
               >
                 Cancel
-              </Button>
-              <Button size="small" type="submit" color="primary" onClick={submitForm} variant="contained">
+              </ThemeButton>
+              <ThemeButton buttonType="theme" onClick={submitForm}>
                 {fieldData ? 'Update' : 'Add'}
-              </Button>
+              </ThemeButton>
             </CustomDialogFooter>
             {showConfirmDialog ? (
               <ConfirmCancelDialog
-                close={() => setShowConfirmDialog(false)}
                 open={showConfirmDialog}
                 onSave={() => {
                   setShowConfirmDialog(false);

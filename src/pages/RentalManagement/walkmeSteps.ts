@@ -1,5 +1,4 @@
 import { generateFormFieldSteps, StepDefination, WalkmeData } from 'src/components/CustomIntro';
-import routes from 'src/components/Helpers/Routes';
 import { sidebarResource } from 'src/constants/helpers';
 
 export const generateAddExistingProduct = (waitForStepInsertion = false): WalkmeData => ({
@@ -75,7 +74,8 @@ export const generateAddChildProduct = (index: number, waitForStepInsertion = fa
     },
     {
       target: `#${sidebarResource.product}-table-checkbox-0`,
-      title: 'Add a Product'
+      title: 'Add a Product',
+      isPreviousButtonDisabled : true
     },
     {
       target: '#dialog-add-button',
@@ -264,12 +264,12 @@ export const createRentalJobsFlow = (fields: any, resources: any): WalkmeData =>
   const ignoreField = ['currency', 'owner', 'pdfTemplate'];
 
   const data: WalkmeData = {
-    name: `Add ${resources?.rentalManagement?.titleSingular}`,
+    name: `Create ${resources?.rentalManagement?.titleSingular}`,
     url: '/rental-management',
     type: 'flow',
     steps: [
       {
-        title: `Add`,
+        title: `Create`,
         target: '#add-button'
       },
       ...generateFormFieldSteps(fields, ignoreField),

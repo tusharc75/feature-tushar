@@ -1,6 +1,6 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
+import { Box, IconButton, MenuItem } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -16,7 +16,6 @@ import { CHILD_RESOURCE, gridLoadingTimeout, prepareDataForGrid, sidebarResource
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import ManagePaidTimeOff from './ManagePaidTimeOff';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
-import { sidebarItems } from 'src/components/FormBuilder/FieldList';
 
 const PaidTimeOff = ({ payrollPolicyData }) => {
   const renderedFrom = `${camelCase(sidebarResource.payrollPolicy)}_paidTimeOff`;

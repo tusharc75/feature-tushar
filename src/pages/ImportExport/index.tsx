@@ -1,22 +1,23 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import { Box, Grid, Button, CircularProgress, Typography, IconButton } from '@material-ui/core';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import TextField from '@material-ui/core/TextField';
+import { Box, Button, CircularProgress, Typography, IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
 import axiosInstance from '../../axios/axiosInstance';
 import { AiOutlineExport, AiOutlineImport } from 'react-icons/ai';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { dateTimeFormat, downloadExcel, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { displayDateTime, downloadExcel, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomContainer from 'src/components/CustomContainer';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import { GetApp } from '@material-ui/icons';
+import { GetApp } from '@mui/icons-material';
 import { CustomImport } from './customImport';
-import moment from 'moment';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const renderedFrom = 'import-export';
 
@@ -94,7 +95,7 @@ const ImportExport = () => {
         accessor: 'date',
         Header: 'Date & Time',
         Cell: ({ row }) => {
-          return row.original?.date ? <p className="text-truncate">{moment(row?.original?.date)?.format(dateTimeFormat)}</p> : <NoDataCell />;
+          return row.original?.date ? <p className="text-truncate">{displayDateTime(row?.original?.date)}</p> : <NoDataCell />;
         }
       },
       {
@@ -343,7 +344,7 @@ const ImportExport = () => {
   return (
     <Fragment>
       <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
+        <Grid size={{md:4, sm:11, xs:10}}>
           <CustomBreadCrumbs routes={[{ ...routes.importExport, title: resources?.importExport?.titlePlural }]} />
         </Grid>
       </Grid>
@@ -353,7 +354,7 @@ const ImportExport = () => {
             id="export-resources"
             style={{ width: '300px' }}
             options={Object.keys(sidebarResource)?.map((key) => sidebarResource[key])}
-            renderInput={(params) => <TextField {...params} variant="outlined" label="Resource" margin="dense" required={true} />}
+            renderInput={(params) => <TextField {...params} variant="outlined" label="Resource" margin="dense" size="small" required={true} />}
             getOptionLabel={(option) => option}
             onChange={(e, val) => {
               setSelectResource(val);
@@ -361,9 +362,9 @@ const ImportExport = () => {
           />
         </Box>
 
-        <Grid container xs={12} lg={12} md={12} style={{ maxWidth: '100%', justifyContent: 'space-between' }}>
-          <Grid container spacing={2} xs={8} lg={8} md={8}>
-            <Grid item>
+        <Grid container size={{xs:12, lg:12, md:12}} style={{ maxWidth: '100%', justifyContent: 'space-between' }}>
+          <Grid container spacing={2} size={{xs:8, lg:8, md:8}}>
+            <Grid >
               <input
                 id={`file`}
                 name={`file`}
@@ -388,35 +389,30 @@ const ImportExport = () => {
                 </>
               )}
             </Grid>
-            <Grid item>
-              <Button
-                size="small"
-                variant="outlined"
-                component="span"
+            <Grid >
+              <ThemeButton 
                 disabled={isImgUploading || !selectResource}
-                startIcon={<AiOutlineExport />}
                 onClick={() => {
                   handleDownloadTemplate();
                 }}
+                buttonType="theme" 
+                isLoading={downloading.loading && downloading.type === 'template'}
               >
-                Download Template {downloading.loading && downloading.type === 'template' && <CircularProgress size={20} />}
-              </Button>
+                Download Template
+              </ThemeButton>
             </Grid>
-            <Grid item>
-              <Button
-                type="button"
-                size="small"
-                color="primary"
-                variant="outlined"
-                onClick={handleExportExcel}
-                startIcon={<AiOutlineExport />}
+            <Grid >
+              <ThemeButton 
                 disabled={selectResource == null}
+                onClick={handleExportExcel}
+                buttonType="theme" 
+                isLoading={downloading.loading && downloading.type === 'export'}
               >
-                Export to Excel {downloading.loading && downloading.type === 'export' && <CircularProgress size={20} />}
-              </Button>
+                Export to Excel
+              </ThemeButton>
             </Grid>
           </Grid>
-          <Grid container xs={4} lg={4} md={4} justify="flex-end">
+          <Grid container size={{xs:4, lg:4, md:4}} justifyContent="flex-end">
             <Button
               size="small"
               variant="outlined"
@@ -432,7 +428,7 @@ const ImportExport = () => {
           </Grid>
         </Grid>
         <Box>
-          {columns ?
+          {columns ? (
             <CustomReactTable
               height={'calc(100vh - 200px)'}
               columns={columns}
@@ -442,10 +438,12 @@ const ImportExport = () => {
               refreshGrid={fetchLogs}
               isClientSideGrid={true}
               hideSelection={true}
-            /> : <Box p={2} height={500}>
+            />
+          ) : (
+            <Box p={2} height={500}>
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>
-          }
+          )}
           {customImportDialog && (
             <CustomImport
               open={customImportDialog}

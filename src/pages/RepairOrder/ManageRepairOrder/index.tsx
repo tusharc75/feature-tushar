@@ -1,8 +1,8 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import Dialog from '@mui/material/Dialog';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
-import moment from 'moment';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
@@ -14,7 +14,6 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomButton from '../../../components/Helpers/CustomButton';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import routes from '../../../components/Helpers/Routes';
 import {
@@ -30,6 +29,8 @@ import {
 } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 const ManageRepairOrder = ({
   isClone = false,
@@ -131,7 +132,7 @@ const ManageRepairOrder = ({
           if (fieldsDataForCreate?.some((e) => e?.fieldName === 'type')) {
             initialData['type'] = REPAIR_ORDER_TYPE.internal;
           }
-          const disabledField = ['rentalJob', 'warehouse', 'customerAccount', 'type']
+          const disabledField = ['rentalJob', 'warehouse', 'customerAccount', 'type'];
           disabledField?.forEach((field: any) => {
             fieldsDataForCreate?.forEach((e) => {
               if (e.fieldName === field && initialData[field]) {
@@ -139,7 +140,7 @@ const ManageRepairOrder = ({
                 e.isUneditable = true;
               }
             });
-          })
+          });
         }
         if (referenceType === sidebarResource.workOrderPlanning) {
           if (referenceData) {
@@ -317,7 +318,7 @@ const ManageRepairOrder = ({
                               <Box marginY={2}>
                                 <Grid spacing={3} container>
                                   {form.sectionFields.map((field) => (
-                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                    <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                       {field.fieldName === 'startDate' ? (
                                         <FormTypes
                                           repairOrderId={repairOrderId}
@@ -341,7 +342,7 @@ const ManageRepairOrder = ({
                                           size="small"
                                           minDate={new Date()}
                                           maxDate={
-                                            values['expectedCompletionDate'] ? moment(values['expectedCompletionDate']) : moment().add(5, 'years')
+                                            values['expectedCompletionDate'] ? dayjs(values['expectedCompletionDate']) : dayjs().add(5, 'year')
                                           }
                                         />
                                       ) : field.fieldName === 'expectedCompletionDate' ? (
@@ -447,11 +448,8 @@ const ManageRepairOrder = ({
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                  <Button
-                    type="button"
-                    variant="outlined"
-                    color="primary"
-                    size="small"
+                  <ThemeButton
+                    buttonType="transparent"
                     id="dialog-cancel-button"
                     onClick={() => {
                       if (isEqual(initialData.values, values)) onClose();
@@ -459,11 +457,10 @@ const ManageRepairOrder = ({
                     }}
                   >
                     Cancel
-                  </Button>
-                  <CustomButton
-                    loading={loading}
-                    variant="contained"
-                    color="primary"
+                  </ThemeButton>
+                  <ThemeButton
+                    isLoading={loading}
+                    buttonType="theme"
                     id="dialog-save-button"
                     disabled={uploadingImageOrFileProgress > 0 || loading}
                     onClick={(e) => {
@@ -473,7 +470,7 @@ const ManageRepairOrder = ({
                     }}
                   >
                     Save
-                  </CustomButton>
+                  </ThemeButton>
                 </CustomDialogFooter>
                 {showConfirmDialog && (
                   <ConfirmCancelDialog

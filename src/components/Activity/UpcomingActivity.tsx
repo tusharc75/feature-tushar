@@ -1,7 +1,7 @@
-import Box from '@material-ui/core/Box';
-import Chip from '@material-ui/core/Chip';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
+import Box from '@mui/material/Box';
+import Chip from '@mui/material/Chip';
+import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
 import { useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { displayDate } from '../../constants/helpers';
@@ -25,7 +25,7 @@ const UpcomingActivity = (props) => {
       .then(({ data: { data } }) => {
         setActivity(data);
       })
-      .catch(() => {});
+      .catch(() => { });
   };
 
   return (
@@ -45,7 +45,6 @@ const UpcomingActivity = (props) => {
                     </Grid>
                     <Grid item xs={6} container justify="flex-end">
                       <Chip label={_activity.type} size="small" color="primary" />
-                      {/* {_activity.status && <Chip label={_activity.status} size="small" color="default" />} */}
                     </Grid>
                   </Grid>
                 </Box>

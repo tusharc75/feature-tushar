@@ -1,17 +1,20 @@
-import { Box, Button, FormControlLabel, FormLabel, Grid, Radio, RadioGroup, TextField } from '@material-ui/core';
+import { Box, Dialog, FormControlLabel, FormLabel, Radio, RadioGroup, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
-import { Fragment, useContext, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import DashboardModal from 'src/components/DashboardModal';
 import { object, string } from 'yup';
 import axiosInstance from '../../axios/axiosInstance';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
-import CustomButton from '../../components/Helpers/CustomButton';
 import { CustomDialogTransition } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 
-const ManageChannel = ({ onClose, onSuccess }) => {
+const ManageChannel = ({ onClose, onSuccess, _id }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const validationSchema = object().shape({
@@ -20,11 +23,29 @@ const ManageChannel = ({ onClose, onSuccess }) => {
     access: string().required('Please select access type')
   });
 
-  const initialValues = {
+  const [initialValues, setInitialValues] = useState({
     title: '',
     description: '',
     access: 'public'
-  };
+  });
+
+  useEffect(() => {
+    if (_id) {
+      axiosInstance()
+        .get(`/work-space/channel/${_id}`)
+        .then(({ data }) => {
+          setInitialValues({
+            title: data?.data?.title,
+            description: data?.data?.description,
+            access: data?.data?.access
+          });
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+
+  }, [_id]);
 
   const [loading, setLoading] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -34,6 +55,10 @@ const ManageChannel = ({ onClose, onSuccess }) => {
   const handleSubmit = async (values) => {
     setSubmitting(true);
     let updatedValues = { ...values };
+
+    if (_id) {
+      updatedValues = { ...values, _id };
+    }
 
     await axiosInstance()
       .post('/work-space/channel', updatedValues)
@@ -68,68 +93,42 @@ const ManageChannel = ({ onClose, onSuccess }) => {
   };
 
   return (
-    <>
-      <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
+    <Dialog
+      maxWidth="sm"
+      fullScreen={fullScreen || isMobile || isTablet}
+      TransitionComponent={CustomDialogTransition}
+      aria-labelledby="customized-dialog-title"
+      open={true}
+      fullWidth
+      onClose={(e, reason) => {
+        if (reason !== 'backdropClick') {
+          setShowConfirmDialog(true);
+        }
+      }}
+    >
+      <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit} enableReinitialize>
         {({ values, errors, setFieldValue, touched, submitForm }) => (
-          <DashboardModal
-            handleClose={() => {
-              if (!isEqual(values, initialValues)) {
-                setShowConfirmDialog(true);
-              } else {
-                onClose();
-              }
-            }}
-            open={true}
-            dialogProps={{
-              fullScreen: fullScreen || isMobile || isTablet,
-              fullWidth: false,
-              TransitionComponent: CustomDialogTransition,
-              maxWidth: 'sm'
-            }}
-            modalHead={{
-              title: `Create Channel`,
-              fullScreenOption: true
-            }}
-            footer={
-              <>
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  size="small"
-                  disabled={isSubmitting || loading}
-                  onClick={() => {
-                    if (!isEqual(values, initialValues)) {
-                      setShowConfirmDialog(true);
-                    } else {
-                      onClose();
-                    }
-                  }}
-                >
-                  Cancel
-                </Button>
-                <CustomButton
-                  disabled={isSubmitting || loading}
-                  loading={loading}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleScroll(errors);
-                    submitForm();
-                  }}
-                >
-                  {' '}
-                  Save
-                </CustomButton>
-              </>
-            }
-          >
-            <Fragment>
+          <Fragment>
+            <CustomDialogHeader
+              onClose={() => {
+                if (!isEqual(values, initialValues)) {
+                  setShowConfirmDialog(true);
+                } else {
+                  onClose();
+                }
+              }}
+              title={'Create Channel'}
+              isMinimized={!fullScreen}
+              onMinimizeMaximize={() => {
+                setFullScreen((prevState) => !prevState);
+              }}
+              showManimizeMaximize={true}
+            />
+            <CustomDialogContent>
               <Form autoComplete="off" autoCorrect="off" noValidate>
                 <Box>
                   <Grid container spacing={1}>
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                       <TextField
                         variant="outlined"
                         type="text"
@@ -138,6 +137,7 @@ const ManageChannel = ({ onClose, onSuccess }) => {
                         name="title"
                         fullWidth
                         margin="dense"
+                        size="small"
                         value={values['title']}
                         error={touched['title'] && Boolean(errors['title'])}
                         helperText={touched['title'] && errors['title']}
@@ -146,7 +146,7 @@ const ManageChannel = ({ onClose, onSuccess }) => {
                         }}
                       />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                       <TextField
                         variant="outlined"
                         type="text"
@@ -154,6 +154,7 @@ const ManageChannel = ({ onClose, onSuccess }) => {
                         name="description"
                         fullWidth
                         margin="dense"
+                        size="small"
                         value={values['description']}
                         error={touched['description'] && Boolean(errors['description'])}
                         helperText={touched['description'] && errors['description']}
@@ -162,7 +163,7 @@ const ManageChannel = ({ onClose, onSuccess }) => {
                         }}
                       />
                     </Grid>
-                    <Grid item xs={12} md={6} sm={6}>
+                    <Grid size={{ xs: 12, md: 6, sm: 6 }}>
                       <FormLabel component="legend" required={true}>
                         Access
                       </FormLabel>
@@ -175,27 +176,51 @@ const ManageChannel = ({ onClose, onSuccess }) => {
                   </Grid>
                 </Box>
               </Form>
-              <div className="flex items-center justify-end gap-2"></div>
-              {showConfirmDialog ? (
-                <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
-                  open={showConfirmDialog}
-                  onSave={() => {
-                    setShowConfirmDialog(false);
-                    handleScroll(errors);
-                    submitForm();
-                  }}
-                  onClose={() => {
-                    setShowConfirmDialog(false);
+            </CustomDialogContent>
+            <CustomDialogFooter>
+              <ThemeButton
+                buttonType="transparent"
+                disabled={isSubmitting || loading}
+                onClick={() => {
+                  if (!isEqual(values, initialValues)) {
+                    setShowConfirmDialog(true);
+                  } else {
                     onClose();
-                  }}
-                />
-              ) : null}
-            </Fragment>
-          </DashboardModal>
+                  }
+                }}
+              >
+                Cancel
+              </ThemeButton>
+              <ThemeButton
+                disabled={isSubmitting || loading}
+                isLoading={loading}
+                buttonType="theme"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleScroll(errors);
+                  submitForm();
+                }}
+              >
+                Save
+              </ThemeButton>
+            </CustomDialogFooter>
+            {showConfirmDialog ? (
+              <ConfirmCancelDialog
+                open={showConfirmDialog}
+                onSave={() => {
+                  setShowConfirmDialog(false);
+                  submitForm();
+                }}
+                onClose={() => {
+                  setShowConfirmDialog(false);
+                  onClose();
+                }}
+              />
+            ) : null}
+          </Fragment>
         )}
       </Formik>
-    </>
+    </Dialog>
   );
 };
 

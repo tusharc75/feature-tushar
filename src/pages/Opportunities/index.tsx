@@ -1,7 +1,7 @@
-import { Box, Button, Menu, MenuItem } from '@material-ui/core';
-import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { Box, MenuItem } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/Delete';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -16,7 +16,6 @@ import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEnt
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import MessageDialog from '../../components/Helpers/MessageDialog';
 import {
   checkIsAllowedToDelete,
   customerAccount,
@@ -30,17 +29,15 @@ import {
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageOpportunityDialog from './ManageOpportunityDialog';
-import './style.scss';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
 const renderedFrom = camelCase(sidebarResource.opportunity);
 
 const Opportunities = () => {
-
   const {
     state: { user, selectedEntity, permissions, resources }
-  }: any = useData()
+  }: any = useData();
 
   const types = [
     {
@@ -60,7 +57,6 @@ const Opportunities = () => {
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-  ;
   const { generateColumns, checkStaticField } = useColumns();
   const { opportunityResource, opportunityApi } = opportunity;
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.opportunity));
@@ -187,8 +183,7 @@ const Opportunities = () => {
         field: 'outcome',
         term: ['Won', 'Lost']
       });
-    }
-    else {
+    } else {
       deepFilter = `${deepFilter}&pendingOutcome=1`;
     }
 
@@ -296,7 +291,7 @@ const Opportunities = () => {
             if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
             } else {
-              setDeleteRecord(null)
+              setDeleteRecord(null);
             }
             setIsConformDialogVisible(true);
           }}

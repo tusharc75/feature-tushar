@@ -1,12 +1,9 @@
-import DateFnsUtils from '@date-io/date-fns';
-import { Box, IconButton, TextField } from '@material-ui/core';
-import Grid from '@material-ui/core/Grid';
-import HistoryIcon from '@material-ui/icons/History';
-import NoteAddIcon from '@material-ui/icons/NoteAdd';
-import { Autocomplete } from '@material-ui/lab';
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { Box, IconButton, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import HistoryIcon from '@mui/icons-material/History';
+import NoteAddIcon from '@mui/icons-material/NoteAdd';
+import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase } from 'lodash';
-import moment from 'moment';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import SearchBox from 'src/components/Helpers/SearchBox';
@@ -19,7 +16,7 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import routes from '../../components/Helpers/Routes';
 import {
   CHILD_RESOURCE,
-  dateFormatForInputControl,
+  dateFormatToSend,
   gridLoadingTimeout,
   prepareDataForGrid,
   serializedAsset,
@@ -29,6 +26,8 @@ import {
 import CertificateHistoryDialog from './CertificateHistoryDialog';
 import IssueCertificateDialog from './IssueCertificateDialog';
 import axios, { CancelTokenSource } from 'axios';
+import CustomDatePicker from 'src/components/CustomDatePicker';
+import dayjs from 'dayjs';
 
 const renderedFrom = camelCase(CHILD_RESOURCE?.serializedAssetsCertification);
 
@@ -100,8 +99,8 @@ const SerializedAssetsCertification = () => {
       .then(({ data }) => {
         let rows = data?.data?.map((u, user) => {
           let finalObject = prepareDataForGrid(u, user);
-          const dateToQuery = moment().add(30, 'days').toDate();
-          const certificateExpiryDate = u.certificateExpiryDate ? moment(u.certificateExpiryDate).toDate() : null;
+          const dateToQuery = dayjs().add(30, 'day').toDate();
+          const certificateExpiryDate = u.certificateExpiryDate ? dayjs(u.certificateExpiryDate).toDate() : null;
           finalObject['canIssueCertificate'] = !certificateExpiryDate || certificateExpiryDate <= dateToQuery;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           return finalObject;
@@ -131,8 +130,8 @@ const SerializedAssetsCertification = () => {
       deepFilters.push({
         field: 'certificateIssueDate',
         term: {
-          from: moment(issueDuration?.from).format('MM/DD/YYYY'),
-          to: moment(issueDuration?.to).format('MM/DD/YYYY')
+          from: dateFormatToSend(issueDuration?.from),
+          to: dateFormatToSend(issueDuration?.to)
         }
       });
     }
@@ -140,8 +139,8 @@ const SerializedAssetsCertification = () => {
       deepFilters.push({
         field: 'certificateExpiryDate',
         term: {
-          from: moment(expireDuration?.from).format('MM/DD/YYYY'),
-          to: moment(expireDuration?.to).format('MM/DD/YYYY')
+          from: dateFormatToSend(expireDuration?.from),
+          to: dateFormatToSend(expireDuration?.to)
         }
       });
     }
@@ -228,7 +227,7 @@ const SerializedAssetsCertification = () => {
   return (
     <Fragment>
       <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
+        <Grid size={{ md: 4, sm: 11, xs: 10 }}>
           <CustomBreadCrumbs routes={[{ ...routes.serializedAssetsCertification, title: resources?.serializedAssetsCertification?.titlePlural }]} />
         </Grid>
       </Grid>
@@ -241,95 +240,63 @@ const SerializedAssetsCertification = () => {
               }}
               fullWidth
               options={assetOptions}
-              getOptionSelected={(option, val) => (option ? option.optionLabel === val.optionLabel : false)}
+              isOptionEqualToValue={(option, val) => (option ? option.optionLabel === val.optionLabel : false)}
               getOptionLabel={(option) => option.optionLabel}
               size="small"
               renderInput={(params) => <TextField {...params} label={'Asset'} variant="outlined" size="small" />}
             />
-            <MuiPickersUtilsProvider utils={DateFnsUtils}>
-              <KeyboardDatePicker
-                inputVariant="outlined"
-                variant="inline"
-                fullWidth
-                size="small"
-                format={dateFormatForInputControl}
-                maxDate={issueDuration.to}
-                label="From (Issue Date)"
-                autoOk
-                InputLabelProps={{
-                  shrink: true
-                }}
-                views={['year', 'month', 'date']}
-                value={issueDuration.from}
-                onChange={(date) => {
-                  setIssueDuration({ to: issueDuration.to, from: date });
-                }}
-                InputProps={{
-                  style: { minHeight: '38px' }
-                }}
-              />
-              <KeyboardDatePicker
-                inputVariant="outlined"
-                variant="inline"
-                fullWidth
-                size="small"
-                format={dateFormatForInputControl}
-                label="To (Issue Date)"
-                autoOk
-                InputLabelProps={{
-                  shrink: true
-                }}
-                views={['year', 'month', 'date']}
-                value={issueDuration.to}
-                onChange={(date) => {
-                  setIssueDuration({ from: issueDuration.from, to: date });
-                }}
-                InputProps={{
-                  style: { minHeight: '38px' }
-                }}
-              />
-              <KeyboardDatePicker
-                inputVariant="outlined"
-                variant="inline"
-                fullWidth
-                size="small"
-                format={dateFormatForInputControl}
-                maxDate={expireDuration.to}
-                label="From (Expiry Date)"
-                autoOk
-                InputLabelProps={{
-                  shrink: true
-                }}
-                views={['year', 'month', 'date']}
-                value={expireDuration.from}
-                onChange={(date) => {
-                  setExpireDuration({ to: expireDuration.to, from: date });
-                }}
-                InputProps={{
-                  style: { minHeight: '38px' }
-                }}
-              />
-              <KeyboardDatePicker
-                inputVariant="outlined"
-                variant="inline"
-                fullWidth
-                size="small"
-                format={dateFormatForInputControl}
-                label="To (Expiry Date)"
-                autoOk
-                InputLabelProps={{
-                  shrink: true
-                }}
-                views={['year', 'month', 'date']}
-                value={expireDuration.to}
-                onChange={(date) => {
-                  setExpireDuration({ from: expireDuration.from, to: date });
-                }}
-                InputProps={{
-                  style: { minHeight: '38px' }
-                }}
-              />
-            </MuiPickersUtilsProvider>
+            <CustomDatePicker
+              fullWidth
+              size="small"
+              maxDate={issueDuration.to}
+              label="From (Issue Date)"
+              value={issueDuration.from}
+              onChange={(date) => {
+                setIssueDuration({ to: issueDuration.to, from: date });
+              }}
+              InputProps={{
+                style: { minHeight: '38px' }
+              }}
+            />
+            <CustomDatePicker
+              inputVariant="outlined"
+              variant="inline"
+              fullWidth
+              size="small"
+              label="To (Issue Date)"
+              value={issueDuration.to}
+              onChange={(date) => {
+                setIssueDuration({ from: issueDuration.from, to: date });
+              }}
+              InputProps={{
+                style: { minHeight: '38px' }
+              }}
+            />
+            <CustomDatePicker
+              fullWidth
+              size="small"
+              maxDate={expireDuration.to}
+              label="From (Expiry Date)"
+              value={expireDuration.from}
+              onChange={(date) => {
+                setExpireDuration({ to: expireDuration.to, from: date });
+              }}
+              InputProps={{
+                style: { minHeight: '38px' }
+              }}
+            />
+            <CustomDatePicker
+              fullWidth
+              size="small"
+              label="To (Expiry Date)"
+              value={expireDuration.to}
+              onChange={(date) => {
+                setExpireDuration({ from: expireDuration.from, to: date });
+              }}
+              InputProps={{
+                style: { minHeight: '38px' }
+              }}
+            />
             <SearchBox onChange={handleSearch} width={'150px'} value={search} />
           </div>
         </div>

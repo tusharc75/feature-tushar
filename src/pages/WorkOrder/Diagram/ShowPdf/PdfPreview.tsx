@@ -2,10 +2,10 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import { fabric } from 'fabric';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { asyncForEach, b64toBlob, convertBlobToBase64 } from 'src/constants/helpers';
-import { Box, Button, FormControl, Grid, Typography } from '@material-ui/core';
-import CustomButton from 'src/components/Helpers/CustomButton';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { asyncForEach, convertBlobToBase64 } from 'src/constants/helpers';
+import { Box, FormControl, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 
 fabric.IText.prototype.initHiddenTextarea = (function (initHiddenTextarea) {
   return function () {
@@ -196,11 +196,13 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
       }
     });
 
-    axiosInstance().post('/user/pdf', { images: imageData, fileName: data?.url, attachmentId: data?.attachmentId }).then(() => {
-      setSelectedAttachment(null);
-      fetchData();
-      setSubmitting(false);
-    })
+    axiosInstance()
+      .post('/user/pdf', { images: imageData, fileName: data?.url, attachmentId: data?.attachmentId })
+      .then(() => {
+        setSelectedAttachment(null);
+        fetchData();
+        setSubmitting(false);
+      })
       .catch((err) => {
         toastConfig.setToastConfig(err);
         setSubmitting(false);
@@ -410,67 +412,72 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
 
   return (
     <Box>
-      <div className="flex flex-wrap items-center justify-between gap-2 min-h-[40px] my-2">
-        <div className={'flex gap-2 flex-wrap'}>
-          <Button disabled={loading || isDrawingMode || isHighlighterMode} variant="outlined" color="primary" size="small" onClick={handleAddText}>
-            Add Text
-          </Button>
-          <Button disabled={loading || isDrawingMode || isHighlighterMode} variant="outlined" color="primary" size="small" onClick={handleAddLine}>
-            Add Line
-          </Button>
-          <Button
+      <div className="my-2 flex min-h-[40px] flex-wrap items-center justify-between gap-2">
+        <div className={'flex flex-wrap gap-2'}>
+          <ThemeButton
             disabled={loading || isDrawingMode || isHighlighterMode}
-            variant="outlined"
-            color="primary"
-            size="small"
+            onClick={handleAddText}
+          >
+            Add Text
+          </ThemeButton>
+          <ThemeButton
+            disabled={loading || isDrawingMode || isHighlighterMode}
+            onClick={handleAddLine}
+          >
+            Add Line
+          </ThemeButton>
+          <ThemeButton
+            disabled={loading || isDrawingMode || isHighlighterMode}
             onClick={handleAddRectangle}
           >
             Add Rectangle
-          </Button>
-          <Button disabled={loading || isDrawingMode || isHighlighterMode} variant="outlined" color="primary" size="small" onClick={handleAddCircle}>
+          </ThemeButton>
+          <ThemeButton
+            disabled={loading || isDrawingMode || isHighlighterMode}
+            onClick={handleAddCircle}
+          >
             Add Circle
-          </Button>
-          <Button disabled={loading || isDrawingMode} variant="outlined" color="primary" size="small" onClick={toggleHighlighterMode}>
+          </ThemeButton>
+          <ThemeButton
+            disabled={loading || isDrawingMode}
+            onClick={toggleHighlighterMode}
+          >
             {isHighlighterMode ? 'Exit highlighter Mode' : 'Enter highlighter Mode'}
-          </Button>
-          <Button disabled={loading || isHighlighterMode} variant="outlined" color="primary" size="small" onClick={toggleDrawingMode}>
+          </ThemeButton>
+          <ThemeButton
+            disabled={loading || isDrawingMode}
+            onClick={toggleDrawingMode}
+          >
             {isDrawingMode ? 'Exit Drawing Mode' : 'Enter Drawing Mode'}
-          </Button>
+          </ThemeButton>
           {(isDrawingMode || isHighlighterMode) && (
-            <Button disabled={loading} variant="outlined" color="primary" size="small" onClick={handleUndo}>
+            <ThemeButton
+              disabled={loading}
+              onClick={handleUndo}
+            >
               Undo
-            </Button>
+            </ThemeButton>
           )}
           <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*" onChange={handleImageUpload} />
-          <Button
+          <ThemeButton
             disabled={loading || isDrawingMode || isHighlighterMode}
-            variant="outlined"
-            color="primary"
-            size="small"
             onClick={() => {
               fileInputRef.current.click();
-            }}
-          >
+            }}            >
             Upload Watermark
-          </Button>
-          <Button
+          </ThemeButton>
+          <ThemeButton
             disabled={loading || isDrawingMode || currentPageIndex === 0 || isHighlighterMode}
-            variant="outlined"
-            color="primary"
-            size="small"
             onClick={handlePreviousPage}
           >
             Previous Page
-          </Button>
-          <Button
+          </ThemeButton>
+          <ThemeButton
             disabled={loading || isDrawingMode || currentPageIndex === pageImages?.length - 1 || isHighlighterMode}
-            variant="outlined"
-            color="primary"
-            size="small"
             onClick={handleNextPage}
           >
             Next Page
-          </Button>
+          </ThemeButton>
         </div>
         {selectedObject && (
           <Box className="flex items-center gap-2">
@@ -481,24 +488,26 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
           </Box>
         )}
 
-        <div className="flex flex-wrap gap-2 items-center">
-          <CustomButton
+        <div className="flex flex-wrap items-center gap-2">
+          <ThemeButton
             disabled={isSubmitting || loading}
-            loading={isSubmitting}
-            variant="contained"
-            color="primary"
-            type="submit"
+            isLoading={isSubmitting}
+            buttonType="theme"
             onClick={handleSave}
           >
             Save
-          </CustomButton>
-          <Button disabled={loading} variant="contained" color="primary" size="small" onClick={handleDownload}>
+          </ThemeButton>
+          <ThemeButton
+            disabled={loading}
+            buttonType="theme"
+            onClick={handleDownload}
+          >
             Download
-          </Button>
+          </ThemeButton>
         </div>
       </div>
       <Grid container spacing={2}>
-        <Grid item xs={12} style={{ height: 'calc(100vh - 140px)', overflow: 'auto' }}>
+        <Grid size={{ xs: 12 }} style={{ height: 'calc(100vh - 140px)', overflow: 'auto' }}>
           {loading ? (
             <Box pt={2}>
               <Typography>Pdf Pages Loading...</Typography>

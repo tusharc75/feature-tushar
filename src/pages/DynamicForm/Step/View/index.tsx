@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { camelCase, startCase } from 'lodash';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { Box, Button, IconButton, MenuItem, Typography } from '@material-ui/core';
+import { Box, IconButton, MenuItem, Typography } from '@mui/material';
 import axiosInstance from 'src/axios/axiosInstance';
 import { MATERIAL_TYPE, gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
 import ManageStep from '../ManageStep';
@@ -10,8 +10,8 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../../../components/Shared/DetailsPage';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { deleteDisable, editDisable } from 'src/constants/messageHelpers';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import ResourceField from './ResourceField';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
@@ -24,6 +24,7 @@ import { flattenArray } from 'src/constants/columns';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { FiExternalLink } from 'react-icons/fi';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const View = ({
   step,
@@ -371,16 +372,14 @@ const View = ({
                     hasXpadding
                     leftSideContents={
                       !step?.linkWithMaterial ? (
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          size="small"
+                        <ThemeButton
                           onClick={() => {
                             setOpen({ open: true, id: null });
                           }}
+                          buttonType='theme'
                         >
                           Add
-                        </Button>
+                        </ThemeButton>
                       ) : null
                     }
                   />
@@ -408,17 +407,14 @@ const View = ({
             ) : (
               <>
                 <Box textAlign={'right'}>
-                  <Button
-                    className={'no-shadow'}
+                  <ThemeButton
                     onClick={() => {
                       setOpen({ open: true, id: dataRows[0] ? dataRows[0]?._id : null });
                     }}
-                    variant={'contained'}
-                    size="small"
-                    color="primary"
+                    buttonType='theme'
                   >
                     Edit
-                  </Button>
+                  </ThemeButton>
                 </Box>
                 <Box mt={2}>
                   <DetailsPage data={dataRows[0] || {}} fields={step?.fields?.map((f) => ({ fieldData: f }))} />

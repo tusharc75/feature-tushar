@@ -4,6 +4,7 @@ import { objectStore, findOne } from '../../constants/indexdbhelper';
 import axiosInstance from '../../axios/axiosInstance';
 import { autoCalculateSpecificFields, CURReplaceByCurrencySingle } from '../../constants/formulaUtility';
 import { unionBy, uniq, map, isArray, isObject } from 'lodash';
+import dayjs from 'dayjs';
 
 export const fetch_rental_product_fields = async (currency, isOffline) => {
     var data;
@@ -119,12 +120,32 @@ export const sumOnParent = (parent, child, fields, currency) => {
         else if (element.type === "percent") {
             resetFields.push({ fieldName: element.fieldName, type: "percent" })
         }
+        else if (element.type === "date") {
+            resetFields.push({ fieldName: element.fieldName, type: "date" })
+        }
     })
     const sumValues: any = {}
+    const minMaxDates: any = {}
+
     resetFields.forEach((_field: any) => {
         sumValues[_field.fieldName] = 0;
+        minMaxDates[_field.fieldName] = null;
         child.forEach(element => {
-            sumValues[_field.fieldName] += element[_field.fieldName] ? element[_field.fieldName] : 0;
+            if (_field.type === 'date') {
+                if (_field.fieldName?.includes("startDate")) {
+                    if (element?.[_field.fieldName] && (!minMaxDates[_field.fieldName] || new Date(element?.[_field.fieldName]) < minMaxDates[_field.fieldName])) {
+                        minMaxDates[_field.fieldName] = new Date(element?.[_field.fieldName]);
+                    }
+                }
+                else {
+                    if (element?.[_field.fieldName] && (!minMaxDates[_field.fieldName] || new Date(element?.[_field.fieldName]) > minMaxDates[_field.fieldName])) {
+                        minMaxDates[_field.fieldName] = new Date(element?.[_field.fieldName]);
+                    }
+                }
+            }
+            else {
+                sumValues[_field.fieldName] += element[_field.fieldName] ? element[_field.fieldName] : 0;
+            }
         });
     });
     parent.forEach((row) => {
@@ -132,15 +153,18 @@ export const sumOnParent = (parent, child, fields, currency) => {
             if (ele.type === "amount") {
                 row[ele.fieldName] = sumValues[ele.fieldName];
             }
-            else {
-                if (ele.fieldName === "discountPercentage") {
-                    row[ele.fieldName] = parseFloat(((sumValues[`discount_${currency?.toLowerCase()}`] / sumValues[`totalPrice_${currency?.toLowerCase()}`]) * 100)?.toFixed(2));
-                }
-                else if (ele.fieldName === "taxPercentage") {
-                    row[ele.fieldName] = parseFloat(((sumValues[`tax_${currency?.toLowerCase()}`] / (sumValues[`totalPrice_${currency?.toLowerCase()}`] - sumValues[`discount_${currency?.toLowerCase()}`])) * 100)?.toFixed(2));
-                }
-                else if (ele.type === 'percent') {
-                    row[ele.fieldName] = parseFloat((sumValues[ele.fieldName] / child?.length)?.toFixed(2));
+            else if (ele.fieldName === "discountPercentage") {
+                row[ele.fieldName] = parseFloat(((sumValues[`discount_${currency?.toLowerCase()}`] / sumValues[`totalPrice_${currency?.toLowerCase()}`]) * 100)?.toFixed(2));
+            }
+            else if (ele.fieldName === "taxPercentage") {
+                row[ele.fieldName] = parseFloat(((sumValues[`tax_${currency?.toLowerCase()}`] / (sumValues[`totalPrice_${currency?.toLowerCase()}`] - sumValues[`discount_${currency?.toLowerCase()}`])) * 100)?.toFixed(2));
+            }
+            else if (ele.type === 'percent') {
+                row[ele.fieldName] = parseFloat((sumValues[ele.fieldName] / child?.length)?.toFixed(2));
+            }
+            else if (ele.type === 'date') {
+                if (minMaxDates[ele.fieldName]) {
+                    row[ele.fieldName] = dayjs(minMaxDates[ele.fieldName]);
                 }
             }
         })
@@ -148,10 +172,8 @@ export const sumOnParent = (parent, child, fields, currency) => {
     return parent;
 }
 
-export const resetValueZero = (material, fields, parentId, bulkUpdateValues = null) => {
+export const resetValueZero = (material, fields, parentId) => {
     const resetFields = []
-    const updateFields = []
-
     fields.forEach((element) => {
         if (element.type === "converter" || element.type === "currencyAmount" || element.isConverter === true) {
             if (element.type !== "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
@@ -175,34 +197,17 @@ export const resetValueZero = (material, fields, parentId, bulkUpdateValues = nu
         else if (element.type === "percent") {
             resetFields.push(element.fieldName)
         }
-        else if (bulkUpdateValues && bulkUpdateValues[element.fieldName]) {
-            updateFields.push(element.fieldName)
-        }
     })
     const result = [];
     material?.filter((e) => e.parentId === parentId)?.forEach((child) => {
         resetFields.forEach((fieldName) => {
-            if (bulkUpdateValues?.hasOwnProperty(fieldName)) {
-                child[fieldName] = 0;
-            }
+            child[fieldName] = 0;
         })
-        if (bulkUpdateValues && updateFields?.length) {
-            updateFields.forEach((fieldName) => {
-                child[fieldName] = bulkUpdateValues[fieldName];
-            })
-        }
         result.push(child)
         material?.filter((e) => e?.parentId === child?._id)?.forEach((subChild) => {
             resetFields.forEach((fieldName) => {
-                if (bulkUpdateValues?.hasOwnProperty(fieldName)) {
-                    subChild[fieldName] = 0;
-                }
+                child[fieldName] = 0;
             })
-            if (bulkUpdateValues && updateFields?.length) {
-                updateFields.forEach((fieldName) => {
-                    subChild[fieldName] = bulkUpdateValues[fieldName];
-                })
-            }
             result.push(subChild)
         })
     })
@@ -219,7 +224,7 @@ const calculateParentRows = (material: any[], rows: any, fields: any[], rowData:
     }
 };
 
-export const calculateRowsField = async (material: any[], values: any, fields: any[], rowData: any, currency: any, resetChild: any = true) => {
+export const calculateRowsField = async (material: any[], values: any, fields: any[], rowData: any, currency: any) => {
     currency = (currency || 'USD')?.toLowerCase()
     let rows: any = []
     let childs: any = []
@@ -233,9 +238,7 @@ export const calculateRowsField = async (material: any[], values: any, fields: a
             await calculateParentRows(material, rows, fields, rowData, parent, currency)
             rows = [...rows, ...parent]
         }
-        if (resetChild) {
-            childs = resetValueZero(material, fields, rowData._id)
-        }
+        childs = resetValueZero(material, fields, rowData._id)
     }
     const result: any = [];
     [...rows, ...childs]?.forEach((e: any) => {
@@ -253,7 +256,7 @@ export const getNestedSubRows = (obj, original) => {
     }
 };
 
-export const bulkUpdate = (values, selectedProducts, material, allFields, currency) => {
+export const bulkUpdate = (values, selectedProducts, material, allFields, currency, priorityToParent = false) => {
 
     var rows: any = []
 
@@ -263,38 +266,49 @@ export const bulkUpdate = (values, selectedProducts, material, allFields, curren
         }
     }
 
-    selectedProducts.filter(d => !selectedProducts.some(obj => obj._id === d.parentId)).forEach(element => {
+    let parentIds = []
 
+    selectedProducts.forEach(element => {
         const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
-        rows.push({ ...element, ...calValues })
-
-        const child: any = resetValueZero(material, allFields, element?._id, calValues)
-        rows = [...rows, ...child]
-        if (element.parentId) {
-            var parent: any = unionBy(rows, material, '_id').filter((e: any) => e._id === element.parentId)
-            const sameParent: any = unionBy(rows, material, '_id').filter((e: any) => e.parentId === element.parentId && e._id !== element._id)
-            parent = sumOnParent(parent, [...sameParent, { ...element, ...calValues }], allFields, currency)
-            rows = [...rows, ...parent]
+        if (element?.parentId) {
+            rows.push({ ...element, ...calValues })
+            parentIds.push(element?.parentId)
+        } else if (!material?.find((e) => e.parentId === element._id)) {
+            rows.push({ ...element, ...calValues })
         }
-    });
+    })
 
-    let packageProducts = selectedProducts.filter((ele) => ele.parentId !== null && !selectedProducts.some(f => f._id === ele.parentId));
-    if (packageProducts.length) {
-        const packageIds = uniq(map(packageProducts, 'parentId'))
-        packageIds.forEach((_packageId) => {
-            var packages: any = material.filter((e) => e._id === _packageId)
-            const product: any = material.filter((e) => e.parentId === _packageId)
-            product.forEach((element) => {
-                if (packageProducts.filter((e) => element._id === e._id).length) {
-                    const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
-                    rows.push({ ...element, ...calValues })
-                    for (var key in calValues) {
-                        element[key] = calValues[key];
+    parentIds = uniq(parentIds)
+
+    if (parentIds.length) {
+        parentIds.forEach((parentId) => {
+            let parent: any = material.find((e) => e._id === parentId)
+            if (parent) {
+                const child = material.filter((e) => e.parentId === parentId);
+                child?.forEach((ele) => {
+                    if (rows?.find((e) => e?._id === ele?._id)) {
+                        Object.assign(ele, rows?.find((e) => e?._id === ele?._id))
                     }
+                })
+                if (selectedProducts?.find((e) => e._id === parent._id)) {
+                    const calValues = autoCalculateSpecificFields(values, { ...parent, ...values }, allFields)
+                    Object.assign(parent, calValues)
                 }
-            })
-            packages = sumOnParent(packages, product, allFields, currency)
-            rows = [...rows, ...packages]
+                if (priorityToParent) {
+                    rows.push(parent)
+                    const resetChilds = resetValueZero(child, allFields, parent._id)
+                    rows?.forEach((ele) => {
+                        if (resetChilds?.find((e) => e?._id === ele?._id)) {
+                            Object.assign(ele, resetChilds?.find((e) => e?._id === ele?._id))
+                        }
+                    })
+                }
+                else {
+                    const tempParent = sumOnParent([parent], child, allFields, currency)
+                    Object.assign(parent, tempParent[0])
+                    rows.push(parent)
+                }
+            }
         })
     }
 

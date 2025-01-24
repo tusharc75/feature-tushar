@@ -1,4 +1,5 @@
-import { Box, Grid, Typography, Paper } from '@material-ui/core';
+import { Box, Typography, Paper } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import styles from './dashboard.module.scss';
 
 const StaticCards = ({ chartData }: any) => {
@@ -9,7 +10,7 @@ const StaticCards = ({ chartData }: any) => {
     <>
       {chartData?.bookedData &&
         Object.keys(chartData?.bookedData).map((key, index) => (
-          <Grid item xs={12} sm={6} md={3} key={key + index}>
+          <Grid size={{xs:12, sm:6, md:3}}  key={key + index}>
             <Box p={2} component={Paper} height={'100%'} display="flex" flexDirection="column" justifyContent="space-between">
               <Box>
                 <Typography className={styles.price}>{chartData?.bookedData[key] ? chartData?.bookedData[key] : 0}</Typography>
@@ -25,7 +26,7 @@ const StaticCards = ({ chartData }: any) => {
         ))}
       {chartData?.offeredData &&
         Object.keys(chartData?.offeredData).map((key, index) => (
-          <Grid item xs={12} sm={6} md={3} key={key + index}>
+          <Grid size={{xs:12, sm:6, md:3}} key={key + index}>
             <Box p={2} component={Paper} height={'100%'} display="flex" flexDirection="column" justifyContent="space-between">
               <Box>
                 <Typography className={styles.price}>{chartData?.offeredData[key] ? chartData?.offeredData[key] : 0}</Typography>

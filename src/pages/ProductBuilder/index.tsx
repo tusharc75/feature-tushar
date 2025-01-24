@@ -1,8 +1,7 @@
-import { Box, MenuItem } from '@material-ui/core';
-import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
+import { Box, MenuItem } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { camelCase } from 'lodash';
-import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
@@ -17,7 +16,7 @@ import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import routes from '../../components/Helpers/Routes';
-import { dateFormat, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { displayDate, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CreateNewDialog from './CreateNewDialog';
 import axios, { CancelTokenSource } from 'axios';
 
@@ -59,10 +58,10 @@ const ProductBuilder = () => {
       sortable: false,
       Cell: ({ row }) =>
         row.original?.createdByDate ? (
-          <h5 className="createBy" title={`${row.original?.createdByDate} • ${moment(row.original?.createdByDate).format(dateFormat)}`}>
+          <h5 className="createBy" title={`${row.original?.createdByDate} • ${displayDate(row.original?.createdByDate)}`}>
             {row.original?.createdByDate}
             <span className="hidden">&nbsp;-&nbsp;</span>
-            <span className="createdAtTime badge-date">{moment(row.original?.createdByDate)?.format(dateFormat)}</span>
+            <span className="createdAtTime badge-date">{displayDate(row.original?.createdByDate)}</span>
           </h5>
         ) : (
           <NoDataCell />
@@ -198,12 +197,12 @@ const ProductBuilder = () => {
         <MenuItem
           disabled={selectedRecords?.every((e) => !e.canDelete) ? true : false}
           onClick={() => {
-            if (selectedRecords.length === 1){
+            if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-              }else{
-                setDeleteRecord(null)
-              }
-              setShowDeleteConfirmBox(true);
+            } else {
+              setDeleteRecord(null);
+            }
+            setShowDeleteConfirmBox(true);
           }}
         >
           {`Delete (${selectedRecords?.length})`}
@@ -246,8 +245,12 @@ const ProductBuilder = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.productBuilder?.titleSingular?.toLowerCase()} :
-              ${deleteRecord?.name || ''}` : `selected ${resources?.productBuilder?.titlePlural?.toLowerCase()}`} ?`}
+            message={`Are you sure you want to delete ${
+              deleteRecord
+                ? `${resources?.productBuilder?.titleSingular?.toLowerCase()} :
+              ${deleteRecord?.name || ''}`
+                : `selected ${resources?.productBuilder?.titlePlural?.toLowerCase()}`
+            } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

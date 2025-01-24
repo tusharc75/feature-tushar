@@ -1,7 +1,8 @@
-import { Box, makeStyles } from '@material-ui/core';
-import moment from 'moment';
+import { Box, Theme } from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import dayjs from 'dayjs';
 import { useCallback, useContext, useEffect, useState } from 'react';
-import { momentLocalizer, View } from 'react-big-calendar';
+import { View, dayjsLocalizer } from 'react-big-calendar';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomCalendar from 'src/components/CustomCalendar';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -9,15 +10,13 @@ import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 
-const localizer = momentLocalizer(moment);
-
 type Props = {};
 
 const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   topbar: {
     backgroundColor: 'var(--dark-secondary, #fff)',
     padding: '10px 10px',
@@ -43,8 +42,8 @@ const CalendarView = (props: Props) => {
   const [events, setEvents] = useState([]);
   const [range, setRange] = useState();
   const [dateRange, setDateRange] = useState({
-    estimateStartDate: moment().startOf('month').format('MM/DD/YYYY'),
-    estimateEndDate: moment().endOf('month').format('MM/DD/YYYY')
+    estimateStartDate: dayjs().startOf('month').format('MM/DD/YYYY'),
+    estimateEndDate: dayjs().endOf('month').format('MM/DD/YYYY')
   });
   const [view, setView] = useState<View>('month');
   const [converPlanning, setConvertPlanning] = useState({ open: false, data: null });
@@ -66,7 +65,7 @@ const CalendarView = (props: Props) => {
           }));
         setEvents(eventsData);
       })
-      .catch((err) => {});
+      .catch((err) => { });
   }, []);
 
   const onRangeChange = useCallback(
@@ -82,6 +81,8 @@ const CalendarView = (props: Props) => {
     },
     [setView]
   );
+
+  const localizer = dayjsLocalizer(dayjs);
 
   return (
     <>
@@ -106,7 +107,7 @@ const CalendarView = (props: Props) => {
         </div>
         <div className="relative">
           <CustomCalendar
-            defaultDate={moment().toDate()}
+            defaultDate={dayjs().toDate()}
             defaultView="day"
             events={events}
             localizer={localizer}
@@ -115,8 +116,8 @@ const CalendarView = (props: Props) => {
             onNavigate={(date) => {
               // if (view === 'month') {
               //   setDateRange({
-              //     estimateStartDate: moment(date).startOf('month').format('MM/DD/YYYY'),
-              //     estimateEndDate: moment(date).endOf('month').format('MM/DD/YYYY')
+              //     estimateStartDate: dayjs(date).startOf('month').format('MM/DD/YYYY'),
+              //     estimateEndDate: dayjs(date).endOf('month').format('MM/DD/YYYY')
               //   });
               // }
             }}

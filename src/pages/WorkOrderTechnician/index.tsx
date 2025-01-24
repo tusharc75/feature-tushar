@@ -1,7 +1,7 @@
-import { Box, Checkbox, FormControlLabel, FormGroup, IconButton, Popover } from '@material-ui/core';
-import { Close } from '@material-ui/icons';
-import DonutLargeIcon from '@material-ui/icons/DonutLarge';
-import RefreshIcon from '@material-ui/icons/Refresh';
+import { Close } from '@mui/icons-material';
+import DonutLargeIcon from '@mui/icons-material/DonutLarge';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import { Box, Checkbox, FormControlLabel, FormGroup, IconButton, Popover } from '@mui/material';
 import { camelCase } from 'lodash';
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { MdViewWeek } from 'react-icons/md';
@@ -15,52 +15,17 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import CustomFilter from 'src/components/Helpers/CustomFilter';
 import routes from 'src/components/Helpers/Routes';
 import IconButtonTabs from 'src/components/IconButtonTabs';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHeader/NewActionButton';
-import {
-  WORKORDER_SERVICE_STATUS,
-  WORKORDER_TECHNICIAN_SERVICE_STATUS,
-  cn,
-  sidebarResource,
-  workOrder,
-  workOrderColormap
-} from 'src/constants/helpers';
+import { WORKORDER_SERVICE_STATUS, WORKORDER_TECHNICIAN_SERVICE_STATUS, sidebarResource, workOrder, workOrderIconMap } from 'src/constants/helpers';
 import CardView from './CardView';
 import GridView, { GridViewRef } from './GridView';
-
-const FIELD_TO_FILTER = [
-  {
-    key: 'serviceMaster',
-    fieldName: 'service',
-    fieldLabel: sidebarResource.serviceMaster,
-    resource: sidebarResource.serviceMaster,
-    type: 'dropDown'
-  },
-  {
-    key: 'workOrder',
-    fieldName: '_id',
-    fieldLabel: sidebarResource?.workOrder,
-    resource: sidebarResource.workOrder,
-    type: 'dropDown'
-  },
-  {
-    key: 'repairOrder',
-    fieldName: 'repairOrder',
-    fieldLabel: sidebarResource?.repairOrder,
-    resource: sidebarResource?.repairOrder,
-    type: 'dropDown'
-  },
-  {
-    key: 'productionOrder',
-    fieldName: 'productionOrder',
-    fieldLabel: sidebarResource?.productionOrder,
-    resource: sidebarResource?.productionOrder,
-    type: 'dropDown'
-  }
-];
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { BiFilterAlt } from 'react-icons/bi';
+import DisplayFilterChip from 'src/pages/Reports/tables/DisplayFilterChip';
+import Filter from 'src/components/Filter';
 
 type ViewType = 'card-view' | 'table-view';
 type TableViewStatus =
@@ -88,35 +53,121 @@ const WorkOrderTechnician = () => {
   };
 
   const {
-    state: { permissions, resources }
+    state: {
+      permissions,
+      resources,
+      user: { user }
+    }
   }: any = useData();
 
   const ref: any = useRef();
 
-  const [viewType, setViewType] = useState<ViewType>('table-view');
+  const FIELD_TO_FILTER = [
+    {
+      fieldData: {
+        _id: '630dc2429ec41869032395b2',
+        fieldName: 'service',
+        fieldLabel: resources?.serviceMaster?.titlePlural,
+        lookup: true,
+        lookupResource: sidebarResource.serviceMaster,
+        resource: sidebarResource.workOrderTechnician,
+        type: 'dropDown',
+        order: 1,
+        required: false,
+        sectionName: 'Work Order Technician Filter',
+        isTooltip: false,
+        editAble: false,
+        brand: user?.brand,
+        roleType: 0,
+        sectionProperties: ''
+      },
+      isRead: permissions && permissions?.serviceMaster ? permissions?.serviceMaster?.isRead : false,
+      isCreate: permissions && permissions?.serviceMaster ? permissions?.serviceMaster?.isCreate : false,
+      isUpdate: permissions && permissions?.serviceMaster ? permissions?.serviceMaster?.isUpdate : false
+    },
+    {
+      fieldData: {
+        _id: '630dc2429ec41869032395b3',
+        fieldName: '_id',
+        fieldLabel: resources?.workOrder?.titlePlural,
+        lookup: true,
+        lookupResource: sidebarResource.workOrder,
+        resource: sidebarResource.workOrderTechnician,
+        type: 'dropDown',
+        order: 2,
+        required: false,
+        sectionName: 'Work Order Technician Filter',
+        isTooltip: false,
+        editAble: false,
+        brand: user?.brand,
+        roleType: 0,
+        sectionProperties: ''
+      },
+      isRead: permissions && permissions?.workOrder ? permissions?.workOrder?.isRead : false,
+      isCreate: permissions && permissions?.workOrder ? permissions?.workOrder?.isCreate : false,
+      isUpdate: permissions && permissions?.workOrder ? permissions?.workOrder?.isUpdate : false
+    },
+    {
+      fieldData: {
+        _id: '630dc2429ec41869032395b4',
+        fieldName: 'repairOrder',
+        fieldLabel: resources?.repairOrder?.titlePlural,
+        lookup: true,
+        lookupResource: sidebarResource.repairOrder,
+        resource: sidebarResource.workOrderTechnician,
+        type: 'dropDown',
+        order: 3,
+        required: false,
+        sectionName: 'Work Order Technician Filter',
+        isTooltip: false,
+        editAble: false,
+        brand: user?.brand,
+        roleType: 0,
+        sectionProperties: ''
+      },
+      isRead: permissions && permissions?.repairOrder ? permissions?.repairOrder?.isRead : false,
+      isCreate: permissions && permissions?.repairOrder ? permissions?.repairOrder?.isCreate : false,
+      isUpdate: permissions && permissions?.repairOrder ? permissions?.repairOrder?.isUpdate : false
+    },
+    {
+      fieldData: {
+        _id: '630dc2429ec41869032395b5',
+        fieldName: 'productionOrder',
+        fieldLabel: resources?.productionOrder?.titlePlural,
+        lookup: true,
+        lookupResource: sidebarResource.productionOrder,
+        resource: sidebarResource.workOrderTechnician,
+        type: 'dropDown',
+        order: 4,
+        required: false,
+        sectionName: 'Work Order Technician Filter',
+        isTooltip: false,
+        editAble: false,
+        brand: user?.brand,
+        roleType: 0,
+        sectionProperties: ''
+      },
+      isRead: permissions && permissions?.productionOrder ? permissions?.productionOrder?.isRead : false,
+      isCreate: permissions && permissions?.productionOrder ? permissions?.productionOrder?.isCreate : false,
+      isUpdate: permissions && permissions?.productionOrder ? permissions?.productionOrder?.isUpdate : false
+    }
+  ];
+
+  const [viewType, setViewType] = useState<ViewType>(() => {
+    return (localStorage.getItem(`${renderedFrom}_view`) as ViewType) || 'table-view';
+  });
   const [tableViewStatus, setTableViewStatus] = useState<TableViewStatus>('Pending');
-  const [fieldToFilterList, setFieldToFilterList] = useState([]);
   const [selectedServiceStatus, setSelectedServiceStatus] = useState([
     WORKORDER_SERVICE_STATUS.pending,
     WORKORDER_SERVICE_STATUS.inProgress,
     WORKORDER_SERVICE_STATUS.completed
   ]);
-  const [filterQuery, setFilterQuery] = useState({
-    filterById: [],
-    deepFilter: []
-  });
+  const [showFilter, setShowFilter] = useState(false);
+  const [filterByIds, setFilterByIds] = useState([]);
+  const [filterTerm, setFilterTerm] = useState({});
+  const [filterQuery, setFilterQuery] = useState([]);
   const [showServiceCompleteConfirmBox, setShowServiceCompleteConfirmBox] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    const options: any = [];
-    FIELD_TO_FILTER?.forEach((item) => {
-      if (permissions[item.key] && permissions[item.key]?.isRead === true) {
-        options.push(item);
-      }
-    });
-    setFieldToFilterList(options);
-  }, []);
 
   const onClickRefreshIcon = () => {
     if (viewType === 'card-view') {
@@ -130,7 +181,7 @@ const WorkOrderTechnician = () => {
   const handleCompleteService = () => {
     setIsSubmitting(true);
     const data = selectedRecords
-      ?.filter((s) => s?.status === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)
+      ?.filter((s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)
       ?.map((_s) => ({
         workOrder: _s?.workOrderDetail?._id,
         service: _s?.materialId,
@@ -157,7 +208,8 @@ const WorkOrderTechnician = () => {
         {
           disabled:
             selectedRecords?.length &&
-            selectedRecords?.filter((s) => s?.status === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length === selectedRecords?.length
+            selectedRecords?.filter((s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length ===
+              selectedRecords?.length
               ? false
               : true,
           label: `Complete Service(s)`,
@@ -166,52 +218,66 @@ const WorkOrderTechnician = () => {
       ]
     };
     return items;
-  }, [selectedRecords]);
+  }, [selectedRecords, viewType]);
 
   const statusMenuItems = useMemo(() => {
     return [
       {
-        label: (
-          <span className="flex items-center gap-2">
-            <span className={cn('block h-2 w-2 rounded-full', workOrderColormap[WORKORDER_SERVICE_STATUS.pending].indicator)} />
-            {WORKORDER_SERVICE_STATUS.pending}
-          </span>
-        ),
+        label: WORKORDER_SERVICE_STATUS.pending,
         selected: tableViewStatus === WORKORDER_SERVICE_STATUS.pending,
-        value: WORKORDER_SERVICE_STATUS.pending
+        value: WORKORDER_SERVICE_STATUS.pending,
+        startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.pending]
       },
       {
-        label: (
-          <span className="flex items-center gap-2">
-            <span className={cn('block h-2 w-2 rounded-full', workOrderColormap[WORKORDER_SERVICE_STATUS.inProgress].indicator)} />
-            {WORKORDER_SERVICE_STATUS.inProgress}
-          </span>
-        ),
+        label: WORKORDER_SERVICE_STATUS.inProgress,
         selected: tableViewStatus === WORKORDER_SERVICE_STATUS.inProgress,
-        value: WORKORDER_SERVICE_STATUS.inProgress
+        value: WORKORDER_SERVICE_STATUS.inProgress,
+        startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.inProgress]
       },
       {
-        label: (
-          <span className="flex items-center gap-2">
-            <span className={cn('block h-2 w-2 rounded-full', workOrderColormap[WORKORDER_SERVICE_STATUS.completed].indicator)} />
-            {WORKORDER_SERVICE_STATUS.completed}
-          </span>
-        ),
+        label: WORKORDER_SERVICE_STATUS.completed,
         selected: tableViewStatus === WORKORDER_SERVICE_STATUS.completed,
-        value: WORKORDER_SERVICE_STATUS.completed
+        value: WORKORDER_SERVICE_STATUS.completed,
+        startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.completed]
       },
       {
-        label: (
-          <span className="flex items-center gap-2">
-            <span className={cn('block h-2 w-2 rounded-full', workOrderColormap[WORKORDER_SERVICE_STATUS.inProgressByOther].indicator)} />
-            {WORKORDER_SERVICE_STATUS.inProgressByOther}
-          </span>
-        ),
+        label: WORKORDER_SERVICE_STATUS.inProgressByOther,
         selected: tableViewStatus === WORKORDER_SERVICE_STATUS.inProgressByOther,
-        value: WORKORDER_SERVICE_STATUS.inProgressByOther
+        value: WORKORDER_SERVICE_STATUS.inProgressByOther,
+        startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.inProgressByOther]
       }
     ];
   }, [tableViewStatus]);
+
+  const getQueryString = (filterByIdsP = filterByIds) => {
+    if (filterByIdsP?.length > 0) {
+      const filterById = filterByIdsP
+        ?.filter((f) => f?.term?.length > 0)
+        ?.map((f) => {
+          const term = filterTerm[f?.field] === '$nin' ? '$nin' : '$in';
+          return {
+            field: f?.field,
+            term: {
+              [term]: f?.term?.map?.((d: any) => d.optionValue)
+            }
+          };
+        });
+      if (filterById?.length > 0) {
+        return filterById;
+      }
+    }
+    return [];
+  };
+
+  const handleApplyFilter = (filterByIdsP = filterByIds) => {
+    setShowFilter(false);
+    const queryString = getQueryString(filterByIdsP);
+    setFilterQuery(queryString);
+  };
+
+  useEffect(() => {
+    localStorage.setItem(`${renderedFrom}_view`, viewType);
+  }, [viewType]);
 
   return (
     <Box className="main-container-v1">
@@ -219,57 +285,39 @@ const WorkOrderTechnician = () => {
         <Box className="nav-v1">
           <CustomBreadCrumbs routes={[{ ...routes.workOrderTechnician, title: resources?.workOrderTechnician?.titlePlural }]} />
         </Box>
+        <div className="ml-auto flex items-center gap-2">
+          {viewType === 'card-view' && (
+            <StatusSelector selectedServiceStatus={selectedServiceStatus} setSelectedServiceStatus={setSelectedServiceStatus} />
+          )}
+          <IconButtonTabs
+            onItemClick={resetSelectedRecords}
+            items={
+              [
+                {
+                  value: 'card-view',
+                  icon: <MdViewWeek />,
+                  tooltip: 'Card View'
+                },
+                {
+                  value: 'table-view',
+                  icon: <TfiLayoutListThumbAlt />,
+                  tooltip: 'Table View'
+                }
+              ] as const
+            }
+            setValue={setViewType}
+            value={viewType}
+          />
+          <HtmlTooltip title={'Refresh'}>
+            <IconButton size="small" onClick={onClickRefreshIcon} style={{ width: 32, height: 32 }}>
+              <RefreshIcon fontSize="small" />
+            </IconButton>
+          </HtmlTooltip>
+        </div>
       </Box>
       <Box className={`detail-container-v1`}>
-        <div className="header-panel pb-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex gap-2">
-              {viewType === 'table-view' && (
-                <ButtonMenu
-                  showChevron={true}
-                  items={statusMenuItems}
-                  onItemClick={(e, item) => {
-                    setTableViewStatus(item.value);
-                  }}
-                >
-                  <span className="flex items-center gap-2">
-                    <span className={cn('block h-2 w-2 rounded-full', workOrderColormap[tableViewStatus].indicator)} />
-                    Status: {tableViewStatus}
-                  </span>
-                </ButtonMenu>
-              )}
-            </div>
-            <div className="ml-auto flex items-center gap-2">
-              {viewType === 'card-view' && (
-                <StatusSelector selectedServiceStatus={selectedServiceStatus} setSelectedServiceStatus={setSelectedServiceStatus} />
-              )}
-              <IconButtonTabs
-                onItemClick={resetSelectedRecords}
-                items={
-                  [
-                    {
-                      value: 'card-view',
-                      icon: <MdViewWeek />,
-                      tooltip: 'Card View'
-                    },
-                    {
-                      value: 'table-view',
-                      icon: <TfiLayoutListThumbAlt />,
-                      tooltip: 'Table View'
-                    }
-                  ] as const
-                }
-                setValue={setViewType}
-                value={viewType}
-              />
-              <HtmlTooltip title={'Refresh'}>
-                <IconButton size="small" onClick={onClickRefreshIcon} style={{ width: 32, height: 32 }}>
-                  <RefreshIcon fontSize="small" />
-                </IconButton>
-              </HtmlTooltip>
-            </div>
-          </div>
-          {viewType === 'card-view' && (
+        {viewType === 'card-view' && (
+          <div className="header-panel pb-0 pt-0">
             <DetailsPageHeader
               isAddButtonVisible={false}
               isActionButtonVisible={false}
@@ -277,16 +325,35 @@ const WorkOrderTechnician = () => {
               newActionButtonProps={newActionButtonProps}
               actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
               leftSideContents={
-                <div className="flex-grow">
-                  <CustomFilter field={fieldToFilterList} position="right" setFilterQuery={setFilterQuery} />
+                <div className="flex items-center gap-2">
+                  <ThemeButton
+                    mobileTooltip="Apply Filters"
+                    startIcon={<BiFilterAlt className="-ml-1 mr-1 mt-[1px]" />}
+                    iconForMobile={<BiFilterAlt />}
+                    onClick={() => {
+                      setShowFilter(true);
+                    }}
+                  >
+                    Show Filters
+                  </ThemeButton>
+                  <DisplayFilterChip
+                    filterTerm={filterTerm}
+                    resourceColumns={FIELD_TO_FILTER}
+                    deepFilters={[]}
+                    filterByIds={filterByIds}
+                    fetchResourceData={(deepFilter, filterById) => {
+                      handleApplyFilter(filterById);
+                    }}
+                    setDeepFilters={null}
+                    setFilterByIds={setFilterByIds}
+                  />
                 </div>
               }
               hasXpadding={false}
               hasYpadding={false}
-              className="pt-4"
             />
-          )}
-        </div>
+          </div>
+        )}
 
         {viewType === 'card-view' && (
           <div className="pt-2">
@@ -294,7 +361,7 @@ const WorkOrderTechnician = () => {
           </div>
         )}
         {viewType === 'table-view' && (
-          <div className="pt-4">
+          <div className="">
             <GridView
               renderedFrom={renderedFrom}
               state={tableState}
@@ -306,8 +373,40 @@ const WorkOrderTechnician = () => {
                   newActionButtonProps={newActionButtonProps}
                   actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
                   leftSideContents={
-                    <div className="flex-grow">
-                      <CustomFilter field={fieldToFilterList} position="right" setFilterQuery={setFilterQuery} />
+                    <div className="flex items-center gap-2">
+                      <ButtonMenu
+                        showChevron={true}
+                        items={statusMenuItems}
+                        onItemClick={(e, item) => {
+                          setTableViewStatus(item.value);
+                        }}
+                      >
+                        <span className="flex items-center gap-2  [&_svg]:text-[18px]">
+                          {workOrderIconMap[tableViewStatus]}
+                          Status: {tableViewStatus}
+                        </span>
+                      </ButtonMenu>
+                      <ThemeButton
+                        mobileTooltip="Apply Filters"
+                        startIcon={<BiFilterAlt className="-ml-1 mr-1 mt-[1px]" />}
+                        iconForMobile={<BiFilterAlt />}
+                        onClick={() => {
+                          setShowFilter(true);
+                        }}
+                      >
+                        Show Filters
+                      </ThemeButton>
+                      <DisplayFilterChip
+                        filterTerm={filterTerm}
+                        resourceColumns={FIELD_TO_FILTER}
+                        deepFilters={[]}
+                        filterByIds={filterByIds}
+                        fetchResourceData={(deepFilter, filterById) => {
+                          handleApplyFilter(filterById);
+                        }}
+                        setDeepFilters={null}
+                        setFilterByIds={setFilterByIds}
+                      />
                     </div>
                   }
                   hasXpadding={false}
@@ -332,6 +431,26 @@ const WorkOrderTechnician = () => {
             setShowServiceCompleteConfirmBox(false);
           }}
           onOk={handleCompleteService}
+        />
+      )}
+      {showFilter && (
+        <Filter
+          onClose={() => {
+            setShowFilter(false);
+            tableDispatch({ type: 'onlyFilter', filters: {} });
+            dispatch({ type: 'setFilterQuery', filterQuery: '' });
+          }}
+          loading={false}
+          filterTitle={resources?.workOrderTechnician?.titleSingular}
+          resource={sidebarResource.workOrderTechnician}
+          columns={FIELD_TO_FILTER}
+          onApplyFilter={handleApplyFilter}
+          deepFilters={[]}
+          setDeepFilters={null}
+          filterByIds={filterByIds}
+          setFilterByIds={setFilterByIds}
+          filterTerm={filterTerm}
+          setFilterTerm={setFilterTerm}
         />
       )}
     </Box>

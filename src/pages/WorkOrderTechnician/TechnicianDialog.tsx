@@ -1,4 +1,5 @@
-import { Box, Dialog, Typography, Grid } from '@material-ui/core';
+import { Box, Dialog, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import routes from 'src/components/Helpers/Routes';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { useData } from 'src/StateProvider/Provider';

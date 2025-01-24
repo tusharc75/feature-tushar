@@ -1,6 +1,6 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { Box, IconButton, MenuItem } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -97,7 +97,7 @@ const ManagedPackages = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" />
+              <DeleteIcon color="error" fontSize='small' />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -193,11 +193,11 @@ const ManagedPackages = () => {
           <MenuItem
             disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
             onClick={() => {
-              if (selectedRecords.length === 1){
+              if (selectedRecords.length === 1) {
                 setDeleteRecord(selectedRecords[0]);
-                }else{
-                  setDeleteRecord(null)
-                }
+              } else {
+                setDeleteRecord(null);
+              }
               setShowDeleteConfirmBox(true);
             }}
           >
@@ -235,6 +235,7 @@ const ManagedPackages = () => {
           onSearch={handleSearch}
           isActionButtonVisible={true}
           isAddButtonVisible={true}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
           addButtonOnclick={() => {
             setShowManageDialog({ open: true, isClone: false, idToClone: null });
@@ -261,7 +262,7 @@ const ManagedPackages = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.managedPackages?.titleSingular?.toLowerCase()} : ${deleteRecord?.managedPackageName || ''}` : `selected ${resources?.managedPackages?.titlePlural?.toLowerCase()}`} ?`}              
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.managedPackages?.titleSingular?.toLowerCase()} : ${deleteRecord?.managedPackageName || ''}` : `selected ${resources?.managedPackages?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

@@ -1,6 +1,7 @@
-import { Box, Grid, IconButton, Menu, MenuItem, useMediaQuery } from '@material-ui/core';
-import { Add, ExpandMore, LowPriority } from '@material-ui/icons';
-import DragIndicatorIcon from '@material-ui/icons/DragIndicator';
+import { Add, ExpandMore, LowPriority } from '@mui/icons-material';
+import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
+import { Box, Menu, MenuItem, useMediaQuery } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { isArray, reverse } from 'lodash';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -37,7 +38,6 @@ import RenderService, { ServicesButtons } from './RenderServices';
 import Steps from './Steps';
 import StepsInOtherServices from './StepsInOtherService';
 import ViewServiceStepDataDialog from './ViewServiceStepDataDialog';
-import { MdKeyboardDoubleArrowUp } from 'react-icons/md';
 
 const Service = ({
   workOrderId,
@@ -246,7 +246,7 @@ const Service = ({
         toastConfig.setToastConfig({
           open: true,
           message: data.message,
-          severity: 'success'
+          type: 'success'
         });
       })
       .catch((err) => {
@@ -438,7 +438,7 @@ const Service = ({
         toastConfig.setToastConfig({
           open: true,
           message: data.message,
-          severity: 'success'
+          type: 'success'
         });
         setAssignSteps(false);
       })
@@ -454,7 +454,7 @@ const Service = ({
         toastConfig.setToastConfig({
           open: true,
           message: data.message,
-          severity: 'success'
+          type: 'success'
         });
         setAssignSteps(false);
         setShowManagePurchaseOrder(false);
@@ -485,7 +485,7 @@ const Service = ({
         toastConfig.setToastConfig({
           open: true,
           message: data.message,
-          severity: 'success'
+          type: 'success'
         });
         fetchServiceData();
         setOpenProperties(false);
@@ -514,8 +514,6 @@ const Service = ({
       id: '2',
       disabled: allowedToEdit && !completed ? false : true,
       iconForMobile: <LowPriority />,
-      color: 'primary',
-      size: 'small',
       onClick: () => setArrangeView(true),
       children: (
         <>
@@ -531,21 +529,14 @@ const Service = ({
     <Box>
       {serviceSteps ? (
         <>
-          <Grid container spacing={2}>
+          <div
+            className={cn(
+              'grid min-h-[calc(100vh-300px)] gap-4 transition-all max-md:grid-cols-1',
+              isColapsed ? 'grid-cols-[100px_1fr]' : 'md:grid-cols-[300px_1fr] lg:grid-cols-[360px_1fr] xl:grid-cols-[380px_1fr]'
+            )}
+          >
             {!mobScreen && (
-              <Grid
-                item
-                xs={12}
-                sm={5}
-                md={5}
-                lg={4}
-                xl={3}
-                style={{
-                  maxWidth: isColapsed ? 'calc(76px + 40px)' : mobScreen ? '100%' : '',
-                  flexBasis: isColapsed ? 'calc(76px + 40px)' : mobScreen ? '100%' : '',
-                  transition: 'width 300ms ease 0s, max-width 300ms ease 0s, flex-basis 300ms ease 0s'
-                }}
-              >
+              <div className="transition-all">
                 <RenderService
                   {...{
                     isColapsed,
@@ -567,23 +558,11 @@ const Service = ({
                     completed
                   }}
                 />
-              </Grid>
+              </div>
             )}
 
             {/* ------------------ RIGHT SIDE CONTENTS ------------------ */}
-            <Grid
-              item
-              xs={12}
-              sm={7}
-              md={7}
-              lg={8}
-              xl={9}
-              style={{
-                maxWidth: isColapsed ? 'calc(100% - calc(76px + 40px))' : mobScreen ? '100%' : '',
-                flexBasis: isColapsed ? 'calc(100% - calc(76px + 40px))' : mobScreen ? '100%' : '',
-                transition: 'width 300ms ease 0s, max-width 300ms ease 0s, flex-basis 300ms ease 0s'
-              }}
-            >
+            <div className="transition-all">
               <Box
                 className="container-with-border"
                 style={{
@@ -619,8 +598,8 @@ const Service = ({
                   </div>
                 )}
               </Box>
-            </Grid>
-          </Grid>
+            </div>
+          </div>
           {mobScreen && (
             <div
               className={`
@@ -649,13 +628,11 @@ const Service = ({
               />
             </div>
           )}
-          {/* add Button menu */}
           {!isColapsed && resource === sidebarResource.workOrder && (
             <>
               <Menu
                 anchorEl={addServiceAnchorEl}
                 keepMounted
-                getContentAnchorEl={null}
                 anchorOrigin={{
                   vertical: 'bottom',
                   horizontal: 'left'

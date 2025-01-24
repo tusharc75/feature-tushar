@@ -1,20 +1,20 @@
-import React, { useContext, useState } from 'react';
-import { Divider, IconButton, makeStyles, useMediaQuery, Menu, MenuItem, Box, Button } from '@material-ui/core';
+import { Box, IconButton, Menu, MenuItem, Theme, useMediaQuery } from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import { isEmpty } from 'lodash';
+import { useContext, useEffect, useState } from 'react';
 import { IoIosArrowDropdown } from 'react-icons/io';
+import { MdImportExport } from 'react-icons/md';
+import { DownloadIcon, ExportIcon, ImportIcon } from 'src/assets/svg/svgIcons';
+import { CustomImport } from 'src/components/productBuilder/CustomImport';
+import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import { downloadExcel } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import SelectionDialog from './SelectionDialog';
-import { isEmpty } from 'lodash';
-import { useEffect } from 'react';
-import { ImportIcon, ExportIcon, DownloadIcon } from 'src/assets/svg/svgIcons';
-import { useData } from 'src/StateProvider/Provider';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import { MdImportExport } from 'react-icons/md';
-import { CustomImport } from 'src/components/productBuilder/CustomImport';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { ExpandMore } from '@mui/icons-material';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     flexGrow: 1,
     display: 'flex',
@@ -48,14 +48,14 @@ export default function ImportExportLinks({
   recordsToExport = 0,
   exportSelectedRecords = null,
   isExportAllOrSomeFeature = false,
-  onExportToExcelSuccess = () => {},
+  onExportToExcelSuccess = () => { },
   total = 0,
   additionalParams = null,
   extraImportExportLinks = [],
   inverted = false,
   small = false,
   isCustomImport = false,
-  onSuccessCustomImport = () => {},
+  onSuccessCustomImport = () => { },
   currency = 'USD'
 }) {
   const classes = useStyles();
@@ -106,7 +106,6 @@ export default function ImportExportLinks({
     setIsSelection(false);
     if (event.target.files && event.target.files.length) {
       toastConfig.setToastConfig({
-        hideDuration: null,
         open: true,
         type: 'info',
         message: `Uploading ${module}, Please wait...`
@@ -153,7 +152,6 @@ export default function ImportExportLinks({
   const uploadExtraData = (event, apiUrl = null) => {
     if (event.target.files && event.target.files.length) {
       toastConfig.setToastConfig({
-        hideDuration: null,
         open: true,
         type: 'info',
         message: `Uploading ${module}, Please wait...`
@@ -200,7 +198,6 @@ export default function ImportExportLinks({
 
   const exportToExcel = (apiUrl = null) => {
     toastConfig.setToastConfig({
-      hideDuration: null,
       open: true,
       type: 'info',
       message: `Your file will be downloaded/uploaded in a matter of seconds`
@@ -255,7 +252,6 @@ export default function ImportExportLinks({
         keepMounted
         open={true}
         onClose={handleCloseMenu}
-        getContentAnchorEl={null}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'right'
@@ -443,7 +439,6 @@ export default function ImportExportLinks({
             <>
               <Menu
                 id="import-export-extra-links"
-                getContentAnchorEl={null}
                 anchorEl={anchorExtraEl}
                 keepMounted
                 open={Boolean(anchorExtraEl)}
@@ -501,28 +496,14 @@ export default function ImportExportLinks({
           )}
         </div>
       ) : (
-        <HtmlTooltip title={'Import/Export'} placement="top" arrow enterTouchDelay={0}>
-          <span>
-            <Button
-              onClick={(e) => handleClick(e)}
-              endIcon={<ArrowDropDownIcon />}
-              variant={'outlined'}
-              color="primary"
-              aria-controls="simple-menu"
-              aria-haspopup="true"
-              className="min-h-[32px]"
-              size="small"
-            >
-              {isMobile ? (
-                <>
-                  <MdImportExport size={20} />
-                </>
-              ) : (
-                'Import/Export'
-              )}
-            </Button>
-          </span>
-        </HtmlTooltip>
+        <ThemeButton
+          onClick={(e) => handleClick(e)}
+          endIcon={<ExpandMore />}
+          mobileTooltip='Import/Export'
+          iconForMobile={<MdImportExport size={20} />}
+        >
+          Import/Export
+        </ThemeButton>
       )}
       {isMobile && (
         <IconButton onClick={handleClick} className={`expand-icon-v1`} style={{ padding: '3px' }}>
@@ -533,7 +514,6 @@ export default function ImportExportLinks({
       <Menu
         id="import-export-links"
         anchorEl={anchorEl}
-        getContentAnchorEl={null}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'right'

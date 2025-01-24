@@ -1,11 +1,10 @@
-import { Box, Button, Chip, IconButton, MenuItem, MenuList } from '@material-ui/core';
-import ButtonGroup from '@material-ui/core/ButtonGroup';
-import ClickAwayListener from '@material-ui/core/ClickAwayListener';
-import Grow from '@material-ui/core/Grow';
-import Paper from '@material-ui/core/Paper';
-import Popper from '@material-ui/core/Popper';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { Box, Button, Chip, IconButton, MenuItem, MenuList } from '@mui/material';
+import ButtonGroup from '@mui/material/ButtonGroup';
+import ClickAwayListener from '@mui/material/ClickAwayListener';
+import Grow from '@mui/material/Grow';
+import Paper from '@mui/material/Paper';
+import Popper from '@mui/material/Popper';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';
 import { AiOutlineDeploymentUnit } from 'react-icons/ai';
@@ -41,7 +40,8 @@ import routes from './../../components/Helpers/Routes';
 import ManageAccountDialog from './ManageAccount/index';
 import WarhouseList from './Warehouse/WarhouseList';
 import axios, { CancelTokenSource } from 'axios';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { ExpandMore } from '@mui/icons-material';
 
 const options = ['All', 'Approved', 'Disapproved'];
 
@@ -92,7 +92,6 @@ export default function Account(props) {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
 
   const [multipleApproveDisapproveAccount, setMultipleApproveDisapproveAccount] = useState<any>({ show: false, approved: false, selectedRecords: 0 });
 
@@ -256,7 +255,7 @@ export default function Account(props) {
             disabled={accountPermissions?.isDelete && row?.original?.canDelete ? false : true}
             aria-label="Delete"
             onClick={() => {
-              setDeleteRecord(row?.original)
+              setDeleteRecord(row?.original);
               setShowDeleteConfirmBox(true);
             }}
           >
@@ -398,26 +397,27 @@ export default function Account(props) {
     } else {
       ids = selectedRecords?.map((d) => d._id);
     }
-    axiosInstance().put(`/${accountApi}/remove`, {
-      ids
-    }).then(({ data }) => {
-      setIsSubmitting(false);
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
+    axiosInstance()
+      .put(`/${accountApi}/remove`, {
+        ids
+      })
+      .then(({ data }) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setShowDeleteConfirmBox(false);
+        setDeleteRecord(null);
+        dispatch({ type: 'selection', selectedRecords: [] });
+        fetchAccounts();
+      })
+      .catch((error) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig(error);
       });
-      setShowDeleteConfirmBox(false);
-      setDeleteRecord(null);
-      dispatch({ type: 'selection', selectedRecords: [] });
-      fetchAccounts();
-    }).catch((error) => {
-      setIsSubmitting(false);
-      toastConfig.setToastConfig(error);
-    });
-
   };
-
 
   const handleSingleApproveDisapproveAccount = () => {
     axiosInstance()
@@ -603,12 +603,13 @@ export default function Account(props) {
         {showDeleteConfirmBox ? (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord ?
-              `${resources?.[accountResource]?.titleSingular?.toLowerCase()} : ${deleteRecord?.accountName}` :
-              `selected ${resources?.[accountResource]?.titlePlural?.toLowerCase()}`} ?`}
+            message={`Are you sure you want to delete ${deleteRecord
+              ? `${resources?.[accountResource]?.titleSingular?.toLowerCase()} : ${deleteRecord?.accountName}`
+              : `selected ${resources?.[accountResource]?.titlePlural?.toLowerCase()}`
+              } ?`}
             onClose={() => {
-              setShowDeleteConfirmBox(false)
-              setDeleteRecord(null)
+              setShowDeleteConfirmBox(false);
+              setDeleteRecord(null);
             }}
             okBtnLoading={isSubmitting}
             onOk={handleDeleteAccounts}
@@ -747,7 +748,7 @@ const LeftSideContents = ({ selectedIndex, setSelectedIndex, menuOptionSelection
           onClick={handleToggle}
           className="all-button"
         >
-          <ArrowDropDownIcon className="all-button-sub-icon" />
+          <ExpandMore className="all-button-sub-icon" />
         </Button>
       </ButtonGroup>
       <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal style={{ zIndex: 1111111 }}>
@@ -822,12 +823,12 @@ const ActionMenuItems = ({
       )}
       {accountPermissions?.isDelete && (
         <MenuItem
-          disabled={selectedRecords?.every((e => e?.canDelete)) ? false : true}
+          disabled={selectedRecords?.every((e) => e?.canDelete) ? false : true}
           onClick={() => {
             if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
             } else {
-              setDeleteRecord(null)
+              setDeleteRecord(null);
             }
             setShowDeleteConfirmBox(true);
           }}

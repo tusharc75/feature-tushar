@@ -1,9 +1,9 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import { Edit } from '@material-ui/icons';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import EditIcon from '@mui/icons-material/Edit';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -71,20 +71,22 @@ const TransactionLockDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ ...routes.transactionLock, title: resources?.transactionLock?.titlePlural }, { title: transactionLockData?.lockNumber }]} />
+          <CustomBreadCrumbs
+            routes={[{ ...routes.transactionLock, title: resources?.transactionLock?.titlePlural }, { title: transactionLockData?.lockNumber }]}
+          />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {permissions?.transactionLock?.isUpdate && (
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
+              <ThemeButton
+                iconForMobile={<EditIcon />}
                 onClick={() => {
                   setOpenUpdateDialog(true);
                 }}
-                className={'btn-outline-v1'}
+                mobileTooltip={'Edit'}
               >
-                {isMobile && !isTablet ? <Edit /> : 'Edit'}
-              </Button>
+                {'Edit'}
+              </ThemeButton>
             )}
             {permissions?.transactionLock?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
           </Box>
@@ -95,9 +97,9 @@ const TransactionLockDetail = () => {
           {transactionLockData && fields.length ? (
             <DetailsPage data={transactionLockData} fields={fields} />
           ) : (
-            <Grid container spacing={2} style={{ padding: '8px' }}>
-              <CommonSkeleton lenArray={[...Array(7).keys()]} />
-            </Grid>
+            <div className="p-2">
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </div>
           )}
         </Box>
       </Box>

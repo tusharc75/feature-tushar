@@ -1,8 +1,6 @@
-import { Box, Grid, Typography } from '@material-ui/core';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import React from 'react';
-import DateFnsUtils from '@date-io/date-fns';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import moment from 'moment';
 import axiosInstance from 'src/axios/axiosInstance';
 import ChartTypes from '../Dashboard/ChartTypes';
 import countriesData from 'src/constants/Country.json';
@@ -12,6 +10,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { ChartDataType } from '../Dashboard/ChartTypes';
 import FullScreenChart from '../Dashboard/FullScreenChart';
 import { periodOption } from '../DashboardBuilder/builderHelpers';
+import dayjs from 'dayjs';
 
 const Chart = () => {
   const {
@@ -26,7 +25,7 @@ const Chart = () => {
     return {
       currency: user?.user?.currency || `USD`,
       between: {
-        from: new Date(moment().subtract(1, 'year').calendar()),
+        from: new Date(dayjs().subtract(1, 'year').toDate()),
         to: new Date()
       }
     };
@@ -88,41 +87,39 @@ const Chart = () => {
       mt={3}
       className=" rounded-[10px] bg-[var(--card-bg)] shadow-[0px_3.90676px_39.0676px_rgba(0,0,0,0.08)] [&_canvas]:h-auto [&_canvas]:max-w-full"
     >
-      <MuiPickersUtilsProvider utils={DateFnsUtils}>
-        <React.Fragment>
-          <GlobalFilter globalFilters={globalFilters} setGlobalFilters={setGlobalFilters} disabled={false} dashboardList={[]} />
-          <Box mt={1}>
-            <Grid container spacing={1} justifyContent="space-between" alignItems="stretch">
-              {charts.map((chart: ChartDataType, index: number) => (
-                <ChartTypes
-                  globalFilters={globalFilters}
-                  key={chart.chartType + ' ' + index + 1}
-                  chart={chart}
-                  filterData={{ ...filtersOptions }}
-                  setSelectedChart={(currentChart: ChartDataType) => {
-                    setSelectedChart(currentChart);
-                    setOpenFullScreenChart(true);
-                  }}
-                  fetchDashboards={fetchDashboards}
-                />
-              ))}
-            </Grid>
-          </Box>
-        </React.Fragment>
-        {openFullScreenChart && (
-          <FullScreenChart
-            chart={selectedChart}
-            globalFilters={globalFilters}
-            filterData={{ ...filtersOptions }}
-            close={() => {
-              setOpenFullScreenChart(false);
-              setSelectedChart(null);
-            }}
-            selectedDashboardId={null}
-            fetchDashboards={fetchDashboards}
-          />
-        )}
-      </MuiPickersUtilsProvider>
+      <React.Fragment>
+        <GlobalFilter globalFilters={globalFilters} setGlobalFilters={setGlobalFilters} disabled={false} dashboardList={[]} />
+        <Box mt={1}>
+          <Grid container spacing={1} justifyContent="space-between" alignItems="stretch">
+            {charts.map((chart: ChartDataType, index: number) => (
+              <ChartTypes
+                globalFilters={globalFilters}
+                key={chart.chartType + ' ' + index + 1}
+                chart={chart}
+                filterData={{ ...filtersOptions }}
+                setSelectedChart={(currentChart: ChartDataType) => {
+                  setSelectedChart(currentChart);
+                  setOpenFullScreenChart(true);
+                }}
+                fetchDashboards={fetchDashboards}
+              />
+            ))}
+          </Grid>
+        </Box>
+      </React.Fragment>
+      {openFullScreenChart && (
+        <FullScreenChart
+          chart={selectedChart}
+          globalFilters={globalFilters}
+          filterData={{ ...filtersOptions }}
+          close={() => {
+            setOpenFullScreenChart(false);
+            setSelectedChart(null);
+          }}
+          selectedDashboardId={null}
+          fetchDashboards={fetchDashboards}
+        />
+      )}
     </Box>
   ) : (
     <div></div>

@@ -1,5 +1,5 @@
 import { useEffect, useState, Fragment, useRef } from 'react';
-import { Button, Dialog, Box } from '@material-ui/core';
+import { Dialog, Box } from '@mui/material';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -8,7 +8,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomButton from '../../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import InputField from 'src/components/Helpers/InputField';
@@ -36,7 +36,7 @@ const ServiceDialog = ({ onClose, purchaseOrderData, handleUpdateService, servic
 
   const fetchField = async () => {
     setInitialData({ fields: [], values: {} });
-    var poFields = await fetch_child_resource_fields(CHILD_RESOURCE.purchaseOrderService, purchaseOrderData?.currency, true)
+    var poFields = await fetch_child_resource_fields(CHILD_RESOURCE.purchaseOrderService, purchaseOrderData?.currency, true);
     setAllFields(JSON.parse(JSON.stringify(poFields)));
     if (bulkEdit) {
       let unitArray: any = [];
@@ -83,7 +83,6 @@ const ServiceDialog = ({ onClose, purchaseOrderData, handleUpdateService, servic
       });
     }
   };
-
 
   const handleSubmit = (values) => {
     let returnData = [];
@@ -144,11 +143,7 @@ const ServiceDialog = ({ onClose, purchaseOrderData, handleUpdateService, servic
                       if (name === 'taxCode') {
                         const taxCode = initialData?.fields?.find((e) => e?.fieldName === 'taxCode')?.option.find((d) => d.optionValue === value);
                         setFieldValue('taxPercentage', taxCode?.taxRate || 0);
-                        const result = autoCalculateSpecificFields(
-                          { ['taxPercentage']: taxCode?.taxRate || 0 },
-                          values,
-                          initialData.fields
-                        );
+                        const result = autoCalculateSpecificFields({ ['taxPercentage']: taxCode?.taxRate || 0 }, values, initialData.fields);
                         if (Object.keys(result).length >= 1) {
                           for (var x in result) {
                             setFieldValue(x, result[x]);
@@ -164,22 +159,19 @@ const ServiceDialog = ({ onClose, purchaseOrderData, handleUpdateService, servic
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType="transparent"
                   onClick={() => {
                     onClose();
                   }}
                 >
                   {'Close'}
-                </Button>
+                </ThemeButton>
                 {bulkEdit === false && showSaveAndNext && (
-                  <CustomButton
-                    loading={loadingEdit}
+                  <ThemeButton
+                    isLoading={loadingEdit}
                     disabled={loadingEdit}
-                    variant="contained"
-                    color="primary"
-                    type="submit"
+                    buttonType="theme"
                     onClick={() => {
                       setSaveAndNext(true);
                       submitForm();
@@ -187,22 +179,20 @@ const ServiceDialog = ({ onClose, purchaseOrderData, handleUpdateService, servic
                   >
                     {' '}
                     Save & Next
-                  </CustomButton>
+                  </ThemeButton>
                 )}
-                <CustomButton
+                <ThemeButton
                   id={'dialog-save-button'}
-                  loading={loadingEdit}
+                  isLoading={loadingEdit}
                   disabled={loadingEdit}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+                  buttonType="theme"
                   onClick={() => {
                     setSaveAndNext(false);
                     submitForm();
                   }}
                 >
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
             </Fragment>
           )}

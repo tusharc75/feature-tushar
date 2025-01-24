@@ -1,20 +1,25 @@
-import { CircularProgress, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
-import { debounce } from 'lodash';
+import { CircularProgress, Dialog, TextField } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
+import { debounce, uniqBy } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
-import DashboardModal from 'src/components/DashboardModal';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
-  const [selectedUsers, setSelectedUsers] = useState([]);
+const AddMemberDialog = ({ onClose, channelId = null, onSuccess, ignoreIds = [], newChat = false, users= [] }) => {
+  const [selectedUsers, setSelectedUsers] = useState(users?.length > 0 ? users : []);
   const toastConfig = useContext(CustomToastContext);
 
-  const [options, setOptions] = useState([]);
+  const [options, setOptions] = useState(users?.length > 0 ? users : []);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
+  const [inputValue, setInputValue] = useState('');
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const fetchOptions = debounce(async (searchKey: string = '', page: number = 0) => {
     setLoading(true);
@@ -31,7 +36,9 @@ const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
       }));
 
       setOptions((currentOptions) => {
-        return page === 0 ? [...optionsData] : [...currentOptions, ...optionsData];
+        let alreadySelectedOptions: any = currentOptions?.filter((option) => selectedUsers?.map(s => s?.optionValue)?.includes(option?.optionValue)) || [];
+        optionsData = uniqBy([...alreadySelectedOptions, ...optionsData], 'optionValue');
+        return page === 0 ? optionsData : [...currentOptions, ...optionsData];
       });
       if (page > 0 && optionsData?.length > 0) {
         setCurrentPage(page);
@@ -45,7 +52,7 @@ const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
 
   const handleAddMembers = async () => {
     try {
-      const { data } = await axiosInstance().put(`/work-space/channel/${channelId}`, { userIds: selectedUsers });
+      const { data } = await axiosInstance().put(`/work-space/channel/${channelId}`, { userIds: selectedUsers?.map(s => s?.optionValue) });
       onSuccess();
       toastConfig.setToastConfig({
         open: true,
@@ -61,84 +68,104 @@ const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
     fetchOptions();
   }, []);
 
-  return (
-    <DashboardModal
-      handleClose={onClose}
+  return (<>
+    <Dialog
+      maxWidth="sm"
+      fullScreen={fullScreen || isMobile || isTablet}
+      TransitionComponent={CustomDialogTransition}
+      aria-labelledby="customized-dialog-title"
       open={true}
-      dialogProps={{
-        fullScreen: isMobile || isTablet,
-        maxWidth: 'xs'
-      }}
-      modalHead={{
-        title: `Add Members`,
-        fullScreenOption: true
-      }}
-      footer={
-        <CustomButton
-          variant="contained"
-          color="primary"
-          disabled={selectedUsers.length === 0}
+      fullWidth
+      onClose={onClose}
+    >
+      <CustomDialogHeader
+        onClose={onClose}
+        title={'Add Members'}
+        isMinimized={!fullScreen}
+        onMinimizeMaximize={() => {
+          setFullScreen((prevState) => !prevState);
+        }}
+        showManimizeMaximize={true}
+        showRequiredLabel={false}
+      />
+      <CustomDialogContent >
+        <Autocomplete
+          multiple={true}
+          fullWidth
+          onOpen={() => {
+            fetchOptions('', 0);
+          }}
+          inputValue={inputValue}
+          onInputChange={(event, value, reason) => {
+            if (reason === 'input') {
+              setInputValue(value);
+              fetchOptions(value);
+            }
+          }}
+          loading={loading || !options}
+          options={options}
+          autoHighlight
+          value={selectedUsers?.map((user) => options?.find((option) => option?.optionValue === user?.optionValue) || { optionLabel: '', optionValue: user?.optionValue })}
+          getOptionLabel={(option) => option.optionLabel || ''}
+          isOptionEqualToValue={(option, val) => option.optionValue === val.optionValue}
+          onChange={(event, newValue) => { setSelectedUsers(newValue) }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label={'Select Users'}
+              name={'users'}
+              autoFocus
+              required={true}
+              slotProps={{
+                input: {
+                  ...params.InputProps,
+                  endAdornment: (
+                    <>
+                      {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                      {params.InputProps.endAdornment}
+                    </>
+                  )
+                }
+              }}
+              margin="none"
+              size={'small'}
+              variant="outlined"
+            />
+          )}
+          ListboxProps={{
+            onScroll: (e: any) => {
+              if (e.target.scrollTop + e.target.clientHeight >= e.target.scrollHeight - 1) {
+                fetchOptions('', currentPage + 1);
+              }
+            }
+          }}
+        />
+      </CustomDialogContent>
+      <CustomDialogFooter>
+        <ThemeButton
+          buttonType="transparent"
+          onClick={onClose}
+        >
+          Cancel
+        </ThemeButton>
+        <ThemeButton
+          buttonType="theme"
+          disabled={selectedUsers?.length === 0}
           onClick={(e) => {
             e.preventDefault();
-            handleAddMembers();
+            if (newChat) {
+              onSuccess(selectedUsers);
+            } else {
+              handleAddMembers();
+            }
             onClose();
           }}
         >
           Add
-        </CustomButton>
-      }
-    >
-      <Autocomplete
-        multiple={true}
-        fullWidth
-        onOpen={() => {
-          fetchOptions('', 0);
-        }}
-        onInputChange={(event, value, reason) => {
-          if (reason === 'input') {
-            fetchOptions(value);
-          }
-        }}
-        loading={loading || !options}
-        options={options}
-        autoHighlight
-        value={selectedUsers?.map((userId) => options.find((option) => option.optionValue === userId) || { optionLabel: '', optionValue: userId })}
-        getOptionLabel={(option) => option.optionLabel || ''}
-        getOptionSelected={(option, val) => option.optionValue === val.optionValue}
-        onChange={(event, newValue) => {
-          setSelectedUsers(newValue.map((user) => user.optionValue));
-        }}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label={'Select Members'}
-            name={'members'}
-            autoFocus
-            required={true}
-            InputProps={{
-              ...params.InputProps,
-              endAdornment: (
-                <>
-                  {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                  {params.InputProps.endAdornment}
-                </>
-              )
-            }}
-            margin="none"
-            size={'small'}
-            variant="outlined"
-          />
-        )}
-        ListboxProps={{
-          onScroll: (e: any) => {
-            if (e.target.scrollTop + e.target.clientHeight >= e.target.scrollHeight - 1) {
-              fetchOptions('', currentPage + 1);
-            }
-          }
-        }}
-      />
-    </DashboardModal>
-  );
+        </ThemeButton>
+      </CustomDialogFooter>
+    </Dialog>
+  </>);
 };
 
 export default AddMemberDialog;

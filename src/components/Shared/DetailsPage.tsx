@@ -1,5 +1,6 @@
-import { Avatar, Box, Dialog, GridSize, IconButton, ImageList, ImageListItem, makeStyles, Link as MuiLink, Typography } from '@material-ui/core';
-import { Image, InfoOutlined, MoreHoriz } from '@material-ui/icons';
+import { Avatar, Box, Dialog, GridSize, IconButton, ImageList, ImageListItem, Link as MuiLink, Theme, Typography } from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import { Image, InfoOutlined, MoreHoriz } from '@mui/icons-material';
 import { camelCase, isArray, kebabCase } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { FcApproval } from 'react-icons/fc';
@@ -10,7 +11,6 @@ import {
   colSpans,
   columnSize,
   CustomDialogTransition,
-  dateFormat,
   displayDate,
   displayDateTime,
   formatAmountWithCurrency,
@@ -25,19 +25,19 @@ import HtmlTooltip from '../CustomTooltipTitle';
 import FollowUpsDialog from 'src/components/Activity/Task/FollowUpsDialog';
 import axios, { CancelTokenSource } from 'axios';
 import axiosInstance from 'src/axios/axiosInstance';
-import moment from 'moment';
 import { FaUserPlus } from 'react-icons/fa6';
 import NumberCell from 'src/components/CustomReactTable/Cells/NumberCell';
 import GroupSignatureCell from 'src/components/CustomReactTable/Cells/GroupSignatureCell';
 import CopyToClipboardButton from 'src/components/CopyToClipboardButton';
 import { isFieldVisible, isSectionVisible } from 'src/components/Helpers/FormTypes';
-import LocationOnIcon from '@material-ui/icons/LocationOn';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 import GoogleMaps from 'src/components/GoogleMap';
 import { CreateTask } from 'src/components/Activity/Task/CreateTask';
 import { isMobile, isTablet } from 'react-device-detect';
 import FreeStyleMultiSelect from 'src/components/CustomReactTable/Cells/FreeStyleMultiSelect';
+import RichTextEditorCell from 'src/components/CustomReactTable/Cells/RichTextEditorCell';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   fieldText: {
     borderRadius: 4,
     cursor: 'normal',
@@ -87,7 +87,6 @@ const useStyles = makeStyles((theme) => ({
   withMultichild: {
     display: 'flex',
     flexWrap: 'wrap',
-    borderLeft: '1px solid var(--dark-mode-border-color, #e2e2e2)',
     marginLeft: '-1px'
   }
 }));
@@ -108,7 +107,6 @@ const Details = (props: DetailProps) => {
     state: { permissions, user }
   }: any = useData();
   const { data, fields, gridSize, containerPadding, fullHeight = false, resource = null, referenceId = null } = props;
-
   const [initialVals, setValues] = useState(null);
   const [formsData, setFormsData] = useState([]);
   const [formDataWithFollowUps, setFormDataWithFollowUps] = useState([]);
@@ -244,7 +242,10 @@ const Details = (props: DetailProps) => {
     if (fieldData?.hasOwnProperty('lookup') && fieldData?.lookup && permissions && permissions[camelCase(fieldData?.lookupResource)]?.isRead) {
       if (fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') {
         return (
-          <Typography className={`${classes.fieldText} ${classes.withMultichild} w-full`} variant="body2">
+          <Typography
+            className={`${classes.fieldText} ${classes.withMultichild} min-h-[35px] w-full items-center gap-1 px-[10px] py-[7px]`}
+            variant="body2"
+          >
             {Array.isArray(data[fieldData.fieldName]) ? (
               data[fieldData.fieldName].length ? (
                 data[fieldData.fieldName].map((_val: any, i) => (
@@ -253,10 +254,10 @@ const Details = (props: DetailProps) => {
                       to={`/${kebabCase(fieldData.lookupResource)}/detail/${_val.optionValue}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="link block w-full"
+                      className="link"
                       title={_val.optionLabel}
                     >
-                      <span className={`link block md:truncate md:text-ellipsis`}>
+                      <span className={`link p-0`}>
                         {_val.optionLabel}
                         {i < data[fieldData.fieldName].length - 1 ? ',' : ''}
                       </span>
@@ -264,19 +265,17 @@ const Details = (props: DetailProps) => {
                   </React.Fragment>
                 ))
               ) : (
-                <Typography component={'span'} style={{ padding: '7px 10px' }}>
-                  -
-                </Typography>
+                <span className="p-0">-</span>
               )
             ) : data[fieldData.fieldName] ? (
               <Link
                 to={`/${kebabCase(fieldData.lookupResource)}/detail/${val[fieldData.fieldName]}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="link block w-full"
+                className="link"
                 title={data[fieldData.fieldName].optionLabel || value}
               >
-                <span className={`link block md:truncate md:text-ellipsis`}>
+                <span className={`link block p-0 md:truncate md:text-ellipsis`}>
                   {data[fieldData.fieldName].optionLabel || value}
                   {data[fieldData.fieldName]?.staticData?.approved && data[fieldData.fieldName]?.staticData?.approved === true ? (
                     <FcApproval className={classes.approvalIcon} title="Approved" size={20} />
@@ -284,9 +283,7 @@ const Details = (props: DetailProps) => {
                 </span>
               </Link>
             ) : (
-              <Typography component={'span'} style={{ padding: '7px 10px' }}>
-                -
-              </Typography>
+              <span className="p-0">-</span>
             )}
           </Typography>
         );
@@ -453,6 +450,11 @@ const Details = (props: DetailProps) => {
           </>
         );
       }
+
+      if (fieldData.type === 'richTextEditor') {
+        return <RichTextEditorCell field={fieldData} original={val} enableDilaog={false} />;
+      }
+
       if (fieldData.type === 'freeStyleMultiSelect') {
         return (
           <div className={cn(classes.fieldText, ' flex !w-full items-center')}>
@@ -468,15 +470,21 @@ const Details = (props: DetailProps) => {
         >
           {fieldData.type === 'url' || fieldData.type === 'email' ? (
             <>
-              <MuiLink
-                href={fieldData.type === 'email' ? `mailto:${value}` : `https://${value}`}
-                target="_blank"
-                className="line-clamp-1"
-                rel="noopener noreferrer"
-              >
-                <span className={`text-truncate block`}> {value} </span>
-              </MuiLink>
-              {fieldData.type === 'email' && value !== '-' ? <CopyToClipboardButton text={value} style={{ padding: '3px' }} smallIcon /> : null}
+              {value !== '-' ? (
+                <>
+                  <MuiLink
+                    href={fieldData.type === 'email' ? `mailto:${value}` : `https://${value}`}
+                    target="_blank"
+                    className="line-clamp-1"
+                    rel="noopener noreferrer"
+                  >
+                    <span className={`text-truncate block`}> {value} </span>
+                  </MuiLink>
+                  {fieldData.type === 'email' && value !== '-' ? <CopyToClipboardButton text={value} style={{ padding: '3px' }} smallIcon /> : null}
+                </>
+              ) : (
+                <span>{value}</span>
+              )}
             </>
           ) : (
             <span className={` block md:truncate`}>{value}</span>
@@ -568,80 +576,81 @@ const Details = (props: DetailProps) => {
                       </HtmlTooltip>
                     )}
                   </div>
-                  <div className="formdata-v1 grid grid-cols-12">
-                    {form.sectionFields.map((field, i) => {
-                      if (!isFieldVisible(field?.fieldData, fieldsData, initialVals)) return null;
-                      return (
-                        <div
-                          className={cn(
-                            `md:${field.fieldData.columnSize ? colSpans[+field.fieldData.columnSize - 1] || 'col-span-6' : columnSize(field.fieldData.type)}`,
-                            'col-span-12'
-                          )}
-                          key={i}
-                        >
+                  <div className="formdata-v1">
+                    <div className="grid  grid-cols-12 border ">
+                      {form.sectionFields.map((field, i) => {
+                        if (!isFieldVisible(field?.fieldData, fieldsData, initialVals)) return null;
+                        return (
                           <div
                             className={cn(
-                              isTypeFile(field.fieldData.type) && 'flex-wrap',
-                              'flex  [border:1px_solid_var(--dark-mode-border-color,_#EDEDED)]'
+                              '-mb-[1px] -mr-[1px] border-b md:border-r',
+                              `md:${field.fieldData.columnSize ? colSpans[+field.fieldData.columnSize - 1] || 'col-span-6' : columnSize(field.fieldData.type)}`,
+                              'col-span-12'
                             )}
+                            key={i}
                           >
-                            <div className="w-1/2 md:w-[150px] lg:w-[180px] ">
-                              <div
-                                className={cn('d-flex formdata-title-v1 min-h-full items-center', isTypeFile(field.fieldData.type) && '!border-r-0')}
-                              >
-                                <h4 title={field.fieldData.fieldLabel} className={`text-truncate ${field.fieldData.isTooltip ? 'pr-1' : ''}`}>
-                                  {field.fieldData.fieldLabel}
-                                </h4>
-                                {field.fieldData.isTooltip && (
-                                  <HtmlTooltip title={field.fieldData.tooltipMessage} className="pr-2">
-                                    <InfoOutlined style={{ width: 18, height: 18 }} color="disabled" />
-                                  </HtmlTooltip>
+                            <div className={cn(isTypeFile(field.fieldData.type) && 'flex-wrap', 'flex min-h-full')}>
+                              <div className="w-1/2 md:w-[150px] lg:w-[180px] ">
+                                <div
+                                  className={cn(
+                                    'd-flex formdata-title-v1 min-h-full items-center',
+                                    isTypeFile(field.fieldData.type) && '!border-r-0'
+                                  )}
+                                >
+                                  <h4 title={field.fieldData.fieldLabel} className={`text-truncate ${field.fieldData.isTooltip ? 'pr-1' : ''}`}>
+                                    {field.fieldData.fieldLabel}
+                                  </h4>
+                                  {field.fieldData.isTooltip && (
+                                    <HtmlTooltip title={field.fieldData.tooltipMessage} className="pr-2">
+                                      <InfoOutlined style={{ width: 18, height: 18 }} color="disabled" />
+                                    </HtmlTooltip>
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className={`${isTypeFile(field.fieldData.type) ? 'w-full' : 'md:flex-grow'} w-1/2`}>
+                                {field.fieldData.type === 'imageUpload' ? (
+                                  <Box marginTop={1} marginBottom={4} marginLeft={1.5}>
+                                    <span
+                                      className={initialVals[field.fieldData.fieldName] ? 'cursor-pointer' : ''}
+                                      onClick={() => {
+                                        if (initialVals[field.fieldData.fieldName]) {
+                                          setDialogData({
+                                            index: 0,
+                                            title: field.fieldData.fieldLabel,
+                                            open: true,
+                                            images: [initialVals[field.fieldData.fieldName]]
+                                          });
+                                        }
+                                      }}
+                                    >
+                                      <Avatar src={initialVals[field.fieldData.fieldName]} style={{ width: 56, height: 56 }}>
+                                        <Image style={{ fontSize: 30 }} />
+                                      </Avatar>
+                                    </span>
+                                  </Box>
+                                ) : (
+                                  <Box display="flex" alignItems="center" className="formdata-text-v1">
+                                    {renderData(initialVals, field.fieldData) === '-' ? (
+                                      <span>{renderData(initialVals, field.fieldData)}</span>
+                                    ) : (
+                                      renderData(initialVals, field.fieldData)
+                                    )}
+                                  </Box>
+                                )}
+                                {field.followUpData?.length > 0 && (
+                                  <RenderFollowUP
+                                    data={field.followUpData}
+                                    columnSize={isTypeFile(field.fieldData.type) ? 12 : field.fieldData.columnSize}
+                                    setOpenTask={setOpenTask}
+                                  />
                                 )}
                               </div>
                             </div>
-
-                            <div className={`${isTypeFile(field.fieldData.type) ? 'w-full' : 'md:flex-grow'} w-1/2`}>
-                              {field.fieldData.type === 'imageUpload' ? (
-                                <Box marginTop={1} marginBottom={4} marginLeft={1.5}>
-                                  <span
-                                    className={initialVals[field.fieldData.fieldName] ? 'cursor-pointer' : ''}
-                                    onClick={() => {
-                                      if (initialVals[field.fieldData.fieldName]) {
-                                        setDialogData({
-                                          index: 0,
-                                          title: field.fieldData.fieldLabel,
-                                          open: true,
-                                          images: [initialVals[field.fieldData.fieldName]]
-                                        });
-                                      }
-                                    }}
-                                  >
-                                    <Avatar src={initialVals[field.fieldData.fieldName]} style={{ width: 56, height: 56 }}>
-                                      <Image style={{ fontSize: 30 }} />
-                                    </Avatar>
-                                  </span>
-                                </Box>
-                              ) : (
-                                <Box display="flex" alignItems="center" className="formdata-text-v1">
-                                  {renderData(initialVals, field.fieldData) === '-' ? (
-                                    <span>{renderData(initialVals, field.fieldData)}</span>
-                                  ) : (
-                                    renderData(initialVals, field.fieldData)
-                                  )}
-                                </Box>
-                              )}
-                              {field.followUpData?.length > 0 && (
-                                <RenderFollowUP
-                                  data={field.followUpData}
-                                  columnSize={isTypeFile(field.fieldData.type) ? 12 : field.fieldData.columnSize}
-                                  setOpenTask={setOpenTask}
-                                />
-                              )}
-                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               </React.Fragment>
@@ -787,8 +796,8 @@ const RenderFollowUP = ({
           </div>
           {d.description && <p className="py-2 text-gray-600 dark:text-gray-400">{d.description}</p>}
           <span className="block text-[12px] font-bold text-gray-500 dark:text-gray-600">
-            Start date: {moment(d.startDate).format(dateFormat)}
-            {d.dueDate && <>, Due date: {moment(d.dueDate).format(dateFormat)}</>}
+            Start date: {displayDate(d.startDate)}
+            {d.dueDate && <>, Due date: {displayDate(d.dueDate)}</>}
           </span>
         </div>
       ))}

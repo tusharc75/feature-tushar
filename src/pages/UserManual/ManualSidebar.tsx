@@ -1,4 +1,4 @@
-import { ExpandMore } from '@material-ui/icons';
+import { ExpandMore } from '@mui/icons-material';
 import React from 'react';
 import { cn } from 'src/constants/helpers';
 import { Accordion, AccordionSummary, AccordionDetails } from 'src/pages/UserManual/components/Accordion';

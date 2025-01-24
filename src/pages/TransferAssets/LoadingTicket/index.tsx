@@ -1,7 +1,6 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
-import InfoIcon from '@material-ui/icons/Info';
+import { Box, IconButton, MenuItem } from '@mui/material';
+import InfoIcon from '@mui/icons-material/Info';
 import { groupBy, map, uniq } from 'lodash';
-import moment from 'moment';
 import { FC, Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -21,8 +20,8 @@ import {
   DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
   TRANSFER_ASSET_STATUS,
-  dateTimeFormat,
   deliveryTicket,
+  displayDateTime,
   prepareDataForGrid,
   serializedAsset,
   sidebarResource
@@ -31,7 +30,7 @@ import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket'
 import AddSerializedAsset from 'src/pages/RentalManagement/SerializedAsset/AddSerializedAsset';
 import ReplaceAssetReason from '../../../components/RentalManagment/ReplaceAssetReason';
 import { FiExternalLink } from 'react-icons/fi';
-import LocalShippingIcon from '@material-ui/icons/LocalShipping';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import ReceiveDialog from './ReceiveDialog';
 import { transferAssetMessage } from 'src/constants/messageHelpers';
 
@@ -126,8 +125,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       disableSortBy: true,
       Cell: ({ row }) =>
         row.original?.createDate ? (
-          <div className="createBy" title={`${moment(row.original?.createDate)?.format(dateTimeFormat)}`}>
-            {moment(row.original?.createDate)?.format(dateTimeFormat)}
+          <div className="createBy" title={`${displayDateTime(row.original?.createDate)}`}>
+            {displayDateTime(row.original?.createDate)}
           </div>
         ) : (
           <NoDataCell />
@@ -141,8 +140,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       disableSortBy: true,
       Cell: ({ row }) =>
         row.original?.actualDeliveryDate ? (
-          <div className="createBy" title={`${moment(row.original?.actualDeliveryDate)?.format(dateTimeFormat)}`}>
-            {moment(row.original?.actualDeliveryDate)?.format(dateTimeFormat)}
+          <div className="createBy" title={`${displayDateTime(row.original?.actualDeliveryDate)}`}>
+            {displayDateTime(row.original?.actualDeliveryDate)}
           </div>
         ) : (
           <NoDataCell />
@@ -529,8 +528,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           Replace Assets
         </MenuItem>
         {permissions?.transferAsset?.isUpdate &&
-          selectedRecords.length &&
-          selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
+        selectedRecords.length &&
+        selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
           selectedRecords?.length ? (
           <MenuItem
             onClick={() => {
@@ -554,7 +553,9 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           disabled={
             !canReceive ||
             selectedRecords.length === 0 ||
-            selectedRecords.some((e: any) => e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered || selectedRecords?.some((e: any) => e.receivingTicketId))
+            selectedRecords.some(
+              (e: any) => e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered || selectedRecords?.some((e: any) => e.receivingTicketId)
+            )
           }
           onClick={() => {
             setShowConfirmBoxReceive({ open: true, type: 'changeReceiveDate' });

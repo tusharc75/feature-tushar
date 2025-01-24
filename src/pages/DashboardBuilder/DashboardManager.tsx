@@ -1,5 +1,6 @@
 import { DndContext, DragOverEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
-import { Box, Button, CircularProgress, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Typography } from '@material-ui/core';
+import { Box, CircularProgress, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { saveAs } from 'file-saver';
 import { Form, Formik } from 'formik';
 import update from 'immutability-helper';
@@ -18,6 +19,7 @@ import DashboardItem from './DashboardItem';
 import DashboardView from './DashboardView';
 import { IFormDataType, baseURL } from './builderHelpers';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const DashboardBuilder = () => {
   const history = useHistory();
@@ -120,7 +122,6 @@ const DashboardBuilder = () => {
               hasFilters: false,
               hasTableView: false,
               hasExport: false,
-              statusOptions: [],
               filters: []
             }
           ]
@@ -212,135 +213,134 @@ const DashboardBuilder = () => {
 
   const sensors = useDndSensors();
 
-  return (<>
-    <DeviceMessage />
-    <Box className="main-container-v1">
-      <Box className="headerbox-v1">
-        <Box className="nav-v1">
-          <CustomBreadCrumbs
-            routes={[
-              { title: resources?.dashboardMaster?.titlePlural, path: '/dashboard-master' },
-              { title: type && type === 'clone' ? 'Clone' : !isNew ? values.name : 'New', path: '' }
-            ]}
-          />
-        </Box>
-        <Box>
-          <Box display="flex" justifyContent="flex-end">
-            <Box mr={2}>
-              <button className="new-headerbox-button-v1" onClick={handleExportField}>
-                <span>Export</span>
-                <ExportIcon />
-              </button>
-            </Box>
-            <Box>
-              <input accept="json" style={{ display: 'none' }} onChange={handleImport} id="import-file" multiple={false} type="file" />
-              <label htmlFor="import-file" className="new-headerbox-button-v1">
-                <span>Import</span>
-                <ImportIcon />
-              </label>
+  return (
+    <>
+      <DeviceMessage />
+      <Box className="main-container-v1">
+        <Box className="headerbox-v1">
+          <Box className="nav-v1">
+            <CustomBreadCrumbs
+              routes={[
+                { title: resources?.dashboardMaster?.titlePlural, path: '/dashboard-master' },
+                { title: type && type === 'clone' ? 'Clone' : !isNew ? values.name : 'New', path: '' }
+              ]}
+            />
+          </Box>
+          <Box>
+            <Box display="flex" justifyContent="flex-end">
+              <Box mr={2}>
+                <button className="new-headerbox-button-v1" onClick={handleExportField}>
+                  <span>Export</span>
+                  <ExportIcon />
+                </button>
+              </Box>
+              <Box>
+                <input accept="json" style={{ display: 'none' }} onChange={handleImport} id="import-file" multiple={false} type="file" />
+                <label htmlFor="import-file" className="new-headerbox-button-v1">
+                  <span>Import</span>
+                  <ImportIcon />
+                </label>
+              </Box>
             </Box>
           </Box>
         </Box>
-      </Box>
-      <Box className={`detail-container-v1`}>
-        <Box p={1.2} display="flex" justifyContent="space-between" alignItems={'center'}>
-          <Formik initialValues={values} enableReinitialize={true} onSubmit={handleClickSave} validate={validate}>
-            {({ values, errors, touched, setFieldValue, submitForm, setValues }) => (
-              <Fragment>
-                <Box display="flex">
-                  <Form autoComplete="off" autoCorrect="off" noValidate>
-                    <Box display="flex">
-                      <TextField
-                        disabled={isLoading}
-                        style={{ width: 300 }}
-                        variant="outlined"
-                        required
-                        value={values.name}
-                        onChange={(e) => setFieldValue('name', e.target.value)}
-                        size="small"
-                        label="Dashboard Name"
-                        error={touched['name'] && Boolean(errors['name'])}
-                        helperText={touched['name'] && errors['name']}
-                      />
-                      <Box pl={2}>
-                        <FormControl fullWidth size="small" variant="outlined">
-                          <InputLabel id="duration">Select Duration</InputLabel>
-                          <Select
-                            labelId="duration"
-                            id="time-duration"
-                            style={{ width: 300 }}
-                            value={values.defaultDuration}
-                            onChange={(e) => setFieldValue('defaultDuration', e.target.value)}
-                            label="Select Duration"
-                          >
-                            <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
-                            <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
-                            <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
-                            <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
-                            <MenuItem value={'current-year'}>Current Year</MenuItem>
-                          </Select>
-                        </FormControl>
+        <Box className={`detail-container-v1`}>
+          <Box p={1.2} display="flex" justifyContent="space-between" alignItems={'center'}>
+            <Formik initialValues={values} enableReinitialize={true} onSubmit={handleClickSave} validate={validate}>
+              {({ values, errors, touched, setFieldValue, submitForm, setValues }) => (
+                <Fragment>
+                  <Box display="flex">
+                    <Form autoComplete="off" autoCorrect="off" noValidate>
+                      <Box display="flex">
+                        <TextField
+                          disabled={isLoading}
+                          style={{ width: 300 }}
+                          variant="outlined"
+                          required
+                          value={values.name}
+                          onChange={(e) => setFieldValue('name', e.target.value)}
+                          size="small"
+                          label="Dashboard Name"
+                          error={touched['name'] && Boolean(errors['name'])}
+                          helperText={touched['name'] && errors['name']}
+                        />
+                        <Box pl={2}>
+                          <FormControl fullWidth size="small" variant="outlined">
+                            <InputLabel id="duration">Select Duration</InputLabel>
+                            <Select
+                              labelId="duration"
+                              id="time-duration"
+                              style={{ width: 300 }}
+                              value={values.defaultDuration}
+                              onChange={(e) => setFieldValue('defaultDuration', e.target.value)}
+                              label="Select Duration"
+                              size="small"
+                            >
+                              <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
+                              <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
+                              <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
+                              <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
+                              <MenuItem value={'current-year'}>Current Year</MenuItem>
+                            </Select>
+                          </FormControl>
+                        </Box>
                       </Box>
+                    </Form>
+                  </Box>
+                  {permissions?.dashboardMaster?.isUpdate && (
+                    <Box py={'6px'}>
+                      <ThemeButton
+                        disabled={!Boolean(values.name) || formData.length === 0 || isSubmitting}
+                        onClick={submitForm}
+                        isLoading={isSubmitting}
+                        buttonType='theme'
+                      >
+                        Save
+                      </ThemeButton>
                     </Box>
-                  </Form>
+                  )}
+                </Fragment>
+              )}
+            </Formik>
+          </Box>
+          <Box p={1}>
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <Builder setFormData={setFormData} selectedData={selectedData} handleUpdate={handleUpdate} />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 8 }}>
+                <Box className={'container-with-border'} p={2}>
+                  {formData.length === 0 && (
+                    <Box height="100%" width="100%" display="flex" justifyContent="center" alignItems="center">
+                      {isLoading ? (
+                        <CircularProgress size={22} color="primary" />
+                      ) : (
+                        <Box textAlign="center">
+                          <MdDashboardCustomize size={120} className="headerLogo" />
+                          <Typography variant="body1" align="center">
+                            Start creating layout
+                          </Typography>
+                        </Box>
+                      )}
+                    </Box>
+                  )}
+                  <DndContext onDragEnd={onDragEnd} onDragOver={onDragOver} sensors={sensors} onDragStart={onDragStart}>
+                    <DashboardView
+                      selectedData={selectedData}
+                      formData={formData}
+                      setFormData={setFormData}
+                      handleEdit={handleEdit}
+                      handleRemove={handleRemove}
+                    />
+                    <DragOverlay>{activeItem && <DashboardItem formData={activeItem} id={activeItem.uniqueId} index={0} />}</DragOverlay>
+                  </DndContext>
                 </Box>
-                {permissions?.dashboardMaster?.isUpdate && (
-                  <Box py={'6px'}>
-                    <Button
-                      color="primary"
-                      variant="contained"
-                      size="small"
-                      disableRipple
-                      disabled={!Boolean(values.name) || formData.length === 0 || isSubmitting}
-                      onClick={submitForm}
-                      startIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
-                    >
-                      Save
-                    </Button>
-                  </Box>
-                )}
-              </Fragment>
-            )}
-          </Formik>
-        </Box>
-        <Box p={1}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={4}>
-              <Builder setFormData={setFormData} selectedData={selectedData} handleUpdate={handleUpdate} />
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={8}>
-              <Box className={'container-with-border'} p={2}>
-                {formData.length === 0 && (
-                  <Box height="100%" width="100%" display="flex" justifyContent="center" alignItems="center">
-                    {isLoading ? (
-                      <CircularProgress size={22} color="primary" />
-                    ) : (
-                      <Box textAlign="center">
-                        <MdDashboardCustomize size={120} className="headerLogo" />
-                        <Typography variant="body1" align="center">
-                          Start creating layout
-                        </Typography>
-                      </Box>
-                    )}
-                  </Box>
-                )}
-                <DndContext onDragEnd={onDragEnd} onDragOver={onDragOver} sensors={sensors} onDragStart={onDragStart}>
-                  <DashboardView
-                    selectedData={selectedData}
-                    formData={formData}
-                    setFormData={setFormData}
-                    handleEdit={handleEdit}
-                    handleRemove={handleRemove}
-                  />
-                  <DragOverlay>{activeItem && <DashboardItem formData={activeItem} id={activeItem.uniqueId} index={0} />}</DragOverlay>
-                </DndContext>
-              </Box>
-            </Grid>
-          </Grid>
+          </Box>
         </Box>
       </Box>
-    </Box>
-  </>
+    </>
   );
 };
 

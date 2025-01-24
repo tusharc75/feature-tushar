@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isArray, isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -16,7 +16,7 @@ import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
-
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ManagePadMaster = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, isRedirectToDetailPage = true }) => {
   const history = useHistory();
@@ -70,8 +70,7 @@ const ManagePadMaster = ({ onClose, onSuccess, isClone = false, id = null, refer
             const field: any = fieldsDataForCreate?.find((e) => e.fieldName === key);
             if (field.type === 'multiSelect' && !isArray(referenceData[key])) {
               tempInitialData[key] = [referenceData[key]];
-            }
-            else {
+            } else {
               tempInitialData[key] = referenceData[key];
             }
             field.disableOnEdit = true;
@@ -155,12 +154,13 @@ const ManagePadMaster = ({ onClose, onSuccess, isClone = false, id = null, refer
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${id
-                  ? isClone
-                    ? `Clone - ${cloneHeading}`
-                    : `Update ${initialData.values?.padName ? `(${initialData.values?.padName})` : ''}`
-                  : `Create ${resources?.padMaster?.titleSingular}`
-                  }`}
+                title={`${
+                  id
+                    ? isClone
+                      ? `Clone - ${cloneHeading}`
+                      : `Update ${initialData.values?.padName ? `(${initialData.values?.padName})` : ''}`
+                    : `Create ${resources?.padMaster?.titleSingular}`
+                }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -181,33 +181,26 @@ const ManagePadMaster = ({ onClose, onSuccess, isClone = false, id = null, refer
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
-                  disabled={submitting}
+                <ThemeButton
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
+                  buttonType='transparent'
                 >
                   Cancel
-                </Button>
-                <Button
-                  disabled={loading || submitting}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
-                  size="small"
+                </ThemeButton>
+                <ThemeButton
                   onClick={submitForm}
-                  endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                  disabled={loading || submitting}
+                  isLoading={submitting}
+                  buttonType='theme'
                 >
-                  {' '}
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);
@@ -228,7 +221,7 @@ const ManagePadMaster = ({ onClose, onSuccess, isClone = false, id = null, refer
         </Box>
       )}
     </Dialog>
-  )
-}
+  );
+};
 
-export default ManagePadMaster
+export default ManagePadMaster;

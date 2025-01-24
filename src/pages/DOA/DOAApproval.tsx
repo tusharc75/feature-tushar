@@ -1,6 +1,6 @@
-import { Box, Button, Dialog, IconButton, Typography, useMediaQuery } from '@material-ui/core';
-import ThumbDownIcon from '@material-ui/icons/ThumbDown';
-import ThumbUpIcon from '@material-ui/icons/ThumbUp';
+import { Box, IconButton, useMediaQuery } from '@mui/material';
+import ThumbDownIcon from '@mui/icons-material/ThumbDown';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { GiVintageRobot } from 'react-icons/gi';
@@ -11,14 +11,12 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
-import PerformanceTuningImg from '../../assets/PerformanceTuning.png';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
-import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import ProductBuilder from '../../components/productBuilder';
-import { ACTIVITY_RESOURCE, CustomDialogTransition, defaultActivityShow, formatAmountWithCurrency, quoteBuilder, sidebarResource } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, defaultActivityShow, formatAmountWithCurrency, QUOTE_STATUS, quoteBuilder, sidebarResource } from '../../constants/helpers';
 import DOAReasonDialog from './DOAReasonDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const DOAApproval = () => {
   const {
@@ -41,7 +39,6 @@ const DOAApproval = () => {
 
   const [needDOA, setneedDOA] = useState(false);
   const [QStatus, setQStatus] = useState(true);
-  const [showAIDialog, setShowAIDialog] = useState(false);
   const [showQuoteStatusChangeDialog, setShowQuoteStatusChangeDialog] = useState(false);
   const [quoteStatusChangeData, setQuoteStatusChangeData] = useState('');
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
@@ -76,7 +73,7 @@ const DOAApproval = () => {
         setVersionData(data?.version);
         setProductBuilderId(data?.version?.productBuilderId);
         setQData(data);
-        if (data?.version?.status !== 'Sent for DOA') {
+        if (data?.version?.status !== QUOTE_STATUS.sentforDOA) {
           setQStatus(false);
         }
       })
@@ -204,54 +201,32 @@ const DOAApproval = () => {
                 `totalSalesPrice_${quoteData?.currency?.toLowerCase()}`
               ]}
             />
-            <HtmlTooltip title="AI Suggestion" arrow placement="top">
-              <IconButton
-                size="small"
-                className="btn-outline-v1"
-                onClick={() => {
-                  setShowAIDialog(true);
-                }}
-              >
-                <GiVintageRobot />
-              </IconButton>
-            </HtmlTooltip>
             {QData && QStatus && QData?.DOA.requestTo.find((u) => u === currentUser._id) ? (
               <>
-                <HtmlTooltip title={'Accept'} arrow placement="top">
-                  <Button
-                    onClick={() => {
-                      QuoteStatusChange('Accepted', '', '');
-                    }}
-                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                    size="small"
-                    startIcon={isMobile && !isTablet ? null : <ThumbUpIcon />}
-                    color="primary"
-                    className="btn-outline-v1"
-                  >
-                    {isMobile && !isTablet ? <ThumbUpIcon /> : 'Accept'}
-                  </Button>
-                </HtmlTooltip>
-                <HtmlTooltip title={'Reject'} arrow placement="top">
-                  <Button
-                    onClick={() => {
-                      setQuoteStatusChangeData('Rejected');
-                      setShowQuoteStatusChangeDialog(true);
-                    }}
-                    startIcon={isMobile && !isTablet ? null : <ThumbDownIcon />}
-                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                    size="small"
-                    color="primary"
-                    className="btn-outline-v1"
-                  >
-                    {isMobile && !isTablet ? <ThumbDownIcon /> : 'Reject'}
-                  </Button>
-                </HtmlTooltip>
+                <ThemeButton
+                  onClick={() => {
+                    QuoteStatusChange('Accepted', '', '');
+                  }}
+                  startIcon={<ThumbUpIcon />}
+                  mobileTooltip="Accept"
+                  iconForMobile={<ThumbUpIcon />}
+                >
+                  {'Accept'}
+                </ThemeButton>
+                <ThemeButton
+                  onClick={() => {
+                    setQuoteStatusChangeData('Rejected');
+                    setShowQuoteStatusChangeDialog(true);
+                  }}
+                  startIcon={<ThumbDownIcon />}
+                  mobileTooltip="Reject"
+                  iconForMobile={<ThumbDownIcon />}
+                >
+                  {'Reject'}
+                </ThemeButton>
               </>
             ) : null}
-            <ActivityButton
-              referenceId={QData?.quoteBuilderId}
-              resource={ACTIVITY_RESOURCE.quote}
-              resourceLabel={QData?.quoteName} />
+            <ActivityButton referenceId={QData?.quoteBuilderId} resource={ACTIVITY_RESOURCE.quote} resourceLabel={QData?.quoteName} />
           </Box>
         </Box>
       </Box>
@@ -306,37 +281,6 @@ const DOAApproval = () => {
           )}
         </div>
       </Box>
-      {showAIDialog && (
-        <Dialog
-          open={showAIDialog}
-          aria-labelledby="customized-dialog-title"
-          maxWidth="sm"
-          onClose={() => {
-            setShowAIDialog(false);
-          }}
-          fullWidth
-          fullScreen={fullScreen || isMobile || isTablet}
-          TransitionComponent={CustomDialogTransition}
-        >
-          <CustomDialogHeader
-            title="AI Suggestion"
-            onClose={() => {
-              setShowAIDialog(false);
-            }}
-            isMinimized={!fullScreen}
-            onMinimizeMaximize={() => {
-              setFullScreen((prevState) => !prevState);
-            }}
-            showManimizeMaximize={true}
-          />
-          <CustomDialogContent isFooterPresent={false}>
-            <div className="text-align-center">
-              <Typography variant="h4">Under Construction </Typography>
-              <img src={`${PerformanceTuningImg}`} alt="" style={{ height: '300px' }} />
-            </div>
-          </CustomDialogContent>
-        </Dialog>
-      )}
       {showQuoteStatusChangeDialog && (
         <DOAReasonDialog
           reasonDialogOpen={showQuoteStatusChangeDialog}

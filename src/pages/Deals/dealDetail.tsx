@@ -1,4 +1,5 @@
-import { Box, Grid } from '@material-ui/core';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { camelCase } from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -74,21 +75,17 @@ const DealDetail = () => {
       </Box>
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0}>
-            Header
-          </CustomTab>
-          <CustomTab value={2}>
-            {resources?.units?.titlePlural}
-          </CustomTab>
+          <CustomTab value={0}>Header</CustomTab>
+          <CustomTab value={2}>{resources?.units?.titlePlural}</CustomTab>
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
             {dealData && fields ? (
               <DetailsPage data={dealData} fields={fields} />
             ) : (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-              </Grid>
+              <div className="p-2">
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+              </div>
             )}
           </Box>
         </TabPanel>

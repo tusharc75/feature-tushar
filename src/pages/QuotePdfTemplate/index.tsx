@@ -1,7 +1,7 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import { Box, IconButton, MenuItem } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
@@ -127,12 +127,10 @@ const QuotePdfTemplate = () => {
 
   const previewPdfTemplate = (templateId) => {
     toastConfig.setToastConfig({
-      hideDuration: null,
       open: true,
       type: 'info',
       message: `Downloading preview file, Please wait...`
     });
-
     axiosInstance()
       .get(`${qbApi}/getdummy/${templateId}`, {
         responseType: 'blob'
@@ -247,11 +245,11 @@ const QuotePdfTemplate = () => {
         <MenuItem
           disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
           onClick={() => {
-            if (selectedRecords.length === 1){
+            if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-              }else{
-                setDeleteRecord(null)
-              }
+            } else {
+              setDeleteRecord(null);
+            }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -268,22 +266,14 @@ const QuotePdfTemplate = () => {
       </div>
       <CustomContainer>
         <ListingPageHeader
-          // toggleButtonList
-          // onToggle
-          // selectedType
-          // setSelectedType
-          // leftSideContents
           searchValue={search}
           onSearch={handleSearch}
-          // rightSideContents
           isActionButtonVisible={permissions?.quotePdfTemplate?.isDelete}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
-          // addButtonProps
           addButtonOnclick={() => CreateNew('0', false)}
           isAddButtonVisible={permissions?.quotePdfTemplate?.isCreate}
         />
-
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

@@ -1,14 +1,14 @@
 import React, { useEffect, memo } from 'react';
-import Box from '@material-ui/core/Box';
-import Typography from '@material-ui/core/Typography';
-import moment from 'moment';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import { Virtualizer } from '@tanstack/react-virtual';
+import dayjs from 'dayjs';
 
 const getAllDaysInMonthFormatted = (date: any): string[] => {
   const daysInMonth = date.daysInMonth();
   const days: string[] = [];
   for (let day = 1; day <= daysInMonth; day++) {
-    days.push(moment(date).date(day).format('D dd'));
+    days.push(dayjs(date).date(day).format('D dd'));
   }
   return days;
 };
@@ -16,9 +16,9 @@ const getAllDaysInMonthFormatted = (date: any): string[] => {
 const DaysBetweenDates = (startDate: any, endDate: any) => {
   const week: { month: string; dates: string[] }[] = [];
   const allDates: string[] = [];
-  const totalMonths = endDate.diff(startDate, 'months');
+  const totalMonths = endDate.diff(startDate, 'month');
   for (let i = 0; i <= totalMonths; i++) {
-    const date = startDate.clone().add(i, 'months');
+    const date = startDate.clone().add(i, 'month');
     const result = date.format('MMM YYYY');
     const dates = getAllDaysInMonthFormatted(date);
     const obj: { month: string; dates: string[] } = { month: result, dates };

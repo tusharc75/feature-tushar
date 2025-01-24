@@ -1,17 +1,19 @@
 import { Form, Formik } from 'formik';
-import { Button, CircularProgress, Dialog, Grid, Box } from '@material-ui/core';
+import { Dialog, Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import FormTypes from 'src/components/Helpers/FormTypes';
-import moment from 'moment';
 import { useData } from 'src/StateProvider/Provider';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, isBulkUpdate, records, rentalId }) => {
   const {
@@ -30,36 +32,39 @@ const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, isBulkUp
         fetchAssetRentalDate(assets);
       }
     }
-  }, [])
+  }, []);
 
   const fetchAssetRentalDate = (assets) => {
     setLoadingData(true);
-    axiosInstance().put(`${routes?.serializedAsset?.path}/asset-last-history-date-before-adding`, { referenceId: rentalId, assets: assets }).then(({ data: { data } }) => {
-      if (data?.date) {
-        const date = new Date(data?.date);
-        date.setHours(0, 0, 0);
-        setMinStartDate(date);
-      }
-      setLoadingData(false);
-    }).catch((err) => {
-      setLoadingData(false);
-      toastConfig.setToastConfig(err);
-    })
-  }
+    axiosInstance()
+      .put(`${routes?.serializedAsset?.path}/asset-last-history-date-before-adding`, { referenceId: rentalId, assets: assets })
+      .then(({ data: { data } }) => {
+        if (data?.date) {
+          const date = new Date(data?.date);
+          date.setHours(0, 0, 0);
+          setMinStartDate(date);
+        }
+        setLoadingData(false);
+      })
+      .catch((err) => {
+        setLoadingData(false);
+        toastConfig.setToastConfig(err);
+      });
+  };
 
   function validate(values) {
     const errors = {};
     if (data?.isAllowedStartDate && data?.isAllowedEndDate) {
-      let manualStartDate = moment(values?.manualStartDate);
-      let manualEndDate = moment(values?.manualEndDate);
-      if (manualEndDate.diff(manualStartDate, 'days') < 0) {
+      let manualStartDate = dayjs(values?.manualStartDate);
+      let manualEndDate = dayjs(values?.manualEndDate);
+      if (manualEndDate.diff(manualStartDate, 'day') < 0) {
         errors['manualEndDate'] = 'Please enter valid end date';
       }
     }
     if (minStartDate) {
-      let manualStartDate = moment(values?.manualStartDate);
-      let newMinStartDate = moment(minStartDate);
-      if (manualStartDate.diff(newMinStartDate, 'days') < 0) {
+      let manualStartDate = dayjs(values?.manualStartDate);
+      let newMinStartDate = dayjs(minStartDate);
+      if (manualStartDate.diff(newMinStartDate, 'day') < 0) {
         errors['manualStartDate'] = 'Please enter valid start date';
       }
     }
@@ -76,34 +81,45 @@ const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, isBulkUp
         }
       }}
       maxWidth="sm"
-      fullWidth>
+      fullWidth
+    >
       {!loadingData ? (
         <Formik
-          initialValues={data?.isAllowedStartDate && data?.isAllowedEndDate ? {
-            manualStartDate: new Date(data?.manualStartDate),
-            manualEndDate: new Date(data?.manualEndDate),
-          } :
-            data?.isAllowedStartDate ? { manualStartDate: new Date(data?.manualStartDate) } :
-              data?.isAllowedEndDate ? { manualEndDate: new Date(data?.manualEndDate) } : {}}
+          initialValues={
+            data?.isAllowedStartDate && data?.isAllowedEndDate
+              ? {
+                manualStartDate: new Date(data?.manualStartDate),
+                manualEndDate: new Date(data?.manualEndDate)
+              }
+              : data?.isAllowedStartDate
+                ? { manualStartDate: new Date(data?.manualStartDate) }
+                : data?.isAllowedEndDate
+                  ? { manualEndDate: new Date(data?.manualEndDate) }
+                  : {}
+          }
           validate={validate}
           onSubmit={(values) => {
             const newValues: any = {};
             if (data.isAllowedStartDate) {
-              newValues.manualStartDate = new Date(values.manualStartDate)?.toISOString()
+              newValues.manualStartDate = new Date(values.manualStartDate)?.toISOString();
             }
             if (data.isAllowedEndDate) {
-              newValues.manualEndDate = new Date(values.manualEndDate)?.toISOString()
+              newValues.manualEndDate = new Date(values.manualEndDate)?.toISOString();
             }
             handleSubmit(newValues);
-          }}>
-          {({ values, errors, touched, setFieldValue }) => (
-            <Form >
-              <CustomDialogHeader title={isBulkUpdate ? 'Update Start Date/End Date' : data?.assetNumber ? data?.assetNumber : ''} onClose={onClose} />
+          }}
+        >
+          {({ values, errors, touched, setFieldValue, submitForm }) => (
+            <Form>
+              <CustomDialogHeader
+                title={isBulkUpdate ? 'Update Start Date/End Date' : data?.assetNumber ? data?.assetNumber : ''}
+                onClose={onClose}
+              />
               <CustomDialogContent>
                 <Box p={2}>
                   <Grid container spacing={2}>
-                    {data?.isAllowedStartDate &&
-                      <Grid item xs={12} sm={12}>
+                    {data?.isAllowedStartDate && (
+                      <Grid size={{ xs: 12, sm: 12 }}>
                         <FormTypes
                           size="small"
                           fullWidth
@@ -119,9 +135,10 @@ const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, isBulkUp
                           {...(values.manualEndDate ? { maxDate: values.manualEndDate } : {})}
                           {...(minStartDate ? { minDate: minStartDate } : {})}
                         />
-                      </Grid>}
-                    {data?.isAllowedEndDate &&
-                      <Grid item xs={12} sm={12}>
+                      </Grid>
+                    )}
+                    {data?.isAllowedEndDate && (
+                      <Grid size={{ xs: 12, sm: 12 }}>
                         <FormTypes
                           size="small"
                           fullWidth
@@ -137,24 +154,25 @@ const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, isBulkUp
                           }}
                         />
                       </Grid>
-                    }
+                    )}
                   </Grid>
                 </Box>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button disabled={loading} size="small" variant="outlined" color="primary" onClick={onClose}>
+                <ThemeButton
+                  onClick={onClose}
+                  buttonType='transparent'
+                >
                   Close
-                </Button>
-                <Button
+                </ThemeButton>
+                <ThemeButton
+                  onClick={submitForm}
                   disabled={loading}
-                  startIcon={loading && <CircularProgress size={18} color="inherit" />}
-                  size="small"
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+                  buttonType='theme'
+                  isLoading={loading}
                 >
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
             </Form>
           )}

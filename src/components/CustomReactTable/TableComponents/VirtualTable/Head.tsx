@@ -1,5 +1,5 @@
 import { horizontalListSortingStrategy, SortableContext } from '@dnd-kit/sortable';
-import { TableHead, TableRow } from '@material-ui/core';
+import { TableHead, TableRow } from '@mui/material';
 import { Fragment, memo } from 'react';
 import { DraggableHeader } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
 
@@ -18,7 +18,8 @@ export const VirtualTableHead = memo(
     resource,
     vtableData,
     virtualPaddingLeft,
-    virtualPaddingRight
+    virtualPaddingRight,
+    renderedFrom = ''
   }: any) => {
     return (
       <TableHead
@@ -30,6 +31,7 @@ export const VirtualTableHead = memo(
       >
         {table.getHeaderGroups().map((headerGroup) => (
           <SingleRow
+            renderedFrom={renderedFrom}
             key={headerGroup.id}
             headerGroup={headerGroup}
             virtualPaddingLeft={virtualPaddingLeft}
@@ -65,7 +67,8 @@ const SingleRow = memo(
     isClientSideGrid,
     resource,
     vtableData,
-    left
+    left,
+    renderedFrom
   }: any) => {
     return (
       <TableRow className="tr sticky top-0 z-[11] !flex bg-[var(--dark-primary,_white)]" key={headerGroup.id}>
@@ -88,6 +91,7 @@ const SingleRow = memo(
                   header={header}
                   key={header.id}
                   resource={resource}
+                  renderedFrom={renderedFrom}
                   vtableData={vtableData}
                 />
                 {left.length && header.id === left[left.length - 1] && virtualPaddingLeft ? (

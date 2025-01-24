@@ -1,4 +1,4 @@
-import { useMediaQuery } from '@material-ui/core';
+import { useMediaQuery } from '@mui/material';
 import { useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
@@ -15,11 +15,19 @@ import { useData } from 'src/StateProvider/Provider';
 const Workspace = () => {
   const [channels, setChannels] = useState<TChannel[]>(null);
   const [selectedChannel, setSelectedChannel] = useState<TChannel>(null);
-  const [createChannelDialog, setCreateChannelDialog] = useState(false);
+  const [manageChannelDialog, setManageChannelDialog] = useState({ open: false, _id: null });
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const mobScreen = useMediaQuery('(max-width:768px)');
   const [socket, setSocket] = useState<Socket>(null);
-  const { state: { user: { user }, resources } } = useData();
+  const [newChat, setNewChat] = useState(false);
+  const [newChatUsers, setNewChatUsers] = useState([]);
+  const [newChatAddMemberDialog, setNewChatAddMemberDialog] = useState<boolean>(false);
+  const {
+    state: {
+      user: { user },
+      resources
+    }
+  } = useData();
 
   const token = localStorage.getItem('token');
 
@@ -31,10 +39,24 @@ const Workspace = () => {
     setIsSidebarCollapsed((prev) => !prev);
   };
 
-  const fetchChannels = async () => {
+  const fetchChannels = async (selectLatestChat= false) => {
     const { data } = await axiosInstance().get('/work-space/channel');
+    data?.data?.forEach((d: any) => {
+      if (d?.type === 'chat') {
+        d.title = (d?.members?.filter(m => m?.optionValue !== user?._id) || d?.members)?.map((m) => m?.optionLabel)?.join(', ');
+        d.description = 'Direct Messaging';
+      }
+    })
     setChannels(data.data || []);
-    if (data?.data?.length) setSelectedChannel(data?.data[0]);
+    const queryParam = new URLSearchParams(window.location.search)
+    const channelId = queryParam.get("channelId");
+    if (channelId) {
+      const channel = data?.data?.find((channel) => channel?._id === channelId);
+      setSelectedChannel(channel);
+    } else if (selectLatestChat) {
+      const channel = data?.data?.findLast((channel) => channel?.type === 'chat');
+      setSelectedChannel(channel);
+    }
   };
 
   const handleDeleteChannels = async (channelIds: string[]) => {
@@ -43,10 +65,11 @@ const Workspace = () => {
   };
 
   useEffect(() => {
-    if (socket && channels?.length) {
-      channels.forEach((channel) => {
+    if (socket) {
+      channels?.forEach((channel) => {
         socket.emit('joinChannel', channel?._id);
       });
+      socket.off('notification');
       socket.on('notification', (channel, userId) => {
         if (user?._id !== userId && selectedChannel?._id !== channel) {
           setChannels((prev) => {
@@ -55,29 +78,31 @@ const Workspace = () => {
             if (index !== -1) {
               const updatedChannel = {
                 ...updatedChannels[index],
-                notifications: (updatedChannels[index]?.notifications || 0) + 1,
+                notifications: (updatedChannels[index]?.notifications || 0) + 1
               };
               updatedChannels[index] = updatedChannel;
             }
             return updatedChannels;
-          })
+          });
         }
       });
+      socket.emit('joinChannel', 'directMessaging');
+      socket.off('refreshChannels');
+      socket.on('refreshChannels', () => {
+        fetchChannels(true)
+;      });
     }
     return () => {
-      if (socket && channels?.length) {
-        channels.forEach((channel) => {
+      if (socket) {
+        channels?.forEach((channel) => {
           socket.emit('leaveChannel', channel?._id);
         });
-        socket.off('fetchNewMessage');
-        socket.off('fetchMessages');
-        socket.off('addReaction');
-        socket.off('removeReaction');
+        socket.emit('leaveChannel', 'directMessaging');
         socket.off('notification');
+        socket.off('refreshChannels');
       }
     };
   }, [socket, channels]);
-
 
   useEffect(() => {
     if (!token) return;
@@ -91,14 +116,13 @@ const Workspace = () => {
     setSocket(s);
   }, [token]);
 
-
   return (
     <>
       <div className="main-container-v1">
         <div className="headerbox-v1">
           <CustomBreadCrumbs routes={[{ title: resources?.workSpace?.titlePlural }]} />
         </div>
-        <CustomContainer className="!min-h-[var(--container-height)] !p-0 [--container-height:calc(100vh-150px)] [--h:max(500px,_var(--container-height))] [--sidebar-width:270px] max-[768px]:[--container-height:calc(100vh-179px)]">
+        <CustomContainer className="border !min-h-[var(--container-height)] !p-0 [--container-height:calc(100vh-150px)] [--h:max(500px,_var(--container-height))] [--sidebar-width:270px] max-[768px]:[--container-height:calc(100vh-179px)]">
           <div
             className={cn(
               'relative flex min-h-[var(--h)] overflow-hidden rounded-lg transition-[margin]',
@@ -111,28 +135,36 @@ const Workspace = () => {
               channels={channels}
               selectedChannel={selectedChannel}
               setSelectedChannel={setSelectedChannel}
-              setCreateChannelDialog={setCreateChannelDialog}
+              setManageChannelDialog={setManageChannelDialog}
               handleDeleteChannels={handleDeleteChannels}
               mobScreen={mobScreen}
               setChannels={setChannels}
+              setNewChat={setNewChat}
+              setNewChatUsers={setNewChatUsers}
+              setNewChatAddMemberDialog={setNewChatAddMemberDialog}
             />
             <MessagePanel
               isSidebarCollapsed={isSidebarCollapsed}
               toggleSidebar={toggleSidebar}
-              setSelectedChannel={setSelectedChannel}
               selectedChannel={selectedChannel}
-              mobScreen={mobScreen}
               socket={socket}
+              newChat={newChat}
+              setNewChat={setNewChat}
+              newChatUsers={newChatUsers}
+              setNewChatUsers={setNewChatUsers}
+              newChatAddMemberDialog={newChatAddMemberDialog}
+              setNewChatAddMemberDialog={setNewChatAddMemberDialog}
             />
           </div>
         </CustomContainer>
-        {createChannelDialog && (
+        {manageChannelDialog.open && (
           <ManageChannel
-            onClose={() => setCreateChannelDialog(false)}
+            onClose={() => setManageChannelDialog({ open: false, _id: null })}
             onSuccess={() => {
               fetchChannels();
-              setCreateChannelDialog(false);
+              setManageChannelDialog({ open: false, _id: null });
             }}
+            _id={manageChannelDialog._id}
           />
         )}
       </div>

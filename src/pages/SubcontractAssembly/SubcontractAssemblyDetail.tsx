@@ -1,6 +1,7 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import { Edit } from '@material-ui/icons';
-import { Skeleton } from '@material-ui/lab';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import EditIcon from '@mui/icons-material/Edit';
+import { Skeleton } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
@@ -12,7 +13,7 @@ import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import Steps, { getIndex } from 'src/components/Steps';
@@ -201,13 +202,9 @@ const SubcontractAssemblyDetail = () => {
                   subcontractAssemblyData?.material?.length > 0 &&
                   subcontractAssemblyData?.material?.filter((m) => !m?.parentId)?.every((d) => d?.receivedQty > 0) && (
                     <ButtonWithPulse
-                      variant={'outlined'}
-                      color="default"
-                      size="small"
                       onClick={() => {
                         setShowClosedConfirmBox(true);
                       }}
-                      className={'btn-outline-v1'}
                     >
                       Close
                     </ButtonWithPulse>
@@ -215,9 +212,9 @@ const SubcontractAssemblyDetail = () => {
                 {permissions?.subcontractAssembly?.isUpdate &&
                   allowedToEdit &&
                   ![SUBCONTRACT_ASSEMBLY_STATUS.closed].includes(subcontractAssemblyData?.status) && (
-                    <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
-                      {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                    </Button>
+                    <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                      {'Edit'}
+                    </ThemeButton>
                   )}
                 {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>
@@ -241,9 +238,9 @@ const SubcontractAssemblyDetail = () => {
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
-            <Grid container spacing={2} style={{ padding: '8px' }}>
-              <CommonSkeleton lenArray={[...Array(7).keys()]} />
-            </Grid>
+            <div className="p-2">
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </div>
           ) : (
             <DetailsPage data={subcontractAssemblyData} fields={fields} />
           )}

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Typography, Button } from '@material-ui/core';
+import { Typography } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import styles from './error.module.scss';
 import errorImage from './assets/line-item.png';
 import { VITE_APP_ENV } from 'src/config';
@@ -41,9 +42,9 @@ class ErrorBoundary extends React.Component<any, any> {
             <Typography variant="h4" className={styles.message}>
               Our team has been notified. If the problem persists, please contact Equipt support.
             </Typography>
-            <Button variant="contained" color="primary" className={styles.reload} onClick={() => (window.location.href = '/')}>
+            <ThemeButton buttonType='transparent' onClick={() => (window.location.href = '/')}>
               Try again
-            </Button>
+            </ThemeButton>
             {['local', 'master', 'development'].includes(VITE_APP_ENV) ? (
               <Typography variant="body1">
                 <details style={{ whiteSpace: 'pre-wrap' }} className={styles.detailScreen}>

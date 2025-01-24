@@ -1,15 +1,17 @@
 import { useState, useEffect, useContext, Fragment, useRef } from 'react';
-import { Box, Grid, Button, CircularProgress, Menu, MenuItem, IconButton, makeStyles, useMediaQuery } from '@material-ui/core';
+import { Box, Menu, MenuItem, IconButton, useMediaQuery, Theme } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { makeStyles } from '@mui/styles';
 import { useParams, useHistory } from 'react-router-dom';
 import { FormBuilder } from '../../components/FormBuilder';
 import { Formik, Form } from 'formik';
 import { object, string } from 'yup';
-import TextField from '@material-ui/core/TextField';
+import TextField from '@mui/material/TextField';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
-import { Autocomplete } from '@material-ui/lab';
+import Autocomplete from '@mui/material/Autocomplete';
 import { uniq, map, isEqual } from 'lodash';
 import { extractFields, checkFormulaLoop } from '../../constants/formulaUtility';
 import { useData } from '../../StateProvider/Provider';
@@ -20,8 +22,9 @@ import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { IoIosArrowDropdown } from 'react-icons/io';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     width: '100%',
     flexGrow: 1,
@@ -31,7 +34,7 @@ const useStyles = makeStyles((theme) => ({
   linksContainer: {
     display: 'flex',
     justifyContent: 'flex-end',
-    ['@media (max-width: 960px)']: {
+    "['@media (max-width: 960px)']": {
       display: 'none'
     }
   },
@@ -399,7 +402,7 @@ const PriceTemplate = () => {
                 <Form>
                   <Box py={1} pb={'16px'}>
                     <Grid container spacing={1}>
-                      <Grid item xs={12} sm={4}>
+                      <Grid size={{ xs: 12, sm: 4 }}>
                         <TextField
                           disabled={!hasPermissionToUpdate}
                           variant="outlined"
@@ -409,18 +412,19 @@ const PriceTemplate = () => {
                           name="name"
                           fullWidth
                           margin="dense"
+                          size="small"
                           value={values['name']}
                           error={touched['name'] && Boolean(errors['name'])}
                           helperText={touched['name'] && errors['name']}
                           onChange={(e) => setFieldValue('name', e.target.value.trimStart())}
                         />
                       </Grid>
-                      <Grid item xs={12} sm={4}>
+                      <Grid size={{ xs: 12, sm: 4 }}>
                         <Autocomplete
                           disabled={!hasPermissionToUpdate}
                           options={productTemplate}
                           getOptionLabel={(option: any) => (option ? option.name : '')}
-                          getOptionSelected={(option: any, val) => option._id === val}
+                          isOptionEqualToValue={(option: any, val) => option._id === val}
                           value={
                             productTemplate.filter((data) => data._id === values['productTemplate']).length
                               ? productTemplate.filter((data) => data._id === values['productTemplate'])[0]
@@ -437,6 +441,7 @@ const PriceTemplate = () => {
                             <TextField
                               {...params}
                               margin="dense"
+                              size="small"
                               name="productTemplate"
                               label="Product Template"
                               variant="outlined"
@@ -448,27 +453,24 @@ const PriceTemplate = () => {
                           )}
                         />
                       </Grid>
-                      <Grid item xs={12} sm={4} container justify="flex-end">
+                      <Grid size={{ xs: 12, sm: 4 }} container justifyContent="flex-end">
                         <div className="button flex items-center">
                           <HistoryButton onClick={() => setShowHistory(true)} />
                           <Box>
                             {((id === '0' && priceTemplatePermissions.isCreate) || (id !== '0' && priceTemplatePermissions.isUpdate)) && (
-                              <Button
-                                disabled={isUpdating || !hasPermissionToUpdate}
-                                size="small"
-                                color="primary"
+                              <ThemeButton
                                 onClick={submitForm}
-                                variant="contained"
+                                disabled={isUpdating || !hasPermissionToUpdate}
+                                isLoading={isUpdating}
+                                buttonType='theme'
                               >
-                                Save{isUpdating && <CircularProgress size={24} />}
-                              </Button>
+                                Save
+                              </ThemeButton>
                             )}
                           </Box>
                           <Box ml={1}>
-                            <Button
-                              color="primary"
-                              size="small"
-                              variant="contained"
+                            <ThemeButton
+                              buttonType='theme'
                               onClick={() => {
                                 if (
                                   hasPermissionToUpdate &&
@@ -482,16 +484,15 @@ const PriceTemplate = () => {
                                 } else {
                                   history.push(routes.priceTemplate.path);
                                 }
-                              }}
-                            >
+                              }}>
                               Close
-                            </Button>
+                            </ThemeButton>
                           </Box>
                         </div>
                       </Grid>
                     </Grid>
                     <Grid container spacing={1}>
-                      <Grid item xs={12} sm={4}>
+                      <Grid size={{ xs: 12, sm: 4 }}>
                         {
                           <Autocomplete
                             disabled={!hasPermissionToUpdate}
@@ -515,6 +516,7 @@ const PriceTemplate = () => {
                               <TextField
                                 {...params}
                                 margin="dense"
+                                size="small"
                                 name="entity"
                                 label="Entity"
                                 variant="outlined"
@@ -526,7 +528,7 @@ const PriceTemplate = () => {
                           />
                         }
                       </Grid>
-                      <Grid item xs={12} sm={4}>
+                      <Grid size={{ xs: 12, sm: 4 }}>
                         {
                           <Autocomplete
                             disabled={!hasPermissionToUpdate}
@@ -553,6 +555,7 @@ const PriceTemplate = () => {
                               <TextField
                                 {...params}
                                 margin="dense"
+                                size="small"
                                 name="owner"
                                 label="Owner"
                                 variant="outlined"
@@ -565,7 +568,7 @@ const PriceTemplate = () => {
                           />
                         }
                       </Grid>
-                      <Grid item xs={12} sm={4}>
+                      <Grid size={{ xs: 12, sm: 4 }}>
                         {
                           <Autocomplete
                             disabled={!hasPermissionToUpdate}
@@ -594,6 +597,7 @@ const PriceTemplate = () => {
                               <TextField
                                 {...params}
                                 margin="dense"
+                                size="small"
                                 name="collaborator"
                                 label="Collaborator"
                                 variant="outlined"
@@ -622,7 +626,6 @@ const PriceTemplate = () => {
                   </Box>
                   {showConfirmDialog ? (
                     <ConfirmCancelDialog
-                      close={() => setShowConfirmDialog(false)}
                       open={showConfirmDialog}
                       onSave={() => {
                         setShowConfirmDialog(false);

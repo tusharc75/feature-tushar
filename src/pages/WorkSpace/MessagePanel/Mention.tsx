@@ -1,4 +1,4 @@
-import { MenuItem, Popper } from '@material-ui/core';
+import { MenuItem, Popper } from '@mui/material';
 import { Editor } from '@tinymce/tinymce-react';
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import routes from 'src/components/Helpers/Routes';

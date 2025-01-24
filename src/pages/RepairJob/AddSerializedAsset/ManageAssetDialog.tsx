@@ -1,5 +1,6 @@
-import { useContext, useState, useEffect, Fragment,useRef } from 'react';
-import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
+import { useContext, useState, useEffect, Fragment, useRef } from 'react';
+import { Box, Dialog } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -12,14 +13,22 @@ import { FaDiceOne } from 'react-icons/fa';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import { uniq, map, orderBy } from 'lodash';
-import moment from 'moment';
 import { isMobile, isTablet } from 'react-device-detect';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
-import CustomButton from 'src/components/Helpers/CustomButton';
 import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-export default function ManageAssetDialog({ allFields, onClose, repairJobData, handleSaveData, loadingEdit, selectedRecords, showSaveAndNext, isBulkedit, data }) {
-
+export default function ManageAssetDialog({
+  allFields,
+  onClose,
+  repairJobData,
+  handleSaveData,
+  loadingEdit,
+  selectedRecords,
+  showSaveAndNext,
+  isBulkedit,
+  data
+}) {
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [customFields, setCustomFields] = useState([]);
@@ -117,7 +126,7 @@ export default function ManageAssetDialog({ allFields, onClose, repairJobData, h
               <Fragment>
                 <CustomDialogHeader
                   title={isBulkedit ? 'Bulk Edit' : `Edit - ${data?.index} (${data?.assetNumber || ''})`}
-                  onClose={(e, reason) => {
+                  onClose={() => {
                     onClose();
                   }}
                   isMinimized={!fullScreen}
@@ -140,7 +149,7 @@ export default function ManageAssetDialog({ allFields, onClose, repairJobData, h
                           <Box marginY={2}>
                             <Grid spacing={3} container>
                               {section.sectionFields &&
-                                section.sectionFields.map((field) => (
+                                section.sectionFields.map((field) =>
                                   field.type === 'converter' || field.type === 'currencyAmount' || field.isConverter ? (
                                     <FormTypes
                                       fields={initialData.fields}
@@ -162,7 +171,7 @@ export default function ManageAssetDialog({ allFields, onClose, repairJobData, h
                                       size="small"
                                     />
                                   ) : ['expectedCompletionDate'].includes(field.fieldName) ? (
-                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                    <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
                                       <Box display="flex">
                                         <Box flexGrow={1}>
                                           <FormTypes
@@ -182,13 +191,13 @@ export default function ManageAssetDialog({ allFields, onClose, repairJobData, h
                                             isTooltip={field?.isTooltip || false}
                                             tooltipMessage={field?.tooltipMessage}
                                             size="small"
-                                            minDate={repairJobData['startDate'] ? moment(repairJobData['startDate']) : undefined}
+                                            minDate={repairJobData['startDate'] ? new Date(repairJobData['startDate']) : undefined}
                                           />
                                         </Box>
                                       </Box>
                                     </Grid>
                                   ) : (
-                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                    <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
                                       <Box display="flex">
                                         <Box flexGrow={1}>
                                           <FormTypes
@@ -216,7 +225,7 @@ export default function ManageAssetDialog({ allFields, onClose, repairJobData, h
                                       </Box>
                                     </Grid>
                                   )
-                                ))}
+                                )}
                             </Grid>
                           </Box>
                         </div>
@@ -224,16 +233,14 @@ export default function ManageAssetDialog({ allFields, onClose, repairJobData, h
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                  <Button size="small" variant="outlined" color="primary" onClick={onClose}>
+                  <ThemeButton buttonType="transparent" onClick={onClose}>
                     Close
-                  </Button>
+                  </ThemeButton>
                   {isBulkedit === false && showSaveAndNext && (
-                    <CustomButton
-                      loading={loadingEdit}
+                    <ThemeButton
+                      isLoading={loadingEdit}
                       disabled={loadingEdit}
-                      variant="contained"
-                      color="primary"
-                      type="submit"
+                      buttonType="theme"
                       onClick={() => {
                         setSaveAndNext(true);
                         submitForm();
@@ -241,22 +248,20 @@ export default function ManageAssetDialog({ allFields, onClose, repairJobData, h
                     >
                       {' '}
                       Save & Next
-                    </CustomButton>
+                    </ThemeButton>
                   )}
-                  <CustomButton
-                    loading={loadingEdit}
+                  <ThemeButton
+                    isLoading={loadingEdit}
                     disabled={loadingEdit}
-                    variant="contained"
-                    color="primary"
-                    type="submit"
+                    buttonType="theme"
                     onClick={() => {
                       setSaveAndNext(false);
                       submitForm();
                     }}
-                    id={"dialog-save-button"}
+                    id={'dialog-save-button'}
                   >
                     Save
-                  </CustomButton>
+                  </ThemeButton>
                 </CustomDialogFooter>
               </Fragment>
             )}
@@ -269,7 +274,6 @@ export default function ManageAssetDialog({ allFields, onClose, repairJobData, h
       </Dialog>
       {showConfirmDialog && (
         <ConfirmCancelDialog
-          close={() => setShowConfirmDialog(false)}
           open={showConfirmDialog}
           onSave={() => {
             setShowConfirmDialog(false);

@@ -1,17 +1,15 @@
-import React from 'react';
-import { makeStyles, withStyles } from '@material-ui/core/styles';
+import { Check } from '@mui/icons-material';
+import { Grid2, Paper, Step, StepConnector, StepLabel, Stepper, Theme, Typography } from '@mui/material';
+import { makeStyles, withStyles } from '@mui/styles';
 import clsx from 'clsx';
-import { Stepper, Step, StepLabel, StepConnector, Grid, Typography, Paper, Chip, Box } from '@material-ui/core';
-import { Check } from '@material-ui/icons';
-import { getUniqueCurrencies } from '../../constants/helpers';
-import { FcCancel } from 'react-icons/fc';
 import { FaHourglassHalf } from 'react-icons/fa';
+import { FcCancel } from 'react-icons/fc';
 import { Link } from 'react-router-dom';
+import { getUniqueCurrencies } from '../../constants/helpers';
 
-import HtmlTooltip from '../../components/CustomTooltipTitle';
 import routes from './Routes';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   container: {
     padding: theme.spacing(2),
     marginTop: theme.spacing(2)
@@ -31,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const QontoConnector = withStyles((theme) => ({
+const QontoConnector = withStyles((theme: Theme) => ({
   alternativeLabel: {
     top: 10,
     left: 'calc(-90% - 16px)',
@@ -45,7 +43,7 @@ const QontoConnector = withStyles((theme) => ({
   }
 }))(StepConnector);
 
-const useQontoStepIconStyles = makeStyles((theme) => ({
+const useQontoStepIconStyles = makeStyles((theme: Theme) => ({
   root: {
     color: '#09445A',
     display: 'flex',
@@ -55,16 +53,16 @@ const useQontoStepIconStyles = makeStyles((theme) => ({
     color: '#aaa'
   },
   circle: {
-    width: 22,
-    height: 22,
+    width: 32,
+    height: 32,
     borderRadius: '50%',
-    display: 'grid',
-    placeItems: 'center',
     zIndex: 1,
     border: '2px solid #163340',
-    padding: '5px 23px 23px 5px',
     marginTop: '-6px',
-    background: '#f6f6f6'
+    background: '#f6f6f6',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   completed: {
     color: theme.palette.primary.main //  darkBg
@@ -76,7 +74,7 @@ const useQontoStepIconStyles = makeStyles((theme) => ({
   }
 }));
 
-const useQontoStepIconStylesForQuote = makeStyles((theme) => ({
+const useQontoStepIconStylesForQuote = makeStyles((theme: Theme) => ({
   root: {
     color: 'white',
     display: 'flex',
@@ -86,15 +84,14 @@ const useQontoStepIconStylesForQuote = makeStyles((theme) => ({
     color: '#aaa'
   },
   circle: {
-    width: 22,
-    height: 22,
+    width: 32,
+    height: 32,
     borderRadius: '50%',
     backgroundColor: 'currentColor',
     display: 'grid',
     placeItems: 'center',
     zIndex: 1,
     border: '2px solid #163340',
-    padding: '5px 23px 23px 5px',
     marginTop: '-6px',
     background: '#f6f6f6'
   },
@@ -109,12 +106,12 @@ const useQontoStepIconStylesForQuote = makeStyles((theme) => ({
   cancel: {
     zIndex: 1,
     fontSize: 18,
-    color: '#d60f0f'
+    color: '#d60f0f !important'
   },
   pending: {
     zIndex: 1,
     fontSize: 18,
-    color: '#d1c4c4'
+    color: '#d1c4c4 !important'
   }
 }));
 
@@ -169,9 +166,8 @@ const NewStepper = ({ steps = null, heading, doaCurrency = null, quoteDOA = null
   return (
     <Paper elevation={0} className={classes.container}>
       <Typography variant="h6">{heading}</Typography>
-
-      <Grid container justify="center" alignItems="center">
-        <Grid item xs={12} md={12} lg={7}>
+      <Grid2 container sx={{ justifyContent: 'center', alignItems: 'center' }}>
+        <Grid2 size={{ xs: 12, md: 12, lg: 7 }}>
           <Stepper activeStep={-1} connector={<QontoConnector />} alternativeLabel>
             {quoteDOA
               ? quoteDOA?.map((label, index) => (
@@ -269,8 +265,8 @@ const NewStepper = ({ steps = null, heading, doaCurrency = null, quoteDOA = null
                     </Step>
                   ))}
           </Stepper>
-        </Grid>
-      </Grid>
+        </Grid2>
+      </Grid2>
     </Paper>
   );
 };

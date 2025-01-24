@@ -1,11 +1,11 @@
-import { MenuItem } from '@material-ui/core';
-import Box from '@material-ui/core/Box';
-import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import { MenuItem } from '@mui/material';
+import Box from '@mui/material/Box';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { camelCase, map, sortBy, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import CustomEditableGrid, { useTableReducer as useEditableTableReducer } from 'src/components/CustomEditableGridNew';
@@ -30,6 +30,7 @@ import BulkEditDialog from './BulkEditDialog';
 import ProductDialog from './ProductDialog';
 import SupplierAskPrice from './SupplierAskPrice';
 import ViewSupplierPriceDialog from './ViewSupplierPriceDialog';
+import { FiExternalLink } from 'react-icons/fi';
 
 let levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
@@ -57,7 +58,9 @@ const ProductBuilder = (props) => {
     addButtonMenuItems,
     previewDownloadProps,
     leftSideContents,
-    rightSideContents
+    rightSideContents,
+    ifQuoteApproved = null,
+    currentVersion = null
   } = props;
 
   const renderedFrom = `${camelCase(`${sidebarResource.quoteBuilder}_Product`)}`;
@@ -97,6 +100,22 @@ const ProductBuilder = (props) => {
   useEffect(() => {
     fetchProduct();
   }, [productBuilderId, processStatus]);
+
+  useEffect(() => {
+    if (processStatus === QUOTE_PROCESS_STATUS.doaProcess) {
+      const currentVersionStatus = quoteData?.versions[currentVersion]?.status;
+      if (currentVersionStatus.includes('Accepted')) {
+        setNextStep(true);
+      } else {
+        setNextStep(false);
+      }
+    }
+    if (processStatus === QUOTE_PROCESS_STATUS.sendToCustomer) {
+      if ((ifQuoteApproved && ifQuoteApproved.approved) || (currentVersion && quoteData?.versions[currentVersion]?.offered)) {
+        setNextStep(true);
+      }
+    }
+  }, [quoteData]);
 
   const fetchProduct = () => {
     if (setNextStep) {
@@ -170,6 +189,28 @@ const ProductBuilder = (props) => {
           }
         });
         let newColumns = generateColumns(renderedFrom, fields, routes.productDetail.path, false, currency);
+        newColumns?.forEach((e) => {
+          if (e.accessor === 'productName') {
+            e.cell = ({ row }) => (
+              <div className="flex items-center gap-1">
+                <p className="text-truncate" title={row?.original?.productName}>
+                  {' '}
+                  {row?.original?.productName}
+                </p>
+                {row?.original?.productId && (
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.productDetail.path}/${row.original.productId}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                )}
+              </div>
+            );
+          }
+        });
         columns = [...columns, ...newColumns];
 
         if (stage && stage === 'product') {
@@ -199,13 +240,14 @@ const ProductBuilder = (props) => {
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
-
         if (processStatus === QUOTE_PROCESS_STATUS.new) {
           if (rows?.length) {
             setNextStep(true);
           }
         } else if (processStatus === QUOTE_PROCESS_STATUS.priceBuilder) {
-          if (rows?.find((ele) => (ele[`totalSalesPrice_${currency?.toLowerCase()}`] || 0) === 0 || (ele[`qty`] || 0) === 0)) {
+          if (!rows?.length) {
+            setNextStep(false);
+          } else if (rows?.find((ele) => (ele[`totalSalesPrice_${currency?.toLowerCase()}`] || 0) === 0 || (ele[`qty`] || 0) === 0)) {
             setNextStep(false);
           } else {
             setNextStep(true);
@@ -624,10 +666,8 @@ const ProductBuilder = (props) => {
           )}
 
           {isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice && (
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
+            <ThemeButton
+              buttonType="theme"
               onClick={() => {
                 let tempSupplierAccountId = [];
                 selectedRecords?.forEach((element) => {
@@ -658,7 +698,7 @@ const ProductBuilder = (props) => {
               aria-controls="action-menu"
             >
               Ask Supplier to Quote
-            </Button>
+            </ThemeButton>
           )}
         </>
       );
@@ -829,21 +869,8 @@ const ProductBuilder = (props) => {
       {showConfirmDialog ? (
         <ConfirmCancelDialog
           open={showConfirmDialog}
-          close={() => setShowConfirmDialog(false)}
           onSave={() => {
             setShowConfirmDialog(false);
-            // e.preventDefault();
-            // const err = Object.keys(errors);
-            // if (err.length) {
-            // const input = document.querySelector(
-            //   `input[name=${err[0]}]`,
-            // );
-
-            // input.scrollIntoView({
-            //   behavior: 'smooth',
-            //   block: 'center',
-            //   inline: 'start',
-            // });
           }}
           onClose={() => {
             setShowConfirmDialog(false);

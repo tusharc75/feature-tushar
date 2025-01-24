@@ -1,4 +1,5 @@
-import { Box, Grid, IconButton, Typography, useMediaQuery } from '@material-ui/core';
+import { Box, IconButton, Typography, useMediaQuery } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
@@ -7,13 +8,19 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import Request from './Request';
-import RefreshIcon from '@material-ui/icons/Refresh';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { sidebarResource } from 'src/constants/helpers';
-import CustomFilter from 'src/components/Helpers/CustomFilter';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { FiExternalLink } from 'react-icons/fi';
-import axios, { CancelTokenSource } from 'axios';
+import axios from 'axios';
 import MobileDialog from 'src/pages/MaterialHandling/Request/MobileDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { BiFilterAlt } from 'react-icons/bi';
+import DisplayFilterChip from 'src/pages/Reports/tables/DisplayFilterChip';
+import Filter from 'src/components/Filter';
+import { isEmpty } from 'lodash';
+
+let cancelTokenSource = null;
 
 const MaterialHandling = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -23,11 +30,10 @@ const MaterialHandling = () => {
     state: { user, selectedEntity, resources }
   }: any = useData();
 
-  const [filterQuery, setFilterQuery] = useState({
-    filterById: [],
-    deepFilter: []
-  });
-
+  const [showFilter, setShowFilter] = useState(false);
+  const [deepFilters, setDeepFilters] = useState([]);
+  const [filterByIds, setFilterByIds] = useState([]);
+  const [filterTerm, setFilterTerm] = useState({});
   const [workOrder, setWorkOrder] = useState(null);
   const [selectedWorkOrder, setSelectedWorkOrder] = useState(null);
   const [warehouseOptions, setWarehouseOptions] = useState(null);
@@ -52,31 +58,95 @@ const MaterialHandling = () => {
   }, [selectedEntity]);
 
   useEffect(() => {
-    const cancelTokenSource = axios.CancelToken.source();
-    fetchData(cancelTokenSource);
-    return () => cancelTokenSource.cancel();
-  }, [filterQuery, warehouseOptions]);
+    fetchData();
+  }, [warehouseOptions]);
 
-  const getQueryString = () => {
+  const getQueryString = (deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
     let filter = `?`;
-    const { deepFilter, filterById } = filterQuery;
-    if (filterById?.length) {
-      filter = `${filter}&filterById=${JSON.stringify(filterById)}`;
+    if (filterByIdsP?.length > 0) {
+      const filterById = filterByIdsP
+        ?.filter((f) => {
+          if (typeof f?.term === 'object') return !isEmpty(f?.term);
+          return Array.isArray(f?.term) && f?.term?.length > 0;
+        })
+        ?.map((f) => {
+          const term = filterTerm[f?.field] === '$nin' ? '$nin' : '$in';
+          if (Array.isArray(f?.term)) {
+            return {
+              field: f?.field,
+              term: {
+                [term]: f?.term?.map?.((d: any) => d.optionValue)
+              }
+            };
+          }
+          if (term === '$nin') {
+            return {
+              field: f?.field,
+              term: {
+                ['$nin']: [f?.term?.optionValue]
+              }
+            };
+          }
+          return {
+            field: f?.field,
+            term: f?.term?.optionValue
+          };
+        });
+      if (filterById?.length > 0) {
+        filter = `${filter}filterById=${JSON.stringify(filterById)}&`;
+      }
     }
+
+    let deepFilter = [];
+
+    if (deepFiltersP?.length > 0) {
+      deepFilter = [
+        ...deepFilter,
+        ...deepFiltersP
+          ?.filter((d) => d?.term?.length && !['from_createDate', 'to_createDate']?.includes(d?.field))
+          ?.map((d) => {
+            if (filterTerm[d?.field] === '$nin' && Array.isArray(d?.term)) {
+              return {
+                ...d,
+                term: { $nin: d?.term }
+              };
+            }
+            return d;
+          })
+      ];
+    }
+
+    if (
+      deepFiltersP?.length > 0 &&
+      (deepFiltersP?.some((f) => f?.field === 'from_createDate') || deepFiltersP?.some((f) => f?.field === 'to_createDate'))
+    ) {
+      deepFilter.push({
+        field: 'createdate',
+        term: {
+          from: deepFiltersP?.find((f) => f?.field === 'from_createDate')?.term,
+          to: deepFiltersP?.find((f) => f?.field === 'to_createDate')?.term
+        }
+      });
+    }
+
     if (deepFilter?.length) {
       filter = `${filter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilter))}`;
     }
-    if (filterById?.length || deepFilter?.length) {
-      filter = `${filter}&filterType=and`;
-    }
+
+    filter = `${filter}&filterType=and`;
     return filter;
   };
 
-  const fetchData = (cancelTokenSource?: CancelTokenSource) => {
+  const fetchData = (deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
     setWorkOrder(null);
     setSelectedWorkOrder(null);
     let api = `/material-handling`;
-    const query = getQueryString();
+    const query = getQueryString(deepFiltersP, filterByIdsP);
+
+    if (cancelTokenSource) {
+      cancelTokenSource.cancel();
+    }
+    cancelTokenSource = axios.CancelToken.source();
 
     axiosInstance()
       .get(`${api}${query}`, { cancelToken: cancelTokenSource?.token })
@@ -93,45 +163,160 @@ const MaterialHandling = () => {
 
   const FIELD_TO_FILTER = [
     {
-      fieldName: '_id',
-      fieldLabel: resources?.workOrder?.titlePlural,
-      resource: sidebarResource.workOrder,
-      type: 'dropDown'
+      fieldData: {
+        _id: '630dc2429ec41869052396b1',
+        fieldName: '_id',
+        fieldLabel: resources?.workOrder?.titlePlural,
+        lookup: true,
+        lookupResource: sidebarResource.workOrder,
+        resource: sidebarResource.materialHandling,
+        type: 'dropDown',
+        order: 0,
+        required: false,
+        sectionName: 'Material Handeling Filter',
+        isTooltip: false,
+        editAble: false,
+        brand: user?.user?.brand,
+        roleType: 0,
+        sectionProperties: ''
+      },
+      isRead: true,
+      isCreate: true,
+      isUpdate: true
     },
     {
-      fieldName: 'warehouse',
-      fieldLabel: resources?.warehouse?.titlePlural,
-      resource: sidebarResource.warehouse,
-      type: 'dropDown'
+      fieldData: {
+        _id: '630dc2429ec41869052396b2',
+        fieldName: 'warehouse',
+        fieldLabel: resources?.warehouse?.titlePlural,
+        lookup: true,
+        lookupResource: sidebarResource.warehouse,
+        resource: sidebarResource.materialHandling,
+        type: 'dropDown',
+        order: 1,
+        required: false,
+        multiple: false,
+        customOptions: warehouseOptions,
+        sectionName: 'Material Handeling Filter',
+        isTooltip: false,
+        editAble: false,
+        brand: user?.user?.brand,
+        roleType: 0,
+        sectionProperties: ''
+      },
+      isRead: true,
+      isCreate: true,
+      isUpdate: true
     },
     {
-      fieldName: 'serializedAsset',
-      fieldLabel: resources?.serializedAsset?.titlePlural,
-      resource: sidebarResource.serializedAsset,
-      type: 'dropDown'
+      fieldData: {
+        _id: '630dc2429ec41869052396b3',
+        fieldName: 'serializedAsset',
+        fieldLabel: resources?.serializedAsset?.titlePlural,
+        lookup: true,
+        lookupResource: sidebarResource.serializedAsset,
+        resource: sidebarResource.materialHandling,
+        type: 'dropDown',
+        order: 2,
+        required: false,
+        sectionName: 'Material Handeling Filter',
+        isTooltip: false,
+        editAble: false,
+        brand: user?.user?.brand,
+        roleType: 0,
+        sectionProperties: ''
+      },
+      isRead: true,
+      isCreate: true,
+      isUpdate: true
     },
     {
-      fieldName: 'productCategory',
-      fieldLabel: resources?.productCategory?.titlePlural,
-      resource: sidebarResource.productCategory,
-      type: 'dropDown'
+      fieldData: {
+        _id: '630dc2429ec41869052396b4',
+        fieldName: 'productCategory',
+        fieldLabel: resources?.productCategory?.titlePlural,
+        lookup: true,
+        lookupResource: sidebarResource.productCategory,
+        resource: sidebarResource.materialHandling,
+        type: 'dropDown',
+        order: 3,
+        required: false,
+        sectionName: 'Material Handeling Filter',
+        isTooltip: false,
+        editAble: false,
+        brand: user?.user?.brand,
+        roleType: 0,
+        sectionProperties: ''
+      },
+      isRead: true,
+      isCreate: true,
+      isUpdate: true
     },
     {
-      fieldName: 'product',
-      fieldLabel: resources?.product?.titlePlural,
-      resource: sidebarResource.product,
-      type: 'dropDown'
+      fieldData: {
+        _id: '630dc2429ec41869052396b5',
+        fieldName: 'product',
+        fieldLabel: resources?.product?.titlePlural,
+        lookup: true,
+        lookupResource: sidebarResource.product,
+        resource: sidebarResource.materialHandling,
+        type: 'dropDown',
+        order: 4,
+        required: false,
+        sectionName: 'Material Handeling Filter',
+        isTooltip: false,
+        editAble: false,
+        brand: user?.user?.brand,
+        roleType: 0,
+        sectionProperties: ''
+      },
+      isRead: true,
+      isCreate: true,
+      isUpdate: true
     },
     {
-      fieldName: 'createDate',
-      fieldLabel: 'Create Date',
-      type: 'date'
+      fieldData: {
+        _id: '630dc2429ec41869052396b6',
+        fieldName: 'fieldTicket',
+        fieldLabel: resources?.fieldTicket?.titlePlural,
+        lookup: true,
+        lookupResource: sidebarResource.fieldTicket,
+        resource: sidebarResource.materialHandling,
+        type: 'dropDown',
+        order: 5,
+        required: false,
+        sectionName: 'Material Handeling Filter',
+        isTooltip: false,
+        editAble: false,
+        brand: user?.user?.brand,
+        roleType: 0,
+        sectionProperties: ''
+      },
+      isRead: true,
+      isCreate: true,
+      isUpdate: true
+    },
+    {
+      fieldData: {
+        _id: '630dc2429ec41869052396b7',
+        fieldName: 'createDate',
+        fieldLabel: 'Requested Date',
+        lookup: false,
+        resource: sidebarResource.materialHandling,
+        type: 'date',
+        order: 6,
+        required: false,
+        sectionName: 'Material Handeling Filter',
+        isTooltip: false,
+        editAble: false,
+        brand: user?.user?.brand,
+        roleType: 0,
+        sectionProperties: ''
+      },
+      isRead: true,
+      isCreate: true,
+      isUpdate: true
     }
-    // {
-    //   fieldName: 'requestDate',
-    //   fieldLabel: 'Request Date',
-    //   type: 'date'
-    // },
   ];
 
   return (
@@ -142,27 +327,40 @@ const MaterialHandling = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Box display={'flex'} justifyContent={'end'} alignItems={'center'} pb={2}>
-          <Box width={'100%'}>
-            <CustomFilter
-              field={FIELD_TO_FILTER?.map((e: any) => {
-                return { ...e, options: e.fieldName === 'warehouse' ? warehouseOptions : null };
-              })}
-              setFilterQuery={setFilterQuery}
-            />
-          </Box>
-          <Box mb={1} ml={1}>
+        <div className="mb-4 flex items-center justify-between">
+          <DisplayFilterChip
+            filterTerm={filterTerm}
+            resourceColumns={FIELD_TO_FILTER}
+            deepFilters={deepFilters}
+            filterByIds={filterByIds}
+            fetchResourceData={(deepFilter, filterById) => {
+              fetchData(deepFilter, filterById);
+            }}
+            setDeepFilters={setDeepFilters}
+            setFilterByIds={setFilterByIds}
+          />
+          <div className="flex gap-2">
+            <ThemeButton
+              mobileTooltip="Apply Filters"
+              startIcon={<BiFilterAlt className="-ml-1 mr-1 mt-[1px]" />}
+              iconForMobile={<BiFilterAlt />}
+              onClick={() => {
+                setShowFilter(true);
+              }}
+            >
+              Show Filters
+            </ThemeButton>
             <HtmlTooltip title="Refresh">
               <IconButton size="small" onClick={() => fetchData()}>
                 <RefreshIcon />
               </IconButton>
             </HtmlTooltip>
-          </Box>
-        </Box>
+          </div>
+        </div>
         {workOrder ? (
           workOrder?.length > 0 ? (
             <Grid container spacing={2}>
-              <Grid item xs={12} md={4} lg={3}>
+              <Grid size={{ xs: 12, md: 4, lg: 3 }}>
                 <Box className="container-with-border" p={2}>
                   <Box style={{ maxHeight: isMobile ? 'calc(100vh - 100px)' : 'calc(100vh - 220px)', overflow: 'auto' }}>
                     {workOrder?.map((data, index) => {
@@ -252,7 +450,7 @@ const MaterialHandling = () => {
                   </Box>
                 </Box>
               </Grid>
-              <Grid item xs={12} md={8} lg={filterQuery?.filterById?.findIndex((f) => f?.field === '_id') === -1 ? 9 : 12}>
+              <Grid size={{ xs: 12, md: 8, lg: 9 }}>
                 {selectedWorkOrder && (
                   <>
                     {isMobile ? (
@@ -286,6 +484,28 @@ const MaterialHandling = () => {
           </Box>
         )}
       </Box>
+      {showFilter && (
+        <Filter
+          onClose={() => {
+            setShowFilter(false);
+          }}
+          loading={false}
+          filterTitle={resources?.materialHandling?.titleSingular}
+          resource={sidebarResource.materialHandling}
+          columns={FIELD_TO_FILTER}
+          onApplyFilter={() => {
+            setShowFilter(false);
+            fetchData();
+          }}
+          deepFilters={deepFilters}
+          setDeepFilters={setDeepFilters}
+          filterByIds={filterByIds}
+          setFilterByIds={setFilterByIds}
+          filterTerm={filterTerm}
+          setFilterTerm={setFilterTerm}
+          reportConfig={{ defaultColumn: true, notMultiSelectFields: ['warehouse'] }}
+        />
+      )}
     </Box>
   );
 };

@@ -1,15 +1,14 @@
 import { useState, useEffect, useContext } from 'react';
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { Link } from 'react-router-dom';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { dateTimeFormat, INVENTORY_HISTORY_TYPE, sidebarResource } from 'src/constants/helpers';
+import { dateFormatToSend, displayDateTime, INVENTORY_HISTORY_TYPE, sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import DurationFilter from 'src/components/DurationFilter';
-import moment from 'moment';
 import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { camelCase, cloneDeep, uniq } from 'lodash';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
@@ -328,8 +327,8 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
       disableSortBy: false,
       Cell: ({ row }) =>
         row.original?.date ? (
-          <div className="createBy" title={`${moment(row.original?.date)?.format(dateTimeFormat)}`}>
-            {moment(row.original?.date)?.format(dateTimeFormat)}
+          <div className="createBy" title={`${displayDateTime(row.original?.date)}`}>
+            {displayDateTime(row.original?.date)}
           </div>
         ) : (
           <NoDataCell />
@@ -407,8 +406,8 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
       Cell: ({ row }) => (
         <>
           {row?.original?.transactionDate ? (
-            <h5 className="text-truncate" title={moment(row?.original?.transactionDate)?.format(dateTimeFormat)}>
-              {moment(row?.original?.transactionDate)?.format(dateTimeFormat)}
+            <h5 className="text-truncate" title={displayDateTime(row?.original?.transactionDate)}>
+              {displayDateTime(row?.original?.transactionDate)}
             </h5>
           ) : (
             <NoDataCell />
@@ -469,8 +468,8 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
       deepFilters.push({
         field: 'date',
         term: {
-          from: moment(duration?.from).format('MM/DD/YYYY'),
-          to: moment(duration?.to).format('MM/DD/YYYY')
+          from: dateFormatToSend(duration?.from),
+          to: dateFormatToSend(duration?.to)
         }
       });
     }
@@ -514,9 +513,9 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
 
   return (
     <Box>
-      <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+      <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
         {ASSET_HISTORY_RESOURCE?.filter((f) => permissions[camelCase(f.resource)]?.isRead || f.key === 'all')?.map((res, idx) => (
-          <CustomTab primaryColor={true} value={idx} id={res.key} label={`${res.title}`} />
+          <CustomTab value={idx} id={res.key} label={`${res.title}`} />
         ))}
       </CustomTabs>
       <Box className="flex flex-wrap items-center justify-between gap-3">

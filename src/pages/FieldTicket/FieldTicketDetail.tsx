@@ -1,8 +1,8 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import { Edit } from '@material-ui/icons';
-import { camelCase, isNumber } from 'lodash';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import EditIcon from '@mui/icons-material/Edit';
+import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { VscVersions } from 'react-icons/vsc';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -14,7 +14,7 @@ import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import Steps, { getIndex } from 'src/components/Steps';
 import Versions from 'src/components/Versions';
@@ -198,36 +198,29 @@ const FieldTicketDetail = () => {
           <Box className="control-buttons-v1">
             {allowedToEdit && [FIELD_TICKET_STATUS.invoiced]?.includes(fieldTicketData?.status) && !isOffline && (
               <ButtonWithPulse
-                variant={'outlined'}
-                color="default"
-                size="small"
                 onClick={() => {
                   setShowClosedConfirmBox(true);
                 }}
-                className={'btn-outline-v1'}
               >
                 Close
               </ButtonWithPulse>
             )}
             {fieldTicketData?.versions?.length && !isOffline && (
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                color="primary"
-                size="small"
-                className={'btn-outline-v1'}
+              <ThemeButton
                 onClick={() => {
                   setVersionDialog(true);
                 }}
-                style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                startIcon={isMobile && !isTablet ? null : <VscVersions />}
+                startIcon={<VscVersions />}
+                mobileTooltip="Versions"
+                iconForMobile={<VscVersions size={20} style={{ color: 'var(--primary-text)' }} />}
               >
-                {isMobile && !isTablet ? <VscVersions size={20} /> : 'Versions'}
-              </Button>
+                Versions
+              </ThemeButton>
             )}
             {allowedToEdit && ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(fieldTicketData?.status) && (
-              <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
-                {isMobile && !isTablet ? <Edit /> : 'Edit'}
-              </Button>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                {'Edit'}
+              </ThemeButton>
             )}
             {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             <ActivityButton
@@ -250,9 +243,9 @@ const FieldTicketDetail = () => {
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
-            <Grid container spacing={2} style={{ padding: '8px' }}>
-              <CommonSkeleton lenArray={[...Array(7).keys()]} />
-            </Grid>
+            <div className="p-2">
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </div>
           ) : (
             <DetailsPage data={fieldTicketData} fields={fields} />
           )}

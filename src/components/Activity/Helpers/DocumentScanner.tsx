@@ -1,17 +1,15 @@
 import { useState, useRef, useContext, useEffect } from 'react';
-import { Button } from '@material-ui/core';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { CustomDialogTransition } from '../../../constants/helpers';
-import Dialog from '@material-ui/core/Dialog';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import Dialog from '@mui/material/Dialog';
 import Webcam from 'react-webcam';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { CircularProgress } from '@material-ui/core';
-import IconButton from '@material-ui/core/IconButton';
-import SwitchCameraIcon from '@material-ui/icons/SwitchCamera';
+import IconButton from '@mui/material/IconButton';
+import SwitchCameraIcon from '@mui/icons-material/SwitchCamera';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const DocumentScanner = ({ open, onClose, setFieldValue, onUploadFile }) => {
@@ -30,10 +28,12 @@ const DocumentScanner = ({ open, onClose, setFieldValue, onUploadFile }) => {
     });
 
     navigator.mediaDevices
-      .getUserMedia({ video: {
-        width: { ideal: 1920 },
-        height: { ideal: 1080 },
-      } })
+      .getUserMedia({
+        video: {
+          width: { ideal: 1920 },
+          height: { ideal: 1080 }
+        }
+      })
       .then((stream) => {
         setCameraPermission('granted');
         stream.getTracks().forEach((track) => track.stop());
@@ -45,12 +45,12 @@ const DocumentScanner = ({ open, onClose, setFieldValue, onUploadFile }) => {
 
   const captureImageFromStream = () => {
     const video = webcamRef.current.video;
-    const canvas = document.createElement("canvas");
+    const canvas = document.createElement('canvas');
     canvas.width = 1920;
     canvas.height = 1080;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    return canvas.toDataURL("image/png");
+    return canvas.toDataURL('image/png');
   };
 
   const handleCapture = () => {
@@ -121,30 +121,24 @@ const DocumentScanner = ({ open, onClose, setFieldValue, onUploadFile }) => {
             ))}
         </CustomDialogContent>
         <CustomDialogFooter>
-          <Button
-            type="button"
-            color="primary"
-            size="small"
-            onClick={onClose}>
+          <ThemeButton buttonType="transparent" onClick={onClose}>
             Cancel
-          </Button>
-          <HtmlTooltip title='Switch Camera'>
+          </ThemeButton>
+          <HtmlTooltip title="Switch Camera">
             <IconButton size="small" onClick={switchCamera} disabled={cameraCount < 2}>
               <SwitchCameraIcon color="primary" />
             </IconButton>
           </HtmlTooltip>
-          <CustomButton
-            variant="contained"
-            color="primary"
+          <ThemeButton
+            buttonType="theme"
             onClick={handleCapture}
-            size="small"
             disabled={isScanning}
-            startIcon={isScanning && <CircularProgress size={15} />}
+            isLoading={isScanning}
           >
-            {isScanning ? 'Scanning...' : 'Capture'}
-          </CustomButton>
+            Capture
+          </ThemeButton>
         </CustomDialogFooter>
-      </Dialog >
+      </Dialog>
     </>
   );
 };

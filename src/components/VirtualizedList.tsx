@@ -1,7 +1,6 @@
-import React from 'react'
+import React from 'react';
 import { VariableSizeList, ListChildComponentProps } from 'react-window';
-import { useTheme, useMediaQuery, ListSubheader } from '@material-ui/core';
-
+import { useTheme, useMediaQuery, ListSubheader } from '@mui/material';
 
 const LISTBOX_PADDING = 8; // px
 
@@ -79,4 +78,4 @@ const VirtualizedList = React.forwardRef<HTMLDivElement>(function ListboxCompone
   );
 });
 
-export default VirtualizedList
+export default VirtualizedList;

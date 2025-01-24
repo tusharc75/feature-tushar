@@ -1,10 +1,10 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { DownloadIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
 import { sidebarResource } from 'src/constants/helpers';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { PreviewDialog } from 'src/components/PreviewDownload/PreviewDialog';
 
@@ -19,17 +19,18 @@ function PreviewDownloadMultiple({ referenceIds }) {
 
   const fetchGridColumns = async () => {
     try {
-      const { data: { data } } = await axiosInstance().get(`/field?resource=${sidebarResource.serializedAsset}&view=true`);
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/field?resource=${sidebarResource.serializedAsset}&view=true`);
 
       const cols = data?.map((e: any) => {
         return {
           fieldLabel: e.fieldData.fieldLabel,
           fieldName: e.fieldData.fieldName
         };
-      })
+      });
 
       setColumns(cols);
-
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -39,17 +40,19 @@ function PreviewDownloadMultiple({ referenceIds }) {
   const [loadingType, setLoadingType] = useState(null);
   const [btnLoading, setBtnLoading] = useState(null);
 
-  const handleView = (operation, visibleColumns, sortBy= '', orderBy= '') => {
+  const handleView = (operation, visibleColumns, sortBy = '', orderBy = '') => {
     setLoadingType('Regular');
     setBtnLoading(operation);
 
-    let showColumns = JSON.stringify(visibleColumns?.map((e) => {
-      return ({
-        name: e?.fieldName,
-        width: e?.width,
-        customLabel: e?.customLabel
+    let showColumns = JSON.stringify(
+      visibleColumns?.map((e) => {
+        return {
+          name: e?.fieldName,
+          width: e?.width,
+          customLabel: e?.customLabel
+        };
       })
-    }));
+    );
 
     let api = `/pdf/multiple?resource=${sidebarResource.deliveryTicket}&columns=${showColumns}&ids=${referenceIds}`;
 
@@ -98,21 +101,18 @@ function PreviewDownloadMultiple({ referenceIds }) {
   return (
     <Box display="flex" justifyContent="space-between">
       <Box display="flex" alignItems="center">
-        <Box display="flex" flexWrap={'wrap'} gridGap={8}>
-          {
-            <ThemeButton
-              size="small"
-              tooltip="Preview"
-              iconForMobile={<VisibilityIcon />}
-              startIcon={<VisibilityIcon />}
-              disabled={btnLoading === 'Preview' || referenceIds?.length === 0 || columns?.length === 0}
-              onClick={(e) => {
-                setShowColumnsDialog({ open: true, operation: 'Preview' });
-              }}
-            >
-              {btnLoading === 'Preview' ? 'Please wait...' : 'Preview'}
-            </ThemeButton>
-          }
+        <div className="flex flex-wrap gap-2">
+          <ThemeButton
+            tooltip="Preview"
+            iconForMobile={<VisibilityIcon />}
+            startIcon={<VisibilityIcon />}
+            disabled={btnLoading === 'Preview' || referenceIds?.length === 0 || columns?.length === 0}
+            onClick={(e) => {
+              setShowColumnsDialog({ open: true, operation: 'Preview' });
+            }}
+          >
+            {btnLoading === 'Preview' ? 'Please wait...' : 'Preview'}
+          </ThemeButton>
           <ThemeButton
             iconForMobile={<DownloadIcon />}
             tooltip="Download"
@@ -124,8 +124,7 @@ function PreviewDownloadMultiple({ referenceIds }) {
           >
             {btnLoading === 'Download' ? 'Please wait...' : 'Download'}
           </ThemeButton>
-
-        </Box>
+        </div>
       </Box>
       {showColumnsDialog.open && (
         <PreviewDialog
@@ -133,7 +132,7 @@ function PreviewDownloadMultiple({ referenceIds }) {
           handleClose={() => {
             setShowColumnsDialog({ open: false, operation: '' });
           }}
-          handleView={(subType, visibleColumnsPdf, visibleColumnsExcel, sortBy= '', orderBy= '') => {
+          handleView={(subType, visibleColumnsPdf, visibleColumnsExcel, sortBy = '', orderBy = '') => {
             handleView(showColumnsDialog.operation, visibleColumnsPdf, sortBy, orderBy);
           }}
           loadingType={loadingType}

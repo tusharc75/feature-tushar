@@ -1,39 +1,33 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
-import {
-  ASSET_STATUS,
-  CustomDialogTransition,
-  dateFormatForInputControl,
-  serializedAsset,
-  sidebarResource,
-  workOrder
-} from '../../constants/helpers';
-import { Dialog, TextField, Box, Grid, Button } from '@material-ui/core';
+import { ASSET_STATUS, CustomDialogTransition, serializedAsset, sidebarResource, workOrder, workOrderSupervisor } from '../../constants/helpers';
+import { Dialog, TextField, Box, FormControlLabel, Checkbox } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Autocomplete } from '@material-ui/lab';
-import { KeyboardDatePicker } from '@material-ui/pickers';
+import Autocomplete from '@mui/material/Autocomplete';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import CustomButton from 'src/components/Helpers/CustomButton';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Formik, Form } from 'formik';
-import moment from 'moment';
 import { useData } from 'src/StateProvider/Provider';
+import CustomDatePicker from 'src/components/CustomDatePicker';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
-
   const toastConfig = useContext(CustomToastContext);
   const [productOptions, setProductOptions] = useState([]);
   const [assetOptions, setAssetOptions] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [servicesOptions, setServicesOptions] = useState([]);
+  const [options, setOptions] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [assetLoading, setAssetLoading] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const {
-    state: { resources }
+    state: { resources, permissions }
   }: any = useData();
 
   useEffect(() => {
@@ -47,18 +41,12 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
   }, []);
 
   useEffect(() => {
-    setLoading(true);
+    setAssetLoading(true);
     const deepFilter = [
       {
         field: 'status',
         term: {
-          $in: [
-            ASSET_STATUS.new,
-            ASSET_STATUS.available,
-            ASSET_STATUS.underReview,
-            ASSET_STATUS.needRepair,
-            ASSET_STATUS.needRecert
-          ]
+          $in: [ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]
         }
       }
     ];
@@ -66,29 +54,36 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
       .get(`/sa-formbuilder/lookup?lookupResource=${serializedAsset.resource}&deepFilter=${JSON.stringify(deepFilter)}`)
       .then(({ data: { data: lookupSerializedAssets } }) => {
         let serializedAssets = lookupSerializedAssets['Serialized Asset'] || [];
-        const filteredAssets = serializedAssets?.filter(asset => asset?.product === selectedProduct);
+        const filteredAssets = serializedAssets?.filter((asset) => asset?.product === selectedProduct);
         setAssetOptions(filteredAssets || []);
-        setLoading(false);
+        setAssetLoading(false);
       })
       .catch((err) => {
+        setAssetLoading(false);
         toastConfig.setToastConfig(err);
       });
   }, [selectedProduct]);
 
   useEffect(() => {
-    axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Service Master`)
+    axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.serviceMaster},${sidebarResource.employeeMaster},${sidebarResource.workStations}`)
       .then(({ data: { data } }) => {
-        setServicesOptions(data['Service Master'] || []);
+        setOptions(data);
       });
   }, []);
 
   const handleSubmit = (values) => {
-    axiosInstance().post(`${workOrder.api}/work-order-scheduler/scheduler`, values)
+    setLoading(true);
+    axiosInstance()
+      .post(`${workOrderSupervisor.api}/work-order-scheduler`, values)
       .then(({ data }) => {
+        setLoading(false);
         onSuccess();
         toastConfig.setToastConfig({ open: true, type: 'success', message: data.message });
       })
-      .catch((error) => toastConfig.setToastConfig(error));
+      .catch((error) => {
+        setLoading(false);
+        toastConfig.setToastConfig(error);
+      });
   };
 
   function validate(values) {
@@ -102,14 +97,13 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
     if (values.service.length === 0) {
       errors['service'] = 'Please select service';
     }
-    if (!values.date || !moment(values.date).isValid()) {
+    if (!values.date || !dayjs(values.date).isValid()) {
       errors['date'] = 'Please select date';
-    } else if (moment(values.date).isBefore(moment(), 'day')) {
+    } else if (dayjs(values.date).isBefore(dayjs(), 'day')) {
       errors['date'] = 'Date cannot be in the past';
     }
     return errors;
-  };
-
+  }
 
   return (
     <Dialog
@@ -128,13 +122,16 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
               product: '',
               asset: '',
               service: [],
-              date: new Date()
+              technician: [],
+              workStation: [],
+              date: new Date(),
+              autoCreateWorkOrder: false
             }}
             validateOnMount
             validate={validate}
             onSubmit={handleSubmit}
           >
-            {({ touched, errors, values, setFieldValue }) => (
+            {({ touched, errors, values, setFieldValue, submitForm }) => (
               <Form autoComplete="off" autoCorrect="off" noValidate style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <CustomDialogHeader
                   isMinimized={!fullScreen}
@@ -146,14 +143,14 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                 <CustomDialogContent style={{ flex: 1, overflowY: 'auto' }}>
                   <div className="flex flex-col p-3">
                     <Grid container spacing={3}>
-                      <Grid item xs={12}>
+                      <Grid size={{ xs: 12 }}>
                         <Autocomplete
                           size="small"
                           options={productOptions}
                           value={productOptions.find((data) => data.optionValue === values.product) || null}
                           getOptionLabel={(option) => option?.optionLabel || ''}
                           onChange={(e, val) => {
-                            setFieldValue('product', val?.optionValue || '')
+                            setFieldValue('product', val?.optionValue || '');
                             setSelectedProduct(val?.optionValue);
                           }}
                           renderInput={(params) => (
@@ -168,11 +165,11 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                           )}
                         />
                       </Grid>
-                      <Grid item xs={12}>
+                      <Grid size={{ xs: 12 }}>
                         <Autocomplete
                           size="small"
                           options={assetOptions}
-                          loading={loading}
+                          loading={assetLoading}
                           value={assetOptions.find((data) => data.optionValue === values.asset) || null}
                           getOptionLabel={(option) => option?.optionLabel || ''}
                           onChange={(e, val) => setFieldValue('asset', val?.optionValue || '')}
@@ -188,16 +185,19 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                           )}
                         />
                       </Grid>
-                      <Grid item xs={12}>
+                      <Grid size={{ xs: 12 }}>
                         <Autocomplete
                           multiple
                           size="small"
-                          options={servicesOptions}
-                          value={servicesOptions.filter((option) =>
-                            values.service.includes(option.optionValue)
-                          )}
+                          options={options[sidebarResource.serviceMaster] || []}
+                          value={(options[sidebarResource.serviceMaster] || [])?.filter((option) => values.service.includes(option.optionValue))}
                           getOptionLabel={(option) => option?.optionLabel || ''}
-                          onChange={(e, val) => setFieldValue('service', val.map((item) => item.optionValue))}
+                          onChange={(e, val) =>
+                            setFieldValue(
+                              'service',
+                              val.map((item) => item.optionValue)
+                            )
+                          }
                           renderInput={(params) => (
                             <TextField
                               {...params}
@@ -210,43 +210,95 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                           )}
                         />
                       </Grid>
-                      <Grid item xs={12}>
-                        <KeyboardDatePicker
-                          variant="inline"
+                      {permissions?.employeeMaster?.isRead &&
+                        <Grid size={{ xs: 12 }}>
+                          <Autocomplete
+                            multiple
+                            size="small"
+                            options={options[sidebarResource.employeeMaster] || []}
+                            value={(options[sidebarResource.employeeMaster] || []).filter((option) => values.technician.includes(option.optionValue))}
+                            getOptionLabel={(option) => option?.optionLabel || ''}
+                            onChange={(e, val) =>
+                              setFieldValue(
+                                'technician',
+                                val.map((item) => item.optionValue)
+                              )
+                            }
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                label="Technician"
+                                variant="outlined"
+                                error={Boolean(errors.technician && touched.technician)}
+                                helperText={touched.technician && errors.technician}
+                              />
+                            )}
+                          />
+                        </Grid>
+                      }
+                      {permissions?.workStations?.isRead &&
+                        <Grid size={{ xs: 12 }}>
+                          <Autocomplete
+                            multiple
+                            size="small"
+                            options={options[sidebarResource.workStations] || []}
+                            value={(options[sidebarResource.workStations] || []).filter((option) => values.workStation.includes(option.optionValue))}
+                            getOptionLabel={(option) => option?.optionLabel || ''}
+                            onChange={(e, val) =>
+                              setFieldValue(
+                                'workStation',
+                                val.map((item) => item.optionValue)
+                              )
+                            }
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                label={resources?.workStations?.titlePlural}
+                                variant="outlined"
+                                error={Boolean(errors.workStation && touched.workStation)}
+                                helperText={touched.workStation && errors.workStation}
+                              />
+                            )}
+                          />
+                        </Grid>}
+                      <Grid size={{ xs: 12 }}>
+                        <CustomDatePicker
                           fullWidth
                           size="small"
                           margin="dense"
-                          autoOk
-                          required
-                          inputVariant="outlined"
-                          value={values.customDate}
+                          required={true}
+                          value={values.date}
                           name="Date"
                           label="Date"
-                          format={dateFormatForInputControl}
                           minDate={new Date()}
-                          error={touched['customDate'] && Boolean(errors['customDate'])}
-                          helperText={touched['customDate'] && errors['customDate']}
+                          error={touched['date'] && Boolean(errors['date'])}
+                          helperText={touched['date'] && errors['date']}
                           onChange={(date) => setFieldValue('date', date)}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12 }}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              name={'autoCreateWorkOrder'}
+                              checked={values?.autoCreateWorkOrder}
+                              onChange={(e) => setFieldValue('autoCreateWorkOrder', e?.target?.checked)}
+                              size="small"
+                            />
+                          }
+                          label={'Auto Create Work Order'}
                         />
                       </Grid>
                     </Grid>
                   </div>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                  <Button
-                    size="small"
-                    color="primary"
-                    onClick={() => onClose()}
-                  >
+                  <ThemeButton buttonType="transparent" onClick={() => onClose()}>
                     Cancel
-                  </Button>
-                  <CustomButton
-                    variant="contained"
-                    color="primary"
-                    type="submit"
-                  >
+                  </ThemeButton>
+                  <ThemeButton onClick={submitForm} isLoading={loading} buttonType="theme">
                     Save
-                  </CustomButton>
+                  </ThemeButton>
                 </CustomDialogFooter>
               </Form>
             )}

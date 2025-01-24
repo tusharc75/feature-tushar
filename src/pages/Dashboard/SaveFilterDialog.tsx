@@ -1,4 +1,4 @@
-import { Box, Button, Checkbox, Dialog, FormControlLabel, Radio, RadioGroup, TextField } from '@material-ui/core';
+import { Box, Checkbox, Dialog, FormControlLabel, Radio, RadioGroup, TextField } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { Fragment, useContext, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -7,7 +7,7 @@ import { boolean, object, string } from 'yup';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomDialogTransition } from 'src/constants/helpers';
 
 const schema = object().shape({
@@ -97,6 +97,7 @@ function SaveFilterDialog({ handleClose, handleSucess, kpi, filterValue, filterD
                 <TextField
                   fullWidth
                   margin="dense"
+                  size="small"
                   type="text"
                   required
                   label="Title"
@@ -142,12 +143,12 @@ function SaveFilterDialog({ handleClose, handleSucess, kpi, filterValue, filterD
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button size="small" color="primary" onClick={handleClose}>
+              <ThemeButton buttonType="transparent" onClick={handleClose}>
                 Cancel
-              </Button>
-              <CustomButton loading={loading} variant="contained" color="primary" type="submit" onClick={submitForm} disabled={loading}>
+              </ThemeButton>
+              <ThemeButton isLoading={loading} buttonType="theme" onClick={submitForm} disabled={loading}>
                 Save
-              </CustomButton>
+              </ThemeButton>
             </CustomDialogFooter>
           </Fragment>
         )}

@@ -1,5 +1,6 @@
-import { Button, Grid, IconButton } from '@material-ui/core';
-import EditIcon from '@material-ui/icons/Edit';
+import { IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import EditIcon from '@mui/icons-material/Edit';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
@@ -9,12 +10,13 @@ import routes from './../../../components/Helpers/Routes';
 import { camelCase } from 'lodash';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import ManageStorageLocation from 'src/pages/StorageLocation/ManageStorageLocation';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import { Menu, MenuItem, Box } from '@material-ui/core';
+import { AddOutlined, ExpandMore } from '@mui/icons-material';
+import { Menu, MenuItem, Box } from '@mui/material';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const renderedFrom = camelCase(sidebarResource.storageLocation);
 
@@ -85,7 +87,7 @@ const StorageLocation = ({ warehouse }) => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" />
+              <DeleteIcon color="error" fontSize='small' />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -187,40 +189,36 @@ const StorageLocation = ({ warehouse }) => {
     <Fragment>
       <Box p={1} pb={2}>
         <Grid container>
-          <Grid item xs={3} md={3} sm={3}>
+          <Grid size={{ xs: 3, md: 3, sm: 3 }}>
             {permissions?.storageLocation?.isCreate && (
-              <Button
-                size="small"
-                variant="contained"
-                color="primary"
+              <ThemeButton
                 onClick={() => {
                   setOpenDialog({ open: true, id: null });
                 }}
+                mobileTooltip="Add"
                 startIcon={<AddOutlined />}
+                iconForMobile={<AddOutlined />}
               >
                 Add
-              </Button>
+              </ThemeButton>
             )}
           </Grid>
-          <Grid item xs={9} md={9} sm={9}>
+          <Grid size={{ xs: 9, md: 9, sm: 9 }}>
             {permissions?.storageLocation?.isDelete && (
               <Box display={'flex'} justifyContent={'flex-end'} alignItems="center">
-                <Button
-                  variant="outlined"
-                  color="default"
-                  size="small"
+                <ThemeButton
                   onClick={openActions}
-                  aria-controls="action-menu"
-                  disabled={selectedRecords.length === 0}
                   endIcon={<ExpandMore />}
-                  className="new-dropdown-v1"
+                  mobileTooltip="Actions"
+                  buttonType="yellow"
+                  disabled={selectedRecords.length === 0}
+                  iconForMobile={<ExpandMore />}
                 >
                   Actions
-                </Button>
+                </ThemeButton>
                 <Menu
                   anchorEl={anchorEl}
                   keepMounted
-                  getContentAnchorEl={null}
                   anchorOrigin={{
                     vertical: 'bottom',
                     horizontal: 'left'

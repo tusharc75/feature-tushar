@@ -1,8 +1,8 @@
-import Box from '@material-ui/core/Box';
-import Chip from '@material-ui/core/Chip';
-import IconButton from '@material-ui/core/IconButton';
-import AddOutlined from '@material-ui/icons/AddOutlined';
-import DeleteIcon from '@material-ui/icons/Delete';
+import Box from '@mui/material/Box';
+import Chip from '@mui/material/Chip';
+import IconButton from '@mui/material/IconButton';
+import AddOutlined from '@mui/icons-material/AddOutlined';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { useData } from 'src/StateProvider/Provider';
@@ -15,7 +15,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
-import EditIcon from '@material-ui/icons/Edit';
+import EditIcon from '@mui/icons-material/Edit';
 
 const renderedFrom = 'customer-account-hierarchy';
 

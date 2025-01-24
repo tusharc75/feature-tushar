@@ -1,11 +1,11 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Dialog, Grid } from '@material-ui/core';
+import { Box, Dialog } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
-import CustomButton from '../Helpers/CustomButton';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { ViewDialog } from './ViewDialog';
@@ -14,6 +14,7 @@ import DownloadHistory from './DownloadHistory';
 import { useData } from '../../StateProvider/Provider';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { cloneDeep } from 'lodash';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export const PreviewDialog = ({
   type,
@@ -47,7 +48,11 @@ export const PreviewDialog = ({
   const [sortBy, setSortBy] = useState(null);
   const [orderBy, setOrderBy] = useState(null);
 
-  const { state: { user: { user } } } = useData();
+  const {
+    state: {
+      user: { user }
+    }
+  } = useData();
 
   useEffect(() => {
     setDefaultColumns();
@@ -100,7 +105,7 @@ export const PreviewDialog = ({
           .filter((col) => col !== undefined)
       );
       if (data?.sortBy) {
-        setSortBy(allColumn.find(col => col.fieldName === data?.sortBy));
+        setSortBy(allColumn.find((col) => col.fieldName === data?.sortBy));
       }
       if (data?.orderBy) {
         setOrderBy(data?.orderBy);
@@ -115,12 +120,12 @@ export const PreviewDialog = ({
     }
     for (const col of visibleColumns) {
       const column = selectedView?.columns?.find((e) => e?.name === col?.fieldName);
-      if (!column || ((column?.customLabel || null) !== (col?.customLabel || null)) || ((column?.width || null) !== (col?.width || null))) {
+      if (!column || (column?.customLabel || null) !== (col?.customLabel || null) || (column?.width || null) !== (col?.width || null)) {
         return false;
       }
     }
     return true;
-  }
+  };
 
   return (
     <>
@@ -150,8 +155,8 @@ export const PreviewDialog = ({
           showRequiredLabel={false}
         />
         <CustomDialogContent>
-          <Grid container justify="space-between" alignItems="center">
-            <Grid item style={{ padding: 5, marginTop: 10 }} xs={12} md={12} sm={12}>
+          <Grid container justifyContent="space-between" alignItems="center">
+            <Grid style={{ padding: 5, marginTop: 10 }} size={{ xs: 12, md: 12, sm: 12 }}>
               {type?.includes('PDF') && (
                 <PreviewFields
                   views={views}
@@ -195,47 +200,48 @@ export const PreviewDialog = ({
           </Grid>
         </CustomDialogContent>
         <CustomDialogFooter>
-          {(type?.includes('Excel') || type?.includes('PDF')) && (selectedExcelView || selectedPdfView) && !checkVisibleColumnsSame(type?.includes('Excel') ? visibleColumnsExcel : visibleColumnsPdf, type?.includes('Excel') ? selectedExcelView : selectedPdfView) && (
-            <>
-              <CustomButton
-                id={'show-column-dialog-save-update-button'}
-                onClick={() => {
-                  const selectedView = type === 'Excel' ? cloneDeep(selectedExcelView) : cloneDeep(selectedPdfView);
-                  delete selectedView._id;
-                  setShowSaveViewDialog({ open: true, data: selectedView });
-                }}
-                disabled={sortBy && !orderBy}
-                size="small"
-                className="yellow-button"
-              >
-                Save as New View
-              </CustomButton>
-            </>
-          )}
+          {(type?.includes('Excel') || type?.includes('PDF')) &&
+            (selectedExcelView || selectedPdfView) &&
+            !checkVisibleColumnsSame(
+              type?.includes('Excel') ? visibleColumnsExcel : visibleColumnsPdf,
+              type?.includes('Excel') ? selectedExcelView : selectedPdfView
+            ) && (
+              <>
+                <ThemeButton
+                  iconForMobile={false}
+                  buttonType="yellow"
+                  id={'show-column-dialog-save-update-button'}
+                  onClick={() => {
+                    const selectedView = type === 'Excel' ? cloneDeep(selectedExcelView) : cloneDeep(selectedPdfView);
+                    delete selectedView._id;
+                    setShowSaveViewDialog({ open: true, data: selectedView });
+                  }}
+                  disabled={sortBy && !orderBy}
+                >
+                  Save as New
+                </ThemeButton>
+              </>
+            )}
           {type?.includes('Excel') && type?.includes('PDF') ? null : (
             <HtmlTooltip title={selectedPdfView?.user && user?._id !== selectedPdfView?.user ? 'View owner can only update' : ''}>
               <>
-                <CustomButton
+                <ThemeButton
                   id={'show-column-dialog-save-update-button'}
                   onClick={() => {
                     setShowSaveViewDialog({ open: true, data: type === 'Excel' ? selectedExcelView : selectedPdfView });
                   }}
                   disabled={visibleColumnsPdf?.length == 0 || (sortBy && !orderBy) || (selectedPdfView?.user && user?._id !== selectedPdfView?.user)}
-                  size="small"
-                  className="yellow-button"
+                  buttonType="yellow"
                 >
                   {type === 'Excel' ? (selectedExcelView ? 'Update View' : 'Save View') : selectedPdfView ? 'Update View' : 'Save View'}
-                </CustomButton>
+                </ThemeButton>
               </>
             </HtmlTooltip>
           )}
           {operation === 'Send Email' ? (
-            <CustomButton
-              variant="contained"
-              className="no-shadow"
-              color="primary"
-              size="small"
-              loading={loadingType === 'Regular'}
+            <ThemeButton
+              buttonType="theme"
+              isLoading={loadingType === 'Regular'}
               disabled={loadingType || visibleColumnsPdf?.length === 0}
               onClick={(e) => {
                 handleView('Regular', visibleColumnsPdf, visibleColumnsExcel, sortBy?.fieldName, orderBy);
@@ -243,38 +249,32 @@ export const PreviewDialog = ({
               id={'show-column-dialog-send-email-button'}
             >
               {operation}
-            </CustomButton>
+            </ThemeButton>
           ) : (
             <>
-              <CustomButton
-                variant="contained"
-                className="no-shadow"
-                color="primary"
+              <ThemeButton
+                buttonType="theme"
                 id={'show-column-dialog-export-button'}
-                size="small"
-                loading={loadingType === 'Regular'}
+                isLoading={loadingType === 'Regular'}
                 disabled={loadingType || visibleColumnsPdf?.length === 0 || (sortBy && !orderBy)}
                 onClick={(e) => {
                   handleView('Regular', visibleColumnsPdf, visibleColumnsExcel, sortBy?.fieldName, orderBy);
                 }}
               >
                 {type === 'Excel' ? 'Export' : hideDetailButton ? `${operation}` : `${button1Title} ${operation}`}
-              </CustomButton>
+              </ThemeButton>
               {hideDetailButton || type === 'Excel' ? null : (
-                <CustomButton
-                  variant="contained"
-                  color="primary"
-                  className="no-shadow"
+                <ThemeButton
+                  buttonType="theme"
                   id={'show-column-dialog-operation-2-button'}
-                  size="small"
-                  loading={loadingType === 'Detail'}
+                  isLoading={loadingType === 'Detail'}
                   disabled={loadingType || visibleColumnsPdf?.length === 0 || (sortBy && !orderBy)}
                   onClick={(e) => {
                     handleView('Detail', visibleColumnsPdf, visibleColumnsExcel, sortBy?.fieldName, orderBy);
                   }}
                 >
                   {`${button2Title} ${operation}`}
-                </CustomButton>
+                </ThemeButton>
               )}
             </>
           )}

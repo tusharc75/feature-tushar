@@ -1,15 +1,14 @@
 import { useState, Fragment, useRef } from 'react';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import TextField from '@material-ui/core/TextField';
-import { object, string } from 'yup';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Dialog from '@mui/material/Dialog';
+import TextField from '@mui/material/TextField';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, fieldLabelToFieldName } from 'src/constants/helpers';
 import { Form, Formik } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import { Autocomplete } from '@material-ui/lab';
+import Autocomplete from '@mui/material/Autocomplete';
 
 export const AddAllColumnDialog = (props) => {
   const { fieldLabelOptions, handleClose, handleAddField, fields, section } = props;
@@ -70,7 +69,7 @@ export const AddAllColumnDialog = (props) => {
   function validate(values) {
     const errors = {};
     if (!values.sectionName) {
-      errors['sectionName'] = 'Please select SectionName';
+      errors['sectionName'] = 'Please select Section Name';
     }
     if (values?.columns?.length <= 0) {
       errors['columns'] = 'Please select atleast one column';
@@ -102,7 +101,7 @@ export const AddAllColumnDialog = (props) => {
                   options={section || []}
                   fullWidth
                   size="small"
-                  getOptionSelected={(option, val) => option === val}
+                  isOptionEqualToValue={(option, val) => option === val}
                   getOptionLabel={(option) => option ?? ''}
                   value={values?.sectionName}
                   onChange={(_, newVal) => {
@@ -116,6 +115,7 @@ export const AddAllColumnDialog = (props) => {
                       helperText={touched['sectionName'] && errors['sectionName']}
                       label="Section Name"
                       margin="dense"
+                      size="small"
                       name="sectionName"
                       variant="outlined"
                     />
@@ -139,6 +139,7 @@ export const AddAllColumnDialog = (props) => {
                       helperText={touched['columns'] && errors['columns']}
                       label="Columns"
                       margin="dense"
+                      size="small"
                       name="columns"
                       variant="outlined"
                     />
@@ -147,12 +148,12 @@ export const AddAllColumnDialog = (props) => {
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button size="small" onClick={handleClose} color="primary">
+              <ThemeButton buttonType="transparent" onClick={handleClose}>
                 Cancel
-              </Button>
-              <Button size="small" type="submit" color="primary" onClick={submitForm} variant="contained">
+              </ThemeButton>
+              <ThemeButton buttonType="theme" onClick={submitForm}>
                 Add
-              </Button>
+              </ThemeButton>
             </CustomDialogFooter>
           </Fragment>
         )}

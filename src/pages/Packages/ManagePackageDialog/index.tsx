@@ -1,28 +1,19 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
 import { Formik, Form } from 'formik';
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box } from '@mui/material';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import CustomButton from '../../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { useData } from '../../../StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
-import {
-  CustomDialogTransition,
-  getObjKeys,
-  getObjKeysWithValues,
-  packages,
-  setFieldsInAscendingOrder,
-  sidebarResource,
-  yupSchema
-} from '../../../constants/helpers';
+import { CustomDialogTransition, getObjKeys, getObjKeysWithValues, packages, sidebarResource, yupSchema } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
-import { FaDiceOne } from 'react-icons/fa';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { isEqual, isString } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
@@ -211,23 +202,19 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
+                <ThemeButton
                   disabled={submitting}
-                  type="button"
-                  variant="outlined"
-                  color="primary"
-                  size="small"
+                  buttonType="transparent"
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
                 >
                   Cancel
-                </Button>
-                <CustomButton
-                  loading={submitting}
-                  variant="contained"
-                  color="primary"
+                </ThemeButton>
+                <ThemeButton
+                  isLoading={submitting}
+                  buttonType="theme"
                   disabled={submitting}
                   onClick={(e) => {
                     e.preventDefault();
@@ -236,11 +223,10 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
                   }}
                 >
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog && (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

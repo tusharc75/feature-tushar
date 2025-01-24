@@ -1,7 +1,5 @@
 import {
   Box,
-  Button,
-  CircularProgress,
   Dialog,
   Paper,
   Table,
@@ -12,13 +10,14 @@ import {
   TableRow,
   TextField,
   Typography
-} from '@material-ui/core';
+} from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import { CustomDialogTransition, productInventory, rentalManagement } from 'src/constants/helpers';
 
@@ -65,8 +64,8 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
               qty:
                 type === 'add'
                   ? (d?.inventory || 0) -
-                    (nonSerializedInventory?.find((s) => s?._id === selectedProduct?._id && s?.warehouse?.optionValue === d?.warehouse?._id)?.qty ||
-                      0)
+                  (nonSerializedInventory?.find((s) => s?._id === selectedProduct?._id && s?.warehouse?.optionValue === d?.warehouse?._id)?.qty ||
+                    0)
                   : nonSerializedInventory?.find((s) => s?._id === selectedProduct?._id && s?.warehouse?.optionValue === d?.warehouse?._id)?.qty || 0,
               inventory: 0
             }));
@@ -129,28 +128,28 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
       <Box style={{ display: 'inline' }}>
         {products.length > 0
           ? products?.map((d) => (
-              <Box
-                m={0.5}
-                p={1}
-                border={1}
-                className={`cursor-pointer rounded-sm ${selectedProduct?._id === d._id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'}`}
-                borderColor="var(--common-border-color)"
-                onClick={() => {
-                  if (selectedProduct?._id !== d._id) {
-                    setSelectedProduct(d);
-                  }
-                }}
-                style={{ display: 'inline-block' }}
-              >
-                {d?.qty < 0 ? (
-                  <span key={d.productName} className="text-error">{`${d?.productName} (${d?.qty})`}</span>
-                ) : d?.totalQty - d?.qty > 0 ? (
-                  <span key={d.productName} className="text-success">{`${d?.productName} (${d?.qty})`}</span>
-                ) : (
-                  <span key={d.productName}>{`${d?.productName} (${d?.qty})`}</span>
-                )}
-              </Box>
-            ))
+            <Box
+              m={0.5}
+              p={1}
+              border={1}
+              className={`cursor-pointer rounded-sm ${selectedProduct?._id === d._id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'}`}
+              borderColor="var(--common-border-color)"
+              onClick={() => {
+                if (selectedProduct?._id !== d._id) {
+                  setSelectedProduct(d);
+                }
+              }}
+              style={{ display: 'inline-block' }}
+            >
+              {d?.qty < 0 ? (
+                <span key={d.productName} className="text-error">{`${d?.productName} (${d?.qty})`}</span>
+              ) : d?.totalQty - d?.qty > 0 ? (
+                <span key={d.productName} className="text-success">{`${d?.productName} (${d?.qty})`}</span>
+              ) : (
+                <span key={d.productName}>{`${d?.productName} (${d?.qty})`}</span>
+              )}
+            </Box>
+          ))
           : null}
       </Box>
     );
@@ -158,12 +157,9 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
 
   const rightSideContents = () => {
     return (
-      <Button
-        type="submit"
-        variant="contained"
-        size="small"
-        color="primary"
-        endIcon={isSubmitting && <CircularProgress size={18} />}
+
+      <ThemeButton
+        buttonType='theme'
         disabled={
           isSubmitting ||
           !productInventoryData?.length ||
@@ -172,9 +168,10 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
           productInventoryData?.every((p) => p?.inventory === 0)
         }
         onClick={handleSubmit}
+        isLoading={isSubmitting}
       >
         {type === 'add' ? 'Assign' : 'Remove'}
-      </Button>
+      </ThemeButton>
     );
   };
 
@@ -260,8 +257,8 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
         <Box pt={1}>
           {productInventoryData?.filter((p) => p?._id === selectedProduct?._id)?.reduce((sum, row) => row?.inventory + sum, 0) >
             selectedProducts?.find((s) => s?._id === selectedProduct?._id)?.qty && (
-            <Typography color="error">You are trying to {type === 'add' ? 'assign' : 'remove'} more inventory</Typography>
-          )}
+              <Typography color="error">You are trying to {type === 'add' ? 'assign' : 'remove'} more inventory</Typography>
+            )}
         </Box>
       </CustomDialogContent>
     </Dialog>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, Fragment, useContext } from 'react';
-import Grid from '@material-ui/core/Grid';
-import { Box, Button, CircularProgress, Menu, MenuItem, IconButton, makeStyles, useMediaQuery } from '@material-ui/core';
+import Grid from '@mui/material/Grid2';
+import { Box, Menu, MenuItem, IconButton, useMediaQuery, Theme } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import { useHistory, useParams } from 'react-router-dom';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
@@ -15,18 +16,20 @@ import { isEmpty, isEqual, startCase, toLower } from 'lodash';
 import { isTablet } from 'react-device-detect';
 import { IoIosArrowDropdown } from 'react-icons/io';
 import { RiCloseCircleFill, RiSaveFill } from 'react-icons/ri';
-import TextField from '@material-ui/core/TextField';
-import { Autocomplete } from '@material-ui/lab';
+import TextField from '@mui/material/TextField';
+import Autocomplete from '@mui/material/Autocomplete';
 import History from './History';
 import Tabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 import { fieldLabelToFieldName } from 'src/constants/helpers';
 import DynamicTabs from 'src/components/FormBuilder/Tabs';
-import { Settings } from '@material-ui/icons';
+import { Settings } from '@mui/icons-material';
 import SettingDialog from './SettingDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import EditIcon from '@mui/icons-material/Edit';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     width: '100%',
     flexGrow: 1,
@@ -93,7 +96,6 @@ const CreateFormBuilder = () => {
   const [steppers, setSteppers] = useState([]);
   const [sectionNameList, setSectionNameList] = useState([]);
   const [settingDialog, setSettingDialog] = useState(false);
-
 
   const [isNew, setIsNew] = useState(resource === '0' ? true : false);
 
@@ -218,7 +220,7 @@ const CreateFormBuilder = () => {
           .then(({ data: { data } }) => {
             otherField = data;
           })
-          .catch((error) => { });
+          .catch((error) => {});
         const result = checkUniqueValidation(data, otherField);
         if (result.error) {
           toastConfig.setToastConfig({
@@ -329,14 +331,9 @@ const CreateFormBuilder = () => {
           </Box>
           <Box className="controls-v1">
             <Box className="control-buttons-v1">
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                size="small"
-                className={'btn-outline-v1'}
-                onClick={handleOpenHistoryDialog}
-              >
-                History
-              </Button>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenHistoryDialog} mobileTooltip={'History'}>
+                {'History'}
+              </ThemeButton>
               <div className={classes.linksContainer} style={{ display: 'none' }}>
                 <label htmlFor="importField" className="mr-3 cursor-pointer">
                   Import Fields
@@ -391,7 +388,7 @@ const CreateFormBuilder = () => {
             <Fragment>
               <Box mb={2}>
                 <Grid container spacing={1}>
-                  <Grid item xs={3}>
+                  <Grid size={{ xs: 3 }}>
                     <TextField
                       variant="outlined"
                       type="text"
@@ -400,13 +397,14 @@ const CreateFormBuilder = () => {
                       name="name"
                       fullWidth
                       margin="dense"
+                      size="small"
                       value={resourceLabel}
                       onChange={(e) => {
                         setResourceLabel(e.target.value.trimStart());
                       }}
                     />
                   </Grid>
-                  <Grid item xs={3}>
+                  <Grid size={{ xs: 3 }}>
                     <TextField
                       variant="outlined"
                       type="text"
@@ -414,80 +412,67 @@ const CreateFormBuilder = () => {
                       name="homePageLabel"
                       fullWidth
                       margin="dense"
+                      size="small"
                       value={homePageLabel}
                       onChange={(e) => {
                         setHomePageLabel(e.target.value.trimStart());
                       }}
                     />
                   </Grid>
-                  <Grid item xs={3}>
+                  <Grid size={{ xs: 3 }}>
                     <Autocomplete
                       id="section-name"
                       freeSolo
                       autoSelect
                       options={sectionNameList}
                       getOptionLabel={(option) => option}
-                      renderInput={(params) => <TextField
-                        {...params}
-                        label="Section Name"
-                        variant="outlined"
-                        margin="dense"
-                        fullWidth />
-                      }
+                      renderInput={(params) => (
+                        <TextField {...params} label="Section Name" variant="outlined" margin="dense" size="small" fullWidth />
+                      )}
                       value={sectionName}
                       onChange={(e, value) => {
                         setsectionName(value);
                       }}
                     />
                   </Grid>
-                  <Grid item xs={3} container justifyContent="flex-end">
-                    <Box>
-                      {permissions?.formBuilder?.isUpdate && (
-                        <Button
-                          disabled={isUpdating}
-                          color="primary"
-                          size="small"
+                  <Grid size={{ xs: 3 }} container justifyContent="flex-end">
+                    {permissions?.formBuilder?.isUpdate && (
+                      <Box>
+                        <ThemeButton
                           onClick={handleSave}
-                          variant={isMobile && !isTablet ? 'text' : 'contained'}
-                          style={isMobile && !isTablet ? { color: 'var(--success)' } : {}}
+                          disabled={isUpdating}
+                          isLoading={isUpdating}
+                          buttonType='theme'
                         >
-                          {isMobile && !isTablet ? <RiSaveFill size={24} /> : 'Save'}
-                          {isUpdating && <CircularProgress size={24} />}
-                        </Button>
-                      )}
-                    </Box>
-                    <Box ml={1}>
-                      <Button
-                        color="primary"
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        size="small"
-                        style={isMobile && !isTablet ? { color: 'var(--error)' } : {}}
+                          Save
+                        </ThemeButton>
+                      </Box>
+                    )}
+                    <ThemeButton
+                      onClick={() => {
+                        if (!isEqual(orisection, section) && permissions?.formBuilder?.isUpdate) {
+                          setShowConfirmDialog(true);
+                        } else {
+                          history.push({ pathname: routes.formBuilder.path });
+                        }
+                      }}
+                      mobileTooltip="Close"
+                      iconForMobile={<RiCloseCircleFill size={24} />}
+                    >
+                      {'Close'}
+                    </ThemeButton>
+                    <HtmlTooltip title="Settings">
+                      <IconButton
+                        aria-label="setting"
                         onClick={() => {
-                          if (!isEqual(orisection, section) && permissions?.formBuilder?.isUpdate) {
-                            setShowConfirmDialog(true);
-                          } else {
-                            history.push({ pathname: routes.formBuilder.path });
-                          }
+                          setSettingDialog(true);
                         }}
+                        color="primary"
+                        size="small"
                       >
-                        {' '}
-                        {isMobile && !isTablet ? <RiCloseCircleFill size={24} /> : 'Close'}
-                      </Button>
-                    </Box>
-                    <Box ml={2} mt={0.5}>
-                      <HtmlTooltip title="Settings">
-                        <IconButton
-                          aria-label="setting"
-                          onClick={() => {
-                            setSettingDialog(true);
-                          }}
-                          color='primary'
-                          size='small'
-                        >
-                          <Settings fontSize="small" />
-                        </IconButton>
-                      </HtmlTooltip>
-                    </Box>
+                        <Settings fontSize="small" />
+                      </IconButton>
+                    </HtmlTooltip>
                   </Grid>
                 </Grid>
               </Box>
@@ -519,7 +504,6 @@ const CreateFormBuilder = () => {
               </Box>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

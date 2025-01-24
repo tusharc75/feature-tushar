@@ -1,30 +1,28 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
+import Grid from '@mui/material/Grid2';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import { Box, Dialog, IconButton } from '@material-ui/core';
+import { Box, Dialog, IconButton } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
-import { CHILD_RESOURCE, CustomDialogTransition, MATERIAL_TYPE, dateFormat, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, CustomDialogTransition, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
-import MomentUtils from '@date-io/moment';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { camelCase, startCase } from 'lodash';
-import moment from 'moment';
 import { useData } from 'src/StateProvider/Provider';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import InvoiceDataDialog from 'src/pages/RentalManagement/ProgressiveBilling/InvoiceDataDialog';
+import CustomDatePicker from 'src/components/CustomDatePicker';
+import dayjs from 'dayjs';
 
 const renderedFrom = `${camelCase(sidebarResource.generateInvoice)}_create`;
 
@@ -315,7 +313,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
   const handleApplyDate = async () => {
     setIsDateApplying(true);
     let tempValues: any = { actualEndDate: endDate };
-    let newEndDate = moment(endDate).toISOString();
+    let newEndDate = dayjs(endDate).toISOString();
     const invoiceResponse = await axiosInstance().get(`/generate-invoice/${resourceData[0]?._id}/invoice/material-end-date-qty?resource=${resource}`);
     const invoicedProducts = invoiceResponse?.data?.data?.material;
 
@@ -415,12 +413,12 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
 
   const fetchPolicy = async () => {
     try {
-        const {
-          data: { data }
-        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.invoice}`);
-        if (data) {
-          setInvoiceResourceData(data);
-        }
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.invoice}`);
+      if (data) {
+        setInvoiceResourceData(data);
+      }
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -433,54 +431,43 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
         <CustomDialogContent>
           <Fragment>
             {progressiveBilling && (
-              <MuiPickersUtilsProvider utils={MomentUtils}>
-                <Grid container className={styles.rental_header_layout}>
-                  <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center layout-for-tablet gap-1"></Grid>
-                  <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
-                    <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                      <Grid style={{ display: 'flex', flex: 1, gap: '5px', alignItems: 'center' }} className={isMobile ? styles.content_box : ''}>
-                        <KeyboardDatePicker
-                          autoOk
-                          fullWidth
-                          size="small"
-                          variant="inline"
-                          inputVariant="outlined"
-                          value={endDate}
-                          name="endDate"
-                          label="End Date"
-                          onChange={(date: any) => {
-                            setEndDate(date ? date : null);
-                          }}
-                          format={dateFormat}
-                          InputLabelProps={{
-                            shrink: true
-                          }}
-                          margin="dense"
-                        />
-                        <Box>
-                          <HtmlTooltip title={selectedRecords?.length ? '' : 'Please select items to apply'}>
-                            <span>
-                              <CustomButton
-                                id="dialog-apply-button"
-                                loading={isDateApplying}
-                                disabled={selectedRecords?.length && moment(endDate)?.isValid() ? isDateApplying : true}
-                                variant="contained"
-                                color="primary"
-                                type="button"
-                                onClick={() => {
-                                  handleApplyDate();
-                                }}
-                              >
-                                Apply
-                              </CustomButton>
-                            </span>
-                          </HtmlTooltip>
-                        </Box>
-                      </Grid>
-                    </Box>
-                  </Grid>
+              <Grid container className={styles.rental_header_layout}>
+                <Grid size={{ xs: 12, md: 6, sm: 12 }} className="d-flex align-items-center layout-for-tablet gap-1"></Grid>
+                <Grid size={{ xs: 12, md: 6, sm: 12 }} className={styles.filter_side}>
+                  <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
+                    <Grid style={{ display: 'flex', flex: 1, gap: '5px', alignItems: 'center' }} className={isMobile ? styles.content_box : ''}>
+                      <CustomDatePicker
+                        fullWidth
+                        size="small"
+                        value={endDate}
+                        name="endDate"
+                        label="End Date"
+                        onChange={(date: any) => {
+                          setEndDate(date ? date : null);
+                        }}
+                        margin="dense"
+                      />
+                      <Box>
+                        <HtmlTooltip title={selectedRecords?.length ? '' : 'Please select items to apply'}>
+                          <span>
+                            <ThemeButton
+                              id="dialog-apply-button"
+                              isLoading={isDateApplying}
+                              disabled={selectedRecords?.length && dayjs(endDate)?.isValid() ? isDateApplying : true}
+                              buttonType="theme"
+                              onClick={() => {
+                                handleApplyDate();
+                              }}
+                            >
+                              Apply
+                            </ThemeButton>
+                          </span>
+                        </HtmlTooltip>
+                      </Box>
+                    </Grid>
+                  </Box>
                 </Grid>
-              </MuiPickersUtilsProvider>
+              </Grid>
             )}
             {columns ? (
               <Box zIndex={5} width={'100%'} p={1}>
@@ -510,17 +497,14 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
           </Fragment>
         </CustomDialogContent>
         <CustomDialogFooter>
-          <Button
-            type="button"
-            variant="outlined"
-            color="primary"
-            size="small"
+          <ThemeButton
+            buttonType="transparent"
             onClick={() => {
               onClose();
             }}
           >
             Cancel
-          </Button>
+          </ThemeButton>
           <HtmlTooltip
             title={
               !appliedDate && progressiveBilling
@@ -531,17 +515,15 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
             }
           >
             <span>
-              <CustomButton
+              <ThemeButton
                 id="dialog-save-button"
-                loading={isUpdating}
+                isLoading={isUpdating}
                 disabled={
                   progressiveBilling ? isUpdating || !appliedDate || !rowsApplied?.length || rowsApplied.some((d) => d.invalidDate === true) : false
                 }
-                variant="contained"
-                color="primary"
-                type="button"
+                buttonType="theme"
                 onClick={() => {
-                  if (resource===sidebarResource.fieldTicket && invoiceResourceData?.policy?.fieldTicketInvoiceFields?.length > 0) {
+                  if (resource === sidebarResource.fieldTicket && invoiceResourceData?.policy?.fieldTicketInvoiceFields?.length > 0) {
                     setOpenInvoiceDataDialog(true);
                   } else {
                     handleCreateInvoice();
@@ -549,7 +531,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
                 }}
               >
                 Create Invoice
-              </CustomButton>
+              </ThemeButton>
             </span>
           </HtmlTooltip>
         </CustomDialogFooter>

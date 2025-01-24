@@ -1,22 +1,22 @@
-import { Button, IconButton, useMediaQuery } from '@material-ui/core';
-import RefreshIcon from '@material-ui/icons/Refresh';
+import { IconButton, useMediaQuery } from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import React, { useContext, useEffect, useState } from 'react';
 import { BiFilterAlt } from 'react-icons/bi';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { sidebarResource } from 'src/constants/helpers';
 import ArrangeView from '../ArrangeView';
-import DisplayFilters from '../DisplayFilters';
 import GridFilter from '../GridFilter';
 import ShowFilteredRecordsOnly from '../ShowFilteredRecordsOnly';
-import { IndeterminateCheckbox, TempFilter } from '../TableComponents/TableHelperComponents';
+import { IndeterminateCheckbox } from '../TableComponents/TableHelperComponents';
 import { TInitialState } from '../hooks/useTableReducer';
-
 import { Table } from '@tanstack/react-table';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { ExportIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
-import { createFilterModel, fetchFieldOptions } from '../utils';
+import { createFilterData, createFilterSetData, fetchFieldOptions, filtermodelToFormValue } from '../utils';
 import { useUserTempFilters } from 'src/components/CustomReactTable/GridFilter/utils';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import DisplayFilters from 'src/components/CustomReactTable/DisplayFilters';
 
 type GridHeaderProps = {
   resource: any;
@@ -61,21 +61,25 @@ const GridHeader = ({
 }: GridHeaderProps) => {
   const toastConfig = useContext(CustomToastContext);
   const { selectedRecords, loading, filters: customFilters, dataRows }: TInitialState = state;
-  const { getTempFilter } = useUserTempFilters();
+  const { getTempFilter, setTempFilter } = useUserTempFilters();
 
   const isMobileView = useMediaQuery('(max-width:768px)');
 
   const [selectedFilter, setSelectedFilter] = useState(null);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [currentFomValue, setCurrentFomValue] = useState({});
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [coloums, setColoums] = useState(null);
+  const [deepFilters, setDeepFilters] = useState([]);
+  const [filterByIds, setFilterByIds] = useState([]);
+  const [filterTerm, setFilterTerm] = useState({});
 
   useEffect(() => {
-    const filters = getTempFilter(resource);
+    const filters = getTempFilter(renderedFrom);
     if (filters) {
       if (filters.formValues) setCurrentFomValue(filters.formValues);
       if (filters.filters) dispatch({ type: 'filter', filters: filters.filters });
     }
-  }, [dispatch, resource]);
+  }, [dispatch, renderedFrom]);
 
   const handleFilterOpen = () => {
     setIsFilterOpen(true);
@@ -85,10 +89,18 @@ const GridHeader = ({
     setIsFilterOpen(false);
   };
 
+  const handleApplyFilter = () => {
+    const filters = createFilterData(coloums, filterByIds, deepFilters, filterTerm);
+    const fromValue = filtermodelToFormValue(filters);
+    dispatch({ type: 'filter', filters });
+    setTempFilter(renderedFrom, { formValues: fromValue || {}, filters });
+    setCurrentFomValue(fromValue);
+    handleFilterClose();
+  };
+
   useEffect(() => {
     if (!resource || !showFilters) return;
-    const filters = getTempFilter(resource);
-
+    const filters = getTempFilter(renderedFrom);
     const applyDefaultFilter = async () => {
       try {
         const responce: any = await axiosInstance().get(`/user-resource-filter?resource=${resource}`);
@@ -96,11 +108,15 @@ const GridHeader = ({
         if (defaultFilter) {
           const columns = await fetchFieldOptions({ resource, sidebarResource, toastConfig });
           if (columns.length === 0) return;
+          const { filterById, deepFilter } = createFilterSetData(defaultFilter, columns);
           setSelectedFilter(defaultFilter);
-          let deepFilter;
-          if (defaultFilter?.filterValue) deepFilter = createFilterModel(defaultFilter?.filterValue, columns);
-          if (defaultFilter && deepFilter) {
-            dispatch({ type: 'filter', filters: deepFilter });
+          setFilterByIds(filterById);
+          setDeepFilters(deepFilter);
+          setFilterTerm(defaultFilter?.filterTerm || {});
+          let deepFilterP;
+          if (defaultFilter?.filterValue) deepFilterP = createFilterData(coloums, filterById, deepFilter, defaultFilter?.filterTerm);
+          if (defaultFilter && deepFilterP) {
+            dispatch({ type: 'filter', filters: deepFilterP });
             if (defaultFilter.sortBy) {
               dispatch({
                 type: 'sort',
@@ -134,7 +150,9 @@ const GridHeader = ({
           )}
           {topLeftSlot}
           <DisplayFilters
+            renderedFrom={renderedFrom}
             columns={newColumns}
+            customColumns={coloums}
             customFilters={customFilters}
             dispatchTable={dispatch}
             showFilters={showFilters}
@@ -144,18 +162,28 @@ const GridHeader = ({
             currentFomValue={currentFomValue}
             setCurrentFomValue={setCurrentFomValue}
             resource={resource}
+            filterByIds={filterByIds}
+            setFilterByIds={setFilterByIds}
+            deepFilters={deepFilters}
+            setDeepFilters={setDeepFilters}
+            filterTerm={filterTerm}
+            setFilterTerm={setFilterTerm}
           />
         </div>
         {isFilterOpen && (
           <GridFilter
             resource={resource}
-            customFilters={customFilters}
             handleClose={handleFilterClose}
-            setSelectedFilter={setSelectedFilter}
+            coloums={coloums}
+            setColoums={setColoums}
+            deepFilters={deepFilters}
+            setDeepFilters={setDeepFilters}
+            filterByIds={filterByIds}
+            setFilterByIds={setFilterByIds}
+            filterTerm={filterTerm}
+            setFilterTerm={setFilterTerm}
+            handleApplyFilter={handleApplyFilter}
             selectedFilter={selectedFilter}
-            currentFomValue={currentFomValue}
-            setCurrentFomValue={setCurrentFomValue}
-            dispatch={dispatch}
           />
         )}
       </div>
@@ -179,18 +207,15 @@ const GridHeader = ({
         </div>
         <div className="buttons flex flex-wrap gap-[8px] ">
           {showFilters && (
-            <HtmlTooltip title="Apply Filters" placement="top" arrow>
-              <Button
-                startIcon={isMobileView ? null : <BiFilterAlt />}
-                size={'small'}
-                variant={isMobileView ? 'text' : 'outlined'}
-                className={`btn-outline-v1 light with-border`}
-                onClick={handleFilterOpen}
-              >
-                <span className={isMobileView ? 'sr-only' : ''}>Filter</span>
-                {isMobileView ? <BiFilterAlt /> : ''}
-              </Button>
-            </HtmlTooltip>
+            <ThemeButton
+              onClick={handleFilterOpen}
+              startIcon={<BiFilterAlt />}
+              tooltip="Apply Filters"
+              mobileTooltip="Apply Filters"
+              iconForMobile={<BiFilterAlt />}
+            >
+              {'Filters'}
+            </ThemeButton>
           )}
           {!hideExportTable && isClientSideGrid ? (
             <HtmlTooltip title={dataRows.length === 0 ? 'No Data to Export' : 'Export to Excel'} placement="top" arrow>

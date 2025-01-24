@@ -1,17 +1,22 @@
-import { TableBody, Table, TableCell, TableContainer, TableHead, TableRow, Box } from '@material-ui/core';
-import { startCase } from 'lodash';
+import { TableBody, Table, TableCell, TableContainer, TableHead, TableRow, Box, IconButton } from '@mui/material';
+import { camelCase, startCase } from 'lodash';
 import { useEffect, useState } from 'react';
 import { formatAmountWithCurrency } from '../../constants/helpers';
+import routes from 'src/components/Helpers/Routes';
+import { FiExternalLink } from 'react-icons/fi';
+import queryString from 'query-string';
 
 interface Props {
   id: string;
   chartData: any[];
   currency: string;
   type: string;
-  chart: any
+  chart: any;
+  filters: any;
 }
 
-const TableView = ({ id, chartData, chart, currency }: Props) => {
+const TableView = ({ id, chartData, chart, currency, filters }: Props) => {
+
   const [tableData, setTableData] = useState([]);
   useEffect(() => {
     if (!chartData || chartData.length === 0) return;
@@ -29,6 +34,9 @@ const TableView = ({ id, chartData, chart, currency }: Props) => {
     let tableData = chartData.map((data) => {
       let obj: any = {};
       col.forEach((key) => {
+        if (key !== 'value') {
+          obj['linkField'] = data[key].value;
+        }
         obj[key] = data[key].value;
       });
 
@@ -45,12 +53,27 @@ const TableView = ({ id, chartData, chart, currency }: Props) => {
     );
   }
 
+  const handleRowClick = (key: any) => {
+    const resourcePath = routes[camelCase(chart.kpi.resource)]?.path;
+    const queryObj = {};
+    queryObj[chart.kpi.filterField] = tableData[key]?.linkField;
+    Object.keys(filters).forEach((key) => {
+      const value = filters[key];
+      if (Array.isArray(value) && value?.length > 0) {
+        queryObj[key] = JSON.stringify(value);
+      } else if (!Array.isArray(value) && value) {
+        queryObj[key] = JSON.stringify(value);
+      }
+    });
+    window.open(`${resourcePath}?${queryString.stringify(queryObj)}`, '_blank')
+  };
+
   return (
     <TableContainer id={id} style={{ height: '100%', width: 'auto' }}>
       <Table stickyHeader id={'table_' + id} aria-label="simple table">
         <TableHead>
           <TableRow>
-            {Object.keys(tableData[0]).map((key: string, index) => (
+            {Object.keys(tableData[0])?.filter(f => f!== 'linkField')?.map((key: string, index) => (
               <TableCell style={{ minWidth: '200px' }} key={key + ' ' + index + 1} align={index === 0 ? 'left' : 'right'}>
                 {startCase(key)}
               </TableCell>
@@ -60,7 +83,7 @@ const TableView = ({ id, chartData, chart, currency }: Props) => {
         <TableBody>
           {tableData.map((data: any, index) => (
             <TableRow key={'row ' + index + 1}>
-              {Object.keys(data).map((key, i) => (
+              {Object.keys(data)?.filter(f => f!== 'linkField')?.map((key, i) => (
                 <TableCell key={key} align={i < 1 ? 'left' : 'right'}>
                   {isNaN(data[key])
                     ? data[key]
@@ -68,10 +91,24 @@ const TableView = ({ id, chartData, chart, currency }: Props) => {
                       ? data[key]?.toFixed(2)
                       : chart?.currency
                         ? formatAmountWithCurrency(currency, Number(data[key]) ? data[key] : '00').fullFormatAmount
-                        : chart?.percentage ? `${data[key]}%`
+                        : chart?.percentage
+                          ? `${data[key]}%`
                           : data[key]}
                 </TableCell>
               ))}
+              {chart?.kpi?.filterField && chart?.kpi?.resource && (
+                <div className='pt-3'>
+                  <IconButton
+                    size="small"
+                    color="primary"
+                    onClick={() => {
+                      handleRowClick(index);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                </div>
+              )}
             </TableRow>
           ))}
         </TableBody>

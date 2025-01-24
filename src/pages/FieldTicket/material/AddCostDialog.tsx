@@ -2,7 +2,7 @@ import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { CHILD_RESOURCE, CustomDialogTransition, MATERIAL_TYPE, getObjKeys, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -13,11 +13,12 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import moment from 'moment';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 import InputField from 'src/components/Helpers/InputField';
+import dayjs from 'dayjs';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, handleUpdateCost, showSaveAndNext, loadingEdit }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -56,13 +57,16 @@ const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, hand
     }
   }, [initialData]);
 
-
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
     let data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketCost, fieldTicketData?.currency, true, isOffline);
     data = data?.filter((f) => f?.isRead);
-    if ((fieldTicketData?.taxCode || (fieldTicketData?.billingAddress &&
-      (fieldTicketData?.billingAddress?.zipCode || fieldTicketData?.billingAddress?.state || fieldTicketData?.billingAddress?.county))) && !isOffline) {
+    if (
+      (fieldTicketData?.taxCode ||
+        (fieldTicketData?.billingAddress &&
+          (fieldTicketData?.billingAddress?.zipCode || fieldTicketData?.billingAddress?.state || fieldTicketData?.billingAddress?.county))) &&
+      !isOffline
+    ) {
       const taxCodeOptions = await fetchTaxRate(fieldTicketData?.billingAddress, fieldTicketData?.taxCode?.optionValue || null);
       data?.forEach((e: any) => {
         if (e?.fieldName === 'taxCode') {
@@ -98,9 +102,9 @@ const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, hand
 
   function validate(values) {
     const errors = {};
-    let estimateStartDate = moment(values?.estimateStartDate);
-    let estimateEndDate = moment(values?.estimateEndDate);
-    if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
+    let estimateStartDate = dayjs(values?.estimateStartDate);
+    let estimateEndDate = dayjs(values?.estimateEndDate);
+    if (estimateEndDate.diff(estimateStartDate, 'day') < 0) {
       errors['estimateEndDate'] = 'Please enter valid estimate end date';
     }
     return errors;
@@ -121,7 +125,13 @@ const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, hand
       }}
     >
       {initialData.fields.length ? (
-        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} validateOnMount validate={validate} onSubmit={handleSubmit}>
+        <Formik
+          initialValues={initialData.values}
+          validationSchema={yupSchema(initialData.fields)}
+          validateOnMount
+          validate={validate}
+          onSubmit={handleSubmit}
+        >
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
@@ -146,11 +156,7 @@ const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, hand
                       if (name === 'taxCode') {
                         const taxCode = initialData?.fields?.find((e) => e?.fieldName === 'taxCode')?.option.find((d) => d.optionValue === value);
                         setFieldValue('taxPercentage', taxCode?.taxRate || 0);
-                        const result = autoCalculateSpecificFields(
-                          { ['taxPercentage']: taxCode?.taxRate || 0 },
-                          values,
-                          initialData.fields
-                        );
+                        const result = autoCalculateSpecificFields({ ['taxPercentage']: taxCode?.taxRate || 0 }, values, initialData.fields);
                         if (Object.keys(result).length >= 1) {
                           for (var x in result) {
                             setFieldValue(x, result[x]);
@@ -166,52 +172,42 @@ const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, hand
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
+                  buttonType='transparent'
                 >
                   Cancel
-                </Button>
+                </ThemeButton>
                 {showSaveAndNext && (
-                  <Button
-                    disabled={loadingEdit}
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    type="submit"
+                  <ThemeButton
                     onClick={() => {
                       setSaveAndNext(true);
                       submitForm();
                     }}
-                    endIcon={loadingEdit && <CircularProgress color="inherit" size={18} />}
+                    disabled={loadingEdit}
+                    isLoading={loadingEdit}
+                    buttonType='theme'
                   >
-                    {' '}
                     Save & Next
-                  </Button>
+                  </ThemeButton>
                 )}
-                <Button
-                  id={'dialog-save-button'}
-                  disabled={loadingEdit}
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  type="submit"
+                <ThemeButton
                   onClick={() => {
                     setSaveAndNext(false);
                     submitForm();
                   }}
-                  endIcon={loadingEdit && <CircularProgress color="inherit" size={18} />}
+                  disabled={loadingEdit}
+                  isLoading={loadingEdit}
+                  buttonType='theme'
                 >
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

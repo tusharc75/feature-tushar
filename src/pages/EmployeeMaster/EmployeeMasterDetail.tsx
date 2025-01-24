@@ -1,5 +1,6 @@
-import { Box, Button, Dialog, Grid } from '@material-ui/core';
-import { Edit } from '@material-ui/icons';
+import { Box, Dialog } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import EditIcon from '@mui/icons-material/Edit';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -11,8 +12,7 @@ import ActivityButton from 'src/components/Activity/ActivityButton';
 import AssignEntityDialog from 'src/components/AssignRolesDialog/AssignEntityDialog';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import { ACTIVITY_RESOURCE, CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -154,48 +154,38 @@ const EmployeeMasterDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ ...routes.employeeMaster, title: resources?.employeeMaster?.titlePlural }, { title: employeeMasterData?.employeeNumber }]} />
+          <CustomBreadCrumbs
+            routes={[{ ...routes.employeeMaster, title: resources?.employeeMaster?.titlePlural }, { title: employeeMasterData?.employeeNumber }]}
+          />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <>
               {employeeMasterData?.userId ? (
-                <Button
-                  variant={'outlined'}
-                  size="small"
+                <ThemeButton
                   onClick={() => {
                     window.open(`${routes.userDetail.path}/${employeeMasterData?.userId}`);
                   }}
-                  className={'btn-outline-v1'}
+                  iconForMobile={false}
                 >
                   View User
-                </Button>
+                </ThemeButton>
               ) : (
                 permissions?.employeeMaster?.isUpdate && (
-                  <HtmlTooltip title="Give Portal Access" arrow placement="top">
-                    <Button
-                      size="small"
-                      variant={'outlined'}
-                      disabled={false}
-                      onClick={() => {
-                        setShowAssignEntityDialog(true);
-                      }}
-                      className={'btn-outline-v1'}
-                    >
-                      Give Portal Access
-                    </Button>
-                  </HtmlTooltip>
+                  <ThemeButton
+                    onClick={() => {
+                      setShowAssignEntityDialog(true);
+                    }}
+                    iconForMobile={false}
+                  >
+                    Give Portal Access
+                  </ThemeButton>
                 )
               )}
               {permissions?.employeeMaster?.isUpdate && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  size="small"
-                  onClick={handleOpenUpdateDialog}
-                  className={'btn-outline-v1'}
-                >
-                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                </Button>
+                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                  {'Edit'}
+                </ThemeButton>
               )}
               {permissions?.employeeMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             </>
@@ -215,9 +205,9 @@ const EmployeeMasterDetail = () => {
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
-            <Grid container spacing={2} style={{ padding: '8px' }}>
-              <CommonSkeleton lenArray={[...Array(7).keys()]} />
-            </Grid>
+            <div className="p-2">
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </div>
           ) : (
             <DetailsPage data={employeeMasterData} fields={fields} />
           )}
@@ -245,7 +235,7 @@ const EmployeeMasterDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.employeeMaster?.titleSingular?.toLowerCase()} : ${employeeMasterData?.employeeNumber} ?`}             
+          message={`Are you sure you want to delete ${resources?.employeeMaster?.titleSingular?.toLowerCase()} : ${employeeMasterData?.employeeNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

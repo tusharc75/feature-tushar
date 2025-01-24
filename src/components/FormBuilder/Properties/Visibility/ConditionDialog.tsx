@@ -1,5 +1,6 @@
-import { Box, Button, CircularProgress, Dialog, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, CircularProgress, Dialog, TextField } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Autocomplete from '@mui/material/Autocomplete';
 import { useEffect, useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -233,8 +234,8 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
                       id="fields"
                       disabled={data ? true : false}
                       options={fieldOptions}
-                      getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                      getOptionSelected={(option: any, val) => option.optionValue === val}
+                      getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+                      isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                       value={
                         fieldOptions?.filter((f) => f?.optionValue === values?.fieldName)?.length > 0
                           ? fieldOptions?.filter((f) => f?.optionValue === values?.fieldName)[0]
@@ -249,6 +250,7 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
                         <TextField
                           {...params}
                           margin="dense"
+                          size="small"
                           variant="outlined"
                           label="Fields"
                           placeholder="Select Field"
@@ -276,7 +278,7 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
                             disableCloseOnSelect={true}
                             options={uniqBy([...options, ...defaultOptions], 'optionValue')}
                             getOptionLabel={(option: any) => {
-                              return option ? option?.optionLabel : '';
+                              return option ? option?.optionLabel || '' : '';
                             }}
                             value={
                               values?.value
@@ -285,7 +287,7 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
                                   )
                                 : []
                             }
-                            getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                            isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
                             onChange={(e, val: any) => {
                               setFieldValue('value', val ? val.map((val) => val?.optionValue)?.join(',') : '');
                               setInputValues('');
@@ -296,20 +298,23 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
                                 {...params}
                                 variant="outlined"
                                 margin="dense"
+                                size="small"
                                 label="Value"
                                 name="value"
                                 error={touched['value'] && Boolean(errors['value'])}
                                 helperText={touched['value'] && errors['value']}
                                 required
                                 style={{ whiteSpace: 'nowrap' }}
-                                InputProps={{
-                                  ...params.InputProps,
-                                  endAdornment: (
-                                    <>
-                                      {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                                      {params.InputProps.endAdornment}
-                                    </>
-                                  )
+                                slotProps={{
+                                  input: {
+                                    ...params.InputProps,
+                                    endAdornment: (
+                                      <>
+                                        {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                        {params.InputProps.endAdornment}
+                                      </>
+                                    )
+                                  }
                                 }}
                               />
                             )}
@@ -327,7 +332,7 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
                             id="value"
                             options={options}
                             disableCloseOnSelect={['checkBox', 'switch', 'radio']?.includes(selectedField?.type) ? false : true}
-                            getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                            getOptionLabel={(option: any) => (option ? option.optionLabel || '' : '')}
                             multiple={['checkBox', 'switch', 'radio']?.includes(selectedField?.type) ? false : true}
                             value={
                               values?.value && ['checkBox', 'switch', 'radio']?.includes(selectedField?.type)
@@ -349,6 +354,7 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
                               <TextField
                                 {...params}
                                 margin="dense"
+                                size="small"
                                 variant="outlined"
                                 label="Value"
                                 name="value"
@@ -370,6 +376,7 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
                           name={'value'}
                           required
                           margin="dense"
+                          size="small"
                           value={values?.value}
                           onChange={(val) => {
                             if (val?.length < 5) {
@@ -390,6 +397,7 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
                           rows={4}
                           fullWidth
                           margin="dense"
+                          size="small"
                           value={values?.value}
                           onChange={(e) => {
                             setFieldValue('value', e.target.value.trimStart());
@@ -402,12 +410,12 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button size="small" onClick={onClose} color="primary">
+                <ThemeButton buttonType='transparent' onClick={onClose}>
                   Cancel
-                </Button>
-                <Button size="small" type="submit" color="primary" variant="contained" onClick={submitForm}>
+                </ThemeButton>
+                <ThemeButton buttonType='theme' onClick={submitForm}>
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
             </>
           )}

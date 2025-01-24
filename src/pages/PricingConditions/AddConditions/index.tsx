@@ -1,28 +1,29 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { MenuItem, Grid, Box, Button, IconButton, Menu } from '@material-ui/core';
-import Add from '@material-ui/icons/Add';
+import { MenuItem, Box, IconButton, Menu } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import Add from '@mui/icons-material/Add';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { pricingCondition, gridLoadingTimeout, PRICING_TYPE, sidebarResource, MATERIAL_TYPE } from '../../../constants/helpers';
-import EditIcon from '@material-ui/icons/Edit';
-import VisibilityIcon from '@material-ui/icons/Visibility';
-import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import DeleteIcon from '@mui/icons-material/Delete';
 import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import ConditionDialog from './ConditionDialog';
 import { camelCase, startCase } from 'lodash';
-import { ExpandMore } from '@material-ui/icons';
+import { ExpandMore } from '@mui/icons-material';
 import { isMobile, isTablet } from 'react-device-detect';
-import styles from '../../Leads/Header.module.scss';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { addDisable, deleteDisable, editDisable, updateDisable } from 'src/constants/messageHelpers';
+import { addDisable, deleteDisable, updateDisable } from 'src/constants/messageHelpers';
 import { FiExternalLink } from 'react-icons/fi';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const AddConditions = ({ pricingConditionId, detailData }) => {
   const renderedFrom = camelCase(`${sidebarResource?.pricingCondition}_condition_selected`);
@@ -58,24 +59,22 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       .then(({ data: { data, count } }) => {
         setCondition(JSON.parse(JSON.stringify(data)));
         data.forEach((element) => {
-          element.detail = `${
-            element.materialType === MATERIAL_TYPE.product
-              ? element.productDetail?.productName
-              : element.materialType === MATERIAL_TYPE.service
-                ? element.serviceDetail?.serviceName
-                : element.materialType === MATERIAL_TYPE.package
-                  ? element.packageDetail?.packageName
-                  : element.competencyDetail.competencyName
-          }`;
-          element.description = `${
-            element.materialType === MATERIAL_TYPE.product
-              ? element.productDetail?.productDescription
-              : element.materialType === MATERIAL_TYPE.service
-                ? element.serviceDetail?.serviceDescription
-                : element.materialType === MATERIAL_TYPE.package
-                  ? element.packageDetail?.packageDescription
-                  : ''
-          }`;
+          element.detail = `${element.materialType === MATERIAL_TYPE.product
+            ? element.productDetail?.productName
+            : element.materialType === MATERIAL_TYPE.service
+              ? element.serviceDetail?.serviceName
+              : element.materialType === MATERIAL_TYPE.package
+                ? element.packageDetail?.packageName
+                : element.competencyDetail.competencyName
+            }`;
+          element.description = `${element.materialType === MATERIAL_TYPE.product
+            ? element.productDetail?.productDescription
+            : element.materialType === MATERIAL_TYPE.service
+              ? element.serviceDetail?.serviceDescription
+              : element.materialType === MATERIAL_TYPE.package
+                ? element.packageDetail?.packageDescription
+                : ''
+            }`;
           element.materialType = startCase(element.materialType);
           element.conditionType = PRICING_TYPE?.filter((e) => element.conditionType?.includes(e.optionValue))
             ?.map((e) => e.optionLabel)
@@ -200,14 +199,13 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
               size="small"
               onClick={() => {
                 window.open(
-                  `${
-                    row?.original?.materialType === 'Product'
-                      ? routes.productDetail.path
-                      : row?.original?.materialType === 'Service'
-                        ? routes.serviceMasterDetail.path
-                        : row?.original?.materialType === 'Package'
-                          ? routes.packagesDetail.path
-                          : routes?.competenciesDetail.path
+                  `${row?.original?.materialType === 'Product'
+                    ? routes.productDetail.path
+                    : row?.original?.materialType === 'Service'
+                      ? routes.serviceMasterDetail.path
+                      : row?.original?.materialType === 'Package'
+                        ? routes.packagesDetail.path
+                        : routes?.competenciesDetail.path
                   }/${row?.original?.materialId}`
                 );
               }}
@@ -316,27 +314,22 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
   return (
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1} mt={2}>
-        <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
+        <Box display="flex" gap={'8px'} flexWrap={'wrap'}>
           <HtmlTooltip title={permissions?.pricingCondition?.isUpdate ? 'Add' : addDisable}>
             <span>
-              <Button
-                variant={'outlined'}
-                color="primary"
-                size="small"
+              <ThemeButton
+                endIcon={<ExpandMore fontSize="small" />}
                 startIcon={<Add />}
                 onClick={openAddActions}
                 disabled={!permissions?.pricingCondition?.isUpdate}
-                aria-controls="add-menu"
               >
                 {'Add'}
-                <ExpandMore fontSize="small" />
-              </Button>
+              </ThemeButton>
             </span>
           </HtmlTooltip>
           <Menu
             anchorEl={addAnchorEl}
             keepMounted
-            getContentAnchorEl={null}
             anchorOrigin={{
               vertical: 'bottom',
               horizontal: 'left'
@@ -456,24 +449,21 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
           <Box ml={2}>
             <HtmlTooltip title={permissions?.pricingCondition?.isUpdate ? '' : updateDisable}>
               <span>
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                  color="default"
-                  size="small"
-                  className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
+                <ThemeButton
+                  mobileTooltip="Actions"
+                  buttonType="yellow"
+                  iconForMobile={<ExpandMore />}
                   onClick={openActions}
-                  aria-controls="action-menu"
                   disabled={selectedRecords.length && permissions?.pricingCondition?.isUpdate ? false : true}
                   endIcon={<ExpandMore />}
                 >
                   {isMobile && !isTablet ? '' : 'Actions'}
-                </Button>
+                </ThemeButton>
               </span>
             </HtmlTooltip>
             <Menu
               anchorEl={anchorEl}
               keepMounted
-              getContentAnchorEl={null}
               anchorOrigin={{
                 vertical: 'bottom',
                 horizontal: 'left'
@@ -505,7 +495,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
           </Box>
         </Box>
       </Box>
-      <Grid item xs={12} md={12} sm={12} className="mt-3">
+      <Grid size={{ xs: 12, md: 12, sm: 12 }} className="mt-3">
         {columns && condition ? (
           <CustomReactTable
             height={'calc(100vh - 393px)'}
@@ -592,9 +582,8 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete pricing setup condition  ${
-            deleteRecord?.productDetail?.productName || deleteRecord?.packageDetail?.packageName || ''
-          } ?`}
+          message={`Are you sure you want to delete pricing setup condition  ${deleteRecord?.productDetail?.productName || deleteRecord?.packageDetail?.packageName || ''
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

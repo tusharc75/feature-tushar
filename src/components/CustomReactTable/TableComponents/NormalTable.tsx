@@ -1,7 +1,7 @@
 import { horizontalListSortingStrategy, SortableContext } from '@dnd-kit/sortable';
-import { Box, CircularProgress, TableBody, TableHead, TableRow } from '@material-ui/core';
-import MaUTable from '@material-ui/core/Table';
-import { Error } from '@material-ui/icons';
+import { Box, CircularProgress, TableBody, TableHead, TableRow } from '@mui/material';
+import MaUTable from '@mui/material/Table';
+import { Error } from '@mui/icons-material';
 import { flexRender } from '@tanstack/react-table';
 import React, { ForwardedRef, forwardRef, memo } from 'react';
 import { RnderTableProps } from 'src/components/CustomReactTable/TableComponents/Table';
@@ -34,7 +34,8 @@ export const NormalTable = forwardRef(function (
     tableRef,
     excludedColumns,
     footerRowFound,
-    stickyColumns
+    stickyColumns,
+    renderedFrom = ''
   }: RnderTableProps,
   ref: ForwardedRef<HTMLTableElement>
 ) {
@@ -100,6 +101,7 @@ export const NormalTable = forwardRef(function (
                         key={header.id}
                         resource={resource}
                         virtualTable={false}
+                        renderedFrom={renderedFrom}
                       />
                     );
                   })}

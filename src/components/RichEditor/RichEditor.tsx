@@ -1,10 +1,10 @@
 import Editor from '@draft-js-plugins/editor';
 import createImagePlugin from '@draft-js-plugins/image';
-import { IconButton } from '@material-ui/core';
-import Typography from '@material-ui/core/Typography';
-import FormatAlignCenterIcon from '@material-ui/icons/FormatAlignCenter';
-import FormatAlignLeftIcon from '@material-ui/icons/FormatAlignLeft';
-import FormatAlignRightIcon from '@material-ui/icons/FormatAlignRight';
+import { IconButton } from '@mui/material';
+import Typography from '@mui/material/Typography';
+import FormatAlignCenterIcon from '@mui/icons-material/FormatAlignCenter';
+import FormatAlignLeftIcon from '@mui/icons-material/FormatAlignLeft';
+import FormatAlignRightIcon from '@mui/icons-material/FormatAlignRight';
 import { AtomicBlockUtils, EditorState, Modifier, RichUtils } from 'draft-js';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { BsFillImageFill, BsListOl, BsListUl, BsTypeBold, BsTypeItalic, BsTypeUnderline } from 'react-icons/bs';

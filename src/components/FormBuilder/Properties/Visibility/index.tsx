@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Box, Button, IconButton, Menu, MenuItem, Typography, makeStyles } from '@material-ui/core';
+import { Box, IconButton, Menu, MenuItem, Typography } from '@mui/material';
 import ConditionDialog from './ConditionDialog';
-import { MoreHoriz, Settings } from '@material-ui/icons';
+import { MoreHoriz, Settings } from '@mui/icons-material';
 import axiosInstance from 'src/axios/axiosInstance';
 import { LOGIC } from '../../helper';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { Entity } from 'src/components/FormBuilder/AddField/entity';
+import { makeStyles } from '@mui/styles';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const useStyles = makeStyles({
   group: {
@@ -167,16 +169,15 @@ const Visibility = ({ values, setFieldValue, fields, fieldsToExclude, touched, e
                 alignItems={'center'}
                 mt={1}
               >
-                <Typography variant="body2">{`${fields?.find((f) => f?.fieldName === _f?.fieldName)?.fieldLabel} is ${
-                  fields?.find((f) => f?.fieldName === _f?.fieldName)?.lookup || fields?.find((f) => f?.fieldName === _f?.fieldName)?.dataList
+                <Typography variant="body2">{`${fields?.find((f) => f?.fieldName === _f?.fieldName)?.fieldLabel} is ${fields?.find((f) => f?.fieldName === _f?.fieldName)?.lookup || fields?.find((f) => f?.fieldName === _f?.fieldName)?.dataList
+                  ? data[_f?.fieldName]
                     ? data[_f?.fieldName]
-                      ? data[_f?.fieldName]
-                          ?.filter((d) => _f?.value?.split(',').includes(d?.optionValue))
-                          ?.map((v) => v?.optionLabel)
-                          ?.join(', ')
-                      : ''
-                    : _f?.value
-                }`}</Typography>
+                      ?.filter((d) => _f?.value?.split(',').includes(d?.optionValue))
+                      ?.map((v) => v?.optionLabel)
+                      ?.join(', ')
+                    : ''
+                  : _f?.value
+                  }`}</Typography>
                 <Box>
                   <IconButton
                     aria-label="setting"
@@ -217,24 +218,18 @@ const Visibility = ({ values, setFieldValue, fields, fieldsToExclude, touched, e
               </Box>
             ))}
             <Box mt={2}>
-              <Button
-                variant="outlined"
-                size="small"
-                color="primary"
+              <ThemeButton
                 onClick={() => {
                   setOpen({ open: true, group: c?.index, data: null });
                 }}
               >
                 Add Condition
-              </Button>
+              </ThemeButton>
             </Box>
           </Box>
         ))}
       <Box mt={2} mb={2}>
-        <Button
-          variant="outlined"
-          size="small"
-          color="primary"
+        <ThemeButton
           onClick={() => {
             setFieldValue('visibilityCondition', [
               ...values?.visibilityCondition,
@@ -247,7 +242,7 @@ const Visibility = ({ values, setFieldValue, fields, fieldsToExclude, touched, e
           }}
         >
           Add Group
-        </Button>
+        </ThemeButton>
       </Box>
       {open?.open && (
         <ConditionDialog

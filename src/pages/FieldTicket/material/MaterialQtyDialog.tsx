@@ -1,29 +1,30 @@
 import { FC, useEffect, useState, Fragment, useRef, useContext } from 'react';
-import { Button, Dialog, Grid, Box } from '@material-ui/core';
+import { Dialog, Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import axiosInstance from '../../../axios/axiosInstance';
 import { isArray, uniqBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE, MATERIAL_TYPE } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE, MATERIAL_TYPE, displayDate } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomButton from '../../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import moment from 'moment';
 import { bulkUpdate, calculatePrice, calculateRowsField } from '../../../components/RentalManagment/helper';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
+import dayjs from 'dayjs';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -145,7 +146,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
         element.isMulitFormula = false;
       });
       data = data.filter((e: any) => !e.isUneditable && !e.disableOnEdit);
-      
+
       setInitialData({
         fields: data,
         values: {
@@ -188,13 +189,12 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
             const assetPricingMethod = {
               optionValue: 'Per Job',
               optionLabel: 'Per Job'
-            }
-            pricingMethodOptions.push(assetPricingMethod)
+            };
+            pricingMethodOptions.push(assetPricingMethod);
             element.option = [assetPricingMethod];
             element.value = 'Per Job';
           }
-        }
-        else {
+        } else {
           if (element.fieldName === 'unit') {
             element.option = unitOptions;
           }
@@ -251,8 +251,12 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
       return { name, sectionFields };
     });
 
-    if ((fieldTicketData?.taxCode || (fieldTicketData?.billingAddress &&
-      (fieldTicketData?.billingAddress?.zipCode || fieldTicketData?.billingAddress?.state || fieldTicketData?.billingAddress?.county))) && !isOffline) {
+    if (
+      (fieldTicketData?.taxCode ||
+        (fieldTicketData?.billingAddress &&
+          (fieldTicketData?.billingAddress?.zipCode || fieldTicketData?.billingAddress?.state || fieldTicketData?.billingAddress?.county))) &&
+      !isOffline
+    ) {
       const taxCodeOptions = await fetchTaxRate(fieldTicketData?.billingAddress, fieldTicketData?.taxCode?.optionValue || null);
       fields?.forEach((e: any) => {
         if (e?.fieldName === 'taxCode') {
@@ -268,7 +272,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
       const rows = bulkUpdate(values, selectedServices, material, allFields, fieldTicketData?.currency);
       handleSaveData(rows);
     } else {
-      if(isEqual(ref?.current?.values, initialData.values)){
+      if (isEqual(ref?.current?.values, initialData.values)) {
         handleSaveData([rowData], saveAndNext, true);
         return;
       }
@@ -335,16 +339,21 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
 
   function validate(values) {
     const errors = {};
-    let estimateStartDate = moment(values?.estimateStartDate);
-    let estimateEndDate = moment(values?.estimateEndDate);
-    if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
+    let estimateStartDate = dayjs(values?.estimateStartDate);
+    let estimateEndDate = dayjs(values?.estimateEndDate);
+    if (estimateEndDate.diff(estimateStartDate, 'day') < 0) {
       errors['estimateEndDate'] = 'Please enter valid estimate end date';
     }
+    if (fieldTicketData?.estimateStartDate && estimateStartDate.format('YYYY-MM-DD') < dayjs(fieldTicketData.estimateStartDate).format('YYYY-MM-DD')) {
+      errors['estimateStartDate'] = `Start date cannot be earlier than ${displayDate(fieldTicketData.estimateStartDate)}`;
+    }
+    if (fieldTicketData?.estimateEndDate && estimateEndDate.format('YYYY-MM-DD') > dayjs(fieldTicketData.estimateEndDate).format('YYYY-MM-DD')) {
+      errors['estimateEndDate'] = `End date cannot be later than ${displayDate(fieldTicketData.estimateEndDate)}`;
+    }
     if (referenceType === 'consumables') {
-      if (isBulkedit && rowData?.find((e) => e?.consumedQty || e?.requestedQty) && values.qty>0) {
+      if (isBulkedit && rowData?.find((e) => e?.consumedQty || e?.requestedQty) && values.qty > 0) {
         errors['qty'] = 'Quantity can not be change in bulk edit once consumed';
-      }
-      else {
+      } else {
         if (values.qty < (rowData?.consumedQty || 0) + (rowData?.requestedQty || 0)) {
           errors['qty'] = 'Quantity can not be less than consumed quantity';
         }
@@ -430,7 +439,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                                     size="small"
                                   />
                                 ) : rateChangeFields.includes(field.fieldName) && !isBulkedit ? (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                     <Box display="flex">
                                       <Box flexGrow={1}>
                                         <FormTypes
@@ -514,7 +523,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                                     </Box>
                                   </Grid>
                                 ) : ['estimateStartDate', 'estimateEndDate'].includes(field.fieldName) ? (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                     <Box display="flex">
                                       <Box flexGrow={1}>
                                         <FormTypes
@@ -543,7 +552,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                                     </Box>
                                   </Grid>
                                 ) : ['taxCode'].includes(field.fieldName) ? (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                     <Box display="flex">
                                       <Box flexGrow={1}>
                                         <FormTypes
@@ -584,7 +593,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                                 ) : field.fieldName === 'numberOfWells' ? (
                                   <>
                                     {values?.byWellNumber && (
-                                      <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                      <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                         <Box display="flex">
                                           <Box flexGrow={1}>
                                             <FormTypes
@@ -613,7 +622,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                                     )}
                                   </>
                                 ) : (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                     <Box display="flex">
                                       <Box flexGrow={1}>
                                         <FormTypes
@@ -655,9 +664,8 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType="transparent"
                   onClick={() => {
                     if (!isEqual(ref.current.values, initialData.values)) {
                       setShowConfirmDialog(true);
@@ -667,46 +675,40 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                   }}
                 >
                   {'Close'}
-                </Button>
-                {isBulkedit === false && showSaveAndNext && (
-                  isEqual(ref?.current?.values, initialData.values) ? (
-                    <CustomButton
-                    loading={fetchingData}
-                    disabled={fetchingData}
-                    variant="contained"
-                    color="primary"
-                    type="submit"
-                    onClick={() => {
-                      setSaveAndNext(true);
-                      submitForm();
-                    }}
-                  >
-                    {'Next'}
-                  </CustomButton>
+                </ThemeButton>
+                {isBulkedit === false &&
+                  showSaveAndNext &&
+                  (isEqual(ref?.current?.values, initialData.values) ? (
+                    <ThemeButton
+                      isLoading={fetchingData}
+                      disabled={fetchingData}
+                      buttonType="theme"
+                      onClick={() => {
+                        setSaveAndNext(true);
+                        submitForm();
+                      }}
+                    >
+                      {'Next'}
+                    </ThemeButton>
                   ) : (
-                    <CustomButton
-                    loading={loading}
-                    disabled={loading || isEqual(ref?.current?.values, initialData.values)}
-                    variant="contained"
-                    color="primary"
-                    type="submit"
-                    onClick={() => {
-                      setSaveAndNext(true);
-                      submitForm();
-                    }}
-                  >
-                    {' '}
-                    Save & Next
-                  </CustomButton>
-                  )
-                )}
-                <CustomButton
+                    <ThemeButton
+                      isLoading={loading}
+                      disabled={loading || isEqual(ref?.current?.values, initialData.values)}
+                      buttonType="theme"
+                      onClick={() => {
+                        setSaveAndNext(true);
+                        submitForm();
+                      }}
+                    >
+                      {' '}
+                      Save & Next
+                    </ThemeButton>
+                  ))}
+                <ThemeButton
                   id="dialog-save-button"
-                  loading={loading}
+                  isLoading={loading}
                   disabled={loading || isEqual(ref?.current?.values, initialData.values)}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+                  buttonType="theme"
                   onClick={() => {
                     setSaveAndNext(false);
                     submitForm();
@@ -714,7 +716,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                 >
                   {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmationDialog && (
                 <ConfirmationDialog
@@ -730,7 +732,6 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
               )}
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);
@@ -755,5 +756,3 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
 };
 
 export default MaterialQtyDialog;
-
-

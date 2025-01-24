@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext, Fragment } from 'react';
 import ReactFlow, { ControlButton, Controls, ReactFlowProvider } from 'react-flow-renderer';
-import { useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { deliveryTicket, DELIVERY_TICKET_REFERENCE_TYPE, ASSET_STATUS, REPAIR_JOB_STATUS, COLOUR_MASTER } from 'src/constants/helpers';
@@ -8,8 +7,9 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { MdZoomOutMap } from 'react-icons/md';
-import { ExpandLess, ExpandMore } from '@material-ui/icons';
-import { Box, Button, Paper, Typography } from '@material-ui/core';
+import { ExpandLess, ExpandMore } from '@mui/icons-material';
+import { Box, Paper, Typography } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const customNodeStyles = {
   repairJob: {
@@ -52,7 +52,6 @@ const RepairJobViews = (props) => {
 
   const [flowData, setFlowData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const [fullScreenOpen, setFullScreenOpen] = useState(false);
   const [colorInfo, setColorInfo] = useState(false);
@@ -266,19 +265,16 @@ const RepairJobViews = (props) => {
 
   return (
     <ContentFullScreen fullScreen={fullScreenOpen} setFullScreen={setFullScreenOpen}>
-      <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
+      <Box display="flex" flexDirection="column">
         <Box>
-          <Button
-            variant={'outlined'}
-            color="default"
-            size="small"
+          <ThemeButton
             onClick={() => {
               setColorInfo(!colorInfo);
             }}
-            aria-controls="action-menu"
+            endIcon={colorInfo ? <ExpandLess /> : <ExpandMore />}
           >
-            {'Color Info'} {colorInfo ? <ExpandLess /> : <ExpandMore />}
-          </Button>
+            {'Color Info'}
+          </ThemeButton>
         </Box>
         {colorInfo && (
           <Box>
@@ -309,7 +305,7 @@ const RepairJobViews = (props) => {
           </Box>
         )}
       </Box>
-      <div style={fullScreenOpen ? { height: '95vh' } : { height: '68vh' }}>
+      <div style={fullScreenOpen ? { height: '95vh' } : { height: '75vh' }}>
         {!loading ? (
           flowData.length ? (
             <Fragment>

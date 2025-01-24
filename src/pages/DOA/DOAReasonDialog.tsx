@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Button, Checkbox, CircularProgress, Dialog, List, ListItem, ListItemIcon, ListItemText, TextField } from '@material-ui/core';
+import { Checkbox, Dialog, List, ListItem, ListItemIcon, ListItemText, TextField } from '@mui/material';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import { CustomDialogTransition } from 'src/constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const DOAReasonDialog = ({ reasonDialogOpen, handleCloseDialog, QuoteStatusChange, accepted }) => {
   const [selectedRec, setSelectedRec] = useState(null);
@@ -63,18 +64,20 @@ const DOAReasonDialog = ({ reasonDialogOpen, handleCloseDialog, QuoteStatusChang
             </>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button disabled={isAssigning} onClick={handleCloseDialog} color="primary" size="small">
+            <ThemeButton
+              onClick={handleCloseDialog}
+              buttonType='transparent'
+            >
               Cancel
-            </Button>
-            <Button
+            </ThemeButton>
+            <ThemeButton
               disabled={isAssigning}
               onClick={() => QuoteStatusChange(accepted, '', selectedRec === 'Others' ? value : selectedRec)}
-              color="primary"
-              size="small"
-              variant="contained"
+              isLoading={isAssigning}
+              buttonType='theme'
             >
-              {isAssigning ? <CircularProgress size={22} /> : 'Save'}
-            </Button>
+              Save
+            </ThemeButton>
           </CustomDialogFooter>
         </Dialog>
       ) : null}

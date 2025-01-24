@@ -1,5 +1,5 @@
-import { IconButton } from '@material-ui/core';
-import { Warning } from '@material-ui/icons';
+import { IconButton } from '@mui/material';
+import { Warning } from '@mui/icons-material';
 import { capitalize, isArray } from 'lodash';
 import { FiExternalLink } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
@@ -147,3 +147,26 @@ export const SerializedAssetRenderer = (row) => {
     </div>
   );
 };
+
+export const InvoiceNumberRenderer = (row) => {
+  return (
+    <div>
+      {row?.original?.invoiceNumber ? (
+        <div className="flex items-center gap-1">
+          <p>{row?.original?.invoiceNumber}</p>
+          <IconButton
+            size="small"
+            onClick={() => {
+              window.open(`${routes.invoiceDetail.path}/${row?.original?.invoiceId}`);
+            }}
+          >
+            <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+          </IconButton>
+        </div>
+      ) : (
+        <NoDataCell />
+      )}
+    </div>
+  );
+};
+

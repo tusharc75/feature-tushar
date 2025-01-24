@@ -1,7 +1,8 @@
-import { Box, Grid, IconButton, MenuItem, TextField } from '@material-ui/core';
-import NoteAddIcon from '@material-ui/icons/NoteAdd';
-import VisibilityIcon from '@material-ui/icons/Visibility';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, IconButton, MenuItem, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import NoteAddIcon from '@mui/icons-material/NoteAdd';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase, map, uniq } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -111,7 +112,9 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   }, []);
 
   useEffect(() => {
-    fetchGridColumns();
+    if(selectedResource){
+      fetchGridColumns();
+    }
   }, [selectedResource]);
 
   useEffect(() => {
@@ -306,7 +309,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
             id="generate-invoice"
             style={{ width: '300px' }}
             options={resourceList?.map((item) => item)}
-            renderInput={(params) => <TextField {...params} variant="outlined" label="Resource" margin="dense" required={true} />}
+            renderInput={(params) => <TextField {...params} variant="outlined" label="Resource" margin="dense" size="small" required={true} />}
             getOptionLabel={(option) => option?.title}
             onChange={(e, val) => {
               dispatch({ type: 'selection', selectedRecords: [] });
@@ -395,7 +398,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   return selectedResource ? (
     <Fragment>
       <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
+        <Grid size={{md:4, sm:11, xs:10}}>
           <CustomBreadCrumbs
             routes={[
               {
@@ -408,11 +411,11 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
             ]}
           />
         </Grid>
-        <Grid item md={8} sm={1} xs={2} />
+        <Grid size={{md:8, sm:1, xs:2}} />
       </Grid>
       <div className="main-container">
         <ListingPageHeader
-          leftSideContents={<LeftSideContents />}
+          leftSideContents={LeftSideContents()}
           searchValue={search}
           onSearch={handleSearch}
           isActionButtonVisible={selectedResource.resource === sidebarResource.fieldTicket}

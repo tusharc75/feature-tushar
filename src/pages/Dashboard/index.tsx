@@ -1,7 +1,6 @@
-import { Box, Grid, Typography } from '@material-ui/core';
+import { Box, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import React, { useEffect } from 'react';
-import DateFnsUtils from '@date-io/date-fns';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import axiosInstance from 'src/axios/axiosInstance';
 import ChartTypes from './ChartTypes';
 import countriesData from 'src/constants/Country.json';
@@ -16,6 +15,8 @@ import AssetStats from './AssetStats';
 import FullScreenChart from './FullScreenChart';
 import { periodOption, frequencyData } from '../DashboardBuilder/builderHelpers';
 import { camelCase, set } from 'lodash';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import CustomContainer from 'src/components/CustomContainer';
 
 const Dashboard = () => {
   const {
@@ -91,11 +92,7 @@ const Dashboard = () => {
           } else {
             setGlobalFilters((prevState) => ({ ...prevState, dashboardType: data[0].name, timeFrame: data[0]?.defaultDuration || 'current-year' }));
             setCharts(data[0]?.charts);
-            setKpis(
-              data[0]?.charts
-                ?.filter((chart) => chart?.hasFilters)
-                ?.map((chart) => camelCase(chart?.kpi?.name))
-            );
+            setKpis(data[0]?.charts?.filter((chart) => chart?.hasFilters)?.map((chart) => camelCase(chart?.kpi?.name)));
             setSelectedDashboardId(data[0]?._id);
           }
           setDashboardList(data);
@@ -125,90 +122,87 @@ const Dashboard = () => {
 
   return (
     <div className="main-container-v1">
-      <MuiPickersUtilsProvider utils={DateFnsUtils}>
-        <div className="headerbox-v1">
-          <CustomBreadCrumbs routes={[{ title: 'Dashboard' }]} />
-        </div>
-        <div className="detail-container-v1">
-          {!userLoading ? (
-            <React.Fragment>
-              <GlobalFilter
-                dashboardList={dashboardList.map((d) => ({ id: d._id, name: d.name, defaultDuration: d?.defaultDuration }))}
-                globalFilters={globalFilters}
-                setGlobalFilters={setGlobalFilters}
-                disabled={dashboardList.length === 0}
-              />
-              <Box pt={1}>
-                {dashboardLoading ? (
-                  <Loader minHeight={'100%'} height="calc(100vh - 200px)" noLoader={false} text="Loading Dashboard..." />
-                ) : dashboardList.length === 0 ? (
-                  <Box
-                    style={{ height: 'calc(100vh - 256px)', minHeight: '400px' }}
-                    width={'100%'}
-                    display={'flex'}
-                    flexDirection="column"
-                    justifyContent={'center'}
-                    alignItems={'center'}
-                    className="asdfkasjhdfkjsdh"
-                  >
-                    <img width={400} height={340} src={placeholder_img} alt="dashboard" />
-                    <Typography color="textSecondary" variant="h5">
-                      You don't have access to any dashboard
-                    </Typography>
-                  </Box>
-                ) : (
-                  <Grid
-                    container
-                    spacing={1}
-                    justifyContent="space-between"
-                    alignItems="stretch"
-                    style={{ height: 'calc(100vh - 256px)', minHeight: '600px', overflow: 'auto' }}
-                  >
-                    {charts.map((chart: ChartDataType, index: number) => (
-                      <ChartTypes
-                        globalFilters={globalFilters}
-                        key={chart.chartType + ' ' + index + 1}
-                        chart={chart}
-                        filterData={{ ...filtersOptions }}
-                        setSelectedChart={(currentChart: ChartDataType) => {
-                          setSelectedChart(currentChart);
-                          setOpenFullScreenChart(true);
-                        }}
-                        selectedDashboardId={selectedDashboardId}
-                        fetchDashboards={fetchDashboards}
-                        kpiFilters={kpiFilters?.filter((k: any) => k.kpi === camelCase(chart.kpi.name))}
-                        fetchKpiFilters={fetchKpiFilters}
-                      />
-                    ))}
-                    {globalFilters.dashboardType?.includes('Asset') && (
-                      <Grid item xs={12}>
-                        <AssetStats />
-                      </Grid>
-                    )}
-                  </Grid>
-                )}
-              </Box>
-            </React.Fragment>
-          ) : (
-            <Loader minHeight="100%" noLoader={false} text="Loading Data..." />
-          )}
-        </div>
-        {openFullScreenChart && (
-          <FullScreenChart
-            chart={selectedChart}
-            globalFilters={globalFilters}
-            filterData={{ ...filtersOptions }}
-            close={() => {
-              setOpenFullScreenChart(false);
-              setSelectedChart(null);
-            }}
-            selectedDashboardId={selectedDashboardId}
-            fetchDashboards={fetchDashboards}
-            kpiFilters={kpiFilters?.filter((k: any) => k.kpi === camelCase(selectedChart.kpi.name))}
-            fetchKpiFilters={fetchKpiFilters}
-          />
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[{ title: 'Dashboard' }]} />
+      </div>
+      <CustomContainer>
+        {!userLoading ? (
+          <React.Fragment>
+            <GlobalFilter
+              dashboardList={dashboardList.map((d) => ({ id: d._id, name: d.name, defaultDuration: d?.defaultDuration }))}
+              globalFilters={globalFilters}
+              setGlobalFilters={setGlobalFilters}
+              disabled={dashboardList.length === 0}
+            />
+            <Box pt={1}>
+              {dashboardLoading ? (
+                <CommonSkeleton />
+              ) : dashboardList.length === 0 ? (
+                <Box
+                  style={{ height: 'calc(100vh - 256px)', minHeight: '400px' }}
+                  width={'100%'}
+                  display={'flex'}
+                  flexDirection="column"
+                  justifyContent={'center'}
+                  alignItems={'center'}
+                >
+                  <img width={400} height={340} src={placeholder_img} alt="dashboard" />
+                  <Typography color="textSecondary" variant="h5">
+                    You don't have access to any dashboard
+                  </Typography>
+                </Box>
+              ) : (
+                <Grid
+                  container
+                  spacing={1}
+                  justifyContent="space-between"
+                  alignItems="stretch"
+                  style={{ height: 'calc(100vh - 256px)', minHeight: '600px', overflow: 'auto' }}
+                >
+                  {charts.map((chart: ChartDataType, index: number) => (
+                    <ChartTypes
+                      globalFilters={globalFilters}
+                      key={chart.chartType + ' ' + index + 1}
+                      chart={chart}
+                      filterData={{ ...filtersOptions }}
+                      setSelectedChart={(currentChart: ChartDataType) => {
+                        setSelectedChart(currentChart);
+                        setOpenFullScreenChart(true);
+                      }}
+                      selectedDashboardId={selectedDashboardId}
+                      fetchDashboards={fetchDashboards}
+                      kpiFilters={kpiFilters?.filter((k: any) => k.kpi === camelCase(chart.kpi.name))}
+                      fetchKpiFilters={fetchKpiFilters}
+                    />
+                  ))}
+                  {globalFilters.dashboardType?.includes('Asset') && (
+                    <Grid size={{ xs: 12 }}>
+                      <AssetStats />
+                    </Grid>
+                  )}
+                </Grid>
+              )}
+            </Box>
+          </React.Fragment>
+        ) : (
+          <Loader minHeight="100%" noLoader={false} text="Loading Data..." />
         )}
-      </MuiPickersUtilsProvider>
+      </CustomContainer>
+      {openFullScreenChart && (
+        <FullScreenChart
+          chart={selectedChart}
+          globalFilters={globalFilters}
+          filterData={{ ...filtersOptions }}
+          close={() => {
+            setOpenFullScreenChart(false);
+            setSelectedChart(null);
+          }}
+          selectedDashboardId={selectedDashboardId}
+          fetchDashboards={fetchDashboards}
+          kpiFilters={kpiFilters?.filter((k: any) => k.kpi === camelCase(selectedChart.kpi.name))}
+          fetchKpiFilters={fetchKpiFilters}
+        />
+      )}
     </div>
   );
 };

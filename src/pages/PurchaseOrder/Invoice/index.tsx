@@ -1,18 +1,19 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Box, Button, IconButton, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import axiosInstance from '../../../axios/axiosInstance';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import { purchaseOrder, gridLoadingTimeout, dateTimeFormat } from '../../../constants/helpers';
+import { purchaseOrder, gridLoadingTimeout, displayDateTime } from '../../../constants/helpers';
 import AddInvoice from './AddInvoice';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import EditIcon from '@material-ui/icons/Edit';
-import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import moment from 'moment';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import {  useSetWalkmeData } from 'src/components/CustomIntro';
+import { generateAddInvoice } from '../walkmeSteps';
 
 const renderedFrom = `po_invoice`;
 
@@ -24,9 +25,11 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
   const [addOpen, setAddOpen] = useState({ open: false, invoiceData: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteData, setDeleteData] = useState(null);
+  const { setWalkmeData } = useSetWalkmeData();
 
   useEffect(() => {
     fetchData();
+    setWalkmeData([generateAddInvoice()]);
   }, [purchaseOrderData]);
 
   const columns = [
@@ -57,8 +60,8 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
       Cell: ({ row }) => (
         <>
           {row?.original?.invoiceDate ? (
-            <h5 className="text-truncate" title={moment(row?.original?.invoiceDate)?.format(dateTimeFormat)}>
-              {moment(row?.original?.invoiceDate)?.format(dateTimeFormat)}
+            <h5 className="text-truncate" title={displayDateTime(row?.original?.invoiceDate)}>
+              {displayDateTime(row?.original?.invoiceDate)}
             </h5>
           ) : (
             <NoDataCell />
@@ -127,7 +130,7 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
           toastConfig.setToastConfig({
             open: true,
             message: data.message,
-            severity: 'success'
+            type: 'success'
           });
         })
         .catch((err) => {
@@ -141,6 +144,7 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
     return (
       <>
         <MenuItem
+         id={'add-invoice-button'}
           onClick={() => {
             setAddOpen({ open: true, invoiceData: null });
           }}
@@ -155,7 +159,6 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
     return (
       <>
         <MenuItem
-
           onClick={() => {
             const ids = selectedRecords.map((d) => d._id);
             setShowDeleteConfirmBox(true);

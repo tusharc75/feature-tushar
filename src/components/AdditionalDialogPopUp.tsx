@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Box, Button, Dialog, Grid } from '@material-ui/core';
+import { Box, Dialog } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, getObjKeys, setFieldsInAscendingOrder, yupSchema } from '../constants/helpers';
 import CustomDialogHeader from './CustomDialog/CustomDialogHeader';
@@ -8,13 +9,13 @@ import CommonSkeleton from './Helpers/CommonSkeleton';
 import { Form, Formik } from 'formik';
 import FormTypes from './Helpers/FormTypes';
 import CustomDialogFooter from './CustomDialog/CustomDialogFooter';
-import CustomButton from './Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const arr = [...Array(9).keys()];
 
 const AdditionalDialogPopUp = ({ open, close, title, handleSave, fieldData }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [entityData,] = useState({
+  const [entityData] = useState({
     fields: fieldData.map((fields) => fields.fieldData),
     initialValues: getObjKeys(
       '',
@@ -37,17 +38,22 @@ const AdditionalDialogPopUp = ({ open, close, title, handleSave, fieldData }) =>
       <Dialog
         maxWidth="md"
         fullWidth
-        fullScreen={fullScreen || (isMobile || isTablet)}
+        fullScreen={fullScreen || isMobile || isTablet}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
-        onClose={close}
         open={open}
-        disableBackdropClick={true}
+        onClose={(event, reason) => {
+          if (reason !== 'backdropClick') {
+            close();
+          }
+        }}
       >
-        <CustomDialogHeader title={title} onClose={close}
+        <CustomDialogHeader
+          title={title}
+          onClose={close}
           isMinimized={!fullScreen}
           onMinimizeMaximize={() => {
-            setFullScreen(prevState => !prevState)
+            setFullScreen((prevState) => !prevState);
           }}
           showManimizeMaximize={true}
         />
@@ -71,7 +77,7 @@ const AdditionalDialogPopUp = ({ open, close, title, handleSave, fieldData }) =>
                               <Box marginY={2}>
                                 <Grid spacing={3} container>
                                   {form.sectionFields.map((field, index2) => (
-                                    <Grid key={index2} item xs={12} sm={6} md={6}>
+                                    <Grid key={index2} size={{ xs: 12, sm: 6, md: 6 }} >
                                       <FormTypes
                                         // {...rest}
                                         values={values}
@@ -101,14 +107,12 @@ const AdditionalDialogPopUp = ({ open, close, title, handleSave, fieldData }) =>
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                  <Button type="button" variant="outlined" color="primary" size="small" onClick={close}>
+                  <ThemeButton buttonType="transparent" onClick={close}>
                     Cancel
-                  </Button>
+                  </ThemeButton>
 
-                  <CustomButton
-                    // loading={loading}
-                    variant="contained"
-                    color="primary"
+                  <ThemeButton
+                    buttonType="theme"
                     disabled={Object.keys(errors).length > 0 ? true : false}
                     onClick={(e) => {
                       e.preventDefault();
@@ -116,7 +120,7 @@ const AdditionalDialogPopUp = ({ open, close, title, handleSave, fieldData }) =>
                     }}
                   >
                     Save
-                  </CustomButton>
+                  </ThemeButton>
                 </CustomDialogFooter>
               </>
             )}

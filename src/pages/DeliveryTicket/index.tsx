@@ -1,5 +1,5 @@
-import { Box, Chip, IconButton } from '@material-ui/core';
-import { Delete } from '@material-ui/icons';
+import { Box, Chip, IconButton } from '@mui/material';
+import { Delete } from '@mui/icons-material';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
@@ -273,7 +273,6 @@ const DeliveryTicket = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-
   const handleDelete = async () => {
     setDeleteLoading(true);
     let recordsToDelete = [];
@@ -379,8 +378,12 @@ const DeliveryTicket = () => {
           {isConfirmDialogVisible ? (
             <ConfirmationDialog
               open={isConfirmDialogVisible}
-                message={`Are you sure you want to delete ${deleteRecord ? `${resources?.deliveryTicket?.titleSingular?.toLowerCase()} :
-                  ${deleteRecord?.ticketName || ''}` : `selected ${resources?.deliveryTicket?.titlePlural?.toLowerCase()}`} ?`}
+              message={`Are you sure you want to delete ${
+                deleteRecord
+                  ? `${resources?.deliveryTicket?.titleSingular?.toLowerCase()} :
+                  ${deleteRecord?.ticketName || ''}`
+                  : `selected ${resources?.deliveryTicket?.titlePlural?.toLowerCase()}`
+              } ?`}
               onClose={() => {
                 setDeleteRecord(null);
                 setIsConformDialogVisible(false);

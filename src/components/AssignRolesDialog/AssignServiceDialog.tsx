@@ -1,4 +1,4 @@
-import { Box, Dialog, IconButton, Menu, Popover } from '@material-ui/core';
+import { Box, Dialog, IconButton, Menu, Popover } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -23,7 +23,7 @@ import { ListingPageHeader } from '../PageHeaders';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { findOne, objectStore } from 'src/constants/indexdbhelper';
 import { Link } from 'react-router-dom';
-import { Info } from '@material-ui/icons';
+import { Info } from '@mui/icons-material';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const AssignServiceDialog = ({
@@ -198,7 +198,7 @@ const AssignServiceDialog = ({
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
-    const updatedDeepFilters = [...deepFilters];
+    let updatedDeepFilters = [...deepFilters];
     const updatedFilterByIds = [...filterByIds];
 
     if (extraStaticFilter?.length) {
@@ -207,7 +207,9 @@ const AssignServiceDialog = ({
           if (user?.user?.brandPolicy?.servicePrePost) {
             updatedDeepFilters.push(e);
           }
-        } else {
+        }
+        else {
+          updatedDeepFilters = updatedDeepFilters?.filter((ele) => e.field !== ele.field);
           updatedDeepFilters.push(e);
         }
       });
@@ -310,7 +312,7 @@ const AssignServiceDialog = ({
           <Box>
             <CustomTabs value={tabValue} onChange={handleMainTabChange}>
               <CustomTab value={0} label={`${resources?.pricingCondition?.titleSingular} Services`} />
-              <CustomTab value={1} className={'tabLayout'} label={'All Services'} />
+              <CustomTab value={1} label={'All Services'} />
             </CustomTabs>
           </Box>
         )}

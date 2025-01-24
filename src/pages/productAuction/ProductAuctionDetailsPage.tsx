@@ -1,11 +1,10 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import { Edit } from '@material-ui/icons';
+import { Box } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -83,22 +82,23 @@ const ProductAuctionDetailsPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ ...routes.productAuction, title: resources?.productAuction?.titlePlural }, { title: `${productAuctionData?.auctionNumber}` }]} />
+          <CustomBreadCrumbs
+            routes={[{ ...routes.productAuction, title: resources?.productAuction?.titlePlural }, { title: `${productAuctionData?.auctionNumber}` }]}
+          />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <>
               {permissions?.product?.isUpdate && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  size="small"
+                <ThemeButton
+                  iconForMobile={<EditIcon />}
                   onClick={() => {
                     setOpenUpdateDialog(true);
                   }}
-                  className={`btn-outline-v1`}
+                  mobileTooltip={'Edit'}
                 >
-                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                </Button>
+                  {'Edit'}
+                </ThemeButton>
               )}
               {permissions?.productAuction?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             </>
@@ -114,12 +114,8 @@ const ProductAuctionDetailsPage = () => {
         {productAuctionData && fields.length ? (
           <>
             <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-              <CustomTab value={0}>
-                Header
-              </CustomTab>
-              <CustomTab value={1}>
-                Bids
-              </CustomTab>
+              <CustomTab value={0}>Header</CustomTab>
+              <CustomTab value={1}>Bids</CustomTab>
             </CustomTabs>
             <TabPanel value={tabValue} index={0}>
               <DetailsPage data={productAuctionData} fields={fields} />
@@ -129,15 +125,15 @@ const ProductAuctionDetailsPage = () => {
             </TabPanel>
           </>
         ) : (
-          <Grid container spacing={2} style={{ padding: '8px' }}>
-            <CommonSkeleton lenArray={[...Array(7).keys()]} />
-          </Grid>
+          <div className="p-2">
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </div>
         )}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.productAuction?.titleSingular?.toLowerCase()} : ${productAuctionData?.auctionNumber || ''} ?`}             
+          message={`Are you sure you want to delete ${resources?.productAuction?.titleSingular?.toLowerCase()} : ${productAuctionData?.auctionNumber || ''} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

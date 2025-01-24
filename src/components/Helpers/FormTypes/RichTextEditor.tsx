@@ -1,7 +1,9 @@
 import React, { useContext, useRef, useState } from 'react';
 import { Editor } from '@tinymce/tinymce-react';
-import { Box, Button, CircularProgress, Dialog, Grid, IconButton, TextField, Typography } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { Box, CircularProgress, Dialog, IconButton, TextField, Theme, Typography } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Grid from '@mui/material/Grid2';
+import { makeStyles } from '@mui/styles';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import { HiOutlinePhotograph } from 'react-icons/hi';
@@ -13,7 +15,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import { useAppTheme } from 'src/constants/AppConfig';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     flexGrow: 1
   },
@@ -74,7 +76,6 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
   };
 
   const handleUploadFile = async (ev) => {
-
     setToastConfig({
       open: true,
       type: 'info',
@@ -94,7 +95,7 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
           break;
         }
 
-        getFileUrl(file, "", {});
+        getFileUrl(file, '', {});
       }
       ev.target.value = '';
     }
@@ -179,20 +180,23 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
       {label}
       {isUploadImage ? (
         <Dialog
-          disableBackdropClick={true}
+          onClose={(event, reason) => {
+            if (reason !== 'backdropClick') {
+              setIsUploadImage(false);
+            }
+          }}
           open={true}
           fullScreen={isMobile || isTablet}
           TransitionComponent={CustomDialogTransition}
           aria-labelledby="customized-dialog-title"
           maxWidth="xs"
-          onClose={() => setIsUploadImage(false)}
         >
           <CustomDialogHeader onClose={() => setIsUploadImage(false)} title="Upload Image"></CustomDialogHeader>
 
           <CustomDialogContent>
             <div>
               <Grid container spacing={3}>
-                <Grid item xs={12} style={{ display: 'flex' }}>
+                <Grid size={{ xs: 12 }} style={{ display: 'flex' }}>
                   <input
                     id="avatar"
                     name="avatar"
@@ -209,15 +213,13 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
 
                   <label htmlFor="avatar">
                     <IconButton title="Add picture" size="small" aria-label="upload picture" component="span">
-                      <Button
+                      <ThemeButton
                         startIcon={<HiOutlinePhotograph />}
-                        // size="small"
-                        variant="outlined"
-                        component="span"
+                        buttonType='transparent'
                         disabled={isImageLoading}
                       >
                         Upload Image
-                      </Button>
+                      </ThemeButton>
                     </IconButton>
                   </label>
                   <Box display="flex">
@@ -232,31 +234,32 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
                   </Box>
                 </Grid>
                 {imageUrl || uploadError ? (
-                  <Grid item container>
+                  <Grid container>
                     {imageUrl ? (
                       <>
-                        <Grid item xs={10}>
+                        <Grid size={{ xs: 10 }}>
                           <Typography noWrap variant="body2">
                             {imageUrl.substring(imageUrl.lastIndexOf('/') + 1)}
                           </Typography>
                         </Grid>
-                        <Grid item xs={2}>
-                          <Button size="small" startIcon={<AiOutlineClose />} onClick={() => setImageUrl('')} />
+                        <Grid size={{ xs: 2 }}>
+                          <ThemeButton buttonType='transparent'
+                            startIcon={<AiOutlineClose />} onClick={() => setImageUrl('')} />
                         </Grid>
                       </>
                     ) : null}
 
                     {uploadError ? (
-                      <Grid item xs={12}>
+                      <Grid size={{ xs: 12 }}>
                         <Typography className={classes.errorText}>Please Upload Image/Photo</Typography>
                       </Grid>
                     ) : null}
                   </Grid>
                 ) : null}
-                <Grid item xs={6}>
+                <Grid size={{ xs: 6 }}>
                   <TextField id="width" type="number" name="width" size="small" label="Width" variant="outlined" onChange={handleChange} />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid size={{ xs: 6 }}>
                   <TextField
                     id="height"
                     name="height"
@@ -269,16 +272,15 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
                     onChange={handleChange}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                   <TextField id="alt" name="Alternative Text" size="small" label="alt" fullWidth variant="outlined" onChange={handleChange} />
                 </Grid>
               </Grid>
             </div>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button
-              size="small"
-              color="primary"
+            <ThemeButton
+              buttonType="transparent"
               onClick={() => {
                 setImageDetails({ width: 0, height: 60, alt: '' });
                 setImageUrl('');
@@ -286,24 +288,13 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
               }}
             >
               Cancel
-            </Button>
-            <Button variant="contained" color="primary" type="submit" onClick={handleSubmit}>
+            </ThemeButton>
+            <ThemeButton buttonType="theme" onClick={handleSubmit}>
               Save
-            </Button>
+            </ThemeButton>
           </CustomDialogFooter>
         </Dialog>
       ) : null}
-
-      {/* <Button
-          size="small"
-          color="primary"
-          onClick={() => {
-            setIsUploadImage(true);
-          }}
-        >
-          Upload Image
-        </Button> */}
-
       <Editor
         id={name}
         onInit={(evt, editor) => (editorRef.current = editor)}
@@ -338,9 +329,8 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
             });
             editor.ui.registry.addButton('uploadDocument', {
               text: 'Upload Document',
-              onAction: (e) => handleUploadFileClick(e),
+              onAction: (e) => handleUploadFileClick(e)
             });
-
           },
 
           skin: themeColor === 'dark' ? 'oxide-dark' : 'oxide',

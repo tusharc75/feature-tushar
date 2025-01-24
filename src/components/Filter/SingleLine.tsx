@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useContext } from 'react';
-import { Checkbox, FormControlLabel } from '@material-ui/core';
+import { Checkbox, FormControlLabel } from '@mui/material';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -90,13 +90,13 @@ const SingleLine = ({ fieldData, allFields, deepFilters, setDeepFilters, filterT
 
   return (
     <div>
-      <div className="sticky top-0 z-10 flex items-center justify-between bg-[var(--dark-primary,white)] py-[--py,_16px] max-md:flex-wrap">
+      <div className="sticky top-0 z-10 flex min-h-[64px] items-center justify-between bg-[var(--dark-primary,white)] py-[--py,_16px] max-md:flex-wrap">
         <div className="flex items-center gap-2">
           {sidebarIcon}
           <p className="text-[16px] font-medium leading-[19px]">{fieldData?.fieldLabel}</p>
         </div>
         <div className="flex items-center justify-between">
-          <InNin filterTerm={filterTerm} setFilterTerm={setFilterTerm} fieldName={fieldData?.fieldName} />
+          {filterTerm && setFilterTerm && <InNin filterTerm={filterTerm} setFilterTerm={setFilterTerm} fieldName={fieldData?.fieldName} />}
           <SearchBox
             onChange={(e) => {
               setSearchVal(e?.target?.value);
@@ -123,12 +123,15 @@ const SingleLine = ({ fieldData, allFields, deepFilters, setDeepFilters, filterT
                         } else {
                           filter.term = filter.term?.filter((t) => t != o);
                         }
-                        setDeepFilters([...deepFilters?.filter((d) => d?.field != fieldData?.fieldName), filter]);
+                        if (filter.term?.length) {
+                          setDeepFilters([...deepFilters?.filter((d) => d?.field != fieldData?.fieldName), filter]);
+                        } else {
+                          setDeepFilters([...deepFilters?.filter((d) => d?.field != fieldData?.fieldName)]);
+                        }
                       } else {
                         setDeepFilters((pre) => [...pre, { field: fieldData?.fieldName, term: [o] }]);
                       }
                     }}
-                    className="!text-[--new-theme-color] dark:!text-gray-200"
                   />
                 }
                 label={<span className="!text-[14px] !font-medium !leading-[17px] !text-[#6C757D] dark:!text-gray-200">{o}</span>}

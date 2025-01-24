@@ -1,5 +1,5 @@
-import { Box, Dialog, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, Dialog, TextField } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase, groupBy } from 'lodash';
 import { useEffect, useState } from 'react';
@@ -240,7 +240,7 @@ const Board = ({ type, filter }) => {
         <Autocomplete
           fullWidth
           options={resourceOptions}
-          getOptionLabel={(option) => option.optionLabel}
+          getOptionLabel={(option) => option.optionLabel || ''}
           value={resource}
           onChange={(event, newValue) => {
             setResource(newValue);
@@ -253,8 +253,8 @@ const Board = ({ type, filter }) => {
             fullWidth
             disabled={loadingResources}
             options={resourceData}
-            getOptionLabel={(option: any) => option.optionLabel}
-            getOptionSelected={(option: any, value: any) => option?.optionLabel === value?.optionLabel}
+            getOptionLabel={(option: any) => option.optionLabel || ''}
+            isOptionEqualToValue={(option: any, value: any) => option?.optionLabel === value?.optionLabel}
             value={selectedResourceData}
             onChange={(event, newValue) => {
               setSelectedResourceData(newValue);

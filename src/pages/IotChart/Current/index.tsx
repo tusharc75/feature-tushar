@@ -1,14 +1,13 @@
-import { Box, Grid, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core';
-import RefreshIcon from '@material-ui/icons/Refresh';
-import { startCase } from 'lodash';
-import moment from 'moment';
+import { Box, IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import { cn, dateTimeFormat24Hours } from 'src/constants/helpers';
+import { cn, dateTimeFormat24Hours, displayDateTime } from 'src/constants/helpers';
 import TreeView from './TreeView';
 
 export default function Current({ deviceTemplate, assetId }) {
@@ -80,7 +79,7 @@ export default function Current({ deviceTemplate, assetId }) {
     <>
       <Box pb={2}>
         <Grid direction="row" justifyContent="flex-end" alignItems="center" container spacing={2}>
-          <Grid item>
+          <Grid >
             <SearchBox
               onChange={(e) => {
                 setSearchValue(e.target.value);
@@ -88,7 +87,7 @@ export default function Current({ deviceTemplate, assetId }) {
               value={searchValue}
             />
           </Grid>
-          <Grid item>
+          <Grid >
             <HtmlTooltip title="Refresh">
               <IconButton
                 size="small"
@@ -104,7 +103,7 @@ export default function Current({ deviceTemplate, assetId }) {
         </Grid>
       </Box>
       <Grid container spacing={2}>
-        <Grid item lg={8} md={8} sm={12} xs={12}>
+        <Grid size={{lg:8, md:8, sm:12, xs:12}}>
           {categories && currentData ? (
             currentData?.length ? (
               <div className="grid gap-3 md:gap-4">
@@ -134,7 +133,7 @@ export default function Current({ deviceTemplate, assetId }) {
             </Box>
           )}
         </Grid>
-        <Grid item lg={4} md={4} sm={12} xs={12}>
+        <Grid size={{lg:4, md:4, sm:12, xs:12}}>
           {errorData ? (
             <div className="rounded-lg border shadow-lg">
               <div className="head pb-2 pt-4 md:p-6 md:pb-3">
@@ -146,7 +145,7 @@ export default function Current({ deviceTemplate, assetId }) {
                     <div className="py-[15px]">
                       <p className="text-[0.875rem] font-semibold leading-[1.5714]">{data?.message}</p>
                       <p className="text-[0.75rem] font-normal leading-[1.5] text-gray-500 dark:text-gray-400">
-                        {moment(data?.time).format(dateTimeFormat24Hours)}
+                        {displayDateTime(data?.time, dateTimeFormat24Hours)}
                       </p>
                     </div>
                   </li>

@@ -1,28 +1,29 @@
 import { useState, useEffect, Fragment, useContext, useRef, FC } from 'react';
-import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
-import AddIcon from '@material-ui/icons/AddCircle';
-import InfoIcon from '@material-ui/icons/Info';
 import { Formik, Form } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import CustomButton from 'src/components/Helpers/CustomButton';
-import routes from 'src/components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, transferAsset, setFieldsInAscendingOrder, GenerateResourceLineNumber, convertDateInDateTime } from 'src/constants/helpers';
+import {
+  CustomDialogTransition,
+  transferAsset,
+  setFieldsInAscendingOrder,
+  GenerateResourceLineNumber,
+} from 'src/constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { Box, Grid } from '@material-ui/core';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import ConfirmCancelDialog from 'src/components/ConfirmCancelDialog';
 import { useData } from 'src/StateProvider/Provider';
 import { FaDiceOne } from 'react-icons/fa';
 import { isEqual } from 'lodash';
-import moment from 'moment';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 interface Props {
   isClone?: boolean;
@@ -49,7 +50,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
     referenceType = null,
     referenceId = null,
     referenceData = null,
-    assets = null,
+    assets = null
   } = props;
 
   const toastConfig = useContext(CustomToastContext);
@@ -107,7 +108,11 @@ const ManageTransferAsset: FC<Props> = (props) => {
                 }
                 if (data?.ticketCreated) {
                   fieldsDataForUpdate?.forEach((e) => {
-                    if (['transfertoPlant', 'plantShipTo', 'transfertoSupplier', 'supplierShipTo', 'transfertoCustomer', 'customerShipTo']?.includes(e?.fieldName)) {
+                    if (
+                      ['transfertoPlant', 'plantShipTo', 'transfertoSupplier', 'supplierShipTo', 'transfertoCustomer', 'customerShipTo']?.includes(
+                        e?.fieldName
+                      )
+                    ) {
                       e.isUneditable = true;
                       e.disableOnEdit = true;
                     }
@@ -210,7 +215,6 @@ const ManageTransferAsset: FC<Props> = (props) => {
     }
   }, [formValues]);
 
-
   useEffect(() => {
     if (allFields?.some((e) => e?.fieldName === 'createDate') && assets && assets?.length) {
       findValidationDate();
@@ -265,7 +269,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
       }
     }
     if (createDateMin && allFields?.find((e) => e?.fieldName === 'createDate')) {
-      if (!moment(values['createDate']).isSameOrAfter(moment(createDateMin))) {
+      if (!dayjs(values['createDate']).isSameOrAfter(dayjs(createDateMin))) {
         errors['createDate'] = `Please select valid date`;
       }
     }
@@ -338,7 +342,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                 values?.transferType.includes('Internal') && (
                                   <Fragment key={index2}>
                                     {field.fieldName === 'transfertoPlant' && (
-                                      <Grid item xs={12} sm={6} md={6}>
+                                      <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                                         <FormTypes
                                           {...field}
                                           disabled={Boolean(transferAssetId) && field.disableOnEdit}
@@ -365,7 +369,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                       </Grid>
                                     )}
                                     {field.fieldName === 'plantShipTo' && (
-                                      <Grid key={index2} item xs={12} sm={6} md={6}>
+                                      <Grid key={index2} size={{ xs: 12, sm: 6, md: 6 }}>
                                         <FormTypes
                                           {...field}
                                           disabled={Boolean(transferAssetId) && field.disableOnEdit}
@@ -399,7 +403,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                 )
                               ) : field.fieldName === 'transfertoSupplier' || field.fieldName === 'supplierShipTo' ? (
                                 values?.transferType.includes('Supplier') && (
-                                  <Grid item xs={12} sm={6} md={6}>
+                                  <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                                     <FormTypes
                                       {...field}
                                       disabled={Boolean(transferAssetId) && field.disableOnEdit}
@@ -425,7 +429,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                 )
                               ) : field.fieldName === 'transfertoCustomer' || field.fieldName === 'customerShipTo' ? (
                                 values?.transferType.includes('Customer') && (
-                                  <Grid item xs={12} sm={6} md={6}>
+                                  <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                                     <FormTypes
                                       {...field}
                                       disabled={Boolean(transferAssetId) && field.disableOnEdit}
@@ -450,7 +454,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                   </Grid>
                                 )
                               ) : field.fieldName === 'transferType' ? (
-                                <Grid key={index2} item xs={12} sm={6} md={6}>
+                                <Grid key={index2} size={{ xs: 12, sm: 6, md: 6 }}>
                                   <FormTypes
                                     {...field}
                                     disabled={Boolean(transferAssetId) && field.disableOnEdit}
@@ -492,7 +496,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                   />
                                 </Grid>
                               ) : field.fieldName === 'transferFromPlant' ? (
-                                <Grid key={index2} item xs={12} sm={6} md={6}>
+                                <Grid key={index2} size={{ xs: 12, sm: 6, md: 6 }}>
                                   <FormTypes
                                     {...field}
                                     disabled={Boolean(transferAssetId) && field.disableOnEdit}
@@ -521,7 +525,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                   />
                                 </Grid>
                               ) : field.fieldName === 'createDate' ? (
-                                <Grid key={index2} item xs={12} sm={6} md={6}>
+                                <Grid key={index2} size={{ xs: 12, sm: 6, md: 6 }}>
                                   <FormTypes
                                     {...field}
                                     fieldData={field}
@@ -534,8 +538,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                     type={field.type}
                                     options={field.option}
                                     setFieldValue={(name, value) => {
-                                      var newDate = convertDateInDateTime(value);
-                                      setFieldValue(name, newDate);
+                                      setFieldValue(name, value);
                                     }}
                                     required={field.required}
                                     fullWidth
@@ -546,7 +549,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                   />
                                 </Grid>
                               ) : (
-                                <Grid key={index2} item xs={12} sm={6} md={6}>
+                                <Grid key={index2} size={{ xs: 12, sm: 6, md: 6 }}>
                                   <FormTypes
                                     {...field}
                                     disabled={
@@ -581,9 +584,8 @@ const ManageTransferAsset: FC<Props> = (props) => {
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType="transparent"
                   disabled={isSubmitting}
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
@@ -591,15 +593,14 @@ const ManageTransferAsset: FC<Props> = (props) => {
                   }}
                 >
                   Cancel
-                </Button>
-                <CustomButton loading={isSubmitting} disabled={isSubmitting} variant="contained" color="primary" type="submit" onClick={submitForm}>
+                </ThemeButton>
+                <ThemeButton isLoading={isSubmitting} disabled={isSubmitting} buttonType="theme" onClick={submitForm}>
                   {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

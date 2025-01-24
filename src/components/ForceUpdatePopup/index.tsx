@@ -1,4 +1,4 @@
-import { Dialog } from '@material-ui/core';
+import { Dialog } from '@mui/material';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { UpdateIllustration } from 'src/assets/svg/Illustrations';
 
@@ -32,8 +32,7 @@ const ForceUpdatePopup = ({ onClose, data }: ForceUpdatePopupProps) => {
             <ThemeButton
               onClick={onClose}
               iconForMobile={false}
-              color="primary"
-              borderColor="none"
+              buttonType="theme"
               fullWidth
               style={{ padding: '9px 10px', borderRadius: '10px', maxWidth: '204px', fontSize: '20px', fontWeight: '600' }}
             >

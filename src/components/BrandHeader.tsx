@@ -1,21 +1,21 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { makeStyles } from "@material-ui/core/styles";
-import { Grid, Typography, Box, Select, MenuItem } from "@material-ui/core";
-import Container from "./CustomContainer";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Grid, Typography, Box, Select, MenuItem, Theme } from '@mui/material';
+import Container from './CustomContainer';
+import { makeStyles } from '@mui/styles';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
-    minHeight: "100%!important",
-    marginTop: 5,
+    minHeight: '100%!important',
+    marginTop: 5
   },
   box: {
-    backgroundColor: "#E6F4FF",
+    backgroundColor: '#E6F4FF',
     borderRadius: 6,
     padding: theme.spacing(0.5, 1.5),
     marginTop: 5,
-    marginLeft: 5,
-  },
+    marginLeft: 5
+  }
 }));
 
 const BrandHeader = (props) => {
@@ -33,7 +33,7 @@ const BrandHeader = (props) => {
     onChange,
     values,
     options,
-    placeholder,
+    placeholder
   } = props;
   const classes = useStyles();
 
@@ -49,15 +49,15 @@ const BrandHeader = (props) => {
             ) : null}
             {showDropDown && Object.keys(options).length ? (
               <Select
-                style={{ width: "160px" }}
+                style={{ width: '160px' }}
                 labelId="demo-simple-select-outlined-label"
                 id="demo-simple-select-outlined"
                 MenuProps={{
                   anchorOrigin: {
-                    vertical: "bottom",
-                    horizontal: "left",
+                    vertical: 'bottom',
+                    horizontal: 'left'
                   },
-                  getContentAnchorEl: null,
+                  getContentAnchorEl: null
                 }}
                 value={values}
                 onChange={onChange}
@@ -78,41 +78,29 @@ const BrandHeader = (props) => {
         <Box display="flex" id="tapleen2">
           {total ? (
             <Box className={classes.box}>
-              <Typography>{`${
-                totalHeading ? totalHeading : "Total " + heading
-              }`}</Typography>
-              <Typography style={{ color: "#0068AB", fontWeight: "bold" }}>
-                {total}
-              </Typography>
+              <Typography>{`${totalHeading ? totalHeading : 'Total ' + heading}`}</Typography>
+              <Typography style={{ color: '#0068AB', fontWeight: 'bold' }}>{total}</Typography>
             </Box>
           ) : (
-            ""
+            ''
           )}
           <Box component="span" marginX={1} />
           {active ? (
             <Box className={classes.box}>
-              <Typography>{`${
-                activeHeading ? activeHeading : "Active " + heading
-              }`}</Typography>
-              <Typography style={{ color: "#1A7C1B", fontWeight: "bold" }}>
-                {active}
-              </Typography>
+              <Typography>{`${activeHeading ? activeHeading : 'Active ' + heading}`}</Typography>
+              <Typography style={{ color: '#1A7C1B', fontWeight: 'bold' }}>{active}</Typography>
             </Box>
           ) : (
-            ""
+            ''
           )}
           <Box component="span" marginX={1} />
           {inActive ? (
             <Box className={classes.box}>
-              <Typography>{`${
-                inActiveHeading ? inActiveHeading : "Inactive " + heading
-              }`}</Typography>
-              <Typography style={{ color: "#D63F19", fontWeight: "bold" }}>
-                {inActive}
-              </Typography>
+              <Typography>{`${inActiveHeading ? inActiveHeading : 'Inactive ' + heading}`}</Typography>
+              <Typography style={{ color: '#D63F19', fontWeight: 'bold' }}>{inActive}</Typography>
             </Box>
           ) : (
-            ""
+            ''
           )}
         </Box>
       </Container>
@@ -128,7 +116,7 @@ BrandHeader.propTypes = {
   children: PropTypes.node,
   totalHeading: PropTypes.any,
   activeHeading: PropTypes.any,
-  inActiveHeading: PropTypes.any,
+  inActiveHeading: PropTypes.any
 };
 
 export default BrandHeader;

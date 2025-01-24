@@ -1,10 +1,11 @@
-import { Box, Button, Divider, Typography } from '@material-ui/core';
+import { Box, Divider, Typography } from '@mui/material';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import AddNotificationDialog from 'src/pages/WorkFlow/Notifications/AddNotificationDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const NOTIF_TYPE = {
   activationNotification: 'Activation Notification',
@@ -42,48 +43,39 @@ const Notifications = ({ resource, id }) => {
         <Box className="conditions-container flex flex-col gap-1 sm:mb-3 sm:p-3 md:mb-2 md:p-2">
           <Box p={1} px={1} display={'flex'} flexDirection={'column'} mt={1} borderRadius={'5px'}>
             <Box className="mb-5">
-              <Button
-                variant="outlined"
-                color="primary"
-                size="small"
+              <ThemeButton
                 onClick={() => {
                   setOpen({ open: true, type: NOTIF_TYPE.activationNotification, data: notificationData.activationNotification });
                 }}
               >
                 Activation Notification
-              </Button>
+              </ThemeButton>
             </Box>
             <Typography variant="body2">{getNotiUser(notificationData?.activationNotification, NOTIF_TYPE.activationNotification)}</Typography>
           </Box>
           <Divider />
           <Box p={1} px={1} display={'flex'} flexDirection={'column'} mt={1} borderRadius={'5px'}>
             <Box className="mb-5">
-              <Button
-                variant="outlined"
-                color="primary"
-                size="small"
+              <ThemeButton
                 onClick={() => {
                   setOpen({ open: true, type: NOTIF_TYPE.stoppedNotification, data: notificationData.stoppedNotification });
                 }}
               >
                 Stopped Notification
-              </Button>
+              </ThemeButton>
             </Box>
             <Typography variant="body2">{getNotiUser(notificationData?.stoppedNotification, NOTIF_TYPE.stoppedNotification)}</Typography>
           </Box>
           <Divider />
           <Box p={1} px={1} display={'flex'} flexDirection={'column'} mt={1} borderRadius={'5px'}>
             <Box className="mb-5">
-              <Button
-                variant="outlined"
-                color="primary"
-                size="small"
+              <ThemeButton
                 onClick={() => {
                   setOpen({ open: true, type: NOTIF_TYPE.completedNotification, data: notificationData.completedNotification });
                 }}
               >
                 Completed Notification
-              </Button>
+              </ThemeButton>
             </Box>
             <Typography variant="body2">{getNotiUser(notificationData?.completedNotification, NOTIF_TYPE.completedNotification)}</Typography>
           </Box>

@@ -1,7 +1,6 @@
-import { Box, CircularProgress } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog/Dialog';
-import Grid from '@material-ui/core/Grid';
+import { Box } from '@mui/material';
+import Dialog from '@mui/material/Dialog/Dialog';
+import Grid from '@mui/material/Grid2';
 import { camelCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -14,6 +13,7 @@ import routes from '../../../components/Helpers/Routes';
 import SearchBox from '../../../components/Helpers/SearchBox';
 import { CustomDialogTransition, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, sidebarResource } from '../../../constants/helpers';
 import axios, { CancelTokenSource } from 'axios';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAddingWarehouse, assignedWarehouse }) => {
   const renderedFrom = camelCase(sidebarResource?.warehouse);
@@ -102,21 +102,19 @@ const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAdding
         <div className="listing-grid p-3">
           <Box mb={2}>
             <Grid container>
-              <Grid item xs={12} sm={12} container justify="flex-end">
-                <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
+              <Grid size={{ xs: 6, sm: 12, md: 6, lg: 6 }} container justifyContent="flex-end">
+              <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
                 <Box ml={1}>
-                  <Button
-                    size="small"
-                    color="primary"
+                  <ThemeButton
                     onClick={() => {
                       addWarehouse(selectedRecords);
                     }}
-                    variant="contained"
                     disabled={!selectedRecords?.length || isAddingWarehouse}
-                    endIcon={isAddingWarehouse && <CircularProgress size={20} color="primary" />}
+                    isLoading={isAddingWarehouse}
+                    buttonType='theme'
                   >
                     Assign {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
-                  </Button>
+                  </ThemeButton>
                 </Box>
               </Grid>
             </Grid>

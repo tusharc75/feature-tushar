@@ -7,6 +7,7 @@ export type TChannel = {
   members: string[];
   createdBy: CreatedBy;
   notifications?: number;
+  isOwner?: boolean;
 };
 
 export type CreatedBy = {
@@ -19,10 +20,10 @@ export type ChannelData = {
   brand: string;
   title: string;
   description: string;
-  access: string;
+  access?: string;
   members: Member[];
   createdBy: CreatedBy;
-  updatedBy: CreatedBy;
+  updatedBy?: CreatedBy;
 };
 
 export type User = {
@@ -50,6 +51,7 @@ export type Message = {
   lastModified?: Date;
   attachments?: any[];
   reactions?: any[];
+  pinned?: boolean;
 };
 
 export type MessageUser = {

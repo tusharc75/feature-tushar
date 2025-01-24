@@ -1,5 +1,5 @@
-import { IconButton } from '@material-ui/core';
-import { Close } from '@material-ui/icons';
+import { IconButton } from '@mui/material';
+import { Close } from '@mui/icons-material';
 import { useEffect, useState } from 'react';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { cn } from 'src/constants/helpers';
@@ -8,15 +8,11 @@ import { Message } from 'src/pages/WorkSpace/types';
 import { formatDateWithTodayYestarday } from 'src/pages/WorkSpace/utils';
 import { DisplaySingleMessage, MoreMenuAndDeleteConfirmDialog } from './Messages';
 
-const Thread = ({ message, onClose, socket, channelId, deleteMessage, open, channelData }) => {
+const Thread = ({ message, onClose, socket, channelId, open, channelData }) => {
   const [messages, setMessages] = useState(null);
-  const [showConfirmBox, setShowConfirmBox] = useState({ open: false, _id: null });
-
-  //
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedMessage, setSelectedMessage] = useState<Message>(null);
   const [editingMessage, setEditingMessage] = useState(null);
-  //
 
   useEffect(() => {
     setMessages(message?.replies);
@@ -29,7 +25,6 @@ const Thread = ({ message, onClose, socket, channelId, deleteMessage, open, chan
 
   const handleMenuClose = () => {
     setAnchorEl(null);
-    setSelectedMessage(null);
   };
 
   const handleEdit = () => {
@@ -107,7 +102,7 @@ const Thread = ({ message, onClose, socket, channelId, deleteMessage, open, chan
           )}
         </div>
         <div className="footer">
-          <SendMessage channelId={channelId} socket={socket} messageId={message?._id} editorId={'from-thread'} channelData={channelData} />
+          <SendMessage channelId={channelId} socket={socket} parentMessageId={message?._id} editorId={'from-thread'} channelData={channelData} />
         </div>
 
         <MoreMenuAndDeleteConfirmDialog
@@ -115,9 +110,7 @@ const Thread = ({ message, onClose, socket, channelId, deleteMessage, open, chan
           handleMenuClose={handleMenuClose}
           selectedMessage={selectedMessage}
           handleEdit={handleEdit}
-          setShowConfirmBox={setShowConfirmBox}
-          showConfirmBox={showConfirmBox}
-          deleteMessage={deleteMessage}
+          socket={socket}
         />
       </div>
     </>

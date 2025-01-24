@@ -1,18 +1,17 @@
+import { MoreVert } from '@mui/icons-material';
+import { Card, CardContent, IconButton, Menu, MenuItem } from '@mui/material';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid2';
+import Typography from '@mui/material/Typography';
 import { useState } from 'react';
-import Typography from '@material-ui/core/Typography';
-import Box from '@material-ui/core/Box';
-import { Card, IconButton, CardContent, Grid, Menu, MenuItem } from '@material-ui/core';
-import { Link } from 'react-router-dom';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import { AiOutlineMail, AiOutlineUser } from 'react-icons/ai';
 import { BiPhone } from 'react-icons/bi';
 import { FaArrowAltCircleDown } from 'react-icons/fa';
-import { customerContact, supplierAccount, supplierContact } from '../../constants/helpers';
-import { MoreVert } from '@material-ui/icons';
-import ManageContactDialog from '../Contact/ManageContact';
-import { Accordion, AccordionSummary, AccordionDetails } from 'src/components/CustomAccordion';
+import { Link } from 'react-router-dom';
 import DisplayData from 'src/components/CardDisplayData';
+import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
+import { customerContact, supplierAccount, supplierContact } from '../../constants/helpers';
+import ManageContactDialog from '../Contact/ManageContact';
 
 export default function OpportunityContacts({
   contacts,
@@ -44,12 +43,12 @@ export default function OpportunityContacts({
           <Grid container spacing={2}>
             {[...contacts].slice(0, maxRecordsToShow).map((obj, index) => {
               return (
-                <Grid key={index} item xs={12} sm={6} md={4}>
+                <Grid key={index} size={{ xs: 12, sm: 6, md: 4 }}>
                   <Card className="detailCard   card-v1">
                     <CardContent className="card-link">
-                      <Grid item xs={12}>
+                      <Grid size={{ xs: 12 }}>
                         <Grid container className="detailCardHeader">
-                          <Grid item xs={12} sm={12}>
+                          <Grid size={{ xs: 12, sm: 12 }}>
                             {
                               <Link className="link" target="_blank" rel="noopener noreferrer" to={`/${contactApi}/detail/${obj._id}`}>
                                 <Typography className="detailName">
@@ -62,11 +61,11 @@ export default function OpportunityContacts({
                           </Grid>
                         </Grid>
                         <Grid container>
-                          <Grid item xs={12} md={6}>
+                          <Grid size={{ xs: 12, md: 6 }}>
                             {<DisplayData key="2" label="Email" showCopyToText={true} icon={<AiOutlineMail size={15} />} value={obj.email || ''} />}
                           </Grid>
                           {supplierContact.contactApi === contactApi && (
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               {
                                 <Link
                                   target="_blank"
@@ -84,7 +83,7 @@ export default function OpportunityContacts({
                               }
                             </Grid>
                           )}
-                          <Grid item xs={12} sm={6} md={6}>
+                          <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                             {<DisplayData key="3" label="Phone" showCopyToText={true} icon={<BiPhone size={15} />} value={obj.phone || ''} />}
                           </Grid>
                         </Grid>
@@ -104,57 +103,48 @@ export default function OpportunityContacts({
   return (
     <Accordion expanded={isExpanded} className="omsAccordian" onChange={onSetExpanded}>
       <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
-        <Grid container className="pos_rel">
-          <Grid item xs={8}>
-            <Box display="flex">
-              <Box>
-                <IconButton size="small">{isExpanded === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
-              </Box>
-              <Box padding="5px">
-                <Typography variant="subtitle2">
-                  {title} {`(${contacts.length})`}
-                </Typography>
-              </Box>
-            </Box>
-          </Grid>
-          <Grid item xs={4} container justify="flex-end">
-            {allowedToEdit && (
-              <>
-                <IconButton
-                  aria-haspopup="true"
-                  color="primary"
-                  size="small"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleOpenMenu(e);
-                  }}
-                >
-                  <MoreVert />
-                </IconButton>
-                <Menu id="menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
-                  {contactApi === customerContact.contactApi && (
-                    <MenuItem
-                      onClick={() => {
-                        setShowCreateDialog(true);
-                        handleCloseMenu();
-                      }}
-                    >
-                      Create New
-                    </MenuItem>
-                  )}
+        <div className="flex items-center justify-between">
+          <Typography variant="subtitle2">
+            {title} {`(${contacts.length})`}
+          </Typography>
+
+          {allowedToEdit && (
+            <>
+              <IconButton
+                aria-haspopup="true"
+                color="primary"
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  handleOpenMenu(e);
+                }}
+              >
+                <MoreVert />
+              </IconButton>
+              <Menu id="menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
+                {contactApi === customerContact.contactApi && (
                   <MenuItem
                     onClick={() => {
-                      onAddContact();
+                      setShowCreateDialog(true);
                       handleCloseMenu();
                     }}
                   >
-                    Add Existing
+                    Create New
                   </MenuItem>
-                </Menu>
-              </>
-            )}
-          </Grid>
-        </Grid>
+                )}
+                <MenuItem
+                  onClick={() => {
+                    onAddContact();
+                    handleCloseMenu();
+                  }}
+                >
+                  Add Existing
+                </MenuItem>
+              </Menu>
+            </>
+          )}
+        </div>
       </AccordionSummary>
       <AccordionDetails>
         <ContactDetails contacts={contacts} contactApi={contactApi} />
