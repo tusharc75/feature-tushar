@@ -127,7 +127,7 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
         accessor: 'actualEndDate',
         Header: 'Actual End Date',
         Cell: ({ row }) =>
-          row?.original?.manualEndDate ? (
+          row?.original?.actualEndDate ? (
             <h5 className="text-truncate" title={`${displayDate(row?.original?.actualEndDate)}`}>
               {displayDate(row?.original?.actualEndDate)}
             </h5>
