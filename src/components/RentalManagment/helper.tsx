@@ -151,16 +151,27 @@ export const sumOnParent = (parent, child, fields, currency) => {
     parent.forEach((row) => {
         resetFields.forEach((ele) => {
             if (ele.type === "amount") {
-                row[ele.fieldName] = sumValues[ele.fieldName];
+                if (sumValues[ele.fieldName]) {
+                    row[ele.fieldName] = sumValues[ele.fieldName];
+                }
             }
             else if (ele.fieldName === "discountPercentage") {
-                row[ele.fieldName] = parseFloat(((sumValues[`discount_${currency?.toLowerCase()}`] / sumValues[`totalPrice_${currency?.toLowerCase()}`]) * 100)?.toFixed(2));
+                let value = parseFloat(((sumValues[`discount_${currency?.toLowerCase()}`] / sumValues[`totalPrice_${currency?.toLowerCase()}`]) * 100)?.toFixed(2));;
+                if (value) {
+                    row[ele.fieldName] = value;
+                }
             }
             else if (ele.fieldName === "taxPercentage") {
-                row[ele.fieldName] = parseFloat(((sumValues[`tax_${currency?.toLowerCase()}`] / (sumValues[`totalPrice_${currency?.toLowerCase()}`] - sumValues[`discount_${currency?.toLowerCase()}`])) * 100)?.toFixed(2));
+                let value = parseFloat(((sumValues[`tax_${currency?.toLowerCase()}`] / (sumValues[`totalPrice_${currency?.toLowerCase()}`] - sumValues[`discount_${currency?.toLowerCase()}`])) * 100)?.toFixed(2));
+                if (value) {
+                    row[ele.fieldName] = value;
+                }
             }
             else if (ele.type === 'percent') {
-                row[ele.fieldName] = parseFloat((sumValues[ele.fieldName] / child?.length)?.toFixed(2));
+                let value = parseFloat((sumValues[ele.fieldName] / child?.length)?.toFixed(2));
+                if (value) {
+                    row[ele.fieldName] = value;
+                }
             }
             else if (ele.type === 'date') {
                 if (minMaxDates[ele.fieldName]) {
