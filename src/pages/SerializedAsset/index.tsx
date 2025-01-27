@@ -7,7 +7,7 @@ import FileCopyIcon from '@mui/icons-material/FileCopy';
 import WarningIcon from '@mui/icons-material/Warning';
 import queryString from 'query-string';
 import Autocomplete from '@mui/material/Autocomplete';
-import { camelCase, isArray } from 'lodash';
+import { camelCase, isArray, isObject } from 'lodash';
 import { Fragment, useContext, useEffect, useMemo, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
@@ -38,6 +38,7 @@ import {
 import ManageSerializedAsset from './ManageSerializedAsset';
 import ReasonDialog from './ReasonDialog';
 import axios, { CancelTokenSource } from 'axios';
+import { AnyObject } from 'yup/lib/types';
 
 const renderedFrom = camelCase(sidebarResource?.serializedAsset);
 
@@ -50,7 +51,8 @@ const SerializedAsset = () => {
     product,
     warehouse,
     currentLocation,
-    productCategory: productCategoryFromQuery
+    productCategory: productCategoryFromQuery,
+    jobCount
   }: any = queryString.parse(history.location.search);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -71,7 +73,7 @@ const SerializedAsset = () => {
   const [warehouseOptions, setWarehouseOptions] = useState([]);
   const [selectedWarehouse, setSelectedWarehouse] = useState(null);
   const [subleaseAsset, setSubleaseAsset] = useState(false);
-  const [showScrapAsset, setShowScrapAsset] = useState(false);
+  const [showScrapAsset, setShowScrapAsset] = useState(assetStatus && assetStatus === ASSET_STATUS.scrap ? true : false);
 
   const [openSupplierAccountDialog, setOpenSupplierAccountDialog] = useState(false);
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
@@ -87,58 +89,65 @@ const SerializedAsset = () => {
   }, [permissions, selectedEntity]);
 
   useEffect(() => {
-    if (assetStatus || product || warehouse || currentLocation) {
-      const filterVal = {};
-      if (assetStatus) {
-        filterVal['status'] = { filter: [assetStatus] };
-      }
-      if (product) {
-        const productFilter = JSON.parse(product);
-        if (isArray(productFilter)) {
-          filterVal['product'] = {
-            operator: 'OR',
-            condition1: {
-              filter: productFilter
-            }
-          };
+    if (columns) {
+      if (assetStatus || product || warehouse || currentLocation || jobCount) {
+        const filterVal = {};
+        if (assetStatus) {
+          filterVal['status'] = { filter: [assetStatus] };
         }
-      }
-      if (warehouse) {
-        const warehouseFilter = JSON.parse(warehouse);
-        if (isArray(warehouseFilter)) {
-          filterVal['warehouse'] = {
-            operator: 'OR',
-            condition1: {
-              filter: warehouseFilter
-            }
-          };
+        if (product) {
+          const productFilter = JSON.parse(product);
+          if (isArray(productFilter)) {
+            filterVal['product'] = {
+              operator: 'OR',
+              condition1: {
+                filter: productFilter
+              }
+            };
+          }
         }
-      }
-      if (currentLocation) {
-        const currentLocationFilter = JSON.parse(currentLocation);
-        if (isArray(currentLocationFilter)) {
-          filterVal['currentLocation'] = {
-            operator: 'OR',
-            condition1: {
-              filter: currentLocationFilter
-            }
-          };
+        if (warehouse) {
+          const warehouseFilter = JSON.parse(warehouse);
+          if (isArray(warehouseFilter)) {
+            filterVal['warehouse'] = {
+              operator: 'OR',
+              condition1: {
+                filter: warehouseFilter
+              }
+            };
+          }
         }
-      }
-      if (productCategoryFromQuery) {
-        const productCategoryFilter = JSON.parse(productCategoryFromQuery);
-        if (isArray(productCategoryFilter)) {
-          filterVal['productCategory'] = {
-            operator: 'OR',
-            condition1: {
-              filter: productCategoryFilter
-            }
-          };
+        if (currentLocation) {
+          const currentLocationFilter = JSON.parse(currentLocation);
+          if (isArray(currentLocationFilter)) {
+            filterVal['currentLocation'] = {
+              operator: 'OR',
+              condition1: {
+                filter: currentLocationFilter
+              }
+            };
+          }
         }
+        if (productCategoryFromQuery) {
+          const productCategoryFilter = JSON.parse(productCategoryFromQuery);
+          if (isArray(productCategoryFilter)) {
+            filterVal['productCategory'] = {
+              operator: 'OR',
+              condition1: {
+                filter: productCategoryFilter
+              }
+            };
+          }
+        }
+        if (jobCount) {
+          if (isObject(JSON.parse(jobCount))) {
+            filterVal['jobCount'] = { filter: ((JSON.parse(jobCount))?.optionValue)?.toString() };
+          }
+        }
+        dispatch({ type: 'filter', filters: filterVal });
       }
-      dispatch({ type: 'filter', filters: filterVal });
     }
-  }, []);
+  }, [columns]);
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
