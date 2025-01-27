@@ -8,7 +8,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import queryString from 'query-string';
 import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase, isArray } from 'lodash';
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useMemo, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 import CustomContainer from 'src/components/CustomContainer';
@@ -45,7 +45,13 @@ const SerializedAsset = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const history = useHistory();
-  let { assetStatus, product, warehouse, currentLocation, productCategory: productCategoryFromQuery }: any = queryString.parse(history.location.search);
+  let {
+    assetStatus,
+    product,
+    warehouse,
+    currentLocation,
+    productCategory: productCategoryFromQuery
+  }: any = queryString.parse(history.location.search);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
@@ -129,7 +135,6 @@ const SerializedAsset = () => {
             }
           };
         }
-        
       }
       dispatch({ type: 'filter', filters: filterVal });
     }
@@ -296,50 +301,53 @@ const SerializedAsset = () => {
       });
   };
 
-  const ActionsRenderer = {
-    accessor: 'action',
-    Header: 'Actions',
-    minWidth: 100,
-    width: 110,
-    sticky: 'right',
-    disableFilters: true,
-    disableSortBy: true,
-    canDrag: false,
-    Cell: ({ row }) => (
-      <>
-        <HtmlTooltip title={permissions?.serializedAsset?.isCreate ? 'Clone' : cloneDisable}>
-          <span>
-            <IconButton
-              size="small"
-              aria-label="Clone"
-              disabled={!permissions?.serializedAsset?.isCreate}
-              onClick={() => {
-                setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: row?.original?._id });
-              }}
-            >
-              <FileCopyIcon fontSize="small" color={permissions?.serializedAsset?.isCreate ? 'primary' : 'disabled'} />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
+  const ActionsRenderer = useMemo(
+    () => ({
+      accessor: 'action',
+      Header: 'Actions',
+      minWidth: 100,
+      width: 110,
+      sticky: 'right',
+      disableFilters: true,
+      disableSortBy: true,
+      canDrag: false,
+      Cell: ({ row }) => (
+        <>
+          <HtmlTooltip title={permissions?.serializedAsset?.isCreate ? 'Clone' : cloneDisable}>
+            <span>
+              <IconButton
+                size="small"
+                aria-label="Clone"
+                disabled={!permissions?.serializedAsset?.isCreate}
+                onClick={() => {
+                  setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: row?.original?._id });
+                }}
+              >
+                <FileCopyIcon fontSize="small" color={permissions?.serializedAsset?.isCreate ? 'primary' : 'disabled'} />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
 
-        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
-          <span>
-            <IconButton
-              size="small"
-              aria-label="Delete"
-              disabled={row?.original?.canDelete ? false : true}
-              onClick={() => {
-                setDeleteRecord(row?.original);
-                setShowDeleteConfirmBox(true);
-              }}
-            >
-              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
-      </>
-    )
-  };
+          <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
+            <span>
+              <IconButton
+                size="small"
+                aria-label="Delete"
+                disabled={row?.original?.canDelete ? false : true}
+                onClick={() => {
+                  setDeleteRecord(row?.original);
+                  setShowDeleteConfirmBox(true);
+                }}
+              >
+                <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
+        </>
+      )
+    }),
+    [permissions?.serializedAsset?.isCreate]
+  );
 
   const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });

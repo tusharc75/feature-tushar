@@ -185,7 +185,7 @@ const ExpenseReportDetailsPage = () => {
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </div>
             )}
-            {!loadingDetails ? (
+            {!loadingDetails && expenseReportData && fields ? (
               <div className="mt-2">
                 <Expenses selectedExpenseData={expenseReportData} />
               </div>
