@@ -361,14 +361,14 @@ const SerializedAsset = () => {
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['canDelete'] =
             permissions?.serializedAsset?.isDelete &&
-            ![
-              ASSET_STATUS.new,
-              ASSET_STATUS.available,
-              ASSET_STATUS.lost,
-              ASSET_STATUS.customerPossession,
-              ASSET_STATUS.onPO,
-              ASSET_STATUS.scrap
-            ]?.includes(u?.status)
+              ![
+                ASSET_STATUS.new,
+                ASSET_STATUS.available,
+                ASSET_STATUS.lost,
+                ASSET_STATUS.customerPossession,
+                ASSET_STATUS.onPO,
+                ASSET_STATUS.scrap
+              ]?.includes(u?.status)
               ? false
               : true;
           return finalObject;
@@ -431,7 +431,7 @@ const SerializedAsset = () => {
     if (showFilteredRecordsOnly) {
       deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
-    return `${deepFilter}&filterType=and&filterByIdType=and`;
+    return `${deepFilter}&filterType=and`;
   };
 
   const handleDelete = () => {
@@ -764,12 +764,11 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
-              ? `${resources?.serializedAsset?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${deleteRecord
+            ? `${resources?.serializedAsset?.titleSingular?.toLowerCase()} :
             ${deleteRecord?._id ? deleteRecord?.assetNumber : ''}`
-              : `selected ${resources?.serializedAsset?.titlePlural?.toLowerCase()}`
-          } ?`}
+            : `selected ${resources?.serializedAsset?.titlePlural?.toLowerCase()}`
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
