@@ -42,6 +42,11 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
   const classes = useStyles();
 
   const [timeFrame, setTimeFrame] = React.useState<any>(null);
+  const [dateFilter, setDateFilter] = React.useState({
+    from: null,
+    to: null
+  });
+  const [inputFormKeyBoard, setInputFromKeyBoard] = React.useState(false);
 
   React.useEffect(() => {
     setTimeFrame(globalFilters.timeFrame);
@@ -57,6 +62,10 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
             to: new Date()
           }
         });
+        setDateFilter({
+          from: new Date(dayjs().subtract(1, 'month').toDate()),
+          to: new Date()
+        });
         break;
 
       case '3-months':
@@ -66,6 +75,10 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
             from: new Date(dayjs().subtract(3, 'month').toDate()),
             to: new Date()
           }
+        });
+        setDateFilter({
+          from: new Date(dayjs().subtract(3, 'month').toDate()),
+          to: new Date()
         });
         break;
 
@@ -77,6 +90,10 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
             to: new Date()
           }
         });
+        setDateFilter({
+          from: new Date(dayjs().subtract(6, 'month').toDate()),
+          to: new Date()
+        });
         break;
 
       case '1-year':
@@ -87,6 +104,10 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
             to: new Date()
           }
         });
+        setDateFilter({
+          from: new Date(dayjs().subtract(1, 'year').toDate()),
+          to: new Date()
+        });
         break;
       case 'current-year':
         setGlobalFilters({
@@ -95,6 +116,10 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
             from: new Date(dayjs().startOf('year').toDate()),
             to: new Date(dayjs().endOf('year').toDate())
           }
+        });
+        setDateFilter({
+          from: new Date(dayjs().startOf('year').toDate()),
+          to: new Date(dayjs().endOf('year').toDate())
         });
         break;
 
@@ -112,6 +137,12 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
     }
   };
 
+  React.useEffect(() => {
+    if (inputFormKeyBoard && dayjs(dateFilter.from).isValid() && dayjs(dateFilter.to).isValid()) {
+      setGlobalFilters({ ...globalFilters, between: { from: dateFilter.from, to: dateFilter.to } });
+    }
+  }, [dateFilter, inputFormKeyBoard]);
+
   return (
     <AppBar className={classes.appBar} position="sticky" elevation={0} sx={{ zIndex: 1, '--AppBar-background': 'var(--dark-primary, white)' }}>
       <Box pt={1}>
@@ -122,7 +153,14 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
                 <Grid size={{ xs: 12, sm: 6 }}>
                   <FormControl disabled={disabled} fullWidth size="small" variant="outlined">
                     <InputLabel id="dashboard-type">Dashboard</InputLabel>
-                    <Select labelId="dashboard-type" id="type" value={globalFilters.dashboardType} onChange={handleSelectDashboard} label="Dashboard" size="small">
+                    <Select
+                      labelId="dashboard-type"
+                      id="type"
+                      value={globalFilters.dashboardType}
+                      onChange={handleSelectDashboard}
+                      label="Dashboard"
+                      size="small"
+                    >
                       {dashboardList.map((d: { name: string; id: string }) => (
                         <MenuItem key={d.id} value={d.name}>
                           {d.name}
@@ -182,11 +220,20 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
                     disabled={timeFrame !== 'custom' || disabled}
                     fullWidth
                     size="small"
-                    maxDate={globalFilters.between.to}
+                    maxDate={dateFilter.to}
                     label="From"
-                    value={globalFilters.between.from}
+                    value={dateFilter.from || ''}
                     onChange={(date) => {
+                      setInputFromKeyBoard(false);
+                      setDateFilter({ ...dateFilter, from: date });
+                    }}
+                    onAccept={(date) => {
                       setGlobalFilters({ ...globalFilters, between: { ...globalFilters.between, from: date } });
+                    }}
+                    onInput={() => {
+                      setTimeout(() => {
+                        setInputFromKeyBoard(true);
+                      }, 3000);
                     }}
                   />
                 </Grid>
@@ -195,11 +242,20 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
                     disabled={timeFrame !== 'custom' || disabled}
                     fullWidth
                     size="small"
-                    minDate={globalFilters.between.from}
+                    minDate={dateFilter.from}
                     label="To"
-                    value={globalFilters.between.to}
+                    value={dateFilter.to || ''}
                     onChange={(date) => {
+                      setInputFromKeyBoard(false);
+                      setDateFilter({ ...dateFilter, to: date });
+                    }}
+                    onAccept={(date) => {
                       setGlobalFilters({ ...globalFilters, between: { ...globalFilters.between, to: date } });
+                    }}
+                    onInput={() => {
+                      setTimeout(() => {
+                        setInputFromKeyBoard(true);
+                      }, 3000);
                     }}
                   />
                 </Grid>

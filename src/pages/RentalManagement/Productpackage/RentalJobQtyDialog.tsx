@@ -25,6 +25,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import dayjs from 'dayjs';
 import SelectionConfirmationDialog from 'src/components/Helpers/SelectionConfirmationDialog';
+import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -40,6 +41,7 @@ interface EditDialogProps {
   isInlineEdit?: Boolean;
   showSaveAndNext?: Boolean;
   isRateRequired: Boolean;
+  dataRows?: any
 }
 
 const rateChangeFields = ['unit', 'pricingMethod', 'pricingCondition'];
@@ -57,7 +59,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
   isQtyOnly = false,
   from,
   isInlineEdit = false,
-  showSaveAndNext = false
+  showSaveAndNext = false,
+  dataRows = []
 }) => {
   const ref = useRef(null);
 
@@ -387,17 +390,25 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       errors['estimateEndDate'] = 'Please enter valid estimate end date';
     }
     if (rowData && !rowData.canDelete) {
-      if (rowData.parentId) {
-        const _package = material?.filter((e) => e._id === rowData.parentId);
-        if (_package.length) {
-          if (values.qty * _package[0].qty < rowData.assetQty || values.qty * _package[0].qty < rowData.nonSerializedQty) {
-            errors['qty'] = 'The quantity is less than what was assigned.';
+      let isValid = true;
+      const child: any = dataRows?.filter((e) => e.parentId === rowData?._id);
+      if (child?.length) {
+        child?.forEach((e) => {
+          let qty = values.qty * e?.qty
+          if (qty < e?.assetQty || qty < e?.nonSerializedQty) {
+            isValid = false;
+            return;
           }
+        })
+      }
+      else {
+        const qty = getParentMultiplier(material, rowData) * values.qty
+        if ((qty < rowData?.assetQty || qty < rowData?.nonSerializedQty)) {
+          isValid = false;
         }
-      } else {
-        if (values.qty < rowData.assetQty || values.qty < rowData?.nonSerializedQty) {
-          errors['qty'] = 'The quantity is less than what was assigned.';
-        }
+      }
+      if (!isValid) {
+        errors['qty'] = 'The quantity is less than what was assigned.';
       }
     }
     if (isQtyOnly && rowData && values.qty > rowData.qty) {

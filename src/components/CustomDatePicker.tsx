@@ -56,7 +56,8 @@ const CustomDatePicker = (props) => {
           ...(margin ? { margin: margin } : {}),
           ...(size ? { size: size } : {}),
           ...(placeholder ? { placeholder: placeholder } : {}),
-          ...(!isEmpty(InputProps) ? InputProps : {})
+          ...(!isEmpty(InputProps) ? InputProps : {}),
+          ...(onInput ? { onInput: onInput } : {})
         }
       }}
       format={inputFormat ? inputFormat : dateFormatForInputControl}

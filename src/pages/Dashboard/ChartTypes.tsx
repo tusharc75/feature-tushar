@@ -77,7 +77,7 @@ const ChartTypes = ({
   const [chartData, setChartData] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
   const [tableView, setTableView] = React.useState(false);
-  const [filterValues, setFilterValues] = React.useState(getDefaultFilter(kpiFilters));
+  const [filterValues, setFilterValues] = React.useState(null);
   const [anchorElFilter, setAnchorElFilter] = React.useState(null);
   const [anchorElExport, setAnchorElExport] = React.useState(null);
   const [invisible, setInvisible] = React.useState(false);
@@ -115,7 +115,7 @@ const ChartTypes = ({
       ...globalFilters,
       between: JSON.stringify({
         from: dateFormatToSend(globalFilters.between.from),
-        to: dateFormatToSend(globalFilters.between.to),
+        to: dateFormatToSend(globalFilters.between.to)
       })
     };
     const keys = Object.keys(params);
@@ -130,7 +130,7 @@ const ChartTypes = ({
         if (key === 'between') {
           url = `${url}&${key}=${params[key]}`;
         }
-        if (key !== 'between' && params[key].optionValue) {
+        if (key !== 'between' && (params[key].optionValue || params[key].optionValue === 0)) {
           url = `${url}&${key}=${params[key].optionValue}`;
         }
       }
@@ -144,6 +144,7 @@ const ChartTypes = ({
   };
 
   React.useEffect(() => {
+    if (!filterValues) return;
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
@@ -192,25 +193,28 @@ const ChartTypes = ({
     const urlParams = getParams();
     setLoading(true);
     let url = `kpi/${chart.kpi.kpi}?entity=${selectedEntity}${urlParams}`;
-    axiosInstance().get(url, { cancelToken: cancelTokenSource?.token }).then(async ({ data: { data } }) => {
-      if (chart?.chartType === 'Funnel') {
-        const funnelData = data?.map((d: any) => {
-          return { name: `${d.name} - ${d.percentage}%`, value: d.percentage };
-        });
-        setChartData(funnelData);
-      } else {
-        if (chart.kpi?.custom) {
-          const cardData = await getStaticData(chartData, data, globalFilters.currency, currency);
-          setChartData(cardData);
+    axiosInstance()
+      .get(url, { cancelToken: cancelTokenSource?.token })
+      .then(async ({ data: { data } }) => {
+        if (chart?.chartType === 'Funnel') {
+          const funnelData = data?.map((d: any) => {
+            return { name: `${d.name} - ${d.percentage}%`, value: d.percentage };
+          });
+          setChartData(funnelData);
         } else {
-          setChartData(data);
+          if (chart.kpi?.custom) {
+            const cardData = await getStaticData(chartData, data, globalFilters.currency, currency);
+            setChartData(cardData);
+          } else {
+            setChartData(data);
+          }
         }
-      }
-      setLoading(false);
-    }).catch((err: any) => {
-      setToastConfig(err);
-      setLoading(false);
-    });
+        setLoading(false);
+      })
+      .catch((err: any) => {
+        setToastConfig(err);
+        setLoading(false);
+      });
   };
 
   const handlePinUnpin = async (type) => {
@@ -233,7 +237,7 @@ const ChartTypes = ({
   };
 
   return (
-    <Grid size={{ xs: 12, md: chart?.column || 12 }} >
+    <Grid size={{ xs: 12, md: chart?.column || 12 }}>
       {chart.graphType === 'Custom' ? (
         <Grid container spacing={1}>
           {loading ? (
@@ -250,17 +254,13 @@ const ChartTypes = ({
           )}
         </Grid>
       ) : (
-        <Box height={'100%'} flexDirection="column" justifyContent="space-between" sx={{ border: '1px solid var(--common-border-color)' }}   >
+        <Box height={'100%'} flexDirection="column" justifyContent="space-between" sx={{ border: '1px solid var(--common-border-color)' }}>
           <Box style={{ padding: '15px 10px' }}>
             <div className="flex items-center justify-between">
               <div>
                 {chart.hasFilters && (
                   <Badge color="secondary" variant="dot" invisible={invisible}>
-                    <ThemeButton
-                      disabled={loading}
-                      onClick={handleOpenFilter}
-                      startIcon={<BsFilter fontSize={14} />}
-                    >
+                    <ThemeButton disabled={loading} onClick={handleOpenFilter} startIcon={<BsFilter fontSize={14} />}>
                       Filters
                     </ThemeButton>
                   </Badge>
@@ -272,7 +272,7 @@ const ChartTypes = ({
                     disabled={loading}
                     style={{ marginRight: chart.hasTableView ? 10 : 0 }}
                     onClick={handleOpenExport}
-                    buttonType='transparent'
+                    buttonType="transparent"
                     startIcon={<ImportExport />}
                   >
                     Export to
@@ -285,7 +285,7 @@ const ChartTypes = ({
                     onClick={() => {
                       setTableView(!tableView);
                     }}
-                    buttonType='transparent'
+                    buttonType="transparent"
                     startIcon={!tableView ? <TableChart /> : <Timeline />}
                   >
                     {!tableView ? 'Table' : 'Chart'} View
@@ -331,13 +331,13 @@ const ChartTypes = ({
                     }}
                     style={{ marginRight: 10 }}
                   >
-                    <RefreshIcon fontSize='small' />
+                    <RefreshIcon fontSize="small" />
                   </IconButton>
                 </HtmlTooltip>
                 {setSelectedChart && (
                   <HtmlTooltip title="Full Screen">
                     <IconButton size="small" color="primary" onClick={() => setSelectedChart(chart)}>
-                      <OpenInFullIcon fontSize='small' />
+                      <OpenInFullIcon fontSize="small" />
                     </IconButton>
                   </HtmlTooltip>
                 )}
@@ -416,7 +416,7 @@ const ChartTypes = ({
                                   if (parseValue !== null) {
                                     label += chart?.currency
                                       ? formatAmountWithCurrency(globalFilters.currency || currency, Number(parseValue) ? parseValue : '00')
-                                        .fullFormatAmountWithoutSpace
+                                          .fullFormatAmountWithoutSpace
                                       : parseValue;
                                   }
                                 }
@@ -440,7 +440,7 @@ const ChartTypes = ({
                               queryObj[key] = JSON.stringify(value);
                             }
                           });
-                          window.open(`${resourcePath}?${queryString.stringify(queryObj)}`, '_blank')
+                          window.open(`${resourcePath}?${queryString.stringify(queryObj)}`, '_blank');
                         }
                       },
                       maintainAspectRatio: false,
@@ -459,7 +459,7 @@ const ChartTypes = ({
                             callback: function (value) {
                               return chart?.currency
                                 ? formatAmountWithCurrency(globalFilters.currency || currency, Number(value) ? value : '00')
-                                  .fullFormatAmountWithoutSpace
+                                    .fullFormatAmountWithoutSpace
                                 : value;
                             }
                           }
@@ -482,21 +482,21 @@ const ChartTypes = ({
                       },
                       ...(chart.stack &&
                         !chartData.datasets.some((d) => d.stack === 'stacked') && {
-                        scales: {
-                          x: {
-                            stacked: true,
-                            grid: {
-                              color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
-                            }
-                          },
-                          y: {
-                            stacked: true,
-                            grid: {
-                              color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
+                          scales: {
+                            x: {
+                              stacked: true,
+                              grid: {
+                                color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
+                              }
+                            },
+                            y: {
+                              stacked: true,
+                              grid: {
+                                color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
+                              }
                             }
                           }
-                        }
-                      })
+                        })
                     }}
                   />
                 </>
