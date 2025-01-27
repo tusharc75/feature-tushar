@@ -323,18 +323,20 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
     const currency = rentalManagementData?.currency?.toLowerCase();
 
+    const orignalMaterial = JSON.parse(JSON.stringify(data.material))
+
     data.material = data?.material?.filter((e) => e[`price_${currency}`] || e[`finalPrice_${currency}`]);
 
     if (rentalResourceData?.policy?.hidePackageInInvoice) {
       data.material = data.material?.filter((e) => e.type !== MATERIAL_TYPE.package);
       data.material?.forEach((e) => {
+        e.qty = getNestedQty(orignalMaterial, e);
         e.parentId = null;
       });
     }
 
     let newMaterial: any = [];
     data?.material?.forEach((d) => {
-      d['qty'] = getNestedQty(data?.material, d);
       // if (d?.type === MATERIAL_TYPE.service && !d?.actualStartDate) {
       //   d['actualStartDate'] = new Date(d?.estimateStartDate).toISOString();
       // } else
