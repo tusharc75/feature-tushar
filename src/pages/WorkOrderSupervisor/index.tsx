@@ -561,6 +561,8 @@ const WorkOrderSupervisor = () => {
   };
 
   const newActionButtonProps: NewActionButtonProps<string> = useMemo(() => {
+    const canShowWorkStationButton = permissions?.workStations?.isRead;
+
     const data: NewActionButtonProps<string> = {
       disabled: selectedRecords?.length === 0,
       horizontal: 'right',
@@ -568,14 +570,14 @@ const WorkOrderSupervisor = () => {
         viewType === 'table-view'
           ? tableViewStatus === WORKORDER_SERVICE_STATUS.planned
             ? [createRepairOrderButton]
-            : [assignTechnicianButton, assignWorkStationButton, addProductConsumablesButton]
+            : [assignTechnicianButton, ...(canShowWorkStationButton ? [assignWorkStationButton] : []) , addProductConsumablesButton]
           : selectedRecords?.every((r) => r?.status === WORKORDER_SERVICE_STATUS.planned)
             ? [...(viewType === 'card-view' ? [createRepairOrderButton] : [])]
-            : selectedRecords?.every((r) => r?.status != WORKORDER_SERVICE_STATUS.planned)
-              ? [assignTechnicianButton, assignWorkStationButton, ...(viewType === 'card-view' ? [addProductConsumablesButton] : [])]
+            : selectedRecords?.every((r) => r?.status !== WORKORDER_SERVICE_STATUS.planned)
+              ? [assignTechnicianButton, ...(canShowWorkStationButton ? [assignWorkStationButton] : []), ...(viewType === 'card-view' ? [addProductConsumablesButton] : [])]
               : [
                 assignTechnicianButton,
-                assignWorkStationButton,
+                ...(canShowWorkStationButton ? [assignWorkStationButton] : []),
                 ...(viewType === 'card-view' ? [addProductConsumablesButton, createRepairOrderButton] : [])
               ]
     };
