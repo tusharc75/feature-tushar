@@ -20,7 +20,7 @@ import CustomContainer from 'src/components/CustomContainer';
 
 const Dashboard = () => {
   const {
-    state: { user, role, userLoading, selectedEntity }
+    state: { user, userLoading, selectedEntity }
   } = useData();
 
   const { setToastConfig } = React.useContext(CustomToastContext);
