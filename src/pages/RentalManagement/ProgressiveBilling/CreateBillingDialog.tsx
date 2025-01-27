@@ -39,6 +39,7 @@ import InvoiceDataDialog from 'src/pages/RentalManagement/ProgressiveBilling/Inv
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import dayjs from 'dayjs';
+import { getNestedQty } from 'src/pages/RentalManagement/rentalOfflineHelper';
 
 const calculateServiceDays = (serviceLog: any[], startDate: any, endDate: any) => {
   const uniqueDates = new Set<string>();
@@ -333,6 +334,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
     let newMaterial: any = [];
     data?.material?.forEach((d) => {
+      d['qty'] = getNestedQty(data?.material, d);
       // if (d?.type === MATERIAL_TYPE.service && !d?.actualStartDate) {
       //   d['actualStartDate'] = new Date(d?.estimateStartDate).toISOString();
       // } else
@@ -494,7 +496,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                 : parent.type === MATERIAL_TYPE.manualEntry
                   ? parent?.description
                   : '';
-      parent.qtyDisplay = parent.qty;
       parent.isEditable =
         ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) ||
           parent.type === MATERIAL_TYPE.serializedAsset ||
@@ -533,7 +534,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
               : _subRow.type === MATERIAL_TYPE.serializedAsset
                 ? _subRow?.description || ''
                 : '';
-      _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(_subRow?.pricingMethod) ? false : true;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
