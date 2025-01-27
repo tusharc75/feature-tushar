@@ -130,7 +130,7 @@ const ChartTypes = ({
         if (key === 'between') {
           url = `${url}&${key}=${params[key]}`;
         }
-        if (key !== 'between' && params[key].optionValue) {
+        if (key !== 'between' && (params[key].optionValue || params[key].optionValue === 0)) {
           url = `${url}&${key}=${params[key].optionValue}`;
         }
       }
