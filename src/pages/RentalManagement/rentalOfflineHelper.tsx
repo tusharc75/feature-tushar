@@ -150,6 +150,17 @@ export const getNestedQty = (material, parent) => {
     }
 }
 
+export const getParentMultiplier = (material, parent) => {
+    const child: any = material.find((e) => e._id === parent.parentId);
+    if (child) {
+        return child.qty * getParentMultiplier(material, child);
+    }
+    else {
+        return 1
+    }
+}
+
+
 export const rentalJobClearOffline = async (ids: any[] = []) => {
     if (!ids.length) {
         clearAll(objectStore.rentalManagement);
