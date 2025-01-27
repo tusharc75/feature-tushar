@@ -281,6 +281,7 @@ interface DraggableHeaderProps {
   renderedFrom: string;
   vtableData?: any;
   virtualPosition?: React.CSSProperties;
+  tableHeight?: string | number;
 }
 const MINIMUM_SEARCH_DELAY = 1000; // Adjust this delay as needed
 export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
@@ -296,7 +297,8 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
   className = '',
   vtableData,
   renderedFrom,
-  virtualPosition = {}
+  virtualPosition = {},
+  tableHeight = '100%'
 }: any) => {
   const { column, index } = header;
   const columnDef = column.columnDef as TColType;
@@ -381,90 +383,101 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
   };
 
   return (
-    <th
-      key={header.id}
-      title={typeof columnDef.header === 'string' ? columnDef.header : ''}
-      colSpan={header.colSpan}
-      className={cn(
-        `th text-truncate table-header overflow-hidden  ${columnDef.sticky ? `${virtualTable ? 'z-10' : ''} bg-[var(--dark-primary,_white)]` : ''} bg-[var(--dark-primary,_white)] ${
-          overlayMode ? 'border text-[13px] font-semibold' : ''
-        } `,
-        className
-      )}
-      ref={setNodeRef}
-      style={{
-        minWidth: `${header.getSize()}px`,
-        maxWidth: `${header.getSize()}px`,
-        paddingLeft: columnDef.id === 'expander' ? '8px' : '6px',
-        zIndex: columnDef.sticky === 'left' || columnDef.sticky === 'right' ? 12 : 'unset',
-        ...(style.position === 'sticky' ? { ...style } : { ...style, ...virtualPosition }),
-        ...styleDnd
-      }}
-    >
-      <div
-        className={`pos-rel flex flex-grow items-center  ${column.id === 'selection' ? 'justify-center' : 'justify-between pr-[16px]'} ${
-          isDragging ? ' opacity-50 [outline:4px_dashed_var(--common-border-color)]' : ''
-        }`}
+    <>
+      <th
+        key={header.id}
+        title={typeof columnDef.header === 'string' ? columnDef.header : ''}
+        colSpan={header.colSpan}
+        className={cn(
+          `th text-truncate table-header overflow-hidden  ${columnDef.sticky ? `${virtualTable ? 'z-10' : ''} bg-[var(--dark-primary,_white)]` : ''} bg-[var(--dark-primary,_white)] ${
+            overlayMode ? 'border text-[13px] font-semibold' : ''
+          } `,
+          className
+        )}
+        ref={setNodeRef}
+        style={{
+          minWidth: `${header.getSize()}px`,
+          maxWidth: `${header.getSize()}px`,
+          paddingLeft: columnDef.id === 'expander' ? '8px' : '6px',
+          zIndex: columnDef.sticky === 'left' || columnDef.sticky === 'right' ? 12 : 'unset',
+          ...(style.position === 'sticky' ? { ...style } : { ...style, ...virtualPosition }),
+          ...styleDnd
+        }}
       >
         <div
-          className={`d-flex align-items-center gap-2 ${column.id === 'selection' ? 'justify-center' : 'justify-between'} ${
-            header.column.getCanSort() && columnDef.disableSortBy !== true ? 'cursor-pointer' : ''
+          className={`pos-rel flex flex-grow items-center  ${column.id === 'selection' ? 'justify-center' : 'justify-between pr-[16px]'} ${
+            isDragging ? ' opacity-50 [outline:4px_dashed_var(--common-border-color)]' : ''
           }`}
-          onClick={columnDef.disableSortBy !== true ? header.column.getToggleSortingHandler() : null}
         >
-          <div className="line-clamp-1">
-            <span className={`overflow-hidden overflow-ellipsis whitespace-normal `}>
-              {header?.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-            </span>
+          <div
+            className={`d-flex align-items-center gap-2 ${column.id === 'selection' ? 'justify-center' : 'justify-between'} ${
+              header.column.getCanSort() && columnDef.disableSortBy !== true ? 'cursor-pointer' : ''
+            }`}
+            onClick={columnDef.disableSortBy !== true ? header.column.getToggleSortingHandler() : null}
+          >
+            <div className="line-clamp-1">
+              <span className={`overflow-hidden overflow-ellipsis whitespace-normal `}>
+                {header?.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+              </span>
+            </div>
+            {column.getCanSort() && columnDef.disableSortBy !== true ? (
+              <>
+                {{
+                  asc: <ExpandLess fontSize="small" />,
+                  desc: <ExpandMore fontSize="small" />
+                }[header.column.getIsSorted() as string] ?? null}
+              </>
+            ) : (
+              ''
+            )}
           </div>
-          {column.getCanSort() && columnDef.disableSortBy !== true ? (
+          {column?.getCanFilter() && column?.id !== 'action' && columnDef.disableFilters !== true && !overlayMode ? (
             <>
-              {{
-                asc: <ExpandLess fontSize="small" />,
-                desc: <ExpandMore fontSize="small" />
-              }[header.column.getIsSorted() as string] ?? null}
+              {!isClientSideGrid ? (
+                <TempFilter
+                  filterValue={filters.find((filter) => filter.id === column.id)?.value || ''}
+                  id={column?.id}
+                  setFilters={setFilters}
+                  customFilters={customFilters}
+                />
+              ) : (
+                <>
+                  <Filter column={header.column} table={table} />
+                </>
+              )}
             </>
-          ) : (
-            ''
+          ) : null}
+          {isNotDraggable || header.column.getIsResizing() ? null : (
+            <div {...attributes} {...listeners} className={`drag-icon drag-handle mr-2 ${isDragging ? ' cursor-grabbing' : 'cursor-grab'}`}>
+              <DragIndicator className="text-[16px]" />
+            </div>
           )}
         </div>
-        {column?.getCanFilter() && column?.id !== 'action' && columnDef.disableFilters !== true && !overlayMode ? (
-          <>
-            {!isClientSideGrid ? (
-              <TempFilter
-                filterValue={filters.find((filter) => filter.id === column.id)?.value || ''}
-                id={column?.id}
-                setFilters={setFilters}
-                customFilters={customFilters}
-              />
-            ) : (
-              <>
-                <Filter column={header.column} table={table} />
-              </>
-            )}
-          </>
-        ) : null}
-        {isNotDraggable || header.column.getIsResizing() ? null : (
-          <div {...attributes} {...listeners} className={`drag-icon drag-handle mr-2 ${isDragging ? ' cursor-grabbing' : 'cursor-grab'}`}>
-            <DragIndicator className="text-[16px]" />
-          </div>
-        )}
-      </div>
 
-      {column.getCanResize() && !virtualization && (
-        <div
-          {...{
-            onMouseDown: (e) => {
-              header.getResizeHandler()(e);
-            },
-            onTouchStart: (e) => {
-              header.getResizeHandler()(e);
-            },
-            className: `resizer ${header.column.getIsResizing() ? 'isResizing' : ''}`
+        {column.getCanResize() && !virtualization && (
+          <div
+            {...{
+              onMouseDown: (e) => {
+                header.getResizeHandler()(e);
+              },
+              onTouchStart: (e) => {
+                header.getResizeHandler()(e);
+              },
+              className: `resizer ${header.column.getIsResizing() ? 'isResizing' : ''}`
+            }}
+          />
+        )}
+      </th>
+      {header.column.getIsResizing() && (
+        <span
+          className="absolute w-[1px] bg-[--new-theme-color]"
+          style={{
+            height: tableHeight,
+            ...(style.position === 'sticky' ? { ...style } : { ...style, ...virtualPosition, left: virtualPosition.left + header.getSize() - 1 })
           }}
         />
       )}
-    </th>
+    </>
   );
 };
 

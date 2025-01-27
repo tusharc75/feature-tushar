@@ -74,7 +74,7 @@ export const VirtualTable = forwardRef(function (
 
   useEffect(() => {
     columnVirtualizer.measure();
-  }, [columns.length]);
+  }, [columns.length, sizes]);
 
   const virtualColumns = columnVirtualizer.getVirtualItems();
   const totalColumnSize = columnVirtualizer.getTotalSize();
@@ -132,6 +132,7 @@ export const VirtualTable = forwardRef(function (
             resource={resource}
             vtableData={vtableData}
             renderedFrom={renderedFrom}
+            tableHeight={height}
           />
 
           <VirtualTableBody
