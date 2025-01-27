@@ -11,6 +11,7 @@ export type NewActionButtonProps<D> = {
 const NewActionButton = <D,>({ items, itemsVisibleCount = 2, disabled, ...rest }: NewActionButtonProps<D>) => {
   const visibleItems = [...items].slice(0, itemsVisibleCount);
   const hiddenItems = [...items].slice(itemsVisibleCount);
+  console.log("NewActionButtonProps",items)
 
   return (
     <>
