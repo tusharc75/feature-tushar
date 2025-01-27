@@ -20,7 +20,7 @@ import CustomContainer from 'src/components/CustomContainer';
 
 const Dashboard = () => {
   const {
-    state: { user, userLoading }
+    state: { user, userLoading, selectedEntity }
   } = useData();
 
   const { setToastConfig } = React.useContext(CustomToastContext);
@@ -70,39 +70,40 @@ const Dashboard = () => {
       }
     })();
     fetchDashboards();
-  }, []);
+  }, [selectedEntity]);
 
   const fetchDashboards = () => {
     setDashboardLoading(true);
-    axiosInstance()
-      .get('/dashboard-master')
-      .then(({ data: { data } }) => {
-        if (data?.length) {
-          const savedSelected = localStorage.getItem('selectedDashboard');
-          if (savedSelected && data.find((d) => d.name === savedSelected)) {
-            const selectedDashboard = data.find((d) => d.name === savedSelected);
-            setGlobalFilters((prevState) => ({
-              ...prevState,
-              dashboardType: savedSelected,
-              timeFrame: selectedDashboard?.defaultDuration || 'current-year'
-            }));
-            setCharts(selectedDashboard?.charts || []);
-            setKpis(selectedDashboard?.charts?.filter((chart) => chart?.hasFilters)?.map((chart) => camelCase(chart?.kpi?.name)));
-            setSelectedDashboardId(selectedDashboard?._id);
-          } else {
-            setGlobalFilters((prevState) => ({ ...prevState, dashboardType: data[0].name, timeFrame: data[0]?.defaultDuration || 'current-year' }));
-            setCharts(data[0]?.charts);
-            setKpis(data[0]?.charts?.filter((chart) => chart?.hasFilters)?.map((chart) => camelCase(chart?.kpi?.name)));
-            setSelectedDashboardId(data[0]?._id);
-          }
-          setDashboardList(data);
+    axiosInstance().get('/dashboard-master').then(({ data: { data } }) => {
+      if (data?.length) {
+        const selectedEntityData = user?.entity?.find((e) => e?._id === selectedEntity)
+        if (selectedEntityData?.dashboards?.length) {
+          data = data?.filter((e) => selectedEntityData?.dashboards?.includes(e._id))
         }
-        setDashboardLoading(false);
-      })
-      .catch((err) => {
-        setToastConfig(err);
-        setDashboardLoading(false);
-      });
+        const savedSelected = localStorage.getItem('selectedDashboard');
+        if (savedSelected && data.find((d) => d.name === savedSelected)) {
+          const selectedDashboard = data.find((d) => d.name === savedSelected);
+          setGlobalFilters((prevState) => ({
+            ...prevState,
+            dashboardType: savedSelected,
+            timeFrame: selectedDashboard?.defaultDuration || 'current-year'
+          }));
+          setCharts(selectedDashboard?.charts || []);
+          setKpis(selectedDashboard?.charts?.filter((chart) => chart?.hasFilters)?.map((chart) => camelCase(chart?.kpi?.name)));
+          setSelectedDashboardId(selectedDashboard?._id);
+        } else {
+          setGlobalFilters((prevState) => ({ ...prevState, dashboardType: data[0].name, timeFrame: data[0]?.defaultDuration || 'current-year' }));
+          setCharts(data[0]?.charts);
+          setKpis(data[0]?.charts?.filter((chart) => chart?.hasFilters)?.map((chart) => camelCase(chart?.kpi?.name)));
+          setSelectedDashboardId(data[0]?._id);
+        }
+        setDashboardList(data);
+      }
+      setDashboardLoading(false);
+    }).catch((err) => {
+      setToastConfig(err);
+      setDashboardLoading(false);
+    });
   };
 
   const fetchKpiFilters = () => {
