@@ -18,7 +18,7 @@ import {
   prepareDataForGrid,
   expenses,
 } from '../../constants/helpers';
-import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { DetailsPageHeader, ListingPageHeader } from 'src/components/PageHeaders';
 import { useHistory } from 'react-router-dom';
 
 function AddExpenses({
@@ -34,7 +34,7 @@ function AddExpenses({
   const [columns, setColumns] = useState(null);
   const { generateColumns, checkStaticField } = useColumns();
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { page, limit, filters, sorting, showFilteredRecordsOnly } = state;
+  const { page, limit, filters,search, sorting, showFilteredRecordsOnly } = state;
   const { state: { user, permissions, resources } } = useData();
   const [selectedRows, setSelectedRows] = useState([]);
   const { selectedRecords } = state;
@@ -48,7 +48,7 @@ function AddExpenses({
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
-  }, [page, limit, filters, sorting, showFilteredRecordsOnly]);
+  }, [page, limit, filters,search, sorting, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -60,6 +60,10 @@ function AddExpenses({
       newColumns.push(checkStaticField(renderedFrom, field));
     });
     setColumns(newColumns);
+  };
+
+  const handleSearch = (e) => {
+    dispatch({ type: 'search', search: e.target.value });
   };
 
   const fetchData = async (cancelTokenSource) => {
@@ -128,13 +132,22 @@ function AddExpenses({
         }}
       />
       <CustomDialogContent>
-      <DetailsPageHeader
-          isAddButtonVisible={true}
-          addButtonMenuItems={addButtonMenuItems()}
-          isActionButtonVisible={false}
-          actionButtonProps={{ disabled: selectedRecords.length === 0 }}
-          hasXpadding
-        />
+      <ListingPageHeader
+            showSearchInMobile={true}
+            searchValue={search}
+            onSearch={handleSearch}
+            isActionButtonVisible={false}
+            addButtonProps={{
+              disabled: !selectedRecords?.length || isSubmitting,
+              loading: isSubmitting,
+              iconsEnabled: false,
+              text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : '',
+              textAddShow: true
+            }}
+            addButtonOnclick={handleSave}
+            isAddButtonVisible={true}
+            setQueryString={false}
+          />
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
@@ -144,8 +157,9 @@ function AddExpenses({
             renderedFrom={renderedFrom}
             resource={sidebarResource?.expenses}
             onSelect={handleRowSelection} 
-            showArrangeView={false}
-            pagination={false}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={true}
+            refreshGrid={fetchData}
           />
         ) : (
           <Box p={2} height={500}>
@@ -153,14 +167,14 @@ function AddExpenses({
           </Box>
         )}
       </CustomDialogContent>
-      <CustomDialogFooter>
+      {/* <CustomDialogFooter>
         <ThemeButton buttonType="transparent" id="dialog-cancel-button" onClick={onClose}>
           Cancel
         </ThemeButton>
         <ThemeButton isLoading={isSubmitting} buttonType="theme" id="dialog-save-button" disabled={isSubmitting} onClick={handleSave}>
           Save
-        </ThemeButton>
-      </CustomDialogFooter>
+        </ThemeButton> */}
+      {/* </CustomDialogFooter> */}
     </Dialog>
   );
 }

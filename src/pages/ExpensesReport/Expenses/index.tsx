@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import { Box, MenuItem } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -10,6 +10,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 
 const Expenses = (selectedExpenseData) => {
 
@@ -21,6 +22,7 @@ const Expenses = (selectedExpenseData) => {
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const [columns, setColumns] = useState(null);
   const { generateColumns, checkStaticField } = useColumns();
+  const { selectedRecords } = state;
 
   useEffect(() => {
     fetchGridColumns();
@@ -104,20 +106,65 @@ const Expenses = (selectedExpenseData) => {
     }
   };
 
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          // onClick={() => {
+          //   history.push(routes?.expenses?.path);
+          // }}
+        >
+          {`Add Existing ${resources?.expenses?.titlePlural}`}
+        </MenuItem>
+        <MenuItem
+          // onClick={() => {
+          //   history.push(routes?.expenses?.path);
+          // }}
+        >
+          {`Create New ${resources?.expenses?.titlePlural}`}
+        </MenuItem>
+      </>
+    );
+  };
+
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          color="primary"
+          disabled={selectedRecords.length === 0 }
+          // onClick={() => {
+          //   setShowDeleteConfirmBox(true);
+          //   setDeleteBulkAssetCreationProduct(selectedRecords.map((d) => d._id));
+          // }}
+        >
+          Delete
+        </MenuItem>
+      </>
+    );
+  };
+
+
   return (
     <div className="main-container-v1">
       <>
+      <DetailsPageHeader
+          isAddButtonVisible={true}
+          addButtonMenuItems={addButtonMenuItems()}
+          isActionButtonVisible={true}
+          actionButtonMenuItems={actionButtonMenuItems()}
+          actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+          hasXpadding
+        />
         {columns ? (
           <CustomReactTable
-            height={'calc(100vh - 450px)'}
+            height={'calc(100vh - 200px)'}
             columns={columns}
             state={state}
-            showArrangeView = {false}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             resource={sidebarResource.expenses}
             pagination={false}
-            hideSelection={true}
           />
         ) : (
           <Box p={2} height={500}>

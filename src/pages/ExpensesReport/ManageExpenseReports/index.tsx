@@ -99,7 +99,7 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
       axiosInstance()
         .put(`${expenseReport.api}`, data)
         .then(({ data }) => {
-          handleStatusChange(data?.data?.selectedExpenses);
+          handleStatusChange(EXPENSE_STATUS.unSubmitted);
           setIsSubmitting(false);
           onSuccess();
           toastConfig.setToastConfig({
@@ -116,7 +116,7 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
       axiosInstance()
         .post(`${expenseReport.api}`, data)
         .then(({ data: { data, message } }) => {
-          handleStatusChange(data?.data?.selectedExpenses);
+          handleStatusChange(EXPENSE_STATUS.unSubmitted);
           history.push(`${routes?.expenseReportDetail?.path}/${data._id}`);
           setIsSubmitting(false);
           onSuccess(data);
@@ -150,11 +150,11 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
     setSelectedExpense(updatedExpenses);
   };
 
-  const handleStatusChange = async (expenseInfo) => {
-    const newExpensesIds = expenseInfo.map((obj) => obj._id);
+  const handleStatusChange = async (status) => {
+    const newExpensesIds = selectedExpense.map((obj) => obj._id);
 
     axiosInstance()
-      .patch(`${expenses.api}/status/${newExpensesIds}`, { status: EXPENSE_STATUS.unSubmitted })
+      .patch(`${expenses.api}/status/${newExpensesIds}`, { status })
       .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
