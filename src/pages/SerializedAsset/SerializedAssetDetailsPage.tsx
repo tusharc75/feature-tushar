@@ -120,13 +120,17 @@ const SerializedAssetDetailsPage = () => {
           dayjs.duration(data?.totalUtilization).asMinutes() % 60
         )}`;
         delete data?.totalUtilization;
-      }
+      }   
+      
       if (data.totalInUseTimeAfterLastRepair) {
-        data[`totalInUseTimeAfterLastRepairHours`] = `${round(dayjs.duration(data?.totalInUseTimeAfterLastRepair).asHours())}:${Math.floor(
-          dayjs.duration(data?.totalInUseTimeAfterLastRepair).asMinutes() % 60
-        )}`;
+        if(permissions?.repairOrder?.isRead || permissions?.repairJob?.isRead){
+          data[`totalInUseTimeAfterLastRepairHours`] = `${round(dayjs.duration(data?.totalInUseTimeAfterLastRepair).asHours())}:${Math.floor(
+            dayjs.duration(data?.totalInUseTimeAfterLastRepair).asMinutes() % 60
+          )}`;
+        }
         delete data?.totalInUseTimeAfterLastRepair;
       }
+
       handleMainPoints(data);
     } catch (error) {
       toastConfig.setToastConfig(error);

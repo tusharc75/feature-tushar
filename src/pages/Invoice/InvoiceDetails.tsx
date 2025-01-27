@@ -75,6 +75,7 @@ const InvoiceDetails = () => {
   const [showReOpenConfirmBox, setShowReOpenConfirmBox] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [updateLoading, setUpdateLoading] = useState(false);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
   const invoiceProcessStepsNames = React.useMemo(() => {
     return invoiceProcessSteps.map((item) => item.name);
@@ -216,6 +217,28 @@ const InvoiceDetails = () => {
       });
   };
 
+  const handleDownloadPdf = () => {
+    setIsDownloadingPdf(true);
+    axiosInstance()
+      .get(`${invoice.api}/zip/pdf/${invoiceData._id}`, {
+        responseType: 'blob'
+      })
+      .then((response) => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        const filename = response.headers['content-disposition'].split('filename=')[1];
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+        setIsDownloadingPdf(false);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setIsDownloadingPdf(false);
+      });
+  };
+
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -250,6 +273,20 @@ const InvoiceDetails = () => {
                 >
                   {isDownloading ? 'Please wait...' : 'Download'}
                 </ThemeButton>
+                {invoiceData?.fieldTicket?.length ? (
+                  <ThemeButton
+                    type="button"
+                    iconForMobile={<DownloadIcon />}
+                    disabled={isDownloadingPdf ? true : false}
+                    startIcon={<DownloadIcon />}
+                    onClick={(e) => {
+                      handleDownloadPdf();
+                    }}
+                    mobileTooltip={isDownloadingPdf ? 'Please wait...' : 'Download Invoice Tickets'}
+                  >
+                    {isDownloadingPdf ? 'Please wait...' : 'Download Invoice Tickets'}
+                  </ThemeButton>
+                ): null}
                 {invoiceData?.versions?.length && (
                   <ThemeButton
                     onClick={() => {

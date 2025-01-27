@@ -420,11 +420,11 @@ const Product = () => {
               }
             ]}
           />
-          <HtmlTooltip title={'Schedule Maintenance'}>
+          {/* <HtmlTooltip title={'Schedule Maintenance'}>
             <IconButton size="small" aria-label="Schedule Maintenance" onClick={() => setOpenScheduledMaintenance(true)}>
               <HandymanIcon fontSize="small" color={'primary'} />
             </IconButton>
-          </HtmlTooltip>
+          </HtmlTooltip> */}
         </div>
       </div>
       <CustomContainer>

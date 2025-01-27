@@ -112,24 +112,24 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
         Cell: ({ row }) => (row?.original?.description ? <h5 className="text-truncate">{row?.original?.description}</h5> : <NoDataCell />)
       },
       {
-        accessor: 'manualStartDate',
+        accessor: 'actualStartDate',
         Header: 'Actual Start Date',
         Cell: ({ row }) =>
-          row?.original?.manualStartDate ? (
-            <h5 className="text-truncate" title={`${displayDate(row?.original?.manualStartDate)}`}>
-              {displayDate(row?.original?.manualStartDate)}
+          row?.original?.actualStartDate ? (
+            <h5 className="text-truncate" title={`${displayDate(row?.original?.actualStartDate)}`}>
+              {displayDate(row?.original?.actualStartDate)}
             </h5>
           ) : (
             <NoDataCell />
           )
       },
       {
-        accessor: 'manualEndDate',
+        accessor: 'actualEndDate',
         Header: 'Actual End Date',
         Cell: ({ row }) =>
-          row?.original?.manualEndDate ? (
-            <h5 className="text-truncate" title={`${displayDate(row?.original?.manualEndDate)}`}>
-              {displayDate(row?.original?.manualEndDate)}
+          row?.original?.actualEndDate ? (
+            <h5 className="text-truncate" title={`${displayDate(row?.original?.actualEndDate)}`}>
+              {displayDate(row?.original?.actualEndDate)}
             </h5>
           ) : (
             <NoDataCell />
