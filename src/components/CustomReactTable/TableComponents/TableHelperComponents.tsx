@@ -5,7 +5,7 @@ import { Check, DragIndicator, Edit, ExpandLess, ExpandMore } from '@mui/icons-m
 import Autocomplete from '@mui/material/Autocomplete';
 import { Column, ColumnDef, Header, Table, flexRender } from '@tanstack/react-table';
 import { eq, isEqual } from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { CgSearch } from 'react-icons/cg';
 import { GrFormClose } from 'react-icons/gr';
 import { cn } from 'src/constants/helpers';
@@ -280,7 +280,10 @@ interface DraggableHeaderProps {
   className?: string;
   renderedFrom: string;
   vtableData?: any;
+  virtualPosition?: React.CSSProperties;
+  tableHeight?: string | number;
 }
+const MINIMUM_SEARCH_DELAY = 1000; // Adjust this delay as needed
 export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
   header,
   table,
@@ -293,19 +296,24 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
   virtualTable = true,
   className = '',
   vtableData,
-  renderedFrom
+  renderedFrom,
+  virtualPosition = {},
+  tableHeight = '100%'
 }: any) => {
   const { column, index } = header;
   const columnDef = column.columnDef as TColType;
   const { getTempFilter, setTempFilter } = useUserTempFilters();
 
-  const isNotDraggable =
-    columnDef.canDrag === false ||
-    Boolean(columnDef.sticky) ||
-    columnDef.primaryField ||
-    columnDef.lockPosition ||
-    columnDef.disabled === true ||
-    ['action', 'selection', 'expand'].includes(column?.id);
+  const isNotDraggable = useMemo(() => {
+    return (
+      columnDef.canDrag === false ||
+      Boolean(columnDef.sticky) ||
+      columnDef.primaryField ||
+      columnDef.lockPosition ||
+      columnDef.disabled === true ||
+      ['action', 'selection', 'expand'].includes(column?.id)
+    );
+  }, [column?.id, columnDef.canDrag, columnDef.disabled, columnDef.lockPosition, columnDef.primaryField, columnDef.sticky]);
 
   const [filters, setFilters] = useState([]);
 
@@ -319,7 +327,6 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
     );
     return () => setFilters([]);
   }, [customFilters]); // Add customFilters as a dependency
-  const MINIMUM_SEARCH_DELAY = 1000; // Adjust this delay as needed
 
   useEffect(() => {
     if (isClientSideGrid) return;
@@ -350,8 +357,6 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
     return () => clearTimeout(searchTimer);
   }, [filters, isClientSideGrid, renderedFrom]);
 
-  const colSize = header.getSize();
-
   const { style } = vtableData && vtableData[index] ? vtableData[index] : getStickyPosition(columnDef, index, table);
 
   const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
@@ -378,91 +383,101 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
   };
 
   return (
-    <TableCell
-      key={header.id}
-      component={'th'}
-      title={typeof columnDef.header === 'string' ? columnDef.header : ''}
-      colSpan={header.colSpan}
-      className={cn(
-        `th text-truncate table-header overflow-hidden  ${columnDef.sticky ? `${virtualTable ? 'z-10' : ''} bg-[var(--dark-primary,_white)]` : ''} bg-[var(--dark-primary,_white)] ${
-          overlayMode ? 'border text-[13px] font-semibold' : ''
-        } `,
-        className
-      )}
-      ref={setNodeRef}
-      style={{
-        minWidth: `${colSize}px`,
-        maxWidth: `${colSize}px`,
-        paddingLeft: columnDef.id === 'expander' ? '8px' : '6px',
-        zIndex: columnDef.sticky === 'left' || columnDef.sticky === 'right' ? 12 : 'unset',
-        ...(virtualization ? {} : style),
-        ...styleDnd
-      }}
-    >
-      <div
-        className={`pos-rel flex flex-grow items-center  ${column.id === 'selection' ? 'justify-center' : 'justify-between pr-[16px]'} ${
-          isDragging ? ' opacity-50 [outline:4px_dashed_var(--common-border-color)]' : ''
-        }`}
+    <>
+      <th
+        key={header.id}
+        title={typeof columnDef.header === 'string' ? columnDef.header : ''}
+        colSpan={header.colSpan}
+        className={cn(
+          `th text-truncate table-header overflow-hidden  ${columnDef.sticky ? `${virtualTable ? 'z-10' : ''} bg-[var(--dark-primary,_white)]` : ''} bg-[var(--dark-primary,_white)] ${
+            overlayMode ? 'border text-[13px] font-semibold' : ''
+          } `,
+          className
+        )}
+        ref={setNodeRef}
+        style={{
+          minWidth: `${header.getSize()}px`,
+          maxWidth: `${header.getSize()}px`,
+          paddingLeft: columnDef.id === 'expander' ? '8px' : '6px',
+          zIndex: columnDef.sticky === 'left' || columnDef.sticky === 'right' ? 12 : 'unset',
+          ...(style.position === 'sticky' ? { ...style } : { ...style, ...virtualPosition }),
+          ...styleDnd
+        }}
       >
         <div
-          className={`d-flex align-items-center gap-2 ${column.id === 'selection' ? 'justify-center' : 'justify-between'} ${
-            header.column.getCanSort() && columnDef.disableSortBy !== true ? 'cursor-pointer' : ''
+          className={`pos-rel flex flex-grow items-center  ${column.id === 'selection' ? 'justify-center' : 'justify-between pr-[16px]'} ${
+            isDragging ? ' opacity-50 [outline:4px_dashed_var(--common-border-color)]' : ''
           }`}
-          onClick={columnDef.disableSortBy !== true ? header.column.getToggleSortingHandler() : null}
         >
-          <div className="line-clamp-1">
-            <span className={`overflow-hidden overflow-ellipsis whitespace-normal `}>
-              {header?.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-            </span>
+          <div
+            className={`d-flex align-items-center gap-2 ${column.id === 'selection' ? 'justify-center' : 'justify-between'} ${
+              header.column.getCanSort() && columnDef.disableSortBy !== true ? 'cursor-pointer' : ''
+            }`}
+            onClick={columnDef.disableSortBy !== true ? header.column.getToggleSortingHandler() : null}
+          >
+            <div className="line-clamp-1">
+              <span className={`overflow-hidden overflow-ellipsis whitespace-normal `}>
+                {header?.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+              </span>
+            </div>
+            {column.getCanSort() && columnDef.disableSortBy !== true ? (
+              <>
+                {{
+                  asc: <ExpandLess fontSize="small" />,
+                  desc: <ExpandMore fontSize="small" />
+                }[header.column.getIsSorted() as string] ?? null}
+              </>
+            ) : (
+              ''
+            )}
           </div>
-          {column.getCanSort() && columnDef.disableSortBy !== true ? (
+          {column?.getCanFilter() && column?.id !== 'action' && columnDef.disableFilters !== true && !overlayMode ? (
             <>
-              {{
-                asc: <ExpandLess fontSize="small" />,
-                desc: <ExpandMore fontSize="small" />
-              }[header.column.getIsSorted() as string] ?? null}
+              {!isClientSideGrid ? (
+                <TempFilter
+                  filterValue={filters.find((filter) => filter.id === column.id)?.value || ''}
+                  id={column?.id}
+                  setFilters={setFilters}
+                  customFilters={customFilters}
+                />
+              ) : (
+                <>
+                  <Filter column={header.column} table={table} />
+                </>
+              )}
             </>
-          ) : (
-            ''
+          ) : null}
+          {isNotDraggable || header.column.getIsResizing() ? null : (
+            <div {...attributes} {...listeners} className={`drag-icon drag-handle mr-2 ${isDragging ? ' cursor-grabbing' : 'cursor-grab'}`}>
+              <DragIndicator className="text-[16px]" />
+            </div>
           )}
         </div>
-        {column?.getCanFilter() && column?.id !== 'action' && columnDef.disableFilters !== true && !overlayMode ? (
-          <>
-            {!isClientSideGrid ? (
-              <TempFilter
-                filterValue={filters.find((filter) => filter.id === column.id)?.value || ''}
-                id={column?.id}
-                setFilters={setFilters}
-                customFilters={customFilters}
-              />
-            ) : (
-              <>
-                <Filter column={header.column} table={table} />
-              </>
-            )}
-          </>
-        ) : null}
-        {isNotDraggable || header.column.getIsResizing() ? null : (
-          <div {...attributes} {...listeners} className={`drag-icon drag-handle mr-2 ${isDragging ? ' cursor-grabbing' : 'cursor-grab'}`}>
-            <DragIndicator className="text-[16px]" />
-          </div>
-        )}
-      </div>
 
-      {column.getCanResize() && !virtualization && (
-        <div
-          {...{
-            onMouseDown: (e) => {
-              header.getResizeHandler()(e);
-            },
-            onTouchStart: (e) => {
-              header.getResizeHandler()(e);
-            },
-            className: `resizer ${header.column.getIsResizing() ? 'isResizing' : ''}`
+        {column.getCanResize() && !virtualization && (
+          <div
+            {...{
+              onMouseDown: (e) => {
+                header.getResizeHandler()(e);
+              },
+              onTouchStart: (e) => {
+                header.getResizeHandler()(e);
+              },
+              className: `resizer ${header.column.getIsResizing() ? 'isResizing' : ''}`
+            }}
+          />
+        )}
+      </th>
+      {header.column.getIsResizing() && (
+        <span
+          className="absolute w-[1px] bg-[--new-theme-color]"
+          style={{
+            height: tableHeight,
+            ...(style.position === 'sticky' ? { ...style } : { ...style, ...virtualPosition, left: virtualPosition.left + header.getSize() - 1 })
           }}
         />
       )}
-    </TableCell>
+    </>
   );
 };
 
@@ -646,6 +661,8 @@ const RenderInputs = ({ columnDef, row, cell, cellValue, submitInput, resetField
   );
 };
 
+export const parseFromValuesOrFunc = <T, U>(fn: ((arg: U) => T) | T | undefined, arg: U): T | undefined => (fn instanceof Function ? fn(arg) : fn);
+
 // Cells
 export const CellRenderer = ({
   className = '',
@@ -660,7 +677,6 @@ export const CellRenderer = ({
   cellValue,
   resetField,
   virtualStyles,
-  virtualization,
   virtualTable = true,
   handleChangeCurrentEditingCellPosition,
   vtableData
@@ -670,35 +686,57 @@ export const CellRenderer = ({
   const { currentEditingCellPosition, loadingExpanderRowId } = state;
   const { style: stickyStyle, className: stickyClassName } =
     vtableData && vtableData[index] ? vtableData[index] : getStickyPosition(columnDef, index, table);
-  let style = { position: 'static', ...stickyStyle };
-  if (stickyStyle['position'] && stickyStyle['position'] === 'sticky') {
-    style['zIndex'] = 11;
-  }
+  const style = useMemo(() => ({ position: 'static', ...stickyStyle }), [stickyStyle]);
 
-  const props = {
-    id: cell.id,
-    key: cell.id,
-    className: cn(
-      `td h-[45px] overflow-hidden p-0 [&>*]:flex [&>*]:h-[45px] [&>*]:items-center [&>*]:p-[5px_8px]
+  const props = useMemo(
+    () => ({
+      id: cell.id,
+      key: cell.id,
+      className: cn(
+        `td h-[45px] overflow-hidden p-0 [&>*]:flex [&>*]:h-[45px] [&>*]:items-center [&>*]:p-[5px_8px]
   ${columnDef.sticky ? `${virtualTable ? 'z-10' : ''} bg-[var(--dark-primary,_white)]` : ''} 
    ${stickyClassName}`,
+        className,
+        setWholeRowsCellColor ? setWholeRowsCellColor(row.original) + ' td-color' : ''
+      ),
+      style: {
+        minWidth: cell.column.getSize(),
+        maxWidth: cell.column.getSize(),
+        ...(style.position === 'sticky' ? { ...style } : { ...style, ...virtualStyles })
+      },
+      onClick: () => {
+        if (!cell.column.id || !row.original._id || !cell?.column?.columnDef.editable) return;
+        handleChangeCurrentEditingCellPosition(row.original._id, cell.column.id);
+        setCellValue(getCellValue(cell) || null);
+        cellId = cell.id;
+      }
+    }),
+    [
+      cell,
       className,
-      setWholeRowsCellColor ? setWholeRowsCellColor(row.original) + ' td-color' : ''
-    ),
-    style: {
-      minWidth: cell.column.getSize(),
-      maxWidth: cell.column.getSize(),
-      ...(virtualization ? { ...virtualStyles } : { ...style })
-    },
-    onClick: () => {
-      if (!cell.column.id || !row.original._id || !cell?.column?.columnDef.editable) return;
-      handleChangeCurrentEditingCellPosition(row.original._id, cell.column.id);
-      setCellValue(getCellValue(cell) || null);
-      cellId = cell.id;
-    }
-  };
+      columnDef.sticky,
+      handleChangeCurrentEditingCellPosition,
+      row.original,
+      setCellValue,
+      setWholeRowsCellColor,
+      stickyClassName,
+      style,
+      virtualStyles,
+      virtualTable
+    ]
+  );
+
+  const args = { cell, column: cell.column, row, table };
 
   switch (true) {
+    case cell.getIsPlaceholder():
+      return (
+        <td {...props}>
+          <div className="p-[5px_10px]">
+            <CircularProgress size={14} color="primary" style={{ padding: 0 }} />
+          </div>
+        </td>
+      );
     case cell?.column.id === 'expander' && loadingExpanderRowId === row.original._id:
       return (
         <td {...props}>
@@ -743,7 +781,7 @@ export const CellRenderer = ({
         <td {...props}>
           <div className="w-full">
             <div className="flex w-full cursor-pointer justify-between [border-bottom:1px_dashed_#8a8a8a]">
-              <p>{flexRender(cell.column.columnDef.cell, cell.getContext())}</p>
+              <p>{parseFromValuesOrFunc(cell.column.columnDef.cell, args)}</p>
               <span>
                 <Edit className="text-[rgba(0,0,0,0.3)] dark:text-[rgba(255,255,255,0.9)]" fontSize="small" />
               </span>
@@ -754,7 +792,7 @@ export const CellRenderer = ({
     case cell.column.id === 'action':
       return (
         <td {...props}>
-          <div className="action-cell">{flexRender(cell.column.columnDef.cell, cell.getContext())}</div>
+          <div className="action-cell">{parseFromValuesOrFunc(cell.column.columnDef.cell, args)}</div>
         </td>
       );
     default:
@@ -768,7 +806,7 @@ export const CellRenderer = ({
             )
           }}
         >
-          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          {parseFromValuesOrFunc(cell.column.columnDef.cell, args)}
         </td>
       );
   }
