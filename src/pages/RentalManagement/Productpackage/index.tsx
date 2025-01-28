@@ -54,6 +54,7 @@ import {
 } from 'src/pages/RentalManagement/walkmeSteps';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import AssignManagedPackagesDialog from 'src/components/AssignRolesDialog/AssignManagedPackagesDialog';
+import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
 
 const Productpackage = ({
   rentalManagementData,
@@ -180,15 +181,7 @@ const Productpackage = ({
         e.isColumnEditable = false;
       });
     }
-    const newColumns = generateColumns(
-      renderedFrom,
-      data?.map((e) => {
-        return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName };
-      }),
-      null,
-      false,
-      rentalManagementData?.currency
-    );
+    const newColumns = generateColumns(renderedFrom, data, null, false, rentalManagementData?.currency);
     let column: any = [
       {
         accessor: 'index',
@@ -441,17 +434,16 @@ const Productpackage = ({
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === MATERIAL_TYPE.service
-          ? parent.serviceDetail
-            ? parent.serviceDetail?.serviceName
+      parent.detail = `${parent.type === MATERIAL_TYPE.service
+        ? parent.serviceDetail
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+        : parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.manualEntry
+            ? parent.detail
             : parent.packageDetail?.packageName
-          : parent.type === MATERIAL_TYPE.product
-            ? parent.productDetail?.productName
-            : parent.type === MATERIAL_TYPE.manualEntry
-              ? parent.detail
-              : parent.packageDetail?.packageName
-      }`;
+        }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -461,7 +453,6 @@ const Productpackage = ({
               ? parent?.packageDetail?.packageDescription || ''
               : parent.description;
       parent.serializedProduct = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.serializedProduct : false;
-      parent.qtyDisplay = parent.qty;
       parent.isValid = parent[`price_${currency}`] || parent[`finalPrice_${currency}`] ? true : !isPriceRequired;
       if (
         parent?.type == MATERIAL_TYPE.manualEntry &&
@@ -480,7 +471,7 @@ const Productpackage = ({
       parent.assetQty = parent.serializedProduct
         ? inventory?.filter((e) => e._id === parent._id).length + productSerialNumbers?.filter((e) => e._id === parent._id).length
         : nonSerializeAsset?.filter((e) => e._id === parent._id).length +
-          data?.nonSerializedInventory?.filter((d) => d?._id === parent?._id)?.reduce((sum, row) => sum + row?.qty || 0, 0);
+        data?.nonSerializedInventory?.filter((d) => d?._id === parent?._id)?.reduce((sum, row) => sum + row?.qty || 0, 0);
       parent.canDelete =
         parent.type === MATERIAL_TYPE.service && parent?.serviceLog
           ? false
@@ -493,13 +484,13 @@ const Productpackage = ({
                 : true;
       parent.nonSerializedQty =
         parent.type === MATERIAL_TYPE.product &&
-        !parent.serializedProduct &&
-        parent.assetQty === 0 &&
-        parent?.status &&
-        loadingTicketProducts?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)?.length > 0
+          !parent.serializedProduct &&
+          parent.assetQty === 0 &&
+          parent?.status &&
+          loadingTicketProducts?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)?.length > 0
           ? loadingTicketProducts
-              ?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)
-              ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+            ?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)
+            ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
           : 0;
       parent.subRows = generateNestedData(
         data.material,
@@ -549,15 +540,14 @@ const Productpackage = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow.type === MATERIAL_TYPE.service
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.type === MATERIAL_TYPE.package
-            ? _subRow.packageDetail?.packageName
-            : _subRow.type === MATERIAL_TYPE.product
-              ? _subRow.productDetail?.productName
-              : ''
-      } `;
+      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.service
+        ? _subRow.serviceDetail?.serviceName
+        : _subRow.type === MATERIAL_TYPE.package
+          ? _subRow.packageDetail?.packageName
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow.productDetail?.productName
+            : ''
+        } `;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
@@ -567,7 +557,6 @@ const Productpackage = ({
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
-      _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
       _subRow.isValid = _subRow[`price_${currency}`] || _subRow[`finalPrice_${currency}`] ? true : !isPriceRequired;
       if (_subRow?.type === MATERIAL_TYPE.service && rentalPolicyData?.servicePriceRequired) {
         _subRow.isValid = _subRow[`price_${currency}`] || _subRow[`finalPrice_${currency}`] ? true : false;
@@ -579,13 +568,13 @@ const Productpackage = ({
         _subRow.type === MATERIAL_TYPE.service && _subRow?.serviceLog ? false : _subRow?.assetQty > 0 ? false : _subRow?.status ? false : true;
       _subRow.nonSerializedQty =
         _subRow.type === MATERIAL_TYPE.product &&
-        !_subRow.serializedProduct &&
-        _subRow.assetQty === 0 &&
-        _subRow?.status &&
-        loadingTicketProducts?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)?.length > 0
+          !_subRow.serializedProduct &&
+          _subRow.assetQty === 0 &&
+          _subRow?.status &&
+          loadingTicketProducts?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)?.length > 0
           ? loadingTicketProducts
-              ?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)
-              ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+            ?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)
+            ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
           : 0;
       _subRow.subRows = generateNestedData(
         material,
@@ -598,10 +587,7 @@ const Productpackage = ({
       );
     });
 
-    if (
-      (subRows.length === 0 || subRows?.filter((s) => s.type === MATERIAL_TYPE.package && !s.isValid)?.length > 0) &&
-      parent.type === MATERIAL_TYPE.package
-    ) {
+    if ((subRows.length === 0 || subRows?.filter((s) => s.type === MATERIAL_TYPE.package && !s.isValid)?.length > 0) && parent.type === MATERIAL_TYPE.package) {
       parent.isValid = false;
     }
     if (subRows?.length && rentalPolicyData?.servicePriceRequired) {
@@ -868,6 +854,17 @@ const Productpackage = ({
   };
 
   const onSaveInlineEdit = (inputField, updatedData) => {
+    if (inputField.hasOwnProperty('qty')) {
+      if (inputField['qty'] === 0) {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'error',
+          message: 'Please enter valid quantity'
+        });
+        setShowConfirmationDialog({ open: false, data: {} });
+        return;
+      }
+    }
     setIsInlineEdit(true);
     const currency = rentalManagementData?.currency.toLowerCase();
     const requiredItems = [];
@@ -909,18 +906,26 @@ const Productpackage = ({
         }
       });
     } else {
-      if (inputField.hasOwnProperty('qtyDisplay')) {
-        if (inputField['qtyDisplay'] === 0) {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'error',
-            message: 'Please enter valid quantity'
-          });
-          setShowConfirmationDialog({ open: false, data: {} });
-          return;
+      if (inputField.hasOwnProperty('qty')) {
+        let isValid = true;
+        const child: any = flattenArray(dataRows).filter((e) => e.parentId === rowData?._id);
+        if (child?.length) {
+          child?.forEach((e) => {
+            let qty = parseFloat(inputField['qty']) * e?.qty
+            console.log(qty)
+            if (qty < e?.assetQty || qty < e?.nonSerializedQty) {
+              isValid = false;
+              return;
+            }
+          })
         }
-        inputField['qty'] = inputField['qtyDisplay'];
-        if (!rowData.canDelete && (inputField['qty'] < rowData?.assetQty || inputField['qty'] < rowData?.nonSerializedQty)) {
+        else {
+          const qty = getParentMultiplier(material, rowData) * parseFloat(inputField['qty'])
+          if ((qty < rowData?.assetQty || qty < rowData?.nonSerializedQty)) {
+            isValid = false;
+          }
+        }
+        if (!isValid) {
           toastConfig.setToastConfig({
             open: true,
             type: 'error',
@@ -1124,6 +1129,7 @@ const Productpackage = ({
           rentalManagementData={rentalManagementData}
           rowData={!isBulkEdit ? isProductEdit.data : selectedRecords}
           material={material}
+          dataRows={flattenArray(dataRows)}
           selectedProducts={selectedRecords}
           loading={isUpdating}
           showSaveAndNext={isProductEdit.showSaveAndNext}

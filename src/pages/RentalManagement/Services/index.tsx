@@ -101,15 +101,7 @@ const Services = ({
         e.isColumnEditable = false;
       });
     }
-    const newColumns = generateColumns(
-      renderedFrom,
-      data?.map((e) => {
-        return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName };
-      }),
-      null,
-      false,
-      rentalManagementData?.currency
-    );
+    const newColumns = generateColumns(renderedFrom, data, null, false, rentalManagementData?.currency);
     let column: any = [
       {
         accessor: 'index',
@@ -288,6 +280,7 @@ const Services = ({
       var data: any = [];
       var inventory: any = [];
       var nonSerializeAsset: any = [];
+      var productSerialNumbers: any = [];
 
       var nextStepMessage = null;
 
@@ -300,6 +293,8 @@ const Services = ({
         setMaterial(JSON.parse(JSON.stringify(data.material)));
         inventory = data.inventory?.filter((e) => !e.isReplaced);
         nonSerializeAsset = data.nonSerializeAsset;
+        productSerialNumbers = data.productSerialNumbers;
+
       }
       let rows = data.material.filter((e) => e.parentId === null);
       rows = rows.filter((e) => e.type === MATERIAL_TYPE.service || (e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType === 'Service'));
@@ -326,7 +321,6 @@ const Services = ({
                 ? parent?.packageDetail?.packageDescription || ''
                 : '';
         parent.serializedProduct = parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.serializedProduct : false;
-        parent.qtyDisplay = parent.qty;
         parent.isValid = parent[`price_${currency}`] || parent[`finalPrice_${currency}`] ? true : !isPriceRequired;
         if (parent?.type === MATERIAL_TYPE.service && rentalPolicyData?.servicePriceRequired) {
           parent.isValid = parent[`price_${currency}`] || parent[`finalPrice_${currency}`] ? true : false;
@@ -335,11 +329,12 @@ const Services = ({
           nextStepMessage = rentalManagementMessage.validPrice;
         }
         parent.assetQty = parent.serializedProduct
-          ? inventory?.filter((e) => e._id === parent._id).length
-          : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
+          ? inventory?.filter((e) => e._id === parent._id).length + productSerialNumbers?.filter((e) => e._id === parent._id).length
+          : nonSerializeAsset?.filter((e) => e._id === parent._id).length +
+          data?.nonSerializedInventory?.filter((d) => d?._id === parent?._id)?.reduce((sum, row) => sum + row?.qty || 0, 0);
         parent.hideSelection =
           parent.type === MATERIAL_TYPE.service && parent?.serviceLog ? true : parent.assetQty > 0 ? true : parent?.status ? true : false;
-        parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent, isPriceRequired);
+        parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent, productSerialNumbers, isPriceRequired);
         if (parent.type === MATERIAL_TYPE.package && parent.subRows?.length === 0 && !nextStepMessage) {
           nextStepMessage = rentalManagementMessage.addServiceInPackage;
         }
@@ -393,7 +388,7 @@ const Services = ({
     }
   };
 
-  const generateNestedData = (material, inventory, nonSerializeAsset, parent, isPriceRequired) => {
+  const generateNestedData = (material, inventory, nonSerializeAsset, parent, productSerialNumbers, isPriceRequired) => {
     const currency = rentalManagementData?.currency?.toLowerCase();
 
     const subRows: any = material.filter((e) => e.parentId === parent._id);
@@ -414,17 +409,16 @@ const Services = ({
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
-      _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = _subRow[`price_${currency}`] || _subRow[`finalPrice_${currency}`] ? true : !isPriceRequired;
       if (_subRow?.type === MATERIAL_TYPE.service && rentalPolicyData?.servicePriceRequired) {
         _subRow.isValid = _subRow[`price_${currency}`] || _subRow[`finalPrice_${currency}`] ? true : false;
       }
       _subRow.assetQty = _subRow.serializedProduct
-        ? inventory?.filter((e) => e._id === _subRow._id).length
+        ? inventory?.filter((e) => e._id === _subRow._id).length + productSerialNumbers?.filter((e) => e._id === _subRow._id).length
         : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
       _subRow.hideSelection =
         _subRow.type === MATERIAL_TYPE.service && _subRow?.serviceLog ? true : _subRow.assetQty > 0 ? true : _subRow?.status ? true : false;
-      _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow, isPriceRequired);
+      _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow, productSerialNumbers, isPriceRequired);
     });
     if (subRows.length === 0 && parent.type === MATERIAL_TYPE.package) {
       parent.isValid = false;
@@ -563,9 +557,6 @@ const Services = ({
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
-    if (inputField.hasOwnProperty('qtyDisplay')) {
-      inputField['qty'] = inputField['qtyDisplay'];
-    }
     let rows: any = [{ ...rowData, ...updatedData }];
     rows = await calculateRowsField(material, inputField, allFields, updatedData, rentalManagementData?.currency);
     handleSaveData(rows);
@@ -759,6 +750,7 @@ const Services = ({
           rentalManagementData={rentalManagementData}
           rowData={!isBulkEdit ? isProductEdit.data : selectedRecords}
           material={material}
+          dataRows={flattenArray(dataRows)}
           selectedProducts={selectedRecords}
           loading={isUpdating}
           from={'service'}

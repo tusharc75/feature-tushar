@@ -51,6 +51,7 @@ export default function ImportExportLinks({
   small = false,
   visibleColumns = {},
   asyncExport = false,
+  asyncImport = false,
   resource = null
 }) {
   const classes = useStyles();
@@ -90,7 +91,6 @@ export default function ImportExportLinks({
   };
 
   const uploadData = (event, apiUrl = null) => {
-    handleCloseMenu();
     if (event.target.files && event.target.files.length) {
       toastConfig.setToastConfig({
         hideDuration: null,
@@ -241,7 +241,10 @@ export default function ImportExportLinks({
       onClick={(e: any) => (e.target.value = null)}
       id="importFromExcel"
       name="importFromExcel"
-      onChange={uploadData}
+      onChange={(e) => {
+        uploadData(e);
+        handleCloseMenu();
+      }}
       accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
       style={{
         opacity: '0',
@@ -272,7 +275,16 @@ export default function ImportExportLinks({
         {permissions?.isCreate && imptExptDnldMenuDta.action === 'import' && !hideDefaultImportExport && (
           <MenuItem>
             {ImportInput}
-            <label htmlFor="importFromExcel" className="cursor-pointer">
+            <label
+              htmlFor={asyncImport && resource ? '' : 'importFromExcel'}
+              className="cursor-pointer"
+              onClick={() => {
+                if (asyncImport && resource) {
+                  setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.import, api: null });
+                }
+                handleCloseMenu();
+              }}
+            >
               <span>{title !== '' ? `${title} Import ` : `Import from Excel`}</span>
             </label>
           </MenuItem>
@@ -317,7 +329,17 @@ export default function ImportExportLinks({
                   }}
                   type="file"
                 />
-                <label htmlFor={`${d.title}-${idx + 1}`.replace(/\s+/g, '')}>{d.title}</label>
+                <label
+                  htmlFor={asyncImport && resource ? '' : `${d.title}-${idx + 1}`.replace(/\s+/g, '')}
+                  onClick={() => {
+                    if (asyncImport && resource) {
+                      setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.import, api: d.api });
+                    }
+                    handleCloseMenu();
+                  }}
+                >
+                  {d.title}
+                </label>
               </MenuItem>
             );
           } else if (d.type === 'export' && imptExptDnldMenuDta.action === 'export') {
@@ -422,10 +444,12 @@ export default function ImportExportLinks({
           {permissions?.isCreate && !onlyExport && (
             <>
               <label
-                htmlFor={extraImportExportLinks.length > 0 ? '' : 'importFromExcel'}
+                htmlFor={extraImportExportLinks.length > 0 || (asyncImport && resource) ? '' : 'importFromExcel'}
                 onClick={(e) => {
                   if (extraImportExportLinks.length > 0) {
                     handleOpenMenu(e, 'import');
+                  } else if (asyncImport && resource) {
+                    setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.import, api: null });
                   }
                 }}
                 className={`new-headerbox-button-v1 ${small ? 'small' : ''}`}
@@ -531,6 +555,7 @@ export default function ImportExportLinks({
           }}
           refresh={refresh}
           api={api}
+          apiUrl={openAsyncImpExpDialog.api}
           additionalParams={additionalParams}
         />
       )}
