@@ -310,9 +310,8 @@ const RepairOrderDetails = () => {
                   permissions?.repairOrder?.isUpdate &&
                   permissions?.transferAsset?.isCreate &&
                   resourceData?.policy?.showTransferAssets &&
-                  repairOrderData?.material
-                    ?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)
-                    ?.every((e) => e.status === ASSET_STATUS.inRepair) && (
+                  repairOrderData?.material?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length > 0 &&
+                  repairOrderData?.material?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.every((e) => e.status === ASSET_STATUS.inRepair) && (
                     <ThemeButton
                       onClick={() => {
                         setShowTransferAssetDialog(true);
@@ -415,13 +414,13 @@ const RepairOrderDetails = () => {
               setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
               handlePrev={
                 stepNames[currentStep] === 'Quotation' &&
-                allowedToEdit &&
-                [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                  quotationVersionData?.status
-                )
+                  allowedToEdit &&
+                  [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                    quotationVersionData?.status
+                  )
                   ? () => {
-                      setShowQuotationConfirmBox(true);
-                    }
+                    setShowQuotationConfirmBox(true);
+                  }
                   : null
               }
               updateStatus={(step: number) => {
@@ -459,8 +458,8 @@ const RepairOrderDetails = () => {
                   currentStep === 3
                     ? allowedToEdit
                     : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                          quotationVersionData?.status
-                        )
+                      quotationVersionData?.status
+                    )
                       ? false
                       : allowedToEdit
                 }

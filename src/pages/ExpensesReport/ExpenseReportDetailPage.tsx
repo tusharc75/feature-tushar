@@ -1,4 +1,4 @@
-import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import { Box } from '@mui/material';
 import { Edit } from '@mui/icons-material';
 import queryString from 'query-string';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
@@ -16,9 +16,6 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { EXPENSE_STATUS, expenseReport, expenses, sidebarResource } from '../../constants/helpers';
 import Step from '../DynamicForm/Step';
 import ManageExpenseReports from 'src/pages/ExpensesReport/ManageExpenseReports';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import { camelCase } from 'lodash';
-import AddExpenses from 'src/pages/ExpensesReport/AddExpenses';
 import Expenses from 'src/pages/ExpensesReport/Expenses';
 
 const ExpenseReportDetailsPage = () => {
@@ -30,15 +27,13 @@ const ExpenseReportDetailsPage = () => {
   const { tab }: any = parsed;
 
   const {
-    state: { user, permissions, resources }
+    state: { permissions, resources }
   }: any = useData();
   const [loadingDetails, setLoadingDetails] = useState(true);
   const [expenseReportData, setExpenseReportData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
-  const renderedFrom = camelCase(sidebarResource?.expenses);
-  const { state, dispatch } = useTableReducer({ renderedFrom });
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [locationKeys, setLocationKeys] = useState([]);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
@@ -117,30 +112,31 @@ const ExpenseReportDetailsPage = () => {
     }
   };
 
-  const handleDelete = () => {
-    axiosInstance()
-      .put(`${expenseReport.api}/remove`, { ids: [expenseReportData._id] })
-      .then(() => {
-        handleStatusChange(expenseReportData.selectedExpenses);
-        setShowConfirmBox(false);
-        history.push(`${routes?.expenseReport?.path}`);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setShowConfirmBox(false);
-      });
+  const handleDelete = async () => {
+    try {
+      await axiosInstance().put(`${expenseReport.api}/remove`, { ids: [expenseReportData._id] });
+  
+      if (expenseReportData?.selectedExpenses?.length > 0) {
+        for (let expense of expenseReportData.selectedExpenses) {
+          try {
+            await axiosInstance().patch(`${expenses.api}/status/${expense._id}`, {
+              status: EXPENSE_STATUS.unreported,
+            });
+          } catch (error) {
+            toastConfig.setToastConfig(error);
+          }
+        }
+      }
+  
+      setShowConfirmBox(false);
+  
+      history.push(`${routes?.expenseReport?.path}`);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+      setShowConfirmBox(false);
+    }
   };
-
-  const handleStatusChange = async (expenseInfo) => {
-    const newExpensesIds = expenseInfo.map((obj) => obj._id);
-
-    axiosInstance()
-      .patch(`${expenses.api}/status/${newExpensesIds}`, { status: EXPENSE_STATUS.unreported })
-      .then(({ data }) => {})
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
+  
 
   return (
     <Box className="main-container-v1">
@@ -174,6 +170,7 @@ const ExpenseReportDetailsPage = () => {
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
+          <CustomTab value={1}>Expenses</CustomTab>
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 1}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
@@ -185,9 +182,13 @@ const ExpenseReportDetailsPage = () => {
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </div>
             )}
-            {!loadingDetails && expenseReportData && fields ? (
+          </Box>
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <Box>
+          {!loadingDetails && expenseReportData && fields ? (
               <div className="mt-2">
-                <Expenses selectedExpenseData={expenseReportData} />
+                <Expenses selectedExpenseData={expenseReportData?.selectedExpenses} />
               </div>
             ) : (
               <div className="p-2">
@@ -227,6 +228,7 @@ const ExpenseReportDetailsPage = () => {
         <ManageExpenseReports
           isClone={false}
           expenseReportId={id}
+          fetchReportData={fetchData}
           onClose={() => setOpenUpdateDialog(false)}
           onSuccess={() => {
             setOpenUpdateDialog(false);

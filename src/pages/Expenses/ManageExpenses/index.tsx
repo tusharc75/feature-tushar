@@ -29,7 +29,7 @@ import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ItemizeExpenses from 'src/pages/Expenses/ItemizeExpenses';
 
-const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess }) => {
+const ManageExpenses = ({ isClone = false, expenseId = null,isRedirectToDetailPage = true, onClose, onSuccess }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -150,7 +150,8 @@ const ManageExpenses = ({ isClone = false, expenseId = null, onClose, onSuccess 
       axiosInstance()
         .post(`${expenses.api}`, values)
         .then(({ data: { data, message } }) => {
-          history.push(`${routes.expensesDetail.path}/${data._id}`);
+          if(isRedirectToDetailPage){
+          history.push(`${routes.expensesDetail.path}/${data._id}`);}
           setIsSubmitting(false);
           onSuccess(data);
           toastConfig.setToastConfig({
