@@ -32,6 +32,7 @@ type TTableProps = {
   customContentHeight: number;
   customContent: ({ row }: { row: any }) => React.ReactNode;
   renderedFrom: string;
+  sortedColumns: TColType[];
 };
 
 const TableComponent = forwardRef(function (
@@ -58,15 +59,28 @@ const TableComponent = forwardRef(function (
     expanderWithCustomContent,
     customContentHeight,
     customContent,
-    renderedFrom
+    renderedFrom,
+    sortedColumns
   }: TTableProps,
   ref: ForwardedRef<HTMLTableElement>
 ) {
   const { filters: customFilters, initialDataLoaded }: TInitialState = state;
+
   const tableColumns = table.getVisibleFlatColumns();
-  const columns = useMemo(() => tableColumns?.map((d) => d?.columnDef) as TColType[], [tableColumns]);
+
+  const { columns, orderedColumns } = useMemo(() => {
+    const columns = [];
+    const orderedColumns = sortedColumns?.reduce((acc, curr, index) => {
+      columns.push(curr);
+      acc[curr.id] = index;
+      return acc;
+    }, {});
+
+    return { orderedColumns, columns };
+  }, [sortedColumns]);
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const sizes = tableColumns?.map((c) => c.getSize()) || [];
+  const sizes = tableColumns?.sort((a, b) => orderedColumns[a.id] - orderedColumns[b.id])?.map((c) => c.getSize()) || [];
 
   const vtableData = useMemo(() => {
     if (!columns || columns.length === 0) return null;
@@ -216,4 +230,4 @@ export type RnderTableProps = {
   renderedFrom: string;
 };
 
-export default TableComponent;
+export default React.memo(TableComponent);
