@@ -281,8 +281,8 @@ export default function ImportExportLinks({
               onClick={() => {
                 if (asyncImport && resource) {
                   setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.import, api: null });
+                  handleCloseMenu();
                 }
-                handleCloseMenu();
               }}
             >
               <span>{title !== '' ? `${title} Import ` : `Import from Excel`}</span>
@@ -320,6 +320,7 @@ export default function ImportExportLinks({
                   name={`${d.title}-${idx + 1}`.replace(/\s+/g, '')}
                   onChange={(e) => {
                     uploadData(e, d.api);
+                    handleCloseMenu();
                   }}
                   accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                   style={{
@@ -334,8 +335,8 @@ export default function ImportExportLinks({
                   onClick={() => {
                     if (asyncImport && resource) {
                       setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.import, api: d.api });
+                      handleCloseMenu();
                     }
-                    handleCloseMenu();
                   }}
                 >
                   {d.title}
