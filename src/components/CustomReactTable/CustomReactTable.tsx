@@ -526,6 +526,8 @@ const CustomReactTable = ({
             expanderWithCustomContent={false}
             customContentHeight={customContentHeight}
             customContent={customContent}
+            renderedFrom={renderedFrom}
+            sortedColumns={sortedColumns}
           />
         </div>
       )}
@@ -576,6 +578,7 @@ const CustomReactTable = ({
                 customContentHeight={customContentHeight}
                 customContent={customContent}
                 renderedFrom={renderedFrom}
+                sortedColumns={sortedColumns}
               />
             </div>
           )}
