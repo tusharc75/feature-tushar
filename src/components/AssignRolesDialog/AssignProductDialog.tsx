@@ -48,12 +48,13 @@ const AssignProductDialog = ({
     {
       accessor: 'qty',
       Header: 'Qty',
-      minWidth: 150,
-      width: 150,
+      minWidth: 100,
+      width: 100,
       editable: true,
       disableFilters: true,
       disableSortBy: true,
       disabled: true,
+      sticky: 'left',
       Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.qty}</h5>
     }
   ];
