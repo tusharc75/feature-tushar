@@ -112,18 +112,31 @@ const ExpenseReportDetailsPage = () => {
     }
   };
 
-  const handleDelete = () => {
-    axiosInstance()
-      .put(`${expenseReport.api}/remove`, { ids: [expenseReportData._id] })
-      .then(() => {
-        setShowConfirmBox(false);
-        history.push(`${routes?.expenseReport?.path}`);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setShowConfirmBox(false);
-      });
+  const handleDelete = async () => {
+    try {
+      await axiosInstance().put(`${expenseReport.api}/remove`, { ids: [expenseReportData._id] });
+  
+      if (expenseReportData?.selectedExpenses?.length > 0) {
+        for (let expense of expenseReportData.selectedExpenses) {
+          try {
+            await axiosInstance().patch(`${expenses.api}/status/${expense._id}`, {
+              status: EXPENSE_STATUS.unreported,
+            });
+          } catch (error) {
+            toastConfig.setToastConfig(error);
+          }
+        }
+      }
+  
+      setShowConfirmBox(false);
+  
+      history.push(`${routes?.expenseReport?.path}`);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+      setShowConfirmBox(false);
+    }
   };
+  
 
   return (
     <Box className="main-container-v1">

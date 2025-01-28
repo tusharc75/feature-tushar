@@ -151,7 +151,8 @@ const ExpenseReport = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     try {
-      let data: any = [], count;
+      let data: any = [],
+        count;
       const response: any = await axiosInstance().get(`${expenseReport.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
       data = response?.data?.data;
       count = response?.data?.count;
@@ -182,43 +183,55 @@ const ExpenseReport = () => {
     } else {
       recordsToDelete = selectedRecords.map((o) => o._id);
     }
+
     if (recordsToDelete.length > 0) {
       setDeleteLoading(true);
-      axiosInstance()
-        .put(`${expenseReport.api}/remove`, {
+
+      try {
+        const { data } = await axiosInstance().put(`${expenseReport.api}/remove`, {
           ids: recordsToDelete
-        })
-        .then(({ data }) => {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-          handleStatusChange(deleteRecord.selectedExpenses)
-          dispatch({ type: 'selection', selectedRecords: [] });
-          setShowDeleteConfirmBox(false);
-          setDeleteLoading(false);
-          if (deleteRecord) setDeleteRecord({});
-          fetchData();
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-          setShowDeleteConfirmBox(false);
-          setDeleteLoading(false);
         });
+
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+
+        if (deleteRecord?.selectedExpenses?.length > 0) {
+          await handleStatusChange(deleteRecord.selectedExpenses);
+        } else {
+          const allSelectedExpenses = selectedRecords.flatMap((record) => record.selectedExpenses || []);
+          if (allSelectedExpenses.length > 0) {
+            await handleStatusChange(allSelectedExpenses);
+          }
+        }
+
+        dispatch({ type: 'selection', selectedRecords: [] });
+        setShowDeleteConfirmBox(false);
+        setDeleteLoading(false);
+
+        if (deleteRecord) setDeleteRecord({});
+        fetchData();
+      } catch (error) {
+        toastConfig.setToastConfig(error);
+        setShowDeleteConfirmBox(false);
+        setDeleteLoading(false);
+      }
     }
   };
 
-      const handleStatusChange = async (expenseInfo) =>{
-        const newExpensesIds = expenseInfo.map((obj) => obj._id);
-    
-        axiosInstance()
-          .patch(`${expenses.api}/status/${newExpensesIds}`, { status: EXPENSE_STATUS.unreported })
-          .then(({ data }) => {})
-          .catch((error) => {
-            toastConfig.setToastConfig(error);
-          });
+  const handleStatusChange = async (expenseInfo) => {
+    for (let expense of expenseInfo) {
+      try {
+        await axiosInstance().patch(`${expenses.api}/status/${expense._id}`, {
+          status: EXPENSE_STATUS.unreported
+        });
+      } catch (error) {
+        toastConfig.setToastConfig(error);
       }
+    }
+  };
 
   const ActionMenuItems = () => {
     return (

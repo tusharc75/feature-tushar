@@ -32,7 +32,7 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { useTableReducer } from 'src/components/CustomReactTable';
 import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
 
-const ManageExpenseReports = ({ isClone = false,fetchReportData, expenseReportId = null, onClose, onSuccess }) => {
+const ManageExpenseReports = ({ isClone = false, fetchReportData, expenseReportId = null, onClose, onSuccess }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -45,6 +45,7 @@ const ManageExpenseReports = ({ isClone = false,fetchReportData, expenseReportId
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [title, setTitle] = useState('');
   const [selectedExpense, setSelectedExpense] = useState([]);
+  const [selectedRow, setSelectedRow] = useState([])
   const { state, dispatch } = useTableReducer();
   const { selectedRecords } = state;
   const [showAddExistingExpenseModal, setShowAddExistingExpenseModal] = useState(false);
@@ -100,12 +101,23 @@ const ManageExpenseReports = ({ isClone = false,fetchReportData, expenseReportId
     setIsSubmitting(true);
     const { fields, values, ...data } = value;
     data.selectedExpenses = selectedExpense;
-    if (expenseReportId && isClone === false) {
+
+    const status = EXPENSE_STATUS.unSubmitted;
+
+    if (expenseReportId && !isClone) {
       data._id = expenseReportId;
+
       axiosInstance()
         .put(`${expenseReport.api}`, data)
         .then(({ data }) => {
-          // handleStatusChange(EXPENSE_STATUS.unSubmitted);
+          selectedExpense.forEach((expense) => {
+            axiosInstance()
+              .patch(`${expenses.api}/status/${expense._id}`, { status })
+              .catch((error) => {
+                toastConfig.setToastConfig(error);
+              });
+          });
+
           setIsSubmitting(false);
           onSuccess();
           toastConfig.setToastConfig({
@@ -122,7 +134,14 @@ const ManageExpenseReports = ({ isClone = false,fetchReportData, expenseReportId
       axiosInstance()
         .post(`${expenseReport.api}`, data)
         .then(({ data: { data, message } }) => {
-          // handleStatusChange(EXPENSE_STATUS.unSubmitted);
+          selectedExpense.forEach((expense) => {
+            axiosInstance()
+              .patch(`${expenses.api}/status/${expense._id}`, { status })
+              .catch((error) => {
+                toastConfig.setToastConfig(error);
+              });
+          });
+
           history.push(`${routes?.expenseReportDetail?.path}/${data._id}`);
           setIsSubmitting(false);
           onSuccess(data);
@@ -152,19 +171,8 @@ const ManageExpenseReports = ({ isClone = false,fetchReportData, expenseReportId
   };
 
   const handleSaveExpenses = async (newExpenses) => {
-    const updatedExpenses = [ ...newExpenses,...selectedExpense];
+    const updatedExpenses = [...newExpenses, ...selectedExpense];
     setSelectedExpense(updatedExpenses);
-  };
-
-  const handleStatusChange = async (status) => {
-    const newExpensesIds = selectedExpense.map((obj) => obj._id);
-
-    axiosInstance()
-      .patch(`${expenses.api}/status/${newExpensesIds}`, { status })
-      .then(({ data }) => {})
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
   };
 
   const removeExpenseField = (id) => {
@@ -340,6 +348,10 @@ const ManageExpenseReports = ({ isClone = false,fetchReportData, expenseReportId
                   onClose={() => setShowManageExpensesDialog({ open: false, isClone: false, idToClone: null })}
                   onSuccess={(data) => {
                     setShowManageExpensesDialog({ open: false, isClone: false, idToClone: null });
+                    setSelectedExpense((prevExpenses) => {
+                      const updatedExpenses = prevExpenses.filter((exp) => exp._id !== data._id);
+                      return [...updatedExpenses, data];
+                    });
                     fetchReportData();
                   }}
                   isRedirectToDetailPage={false}

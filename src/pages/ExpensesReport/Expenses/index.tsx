@@ -22,7 +22,7 @@ const Expenses = (selectedExpenseData) => {
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const [columns, setColumns] = useState(null);
   const { generateColumns, checkStaticField } = useColumns();
-  const [selectedExpense, setSelectedExpense] = useState([]);
+  const [rows, setRows] = useState([]);
 
   useEffect(() => {
     fetchGridColumns();
@@ -44,15 +44,15 @@ const Expenses = (selectedExpenseData) => {
     const extracolumns: any = [
       ...newColumns,
       {
-        accessor: 'totalAmount', 
+        accessor: 'totalAmount',
         Header: 'Total Amount',
         minWidth: 100,
         width: 150,
         disableFilters: true,
         disableSortBy: false,
-        canDrag: true, 
+        canDrag: true,
         Cell: ({ row }) => {
-          return row?.original?.totalAmount ? ( 
+          return row?.original?.totalAmount ? (
             <div>
               <p className="text-truncate">{row?.original?.totalAmount}</p>
             </div>
@@ -73,33 +73,39 @@ const Expenses = (selectedExpenseData) => {
 
   const getQueryString = (expense) => {
     let queryString = `?`;
-    
+
     if (selectedEntity) {
       queryString = `${queryString}&entity=${selectedEntity}`;
     }
-  
+
     if (expense?._id) {
       const filterById = [{ field: '_id', term: expense._id }];
       queryString = `${queryString}&filterById=${encodeURIComponent(JSON.stringify(filterById))}&filterType=and`;
     }
-  
+
+    if (rows) {
+      const excludedIds = rows.map((field) => field._id);
+      if (excludedIds.length > 0) {
+        queryString = `${queryString}&excludeIds=${encodeURIComponent(JSON.stringify(excludedIds))}`;
+      }
+    }
+
     return queryString;
   };
-  
 
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
-  
+
     try {
       const promises = (selectedExpenseData?.selectedExpenseData || []).map((expense) => {
         const queryString = getQueryString(expense);
         return axiosInstance().get(`${expenses.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
       });
-  
+
       const results = await Promise.all(promises);
-  
+
       let allRows: any[] = [];
-      results.forEach((response) => { 
+      results.forEach((response) => {
         const data = response?.data?.data || [];
         const rows = data.map((u) => {
           const finalObject: any = prepareDataForGrid(u, user);
@@ -109,9 +115,10 @@ const Expenses = (selectedExpenseData) => {
         });
         allRows = [...allRows, ...rows];
       });
-  
+
+      setRows(allRows); // Update local rows state
       dispatch({ type: 'initialize', data: allRows, count: allRows.length });
-  
+
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
@@ -150,18 +157,11 @@ const Expenses = (selectedExpenseData) => {
     )
   };
 
-    const removeExpenseField = (id) => {
-      const removedExpense = selectedExpense.find((field) => field._id === id);
-      setSelectedExpense(selectedExpense.filter((field) => field._id !== id));
-      if (removedExpense) {
-        axiosInstance()
-          .patch(`${expenses.api}/status/${removedExpense._id}`, { status: EXPENSE_STATUS.unreported })
-          .then(({ data }) => {})
-          .catch((error) => {
-            toastConfig.setToastConfig(error);
-          });
-      }
-    };
+  const removeExpenseField = async (id) => {
+    const updatedRows = rows.filter((field) => field._id !== id);
+    setRows(updatedRows); // Update local rows state
+    dispatch({ type: 'initialize', data: updatedRows, count: updatedRows.length });
+  };
 
   return (
     <div className="main-container-v1">
