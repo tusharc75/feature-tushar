@@ -25,14 +25,24 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const renderedFrom = 'import-export';
 
-const ImportExportDialog = ({ handleClose, type, resource, subResource, referenceId, handleExport, api, additionalParams, refresh }) => {
+const ImportExportDialog = ({
+  handleClose,
+  type,
+  resource,
+  subResource,
+  referenceId,
+  handleExport,
+  api,
+  apiUrl = null,
+  additionalParams,
+  refresh
+}) => {
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const [columns, setColumns] = useState(null);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [downloading, setDownloading] = useState({ loading: false, type: null });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, pageSizes } = state;
-
 
   const [refreshInterval, setRefreshInterval] = useState(true);
 
@@ -41,7 +51,7 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
       fetchData();
     }, 10000);
     if (!refreshInterval) {
-      clearInterval(interval)
+      clearInterval(interval);
     }
     return () => clearInterval(interval);
   }, [refreshInterval]);
@@ -74,7 +84,7 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
             user: u?.user
           };
         });
-        setRefreshInterval(data?.data?.find((e) => e.status === IMPORT_EXPORT_STATUS.inProgress))
+        setRefreshInterval(data?.data?.find((e) => e.status === IMPORT_EXPORT_STATUS.inProgress));
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -212,7 +222,7 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
         importApi = `${importApi}?${additionalParams}`;
       }
       axiosInstance()
-        .post(importApi, formData, { responseType: 'blob', headers: { 'Content-Type': 'multipart/form-data' } })
+        .post(apiUrl ? apiUrl : importApi, formData, { responseType: 'blob', headers: { 'Content-Type': 'multipart/form-data' } })
         .then(() => {
           toastConfig.setToastConfig({
             open: true,
