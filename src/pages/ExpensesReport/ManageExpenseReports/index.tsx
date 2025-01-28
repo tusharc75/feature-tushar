@@ -30,6 +30,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import AddIcon from '@mui/icons-material/Add';
 import AddExpenses from 'src/pages/ExpensesReport/AddExpenses';
 import ExpenseTable from 'src/pages/ExpensesReport/ExpenseTable';
+import Expenses from 'src/pages/ExpensesReport/Expenses';
 
 const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose, onSuccess }) => {
   const history = useHistory();
@@ -41,7 +42,6 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [showExpenseDialog, setShowExpenseDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [title, setTitle] = useState('');
   const [selectedExpense, setSelectedExpense] = useState([]);
@@ -51,7 +51,7 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
       .get(`/field?resource=${sidebarResource.expenseReport}`)
       .then(({ data: { data } }) => {
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-        const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+        var fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
         if (expenseReportId) {
           axiosInstance()
             .get(`${expenseReport.api}/` + expenseReportId)
@@ -65,7 +65,9 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
                 });
               } else {
                 setTitle(`Edit - ${data.reportTitle}`);
-                setSelectedExpense(data.selectedExpenses);
+                // setSelectedExpense(data.selectedExpenses);
+                // const excludedFields = ['reportTitle', 'fromDate', 'toDate', 'status'];
+                // fieldsDataForUpdate = fieldsDataForUpdate.filter((field) => !['reportTitle','status']?.includes(field?.fieldName));
                 setInitialData({
                   fields: fieldsDataForUpdate,
                   values: { ...getObjKeysWithValues(data, fieldsDataForUpdate) }
@@ -99,7 +101,7 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
       axiosInstance()
         .put(`${expenseReport.api}`, data)
         .then(({ data }) => {
-          handleStatusChange(EXPENSE_STATUS.unSubmitted);
+          // handleStatusChange(EXPENSE_STATUS.unSubmitted);
           setIsSubmitting(false);
           onSuccess();
           toastConfig.setToastConfig({
@@ -116,7 +118,7 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
       axiosInstance()
         .post(`${expenseReport.api}`, data)
         .then(({ data: { data, message } }) => {
-          handleStatusChange(EXPENSE_STATUS.unSubmitted);
+          // handleStatusChange(EXPENSE_STATUS.unSubmitted);
           history.push(`${routes?.expenseReportDetail?.path}/${data._id}`);
           setIsSubmitting(false);
           onSuccess(data);
@@ -219,24 +221,13 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
                     resource={sidebarResource.expenseReport}
                     referenceId={expenseReportId || null}
                   />
-                  <Grid container spacing={2} sx={{ marginTop: 2 }}>
-                    <Grid size={{ xs: 8 }} sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-                      <ThemeButton
-                        onClick={() => {
-                          setShowExpenseDialog(true);
-                        }}
-                        buttonType="themeBorder"
-                        sx={{ marginRight: 0.5 }}
-                        aria-label="add"
-                      >
-                        <AddIcon fontSize="small" />
-                        Add Expense
-                      </ThemeButton>
-                    </Grid>
-                  </Grid>
-                  {selectedExpense.length > 0 && (
+                  {selectedExpense ? (
                     <div className="mt-2">
-                      <ExpenseTable removeExpenseField={removeExpenseField} selectedExpenses={selectedExpense} />
+                      <Expenses selectedExpenseData={selectedExpense} />
+                    </div>
+                  ) : (
+                    <div className="p-2">
+                      <CommonSkeleton lenArray={[...Array(10).keys()]} />
                     </div>
                   )}
                 </Form>
@@ -259,7 +250,7 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
                   isLoading={isSubmitting}
                   buttonType="theme"
                   id="dialog-save-button"
-                  disabled={isSubmitting || selectedExpense.length === 0}
+                  disabled={isSubmitting}
                   onClick={(e) => {
                     submitForm();
                   }}
@@ -281,7 +272,7 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
                   }}
                 />
               )}
-              {showExpenseDialog && (
+              {/* {showExpenseDialog && (
                 <AddExpenses
                   open={showExpenseDialog}
                   onClose={() => setShowExpenseDialog(false)}
@@ -291,7 +282,7 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
                   isSubmitting={isSubmitting}
                   onSave={handleSaveExpenses}
                 />
-              )}
+              )} */}
             </>
           )}
         </Formik>

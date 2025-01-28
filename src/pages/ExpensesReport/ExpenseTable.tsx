@@ -1,10 +1,12 @@
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, TableFooter } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { getUniqueCurrencies } from 'src/constants/helpers';
+import { useEffect } from 'react';
 
 const ExpenseTable = ({ selectedExpenses, removeExpenseField }) => {
 
   const totalAmount = selectedExpenses?.reduce((acc, row) => acc + parseFloat(row.totalAmount || 0), 0);
+  useEffect(()=>{console.log(selectedExpenses)},[])
   
   return (
     <TableContainer component={Paper}>

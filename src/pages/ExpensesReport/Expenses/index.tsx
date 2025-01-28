@@ -1,19 +1,24 @@
-import { Box, MenuItem } from '@mui/material';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { expenses, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { EXPENSE_STATUS, expenses, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import AddExpenses from 'src/pages/ExpensesReport/AddExpenses';
+import { isMobile, isTablet } from 'react-device-detect';
+import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
+import { useHistory } from 'react-router-dom';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const Expenses = (selectedExpenseData) => {
-
   const renderedFrom = camelCase(sidebarResource?.expenses);
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -23,6 +28,12 @@ const Expenses = (selectedExpenseData) => {
   const [columns, setColumns] = useState(null);
   const { generateColumns, checkStaticField } = useColumns();
   const { selectedRecords } = state;
+  const [showAddExistingExpenseModal, setShowAddExistingExpenseModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedExpense, setSelectedExpense] = useState([]);
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [showManageExpensesDialog, setShowManageExpensesDialog] = useState({ open: false, isClone: false, idToClone: null });
+  const history = useHistory();
 
   useEffect(() => {
     fetchGridColumns();
@@ -58,27 +69,26 @@ const Expenses = (selectedExpenseData) => {
         }
       }
     ];
-    setColumns([...extracolumns, 
-    ]);
+    setColumns([...extracolumns, ActionsRenderer]);
   };
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
-  }, [ selectedEntity]);
+  }, [selectedEntity]);
 
   const getQueryString = () => {
     let queryString = `?`;
     if (selectedEntity) {
       queryString = `${queryString}&entity=${selectedEntity}`;
     }
-  
-    const filterByIds = selectedExpenseData?.selectedExpenseData?.selectedExpenses?.map((expense) => ({ field: '_id', term: expense._id }));
+    console.log(selectedExpenseData);
+    const filterByIds = selectedExpenseData?.selectedExpenseData?.map((expense) => ({ field: '_id', term: expense._id }));
     if (filterByIds?.length) {
       queryString = `${queryString}&filterById=${encodeURIComponent(JSON.stringify(filterByIds))}&filterType=and`;
     }
-  
+
     return queryString;
   };
 
@@ -106,20 +116,69 @@ const Expenses = (selectedExpenseData) => {
     }
   };
 
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 110,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        <HtmlTooltip title={'Delete'}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              disabled={row?.original?.canDelete ? false : true}
+              onClick={() => {
+                console.log(row.original.id)
+                removeExpenseField(row.original.id);
+              }}
+            >
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+      </>
+    )
+  };
+
+  const handleSaveExpenses = async (newExpenses) => {
+    const updatedExpenses = [...selectedExpense, ...newExpenses];
+    setSelectedExpense(updatedExpenses);
+  };
+
+    const removeExpenseField = (id) => {
+      const removedExpense = selectedExpense.find((field) => field._id === id);
+      console.log(selectedExpense)
+      setSelectedExpense(selectedExpense.filter((field) => field._id !== id));
+      if (removedExpense) {
+        axiosInstance()
+          .patch(`${expenses.api}/status/${removedExpense._id}`, { status: EXPENSE_STATUS.unreported })
+          .then(({ data }) => {})
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
+      }
+    };
+
   const addButtonMenuItems = () => {
     return (
       <>
         <MenuItem
-          // onClick={() => {
-          //   history.push(routes?.expenses?.path);
-          // }}
+          onClick={() => {
+            setShowAddExistingExpenseModal(true);
+          }}
         >
           {`Add Existing ${resources?.expenses?.titlePlural}`}
         </MenuItem>
         <MenuItem
-          // onClick={() => {
-          //   history.push(routes?.expenses?.path);
-          // }}
+          onClick={() => {
+            setShowManageExpensesDialog({ open: true, isClone: false, idToClone: null });
+          }}
         >
           {`Create New ${resources?.expenses?.titlePlural}`}
         </MenuItem>
@@ -132,11 +191,10 @@ const Expenses = (selectedExpenseData) => {
       <>
         <MenuItem
           color="primary"
-          disabled={selectedRecords.length === 0 }
-          // onClick={() => {
-          //   setShowDeleteConfirmBox(true);
-          //   setDeleteBulkAssetCreationProduct(selectedRecords.map((d) => d._id));
-          // }}
+          disabled={selectedRecords.length === 0}
+          onClick={() => {
+            removeExpenseField(selectedRecords.map((d) => d._id));
+          }}
         >
           Delete
         </MenuItem>
@@ -144,11 +202,10 @@ const Expenses = (selectedExpenseData) => {
     );
   };
 
-
   return (
     <div className="main-container-v1">
       <>
-      <DetailsPageHeader
+        <DetailsPageHeader
           isAddButtonVisible={true}
           addButtonMenuItems={addButtonMenuItems()}
           isActionButtonVisible={true}
@@ -156,7 +213,7 @@ const Expenses = (selectedExpenseData) => {
           actionButtonProps={{ disabled: selectedRecords.length === 0 }}
           hasXpadding
         />
-        {columns ? (
+        {columns && selectedExpense ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
@@ -172,6 +229,30 @@ const Expenses = (selectedExpenseData) => {
           </Box>
         )}
       </>
+      {showAddExistingExpenseModal && (
+        <AddExpenses
+          open={showAddExistingExpenseModal}
+          onClose={() => setShowAddExistingExpenseModal(false)}
+          fullScreen
+          selectedExpense={selectedExpense}
+          setFullScreen={setFullScreen}
+          isSubmitting={isSubmitting}
+          onSave={handleSaveExpenses}
+          fetchReportData={fetchData}
+        />
+      )}
+      {showManageExpensesDialog.open && (
+        <ManageExpenses
+          isClone={showManageExpensesDialog.isClone}
+          expenseId={showManageExpensesDialog.idToClone}
+          onClose={() => setShowManageExpensesDialog({ open: false, isClone: false, idToClone: null })}
+          onSuccess={(data) => {
+            setShowManageExpensesDialog({ open: false, isClone: false, idToClone: null });
+            fetchData();
+          }}
+          isRedirectToDetailPage ={false}
+        />
+      )}
     </div>
   );
 };

@@ -13,14 +13,7 @@ import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import {
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  expenseReport,
-  sidebarResource,
-  expenses,
-  EXPENSE_STATUS,
-} from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, expenseReport, sidebarResource, expenses, EXPENSE_STATUS } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
@@ -272,6 +265,7 @@ const ExpenseReport = () => {
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
             resource={sidebarResource.expenseReport}
+            showFilters={true}
           />
         ) : (
           <Box p={2} height={500}>
@@ -281,11 +275,12 @@ const ExpenseReport = () => {
         {showDeleteConfirmBox ? (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord
-              ? `${resources?.expenseReport?.titleSingular?.toLowerCase()} :
+            message={`Are you sure you want to delete ${
+              deleteRecord
+                ? `${resources?.expenseReport?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.reportTitle}`
-              : `selected ${resources?.expenseReport?.titlePlural?.toLowerCase()}`
-              } ?`}
+                : `selected ${resources?.expenseReport?.titlePlural?.toLowerCase()}`
+            } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

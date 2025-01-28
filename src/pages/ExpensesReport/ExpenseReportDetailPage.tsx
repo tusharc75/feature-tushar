@@ -116,24 +116,12 @@ const ExpenseReportDetailsPage = () => {
     axiosInstance()
       .put(`${expenseReport.api}/remove`, { ids: [expenseReportData._id] })
       .then(() => {
-        handleStatusChange(EXPENSE_STATUS.unreported);
         setShowConfirmBox(false);
         history.push(`${routes?.expenseReport?.path}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
         setShowConfirmBox(false);
-      });
-  };
-
-  const handleStatusChange = async (status) => {
-    const newExpensesIds = expenseReportData.selectedExpenses.map((obj) => obj._id);
-
-    axiosInstance()
-      .patch(`${expenses.api}/status/${newExpensesIds}`, { status })
-      .then(({ data }) => {})
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
       });
   };
 
@@ -187,7 +175,7 @@ const ExpenseReportDetailsPage = () => {
           <Box>
           {!loadingDetails && expenseReportData && fields ? (
               <div className="mt-2">
-                <Expenses selectedExpenseData={expenseReportData} />
+                <Expenses selectedExpenseData={expenseReportData?.selectedExpenses} />
               </div>
             ) : (
               <div className="p-2">
