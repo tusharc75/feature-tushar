@@ -5,7 +5,7 @@ import { useContext, useEffect, useState } from 'react';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { EXPENSE_STATUS, expenses, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { expenses, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -116,7 +116,7 @@ const Expenses = (selectedExpenseData) => {
         allRows = [...allRows, ...rows];
       });
 
-      setRows(allRows); // Update local rows state
+      setRows(allRows);
       dispatch({ type: 'initialize', data: allRows, count: allRows.length });
 
       setTimeout(() => {
@@ -159,7 +159,7 @@ const Expenses = (selectedExpenseData) => {
 
   const removeExpenseField = async (id) => {
     const updatedRows = rows.filter((field) => field._id !== id);
-    setRows(updatedRows); // Update local rows state
+    setRows(updatedRows);
     dispatch({ type: 'initialize', data: updatedRows, count: updatedRows.length });
   };
 
