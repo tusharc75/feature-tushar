@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -10,11 +10,6 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { DetailsPageHeader } from 'src/components/PageHeaders';
-import AddExpenses from 'src/pages/ExpensesReport/AddExpenses';
-import { isMobile, isTablet } from 'react-device-detect';
-import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
-import { useHistory } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@mui/icons-material/Delete';
 
@@ -27,17 +22,15 @@ const Expenses = (selectedExpenseData) => {
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const [columns, setColumns] = useState(null);
   const { generateColumns, checkStaticField } = useColumns();
-  const { selectedRecords } = state;
-  const [showAddExistingExpenseModal, setShowAddExistingExpenseModal] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState([]);
-  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [showManageExpensesDialog, setShowManageExpensesDialog] = useState({ open: false, isClone: false, idToClone: null });
-  const history = useHistory();
 
   useEffect(() => {
     fetchGridColumns();
   }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [selectedEntity, selectedExpenseData?.selectedExpenseData]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -51,15 +44,15 @@ const Expenses = (selectedExpenseData) => {
     const extracolumns: any = [
       ...newColumns,
       {
-        accessor: 'totalAmount',
+        accessor: 'totalAmount', 
         Header: 'Total Amount',
         minWidth: 100,
         width: 150,
         disableFilters: true,
         disableSortBy: false,
-        canDrag: true,
+        canDrag: true, 
         Cell: ({ row }) => {
-          return row?.original?.totalAmount ? (
+          return row?.original?.totalAmount ? ( 
             <div>
               <p className="text-truncate">{row?.original?.totalAmount}</p>
             </div>
@@ -78,34 +71,47 @@ const Expenses = (selectedExpenseData) => {
     return () => cancelTokenSource.cancel();
   }, [selectedEntity]);
 
-  const getQueryString = () => {
+  const getQueryString = (expense) => {
     let queryString = `?`;
+    
     if (selectedEntity) {
       queryString = `${queryString}&entity=${selectedEntity}`;
     }
-    const filterByIds = selectedExpenseData?.selectedExpenseData?.map((expense) => ({ field: '_id', term: expense._id }));
-    if (filterByIds?.length) {
-      queryString = `${queryString}&filterById=${encodeURIComponent(JSON.stringify(filterByIds))}&filterType=and`;
+  
+    if (expense?._id) {
+      const filterById = [{ field: '_id', term: expense._id }];
+      queryString = `${queryString}&filterById=${encodeURIComponent(JSON.stringify(filterById))}&filterType=and`;
     }
-
+  
     return queryString;
   };
+  
 
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
-    const queryString = getQueryString();
+  
     try {
-      let data: any = [], count;
-      const response: any = await axiosInstance().get(`${expenses.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
-      data = response?.data?.data;
-      count = response?.data?.count;
-      let rows = data.map((u) => {
-        let finalObject: any = prepareDataForGrid(u, user);
-        finalObject['isChecked'] = false;
-        finalObject['canDelete'] = permissions?.expenses?.isDelete;
-        return finalObject;
+      const promises = (selectedExpenseData?.selectedExpenseData || []).map((expense) => {
+        const queryString = getQueryString(expense);
+        return axiosInstance().get(`${expenses.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
       });
-      dispatch({ type: 'initialize', data: rows, count: count });
+  
+      const results = await Promise.all(promises);
+  
+      let allRows: any[] = [];
+      results.forEach((response) => { 
+        const data = response?.data?.data || [];
+        const rows = data.map((u) => {
+          const finalObject: any = prepareDataForGrid(u, user);
+          finalObject['isChecked'] = false;
+          finalObject['canDelete'] = permissions?.expenses?.isDelete;
+          return finalObject;
+        });
+        allRows = [...allRows, ...rows];
+      });
+  
+      dispatch({ type: 'initialize', data: allRows, count: allRows.length });
+  
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
@@ -144,11 +150,6 @@ const Expenses = (selectedExpenseData) => {
     )
   };
 
-  const handleSaveExpenses = async (newExpenses) => {
-    const updatedExpenses = [...selectedExpense, ...newExpenses];
-    setSelectedExpense(updatedExpenses);
-  };
-
     const removeExpenseField = (id) => {
       const removedExpense = selectedExpense.find((field) => field._id === id);
       setSelectedExpense(selectedExpense.filter((field) => field._id !== id));
@@ -162,55 +163,10 @@ const Expenses = (selectedExpenseData) => {
       }
     };
 
-  const addButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          onClick={() => {
-            setShowAddExistingExpenseModal(true);
-          }}
-        >
-          {`Add Existing ${resources?.expenses?.titlePlural}`}
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            setShowManageExpensesDialog({ open: true, isClone: false, idToClone: null });
-          }}
-        >
-          {`Create New ${resources?.expenses?.titlePlural}`}
-        </MenuItem>
-      </>
-    );
-  };
-
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          color="primary"
-          disabled={selectedRecords.length === 0}
-          onClick={() => {
-            removeExpenseField(selectedRecords.map((d) => d._id));
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
-
   return (
     <div className="main-container-v1">
       <>
-        <DetailsPageHeader
-          isAddButtonVisible={true}
-          addButtonMenuItems={addButtonMenuItems()}
-          isActionButtonVisible={true}
-          actionButtonMenuItems={actionButtonMenuItems()}
-          actionButtonProps={{ disabled: selectedRecords.length === 0 }}
-          hasXpadding
-        />
-        {columns && selectedExpense ? (
+        {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
@@ -226,30 +182,6 @@ const Expenses = (selectedExpenseData) => {
           </Box>
         )}
       </>
-      {showAddExistingExpenseModal && (
-        <AddExpenses
-          open={showAddExistingExpenseModal}
-          onClose={() => setShowAddExistingExpenseModal(false)}
-          fullScreen
-          selectedExpense={selectedExpense}
-          setFullScreen={setFullScreen}
-          isSubmitting={isSubmitting}
-          onSave={handleSaveExpenses}
-          fetchReportData={fetchData}
-        />
-      )}
-      {showManageExpensesDialog.open && (
-        <ManageExpenses
-          isClone={showManageExpensesDialog.isClone}
-          expenseId={showManageExpensesDialog.idToClone}
-          onClose={() => setShowManageExpensesDialog({ open: false, isClone: false, idToClone: null })}
-          onSuccess={(data) => {
-            setShowManageExpensesDialog({ open: false, isClone: false, idToClone: null });
-            fetchData();
-          }}
-          isRedirectToDetailPage ={false}
-        />
-      )}
     </div>
   );
 };

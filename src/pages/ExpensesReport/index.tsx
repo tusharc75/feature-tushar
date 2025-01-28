@@ -294,6 +294,7 @@ const ExpenseReport = () => {
         <ManageExpenseReports
           isClone={showManageExpenseReportDialog.isClone}
           expenseReportId={showManageExpenseReportDialog.idToClone}
+          fetchReportData={fetchData}
           onClose={() => setShowManageExpenseReportDialog({ open: false, isClone: false, idToClone: null })}
           onSuccess={(data) => {
             history.push(`${routes?.expenseReportDetail?.path}/${data._id}`);

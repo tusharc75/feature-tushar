@@ -1,7 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { Formik, Form } from 'formik';
-import Grid from '@mui/material/Grid2';
-import { Box } from '@mui/material';
+import { Box, MenuItem } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import { useHistory } from 'react-router-dom';
 import { isEqual } from 'lodash';
@@ -27,12 +26,13 @@ import {
 } from '../../../constants/helpers';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import AddIcon from '@mui/icons-material/Add';
 import AddExpenses from 'src/pages/ExpensesReport/AddExpenses';
-import ExpenseTable from 'src/pages/ExpensesReport/ExpenseTable';
 import Expenses from 'src/pages/ExpensesReport/Expenses';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { useTableReducer } from 'src/components/CustomReactTable';
+import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
 
-const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose, onSuccess }) => {
+const ManageExpenseReports = ({ isClone = false,fetchReportData, expenseReportId = null, onClose, onSuccess }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -45,6 +45,10 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [title, setTitle] = useState('');
   const [selectedExpense, setSelectedExpense] = useState([]);
+  const { state, dispatch } = useTableReducer();
+  const { selectedRecords } = state;
+  const [showAddExistingExpenseModal, setShowAddExistingExpenseModal] = useState(false);
+  const [showManageExpensesDialog, setShowManageExpensesDialog] = useState({ open: false, isClone: false, idToClone: null });
 
   useEffect(() => {
     axiosInstance()
@@ -65,7 +69,7 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
                 });
               } else {
                 setTitle(`Edit - ${data.reportTitle}`);
-                // setSelectedExpense(data.selectedExpenses);
+                setSelectedExpense(data.selectedExpenses);
                 // const excludedFields = ['reportTitle', 'fromDate', 'toDate', 'status'];
                 // fieldsDataForUpdate = fieldsDataForUpdate.filter((field) => !['reportTitle','status']?.includes(field?.fieldName));
                 setInitialData({
@@ -148,7 +152,7 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
   };
 
   const handleSaveExpenses = async (newExpenses) => {
-    const updatedExpenses = [...selectedExpense, ...newExpenses];
+    const updatedExpenses = [ ...newExpenses,...selectedExpense];
     setSelectedExpense(updatedExpenses);
   };
 
@@ -174,6 +178,43 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
           toastConfig.setToastConfig(error);
         });
     }
+  };
+
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setShowAddExistingExpenseModal(true);
+          }}
+        >
+          {`Add Existing ${resources?.expenses?.titlePlural}`}
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setShowManageExpensesDialog({ open: true, isClone: false, idToClone: null });
+          }}
+        >
+          {`Create New ${resources?.expenses?.titlePlural}`}
+        </MenuItem>
+      </>
+    );
+  };
+
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          color="primary"
+          disabled={selectedRecords.length === 0}
+          onClick={() => {
+            removeExpenseField(selectedRecords.map((d) => d._id));
+          }}
+        >
+          Delete
+        </MenuItem>
+      </>
+    );
   };
 
   return (
@@ -220,6 +261,14 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
                     fullWidth
                     resource={sidebarResource.expenseReport}
                     referenceId={expenseReportId || null}
+                  />
+                  <DetailsPageHeader
+                    isAddButtonVisible={true}
+                    addButtonMenuItems={addButtonMenuItems()}
+                    isActionButtonVisible={true}
+                    actionButtonMenuItems={actionButtonMenuItems()}
+                    actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+                    hasXpadding
                   />
                   {selectedExpense ? (
                     <div className="mt-2">
@@ -272,17 +321,30 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
                   }}
                 />
               )}
-              {/* {showExpenseDialog && (
+              {showAddExistingExpenseModal && (
                 <AddExpenses
-                  open={showExpenseDialog}
-                  onClose={() => setShowExpenseDialog(false)}
+                  open={showAddExistingExpenseModal}
+                  onClose={() => setShowAddExistingExpenseModal(false)}
                   fullScreen
                   selectedExpense={selectedExpense}
                   setFullScreen={setFullScreen}
                   isSubmitting={isSubmitting}
                   onSave={handleSaveExpenses}
+                  fetchReportData={fetchReportData}
                 />
-              )} */}
+              )}
+              {showManageExpensesDialog.open && (
+                <ManageExpenses
+                  isClone={showManageExpensesDialog.isClone}
+                  expenseId={showManageExpensesDialog.idToClone}
+                  onClose={() => setShowManageExpensesDialog({ open: false, isClone: false, idToClone: null })}
+                  onSuccess={(data) => {
+                    setShowManageExpensesDialog({ open: false, isClone: false, idToClone: null });
+                    fetchReportData();
+                  }}
+                  isRedirectToDetailPage={false}
+                />
+              )}
             </>
           )}
         </Formik>

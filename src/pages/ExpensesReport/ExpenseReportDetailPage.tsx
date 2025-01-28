@@ -215,6 +215,7 @@ const ExpenseReportDetailsPage = () => {
         <ManageExpenseReports
           isClone={false}
           expenseReportId={id}
+          fetchReportData={fetchData}
           onClose={() => setOpenUpdateDialog(false)}
           onSuccess={() => {
             setOpenUpdateDialog(false);
