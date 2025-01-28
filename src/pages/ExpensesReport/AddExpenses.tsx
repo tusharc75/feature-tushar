@@ -122,7 +122,6 @@ function AddExpenses({
   const handleSave = (selectedRecords) => {
     setSelectedRows(selectedRecords);
     onSave(selectedRows); 
-    console.log(selectedRows);
     onClose();
   };
 

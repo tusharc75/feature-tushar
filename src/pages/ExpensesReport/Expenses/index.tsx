@@ -83,7 +83,6 @@ const Expenses = (selectedExpenseData) => {
     if (selectedEntity) {
       queryString = `${queryString}&entity=${selectedEntity}`;
     }
-    console.log(selectedExpenseData);
     const filterByIds = selectedExpenseData?.selectedExpenseData?.map((expense) => ({ field: '_id', term: expense._id }));
     if (filterByIds?.length) {
       queryString = `${queryString}&filterById=${encodeURIComponent(JSON.stringify(filterByIds))}&filterType=and`;
@@ -134,7 +133,6 @@ const Expenses = (selectedExpenseData) => {
               aria-label="Delete"
               disabled={row?.original?.canDelete ? false : true}
               onClick={() => {
-                console.log(row.original.id)
                 removeExpenseField(row.original.id);
               }}
             >
@@ -153,7 +151,6 @@ const Expenses = (selectedExpenseData) => {
 
     const removeExpenseField = (id) => {
       const removedExpense = selectedExpense.find((field) => field._id === id);
-      console.log(selectedExpense)
       setSelectedExpense(selectedExpense.filter((field) => field._id !== id));
       if (removedExpense) {
         axiosInstance()

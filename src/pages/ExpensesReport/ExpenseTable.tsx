@@ -6,7 +6,6 @@ import { useEffect } from 'react';
 const ExpenseTable = ({ selectedExpenses, removeExpenseField }) => {
 
   const totalAmount = selectedExpenses?.reduce((acc, row) => acc + parseFloat(row.totalAmount || 0), 0);
-  useEffect(()=>{console.log(selectedExpenses)},[])
   
   return (
     <TableContainer component={Paper}>
