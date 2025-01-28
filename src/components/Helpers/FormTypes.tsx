@@ -115,7 +115,7 @@ const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false, wa
           )}
         </Grid>
         <Grid>
-          <Box style={{ marginTop: '7px' }}>
+          <Box>
             <HtmlTooltip title={<Typography>{info}</Typography>}>
               <InfoIcon color="disabled" />
             </HtmlTooltip>
@@ -1266,8 +1266,8 @@ const FormTypes = (props) => {
           warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
           doNotShowInfoTooltip={doNotShowInfoTooltip}
         >
-          <Grid container spacing={1}>
-            <Grid style={{ flexGrow: 1 }}>
+          <div className="flex items-center gap-1">
+            <div className="flex-grow">
               <Autocomplete
                 {...rest}
                 limitTags={2}
@@ -1385,10 +1385,10 @@ const FormTypes = (props) => {
                   />
                 )}
               />
-            </Grid>
+            </div>
 
             {!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) && (
-              <div style={{ marginTop: '7px' }}>
+              <div className="flex-shrink-0">
                 <HtmlTooltip title={`Add ${fieldData?.fieldLabel}`}>
                   <IconButton onClick={() => setOptionSaveDialog(true)} size="small" color="primary">
                     <AddCircleIcon />
@@ -1409,7 +1409,7 @@ const FormTypes = (props) => {
                 )}
               </div>
             )}
-          </Grid>
+          </div>
         </InfoLabel>
       </>
     ) : type === 'vlookupDropdown' && fieldData && !fieldData?.isvlookupReverse ? (
@@ -1951,7 +1951,7 @@ const FormTypes = (props) => {
         warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
         warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
       >
-        <Grid container spacing={1}>
+        <Grid container className="gap-1" alignItems={'center'}>
           <Grid
             size={{
               xs: !lookup && (addAdditionalOption || fieldData?.addAdditionalOption) ? 10 : 12
@@ -2107,7 +2107,7 @@ const FormTypes = (props) => {
           </Grid>
           {!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) && (
             <Grid size={{ xs: 2 }}>
-              <Box style={{ marginTop: '7px' }}>
+              <Box>
                 <IconButton onClick={() => setOptionSaveDialog(true)} size="small" color="primary">
                   <AddCircleIcon />
                 </IconButton>
