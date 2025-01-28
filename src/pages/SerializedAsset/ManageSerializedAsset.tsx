@@ -290,7 +290,7 @@ const ManageSerializedAsset = ({
                                 <Grid key={index2} size={{ xs: 12, sm: 6, md: 6 }}>
                                   {field.fieldName === 'product' ? (
                                     <Grid key={field.fieldName} size={{ xs: 12, sm: 12, md: 12 }}>
-                                      <Box display="flex">
+                                      <Box display="flex" className="items-center gap-1">
                                         <Box flexGrow={1}>
                                           <FormTypes
                                             {...field}
@@ -337,31 +337,29 @@ const ManageSerializedAsset = ({
                                           />
                                         </Box>
                                         {permissions?.product?.isCreate && (
-                                          <Box className="ml-1 mt-1">
-                                            <HtmlTooltip title={`Add ${resources?.product?.titlePlural}`}>
-                                              <IconButton
-                                                onClick={() => {
-                                                  setProductOpen({ open: true, isClone: false });
-                                                }}
-                                                disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone}
-                                                size="small"
-                                              >
-                                                <AddIcon
-                                                  color={
-                                                    productId
-                                                      ? 'disabled'
-                                                      : Boolean(productInventoryId) && !isClone
-                                                        ? field.disableOnEdit || field.isUneditable
-                                                          ? 'disabled'
-                                                          : 'primary'
-                                                        : field.isUneditable
-                                                          ? 'disabled'
-                                                          : 'primary'
-                                                  }
-                                                />
-                                              </IconButton>
-                                            </HtmlTooltip>
-                                          </Box>
+                                          <HtmlTooltip title={`Add ${resources?.product?.titlePlural}`}>
+                                            <IconButton
+                                              onClick={() => {
+                                                setProductOpen({ open: true, isClone: false });
+                                              }}
+                                              disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone}
+                                              size="small"
+                                            >
+                                              <AddIcon
+                                                color={
+                                                  productId
+                                                    ? 'disabled'
+                                                    : Boolean(productInventoryId) && !isClone
+                                                      ? field.disableOnEdit || field.isUneditable
+                                                        ? 'disabled'
+                                                        : 'primary'
+                                                      : field.isUneditable
+                                                        ? 'disabled'
+                                                        : 'primary'
+                                                }
+                                              />
+                                            </IconButton>
+                                          </HtmlTooltip>
                                         )}
                                       </Box>
                                     </Grid>
