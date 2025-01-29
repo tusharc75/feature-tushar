@@ -41,6 +41,11 @@ export const gridFilterParser = (filters) => {
   return { filterByIds, deepFilters };
 };
 
+const marginMap = {
+  left: {},
+  right: { marginLeft: 'auto' }
+};
+
 export const getStickyPosition = (columnDef: TColType, index, table) => {
   const obj = {
     className: columnDef.sticky ? `sticky-cell-${columnDef.sticky}` : '',
@@ -73,15 +78,10 @@ export const getStickyPosition = (columnDef: TColType, index, table) => {
 
   if (['left', 'right'].includes(columnDef.sticky)) {
     const offset = addSizes(index);
-    obj.style = { position: 'sticky', [columnDef.sticky]: offset } as React.CSSProperties;
+    obj.style = { position: 'sticky', [columnDef.sticky]: offset, ...marginMap[columnDef.sticky] } as React.CSSProperties;
   }
 
   return obj;
-};
-
-const marginMap = {
-  left: {},
-  right: { marginLeft: 'auto' }
 };
 
 export const getStickyPosition2 = (columnDef: TColType, index, colSizes) => {
@@ -702,7 +702,7 @@ export const filtermodelToFormValue = (filtermodel: FilterModel) => {
 };
 
 export function adjustSizes(original: TColType[], visibleColumns: { [key: string]: boolean }, containerSize: number): TColType[] | null {
-  const visibleColumnsArray = original.filter((col) => visibleColumns[col.id || col.accessor]);
+  const visibleColumnsArray = Object.keys(visibleColumns).length > 0 ? original.filter((col) => visibleColumns[col.id || col.accessor]) : original;
   const totalSize = visibleColumnsArray.reduce((acc, size) => acc + (size.size || 200), 0);
 
   if (totalSize >= containerSize) {
@@ -711,6 +711,7 @@ export function adjustSizes(original: TColType[], visibleColumns: { [key: string
 
   const maxWidthColumnsSum = visibleColumnsArray.reduce((acc, size) => acc + (size.maxSize || 0), 0);
   const scaleFactor = (containerSize - maxWidthColumnsSum) / (totalSize - maxWidthColumnsSum);
+
   if (scaleFactor === Infinity) {
     return null;
   }
