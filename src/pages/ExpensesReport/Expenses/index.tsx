@@ -23,9 +23,9 @@ const Expenses = (selectedExpenseData) => {
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const [columns, setColumns] = useState(null);
   const { generateColumns, checkStaticField } = useColumns();
-  const [rows, setRows] = useState([]);
-  const [deletedIds, setDeletedIds] = useState([]);
   const { selectedRecords } = state;
+  const pathSegments = (window.location.href).split("/");
+  const pid = pathSegments[pathSegments.length - 1].split("?")[0];
 
   useEffect(() => {
     fetchGridColumns();
@@ -33,7 +33,7 @@ const Expenses = (selectedExpenseData) => {
 
   useEffect(() => {
     fetchData();
-  }, [selectedEntity, selectedExpenseData?.selectedExpenseData, deletedIds]);
+  }, [selectedEntity, selectedExpenseData?.selectedExpenseData]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -90,7 +90,6 @@ const Expenses = (selectedExpenseData) => {
 
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
-
     try {
       const promises = (selectedExpenseData?.selectedExpenseData || []).map((expense) => {
         const queryString = getQueryString(expense);
@@ -102,8 +101,7 @@ const Expenses = (selectedExpenseData) => {
       let allRows = [];
       results.forEach((response) => {
         const data = response?.data?.data || [];
-        const filteredData = data.filter((u) => !deletedIds.includes(u._id)); // Exclude deleted rows
-        const rows = filteredData.map((u) => {
+        const rows = data.map((u) => {
           const finalObject = prepareDataForGrid(u, user);
           finalObject['isChecked'] = false;
           finalObject['canDelete'] = permissions?.expenses?.isDelete;
@@ -112,7 +110,6 @@ const Expenses = (selectedExpenseData) => {
         allRows = [...allRows, ...rows];
       });
 
-      setRows(allRows);
       dispatch({ type: 'initialize', data: allRows, count: allRows.length });
 
       setTimeout(() => {
@@ -125,9 +122,12 @@ const Expenses = (selectedExpenseData) => {
   };
   
   const handleDelete = async (id) => {
-    setDeletedIds((prev) => [...prev, id]); 
-    setRows((prevRows) => prevRows.filter((row) => row._id !== id)); 
-    await axiosInstance().patch(`${expenses.api}/status/${id}`, { status: EXPENSE_STATUS?.unreported });
+      axiosInstance()
+      .put(`${routes.expenseReport.path}/expenses/${pid}/delete`, { id })
+      .then(({ data }) => {
+        dispatch({ type: 'selection', selectedRecords: [] });
+        fetchData();
+      })
   };
 
   const ActionsRenderer = {

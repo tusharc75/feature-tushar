@@ -1,6 +1,6 @@
 import { Box, IconButton, MenuItem, useMediaQuery } from '@mui/material';
 import { Delete } from '@mui/icons-material';
-import React from 'react';
+import React, { useContext } from 'react';
 import { MobileExportIcon, MobileImportIcon } from 'src/assets/svg/svgIcons';
 import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -23,9 +23,11 @@ interface ConfigProps {
 const renderedFrom = 'zone';
 
 const Zipcode = (props: ConfigProps) => {
-  const isMobile = useMediaQuery('(max-width:600px)');
   const { id } = props;
-  const { setToastConfig, toastConfig } = React.useContext(CustomToastContext);
+
+  const toastConfig = useContext(CustomToastContext);
+
+  const { setToastConfig, } = React.useContext(CustomToastContext);
   const [openDialog, setOpenDialog] = React.useState(false);
   const [removing, setRemoving] = React.useState(false);
   const [showConfirmBox, setShowConfirmBox] = React.useState({
@@ -149,7 +151,6 @@ const Zipcode = (props: ConfigProps) => {
         });
         getZipData();
         setRemoving(false);
-        setToastConfig('Zipcode removed successfully');
       })
       .catch((err) => {
         setShowConfirmBox({
@@ -216,26 +217,27 @@ const Zipcode = (props: ConfigProps) => {
             }}
             type="file"
           />
-          <ThemeButton iconForMobile={<MobileImportIcon />} mobileTooltip="Import from Excel">
-            {isMobile ? '' : 'Import from Excel'}
+          <ThemeButton
+            iconForMobile={<MobileImportIcon />}
+            mobileTooltip="Import from Excel">
+            {'Import from Excel'}
           </ThemeButton>
         </label>
         <ThemeButton onClick={handleExportFields} mobileTooltip="Export to Excel" iconForMobile={<MobileExportIcon />}>
           Export to Excel
         </ThemeButton>
-        <DeleteButton
-          mode="light"
-          onClick={() => {
-            setShowConfirmBox({
-              open: true,
-              zips: selectedRecords.map((s) => s.zipCode)
-            });
-          }}
-          size="small"
-          disabled={selectedRecords.length === 0}
-          disableElevation
-          text={'Delete'}
-        />
+        {selectedRecords.length &&
+          <DeleteButton
+            onClick={() => {
+              setShowConfirmBox({
+                open: true,
+                zips: selectedRecords.map((s) => s.zipCode)
+              });
+            }}
+
+            text={'Delete'}
+          />
+        }
       </>
     );
   };

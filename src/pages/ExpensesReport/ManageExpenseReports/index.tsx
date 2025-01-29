@@ -38,15 +38,13 @@ const ManageExpenseReports = ({ isClone = false, fetchReportData, expenseReportI
   const {
     state: { user, resources }
   }: any = useData();
-
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [title, setTitle] = useState('');
   const [selectedExpense, setSelectedExpense] = useState([]);
-  const [selectedRow, setSelectedRow] = useState([])
-  const { state, dispatch } = useTableReducer();
+  const { state } = useTableReducer();
   const { selectedRecords } = state;
   const [showAddExistingExpenseModal, setShowAddExistingExpenseModal] = useState(false);
   const [showManageExpensesDialog, setShowManageExpensesDialog] = useState({ open: false, isClone: false, idToClone: null });

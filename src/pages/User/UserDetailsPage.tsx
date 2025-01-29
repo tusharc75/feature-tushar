@@ -423,12 +423,8 @@ const UserDetailsPage = () => {
                   Edit
                 </ThemeButton>
               ) : null}
-              {permissions?.user?.isDelete ? (
-                <DeleteButton
-                  text={'Delete'}
-                  disabled={user?.user?._id === id || userData?.userType === userType.brandAdmin}
-                  onClick={() => handleDeleteUser(true)}
-                />
+              {permissions?.user?.isDelete && user?.user?._id !== id && userData?.userType !== userType.brandAdmin ? (
+                <DeleteButton text={'Delete'} onClick={() => handleDeleteUser(true)} />
               ) : null}
               <ActivityButton
                 referenceId={userData?._id}

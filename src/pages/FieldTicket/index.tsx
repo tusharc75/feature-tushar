@@ -322,6 +322,8 @@ const FieldTicket = () => {
             total={rowCount}
             recordsToExport={selectedRecords?.length}
             ids={selectedRecords?.map((obj) => obj._id)}
+            asyncExport={true}
+            resource={sidebarResource.fieldTicket}
             onExportToExcelSuccess={() => {
               fetchData();
             }}

@@ -52,6 +52,7 @@ import {
   generateEditService
 } from '../walkmeSteps';
 import { nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
+import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 
 const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep, handleChangeStatus, resourcePolicy, fetchData }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Material`;
@@ -226,13 +227,30 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
         accessor: 'competencyType',
         Header: 'Competency Type',
         width: 250,
-        Cell: ({ row }) => (row.original['competencyType'] ? <p>{row.original?.competencyType}</p> : <NoDataCell />)
+        Cell: ({ row }) => <DropdownCell
+          permissions={permissions}
+          permissionForLinks={{}}
+          field={{
+            fieldName: 'competencyType',
+            lookupResource: sidebarResource.competencyType
+          }}
+          original={row?.original}
+        />
       },
       {
         accessor: 'competencies',
         Header: 'Competencies',
         width: 250,
-        Cell: ({ row }) => (row.original['competencies'] ? <p>{row.original?.competencies}</p> : <NoDataCell />)
+        Cell: ({ row }) =>
+          <DropdownCell
+            permissions={permissions}
+            permissionForLinks={{}}
+            field={{
+              fieldName: 'competencies',
+              lookupResource: sidebarResource.competencies
+            }}
+            original={row?.original}
+          />
       }
     ];
     column = [...column, ...newColumns];
@@ -327,7 +345,8 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           : parent.type === MATERIAL_TYPE.package
             ? parent?.packageDetail?.packageDescription || ''
             : parent.description || '';
-      parent.competencyType = `${parent?.serviceDetail?.competencyType?.optionLabel || ''}`;
+      parent.competencyType = parent?.serviceDetail?.competencyType;
+      parent.competencies = parent?.serviceDetail?.competencies;
       parent.isValid = parent['finalPrice_' + fieldTicketData?.currency?.toLowerCase()] ? true : !isPriceRequired;
       parent.canDelete = parent.canDelete ?? true;
       parent.subRows = generateNestedData(data, parent, isPriceRequired);
@@ -350,7 +369,8 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
       _subRow.index = parent.index + '.' + (j + 1);
       _subRow.detail = _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageName : '';
       _subRow.description = _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageDescription || '' : '';
-      _subRow.competencyType = `${_subRow?.serviceDetail?.competencyType?.optionLabel || ''}`;
+      _subRow.competencyType = _subRow?.serviceDetail?.competencyType;
+      _subRow.competencies = _subRow?.serviceDetail?.competencies;
       _subRow.qty = _subRow.qty * parent.qty;
       _subRow.isValid = _subRow['finalPrice_' + fieldTicketData?.currency?.toLowerCase()] ? true : !isPriceRequired;
       _subRow.canDelete = _subRow.canDelete ?? true;

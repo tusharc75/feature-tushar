@@ -217,9 +217,7 @@ const AddressDetailPage = () => {
                   </ThemeButton>
                 )}
                 {permissions?.address?.isDelete && (
-                  <span title={id ? "Primarily selected address can't be deleted" : 'Permanently delete this address'}>
-                    <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />
-                  </span>
+                  <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />
                 )}
               </>
             </Box>
