@@ -3,7 +3,6 @@ import EditIcon from '@mui/icons-material/Edit';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaSyncAlt } from 'react-icons/fa';
-import { MdDelete } from 'react-icons/md';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
@@ -95,10 +94,10 @@ const LeadDetailsPage = () => {
           }
           setHasPermissionToConvertToOpportunity(
             dontHavePermissions.length === 0 &&
-              user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity &&
-              allowedToEdit &&
-              leadData[processFieldName] &&
-              currentStepToShow + 1 >= steps.length
+            user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity &&
+            allowedToEdit &&
+            leadData[processFieldName] &&
+            currentStepToShow + 1 >= steps.length
           );
         } else {
           setShowAtLast(false);
@@ -335,7 +334,7 @@ const LeadDetailsPage = () => {
   };
 
   const filteredLeadFields = useMemo(() => fields?.filter((item) => item.fieldData.sectionName !== additionalFieldName), [fields, additionalFieldName]);
- 
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -371,8 +370,7 @@ const LeadDetailsPage = () => {
             )}
             {allowedToDelete && !leadData?.staticData?.convertedToOpportunity && (
               <DeleteButton
-                text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'}
-                disabled={isDeleting}
+                text={'Delete'}
                 onClick={() => setShowConfirmBox(true)}
               />
             )}

@@ -64,20 +64,22 @@ const TableComponent = forwardRef(function (
   }: TTableProps,
   ref: ForwardedRef<HTMLTableElement>
 ) {
-  const { filters: customFilters, initialDataLoaded }: TInitialState = state;
+  const { filters: customFilters, initialDataLoaded, visibleColumns }: TInitialState = state;
 
   const tableColumns = table.getVisibleFlatColumns();
 
   const { columns, orderedColumns } = useMemo(() => {
     const columns = [];
-    const orderedColumns = sortedColumns?.reduce((acc, curr, index) => {
-      columns.push(curr);
-      acc[curr.id] = index;
-      return acc;
-    }, {});
+    const orderedColumns = sortedColumns
+      ?.filter((d) => visibleColumns[d.id])
+      .reduce((acc, curr, index) => {
+        columns.push(curr);
+        acc[curr.id] = index;
+        return acc;
+      }, {});
 
     return { orderedColumns, columns };
-  }, [sortedColumns]);
+  }, [sortedColumns, visibleColumns]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const sizes = tableColumns?.sort((a, b) => orderedColumns[a.id] - orderedColumns[b.id])?.map((c) => c.getSize()) || [];

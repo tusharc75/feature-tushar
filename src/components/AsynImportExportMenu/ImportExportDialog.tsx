@@ -22,6 +22,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import NoDataCell from '../Helpers/NoDataCell';
 import routes from '../Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { FiExternalLink } from 'react-icons/fi';
 
 const renderedFrom = 'import-export';
 
@@ -81,7 +82,8 @@ const ImportExportDialog = ({
           let finalObject = prepareDataForGrid(u);
           return {
             ...finalObject,
-            user: u?.user
+            user: u?.user?.concatedName,
+            userId: u?.user?._id
           };
         });
         setRefreshInterval(data?.data?.find((e) => e.status === IMPORT_EXPORT_STATUS.inProgress));
@@ -111,10 +113,16 @@ const ImportExportDialog = ({
         Header: 'User',
         Cell: ({ row }) => {
           return row.original?.user ? (
-            <div>
-              <a className="link text-truncate" href={`${routes.userDetail.path}/${row.original?.user?._id}`} target="_blank">
-                {row.original?.user?.concatedName}
-              </a>
+            <div className="flex items-center gap-1">
+              <p>{row.original.user}</p>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.userDetail.path}/${row.original.userId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
             </div>
           ) : (
             <NoDataCell />
@@ -306,6 +314,7 @@ const ImportExportDialog = ({
             hideSelection={true}
             showFilters={false}
             showArrangeView={false}
+            isClientSideGrid={true}
           />
         ) : (
           <Box p={2} height={300}>

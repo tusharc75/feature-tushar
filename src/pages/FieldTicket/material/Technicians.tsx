@@ -20,6 +20,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import StartStopLogsDialog from 'src/pages/FieldTicket/material/StartStopLogsDialog';
 import StartStopDate from 'src/pages/FieldTicket/material/StartStopDateDialog';
 import { FiExternalLink } from 'react-icons/fi';
+import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 
 const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFullScreen }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Technicians`;
@@ -38,7 +39,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
   const [viewStartStopLog, setViewStartStopLog] = useState({ open: false, _id: null });
 
   const {
-    state: { user }
+    state: { permissions }
   }: any = useData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
@@ -129,13 +130,29 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
         accessor: 'competencyType',
         Header: 'Competency Type',
         width: 250,
-        Cell: ({ row }) => (row.original['competencyType'] ? <p>{row.original?.competencyType}</p> : <NoDataCell />)
+        Cell: ({ row }) => <DropdownCell
+          permissions={permissions}
+          permissionForLinks={{}}
+          field={{
+            fieldName: 'competencyType',
+            lookupResource: sidebarResource.competencyType
+          }}
+          original={row?.original}
+        />
       },
       {
         accessor: 'competencies',
         Header: 'Competencies',
         width: 250,
-        Cell: ({ row }) => (row.original['competencies'] ? <p>{row.original?.competencies}</p> : <NoDataCell />)
+        Cell: ({ row }) => <DropdownCell
+          permissions={permissions}
+          permissionForLinks={{}}
+          field={{
+            fieldName: 'competencies',
+            lookupResource: sidebarResource.competencies
+          }}
+          original={row?.original}
+        />
       },
       {
         accessor: 'startDate',
@@ -202,8 +219,8 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
           res.index = i + 1;
           res.technicianName = u?.technician['firstName'] + ' ' + u?.technician['lastName'];
           res.technicianId = u?.technician['_id'];
-          res.competencyType = u?.technician['competencyType']?.optionLabel;
-          res.competencies = u?.technician['competencies']?.map((e) => e?.optionLabel)?.toString();
+          res.competencyType = u?.technician?.competencyType;
+          res.competencies = u?.technician?.competencies;
           return res;
         });
 
@@ -383,7 +400,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
           </>
         )}
         <Grid container spacing={2}>
-          <Grid size={{xs:12, md:12, sm:12}}>
+          <Grid size={{ xs: 12, md: 12, sm: 12 }}>
             {columns ? (
               <CustomReactTable
                 height={stepFullScreen ? 'calc(100vh - 300px)' : '300px'}

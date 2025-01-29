@@ -148,9 +148,8 @@ const Warehouse = ({ reference, api, id, accountId = '' }) => {
   const rightSideContents = () => {
     return (
       <>
-        {permissions[reference]?.isUpdate && (
+        {permissions[reference]?.isUpdate && selectedRecords.length && (
           <DeleteButton
-            disabled={selectedRecords.length === 0}
             onClick={() => {
               setShowDeleteConfirmBox(true);
             }}

@@ -10,7 +10,6 @@ import { AiOutlineMail } from 'react-icons/ai';
 import { BiPhone } from 'react-icons/bi';
 import { FiStar } from 'react-icons/fi';
 import { HiShoppingCart } from 'react-icons/hi';
-import { MdDelete } from 'react-icons/md';
 import { RiLayoutFill } from 'react-icons/ri';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { AccountHierarchyIcon } from 'src/assets/svg/svgIcons';
@@ -532,7 +531,7 @@ const ContactDetailsPage = (props) => {
               </ThemeButton>
             )}
             {contactPermissions?.isDelete && allowedToDelete && (
-              <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowDeleteConfirmBox(true)} />
+              <DeleteButton text={'Delete'} onClick={() => setShowDeleteConfirmBox(true)} />
             )}
             <ActivityButton
               referenceId={contactData?._id}
