@@ -138,8 +138,9 @@ export const MemoizedSingleRow = memo(
         onClick={() => (typeof onRowClick === 'function' ? onRowClick(row.original) : null)}
       >
         <>
-          {virtualColumns.map((virtualCell, index) => {
+          {virtualColumns.map((virtualCell) => {
             const cell = visibleCells?.[virtualCell?.index];
+
             if (!cell) return null;
             return (
               <Fragment key={virtualColumns.index}>
