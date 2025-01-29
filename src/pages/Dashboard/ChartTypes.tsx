@@ -60,7 +60,6 @@ const ChartTypes = ({
   kpiFilters,
   fetchKpiFilters
 }: Props) => {
-
   const [themeColor] = useAppTheme();
   const theme = useTheme();
   const isScreenSmall = useMediaQuery(theme.breakpoints.down('xs'));
@@ -69,7 +68,7 @@ const ChartTypes = ({
     state: { selectedEntity, user }
   } = useData();
 
-  const currency = user?.user?.currency || 'USD';
+  const currency = user?.user?.brandCurrency || 'USD';
   const [chartData, setChartData] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
   const [tableView, setTableView] = React.useState(false);
@@ -102,8 +101,7 @@ const ChartTypes = ({
       } else {
         setInvisible(true);
       }
-    }
-    else {
+    } else {
       setInvisible(false);
     }
   }, [filterValues]);
@@ -415,7 +413,7 @@ const ChartTypes = ({
                                   if (parseValue !== null) {
                                     label += chart?.currency
                                       ? formatAmountWithCurrency(globalFilters.currency || currency, Number(parseValue) ? parseValue : '00')
-                                        .fullFormatAmountWithoutSpace
+                                          .fullFormatAmountWithoutSpace
                                       : parseValue;
                                   }
                                 }
@@ -458,7 +456,7 @@ const ChartTypes = ({
                             callback: function (value) {
                               return chart?.currency
                                 ? formatAmountWithCurrency(globalFilters.currency || currency, Number(value) ? value : '00')
-                                  .fullFormatAmountWithoutSpace
+                                    .fullFormatAmountWithoutSpace
                                 : value;
                             }
                           }
@@ -481,21 +479,21 @@ const ChartTypes = ({
                       },
                       ...(chart.stack &&
                         !chartData.datasets.some((d) => d.stack === 'stacked') && {
-                        scales: {
-                          x: {
-                            stacked: true,
-                            grid: {
-                              color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
-                            }
-                          },
-                          y: {
-                            stacked: true,
-                            grid: {
-                              color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
+                          scales: {
+                            x: {
+                              stacked: true,
+                              grid: {
+                                color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
+                              }
+                            },
+                            y: {
+                              stacked: true,
+                              grid: {
+                                color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
+                              }
                             }
                           }
-                        }
-                      })
+                        })
                     }}
                   />
                 </>
