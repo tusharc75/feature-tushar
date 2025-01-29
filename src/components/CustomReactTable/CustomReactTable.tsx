@@ -15,6 +15,7 @@ import {
   getSortedRowModel,
   useReactTable
 } from '@tanstack/react-table';
+import dayjs from 'dayjs';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { SEARCH, useStore } from 'src/StateProvider/fastContext';
 import SwipableListForMobile from 'src/components/CustomReactTable/SwipableListForMobile';
@@ -39,7 +40,6 @@ import {
   getUniqueRows,
   useSkipper
 } from './utils';
-import dayjs from 'dayjs';
 
 const handleApplySavedSize = (columns, columnSavedSizes) => {
   if (columnSavedSizes && Object.keys(columnSavedSizes).length) {
@@ -526,6 +526,8 @@ const CustomReactTable = ({
             expanderWithCustomContent={false}
             customContentHeight={customContentHeight}
             customContent={customContent}
+            renderedFrom={renderedFrom}
+            sortedColumns={sortedColumns}
           />
         </div>
       )}
@@ -576,6 +578,7 @@ const CustomReactTable = ({
                 customContentHeight={customContentHeight}
                 customContent={customContent}
                 renderedFrom={renderedFrom}
+                sortedColumns={sortedColumns}
               />
             </div>
           )}

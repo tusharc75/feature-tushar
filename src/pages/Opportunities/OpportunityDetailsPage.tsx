@@ -3,8 +3,6 @@ import EditIcon from '@mui/icons-material/Edit';
 import { Skeleton } from '@mui/material';
 import { cloneDeep } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
-import { MdDelete } from 'react-icons/md';
 import { useHistory, useParams } from 'react-router-dom';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
@@ -489,7 +487,7 @@ function OpportunityDetailsPage() {
   const handleMarkAsCompleted = (data = null) => {
     let tempActiveStep = data && data?.isSetBackStep ? activeStep - 1 : activeStep < steps.length - 1 ? activeStep + 1 : activeStep;
     if (data?.isSetBackStep && data?.isStepBackIdx !== null) {
-      if(data?.isStepBackIdx===-1) return;
+      if (data?.isStepBackIdx === -1) return;
       tempActiveStep = data?.isStepBackIdx;
     }
 
@@ -537,7 +535,7 @@ function OpportunityDetailsPage() {
             <Box className="control-buttons-v1">
               {opportunityData ? (
                 <>
-                  {allowedToEdit ? (
+                  {allowedToEdit &&
                     <ThemeButton
                       iconForMobile={<EditIcon />}
                       onClick={() => {
@@ -547,12 +545,8 @@ function OpportunityDetailsPage() {
                     >
                       {'Edit'}
                     </ThemeButton>
-                  ) : null}
-
-                  {allowedToDelete ? (
-                    <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowConfirmBox(true)} />
-                  ) : null}
-
+                  }
+                  {allowedToDelete && <DeleteButton text={'Delete'} onClick={() => setShowConfirmBox(true)} />}
                   <ActivityButton
                     referenceId={opportunityData?._id}
                     resource={opportunityResource}
@@ -590,10 +584,10 @@ function OpportunityDetailsPage() {
                 stepFullScreen={stepFullScreen}
                 setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
                 showExtraStep={true}
-                updateStatus={(currIdx)=>{
-                  if(currIdx<=activeStep){
-                    setActiveStep(currIdx-1);
-                    handleMarkAsCompleted({ isSetBackStep: true, isStepBackIdx: currIdx-1 });
+                updateStatus={(currIdx) => {
+                  if (currIdx <= activeStep) {
+                    setActiveStep(currIdx - 1);
+                    handleMarkAsCompleted({ isSetBackStep: true, isStepBackIdx: currIdx - 1 });
                   }
                 }}
               />

@@ -7,8 +7,8 @@ import FileCopyIcon from '@mui/icons-material/FileCopy';
 import WarningIcon from '@mui/icons-material/Warning';
 import queryString from 'query-string';
 import Autocomplete from '@mui/material/Autocomplete';
-import { camelCase, isArray } from 'lodash';
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { camelCase, isArray, isObject } from 'lodash';
+import { Fragment, useContext, useEffect, useMemo, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 import CustomContainer from 'src/components/CustomContainer';
@@ -38,6 +38,7 @@ import {
 import ManageSerializedAsset from './ManageSerializedAsset';
 import ReasonDialog from './ReasonDialog';
 import axios, { CancelTokenSource } from 'axios';
+import { AnyObject } from 'yup/lib/types';
 
 const renderedFrom = camelCase(sidebarResource?.serializedAsset);
 
@@ -45,7 +46,14 @@ const SerializedAsset = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const history = useHistory();
-  let { assetStatus, product, warehouse, currentLocation, productCategory: productCategoryFromQuery }: any = queryString.parse(history.location.search);
+  let {
+    assetStatus,
+    product,
+    warehouse,
+    currentLocation,
+    productCategory: productCategoryFromQuery,
+    jobCount
+  }: any = queryString.parse(history.location.search);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
@@ -65,7 +73,7 @@ const SerializedAsset = () => {
   const [warehouseOptions, setWarehouseOptions] = useState([]);
   const [selectedWarehouse, setSelectedWarehouse] = useState(null);
   const [subleaseAsset, setSubleaseAsset] = useState(false);
-  const [showScrapAsset, setShowScrapAsset] = useState(false);
+  const [showScrapAsset, setShowScrapAsset] = useState(assetStatus && assetStatus === ASSET_STATUS.scrap ? true : false);
 
   const [openSupplierAccountDialog, setOpenSupplierAccountDialog] = useState(false);
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
@@ -81,59 +89,65 @@ const SerializedAsset = () => {
   }, [permissions, selectedEntity]);
 
   useEffect(() => {
-    if (assetStatus || product || warehouse || currentLocation) {
-      const filterVal = {};
-      if (assetStatus) {
-        filterVal['status'] = { filter: [assetStatus] };
-      }
-      if (product) {
-        const productFilter = JSON.parse(product);
-        if (isArray(productFilter)) {
-          filterVal['product'] = {
-            operator: 'OR',
-            condition1: {
-              filter: productFilter
-            }
-          };
+    if (columns) {
+      if (assetStatus || product || warehouse || currentLocation || jobCount) {
+        const filterVal = {};
+        if (assetStatus) {
+          filterVal['status'] = { filter: [assetStatus] };
         }
-      }
-      if (warehouse) {
-        const warehouseFilter = JSON.parse(warehouse);
-        if (isArray(warehouseFilter)) {
-          filterVal['warehouse'] = {
-            operator: 'OR',
-            condition1: {
-              filter: warehouseFilter
-            }
-          };
+        if (product) {
+          const productFilter = JSON.parse(product);
+          if (isArray(productFilter)) {
+            filterVal['product'] = {
+              operator: 'OR',
+              condition1: {
+                filter: productFilter
+              }
+            };
+          }
         }
-      }
-      if (currentLocation) {
-        const currentLocationFilter = JSON.parse(currentLocation);
-        if (isArray(currentLocationFilter)) {
-          filterVal['currentLocation'] = {
-            operator: 'OR',
-            condition1: {
-              filter: currentLocationFilter
-            }
-          };
+        if (warehouse) {
+          const warehouseFilter = JSON.parse(warehouse);
+          if (isArray(warehouseFilter)) {
+            filterVal['warehouse'] = {
+              operator: 'OR',
+              condition1: {
+                filter: warehouseFilter
+              }
+            };
+          }
         }
-      }
-      if (productCategoryFromQuery) {
-        const productCategoryFilter = JSON.parse(productCategoryFromQuery);
-        if (isArray(productCategoryFilter)) {
-          filterVal['productCategory'] = {
-            operator: 'OR',
-            condition1: {
-              filter: productCategoryFilter
-            }
-          };
+        if (currentLocation) {
+          const currentLocationFilter = JSON.parse(currentLocation);
+          if (isArray(currentLocationFilter)) {
+            filterVal['currentLocation'] = {
+              operator: 'OR',
+              condition1: {
+                filter: currentLocationFilter
+              }
+            };
+          }
         }
-        
+        if (productCategoryFromQuery) {
+          const productCategoryFilter = JSON.parse(productCategoryFromQuery);
+          if (isArray(productCategoryFilter)) {
+            filterVal['productCategory'] = {
+              operator: 'OR',
+              condition1: {
+                filter: productCategoryFilter
+              }
+            };
+          }
+        }
+        if (jobCount) {
+          if (isObject(JSON.parse(jobCount))) {
+            filterVal['jobCount'] = { filter: ((JSON.parse(jobCount))?.optionValue)?.toString() };
+          }
+        }
+        dispatch({ type: 'filter', filters: filterVal });
       }
-      dispatch({ type: 'filter', filters: filterVal });
     }
-  }, []);
+  }, [columns]);
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
@@ -296,50 +310,53 @@ const SerializedAsset = () => {
       });
   };
 
-  const ActionsRenderer = {
-    accessor: 'action',
-    Header: 'Actions',
-    minWidth: 100,
-    width: 110,
-    sticky: 'right',
-    disableFilters: true,
-    disableSortBy: true,
-    canDrag: false,
-    Cell: ({ row }) => (
-      <>
-        <HtmlTooltip title={permissions?.serializedAsset?.isCreate ? 'Clone' : cloneDisable}>
-          <span>
-            <IconButton
-              size="small"
-              aria-label="Clone"
-              disabled={!permissions?.serializedAsset?.isCreate}
-              onClick={() => {
-                setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: row?.original?._id });
-              }}
-            >
-              <FileCopyIcon fontSize="small" color={permissions?.serializedAsset?.isCreate ? 'primary' : 'disabled'} />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
+  const ActionsRenderer = useMemo(
+    () => ({
+      accessor: 'action',
+      Header: 'Actions',
+      minWidth: 100,
+      width: 110,
+      sticky: 'right',
+      disableFilters: true,
+      disableSortBy: true,
+      canDrag: false,
+      Cell: ({ row }) => (
+        <>
+          <HtmlTooltip title={permissions?.serializedAsset?.isCreate ? 'Clone' : cloneDisable}>
+            <span>
+              <IconButton
+                size="small"
+                aria-label="Clone"
+                disabled={!permissions?.serializedAsset?.isCreate}
+                onClick={() => {
+                  setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: row?.original?._id });
+                }}
+              >
+                <FileCopyIcon fontSize="small" color={permissions?.serializedAsset?.isCreate ? 'primary' : 'disabled'} />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
 
-        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
-          <span>
-            <IconButton
-              size="small"
-              aria-label="Delete"
-              disabled={row?.original?.canDelete ? false : true}
-              onClick={() => {
-                setDeleteRecord(row?.original);
-                setShowDeleteConfirmBox(true);
-              }}
-            >
-              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
-      </>
-    )
-  };
+          <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
+            <span>
+              <IconButton
+                size="small"
+                aria-label="Delete"
+                disabled={row?.original?.canDelete ? false : true}
+                onClick={() => {
+                  setDeleteRecord(row?.original);
+                  setShowDeleteConfirmBox(true);
+                }}
+              >
+                <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
+        </>
+      )
+    }),
+    [permissions?.serializedAsset?.isCreate]
+  );
 
   const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
@@ -353,14 +370,14 @@ const SerializedAsset = () => {
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['canDelete'] =
             permissions?.serializedAsset?.isDelete &&
-            ![
-              ASSET_STATUS.new,
-              ASSET_STATUS.available,
-              ASSET_STATUS.lost,
-              ASSET_STATUS.customerPossession,
-              ASSET_STATUS.onPO,
-              ASSET_STATUS.scrap
-            ]?.includes(u?.status)
+              ![
+                ASSET_STATUS.new,
+                ASSET_STATUS.available,
+                ASSET_STATUS.lost,
+                ASSET_STATUS.customerPossession,
+                ASSET_STATUS.onPO,
+                ASSET_STATUS.scrap
+              ]?.includes(u?.status)
               ? false
               : true;
           return finalObject;
@@ -423,7 +440,7 @@ const SerializedAsset = () => {
     if (showFilteredRecordsOnly) {
       deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
-    return `${deepFilter}&filterType=and&filterByIdType=and`;
+    return `${deepFilter}&filterType=and`;
   };
 
   const handleDelete = () => {
@@ -756,12 +773,11 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
-              ? `${resources?.serializedAsset?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${deleteRecord
+            ? `${resources?.serializedAsset?.titleSingular?.toLowerCase()} :
             ${deleteRecord?._id ? deleteRecord?.assetNumber : ''}`
-              : `selected ${resources?.serializedAsset?.titlePlural?.toLowerCase()}`
-          } ?`}
+            : `selected ${resources?.serializedAsset?.titlePlural?.toLowerCase()}`
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

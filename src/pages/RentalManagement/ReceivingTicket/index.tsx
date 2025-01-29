@@ -1581,23 +1581,20 @@ const ReceivingTicket = ({
   };
 
   const handleAddAssetToRepairJob = (repairJobId) => {
-    axiosInstance()
-      .post(`${repairJob.api}/${repairJobId}/assets`, {
-        assets: selectedRecords?.map((s) => {
-          return { _id: s._id, currentStatus: s.status };
-        })
-      })
-      .then(({ data }) => {
-        axiosInstance()
-          .patch(`${repairJob.api}/${repairJobId}/status`, { status: REPAIR_JOB_STATUS.inProgress })
-          .then(({ data: { data } }) => { })
-          .catch((error) => {
-            toastConfig.setToastConfig(error);
-          });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    let assets = uniqBy(selectedRecords, '_id').map((e: any) => ({
+      _id: e._id,
+      currentStatus: e.status,
+    }));
+    axiosInstance().post(`${repairJob.api}/${repairJobId}/assets`, { assets }).then(({ data }) => {
+      axiosInstance()
+        .patch(`${repairJob.api}/${repairJobId}/status`, { status: REPAIR_JOB_STATUS.inProgress })
+        .then(({ data: { data } }) => { })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
   };
 
   const handleAddAssetsToRepairOrder = async (repairOrderData: any) => {

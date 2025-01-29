@@ -255,7 +255,7 @@ const ServiceOrderDetailsPage = () => {
                   Edit
                 </ThemeButton>
               </Fragment>
-              <DeleteButton text="Delete" disabled={!allowedToDelete} onClick={() => setShowConfirmBox(true)} />
+              {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               <ActivityButton
                 referenceId={serviceOrderData?._id}
                 resource={ACTIVITY_RESOURCE.fieldServiceOrder}

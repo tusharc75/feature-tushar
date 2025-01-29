@@ -26,12 +26,20 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import { calculatePrice, calculateRowsField, fetch_rental_product_fields, getNestedSubRows } from '../../../components/RentalManagment/helper';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import { MATERIAL_TYPE, RENTAL_STATUS, rentalManagement } from '../../../constants/helpers';
+import {
+  DELIVERY_TICKET_REFERENCE_TYPE,
+  DELIVERY_TICKET_TYPE,
+  deliveryTicket,
+  MATERIAL_TYPE,
+  RENTAL_STATUS,
+  rentalManagement
+} from '../../../constants/helpers';
 import { findOne, objectStore } from '../../../constants/indexdbhelper';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import Technicians from './Technicians';
 import { FiExternalLink } from 'react-icons/fi';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
+import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
 
 const Services = ({
   rentalManagementData,
@@ -60,6 +68,7 @@ const Services = ({
   const [isDeleting, setDeleting] = useState(false);
 
   const [material, setMaterial] = useState([]);
+  const [isInlineEdit, setIsInlineEdit] = useState(false);
   const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
   const [columns, setColumns] = useState(null);
   const [allFields, setAllFields] = useState(null);
@@ -101,15 +110,7 @@ const Services = ({
         e.isColumnEditable = false;
       });
     }
-    const newColumns = generateColumns(
-      renderedFrom,
-      data?.map((e) => {
-        return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName };
-      }),
-      null,
-      false,
-      rentalManagementData?.currency
-    );
+    const newColumns = generateColumns(renderedFrom, data, null, false, rentalManagementData?.currency);
     let column: any = [
       {
         accessor: 'index',
@@ -240,10 +241,20 @@ const Services = ({
               </IconButton>
             </HtmlTooltip>
             {allowedToEdit || !quotationApproved ? (
-              row.original.hideSelection ? (
+              !row.original.canDelete ? (
                 <HtmlTooltip
                   title={
-                    row.original.assetQty ? 'Asset is already assigned' : row.original?.status ? rentalManagementMessage.loadingAlreadyCreated : ''
+                    row.original?.assetQty
+                      ? row?.original?.productDetail?.serializedProduct
+                        ? 'Assets/Serial Numbers is already assigned'
+                        : 'Inventory/Serial Numbers is already assigned'
+                      : row.original?.status
+                        ? rentalManagementMessage.loadingAlreadyCreated
+                        : row.original?.invoiceCreated
+                          ? rentalManagementMessage.invoiceCreated
+                          : row.original.type === MATERIAL_TYPE.service && row.original?.serviceLog?.length
+                            ? rentalManagementMessage.serviceAlreadyStarted
+                            : ''
                   }
                 >
                   <span>
@@ -288,7 +299,8 @@ const Services = ({
       var data: any = [];
       var inventory: any = [];
       var nonSerializeAsset: any = [];
-
+      var productSerialNumbers: any = [];
+      const loadingTicketProducts: any = [];
       var nextStepMessage = null;
 
       if (isOffline) {
@@ -297,9 +309,23 @@ const Services = ({
       } else {
         const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
         data = response?.data?.data;
+        const loadingTicketResult = await axiosInstance().get(
+          `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}&referenceId=${rentalManagementData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
+        );
+
         setMaterial(JSON.parse(JSON.stringify(data.material)));
         inventory = data.inventory?.filter((e) => !e.isReplaced);
         nonSerializeAsset = data.nonSerializeAsset;
+        productSerialNumbers = data.productSerialNumbers;
+        loadingTicketResult?.data?.data?.forEach((element) => {
+          if (element.ticketType === DELIVERY_TICKET_TYPE.loading && element?.products?.length) {
+            element?.products?.forEach((ele) => {
+              loadingTicketProducts.push({
+                ...ele
+              });
+            });
+          }
+        });
       }
       let rows = data.material.filter((e) => e.parentId === null);
       rows = rows.filter((e) => e.type === MATERIAL_TYPE.service || (e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType === 'Service'));
@@ -326,7 +352,6 @@ const Services = ({
                 ? parent?.packageDetail?.packageDescription || ''
                 : '';
         parent.serializedProduct = parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.serializedProduct : false;
-        parent.qtyDisplay = parent.qty;
         parent.isValid = parent[`price_${currency}`] || parent[`finalPrice_${currency}`] ? true : !isPriceRequired;
         if (parent?.type === MATERIAL_TYPE.service && rentalPolicyData?.servicePriceRequired) {
           parent.isValid = parent[`price_${currency}`] || parent[`finalPrice_${currency}`] ? true : false;
@@ -335,11 +360,38 @@ const Services = ({
           nextStepMessage = rentalManagementMessage.validPrice;
         }
         parent.assetQty = parent.serializedProduct
-          ? inventory?.filter((e) => e._id === parent._id).length
-          : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
-        parent.hideSelection =
-          parent.type === MATERIAL_TYPE.service && parent?.serviceLog ? true : parent.assetQty > 0 ? true : parent?.status ? true : false;
-        parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent, isPriceRequired);
+          ? inventory?.filter((e) => e._id === parent._id).length + productSerialNumbers?.filter((e) => e._id === parent._id).length
+          : nonSerializeAsset?.filter((e) => e._id === parent._id).length +
+            data?.nonSerializedInventory?.filter((d) => d?._id === parent?._id)?.reduce((sum, row) => sum + row?.qty || 0, 0);
+        parent.canDelete =
+          parent.type === MATERIAL_TYPE.service && parent?.serviceLog
+            ? false
+            : parent?.assetQty > 0 || data.inventory?.filter((e) => e.isReplaced && e._id === parent._id)?.length
+              ? false
+              : parent?.status
+                ? false
+                : parent?.invoiceCreated
+                  ? false
+                  : true;
+        parent.nonSerializedQty =
+          parent.type === MATERIAL_TYPE.service &&
+          !parent.serializedProduct &&
+          parent.assetQty === 0 &&
+          parent?.status &&
+          loadingTicketProducts?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)?.length > 0
+            ? loadingTicketProducts
+                ?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)
+                ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+            : 0;
+        parent.subRows = generateNestedData(
+          data.material,
+          inventory,
+          nonSerializeAsset,
+          parent,
+          productSerialNumbers,
+          isPriceRequired,
+          loadingTicketProducts
+        );
         if (parent.type === MATERIAL_TYPE.package && parent.subRows?.length === 0 && !nextStepMessage) {
           nextStepMessage = rentalManagementMessage.addServiceInPackage;
         }
@@ -393,7 +445,7 @@ const Services = ({
     }
   };
 
-  const generateNestedData = (material, inventory, nonSerializeAsset, parent, isPriceRequired) => {
+  const generateNestedData = (material, inventory, nonSerializeAsset, parent, productSerialNumbers, isPriceRequired, loadingTicketProducts) => {
     const currency = rentalManagementData?.currency?.toLowerCase();
 
     const subRows: any = material.filter((e) => e.parentId === parent._id);
@@ -414,17 +466,34 @@ const Services = ({
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
-      _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = _subRow[`price_${currency}`] || _subRow[`finalPrice_${currency}`] ? true : !isPriceRequired;
       if (_subRow?.type === MATERIAL_TYPE.service && rentalPolicyData?.servicePriceRequired) {
         _subRow.isValid = _subRow[`price_${currency}`] || _subRow[`finalPrice_${currency}`] ? true : false;
       }
       _subRow.assetQty = _subRow.serializedProduct
-        ? inventory?.filter((e) => e._id === _subRow._id).length
+        ? inventory?.filter((e) => e._id === _subRow._id).length + productSerialNumbers?.filter((e) => e._id === _subRow._id).length
         : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
-      _subRow.hideSelection =
-        _subRow.type === MATERIAL_TYPE.service && _subRow?.serviceLog ? true : _subRow.assetQty > 0 ? true : _subRow?.status ? true : false;
-      _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow, isPriceRequired);
+      _subRow.canDelete =
+        _subRow.type === MATERIAL_TYPE.service && _subRow?.serviceLog ? false : _subRow?.assetQty > 0 ? false : _subRow?.status ? false : true;
+      _subRow.nonSerializedQty =
+        _subRow.type === MATERIAL_TYPE.service &&
+        !_subRow.serializedProduct &&
+        _subRow.assetQty === 0 &&
+        _subRow?.status &&
+        loadingTicketProducts?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)?.length > 0
+          ? loadingTicketProducts
+              ?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)
+              ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+          : 0;
+      _subRow.subRows = generateNestedData(
+        material,
+        inventory,
+        nonSerializeAsset,
+        _subRow,
+        productSerialNumbers,
+        isPriceRequired,
+        loadingTicketProducts
+      );
     });
     if (subRows.length === 0 && parent.type === MATERIAL_TYPE.package) {
       parent.isValid = false;
@@ -432,8 +501,11 @@ const Services = ({
     if (subRows?.length && rentalPolicyData?.servicePriceRequired) {
       parent.isValid = subRows.find((e) => e.type === MATERIAL_TYPE.service && !e?.isValid) ? false : parent.isValid;
     }
-    if (parent.type === MATERIAL_TYPE.package) {
-      parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
+    if (subRows?.length && parent.canDelete) {
+      parent.canDelete = !subRows?.some((r) => !r?.canDelete);
+      if (subRows?.some((r) => !r?.canDelete)) {
+        parent.assetQty = parent.qty;
+      }
     }
     return subRows;
   };
@@ -551,7 +623,7 @@ const Services = ({
 
   const handleDeleteMultiple = () => {
     const obj: any = [];
-    const dataToDelete = selectedRecords && selectedRecords.filter((e) => !e.hideSelection);
+    const dataToDelete = selectedRecords && selectedRecords.filter((e) => e.canDelete);
     dataToDelete?.forEach((ele) => {
       obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
     });
@@ -562,9 +634,47 @@ const Services = ({
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
+    if (inputField.hasOwnProperty('qty')) {
+      if (inputField['qty'] === 0) {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'error',
+          message: 'Please enter valid quantity'
+        });
+        return;
+      }
+    }
+    setIsInlineEdit(true);
+    onConfirmSave(inputField, updatedData);
+  };
+
+  const onConfirmSave = async (inputField, updatedData) => {
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
-    if (inputField.hasOwnProperty('qtyDisplay')) {
-      inputField['qty'] = inputField['qtyDisplay'];
+    if (inputField.hasOwnProperty('qty')) {
+      let isValid = true;
+      const child: any = flattenArray(dataRows).filter((e) => e.parentId === rowData?._id);
+      if (child?.length) {
+        child?.forEach((e) => {
+          let qty = parseFloat(inputField['qty']) * e?.qty;
+          if (qty < e?.assetQty || qty < e?.nonSerializedQty) {
+            isValid = false;
+            return;
+          }
+        });
+      } else {
+        const qty = getParentMultiplier(material, rowData) * parseFloat(inputField['qty']);
+        if (qty < rowData?.assetQty || qty < rowData?.nonSerializedQty) {
+          isValid = false;
+        }
+      }
+      if (!isValid) {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'error',
+          message: 'The quantity is less than what was assigned.'
+        });
+        return;
+      }
     }
     let rows: any = [{ ...rowData, ...updatedData }];
     rows = await calculateRowsField(material, inputField, allFields, updatedData, rentalManagementData?.currency);
@@ -633,13 +743,13 @@ const Services = ({
           </MenuItem>
         </HtmlTooltip>
         <HtmlTooltip
-          title={Boolean(selectedRecords && selectedRecords.length) ? 'Delete selected records' : 'Select records to delete'}
+          title={Boolean(selectedRecords && selectedRecords?.some((r) => r?.canDelete)) ? 'Delete selected records' : 'Select records to delete'}
           enterTouchDelay={0}
           arrow
           placement="top"
         >
           <MenuItem
-            disabled={isDeleting}
+            disabled={isDeleting || !selectedRecords?.some((r) => r?.canDelete)}
             onClick={() => {
               handleDeleteMultiple();
             }}
@@ -665,13 +775,13 @@ const Services = ({
         }}
         isActionButtonVisible={true}
         actionButtonMenuItems={actionButtonMenuItems()}
-        actionButtonProps={{ disabled: !Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length) }}
+        actionButtonProps={{ disabled: !Boolean(selectedRecords && selectedRecords.filter((e) => e.canDelete).length) }}
         hasXpadding
       />
 
       {columns ? (
         <CustomReactTable
-          height={permissions?.employeeMaster?.isRead ? "300px" : stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
+          height={permissions?.employeeMaster?.isRead ? '300px' : stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
           columns={columns}
           state={state}
           dispatch={dispatch}
@@ -753,12 +863,16 @@ const Services = ({
           onClose={() => {
             setIsProductEdit({ open: false, data: null, showSaveAndNext: false });
             setIsBulkEdit(false);
+            if (isInlineEdit) {
+              setIsInlineEdit(false);
+            }
           }}
           isBulkedit={isBulkEdit}
           handleSaveData={handleSaveData}
           rentalManagementData={rentalManagementData}
           rowData={!isBulkEdit ? isProductEdit.data : selectedRecords}
           material={material}
+          dataRows={flattenArray(dataRows)}
           selectedProducts={selectedRecords}
           loading={isUpdating}
           from={'service'}

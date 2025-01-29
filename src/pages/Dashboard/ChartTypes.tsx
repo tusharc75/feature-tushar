@@ -60,6 +60,7 @@ const ChartTypes = ({
   kpiFilters,
   fetchKpiFilters
 }: Props) => {
+
   const [themeColor] = useAppTheme();
   const theme = useTheme();
   const isScreenSmall = useMediaQuery(theme.breakpoints.down('xs'));
@@ -68,16 +69,11 @@ const ChartTypes = ({
     state: { selectedEntity, user }
   } = useData();
 
-  const getDefaultFilter = (filters) => {
-    const defaultFilters = filters?.filter((f) => f.default);
-    return defaultFilters?.length ? defaultFilters[0] : {};
-  };
-
   const currency = user?.user?.currency || 'USD';
   const [chartData, setChartData] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
   const [tableView, setTableView] = React.useState(false);
-  const [filterValues, setFilterValues] = React.useState(getDefaultFilter(kpiFilters));
+  const [filterValues, setFilterValues] = React.useState(null);
   const [anchorElFilter, setAnchorElFilter] = React.useState(null);
   const [anchorElExport, setAnchorElExport] = React.useState(null);
   const [invisible, setInvisible] = React.useState(false);
@@ -91,20 +87,24 @@ const ChartTypes = ({
   }, []);
 
   React.useEffect(() => {
-    if (!filterValues) return;
-    const keys = Object.keys(filterValues);
-    let values = [];
-    keys.forEach((key: string) => {
-      if (!filterValues[key]) return;
-      const isEmpty = Array.isArray(filterValues[key]) ? Object.keys(filterValues[key]).length === 0 : filterValues[key] === 0;
-      if (!isEmpty) {
-        values.push(key);
+    if (filterValues) {
+      const keys = Object.keys(filterValues);
+      let values = [];
+      keys.forEach((key: string) => {
+        if (!filterValues[key]) return;
+        const isEmpty = Array.isArray(filterValues[key]) ? Object.keys(filterValues[key]).length === 0 : filterValues[key] === 0;
+        if (!isEmpty) {
+          values.push(key);
+        }
+      });
+      if (values.length > 0) {
+        setInvisible(false);
+      } else {
+        setInvisible(true);
       }
-    });
-    if (values.length > 0) {
+    }
+    else {
       setInvisible(false);
-    } else {
-      setInvisible(true);
     }
   }, [filterValues]);
 
@@ -115,7 +115,7 @@ const ChartTypes = ({
       ...globalFilters,
       between: JSON.stringify({
         from: dateFormatToSend(globalFilters.between.from),
-        to: dateFormatToSend(globalFilters.between.to),
+        to: dateFormatToSend(globalFilters.between.to)
       })
     };
     const keys = Object.keys(params);
@@ -130,7 +130,7 @@ const ChartTypes = ({
         if (key === 'between') {
           url = `${url}&${key}=${params[key]}`;
         }
-        if (key !== 'between' && params[key].optionValue) {
+        if (key !== 'between' && (params[key].optionValue || params[key].optionValue === 0)) {
           url = `${url}&${key}=${params[key].optionValue}`;
         }
       }
@@ -192,25 +192,28 @@ const ChartTypes = ({
     const urlParams = getParams();
     setLoading(true);
     let url = `kpi/${chart.kpi.kpi}?entity=${selectedEntity}${urlParams}`;
-    axiosInstance().get(url, { cancelToken: cancelTokenSource?.token }).then(async ({ data: { data } }) => {
-      if (chart?.chartType === 'Funnel') {
-        const funnelData = data?.map((d: any) => {
-          return { name: `${d.name} - ${d.percentage}%`, value: d.percentage };
-        });
-        setChartData(funnelData);
-      } else {
-        if (chart.kpi?.custom) {
-          const cardData = await getStaticData(chartData, data, globalFilters.currency, currency);
-          setChartData(cardData);
+    axiosInstance()
+      .get(url, { cancelToken: cancelTokenSource?.token })
+      .then(async ({ data: { data } }) => {
+        if (chart?.chartType === 'Funnel') {
+          const funnelData = data?.map((d: any) => {
+            return { name: `${d.name} - ${d.percentage}%`, value: d.percentage };
+          });
+          setChartData(funnelData);
         } else {
-          setChartData(data);
+          if (chart.kpi?.custom) {
+            const cardData = await getStaticData(chartData, data, globalFilters.currency, currency);
+            setChartData(cardData);
+          } else {
+            setChartData(data);
+          }
         }
-      }
-      setLoading(false);
-    }).catch((err: any) => {
-      setToastConfig(err);
-      setLoading(false);
-    });
+        setLoading(false);
+      })
+      .catch((err: any) => {
+        setToastConfig(err);
+        setLoading(false);
+      });
   };
 
   const handlePinUnpin = async (type) => {
@@ -233,7 +236,7 @@ const ChartTypes = ({
   };
 
   return (
-    <Grid size={{ xs: 12, md: chart?.column || 12 }} >
+    <Grid size={{ xs: 12, md: chart?.column || 12 }}>
       {chart.graphType === 'Custom' ? (
         <Grid container spacing={1}>
           {loading ? (
@@ -250,17 +253,13 @@ const ChartTypes = ({
           )}
         </Grid>
       ) : (
-        <Box height={'100%'} flexDirection="column" justifyContent="space-between" sx={{ border: '1px solid var(--common-border-color)' }}   >
+        <Box height={'100%'} flexDirection="column" justifyContent="space-between" sx={{ border: '1px solid var(--common-border-color)' }}>
           <Box style={{ padding: '15px 10px' }}>
             <div className="flex items-center justify-between">
               <div>
                 {chart.hasFilters && (
                   <Badge color="secondary" variant="dot" invisible={invisible}>
-                    <ThemeButton
-                      disabled={loading}
-                      onClick={handleOpenFilter}
-                      startIcon={<BsFilter fontSize={14} />}
-                    >
+                    <ThemeButton disabled={loading} onClick={handleOpenFilter} startIcon={<BsFilter fontSize={14} />}>
                       Filters
                     </ThemeButton>
                   </Badge>
@@ -272,7 +271,7 @@ const ChartTypes = ({
                     disabled={loading}
                     style={{ marginRight: chart.hasTableView ? 10 : 0 }}
                     onClick={handleOpenExport}
-                    buttonType='transparent'
+                    buttonType="transparent"
                     startIcon={<ImportExport />}
                   >
                     Export to
@@ -285,7 +284,7 @@ const ChartTypes = ({
                     onClick={() => {
                       setTableView(!tableView);
                     }}
-                    buttonType='transparent'
+                    buttonType="transparent"
                     startIcon={!tableView ? <TableChart /> : <Timeline />}
                   >
                     {!tableView ? 'Table' : 'Chart'} View
@@ -331,13 +330,13 @@ const ChartTypes = ({
                     }}
                     style={{ marginRight: 10 }}
                   >
-                    <RefreshIcon fontSize='small' />
+                    <RefreshIcon fontSize="small" />
                   </IconButton>
                 </HtmlTooltip>
                 {setSelectedChart && (
                   <HtmlTooltip title="Full Screen">
                     <IconButton size="small" color="primary" onClick={() => setSelectedChart(chart)}>
-                      <OpenInFullIcon fontSize='small' />
+                      <OpenInFullIcon fontSize="small" />
                     </IconButton>
                   </HtmlTooltip>
                 )}
@@ -440,7 +439,7 @@ const ChartTypes = ({
                               queryObj[key] = JSON.stringify(value);
                             }
                           });
-                          window.open(`${resourcePath}?${queryString.stringify(queryObj)}`, '_blank')
+                          window.open(`${resourcePath}?${queryString.stringify(queryObj)}`, '_blank');
                         }
                       },
                       maintainAspectRatio: false,

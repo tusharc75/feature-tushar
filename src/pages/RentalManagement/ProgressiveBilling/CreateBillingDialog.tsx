@@ -39,6 +39,7 @@ import InvoiceDataDialog from 'src/pages/RentalManagement/ProgressiveBilling/Inv
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import dayjs from 'dayjs';
+import { getNestedQty } from 'src/pages/RentalManagement/rentalOfflineHelper';
 
 const calculateServiceDays = (serviceLog: any[], startDate: any, endDate: any) => {
   const uniqueDates = new Set<string>();
@@ -322,11 +323,14 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
     const currency = rentalManagementData?.currency?.toLowerCase();
 
+    const orignalMaterial = JSON.parse(JSON.stringify(data.material))
+
     data.material = data?.material?.filter((e) => e[`price_${currency}`] || e[`finalPrice_${currency}`]);
 
     if (rentalResourceData?.policy?.hidePackageInInvoice) {
       data.material = data.material?.filter((e) => e.type !== MATERIAL_TYPE.package);
       data.material?.forEach((e) => {
+        e.qty = getNestedQty(orignalMaterial, e);
         e.parentId = null;
       });
     }
@@ -494,7 +498,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                 : parent.type === MATERIAL_TYPE.manualEntry
                   ? parent?.description
                   : '';
-      parent.qtyDisplay = parent.qty;
       parent.isEditable =
         ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) ||
           parent.type === MATERIAL_TYPE.serializedAsset ||
@@ -533,7 +536,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
               : _subRow.type === MATERIAL_TYPE.serializedAsset
                 ? _subRow?.description || ''
                 : '';
-      _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(_subRow?.pricingMethod) ? false : true;
       _subRow.subRows = generateNestedData(material, _subRow);
     });

@@ -1,7 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { Formik, Form } from 'formik';
-import Grid from '@mui/material/Grid2';
-import { Box } from '@mui/material';
+import { Box, MenuItem } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import { useHistory } from 'react-router-dom';
 import { isEqual } from 'lodash';
@@ -27,31 +26,35 @@ import {
 } from '../../../constants/helpers';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import AddIcon from '@mui/icons-material/Add';
 import AddExpenses from 'src/pages/ExpensesReport/AddExpenses';
-import ExpenseTable from 'src/pages/ExpensesReport/ExpenseTable';
+import Expenses from 'src/pages/ExpensesReport/Expenses';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { useTableReducer } from 'src/components/CustomReactTable';
+import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
 
-const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose, onSuccess }) => {
+const ManageExpenseReports = ({ isClone = false, fetchReportData, expenseReportId = null, onClose, onSuccess }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, resources }
   }: any = useData();
-
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [showExpenseDialog, setShowExpenseDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [title, setTitle] = useState('');
   const [selectedExpense, setSelectedExpense] = useState([]);
+  const { state } = useTableReducer();
+  const { selectedRecords } = state;
+  const [showAddExistingExpenseModal, setShowAddExistingExpenseModal] = useState(false);
+  const [showManageExpensesDialog, setShowManageExpensesDialog] = useState({ open: false, isClone: false, idToClone: null });
 
   useEffect(() => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource.expenseReport}`)
       .then(({ data: { data } }) => {
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-        const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+        var fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
         if (expenseReportId) {
           axiosInstance()
             .get(`${expenseReport.api}/` + expenseReportId)
@@ -66,6 +69,8 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
               } else {
                 setTitle(`Edit - ${data.reportTitle}`);
                 setSelectedExpense(data.selectedExpenses);
+                // const excludedFields = ['reportTitle', 'fromDate', 'toDate', 'status'];
+                // fieldsDataForUpdate = fieldsDataForUpdate.filter((field) => !['reportTitle','status']?.includes(field?.fieldName));
                 setInitialData({
                   fields: fieldsDataForUpdate,
                   values: { ...getObjKeysWithValues(data, fieldsDataForUpdate) }
@@ -94,12 +99,23 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
     setIsSubmitting(true);
     const { fields, values, ...data } = value;
     data.selectedExpenses = selectedExpense;
-    if (expenseReportId && isClone === false) {
+
+    const status = EXPENSE_STATUS.unSubmitted;
+
+    if (expenseReportId && !isClone) {
       data._id = expenseReportId;
+
       axiosInstance()
         .put(`${expenseReport.api}`, data)
         .then(({ data }) => {
-          handleStatusChange(data?.data?.selectedExpenses);
+          selectedExpense.forEach((expense) => {
+            axiosInstance()
+              .patch(`${expenses.api}/status/${expense._id}`, { status })
+              .catch((error) => {
+                toastConfig.setToastConfig(error);
+              });
+          });
+
           setIsSubmitting(false);
           onSuccess();
           toastConfig.setToastConfig({
@@ -116,7 +132,14 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
       axiosInstance()
         .post(`${expenseReport.api}`, data)
         .then(({ data: { data, message } }) => {
-          handleStatusChange(data?.data?.selectedExpenses);
+          selectedExpense.forEach((expense) => {
+            axiosInstance()
+              .patch(`${expenses.api}/status/${expense._id}`, { status })
+              .catch((error) => {
+                toastConfig.setToastConfig(error);
+              });
+          });
+
           history.push(`${routes?.expenseReportDetail?.path}/${data._id}`);
           setIsSubmitting(false);
           onSuccess(data);
@@ -146,32 +169,29 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
   };
 
   const handleSaveExpenses = async (newExpenses) => {
-    const updatedExpenses = [...selectedExpense, ...newExpenses];
+    const updatedExpenses = [...newExpenses, ...selectedExpense];
     setSelectedExpense(updatedExpenses);
   };
 
-  const handleStatusChange = async (expenseInfo) => {
-    const newExpensesIds = expenseInfo.map((obj) => obj._id);
-
-    axiosInstance()
-      .patch(`${expenses.api}/status/${newExpensesIds}`, { status: EXPENSE_STATUS.unSubmitted })
-      .then(({ data }) => {})
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
-
-  const removeExpenseField = (id) => {
-    const removedExpense = selectedExpense.find((field) => field._id === id);
-    setSelectedExpense(selectedExpense.filter((field) => field._id !== id));
-    if (removedExpense) {
-      axiosInstance()
-        .patch(`${expenses.api}/status/${removedExpense._id}`, { status: EXPENSE_STATUS.unreported })
-        .then(({ data }) => {})
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-    }
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setShowAddExistingExpenseModal(true);
+          }}
+        >
+          {`Add Existing ${resources?.expenses?.titlePlural}`}
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setShowManageExpensesDialog({ open: true, isClone: false, idToClone: null });
+          }}
+        >
+          {`Create New ${resources?.expenses?.titlePlural}`}
+        </MenuItem>
+      </>
+    );
   };
 
   return (
@@ -219,24 +239,16 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
                     resource={sidebarResource.expenseReport}
                     referenceId={expenseReportId || null}
                   />
-                  <Grid container spacing={2} sx={{ marginTop: 2 }}>
-                    <Grid size={{ xs: 8 }} sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-                      <ThemeButton
-                        onClick={() => {
-                          setShowExpenseDialog(true);
-                        }}
-                        buttonType="themeBorder"
-                        sx={{ marginRight: 0.5 }}
-                        aria-label="add"
-                      >
-                        <AddIcon fontSize="small" />
-                        Add Expense
-                      </ThemeButton>
-                    </Grid>
-                  </Grid>
-                  {selectedExpense.length > 0 && (
+                  <DetailsPageHeader
+                    isAddButtonVisible={true}
+                    addButtonMenuItems={addButtonMenuItems()}
+                    isActionButtonVisible={false}
+                    actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+                    hasXpadding
+                  />
+                  {selectedExpense.length>0 && (
                     <div className="mt-2">
-                      <ExpenseTable removeExpenseField={removeExpenseField} selectedExpenses={selectedExpense} />
+                      <Expenses selectedExpenseData={selectedExpense} />
                     </div>
                   )}
                 </Form>
@@ -259,7 +271,7 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
                   isLoading={isSubmitting}
                   buttonType="theme"
                   id="dialog-save-button"
-                  disabled={isSubmitting || selectedExpense.length === 0}
+                  disabled={isSubmitting}
                   onClick={(e) => {
                     submitForm();
                   }}
@@ -281,15 +293,32 @@ const ManageExpenseReports = ({ isClone = false, expenseReportId = null, onClose
                   }}
                 />
               )}
-              {showExpenseDialog && (
+              {showAddExistingExpenseModal && (
                 <AddExpenses
-                  open={showExpenseDialog}
-                  onClose={() => setShowExpenseDialog(false)}
+                  open={showAddExistingExpenseModal}
+                  onClose={() => setShowAddExistingExpenseModal(false)}
                   fullScreen
                   selectedExpense={selectedExpense}
                   setFullScreen={setFullScreen}
                   isSubmitting={isSubmitting}
                   onSave={handleSaveExpenses}
+                  fetchReportData={fetchReportData}
+                />
+              )}
+              {showManageExpensesDialog.open && (
+                <ManageExpenses
+                  isClone={showManageExpensesDialog.isClone}
+                  expenseId={showManageExpensesDialog.idToClone}
+                  onClose={() => setShowManageExpensesDialog({ open: false, isClone: false, idToClone: null })}
+                  onSuccess={(data) => {
+                    setShowManageExpensesDialog({ open: false, isClone: false, idToClone: null });
+                    setSelectedExpense((prevExpenses) => {
+                      const updatedExpenses = prevExpenses.filter((exp) => exp._id !== data._id);
+                      return [...updatedExpenses, data];
+                    });
+                    fetchReportData();
+                  }}
+                  isRedirectToDetailPage={false}
                 />
               )}
             </>

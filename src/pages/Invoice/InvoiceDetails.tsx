@@ -165,7 +165,7 @@ const InvoiceDetails = () => {
       });
   };
 
-  const handleDownload = () => {
+  const handleDownloadZip = () => {
     setIsDownloading(true);
 
     axiosInstance()
@@ -262,31 +262,33 @@ const InvoiceDetails = () => {
           <Box className="control-buttons-v1">
             {invoiceData ? (
               <>
-                <ThemeButton
-                  onClick={(e) => {
-                    handleDownload();
-                  }}
-                  startIcon={<DownloadIcon />}
-                  disabled={isDownloading ? true : false}
-                  mobileTooltip={isDownloading ? 'Please wait...' : 'Download'}
-                  iconForMobile={<DownloadIcon />}
-                >
-                  {isDownloading ? 'Please wait...' : 'Download'}
-                </ThemeButton>
                 {invoiceData?.fieldTicket?.length ? (
-                  <ThemeButton
-                    type="button"
-                    iconForMobile={<DownloadIcon />}
-                    disabled={isDownloadingPdf ? true : false}
-                    startIcon={<DownloadIcon />}
-                    onClick={(e) => {
-                      handleDownloadPdf();
-                    }}
-                    mobileTooltip={isDownloadingPdf ? 'Please wait...' : 'Download Invoice Tickets'}
-                  >
-                    {isDownloadingPdf ? 'Please wait...' : 'Download Invoice Tickets'}
-                  </ThemeButton>
-                ): null}
+                  <>
+                    <ThemeButton
+                      onClick={(e) => {
+                        handleDownloadZip();
+                      }}
+                      startIcon={<DownloadIcon />}
+                      disabled={isDownloading ? true : false}
+                      mobileTooltip={isDownloading ? 'Please wait...' : 'Save as Zip File'}
+                      iconForMobile={<DownloadIcon />}
+                    >
+                      {isDownloading ? 'Please wait...' : 'Save as Zip File'}
+                    </ThemeButton>
+                    <ThemeButton
+                      type="button"
+                      iconForMobile={<DownloadIcon />}
+                      disabled={isDownloadingPdf ? true : false}
+                      startIcon={<DownloadIcon />}
+                      onClick={(e) => {
+                        handleDownloadPdf();
+                      }}
+                      mobileTooltip={isDownloadingPdf ? 'Please wait...' : 'Download Invoice Tickets'}
+                    >
+                      {isDownloadingPdf ? 'Please wait...' : 'Download Invoice Tickets'}
+                    </ThemeButton>
+                  </>
+                ) : null}
                 {invoiceData?.versions?.length && (
                   <ThemeButton
                     onClick={() => {

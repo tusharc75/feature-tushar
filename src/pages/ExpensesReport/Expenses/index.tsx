@@ -1,45 +1,39 @@
-import { Box, IconButton } from '@mui/material';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { deleteDisable } from 'src/constants/messageHelpers';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { expenses, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { EXPENSE_STATUS, expenses, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 
-
-const Expenses = (selectedExpenseData, removeExpense) => {
+const Expenses = (selectedExpenseData) => {
   const renderedFrom = camelCase(sidebarResource?.expenses);
-
   const toastConfig = useContext(CustomToastContext);
-  const history = useHistory();
   const {
     state: { user, permissions, selectedEntity, resources }
   }: any = useData();
-
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [deleteRecord, setDeleteRecord] = useState(null);
-  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [showManageExpensesDialog, setShowManageExpensesDialog] = useState({ open: false, isClone: false, idToClone: null });
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { selectedRecords } = state;
   const [columns, setColumns] = useState(null);
-
   const { generateColumns, checkStaticField } = useColumns();
+  const { selectedRecords } = state;
+  const pathSegments = (window.location.href).split("/");
+  const pid = pathSegments[pathSegments.length - 1].split("?")[0];
 
   useEffect(() => {
     fetchGridColumns();
   }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [selectedEntity, selectedExpenseData?.selectedExpenseData]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -78,7 +72,63 @@ const Expenses = (selectedExpenseData, removeExpense) => {
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
-  }, [ selectedEntity]);
+  }, [selectedEntity]);
+
+  const getQueryString = (expense) => {
+    let queryString = `?`;
+
+    if (selectedEntity) {
+      queryString = `${queryString}&entity=${selectedEntity}`;
+    }
+    if (expense?._id) {
+      const filterById = [{ field: '_id', term: expense._id }];
+      queryString = `${queryString}&filterById=${encodeURIComponent(JSON.stringify(filterById))}&filterType=and`;
+    }
+
+    return queryString;
+  };
+
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
+    dispatch({ type: 'loading', loading: true });
+    try {
+      const promises = (selectedExpenseData?.selectedExpenseData || []).map((expense) => {
+        const queryString = getQueryString(expense);
+        return axiosInstance().get(`${expenses.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
+      });
+
+      const results = await Promise.all(promises);
+  
+      let allRows = [];
+      results.forEach((response) => {
+        const data = response?.data?.data || [];
+        const rows = data.map((u) => {
+          const finalObject = prepareDataForGrid(u, user);
+          finalObject['isChecked'] = false;
+          finalObject['canDelete'] = permissions?.expenses?.isDelete;
+          return finalObject;
+        });  
+        allRows = [...allRows, ...rows];
+      });
+
+      dispatch({ type: 'initialize', data: allRows, count: allRows.length });
+
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+    } catch (error) {
+      dispatch({ type: 'loading', loading: false });
+      toastConfig.setToastConfig(error);
+    }
+  };
+  
+  const handleDelete = async (id) => {
+      axiosInstance()
+      .put(`${routes.expenseReport.path}/expenses/${pid}/delete`, { id })
+      .then(({ data }) => {
+        dispatch({ type: 'selection', selectedRecords: [] });
+        fetchData();
+      })
+  };
 
   const ActionsRenderer = {
     accessor: 'action',
@@ -91,13 +141,13 @@ const Expenses = (selectedExpenseData, removeExpense) => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
+        <HtmlTooltip title={'Delete'}>
           <span>
             <IconButton
               size="small"
               aria-label="Delete"
-              disabled={row?.original?.canDelete ? false : true}
-              onClick={removeExpense}
+              disabled={!row?.original?.canDelete}
+              onClick={() => handleDelete(row?.original?._id)}
             >
               <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
             </IconButton>
@@ -107,87 +157,39 @@ const Expenses = (selectedExpenseData, removeExpense) => {
     )
   };
 
-  const getQueryString = () => {
-    let queryString = `?`;
-    if (selectedEntity) {
-      queryString = `${queryString}&entity=${selectedEntity}`;
-    }
+
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          color="primary"
+          disabled={selectedRecords.length === 0}
+          onClick={() => {
+            selectedRecords.forEach((record) => handleDelete(record._id));
+          }}
+        >
+          {`Delete (${selectedRecords.length})`}
+        </MenuItem>
+      </>
+    );
+  };
   
-    const filterByIds = selectedExpenseData?.selectedExpenses?.map((expense) => ({ field: '_id', term: expense._id }));
-    if (filterByIds?.length) {
-      queryString = `${queryString}&filterById=${encodeURIComponent(JSON.stringify(filterByIds))}&filterType=and`;
-    }
-  
-    return queryString;
-  };
-
-  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
-    dispatch({ type: 'loading', loading: true });
-    const queryString = getQueryString();
-    try {
-      let data: any = [], count;
-      const response: any = await axiosInstance().get(`${expenses.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
-      data = response?.data?.data;
-      count = response?.data?.count;
-      let rows = data.map((u) => {
-        let finalObject: any = prepareDataForGrid(u, user);
-        finalObject['isChecked'] = false;
-        finalObject['canDelete'] = permissions?.expenses?.isDelete;
-        return finalObject;
-      });
-      dispatch({ type: 'initialize', data: rows, count: count });
-      setTimeout(() => {
-        dispatch({ type: 'loading', loading: false });
-      }, gridLoadingTimeout);
-    } catch (error) {
-      dispatch({ type: 'loading', loading: false });
-      toastConfig.setToastConfig(error);
-    }
-  };
-
-  const handleDeleteExpenses = async () => {
-    let recordsToDelete = [];
-    if (deleteRecord?._id) {
-      recordsToDelete.push(deleteRecord?._id);
-    } else {
-      recordsToDelete = selectedRecords.map((o) => o._id);
-    }
-    if (recordsToDelete.length > 0) {
-      setDeleteLoading(true);
-      axiosInstance()
-        .put(`${expenses.api}/remove`, {
-          ids: recordsToDelete
-        })
-        .then(({ data }) => {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-          dispatch({ type: 'selection', selectedRecords: [] });
-          setShowDeleteConfirmBox(false);
-          setDeleteLoading(false);
-          if (deleteRecord) setDeleteRecord({});
-          fetchData();
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-          setShowDeleteConfirmBox(false);
-          setDeleteLoading(false);
-        });
-    }
-  };
-
 
   return (
     <div className="main-container-v1">
       <>
+        <DetailsPageHeader
+          isAddButtonVisible={false}
+          isActionButtonVisible={true}
+          actionButtonMenuItems={actionButtonMenuItems()}
+          actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+          hasXpadding
+        />
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
             state={state}
-            showArrangeView = {false}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             resource={sidebarResource.expenses}
@@ -195,37 +197,10 @@ const Expenses = (selectedExpenseData, removeExpense) => {
           />
         ) : (
           <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            <CommonSkeleton lenArray={[...Array(8).keys()]} />
           </Box>
         )}
-        {showDeleteConfirmBox ? (
-          <ConfirmationDialogRaw
-            open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord
-              ? `${resources?.expenses?.titleSingular?.toLowerCase()} :
-              ${deleteRecord?.expenseNumber}`
-              : `selected ${resources?.expenses?.titlePlural?.toLowerCase()}`
-              } ?`}
-            onClose={() => {
-              setDeleteRecord(null);
-              setShowDeleteConfirmBox(false);
-            }}
-            onOk={handleDeleteExpenses}
-            okBtnLoading={deleteLoading}
-          />
-        ) : null}
       </>
-      {showManageExpensesDialog.open && (
-        <ManageExpenses
-          isClone={showManageExpensesDialog.isClone}
-          expenseId={showManageExpensesDialog.idToClone}
-          onClose={() => setShowManageExpensesDialog({ open: false, isClone: false, idToClone: null })}
-          onSuccess={(data) => {
-            history.push(`${routes.expensesDetail.path}/${data._id}`);
-            setShowManageExpensesDialog({ open: false, isClone: false, idToClone: null });
-          }}
-        />
-      )}
     </div>
   );
 };

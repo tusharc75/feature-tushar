@@ -54,6 +54,7 @@ import {
 } from 'src/pages/RentalManagement/walkmeSteps';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import AssignManagedPackagesDialog from 'src/components/AssignRolesDialog/AssignManagedPackagesDialog';
+import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
 
 const Productpackage = ({
   rentalManagementData,
@@ -180,15 +181,7 @@ const Productpackage = ({
         e.isColumnEditable = false;
       });
     }
-    const newColumns = generateColumns(
-      renderedFrom,
-      data?.map((e) => {
-        return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName };
-      }),
-      null,
-      false,
-      rentalManagementData?.currency
-    );
+    const newColumns = generateColumns(renderedFrom, data, null, false, rentalManagementData?.currency);
     let column: any = [
       {
         accessor: 'index',
@@ -461,7 +454,6 @@ const Productpackage = ({
               ? parent?.packageDetail?.packageDescription || ''
               : parent.description;
       parent.serializedProduct = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.serializedProduct : false;
-      parent.qtyDisplay = parent.qty;
       parent.isValid = parent[`price_${currency}`] || parent[`finalPrice_${currency}`] ? true : !isPriceRequired;
       if (
         parent?.type == MATERIAL_TYPE.manualEntry &&
@@ -567,7 +559,6 @@ const Productpackage = ({
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
-      _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
       _subRow.isValid = _subRow[`price_${currency}`] || _subRow[`finalPrice_${currency}`] ? true : !isPriceRequired;
       if (_subRow?.type === MATERIAL_TYPE.service && rentalPolicyData?.servicePriceRequired) {
         _subRow.isValid = _subRow[`price_${currency}`] || _subRow[`finalPrice_${currency}`] ? true : false;
@@ -868,6 +859,17 @@ const Productpackage = ({
   };
 
   const onSaveInlineEdit = (inputField, updatedData) => {
+    if (inputField.hasOwnProperty('qty')) {
+      if (inputField['qty'] === 0) {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'error',
+          message: 'Please enter valid quantity'
+        });
+        setShowConfirmationDialog({ open: false, data: {} });
+        return;
+      }
+    }
     setIsInlineEdit(true);
     const currency = rentalManagementData?.currency.toLowerCase();
     const requiredItems = [];
@@ -909,18 +911,24 @@ const Productpackage = ({
         }
       });
     } else {
-      if (inputField.hasOwnProperty('qtyDisplay')) {
-        if (inputField['qtyDisplay'] === 0) {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'error',
-            message: 'Please enter valid quantity'
+      if (inputField.hasOwnProperty('qty')) {
+        let isValid = true;
+        const child: any = flattenArray(dataRows).filter((e) => e.parentId === rowData?._id);
+        if (child?.length) {
+          child?.forEach((e) => {
+            let qty = parseFloat(inputField['qty']) * e?.qty;
+            if (qty < e?.assetQty || qty < e?.nonSerializedQty) {
+              isValid = false;
+              return;
+            }
           });
-          setShowConfirmationDialog({ open: false, data: {} });
-          return;
+        } else {
+          const qty = getParentMultiplier(material, rowData) * parseFloat(inputField['qty']);
+          if (qty < rowData?.assetQty || qty < rowData?.nonSerializedQty) {
+            isValid = false;
+          }
         }
-        inputField['qty'] = inputField['qtyDisplay'];
-        if (!rowData.canDelete && (inputField['qty'] < rowData?.assetQty || inputField['qty'] < rowData?.nonSerializedQty)) {
+        if (!isValid) {
           toastConfig.setToastConfig({
             open: true,
             type: 'error',
@@ -1124,6 +1132,7 @@ const Productpackage = ({
           rentalManagementData={rentalManagementData}
           rowData={!isBulkEdit ? isProductEdit.data : selectedRecords}
           material={material}
+          dataRows={flattenArray(dataRows)}
           selectedProducts={selectedRecords}
           loading={isUpdating}
           showSaveAndNext={isProductEdit.showSaveAndNext}
