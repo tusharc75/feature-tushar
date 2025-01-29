@@ -13,8 +13,6 @@ export default function FilterModel({ dateFilters, setDateFilters }) {
   });
   const [inputFormKeyBoard, setInputFromKeyBoard] = useState(false);
 
-  console.log(dateFilters);
-
   useEffect(() => {
     const difference = (new Date(dateFilters?.to).getTime() - new Date(dateFilters?.from).getTime()) / (1000 * 60 * 60);
     const interval = intervals?.map((d) => {
