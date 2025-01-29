@@ -26,7 +26,7 @@ import dayjs from 'dayjs';
 
 const renderedFrom = `${camelCase(sidebarResource.generateInvoice)}_create`;
 
-const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progressiveBilling }) => {
+const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progressiveBilling, invoiceResourceData }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [isUpdating, setUpdating] = useState(false);
@@ -41,7 +41,6 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
   const [appliedDate, setAppliedDate] = useState(false);
   const [rowsApplied, setRowsApplied] = useState([]);
   const [openInvoiceDataDialog, setOpenInvoiceDataDialog] = useState(false);
-  const [invoiceResourceData, setInvoiceResourceData] = useState(null);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
@@ -53,7 +52,6 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
 
   useEffect(() => {
     fetchFields();
-    fetchPolicy();
   }, []);
 
   useEffect(() => {
@@ -408,19 +406,6 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
-    }
-  };
-
-  const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.invoice}`);
-      if (data) {
-        setInvoiceResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
     }
   };
 
