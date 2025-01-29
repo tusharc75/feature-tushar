@@ -80,7 +80,6 @@ const Expenses = (selectedExpenseData) => {
     if (selectedEntity) {
       queryString = `${queryString}&entity=${selectedEntity}`;
     }
-    console.log(selectedExpenseData)
     if (expense?._id) {
       const filterById = [{ field: '_id', term: expense._id }];
       queryString = `${queryString}&filterById=${encodeURIComponent(JSON.stringify(filterById))}&filterType=and`;
