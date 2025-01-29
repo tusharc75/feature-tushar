@@ -61,7 +61,7 @@ function Dashboard() {
             <div className={'grid gap-5 max-[900px]:grid-cols-2 max-[600px]:grid-cols-1'}>
               {aiPermission && (
                 <SideCard
-                  heading={'Equipt Genie'}
+                  heading={'E Genie'}
                   href={routes.equiptAi.path}
                   icon={
                     <div className="max-w-[60px]">
