@@ -14,7 +14,7 @@ export default function FilterModel({ dateFilters, setDateFilters }) {
   const [inputFormKeyBoard, setInputFromKeyBoard] = useState(false);
 
   useEffect(() => {
-    const difference = (dateFilters?.to?.getTime() - dateFilters?.from?.getTime()) / (1000 * 60 * 60);
+    const difference = (new Date(dateFilters?.to).getTime() - new Date(dateFilters?.from).getTime()) / (1000 * 60 * 60);
     const interval = intervals?.map((d) => {
       let disabled = true;
       if (d?.optionValue === 'perCycle') {
@@ -105,8 +105,12 @@ export default function FilterModel({ dateFilters, setDateFilters }) {
           getOptionLabel={(option: any) => option?.optionLabel}
           getOptionDisabled={(option) => option?.disabled || false}
           renderOption={(props, option, state, ownerState) => {
-
-            return <Box>{ownerState.getOptionLabel(option)}</Box>
+            const { key, ...optionProps } = props;
+            return (
+              <Box key={key} component="li" {...optionProps}>
+                {ownerState.getOptionLabel(option)}
+              </Box>
+            );
           }}
           onChange={(event, value) => {
             setDateFilters({

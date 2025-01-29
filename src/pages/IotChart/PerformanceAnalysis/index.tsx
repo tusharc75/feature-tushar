@@ -67,7 +67,7 @@ const PerformanceAnalysis = ({ deviceTemplate = null, assetId, dataPoints = [] }
         <Grid>
           <FilterModel dateFilters={dateFilters} setDateFilters={setDateFilters} />
         </Grid>
-        <Grid >
+        <Grid>
           <SearchBox
             onChange={(e) => {
               setSearchValue(e.target.value);
@@ -78,8 +78,9 @@ const PerformanceAnalysis = ({ deviceTemplate = null, assetId, dataPoints = [] }
       </Grid>
       <Box mt={2}>
         <div
-          className={`grid grid-cols-1 gap-y-4 sm:gap-x-3 md:gap-x-4 ${isExpanded ? '' : '[--left-col-size:62px]'
-            } transition-all duration-300 sm:grid-cols-[var(--left-col-size,5fr)_9fr]  md:grid-cols-[var(--left-col-size,4fr)_9fr] lg:grid-cols-[var(--left-col-size,320px)_1fr]`}
+          className={`grid grid-cols-1 gap-y-4 sm:gap-x-3 md:gap-x-4 ${
+            isExpanded ? '' : '[--left-col-size:62px]'
+          } transition-all duration-300 sm:grid-cols-[var(--left-col-size,5fr)_9fr]  md:grid-cols-[var(--left-col-size,4fr)_9fr] lg:grid-cols-[var(--left-col-size,320px)_1fr]`}
         >
           <div className={`container-with-border ${isExpanded ? '' : 'overflow-hidden'} `}>
             <div className="flex items-center justify-between gap-2 px-4 py-3 [border-bottom:1px_solid_var(--common-border-color)]">
@@ -92,8 +93,9 @@ const PerformanceAnalysis = ({ deviceTemplate = null, assetId, dataPoints = [] }
             </div>
 
             <div
-              className={`h-[250px] px-2 sm:h-[calc(574px-48px)] ${isExpanded ? 'overflow-auto' : `overflow-hidden [&_*]:!line-clamp-1 [&_*]:!flex-nowrap [&_*]:!overflow-hidden ${frostedGlass}`
-                } py-1`}
+              className={`h-[250px] px-2 sm:h-[calc(574px-48px)] ${
+                isExpanded ? 'overflow-auto' : `overflow-hidden [&_*]:!line-clamp-1 [&_*]:!flex-nowrap [&_*]:!overflow-hidden ${frostedGlass}`
+              } py-1`}
             >
               <FormGroup>
                 <div className="grid gap-2">
