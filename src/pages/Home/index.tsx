@@ -16,6 +16,7 @@ import dynamicFormImage from 'src/assets/dashboard_images/sidebar/dynamic-form.p
 import WorkspaceCard from 'src/pages/Home/WorkspaceCard';
 import { VITE_APP_ENV } from 'src/config';
 import { SVG } from 'src/assets';
+import EGenieWord from 'src/assets/svg/EGenieWord.svg';
 
 export const userManual = {
   description: 'View our user manual in just a click.',
@@ -63,9 +64,9 @@ function Dashboard() {
               {aiPermission && (
                 <SideCard
                   heading={
-                    <div className="flex items-center gap-1">
-                      <img src={SVG('LogoNewShort')} alt="E" className="max-h-[18px]" /> Genie
-                    </div>
+                    <>
+                      <img src={SVG('genieWord')} alt="E" className="max-h-[16px]" />
+                    </>
                   }
                   href={routes.equiptAi.path}
                   icon={

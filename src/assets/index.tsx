@@ -28,72 +28,50 @@ import profit from './svg/profit.svg';
 import booked_value from './svg/booked_value.svg';
 import logoNew from './svg/logoNew.svg';
 import LogoShort from './svg/logoShort.svg';
+import EGenieWord from './svg/EGenieWord.svg';
 
-export const SVG = (name) => {
-  switch (name) {
-    case 'Logo':
-      return logo;
-    case 'LogoNew':
-      return logoNew;
-    case 'LogoNewShort':
-      return LogoShort;
-    case 'Menu Icon':
-      return menu_icon;
-    case 'Dashboard':
-      return dashboard;
-    case 'Activities':
-      return activities;
-    case 'Customer':
-      return customer;
-    case 'Pricing':
-      return pricing;
-    case 'Suppliers':
-      return suppliers;
-    case 'Product':
-      return product;
-    case 'Entity':
-      return entity;
-    case 'User':
-      return users;
-    case 'Terms & Conditions':
-      return terms_conditions;
-    case 'DOA':
-      return doa;
-    case 'Currency Convertor':
-      return currency;
-    case 'Contacts':
-      return contact;
-    case 'Leads':
-      return leads;
-    case 'Opportunities':
-      return opportunities;
-    case 'Price Builder':
-      return currency;
-    case 'Quote Builder':
-      return quote_builder;
-    case 'Reminder':
-      return reminder;
-    case 'Calendar':
-      return calendar;
-    case 'Flags':
-      return flags;
-    case 'AI Robot':
-      return ai_robot;
-    case 'Contacts Placeholder':
-      return contacts_placeholder;
-    case 'Timepline Placeholder':
-      return timeline_placeholder;
-    case 'LogoPng':
-      return logoPng;
-    case 'imgComputer':
-      return imgComputer;
-    case 'total_cost':
-      return total_cost;
-    case 'profit':
-      return profit;
-    case 'booked_value':
-      return booked_value;
-    default:
-      return;
+const availabelSvgs = {
+  Logo: logo,
+  LogoNew: logoNew,
+  LogoNewShort: LogoShort,
+  'Menu Icon': menu_icon,
+  Dashboard: dashboard,
+  Activities: activities,
+  Customer: customer,
+  Pricing: pricing,
+  Suppliers: suppliers,
+  Product: product,
+  Entity: entity,
+  User: users,
+  'Terms & Conditions': terms_conditions,
+  DOA: doa,
+  'Currency Convertor': currency,
+  Contacts: contact,
+  Leads: leads,
+  Opportunities: opportunities,
+  'Price Builder': currency,
+  'Quote Builder': quote_builder,
+  Reminder: reminder,
+  Calendar: calendar,
+  Flags: flags,
+  'AI Robot': ai_robot,
+  'Contacts Placeholder': contacts_placeholder,
+  'Timepline Placeholder': timeline_placeholder,
+  LogoPng: logoPng,
+  imgComputer: imgComputer,
+  total_cost: total_cost,
+  profit: profit,
+  booked_value: booked_value,
+  genieWord: EGenieWord
+};
+
+type AvailabelSvgs = keyof typeof availabelSvgs;
+
+export const SVG = (name: AvailabelSvgs) => {
+  const svg = availabelSvgs[name];
+  if (svg) {
+    return svg;
+  } else {
+    return availabelSvgs['LogoNewShort'];
   }
 };
