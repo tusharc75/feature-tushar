@@ -115,9 +115,12 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   }, []);
 
   useEffect(() => {
+    fetchPolicy();
+  }, []);
+
+  useEffect(() => {
     if (selectedResource) {
       fetchGridColumns();
-      fetchPolicy();
     }
   }, [selectedResource]);
 
@@ -237,6 +240,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
           type: 'success',
           message: data.message
         });
+        window.open(`${routes.invoiceDetail.path}/${data?.data?._id}`)
         setCreateInvoiceDialog({ open: false, data: null });
         dispatch({ type: 'selection', selectedRecords: [] });
         setOpenInvoiceDataDialog({ open: false, data: null });
@@ -248,8 +252,8 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   };
 
   const handleCreateInvoice = (rows) => {
-    if (selectedResource?.resource === sidebarResource.fieldTicket && invoicePolicyRef.current?.policy?.hideFieldTicketInvoiceCreateDialog) {
-      if (invoicePolicyRef.current?.policy?.fieldTicketInvoiceFields?.length > 0) {
+    if (selectedResource?.resource === sidebarResource.fieldTicket && invoicePolicyRef?.current?.policy?.hideFieldTicketInvoiceCreateDialog) {
+      if (invoicePolicyRef?.current?.policy?.fieldTicketInvoiceFields?.length > 0) {
         setOpenInvoiceDataDialog({ open: true, data: rows });
       } else {
         createInvoice(rows);
@@ -546,7 +550,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
             onClose={() => {
               setOpenInvoiceDataDialog({ open: false, data: null });
             }}
-            invoiceFields={invoicePolicyRef.current?.policy?.fieldTicketInvoiceFields}
+            invoiceFields={invoicePolicyRef?.current?.policy?.fieldTicketInvoiceFields}
             onSuccess={(data) => {
               createInvoice(openInvoiceDataDialog.data, data);
             }}
