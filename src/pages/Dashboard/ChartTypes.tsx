@@ -60,6 +60,7 @@ const ChartTypes = ({
   kpiFilters,
   fetchKpiFilters
 }: Props) => {
+
   const [themeColor] = useAppTheme();
   const theme = useTheme();
   const isScreenSmall = useMediaQuery(theme.breakpoints.down('xs'));
@@ -67,11 +68,6 @@ const ChartTypes = ({
   const {
     state: { selectedEntity, user }
   } = useData();
-
-  const getDefaultFilter = (filters) => {
-    const defaultFilters = filters?.filter((f) => f.default);
-    return defaultFilters?.length ? defaultFilters[0] : {};
-  };
 
   const currency = user?.user?.currency || 'USD';
   const [chartData, setChartData] = React.useState(null);
@@ -91,20 +87,24 @@ const ChartTypes = ({
   }, []);
 
   React.useEffect(() => {
-    if (!filterValues) return;
-    const keys = Object.keys(filterValues);
-    let values = [];
-    keys.forEach((key: string) => {
-      if (!filterValues[key]) return;
-      const isEmpty = Array.isArray(filterValues[key]) ? Object.keys(filterValues[key]).length === 0 : filterValues[key] === 0;
-      if (!isEmpty) {
-        values.push(key);
+    if (filterValues) {
+      const keys = Object.keys(filterValues);
+      let values = [];
+      keys.forEach((key: string) => {
+        if (!filterValues[key]) return;
+        const isEmpty = Array.isArray(filterValues[key]) ? Object.keys(filterValues[key]).length === 0 : filterValues[key] === 0;
+        if (!isEmpty) {
+          values.push(key);
+        }
+      });
+      if (values.length > 0) {
+        setInvisible(false);
+      } else {
+        setInvisible(true);
       }
-    });
-    if (values.length > 0) {
+    }
+    else {
       setInvisible(false);
-    } else {
-      setInvisible(true);
     }
   }, [filterValues]);
 
@@ -144,7 +144,6 @@ const ChartTypes = ({
   };
 
   React.useEffect(() => {
-    if (!filterValues) return;
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
@@ -416,7 +415,7 @@ const ChartTypes = ({
                                   if (parseValue !== null) {
                                     label += chart?.currency
                                       ? formatAmountWithCurrency(globalFilters.currency || currency, Number(parseValue) ? parseValue : '00')
-                                          .fullFormatAmountWithoutSpace
+                                        .fullFormatAmountWithoutSpace
                                       : parseValue;
                                   }
                                 }
@@ -459,7 +458,7 @@ const ChartTypes = ({
                             callback: function (value) {
                               return chart?.currency
                                 ? formatAmountWithCurrency(globalFilters.currency || currency, Number(value) ? value : '00')
-                                    .fullFormatAmountWithoutSpace
+                                  .fullFormatAmountWithoutSpace
                                 : value;
                             }
                           }
@@ -482,21 +481,21 @@ const ChartTypes = ({
                       },
                       ...(chart.stack &&
                         !chartData.datasets.some((d) => d.stack === 'stacked') && {
-                          scales: {
-                            x: {
-                              stacked: true,
-                              grid: {
-                                color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
-                              }
-                            },
-                            y: {
-                              stacked: true,
-                              grid: {
-                                color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
-                              }
+                        scales: {
+                          x: {
+                            stacked: true,
+                            grid: {
+                              color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
+                            }
+                          },
+                          y: {
+                            stacked: true,
+                            grid: {
+                              color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
                             }
                           }
-                        })
+                        }
+                      })
                     }}
                   />
                 </>
