@@ -34,10 +34,9 @@ function AddExpenses({
   const { generateColumns, checkStaticField } = useColumns();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, filters,search, sorting, showFilteredRecordsOnly } = state;
-  const { state: { user, permissions, resources } } = useData();
+  const { state: { user, permissions } } = useData();
   const [selectedRows, setSelectedRows] = useState([]);
   const { selectedRecords } = state;
-  const history = useHistory();
 
   useEffect(() => {
     fetchGridColumns();

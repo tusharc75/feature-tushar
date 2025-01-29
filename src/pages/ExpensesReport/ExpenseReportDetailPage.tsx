@@ -20,12 +20,10 @@ import Expenses from 'src/pages/ExpensesReport/Expenses';
 
 const ExpenseReportDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
-
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const { tab }: any = parsed;
-
   const {
     state: { permissions, resources }
   }: any = useData();
@@ -37,7 +35,6 @@ const ExpenseReportDetailsPage = () => {
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [locationKeys, setLocationKeys] = useState([]);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
-
   const [resourceData, setResourceData] = useState(null);
   const [fields, setFields] = useState(null);
 
