@@ -10,7 +10,7 @@ import { VirtualTableHead } from 'src/components/CustomReactTable/TableComponent
 import { getStickyPosition } from 'src/components/CustomReactTable/utils';
 import { TColType } from '../TableHelperComponents';
 
-export const VirtualTable = forwardRef(function (
+const VirtualTableImpl = forwardRef(function (
   {
     columns,
     sizes,
@@ -176,7 +176,7 @@ export const VirtualTable = forwardRef(function (
                               style={{
                                 ...style,
                                 ...(style.position === 'sticky' ? { ...style } : { ...style, position: 'absolute', left: vc.start }),
-                                zIndex: columnDef.sticky === 'left' || columnDef.sticky === 'right' ? 12 : 'unset',
+                                zIndex: columnDef.sticky === 'left' || columnDef.sticky === 'right' ? 12 : '-1',
                                 minWidth: colSize,
                                 maxWidth: colSize,
                                 display: 'flex',
@@ -200,3 +200,5 @@ export const VirtualTable = forwardRef(function (
     </>
   );
 });
+
+export const VirtualTable = React.memo(VirtualTableImpl);
