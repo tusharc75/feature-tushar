@@ -297,6 +297,7 @@ const Expenses = () => {
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
             resource={sidebarResource.expenses}
+            showFilters={true}
           />
         ) : (
           <Box p={2} height={500}>

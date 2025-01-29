@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -10,9 +10,10 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const Expenses = (selectedExpenseData) => {
-
   const renderedFrom = camelCase(sidebarResource?.expenses);
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -21,10 +22,15 @@ const Expenses = (selectedExpenseData) => {
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const [columns, setColumns] = useState(null);
   const { generateColumns, checkStaticField } = useColumns();
+  const [rows, setRows] = useState([]);
 
   useEffect(() => {
     fetchGridColumns();
   }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [selectedEntity, selectedExpenseData?.selectedExpenseData]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -56,45 +62,63 @@ const Expenses = (selectedExpenseData) => {
         }
       }
     ];
-    setColumns([...extracolumns, 
-    ]);
+    setColumns([...extracolumns, ActionsRenderer]);
   };
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
-  }, [ selectedEntity]);
+  }, [selectedEntity]);
 
-  const getQueryString = () => {
+  const getQueryString = (expense) => {
     let queryString = `?`;
+
     if (selectedEntity) {
       queryString = `${queryString}&entity=${selectedEntity}`;
     }
-  
-    const filterByIds = selectedExpenseData?.selectedExpenseData?.selectedExpenses?.map((expense) => ({ field: '_id', term: expense._id }));
-    if (filterByIds?.length) {
-      queryString = `${queryString}&filterById=${encodeURIComponent(JSON.stringify(filterByIds))}&filterType=and`;
+
+    if (expense?._id) {
+      const filterById = [{ field: '_id', term: expense._id }];
+      queryString = `${queryString}&filterById=${encodeURIComponent(JSON.stringify(filterById))}&filterType=and`;
     }
-  
+
+    if (rows) {
+      const excludedIds = rows.map((field) => field._id);
+      if (excludedIds.length > 0) {
+        queryString = `${queryString}&excludeIds=${encodeURIComponent(JSON.stringify(excludedIds))}`;
+      }
+    }
+
     return queryString;
   };
 
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
-    const queryString = getQueryString();
+
     try {
-      let data: any = [], count;
-      const response: any = await axiosInstance().get(`${expenses.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
-      data = response?.data?.data;
-      count = response?.data?.count;
-      let rows = data.map((u) => {
-        let finalObject: any = prepareDataForGrid(u, user);
-        finalObject['isChecked'] = false;
-        finalObject['canDelete'] = permissions?.expenses?.isDelete;
-        return finalObject;
+      const promises = (selectedExpenseData?.selectedExpenseData || []).map((expense) => {
+        const queryString = getQueryString(expense);
+        return axiosInstance().get(`${expenses.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
       });
-      dispatch({ type: 'initialize', data: rows, count: count });
+
+      const results = await Promise.all(promises);
+
+      let allRows: any[] = [];
+      results.forEach((response) => {
+        const data = response?.data?.data || [];
+        const rows = data.map((u) => {
+          const finalObject: any = prepareDataForGrid(u, user);
+          finalObject['isChecked'] = false;
+          finalObject['canDelete'] = permissions?.expenses?.isDelete;
+          return finalObject;
+        });
+        allRows = [...allRows, ...rows];
+      });
+
+      setRows(allRows);
+      dispatch({ type: 'initialize', data: allRows, count: allRows.length });
+
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
@@ -104,20 +128,53 @@ const Expenses = (selectedExpenseData) => {
     }
   };
 
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 110,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        <HtmlTooltip title={'Delete'}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              disabled={row?.original?.canDelete ? false : true}
+              onClick={() => {
+                removeExpenseField(row.original.id);
+              }}
+            >
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+      </>
+    )
+  };
+
+  const removeExpenseField = async (id) => {
+    const updatedRows = rows.filter((field) => field._id !== id);
+    setRows(updatedRows);
+    dispatch({ type: 'initialize', data: updatedRows, count: updatedRows.length });
+  };
+
   return (
     <div className="main-container-v1">
       <>
         {columns ? (
           <CustomReactTable
-            height={'calc(100vh - 450px)'}
+            height={'calc(100vh - 200px)'}
             columns={columns}
             state={state}
-            showArrangeView = {false}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             resource={sidebarResource.expenses}
             pagination={false}
-            hideSelection={true}
           />
         ) : (
           <Box p={2} height={500}>
