@@ -7,7 +7,6 @@ import { useHistory, useParams } from 'react-router-dom';
 import EditIcon from '@mui/icons-material/Edit';
 import queryString from 'query-string';
 import { isMobile, isTablet } from 'react-device-detect';
-import { MdDelete } from 'react-icons/md';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
@@ -310,7 +309,7 @@ const ProjectSalesDetails = () => {
                 ) : null}
                 {permissions?.projectSales?.isDelete && isManager ? (
                   <DeleteButton
-                    text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'}
+                    text={'Delete'}
                     onClick={() => {
                       handleDeleteProject(id);
                     }}

@@ -5,19 +5,15 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export type DeleteButtonProps = {
   text: string | React.ReactNode;
-  mode?: 'dark' | 'light';
-  isVisible?: boolean;
   tooltip?: string;
   mobileTooltip?: string;
 } & ButtonProps;
 
-function DeleteButton({ text, onClick, children, mode = 'dark', isVisible = true, tooltip = '', mobileTooltip = '', ...rest }: DeleteButtonProps) {
-  if (!isVisible) return null;
+function DeleteButton({ text, onClick, children, tooltip = '', mobileTooltip = '', ...rest }: DeleteButtonProps) {
   return (
     <ThemeButton
-      className={` ${mode}`}
-      tooltip={tooltip}
       buttonType="red"
+      tooltip={tooltip}
       mobileTooltip={mobileTooltip}
       onClick={onClick}
       {...rest}

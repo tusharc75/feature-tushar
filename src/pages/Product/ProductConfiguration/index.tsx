@@ -176,18 +176,17 @@ const ProductConfiguration = (props: ConfigProps) => {
   const rightSideContents = () => {
     return (
       <>
-        <DeleteButton
-          onClick={() => {
-            setShowConfirmBox({
-              open: true,
-              ids: selectedRecords.map((s) => s.id)
-            });
-          }}
-          size="small"
-          disabled={selectedRecords.length === 0}
-          disableElevation
-          text={'Delete'}
-        />
+        {selectedRecords.length &&
+          <DeleteButton
+            onClick={() => {
+              setShowConfirmBox({
+                open: true,
+                ids: selectedRecords.map((s) => s.id)
+              });
+            }}
+            text={'Delete'}
+          />
+        }
       </>
     );
   };
@@ -213,7 +212,7 @@ const ProductConfiguration = (props: ConfigProps) => {
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            refreshGrid={() => {}}
+            refreshGrid={() => { }}
             isClientSideGrid={true}
             hideAction={!permissions?.product}
             hideSelection={!permissions?.product?.isUpdate}

@@ -5,7 +5,6 @@ import Grid from '@mui/material/Grid2';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaEye } from 'react-icons/fa';
-import { MdDelete } from 'react-icons/md';
 import { useHistory, useParams } from 'react-router-dom';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomDialogTransition, DOA_RESOURCE } from 'src/constants/helpers';
@@ -290,9 +289,9 @@ const EntityDetailsPage = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-          id: user._id,
-          name: `${user.firstName} ${user.lastName}`
-        }))
+        id: user._id,
+        name: `${user.firstName} ${user.lastName}`
+      }))
       : [];
 
     setUserList(rows);
@@ -314,7 +313,7 @@ const EntityDetailsPage = () => {
                   </ThemeButton>
                 )}
                 {permissions?.entity?.isDelete && (
-                  <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowDeleteEntityDialog(true)} />
+                  <DeleteButton text={'Delete'} onClick={() => setShowDeleteEntityDialog(true)} />
                 )}
               </>
             ) : (

@@ -19,7 +19,6 @@ import {
   sidebarResource
 } from '../../constants/helpers';
 import AskSupplierPriceDialog from './AskSupplierPriceDialog';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
 import CustomReactTable, { useColumns, useTableReducer } from '../CustomReactTable';
 
 const renderedFrom = 'quoteSupplierPrice';
@@ -180,10 +179,10 @@ const SupplierAskPrice = (props) => {
       <div className="listing-grid p-3">
         <Box mb={2}>
           <Grid container>
-            <Grid size={{xs:12, sm:12, md:12}} container justifyContent="flex-end">
+            <Grid size={{ xs: 12, sm: 12, md: 12 }} container justifyContent="flex-end">
               <Box ml={1} mt={1}>
                 <ThemeButton
-buttonType='theme'
+                  buttonType='theme'
                   onClick={handleAdd}
                   disabled={getLocalStorageArrayData(localStorageSelectedRecords).length === 1 ? false : true}
                 >
@@ -191,12 +190,13 @@ buttonType='theme'
                 </ThemeButton>
               </Box>
               <Box ml={1} mt={1}>
-                <DeleteButton
-                  id="detailDeleteButton"
-                  text={'Reject'}
+                <ThemeButton
+                  buttonType='red'
                   onClick={() => setAskSupplierPriceDialog(true)}
                   disabled={getLocalStorageArrayData(localStorageSelectedRecords).length === 1 ? false : true}
-                />
+                >
+                  Reject
+                </ThemeButton>
               </Box>
             </Grid>
           </Grid>
@@ -205,7 +205,7 @@ buttonType='theme'
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {}}
+            onSelect={() => { }}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}

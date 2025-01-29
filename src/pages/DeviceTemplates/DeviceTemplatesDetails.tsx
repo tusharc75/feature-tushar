@@ -110,10 +110,8 @@ export default function DeviceTemplatesDetails() {
                     {'Edit'}
                   </ThemeButton>
                 )}
-                {permissions?.warehouse?.isDelete && (
-                  <span title={id ? "Primarily selected warehouse can't be deleted" : 'Permanently delete this warehouse'}>
-                    <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-                  </span>
+                {permissions?.deviceTemplates?.isDelete && (
+                  <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                 )}
               </>
             ) : (
