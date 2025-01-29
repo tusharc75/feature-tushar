@@ -4,7 +4,7 @@ import { cn } from 'src/constants/helpers';
 
 export type SideCardProps = {
   icon: React.ReactNode;
-  heading: string;
+  heading: React.ReactNode;
   description?: string;
   href?: string;
   external?: boolean;

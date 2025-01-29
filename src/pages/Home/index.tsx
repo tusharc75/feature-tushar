@@ -15,6 +15,7 @@ import equiptGenieImage from 'src/assets/dashboard_images/sidebar/genie.svg';
 import dynamicFormImage from 'src/assets/dashboard_images/sidebar/dynamic-form.png';
 import WorkspaceCard from 'src/pages/Home/WorkspaceCard';
 import { VITE_APP_ENV } from 'src/config';
+import { SVG } from 'src/assets';
 
 export const userManual = {
   description: 'View our user manual in just a click.',
@@ -61,7 +62,11 @@ function Dashboard() {
             <div className={'grid gap-5 max-[900px]:grid-cols-2 max-[600px]:grid-cols-1'}>
               {aiPermission && (
                 <SideCard
-                  heading={'Equipt Genie'}
+                  heading={
+                    <div className="flex items-center gap-1">
+                      <img src={SVG('LogoNewShort')} alt="E" className="max-h-[18px]" /> Genie
+                    </div>
+                  }
                   href={routes.equiptAi.path}
                   icon={
                     <div className="max-w-[60px]">
