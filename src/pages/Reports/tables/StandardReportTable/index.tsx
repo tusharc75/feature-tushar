@@ -729,6 +729,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
       {!showGrid && !customReportData && selectedReport?.type != 'custom-report' && (
         <Filter
           onClose={() => {
+            dispatch({ type: 'onlyFilter', filters: {} });
             setShowGrid(true);
           }}
           loading={isColumnsLoading}
