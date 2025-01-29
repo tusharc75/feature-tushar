@@ -12,7 +12,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
-import { CHILD_RESOURCE, MATERIAL_TYPE, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, DEMAND_ORDER_STATUS, MATERIAL_TYPE, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
@@ -23,7 +23,7 @@ import MaterialDialog from './MaterialDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 
-const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit, resources }) => {
+const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit, resources, updateStatus }) => {
   const renderedFrom = `${camelCase(sidebarResource?.demandOrder)}_material`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -264,6 +264,9 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit, resourc
           type: 'success',
           message: data.message
         });
+        if(!demandOrderData?.material?.length && demandOrderData?.status!==DEMAND_ORDER_STATUS.inProgress){
+          updateStatus(DEMAND_ORDER_STATUS.inProgress)
+        }
         fetchData();
         fetchDemadOrderData();
         setSubmitting(false);

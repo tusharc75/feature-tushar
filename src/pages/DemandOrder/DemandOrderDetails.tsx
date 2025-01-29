@@ -83,7 +83,7 @@ const DemandOrderDetails = () => {
       const response: any = await axiosInstance().get(`${demandOrder.api}/${id}`);
       data = response?.data?.data;
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.demandOrder, data));
-      setAllowedToDelete(permissions?.demandOrder?.isDelete && checkIsAllowedToDelete(user, sidebarResource.demandOrder, data.owner.optionValue));
+      setAllowedToDelete(permissions?.demandOrder?.isDelete && checkIsAllowedToDelete(user, sidebarResource.demandOrder, data.owner.optionValue) && !data?.material?.length);
       setDemandOrderData(data);
       setLoading(false);
     } catch (error) {
@@ -105,6 +105,22 @@ const DemandOrderDetails = () => {
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
+  };
+
+  const updateStatus = (status) => {
+    axiosInstance()
+      .put(`${demandOrder.api}/status/${id}`, { status: status })
+      .then(({ data: { data } }) => {
+        fetchData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Status changed to ${status}`
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const handleOpenUpdateDialog = () => {
@@ -249,6 +265,7 @@ const DemandOrderDetails = () => {
                 allowedToEdit && permissions?.demandOrder?.isUpdate && demandOrderData?.status !== DEMAND_ORDER_STATUS.converted ? true : false
               }
               resources={resources}
+              updateStatus={updateStatus}
             />
           )}
         </TabPanel>
