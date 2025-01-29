@@ -1,17 +1,18 @@
-import { Box, IconButton } from '@mui/material';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { expenses, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { EXPENSE_STATUS, expenses, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 
 const Expenses = (selectedExpenseData) => {
   const renderedFrom = camelCase(sidebarResource?.expenses);
@@ -23,6 +24,8 @@ const Expenses = (selectedExpenseData) => {
   const [columns, setColumns] = useState(null);
   const { generateColumns, checkStaticField } = useColumns();
   const [rows, setRows] = useState([]);
+  const [deletedIds, setDeletedIds] = useState([]);
+  const { selectedRecords } = state;
 
   useEffect(() => {
     fetchGridColumns();
@@ -30,7 +33,7 @@ const Expenses = (selectedExpenseData) => {
 
   useEffect(() => {
     fetchData();
-  }, [selectedEntity, selectedExpenseData?.selectedExpenseData]);
+  }, [selectedEntity, selectedExpenseData?.selectedExpenseData, deletedIds]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -77,17 +80,9 @@ const Expenses = (selectedExpenseData) => {
     if (selectedEntity) {
       queryString = `${queryString}&entity=${selectedEntity}`;
     }
-
     if (expense?._id) {
       const filterById = [{ field: '_id', term: expense._id }];
       queryString = `${queryString}&filterById=${encodeURIComponent(JSON.stringify(filterById))}&filterType=and`;
-    }
-
-    if (rows) {
-      const excludedIds = rows.map((field) => field._id);
-      if (excludedIds.length > 0) {
-        queryString = `${queryString}&excludeIds=${encodeURIComponent(JSON.stringify(excludedIds))}`;
-      }
     }
 
     return queryString;
@@ -103,16 +98,17 @@ const Expenses = (selectedExpenseData) => {
       });
 
       const results = await Promise.all(promises);
-
-      let allRows: any[] = [];
+  
+      let allRows = [];
       results.forEach((response) => {
         const data = response?.data?.data || [];
-        const rows = data.map((u) => {
-          const finalObject: any = prepareDataForGrid(u, user);
+        const filteredData = data.filter((u) => !deletedIds.includes(u._id)); // Exclude deleted rows
+        const rows = filteredData.map((u) => {
+          const finalObject = prepareDataForGrid(u, user);
           finalObject['isChecked'] = false;
           finalObject['canDelete'] = permissions?.expenses?.isDelete;
           return finalObject;
-        });
+        });  
         allRows = [...allRows, ...rows];
       });
 
@@ -126,6 +122,12 @@ const Expenses = (selectedExpenseData) => {
       dispatch({ type: 'loading', loading: false });
       toastConfig.setToastConfig(error);
     }
+  };
+  
+  const handleDelete = async (id) => {
+    setDeletedIds((prev) => [...prev, id]); 
+    setRows((prevRows) => prevRows.filter((row) => row._id !== id)); 
+    await axiosInstance().patch(`${expenses.api}/status/${id}`, { status: EXPENSE_STATUS?.unreported });
   };
 
   const ActionsRenderer = {
@@ -144,10 +146,8 @@ const Expenses = (selectedExpenseData) => {
             <IconButton
               size="small"
               aria-label="Delete"
-              disabled={row?.original?.canDelete ? false : true}
-              onClick={() => {
-                removeExpenseField(row.original.id);
-              }}
+              disabled={!row?.original?.canDelete}
+              onClick={() => handleDelete(row?.original?._id)}
             >
               <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
             </IconButton>
@@ -157,15 +157,34 @@ const Expenses = (selectedExpenseData) => {
     )
   };
 
-  const removeExpenseField = async (id) => {
-    const updatedRows = rows.filter((field) => field._id !== id);
-    setRows(updatedRows);
-    dispatch({ type: 'initialize', data: updatedRows, count: updatedRows.length });
+
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          color="primary"
+          disabled={selectedRecords.length === 0}
+          onClick={() => {
+            selectedRecords.forEach((record) => handleDelete(record._id));
+          }}
+        >
+          {`Delete (${selectedRecords.length})`}
+        </MenuItem>
+      </>
+    );
   };
+  
 
   return (
     <div className="main-container-v1">
       <>
+        <DetailsPageHeader
+          isAddButtonVisible={false}
+          isActionButtonVisible={true}
+          actionButtonMenuItems={actionButtonMenuItems()}
+          actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+          hasXpadding
+        />
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

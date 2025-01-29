@@ -175,19 +175,6 @@ const ManageExpenseReports = ({ isClone = false, fetchReportData, expenseReportI
     setSelectedExpense(updatedExpenses);
   };
 
-  const removeExpenseField = (id) => {
-    const removedExpense = selectedExpense.find((field) => field._id === id);
-    setSelectedExpense(selectedExpense.filter((field) => field._id !== id));
-    if (removedExpense) {
-      axiosInstance()
-        .patch(`${expenses.api}/status/${removedExpense._id}`, { status: EXPENSE_STATUS.unreported })
-        .then(({ data }) => {})
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-    }
-  };
-
   const addButtonMenuItems = () => {
     return (
       <>
@@ -204,22 +191,6 @@ const ManageExpenseReports = ({ isClone = false, fetchReportData, expenseReportI
           }}
         >
           {`Create New ${resources?.expenses?.titlePlural}`}
-        </MenuItem>
-      </>
-    );
-  };
-
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          color="primary"
-          disabled={selectedRecords.length === 0}
-          onClick={() => {
-            removeExpenseField(selectedRecords.map((d) => d._id));
-          }}
-        >
-          Delete
         </MenuItem>
       </>
     );
@@ -273,18 +244,13 @@ const ManageExpenseReports = ({ isClone = false, fetchReportData, expenseReportI
                   <DetailsPageHeader
                     isAddButtonVisible={true}
                     addButtonMenuItems={addButtonMenuItems()}
-                    isActionButtonVisible={true}
-                    actionButtonMenuItems={actionButtonMenuItems()}
+                    isActionButtonVisible={false}
                     actionButtonProps={{ disabled: selectedRecords.length === 0 }}
                     hasXpadding
                   />
-                  {selectedExpense ? (
+                  {selectedExpense.length>0 && (
                     <div className="mt-2">
                       <Expenses selectedExpenseData={selectedExpense} />
-                    </div>
-                  ) : (
-                    <div className="p-2">
-                      <CommonSkeleton lenArray={[...Array(10).keys()]} />
                     </div>
                   )}
                 </Form>
