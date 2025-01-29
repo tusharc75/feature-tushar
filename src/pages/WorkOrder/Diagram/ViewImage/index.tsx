@@ -457,7 +457,7 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
             <FormControl size="small" margin="none" variant="outlined">
               <input type="color" value={getSelectedColor()} onChange={handleColorChange} style={{ marginLeft: '10px' }} />
             </FormControl>
-            <DeleteButton mode="light" text="Remove" size="small" onClick={handleRemove} />
+            <DeleteButton text="Remove" onClick={handleRemove} />
           </Box>
         )}
         <div className="flex flex-wrap items-center gap-2">

@@ -115,7 +115,7 @@ const ExpenseReportDetailsPage = () => {
   const handleDelete = async () => {
     try {
       await axiosInstance().put(`${expenseReport.api}/remove`, { ids: [expenseReportData._id] });
-  
+
       if (expenseReportData?.selectedExpenses?.length > 0) {
         for (let expense of expenseReportData.selectedExpenses) {
           try {
@@ -127,16 +127,16 @@ const ExpenseReportDetailsPage = () => {
           }
         }
       }
-  
+
       setShowConfirmBox(false);
-  
+
       history.push(`${routes?.expenseReport?.path}`);
     } catch (error) {
       toastConfig.setToastConfig(error);
       setShowConfirmBox(false);
     }
   };
-  
+
 
   return (
     <Box className="main-container-v1">
@@ -163,7 +163,7 @@ const ExpenseReportDetailsPage = () => {
                 Edit
               </ThemeButton>
             </Fragment>
-            <DeleteButton text="Delete" disabled={!allowedToDelete} onClick={() => setShowConfirmBox(true)} />
+            {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
           </Box>
         </Box>
       </Box>
@@ -186,7 +186,7 @@ const ExpenseReportDetailsPage = () => {
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
           <Box>
-          {!loadingDetails && expenseReportData && fields ? (
+            {!loadingDetails && expenseReportData && fields ? (
               <div className="mt-2">
                 <Expenses selectedExpenseData={expenseReportData?.selectedExpenses} />
               </div>

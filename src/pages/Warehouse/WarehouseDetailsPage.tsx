@@ -129,9 +129,7 @@ const WarehouseDetailsPage = () => {
                   </ThemeButton>
                 )}
                 {permissions?.warehouse?.isDelete && !warehouseData?.deleted && (
-                  <span title={id ? "Primarily selected warehouse can't be deleted" : 'Permanently delete this warehouse'}>
-                    <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-                  </span>
+                  <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                 )}
               </>
             ) : (

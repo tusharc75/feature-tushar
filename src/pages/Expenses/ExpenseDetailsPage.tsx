@@ -150,7 +150,7 @@ const ExpenseDetailsPage = () => {
                 Edit
               </ThemeButton>
             </Fragment>
-            <DeleteButton text="Delete" disabled={!allowedToDelete} onClick={() => setShowConfirmBox(true)} />
+            {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
           </Box>
         </Box>
       </Box>
@@ -196,8 +196,8 @@ const ExpenseDetailsPage = () => {
                           </Typography>
                         </TableCell>
                         <TableCell align="right">
-                        <Typography variant='body1'>
-                          {currencySymbol} {expensesData?.totalAmount}
+                          <Typography variant='body1'>
+                            {currencySymbol} {expensesData?.totalAmount}
                           </Typography>
                         </TableCell>
                       </TableRow>

@@ -606,9 +606,7 @@ export default function AccountDetailPage(props) {
                   setShowApproveDisapproveConfirmBox(true);
                 }}
                 iconForMobile={accountData.staticData?.approved ? <FcDisapprove size={21} /> : <FcApproval size={21} />}
-                buttonType={accountData.staticData?.approved ? 'red' : 'none'}
-                textColor={accountData.staticData?.approved ? 'red' : 'white'}
-                backgroundColor={accountData.staticData?.approved ? 'none' : 'theme'}
+                buttonType={accountData.staticData?.approved ? 'red' : 'theme'}
               >
                 {accountData.staticData?.approved ? 'Disapprove' : 'Approve'}
               </ThemeButton>

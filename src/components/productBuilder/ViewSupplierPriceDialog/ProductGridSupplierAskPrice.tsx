@@ -4,7 +4,6 @@ import Grid from '@mui/material/Grid2';
 import { sortBy } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { displayDateTime, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../../constants/helpers';
 import CommonSkeleton from '../../Helpers/CommonSkeleton';
@@ -92,13 +91,14 @@ const ProductGridSupplierAskPrice = (props) => {
                 </ThemeButton>
               </Box>
               <Box ml={1} mt={1}>
-                <DeleteButton
-                  id="detailDeleteButton"
-                  text={'Reject'}
+                <ThemeButton
+                  buttonType="red"
                   onClick={() => {
                     handleReject(productData?._id);
                   }}
-                />
+                >
+                  Reject
+                </ThemeButton>
               </Box>
             </Grid>
           )}
@@ -108,7 +108,7 @@ const ProductGridSupplierAskPrice = (props) => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {}}
+            onSelect={() => { }}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}

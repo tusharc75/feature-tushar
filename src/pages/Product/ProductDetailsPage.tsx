@@ -7,7 +7,6 @@ import { Skeleton } from '@mui/material';
 import { camelCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { MdDelete } from 'react-icons/md';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
@@ -250,7 +249,7 @@ const ProductDetailsPage = () => {
               </ThemeButton>
             )}
             {permissions?.product?.isDelete && (
-              <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowConfirmBox(true)} />
+              <DeleteButton text={'Delete'} onClick={() => setShowConfirmBox(true)} />
             )}
             <ActivityButton referenceId={productData?._id} resource={ACTIVITY_RESOURCE.product} resourceLabel={productData?.productName} />
           </Box>
