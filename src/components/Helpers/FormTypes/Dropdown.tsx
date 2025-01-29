@@ -740,7 +740,7 @@ function Dropdown({
                             if (fieldData.lookupDependentOn) {
                               if (
                                 data[fieldData.lookupDependentOn] === values[fieldData.lookupDependentOn] ||
-                                data[fieldData.lookupDependentOn]?.includes(values[fieldData.lookupDependentOn])
+                                values[fieldData.lookupDependentOn]?.includes(data[fieldData.lookupDependentOn])
                               ) {
                                 if (type === 'multiSelect') {
                                   handleChange(
