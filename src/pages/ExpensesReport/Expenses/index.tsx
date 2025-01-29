@@ -1,4 +1,4 @@
-import { Box, IconButton } from '@mui/material';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -12,6 +12,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 
 const Expenses = (selectedExpenseData) => {
   const renderedFrom = camelCase(sidebarResource?.expenses);
@@ -23,6 +24,7 @@ const Expenses = (selectedExpenseData) => {
   const [columns, setColumns] = useState(null);
   const { generateColumns, checkStaticField } = useColumns();
   const [rows, setRows] = useState([]);
+  const { selectedRecords } = state;
 
   useEffect(() => {
     fetchGridColumns();
@@ -163,9 +165,32 @@ const Expenses = (selectedExpenseData) => {
     dispatch({ type: 'initialize', data: updatedRows, count: updatedRows.length });
   };
 
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          color="primary"
+          disabled={selectedRecords.length === 0}
+          onClick={() => {
+            removeExpenseField(selectedRecords.map((d) => d._id));
+          }}
+        >
+          Delete
+        </MenuItem>
+      </>
+    );
+  };
+
   return (
     <div className="main-container-v1">
       <>
+        <DetailsPageHeader
+          isAddButtonVisible={false}
+          isActionButtonVisible={true}
+          actionButtonMenuItems={actionButtonMenuItems()}
+          actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+          hasXpadding
+        />
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

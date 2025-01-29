@@ -273,18 +273,13 @@ const ManageExpenseReports = ({ isClone = false, fetchReportData, expenseReportI
                   <DetailsPageHeader
                     isAddButtonVisible={true}
                     addButtonMenuItems={addButtonMenuItems()}
-                    isActionButtonVisible={true}
-                    actionButtonMenuItems={actionButtonMenuItems()}
+                    isActionButtonVisible={false}
                     actionButtonProps={{ disabled: selectedRecords.length === 0 }}
                     hasXpadding
                   />
-                  {selectedExpense ? (
+                  {selectedExpense.length>0 && (
                     <div className="mt-2">
                       <Expenses selectedExpenseData={selectedExpense} />
-                    </div>
-                  ) : (
-                    <div className="p-2">
-                      <CommonSkeleton lenArray={[...Array(10).keys()]} />
                     </div>
                   )}
                 </Form>
