@@ -89,40 +89,40 @@ export const resourcePolicy = [
             fieldName: 'status',
             fieldLabel: 'Status',
             type: 'dropDown',
-            required: true,
+            required: true
           },
           {
             fieldName: 'fields',
             fieldLabel: 'Fields',
             type: 'multiSelect',
-            required: true,
+            required: true
           },
           {
             fieldName: 'fieldsReset',
             fieldLabel: 'Fields Reset',
             type: 'multiSelect',
-            required: false,
+            required: false
           },
           {
             fieldName: 'products',
             fieldLabel: 'Products',
             type: 'multiSelect',
             lookupResource: sidebarResource.product,
-            required: false,
+            required: false
           },
           {
             fieldName: 'sumDecimalField',
             fieldLabel: 'Sum(Decimal Field)',
             type: 'checkBox',
             defaultValue: false,
-            required: false,
+            required: false
           },
           {
             fieldName: 'autoIncrementDecimalField',
             fieldLabel: 'Auto Increment(Decimal Field)',
             type: 'checkBox',
             defaultValue: false,
-            required: false,
+            required: false
           }
         ],
         defaultValue: []
@@ -150,17 +150,17 @@ export const resourcePolicy = [
             fieldName: 'status',
             fieldLabel: 'Status',
             type: 'multiSelect',
-            required: true,
+            required: true
           },
           {
             fieldName: 'colorCode',
             fieldLabel: 'Color Code',
             type: 'colorPicker',
-            required: true,
-          },
+            required: true
+          }
         ],
         defaultValue: []
-      },
+      }
     ]
   },
   {
@@ -225,17 +225,23 @@ export const resourcePolicy = [
         defaultValue: []
       },
       {
+        fieldName: 'rentalInvoiceStatus',
+        fieldLabel: 'Rental Invoice Status',
+        type: 'dropDown',
+        fieldOption: 'status'
+      },
+      {
         fieldName: 'fieldTicketInvoiceFields',
         fieldLabel: 'Field Ticket Invoice Fields',
         type: 'multiSelect',
         defaultValue: []
       },
       {
-        fieldName: 'rentalInvoiceStatus',
-        fieldLabel: 'Rental Invoice Status',
-        type: 'dropDown',
-        fieldOption: 'status'
-      },
+        fieldName: 'hideFieldTicketInvoiceCreateDialog',
+        fieldLabel: 'Hide Field Ticket Invoice Create Dialog',
+        type: 'checkBox',
+        defaultValue: false
+      }
     ]
   },
   {
@@ -246,7 +252,7 @@ export const resourcePolicy = [
         fieldLabel: 'Outcome Fields',
         type: 'multiSelect',
         defaultValue: []
-      },
+      }
     ]
   },
   {
@@ -257,7 +263,7 @@ export const resourcePolicy = [
         fieldLabel: 'County From Tax Master',
         type: 'checkBox',
         defaultValue: false
-      },
+      }
     ]
-  },
+  }
 ];
