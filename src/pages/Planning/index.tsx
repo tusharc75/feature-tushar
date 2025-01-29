@@ -62,7 +62,7 @@ const Planning = () => {
   const [selectedPlanningType, setSelectedPlanningType] = useState(history.location.state);
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.planning));
   const [columns, setColumns] = useState(null);
-
+  
   useEffect(() => {
     fetchGridColumns();
   }, []);
@@ -180,7 +180,15 @@ const Planning = () => {
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
+
     const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    if (selectedPlanningType==='Rental Job') {
+      deepFilters.push({
+        field: 'type',
+        term: 'Rental Job'
+      });
+    }
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
