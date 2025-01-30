@@ -186,11 +186,6 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
                       values={values}
                       setFieldValue={(name, value) => {
                         setFieldValue(name, value);
-                        if (name === 'entity') {
-                          if (initialData?.fields?.some((e) => e.fieldName === 'salesRep')) {
-                            setFieldValue('salesRep', '');
-                          }
-                        }
                       }}
                       touched={touched}
                       fieldsData={initialData.fields}

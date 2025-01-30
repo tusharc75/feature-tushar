@@ -1011,11 +1011,13 @@ const FormTypes = (props) => {
           slotProps={{
             input: {
               inputComponent: CustomFormat as any,
-              allowNegative: false,
-              onValueChange: (values) => {
-                handleChange(name, values.value);
+              inputProps: {
+                allowNegative: false,
+                onValueChange: (values) => {
+                  handleChange(name, values.value);
+                },
+                selectedCurrencyCode: selectedCurrencyCode
               },
-              selectedCurrencyCode: selectedCurrencyCode,
               startAdornment: startAdornment ? (
                 startAdornment
               ) : (
