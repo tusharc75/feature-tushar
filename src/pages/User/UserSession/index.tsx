@@ -11,8 +11,8 @@ import DurationFilter from 'src/components/DurationFilter';
 const UserSession = ({ id }) => {
   const toastConfig = useContext(CustomToastContext);
   const [trackingTime, setTrackingTime] = useState({
-    from: new Date(dayjs().subtract(1, 'year').toDate()),
-    to: new Date()
+    from: dayjs.tz().subtract(1, 'year').toDate(),
+    to: dayjs.tz().toDate()
   });
   const [userTrackingData, setUserTrackingData] = useState({
     labels: [],

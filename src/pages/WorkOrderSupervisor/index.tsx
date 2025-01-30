@@ -99,8 +99,8 @@ const WorkOrderSupervisor = () => {
   const [repairOrderDialog, setRepairOrderDialog] = useState(false);
 
   const [globalFilters, setGlobalFilters] = useState<DateRange>({
-    from: new Date(dayjs().startOf('month').format('YYYY/MM/DD')),
-    to: new Date(dayjs().endOf('month').format('YYYY/MM/DD'))
+    from: new Date(dayjs.tz().startOf('month').format('YYYY/MM/DD')),
+    to: new Date(dayjs.tz().endOf('month').format('YYYY/MM/DD'))
   });
   const [resourceType, setResourceType] = useState('workOrder');
   const [isOpen, setOpen] = useState({ open: false, id: null });

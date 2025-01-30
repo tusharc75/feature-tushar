@@ -25,8 +25,8 @@ const Chart = () => {
     return {
       currency: user?.user?.currency || `USD`,
       between: {
-        from: new Date(dayjs().subtract(1, 'year').toDate()),
-        to: new Date()
+        from: dayjs.tz().subtract(1, 'year').toDate(),
+        to: dayjs.tz().toDate()
       }
     };
   });
