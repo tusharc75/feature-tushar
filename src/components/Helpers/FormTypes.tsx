@@ -2419,7 +2419,7 @@ const FormTypes = (props) => {
         <input accept="image/*" style={{ display: 'none' }} id="multiple-images-button" multiple={false} type="file" onChange={readImageFile} />
         <div className="flex items-center gap-2">
           <label htmlFor="multiple-images-button">
-            <ThemeButton disabled={readingImage} buttonType="theme">
+            <ThemeButton disabled={readingImage} buttonType="theme" component="span">
               Upload image(s)
             </ThemeButton>
           </label>
