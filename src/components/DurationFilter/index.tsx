@@ -10,32 +10,32 @@ const DurationFilter = ({ label, duration, setDuration, defaultTimeFrame, showAl
     switch (timeFrame) {
       case '1-month':
         setDuration({
-          from: new Date(dayjs().subtract(1, 'month').toDate()),
-          to: new Date()
+          from: dayjs.tz().subtract(1, 'month').toDate(),
+          to: dayjs.tz().toDate()
         });
         break;
       case '3-months':
         setDuration({
-          from: new Date(dayjs().subtract(3, 'month').toDate()),
-          to: new Date()
+          from: dayjs.tz().subtract(3, 'month').toDate(),
+          to: dayjs.tz().toDate()
         });
         break;
       case '6-months':
         setDuration({
-          from: new Date(dayjs().subtract(6, 'month').toDate()),
-          to: new Date()
+          from: dayjs.tz().subtract(6, 'month').toDate(),
+          to: dayjs.tz().toDate()
         });
         break;
       case '1-year':
         setDuration({
-          from: new Date(dayjs().subtract(1, 'year').toDate()),
-          to: new Date()
+          from: dayjs.tz().subtract(1, 'year').toDate(),
+          to: dayjs.tz().toDate()
         });
         break;
       case 'current-year':
         setDuration({
-          from: new Date(dayjs().startOf('year').toDate()),
-          to: new Date(dayjs().endOf('year').toDate())
+          from: dayjs.tz().startOf('year').toDate(),
+          to: dayjs.tz().endOf('year').toDate()
         });
         break;
       case 'all':

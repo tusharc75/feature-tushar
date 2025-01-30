@@ -11,18 +11,18 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, required = false, si
     (timeFrame) => {
       let fromDate: any = '';
       let toDate: any = '';
-      if (timeFrame === '1-month') {
-        fromDate = new Date(dayjs().subtract(1, 'month').toDate());
-        toDate = new Date();
+      if (timeFrame === '1-mont h') {
+        fromDate = dayjs.tz().subtract(1, 'month').toDate();
+        toDate = dayjs.tz().toDate();
       } else if (timeFrame === '3-months') {
-        fromDate = new Date(dayjs().subtract(3, 'month').toDate());
-        toDate = new Date();
+        fromDate = dayjs.tz().subtract(3, 'month').toDate();
+        toDate = dayjs.tz().toDate();
       } else if (timeFrame === '6-months') {
-        fromDate = new Date(dayjs().subtract(6, 'month').toDate());
-        toDate = new Date();
+        fromDate = dayjs.tz().subtract(6, 'month').toDate();
+        toDate = dayjs.tz().toDate();
       } else if (timeFrame === '1-year') {
-        fromDate = new Date(dayjs().subtract(1, 'year').toDate());
-        toDate = new Date();
+        fromDate = dayjs.tz().subtract(1, 'year').toDate();
+        toDate = dayjs.tz().toDate();
       }
       setDeepFilters([
         ...deepFilters?.filter((d) => d?.field !== `from_${fieldData?.fieldName}` && d?.field !== `to_${fieldData?.fieldName}`),

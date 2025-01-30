@@ -57,8 +57,8 @@ function DateRangePicker({ className, date, setDate, horizontal = 'center' }: Da
     switch (timeFrame.value) {
       case '1-month': {
         const data = {
-          from: new Date(dayjs().subtract(1, 'month').toDate()),
-          to: new Date()
+          from: dayjs.tz().subtract(1, 'month').toDate(),
+          to: dayjs.tz().toDate()
         };
         setMonth(data.from);
         handleDateChange(data);
@@ -66,8 +66,8 @@ function DateRangePicker({ className, date, setDate, horizontal = 'center' }: Da
       }
       case '3-months': {
         const data = {
-          from: new Date(dayjs().subtract(3, 'month').toDate()),
-          to: new Date()
+          from: dayjs.tz().subtract(3, 'month').toDate(),
+          to: dayjs.tz().toDate()
         };
         setMonth(data.from);
         handleDateChange(data);
@@ -75,8 +75,8 @@ function DateRangePicker({ className, date, setDate, horizontal = 'center' }: Da
       }
       case '6-months': {
         const data = {
-          from: new Date(dayjs().subtract(6, 'month').toDate()),
-          to: new Date()
+          from: dayjs.tz().subtract(6, 'month').toDate(),
+          to: dayjs.tz().toDate()
         };
         setMonth(data.from);
         handleDateChange(data);
@@ -84,8 +84,8 @@ function DateRangePicker({ className, date, setDate, horizontal = 'center' }: Da
       }
       case '1-year': {
         const data = {
-          from: new Date(dayjs().subtract(1, 'year').toDate()),
-          to: new Date()
+          from: dayjs.tz().subtract(1, 'year').toDate(),
+          to: dayjs.tz().toDate()
         };
         setMonth(data.from);
         handleDateChange(data);
@@ -94,10 +94,10 @@ function DateRangePicker({ className, date, setDate, horizontal = 'center' }: Da
       case 'custom':
       default:
         handleDateChange({
-          from: new Date(),
-          to: new Date()
+          from: dayjs.tz().toDate(),
+          to: dayjs.tz().toDate()
         });
-        setMonth(new Date());
+        setMonth(dayjs.tz().toDate());
         break;
     }
   };

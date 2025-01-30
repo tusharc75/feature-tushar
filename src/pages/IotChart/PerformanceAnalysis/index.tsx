@@ -16,8 +16,8 @@ const PerformanceAnalysis = ({ deviceTemplate = null, assetId, dataPoints = [] }
   const [isExpanded, setIsExpanded] = useState(true);
   const isMobile = useMediaQuery('(max-width:640px)');
   const [dateFilters, setDateFilters] = useState({
-    from: new Date(dayjs().subtract(8, 'day').startOf('day').toJSON()),
-    to: new Date(),
+    from: dayjs.tz().subtract(8, 'day').startOf('day').toJSON(),
+    to: dayjs.tz().toDate(),
     intervals: 'perCycle'
   });
 
