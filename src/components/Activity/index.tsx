@@ -42,7 +42,7 @@ const Activity = (props) => {
     resourceId = '',
     resourceLabel = '',
     resource = '',
-    close = () => {}
+    close = () => { }
   } = props;
   const toastConfig = useContext(CustomToastContext);
 
@@ -164,6 +164,7 @@ const Activity = (props) => {
     await navigator.clipboard.writeText(text);
     toastConfig.setToastConfig({
       type: 'success',
+      open: true,
       message: 'Email copied to clipboard'
     });
   };
@@ -215,7 +216,7 @@ const Activity = (props) => {
                           <div className="flex items-center">
                             {data === 'Attachment' && (
                               <Box mr={1}>
-                                <HtmlTooltip title={'Add Folder'} enterTouchDelay={0}>
+                                <HtmlTooltip title={'Add Folder'} >
                                   <IconButton size="small" onClick={(event) => handleCreateActivity(event, 'AttachmentFolder')}>
                                     <CreateNewFolderIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#2A3042)' }} />
                                   </IconButton>
@@ -224,9 +225,7 @@ const Activity = (props) => {
                             )}
                             {data === 'Email' && user?.user?.brandPolicy?.inboundEmail && isEmpty(user?.user?.brandPolicy?.inboundEmail) && (
                               <Box mr={1}>
-                                <HtmlTooltip
-                                  enterTouchDelay={0}
-                                  title={`support+${relatedTo[0].type}_${relatedTo[0].referenceId}_${user?.user?.brand}${user?.user?.brandPolicy?.inboundEmail}`}
+                                <HtmlTooltip title={`support+${relatedTo[0].type}_${relatedTo[0].referenceId}_${user?.user?.brand}${user?.user?.brandPolicy?.inboundEmail}`}
                                 >
                                   <IconButton
                                     size="small"
