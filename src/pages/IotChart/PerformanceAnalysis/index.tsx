@@ -93,12 +93,12 @@ const PerformanceAnalysis = ({ deviceTemplate = null, assetId, dataPoints = [] }
             </div>
 
             <div
-              className={`h-[250px] px-2 sm:h-[calc(574px-48px)] ${
+              className={`h-[250px] min-h-[300px] sm:h-[calc(100vh-310px)] ${
                 isExpanded ? 'overflow-auto' : `overflow-hidden [&_*]:!line-clamp-1 [&_*]:!flex-nowrap [&_*]:!overflow-hidden ${frostedGlass}`
-              } py-1`}
+              } `}
             >
               <FormGroup>
-                <div className="grid gap-2">
+                <div className="grid gap-2 p-2">
                   {categories ? (
                     categories?.map((category: any, index) => (
                       <TreeViewNew
