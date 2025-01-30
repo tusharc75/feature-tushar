@@ -112,8 +112,9 @@ const DemandOrder = () => {
             aria-label="Delete"
             disabled={!row?.original?.canDelete}
             onClick={() => {
-              setDeleteRecord(row.original);
-              setShowDeleteConfirmBox(true);
+              console.log(row.original);
+              // setDeleteRecord(row.original);
+              // setShowDeleteConfirmBox(true);
             }}
           >
             <DeleteIcon color={row?.original?.canDelete ? 'error' : 'disabled'} />
@@ -165,7 +166,7 @@ const DemandOrder = () => {
           finalObject['canDelete'] =
             permissions?.demandOrder?.isDelete &&
             checkIsAllowedToDelete(user, sidebarResource.demandOrder, finalObject?.ownerId) &&
-            finalObject?.status !== DEMAND_ORDER_STATUS.converted;
+            finalObject?.status === DEMAND_ORDER_STATUS.new;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
