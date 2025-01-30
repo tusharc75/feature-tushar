@@ -858,7 +858,7 @@ const Productpackage = ({
 
   const onSaveInlineEdit = (inputField, updatedData) => {
     if (inputField.hasOwnProperty('qty')) {
-      if (inputField['qty'] === 0) {
+      if (!inputField['qty']) {
         toastConfig.setToastConfig({
           open: true,
           type: 'error',
