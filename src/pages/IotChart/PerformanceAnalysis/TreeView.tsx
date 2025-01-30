@@ -49,7 +49,7 @@ export default function CustomAccordian({ expandedAccordition, setExpandedAccord
                           />
                         }
                         className="  max-w-full [&>span+span]:line-clamp-1 [&>span+span]:block [&>span+span]:max-w-full "
-                        label={<div className="mt-2 line-clamp-1 [overflow-wrap:anywhere]">{data?.fieldLabel}</div>}
+                        label={<div className="line-clamp-1 [overflow-wrap:anywhere]">{data?.fieldLabel}</div>}
                       />
                     </Grid>
                   );

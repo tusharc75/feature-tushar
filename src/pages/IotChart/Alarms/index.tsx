@@ -122,7 +122,7 @@ const Alarms = ({ deviceTemplate, assetId }) => {
 
   return (
     <Box display="flex" flexDirection="column">
-      <Box ml={1} display="flex">
+      <div className="flex gap-2">
         {alarmOptions && (
           <Autocomplete
             options={[{ optionValue: 'All', optionLabel: 'All' }, ...alarmOptions]}
@@ -137,24 +137,21 @@ const Alarms = ({ deviceTemplate, assetId }) => {
             renderInput={(params) => <TextField {...params} label="Select Alarm" size="small" variant="outlined" />}
           />
         )}
-
-        <Box ml={1}>
-          {alertOptions && (
-            <Autocomplete
-              options={alertOptions || []}
-              multiple
-              getOptionLabel={(option: any) => option || ''}
-              style={{ width: '350px' }}
-              value={selectedAlert}
-              onChange={(event, newValue: any) => {
-                setSelectedAlert(newValue);
-              }}
-              size="small"
-              renderInput={(params) => <TextField {...params} label="Select Alert" size="small" variant="outlined" />}
-            />
-          )}
-        </Box>
-      </Box>
+        {alertOptions && (
+          <Autocomplete
+            options={alertOptions || []}
+            multiple
+            getOptionLabel={(option: any) => option || ''}
+            style={{ width: '350px' }}
+            value={selectedAlert}
+            onChange={(event, newValue: any) => {
+              setSelectedAlert(newValue);
+            }}
+            size="small"
+            renderInput={(params) => <TextField {...params} label="Select Alert" size="small" variant="outlined" />}
+          />
+        )}
+      </div>
       {columns ? (
         <CustomReactTable
           height={'calc(100vh - 300px)'}
