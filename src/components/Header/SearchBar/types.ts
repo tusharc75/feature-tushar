@@ -242,7 +242,6 @@ export type BrandPolicy = {
   autoCreateInventory: boolean;
   hideProductInventoryCost: boolean;
   openInvoiceIntegration: boolean;
-  packagePriceComponentWise: boolean;
   rentalDateChangeInAssetHistory: boolean;
   rentalInUseAssetRepair: boolean;
   autoAddTaxOnAddressAdd: boolean;
