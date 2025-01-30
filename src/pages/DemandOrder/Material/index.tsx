@@ -266,7 +266,9 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit, resourc
         });
         if(!demandOrderData?.material?.length && demandOrderData?.status!==DEMAND_ORDER_STATUS.inProgress){
           updateStatus(DEMAND_ORDER_STATUS.inProgress)
+          allowedToEdit = true;
         }
+
         fetchData();
         fetchDemadOrderData();
         setSubmitting(false);
