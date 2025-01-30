@@ -101,7 +101,7 @@ const AsynImportExportMenu = ({
                 setDialog({ open: true, type: IMPORT_EXPORT_TYPE.export });
               }}
             >
-              Export All
+              Export To Excel
             </ThemeButton>
           ) : (
             <ThemeButton
