@@ -127,6 +127,11 @@ export const sumOnParent = (parent, child, fields, currency) => {
     const sumValues: any = {}
     const minMaxDates: any = {}
 
+
+    const totalPriceFieldName = `totalPrice_${currency?.toLowerCase()}`
+    const discountFieldName = `discount_${currency?.toLowerCase()}`
+    const taxFieldName = `tax_${currency?.toLowerCase()}`
+
     resetFields.forEach((_field: any) => {
         sumValues[_field.fieldName] = 0;
         minMaxDates[_field.fieldName] = null;
@@ -179,7 +184,23 @@ export const sumOnParent = (parent, child, fields, currency) => {
                 }
             }
         })
+
+        const originalRow = { ...row }
+
+        const calValues = autoCalculateSpecificFields({ [totalPriceFieldName]: row[totalPriceFieldName] * row?.qty }, row, fields)
+        Object.assign(row, calValues)
+
+        if (originalRow[discountFieldName]) {
+            const calValues = autoCalculateSpecificFields({ [discountFieldName]: originalRow[discountFieldName] * row?.qty }, row, fields)
+            Object.assign(row, calValues)
+        }
+
+        if (originalRow[taxFieldName]) {
+            const calValues = autoCalculateSpecificFields({ [taxFieldName]: originalRow[taxFieldName] * row?.qty }, row, fields)
+            Object.assign(row, calValues)
+        }
     })
+
     return parent;
 }
 
