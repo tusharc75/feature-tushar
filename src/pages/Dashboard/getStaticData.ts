@@ -12,6 +12,9 @@ async function getStaticData(chart: ChartDataType, data: any, currencyTo: string
   const offeredCostData = [];
   const labels = [];
   const budget = [];
+  const volumeBudgetData = [];
+  const marginBudgetData = [];
+  const bookedMarginData = [];
   const volumeUnit = data[0]?.volumeUnit;
 
   data = data.sort((a, b) => {
@@ -28,28 +31,37 @@ async function getStaticData(chart: ChartDataType, data: any, currencyTo: string
         getExchangeRates(displayDateTime(d.date, 'YYYY-MM-DD').format(), d.totalBookedCost || 0, currencyFrom, currencyTo),
         getExchangeRates(displayDateTime(d.date, 'YYYY-MM-DD').format(), d.totalOfferedValue || 0, currencyFrom, currencyTo),
         getExchangeRates(displayDateTime(d.date, 'YYYY-MM-DD').format(), d.totalOfferedCost || 0, currencyFrom, currencyTo),
-        getExchangeRates(displayDateTime(d.date, 'YYYY-MM-DD').format(), d.budget || 0, currencyFrom, currencyTo)
+        getExchangeRates(displayDateTime(d.date, 'YYYY-MM-DD').format(), d.budget || 0, currencyFrom, currencyTo),
+        getExchangeRates(displayDateTime(d.date, 'YYYY-MM-DD').format(), d.marginBudget || 0, currencyFrom, currencyTo),
+        getExchangeRates(displayDateTime(d.date, 'YYYY-MM-DD').format(), d.totalBookedMargin || 0, currencyFrom, currencyTo)
       ]);
       const bookedValue: any = salesData[0]?.rates[currencyTo];
       const bookedCost: any = salesData[1]?.rates[currencyTo];
       const offeredValue: any = salesData[2]?.rates[currencyTo];
       const offeredCost: any = salesData[3]?.rates[currencyTo];
       const budgetData: any = salesData[4]?.rates[currencyTo];
+      const marginBudget: any = salesData[5]?.rates[currencyTo];
+      const bookedMargin: any = salesData[6]?.rates[currencyTo];
 
       bookedValueData.push(bookedValue || 0);
       bookedCostData.push(bookedCost || 0);
       offeredValueData.push(offeredValue || 0);
       offeredCostData.push(offeredCost || 0);
       budget.push(budgetData || 0);
+      marginBudgetData.push(marginBudget || 0);
+      bookedMarginData.push(bookedMargin || 0);
     } else {
       bookedValueData.push(d.totalBookedValue || 0);
       bookedCostData.push(d.totalBookedCost || 0);
       offeredValueData.push(d.totalOfferedValue || 0);
       offeredCostData.push(d.totalOfferedCost || 0);
       budget.push(d.budget || 0);
+      marginBudgetData.push(d.marginBudget || 0);
+      bookedMarginData.push(d.totalBookedMargin || 0);
     }
 
     bookedVolumeData.push(d.totalBookedVolume || 0);
+    volumeBudgetData.push(d.volumeBudget || 0);
     offeredVolumeData.push(d.totalOfferedVolume || 0);
     labels.push(displayDateTime(d.date, 'MMM/YY'));
   }
@@ -62,46 +74,88 @@ async function getStaticData(chart: ChartDataType, data: any, currencyTo: string
   let totalOfferedValue = offeredValueData.reduce((acc, val) => acc + val);
   let totalOfferedCost = offeredCostData.reduce((acc, val) => acc + val);
   let totalOfferedVolume = offeredVolumeData.reduce((acc, val) => acc + val);
+  let totalBudget = budget.reduce((acc, val) => acc + val);
+  let volumeBudget = volumeBudgetData.reduce((acc, val) => acc + val);
+  let marginBudget = marginBudgetData.reduce((acc, val) => acc + val);
+  let totalBookedMargin = bookedMarginData.reduce((acc, val) => acc + val);
 
   const grossMargin = totalBookedValue === 0 && totalBookedCost === 0 ? 0 : totalBookedValue - totalBookedCost;
   const offeredMargin = totalOfferedValue === 0 && totalOfferedCost === 0 ? 0 : totalOfferedValue - totalOfferedCost;
-  const hitRatioValue = totalBookedValue && totalOfferedValue ? totalBookedValue / totalOfferedValue : 0;
-  const hitRatioCost = totalBookedCost && totalOfferedCost ? totalBookedCost / totalOfferedCost : 0;
-  const hitRatioMargin = grossMargin && offeredMargin ? grossMargin / offeredMargin : 0;
-  const hitRatioVolume = totalBookedVolume && totalOfferedVolume ? totalBookedVolume / totalOfferedVolume : 0;
   const grossMarginPercent = totalBookedValue !== 0 && totalBookedCost !== 0 ? ((totalBookedValue - totalBookedCost) / totalBookedValue) * 100 : 0;
+  const grossMarginPercentBudget = marginBudget !== 0 && totalBookedValue !== 0 ? (marginBudget / totalBookedValue) * 100 : 0;
   const offeredMarginPercent =
     totalOfferedValue !== 0 && totalOfferedCost !== 0 ? ((totalOfferedValue - totalOfferedCost) / totalOfferedValue) * 100 : 0;
+  const offeredMarginPercentBudget = totalBookedMargin !== 0 && totalOfferedValue !== 0 ? (totalBookedMargin / totalOfferedValue) * 100 : 0;
 
   const cardData = {
-    additionalData: {
-      ['Total Booked Volume']: isNaN(hitRatioVolume) ? 0 : hitRatioVolume * 100,
-      ['Total Booked Value']: isNaN(hitRatioValue) ? 0 : hitRatioValue * 100,
-      ['Total Booked Cost']: isNaN(hitRatioCost) ? 0 : hitRatioCost * 100,
-      ['Booked Gross Margin']: isNaN(hitRatioMargin) ? 0 : hitRatioMargin * 100
-    },
-    bookedData: {
-      ['Total Booked Volume']: `${totalBookedVolume.toFixed(2)} ${volumeUnit || 'MT'}`,
-      ['Total Booked Value']: totalBookedValue
-        ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, totalBookedValue).fullFormatAmount
-        : 0,
-      ['Total Booked Cost']: totalBookedCost ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, totalBookedCost).fullFormatAmount : 0,
-      ['Booked Gross Margin']: `${
-        grossMargin ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, grossMargin).fullFormatAmount : 0
-      } (${grossMarginPercent > 0 ? grossMarginPercent.toFixed(2) : 0}%)`
-    },
-    offeredData: {
-      ['Total Offered Volume']: `${totalOfferedVolume.toFixed(2)} ${volumeUnit || 'MT'}`,
-      ['Total Offered Value']: totalOfferedValue
-        ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, totalOfferedValue).fullFormatAmount
-        : 0,
-      ['Total Offered Cost']: totalOfferedCost
-        ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, totalOfferedCost).fullFormatAmount
-        : 0,
-      ['Offered Gross Margin']: `${
-        offeredMargin ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, offeredMargin).fullFormatAmount : 0
-      } (${offeredMarginPercent > 0 ? offeredMarginPercent.toFixed(2) : 0}%)`
-    }
+    offeredData: [
+      {
+        ['Total Booked Volume']: `${totalBookedVolume.toFixed(2)} ${volumeUnit || 'MT'}`,
+        ['Hit Ratio']:
+          totalBookedVolume && totalOfferedVolume
+            ? isNaN(totalBookedVolume / totalOfferedVolume)
+              ? 0
+              : (totalBookedVolume / totalOfferedVolume) * 100
+            : 0,
+        ['Total Offered Volume']: `${totalOfferedVolume.toFixed(2)} ${volumeUnit || 'MT'}`
+      },
+      {
+        ['Total Booked Value']: totalBookedValue
+          ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, totalBookedValue).fullFormatAmount
+          : 0,
+        ['Hit Ratio']:
+          totalBookedValue && totalOfferedValue
+            ? isNaN(totalBookedValue / totalOfferedValue)
+              ? 0
+              : (totalBookedValue / totalOfferedValue) * 100
+            : 0,
+        ['Total Offered Value']: totalOfferedValue
+          ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, totalOfferedValue).fullFormatAmount
+          : 0
+      },
+      {
+        ['Total Booked Cost']: totalBookedCost
+          ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, totalBookedCost).fullFormatAmount
+          : 0,
+        ['Hit Ratio']:
+          totalBookedCost && totalOfferedCost ? (isNaN(totalBookedCost / totalOfferedCost) ? 0 : (totalBookedCost / totalOfferedCost) * 100) : 0,
+        ['Total Offered Cost']: totalOfferedCost
+          ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, totalOfferedCost).fullFormatAmount
+          : 0
+      },
+      {
+        ['Booked Gross Margin']: `${
+          grossMargin ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, grossMargin).fullFormatAmount : 0
+        } (${grossMarginPercent > 0 ? grossMarginPercent.toFixed(2) : 0}%)`,
+        ['Hit Ratio']: grossMargin && offeredMargin ? (isNaN(grossMargin / offeredMargin) ? 0 : (grossMargin / offeredMargin) * 100) : 0,
+        ['Offered Gross Margin']: `${
+          offeredMargin ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, offeredMargin).fullFormatAmount : 0
+        } (${offeredMarginPercent > 0 ? offeredMarginPercent.toFixed(2) : 0}%)`
+      }
+    ],
+    budgetData: [
+      {
+        ['Total Booked Volume']: `${totalBookedVolume.toFixed(2)} ${volumeUnit || 'MT'}`,
+        ['Hit Ratio']:
+          totalBookedVolume && volumeBudget ? (isNaN(totalBookedVolume / volumeBudget) ? 0 : (totalBookedVolume / volumeBudget) * 100) : 0,
+        ['Total Budget Volume']: `${volumeBudget.toFixed(2)} ${volumeUnit || 'MT'}`
+      },
+      {
+        ['Total Booked Cost']: totalBookedCost
+          ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, totalBookedCost).fullFormatAmount
+          : 0,
+        ['Hit Ratio']: totalBookedCost && totalBudget ? (isNaN(totalBookedCost / totalBudget) ? 0 : (totalBookedCost / totalBudget) * 100) : 0,
+        ['Total Budget']: totalBudget ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, totalBudget).fullFormatAmount : 0
+      },
+      {
+        ['Booked Gross Margin']: `${marginBudget ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, marginBudget).fullFormatAmount : 0} (${grossMarginPercentBudget > 0 ? grossMarginPercentBudget.toFixed(2) : 0}%)`,
+        ['Hit Ratio']:
+          marginBudget && totalBookedMargin ? (isNaN(marginBudget / totalBookedMargin) ? 0 : (marginBudget / totalBookedMargin) * 100) : 0,
+        ['Total Budget Gross Margin']: `${
+          totalBookedMargin ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, totalBookedMargin).fullFormatAmount : 0
+        } (${offeredMarginPercentBudget > 0 ? offeredMarginPercentBudget.toFixed(2) : 0}%)`
+      }
+    ]
   };
 
   dataObject = {
