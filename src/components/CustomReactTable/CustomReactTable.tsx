@@ -40,6 +40,8 @@ import {
   getUniqueRows,
   useSkipper
 } from './utils';
+import { getCurrentColumnSizes } from 'src/components/CustomReactTable/ArrangeView/utils';
+import { isEqual } from 'lodash';
 
 const handleApplySavedSize = (columns, columnSavedSizes) => {
   if (columnSavedSizes && Object.keys(columnSavedSizes).length) {
@@ -58,6 +60,20 @@ const handleApplySavedSize = (columns, columnSavedSizes) => {
 };
 
 let exportTimeout;
+
+let prevColumnsThatAreResized = [];
+
+const getColumnsThatAreNewlyResized = (changedSizes: { [key: string]: number }) => {
+  const columnsThatAreResized = Object.keys(changedSizes);
+  if (!prevColumnsThatAreResized.every((d) => columnsThatAreResized.includes(d))) {
+    return [];
+  } else {
+    const setA = new Set(prevColumnsThatAreResized);
+    const difference = columnsThatAreResized.filter((value) => !setA.has(value));
+    prevColumnsThatAreResized = columnsThatAreResized;
+    return difference;
+  }
+};
 
 const CustomReactTable = ({
   columns,
@@ -497,6 +513,28 @@ const CustomReactTable = ({
     if (!event?.active) return;
     setActiveHeader(event.active.data.current.props);
   };
+
+  // Change the column state from sticky to normal when the column is being resized.
+  const changedSizes = getCurrentColumnSizes(table);
+  useEffect(() => {
+    const handleRemoveFromSticky = () => {
+      const resizedColumns = getColumnsThatAreNewlyResized(changedSizes);
+      if (resizedColumns.length) {
+        setNewColumns((prev) => {
+          const newData = prev.map((data) => {
+            const col = { ...data };
+            if (resizedColumns.includes(col.id)) {
+              col['sticky'] = undefined;
+            }
+            return col;
+          });
+          return newData;
+        });
+      }
+    };
+    const id = setTimeout(handleRemoveFromSticky, 500);
+    return () => clearTimeout(id);
+  }, [changedSizes]);
 
   const sensors = useDndSensors();
   return (
