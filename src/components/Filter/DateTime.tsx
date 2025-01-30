@@ -11,7 +11,7 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, required = false, si
     (timeFrame) => {
       let fromDate: any = '';
       let toDate: any = '';
-      if (timeFrame === '1-mont h') {
+      if (timeFrame === '1-month') {
         fromDate = dayjs.tz().subtract(1, 'month').toDate();
         toDate = dayjs.tz().toDate();
       } else if (timeFrame === '3-months') {
