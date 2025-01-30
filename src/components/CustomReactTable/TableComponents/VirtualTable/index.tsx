@@ -9,6 +9,7 @@ import { VirtualTableBody } from 'src/components/CustomReactTable/TableComponent
 import { VirtualTableHead } from 'src/components/CustomReactTable/TableComponents/VirtualTable/Head';
 import { getStickyPosition } from 'src/components/CustomReactTable/utils';
 import { TColType } from '../TableHelperComponents';
+import { cn } from 'src/constants/helpers';
 
 const VirtualTableImpl = forwardRef(function (
   {
@@ -172,11 +173,11 @@ const VirtualTableImpl = forwardRef(function (
                         return (
                           <Fragment key={vc.index}>
                             <th
-                              className={` bg-[var(--dark-primary,_white)] text-[13px]`}
+                              className={cn(` max-h-[43px] bg-[var(--dark-primary,_white)] text-[13px]`)}
                               style={{
                                 ...style,
                                 ...(style.position === 'sticky' ? { ...style } : { ...style, position: 'absolute', left: vc.start }),
-                                zIndex: columnDef.sticky === 'left' || columnDef.sticky === 'right' ? 12 : '-1',
+                                zIndex: columnDef.sticky === 'left' || columnDef.sticky === 'right' ? 12 : 'unset',
                                 minWidth: colSize,
                                 maxWidth: colSize,
                                 display: 'flex',
