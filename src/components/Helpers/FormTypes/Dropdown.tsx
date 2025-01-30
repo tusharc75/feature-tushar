@@ -381,7 +381,7 @@ function Dropdown({
 
   return (
     <Box key={fieldData?.lookupResource}>
-      <div className="flex items-center gap-1">
+      <div className="flex gap-1">
         <div className="flex-grow">
           <InfoLabel
             info={fieldData?.tooltipMessage}
@@ -524,7 +524,7 @@ function Dropdown({
         {!isOffline && (
           <>
             {rest?.hidelookupAddButton ? null : fieldData?.addBulkOptions ? (
-              <div className="flex-shrink-0">
+              <div className="mt-[2px] max-h-fit flex-shrink-0">
                 <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
                   <IconButton
                     disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
@@ -572,7 +572,7 @@ function Dropdown({
             ) : (
               <>
                 {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.padMaster && permissions?.padMaster?.isCreate && (
-                  <div className="flex-shrink-0">
+                  <div className="mt-[2px] max-h-fit flex-shrink-0">
                     <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
                       <IconButton
                         disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
@@ -622,7 +622,7 @@ function Dropdown({
                   </div>
                 )}
                 {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.wellMaster && permissions?.wellMaster?.isCreate && (
-                  <div className="flex-shrink-0">
+                  <div className="mt-[2px] max-h-fit flex-shrink-0">
                     <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
                       <IconButton
                         disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
@@ -702,7 +702,7 @@ function Dropdown({
                   </div>
                 )}
                 {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.wellNumber && permissions?.wellNumber?.isCreate && (
-                  <div className="flex-shrink-0">
+                  <div className="mt-[2px] max-h-fit flex-shrink-0 ">
                     <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
                       <IconButton
                         disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
@@ -777,7 +777,7 @@ function Dropdown({
                   </div>
                 )}
                 {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.warehouse && permissions?.warehouse?.isCreate && (
-                  <div className="flex-shrink-0">
+                  <div className="mt-[2px] max-h-fit flex-shrink-0">
                     <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
                       <IconButton
                         disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
@@ -820,7 +820,7 @@ function Dropdown({
                   </div>
                 )}
                 {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.storageLocation && permissions?.warehouse?.isCreate && (
-                  <div className="flex-shrink-0">
+                  <div className="mt-[2px] max-h-fit flex-shrink-0">
                     <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
                       <IconButton
                         disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
@@ -857,7 +857,7 @@ function Dropdown({
                   </div>
                 )}
                 {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.competencyType && permissions?.competencyType?.isCreate && (
-                  <div className="flex-shrink-0">
+                  <div className="mt-[2px] max-h-fit flex-shrink-0">
                     <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
                       <IconButton
                         disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
@@ -892,7 +892,7 @@ function Dropdown({
                   </div>
                 )}
                 {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.competencies && permissions?.competencies?.isCreate && (
-                  <div className="flex-shrink-0">
+                  <div className="mt-[2px] max-h-fit flex-shrink-0">
                     <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
                       <IconButton
                         disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
@@ -938,7 +938,7 @@ function Dropdown({
                   </div>
                 )}
                 {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.customerAccount && permissions?.customerAccount?.isCreate && (
-                  <div className="flex-shrink-0">
+                  <div className="mt-[2px] max-h-fit flex-shrink-0">
                     <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
                       <IconButton
                         disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
@@ -985,7 +985,7 @@ function Dropdown({
                   </div>
                 )}
                 {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.supplierAccount && permissions?.supplierAccount?.isCreate && (
-                  <div className="flex-shrink-0">
+                  <div className="mt-[2px] max-h-fit flex-shrink-0">
                     <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
                       <IconButton
                         disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
@@ -1032,7 +1032,7 @@ function Dropdown({
                   </div>
                 )}
                 {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.customerContact && permissions?.customerContact?.isCreate && (
-                  <div className="flex-shrink-0">
+                  <div className="mt-[2px] max-h-fit flex-shrink-0">
                     <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
                       <IconButton
                         disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
@@ -1080,7 +1080,7 @@ function Dropdown({
                   </div>
                 )}
                 {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.supplierContact && permissions?.supplierContact?.isCreate && (
-                  <div className="flex-shrink-0">
+                  <div className="mt-[2px] max-h-fit flex-shrink-0">
                     <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
                       <IconButton
                         disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
@@ -1129,7 +1129,7 @@ function Dropdown({
                   </div>
                 )}
                 {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.address && permissions?.address?.isCreate && (
-                  <div className="flex-shrink-0">
+                  <div className="mt-[2px] max-h-fit flex-shrink-0">
                     <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
                       <IconButton
                         disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
@@ -1174,7 +1174,7 @@ function Dropdown({
                   </div>
                 )}
                 {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.marketSegment && permissions?.marketSegment?.isCreate && (
-                  <div className="flex-shrink-0">
+                  <div className="mt-[2px] max-h-fit flex-shrink-0">
                     <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
                       <IconButton
                         disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
@@ -1220,7 +1220,7 @@ function Dropdown({
                 {fieldData?.lookup &&
                   !(camelCase(fieldData?.lookupResource) in routes) &&
                   permissions[camelCase(fieldData?.lookupResource)]?.isCreate && (
-                    <div className="flex-shrink-0">
+                    <div className="mt-[2px] max-h-fit flex-shrink-0">
                       <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
                         <IconButton
                           disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
