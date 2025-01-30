@@ -124,11 +124,9 @@ const Expenses = (selectedExpenseData) => {
   };
 
   const handleDelete = async (rows) => {
-    console.log(rows);
     axiosInstance()
       .put(`${routes.expenseReport.path}/expenses/${pid}/remove`, { ids:rows })
       .then(({ data }) => {
-        console.log(data)
         dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
         setDeleteData(null);
