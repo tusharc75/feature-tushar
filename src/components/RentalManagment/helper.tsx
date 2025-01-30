@@ -267,7 +267,7 @@ export const getNestedSubRows = (obj, original) => {
     }
 };
 
-export const bulkUpdate = (values, selectedProducts, material, allFields, currency, priorityToParent = false) => {
+export const bulkUpdate = (values, selectedProducts, material, allFields, currency, priorityToParent = false, childMatrialUpdate: any = []) => {
 
     var rows: any = []
 
@@ -279,7 +279,10 @@ export const bulkUpdate = (values, selectedProducts, material, allFields, curren
 
     let parentIds = []
 
-    selectedProducts.forEach(element => {
+    selectedProducts.forEach((element: any) => {
+        if (childMatrialUpdate?.length && !childMatrialUpdate?.includes(element.type)) {
+            return;
+        }
         const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
         if (element?.parentId) {
             rows.push({ ...element, ...calValues })
