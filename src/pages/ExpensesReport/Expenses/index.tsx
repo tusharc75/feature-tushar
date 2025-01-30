@@ -13,6 +13,7 @@ import routes from 'src/components/Helpers/Routes';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 
 const Expenses = (selectedExpenseData) => {
   const renderedFrom = camelCase(sidebarResource?.expenses);
@@ -24,8 +25,9 @@ const Expenses = (selectedExpenseData) => {
   const [columns, setColumns] = useState(null);
   const { generateColumns, checkStaticField } = useColumns();
   const { selectedRecords } = state;
-  const pathSegments = (window.location.href).split("/");
-  const pid = pathSegments[pathSegments.length - 1].split("?")[0];
+  const pathSegments = window.location.href.split('/');
+  const pid = pathSegments[pathSegments.length - 1].split('?')[0];
+  const [deleteData, setDeleteData] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();
@@ -97,7 +99,7 @@ const Expenses = (selectedExpenseData) => {
       });
 
       const results = await Promise.all(promises);
-  
+
       let allRows = [];
       results.forEach((response) => {
         const data = response?.data?.data || [];
@@ -106,7 +108,7 @@ const Expenses = (selectedExpenseData) => {
           finalObject['isChecked'] = false;
           finalObject['canDelete'] = permissions?.expenses?.isDelete;
           return finalObject;
-        });  
+        });
         allRows = [...allRows, ...rows];
       });
 
@@ -120,14 +122,15 @@ const Expenses = (selectedExpenseData) => {
       toastConfig.setToastConfig(error);
     }
   };
-  
-  const handleDelete = async (id) => {
-      axiosInstance()
-      .put(`${routes.expenseReport.path}/expenses/${pid}/delete`, { id })
+
+  const handleDelete = async (rows) => {
+    axiosInstance()
+      .put(`${routes.expenseReport.path}/expenses/${pid}/remove`, { ids:rows })
       .then(({ data }) => {
         dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
-      })
+        setDeleteData(null);
+      });
   };
 
   const ActionsRenderer = {
@@ -143,12 +146,7 @@ const Expenses = (selectedExpenseData) => {
       <>
         <HtmlTooltip title={'Delete'}>
           <span>
-            <IconButton
-              size="small"
-              aria-label="Delete"
-              disabled={!row?.original?.canDelete}
-              onClick={() => handleDelete(row?.original?._id)}
-            >
+            <IconButton size="small" aria-label="Delete" disabled={!row?.original?.canDelete} onClick={() => setDeleteData([row?.original?._id])}>
               <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
             </IconButton>
           </span>
@@ -157,7 +155,6 @@ const Expenses = (selectedExpenseData) => {
     )
   };
 
-
   const actionButtonMenuItems = () => {
     return (
       <>
@@ -165,7 +162,8 @@ const Expenses = (selectedExpenseData) => {
           color="primary"
           disabled={selectedRecords.length === 0}
           onClick={() => {
-            selectedRecords.forEach((record) => handleDelete(record._id));
+            const dataToDelete = selectedRecords.map((record) => record._id);
+            setDeleteData(dataToDelete);
           }}
         >
           {`Delete (${selectedRecords.length})`}
@@ -173,7 +171,6 @@ const Expenses = (selectedExpenseData) => {
       </>
     );
   };
-  
 
   return (
     <div className="main-container-v1">
@@ -194,11 +191,20 @@ const Expenses = (selectedExpenseData) => {
             renderedFrom={renderedFrom}
             resource={sidebarResource.expenses}
             pagination={false}
+            refreshGrid={fetchData}
           />
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(8).keys()]} />
           </Box>
+        )}
+        {deleteData && (
+          <ConfirmationDialog
+            open={true}
+            message={`Are you sure you want to delete the record(s)?`}
+            onClose={() => setDeleteData(null)}
+            onOk={() => handleDelete(deleteData)}
+          />
         )}
       </>
     </div>
