@@ -112,9 +112,8 @@ const DemandOrder = () => {
             aria-label="Delete"
             disabled={!row?.original?.canDelete}
             onClick={() => {
-              console.log(row.original);
-              // setDeleteRecord(row.original);
-              // setShowDeleteConfirmBox(true);
+              setDeleteRecord(row.original);
+              setShowDeleteConfirmBox(true);
             }}
           >
             <DeleteIcon color={row?.original?.canDelete ? 'error' : 'disabled'} />
