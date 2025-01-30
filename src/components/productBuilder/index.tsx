@@ -161,11 +161,12 @@ const ProductBuilder = (props) => {
         });
         data?.priceTemplate?.forEach((ele) => {
           ele?.fields?.forEach((item) => {
+            const isColumnEditable = [QUOTE_PROCESS_STATUS.new, QUOTE_PROCESS_STATUS.priceBuilder]?.includes(processStatus) ? true : false;
             if (item.type === 'converter' || item.type === 'currencyAmount' || item.isConverter === true) {
-              item.isColumnEditable = true;
+              item.isColumnEditable = isColumnEditable;
             }
             if (item.type === 'currencyAmount' && (item.type === 'converter' || item.isConverter === true)) {
-              item.isColumnEditable = true;
+              item.isColumnEditable = isColumnEditable;
             }
             if (
               item.type === 'decimal' ||
@@ -174,7 +175,7 @@ const ProductBuilder = (props) => {
               item.type === 'multiLine' ||
               item.type === 'currencyAmount'
             ) {
-              item.isColumnEditable = true;
+              item.isColumnEditable = isColumnEditable;
             }
           });
           fields = [...fields, ...ele.fields];
