@@ -188,6 +188,11 @@ const ProductBuilder = (props) => {
             });
           }
         });
+        if ([QUOTE_PROCESS_STATUS.quoteBuilder, QUOTE_PROCESS_STATUS.sendToCustomer, QUOTE_PROCESS_STATUS.end]?.includes(processStatus)) {
+          fields?.forEach((f) => {
+            f.isColumnEditable = false;
+          });
+        }
         let newColumns = generateColumns(renderedFrom, fields, routes.productDetail.path, false, currency);
         newColumns?.forEach((e) => {
           if (e.accessor === 'productName') {
