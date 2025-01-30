@@ -40,6 +40,7 @@ import {
   getUniqueRows,
   useSkipper
 } from './utils';
+import { getCurrentColumnSizes } from 'src/components/CustomReactTable/ArrangeView/utils';
 
 const handleApplySavedSize = (columns, columnSavedSizes) => {
   if (columnSavedSizes && Object.keys(columnSavedSizes).length) {
@@ -497,6 +498,28 @@ const CustomReactTable = ({
     if (!event?.active) return;
     setActiveHeader(event.active.data.current.props);
   };
+
+  // Change the column state from sticky to normal when the column is being resized.
+  const changedSizes = getCurrentColumnSizes(table);
+  useEffect(() => {
+    const handleRemoveFromSticky = () => {
+      const columnsThatAreResized = Object.keys(changedSizes);
+      if (columnsThatAreResized.length) {
+        setNewColumns((prev) => {
+          const newData = prev.map((data) => {
+            const col = { ...data };
+            if (columnsThatAreResized.includes(col.id)) {
+              col['sticky'] = undefined;
+            }
+            return col;
+          });
+          return newData;
+        });
+      }
+    };
+    const id = setTimeout(handleRemoveFromSticky, 500);
+    return () => clearTimeout(id);
+  }, [changedSizes]);
 
   const sensors = useDndSensors();
   return (
