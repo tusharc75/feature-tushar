@@ -651,7 +651,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
               </ThemeButton>
             )}
             <span id="importExportLinks" className="space-x-2">
-              {['inUsedSerializedAsset', 'lostAssets', 'assetUtilization', 'invoiceDetails'].includes(resourceCamelCase) ? (
+              {['inUsedSerializedAsset', 'lostAssets', 'assetUtilization', 'invoiceDetails', 'inventoryHistory', 'purchaseOrderDetails', 'purchaseOrderActualReceivedDetails'].includes(resourceCamelCase) ? (
                 <AsynImportExportMenu
                   resource={sidebarResource.report}
                   subResource={selectedReport.resource}
