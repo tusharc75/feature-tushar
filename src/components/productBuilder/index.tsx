@@ -161,11 +161,7 @@ const ProductBuilder = (props) => {
         });
         data?.priceTemplate?.forEach((ele) => {
           ele?.fields?.forEach((item) => {
-            const isColumnEditable = [QUOTE_PROCESS_STATUS.quoteBuilder, QUOTE_PROCESS_STATUS.sendToCustomer, QUOTE_PROCESS_STATUS.end]?.includes(
-              processStatus
-            )
-              ? false
-              : true;
+            const isColumnEditable = [QUOTE_PROCESS_STATUS.new, QUOTE_PROCESS_STATUS.priceBuilder]?.includes(processStatus) ? true : false;
             if (item.type === 'converter' || item.type === 'currencyAmount' || item.isConverter === true) {
               item.isColumnEditable = isColumnEditable;
             }
