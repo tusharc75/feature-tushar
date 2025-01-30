@@ -116,7 +116,7 @@ const DemandOrder = () => {
               setShowDeleteConfirmBox(true);
             }}
           >
-            <DeleteIcon color={row?.original?.canDelete ? 'error' : 'disabled'} />
+            <DeleteIcon fontSize='small' color={row?.original?.canDelete ? 'error' : 'disabled'} />
           </IconButton>
         </HtmlTooltip>
       </>
@@ -162,10 +162,8 @@ const DemandOrder = () => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['canDelete'] =
-            permissions?.demandOrder?.isDelete &&
-            checkIsAllowedToDelete(user, sidebarResource.demandOrder, finalObject?.ownerId) &&
-            finalObject?.status !== DEMAND_ORDER_STATUS.converted;
+          finalObject['canDelete'] = permissions?.demandOrder?.isDelete && checkIsAllowedToDelete(user, sidebarResource.demandOrder, finalObject?.ownerId) &&
+            u?.canDelete && ![DEMAND_ORDER_STATUS.converted]?.includes(finalObject?.status);
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -289,12 +287,11 @@ const DemandOrder = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
-              ? `${resources?.demandOrder?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${deleteRecord
+            ? `${resources?.demandOrder?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.demandOrderNumber || ''}`
-              : `selected ${resources?.demandOrder?.titlePlural?.toLowerCase()}`
-          } ?`}
+            : `selected ${resources?.demandOrder?.titlePlural?.toLowerCase()}`
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
