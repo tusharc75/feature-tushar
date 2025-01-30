@@ -1266,7 +1266,7 @@ const FormTypes = (props) => {
           warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
           doNotShowInfoTooltip={doNotShowInfoTooltip}
         >
-          <div className="flex items-center gap-1">
+          <div className="flex gap-1">
             <div className="flex-grow">
               <Autocomplete
                 {...rest}
@@ -1388,7 +1388,7 @@ const FormTypes = (props) => {
             </div>
 
             {!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) && (
-              <div className="flex-shrink-0">
+              <div className="mt-[2px] max-h-fit flex-shrink-0">
                 <HtmlTooltip title={`Add ${fieldData?.fieldLabel}`}>
                   <IconButton onClick={() => setOptionSaveDialog(true)} size="small" color="primary">
                     <AddCircleIcon />
@@ -1951,12 +1951,8 @@ const FormTypes = (props) => {
         warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
         warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
       >
-        <Grid container className="gap-1" alignItems={'center'}>
-          <Grid
-            size={{
-              xs: !lookup && (addAdditionalOption || fieldData?.addAdditionalOption) ? 10 : 12
-            }}
-          >
+        <div className="flex gap-1">
+          <div className="flex-grow">
             <Autocomplete
               {...rest}
               limitTags={2}
@@ -2104,9 +2100,9 @@ const FormTypes = (props) => {
                 />
               )}
             />
-          </Grid>
+          </div>
           {!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) && (
-            <Grid size={{ xs: 2 }}>
+            <div className="mt-[2px] max-h-fit flex-shrink-0">
               <Box>
                 <IconButton onClick={() => setOptionSaveDialog(true)} size="small" color="primary">
                   <AddCircleIcon />
@@ -2125,9 +2121,9 @@ const FormTypes = (props) => {
                   />
                 )}
               </Box>
-            </Grid>
+            </div>
           )}
-        </Grid>
+        </div>
       </InfoLabel>
     ) : type === 'switch' ? (
       <InfoLabel
