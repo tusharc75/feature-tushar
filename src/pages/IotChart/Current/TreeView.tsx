@@ -18,8 +18,8 @@ import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/Cu
 
 export default function TreeView({ expandedAccordition, setExpandedAccordition, category, currentData, assetId, deviceTemplate = null }) {
   const [dateFilters, setDateFilters] = useState({
-    from: new Date(dayjs().subtract(8, 'day').format('MM/DD/YYYY')),
-    to: new Date(),
+    from: dayjs.tz().subtract(8, 'day').format('MM/DD/YYYY'),
+    to: dayjs.tz().toDate(),
     intervals: 'perCycle'
   });
 
@@ -27,8 +27,8 @@ export default function TreeView({ expandedAccordition, setExpandedAccordition, 
 
   const handleClose = () => {
     setDateFilters({
-      from: new Date(dayjs().subtract(8, 'day').format('MM/DD/YYYY')),
-      to: new Date(),
+      from: dayjs.tz().subtract(8, 'day').format('MM/DD/YYYY'),
+      to: dayjs.tz().toDate(),
       intervals: 'perCycle'
     });
     setDataPoint(null);

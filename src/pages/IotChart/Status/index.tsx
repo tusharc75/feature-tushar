@@ -6,8 +6,8 @@ import dayjs from 'dayjs';
 
 const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
   const [dateFilters, setDateFilters] = useState({
-    from: new Date(dayjs().subtract(8, 'day').startOf('day').toJSON()),
-    to: new Date(),
+    from: dayjs.tz().subtract(8, 'day').startOf('day').toJSON(),
+    to: dayjs.tz().toDate(),
     intervals: 'perCycle'
   });
 

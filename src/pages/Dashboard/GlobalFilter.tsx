@@ -58,13 +58,13 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
         setGlobalFilters({
           ...globalFilters,
           between: {
-            from: new Date(dayjs().subtract(1, 'month').toDate()),
-            to: new Date()
+            from: dayjs.tz().subtract(1, 'month').toDate(),
+            to: dayjs.tz().toDate()
           }
         });
         setDateFilter({
-          from: new Date(dayjs().subtract(1, 'month').toDate()),
-          to: new Date()
+          from: dayjs.tz().subtract(1, 'month').toDate(),
+          to: dayjs.tz().toDate()
         });
         break;
 
@@ -72,13 +72,13 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
         setGlobalFilters({
           ...globalFilters,
           between: {
-            from: new Date(dayjs().subtract(3, 'month').toDate()),
-            to: new Date()
+            from: dayjs.tz().subtract(3, 'month').toDate(),
+            to: dayjs.tz().toDate()
           }
         });
         setDateFilter({
-          from: new Date(dayjs().subtract(3, 'month').toDate()),
-          to: new Date()
+          from: dayjs.tz().subtract(3, 'month').toDate(),
+          to: dayjs.tz().toDate()
         });
         break;
 
@@ -86,13 +86,13 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
         setGlobalFilters({
           ...globalFilters,
           between: {
-            from: new Date(dayjs().subtract(6, 'month').toDate()),
-            to: new Date()
+            from: dayjs.tz().subtract(6, 'month').toDate(),
+            to: dayjs.tz().toDate()
           }
         });
         setDateFilter({
-          from: new Date(dayjs().subtract(6, 'month').toDate()),
-          to: new Date()
+          from: dayjs.tz().subtract(6, 'month').toDate(),
+            to: dayjs.tz().toDate()
         });
         break;
 
@@ -100,26 +100,26 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
         setGlobalFilters({
           ...globalFilters,
           between: {
-            from: new Date(dayjs().subtract(1, 'year').toDate()),
-            to: new Date()
+            from: dayjs.tz().subtract(1, 'year').toDate(),
+            to: dayjs.tz().toDate()
           }
         });
         setDateFilter({
-          from: new Date(dayjs().subtract(1, 'year').toDate()),
-          to: new Date()
+          from: dayjs.tz().subtract(1, 'year').toDate(),
+          to: dayjs.tz().toDate()
         });
         break;
       case 'current-year':
         setGlobalFilters({
           ...globalFilters,
           between: {
-            from: new Date(dayjs().startOf('year').toDate()),
-            to: new Date(dayjs().endOf('year').toDate())
+            from: dayjs.tz().startOf('year').toDate(),
+            to: dayjs.tz().endOf('year').toDate()
           }
         });
         setDateFilter({
-          from: new Date(dayjs().startOf('year').toDate()),
-          to: new Date(dayjs().endOf('year').toDate())
+          from: dayjs.tz().startOf('year').toDate(),
+          to: dayjs.tz().endOf('year').toDate()
         });
         break;
 
