@@ -1,5 +1,4 @@
 import { Box, Menu, MenuItem } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 import { ExpandMore } from '@mui/icons-material';
 import EditIcon from '@mui/icons-material/Edit';
 import queryString from 'query-string';
@@ -23,13 +22,13 @@ import {
   checkIsAllowedToDelete,
   checkIsAllowedToEdit,
   demandOrder,
+  purchaseOrder,
   sidebarResource
 } from '../../constants/helpers';
 import ManageProductionOrder from '../ProductionOrder/ManageProductionOrder';
 import ManagePurchaseOrder from '../PurchaseOrder/ManagePurchaseOrder';
 import ManageDemandOrderDialog from './ManageDemandOrderDialog';
 import Step from '../DynamicForm/Step';
-import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Material from './Material';
 
 const DemandOrderDetails = () => {
@@ -38,7 +37,6 @@ const DemandOrderDetails = () => {
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const { tab }: any = parsed;
-  const { isOffline } = useContext(CustomOfflineContext);
   const [resourceData, setResourceData] = useState(null);
   const {
     state: { user, permissions, resources }
@@ -82,8 +80,9 @@ const DemandOrderDetails = () => {
       let data;
       const response: any = await axiosInstance().get(`${demandOrder.api}/${id}`);
       data = response?.data?.data;
-      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.demandOrder, data));
-      setAllowedToDelete(permissions?.demandOrder?.isDelete && checkIsAllowedToDelete(user, sidebarResource.demandOrder, data.owner.optionValue) && !data?.material?.length);
+      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.demandOrder, data) && ![DEMAND_ORDER_STATUS.converted]?.includes(data?.status));
+      setAllowedToDelete(permissions?.demandOrder?.isDelete
+        && checkIsAllowedToDelete(user, sidebarResource.demandOrder, data.owner.optionValue) && data?.canDelete && ![DEMAND_ORDER_STATUS.converted]?.includes(data?.status));
       setDemandOrderData(data);
       setLoading(false);
     } catch (error) {
@@ -94,33 +93,15 @@ const DemandOrderDetails = () => {
 
   const fetchPolicy = async () => {
     try {
-      if (!isOffline) {
-        const {
-          data: { data }
-        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.demandOrder}`);
-        if (data) {
-          setResourceData(data);
-        }
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.demandOrder}`);
+      if (data) {
+        setResourceData(data);
       }
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
-  };
-
-  const updateStatus = (status) => {
-    axiosInstance()
-      .put(`${demandOrder.api}/status/${id}`, { status: status })
-      .then(({ data: { data } }) => {
-        fetchData();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: `Status changed to ${status}`
-        });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
   };
 
   const handleOpenUpdateDialog = () => {
@@ -156,8 +137,14 @@ const DemandOrderDetails = () => {
     }
     axiosInstance()
       .put(`${routes?.demandOrder?.path}/update-converted`, value)
-      .then(({ data }) => {
+      .then(() => {
         fetchData();
+        if (convertDialog.type === sidebarResource.purchaseOrder) {
+          window.open(`${routes.purchaseOrderDetail.path}/${data?._id}`)
+        } else {
+          window.open(`${routes.productionOrder.path}/${data?._id}`)
+        }
+        setConvertDialog({ open: false, type: '' })
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -261,11 +248,8 @@ const DemandOrderDetails = () => {
             <Material
               demandOrderData={demandOrderData}
               fetchDemadOrderData={fetchData}
-              allowedToEdit={
-                allowedToEdit && permissions?.demandOrder?.isUpdate && demandOrderData?.status !== DEMAND_ORDER_STATUS.converted ? true : false
-              }
+              allowedToEdit={allowedToEdit}
               resources={resources}
-              updateStatus={updateStatus}
             />
           )}
         </TabPanel>
@@ -332,6 +316,7 @@ const DemandOrderDetails = () => {
               return { ...e, service: e.materialId };
             })}
           warehouseId={demandOrderData?.warehouse?.optionValue}
+          isRedirectTodetailPage={false}
         />
       )}
       {convertDialog.open && convertDialog.type === sidebarResource.productionOrder && (
@@ -343,6 +328,7 @@ const DemandOrderDetails = () => {
             handleConvertSuccess(data);
           }}
           referenceData={{ warehouse: demandOrderData?.warehouse?.optionValue }}
+          isRedirectTodetailPage={false}
         />
       )}
     </Box>
