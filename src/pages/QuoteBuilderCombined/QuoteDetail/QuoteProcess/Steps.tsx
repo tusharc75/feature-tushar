@@ -12,7 +12,7 @@ import CustomDialogHeader from '../../../../components/CustomDialog/CustomDialog
 import { isMobile, isTablet } from 'react-device-detect';
 import DoaStepUsers from './DOAStepUsers';
 import Steps1 from 'src/components/Steps';
-import { cn, CustomDialogTransition, QUOTE_STATUS } from 'src/constants/helpers';
+import { cn, CustomDialogTransition, QUOTE_PROCESS_STATUS, QUOTE_STATUS } from 'src/constants/helpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -156,9 +156,9 @@ const Steps = (props) => {
         isPrevStep={currentStep >= 0 && !loading && !globalLoading && isPrevStep}
         isStepEnded={isStepEnded || currentStep === steps.length}
         steps={steps}
-        setCurrentStep={() => { }}
+        setCurrentStep={() => {}}
         handleNext={() => {
-          if (versionStatus.includes(QUOTE_STATUS.sentToCustomer) && steps[currentStep]?.key === QUOTE_STATUS.sentToCustomer) {
+          if (versionStatus.includes(QUOTE_STATUS.sentToCustomer) && steps[currentStep]?.key === QUOTE_PROCESS_STATUS.sendToCustomer) {
             setShowManualCustomerActionDialog(true);
           } else {
             handleNext();
@@ -184,8 +184,12 @@ const Steps = (props) => {
             )}
             <>
               {versionStatus === QUOTE_STATUS.sentforDOA && <DoaStepUsers DOAData={DOAData} versionStatus={QUOTE_STATUS.sentforDOA} />}
-              {versionStatus.split(' (')[0] === QUOTE_STATUS.acceptedbyDOA && <DoaStepUsers DOAData={DOAData} versionStatus={QUOTE_STATUS.acceptedbyDOA} />}
-              {versionStatus.split(' (')[0] === QUOTE_STATUS.rejectedbyDOA && <DoaStepUsers DOAData={DOAData} versionStatus={QUOTE_STATUS.rejectedbyDOA} />}
+              {versionStatus.split(' (')[0] === QUOTE_STATUS.acceptedbyDOA && (
+                <DoaStepUsers DOAData={DOAData} versionStatus={QUOTE_STATUS.acceptedbyDOA} />
+              )}
+              {versionStatus.split(' (')[0] === QUOTE_STATUS.rejectedbyDOA && (
+                <DoaStepUsers DOAData={DOAData} versionStatus={QUOTE_STATUS.rejectedbyDOA} />
+              )}
               {versionStatus === QUOTE_STATUS.sentToCustomer && (
                 <div
                   className={`${classes.sent} d-flex align-items-center justify-content-center max-w-max  gap-1 rounded-bl-md bg-[var(--dark-primary)] px-2 py-[3px]`}
