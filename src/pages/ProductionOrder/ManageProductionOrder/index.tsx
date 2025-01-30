@@ -26,7 +26,7 @@ import routes from '../../../components/Helpers/Routes';
 import { isEqual } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onClose, onSuccess, referenceData = null }) => {
+const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onClose, onSuccess, referenceData = null, isRedirectTodetailPage = true }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -34,7 +34,7 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const {
-    state: { user, permissions, selectedEntity, resources }
+    state: { user, resources }
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [productionOrderData, setProductionOrderData] = useState(null);
@@ -134,7 +134,9 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
             type: 'success',
             message: message
           });
-          history.push(`${routes?.productionOrderDetail?.path}/${data?._id}`);
+          if (isRedirectTodetailPage) {
+            history.push(`${routes?.productionOrderDetail?.path}/${data?._id}`);
+          }
           onSuccess(data);
           setLoading(false);
         })
@@ -157,11 +159,6 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
     }
   };
 
-  function validate(values) {
-    const errors = {};
-    return errors;
-  }
-
   return (
     <Dialog
       maxWidth="md"
@@ -181,7 +178,6 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
           initialValues={initialData.values}
           validationSchema={yupSchema(initialData.fields)}
           validateOnMount
-          validate={validate}
           onSubmit={handleSubmit}
         >
           {({ values, errors, touched, setFieldValue, submitForm }) => (
