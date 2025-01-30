@@ -461,14 +461,12 @@ const RenderListItem = ({ column, handleToggle, checked, index, values, setField
     <li
       ref={setNodeRef}
       style={style}
-      className={`${
-        isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))] ' : 'bg-[var(--dark-secondary,#fff)]'
-      } list-none transition-colors`}
+      className={`${isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))] ' : 'bg-[var(--dark-secondary,#fff)]'
+        } list-none transition-colors`}
     >
       <div
-        className={`flex items-center p-[8px_17px_8px_0] [border-bottom:1px_solid_var(--common-border-color)] ${
-          index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
-        } `}
+        className={`flex items-center p-[8px_17px_8px_0] [border-bottom:1px_solid_var(--common-border-color)] ${index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
+          } `}
       >
         <HtmlTooltip title={isFilteredColumn ? 'Clear search filter to arrange' : ''}>
           <ListItemIcon
