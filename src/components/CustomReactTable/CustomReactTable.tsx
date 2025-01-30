@@ -41,6 +41,7 @@ import {
   useSkipper
 } from './utils';
 import { getCurrentColumnSizes } from 'src/components/CustomReactTable/ArrangeView/utils';
+import { isEqual } from 'lodash';
 
 const handleApplySavedSize = (columns, columnSavedSizes) => {
   if (columnSavedSizes && Object.keys(columnSavedSizes).length) {
@@ -59,6 +60,20 @@ const handleApplySavedSize = (columns, columnSavedSizes) => {
 };
 
 let exportTimeout;
+
+let prevColumnsThatAreResized = [];
+
+const getColumnsThatAreNewlyResized = (changedSizes: { [key: string]: number }) => {
+  const columnsThatAreResized = Object.keys(changedSizes);
+  if (!prevColumnsThatAreResized.every((d) => columnsThatAreResized.includes(d))) {
+    return [];
+  } else {
+    const setA = new Set(prevColumnsThatAreResized);
+    const difference = columnsThatAreResized.filter((value) => !setA.has(value));
+    prevColumnsThatAreResized = columnsThatAreResized;
+    return difference;
+  }
+};
 
 const CustomReactTable = ({
   columns,
@@ -503,12 +518,12 @@ const CustomReactTable = ({
   const changedSizes = getCurrentColumnSizes(table);
   useEffect(() => {
     const handleRemoveFromSticky = () => {
-      const columnsThatAreResized = Object.keys(changedSizes);
-      if (columnsThatAreResized.length) {
+      const resizedColumns = getColumnsThatAreNewlyResized(changedSizes);
+      if (resizedColumns.length) {
         setNewColumns((prev) => {
           const newData = prev.map((data) => {
             const col = { ...data };
-            if (columnsThatAreResized.includes(col.id)) {
+            if (resizedColumns.includes(col.id)) {
               col['sticky'] = undefined;
             }
             return col;
