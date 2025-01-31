@@ -276,14 +276,14 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
   const handleSubmit = async (values) => {
     let currency = rentalManagementData?.currency?.toLowerCase()
     if (isBulkedit) {
+      const rentalPackagePriceMaterialWise = user?.user?.brandPolicy?.rentalPackagePriceMaterialWise && user?.user?.brandPolicy?.rentalPackagePriceMaterialWise?.length
       if (values[`price_${currency}`] && selectedProducts?.find((e) => !e.parentId)
-        && !selectedProducts?.every((e) => !e.parentId) && (!user?.user?.brandPolicy?.rentalPackagePriceMaterialWise
-          || !user?.user?.brandPolicy?.rentalPackagePriceMaterialWise?.length)) {
+        && !selectedProducts?.every((e) => !e.parentId) && !rentalPackagePriceMaterialWise) {
         setShowSelectionConfirmationDialog({ open: true, type: '' });
       }
       else {
         let childMatrialUpdate = []
-        if (user?.user?.brandPolicy?.rentalPackagePriceMaterialWise && user?.user?.brandPolicy?.rentalPackagePriceMaterialWise?.length) {
+        if (rentalPackagePriceMaterialWise) {
           childMatrialUpdate = [...user?.user?.brandPolicy?.rentalPackagePriceMaterialWise, MATERIAL_TYPE.package]
         }
         const rows = bulkUpdate(values, selectedProducts, material, allFields, rentalManagementData?.currency, false, childMatrialUpdate);
