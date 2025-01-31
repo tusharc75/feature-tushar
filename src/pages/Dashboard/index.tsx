@@ -75,13 +75,9 @@ const Dashboard = () => {
   const fetchDashboards = () => {
     setDashboardLoading(true);
     axiosInstance()
-      .get('/dashboard-master')
+      .get('/dashboard-master/role-wise')
       .then(({ data: { data } }) => {
         if (data?.length) {
-          const selectedEntityData = user?.entity?.find((e) => e?._id === selectedEntity);
-          if (selectedEntityData?.dashboards?.length) {
-            data = data?.filter((e) => selectedEntityData?.dashboards?.includes(e._id));
-          }
           const savedSelected = localStorage.getItem('selectedDashboard');
           if (savedSelected && data.find((d) => d.name === savedSelected)) {
             const selectedDashboard = data.find((d) => d.name === savedSelected);
