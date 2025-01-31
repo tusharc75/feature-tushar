@@ -334,7 +334,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
         ...deepFiltersP
           ?.filter((d) => {
             const isoDate = dayjs(d?.term);
-            const hasTermLength = isoDate.isValid() && d?.term?.length === undefined ? true : d?.term?.length ? true : false;
+            const hasTermLength = isoDate.isValid() && d?.term instanceof Date ? true : d?.term?.length ? true : false;
             if (isStatusPeriod) {
               return hasTermLength && !['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field);
             }
@@ -342,7 +342,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
           })
           ?.map((d) => {
             const isoDate = dayjs(d?.term);
-            const term = isoDate.isValid() && d?.term?.length === undefined ? dateFormatToSend(d?.term) : d?.term;
+            const term = isoDate.isValid() && d?.term instanceof Date ? dateFormatToSend(d?.term) : d?.term;
             if (filterTerm[d?.field] === '$nin' && isArray(term)) {
               return {
                 ...d,
