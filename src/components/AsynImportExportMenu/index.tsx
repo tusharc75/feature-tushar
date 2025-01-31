@@ -1,10 +1,9 @@
 import { useContext, useState } from 'react';
-import { Menu, MenuItem, useMediaQuery } from '@mui/material';
+import { Menu, MenuItem } from '@mui/material';
 import axiosInstance from '../../axios/axiosInstance';
 import { IMPORT_EXPORT_TYPE, downloadExcel } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { MdImportExport } from 'react-icons/md';
-import HtmlTooltip from '../CustomTooltipTitle';
 import ImportExportDialog from './ImportExportDialog';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { ExpandMore } from '@mui/icons-material';
@@ -25,7 +24,6 @@ const AsynImportExportMenu = ({
   title = '',
   onlyExport = false
 }) => {
-  const isMobile = useMediaQuery('(max-width:600px)');
 
   const toastConfig = useContext(CustomToastContext);
 
@@ -93,36 +91,29 @@ const AsynImportExportMenu = ({
 
   return (
     <>
-      <HtmlTooltip title={<>Import/Export {title}</>} placement="top" arrow enterTouchDelay={0}>
-        <span>
-          {onlyExport ? (
-            <ThemeButton
-              onClick={() => {
-                setDialog({ open: true, type: IMPORT_EXPORT_TYPE.export });
-              }}
-            >
-              Export To Excel
-            </ThemeButton>
-          ) : (
-            <ThemeButton
-              onClick={(e) => handleClick(e)}
-              endIcon={<ExpandMore />}
-              buttonType="default"
-              aria-controls="simple-menu"
-              aria-haspopup="true"
-            >
-              {isMobile ? (
-                <>
-                  <MdImportExport size={20} />
-                  {` ${title}`}
-                </>
-              ) : (
-                <>Import/Export {title}</>
-              )}
-            </ThemeButton>
-          )}
-        </span>
-      </HtmlTooltip>
+      <span>
+        {onlyExport ? (
+          <ThemeButton
+            onClick={() => {
+              setDialog({ open: true, type: IMPORT_EXPORT_TYPE.export });
+            }}
+          >
+            Export To Excel
+          </ThemeButton>
+        ) : (
+          <ThemeButton
+            onClick={(e) => handleClick(e)}
+            endIcon={<ExpandMore />}
+            buttonType="default"
+            aria-controls="simple-menu"
+            aria-haspopup="true"
+            mobileTooltip={`Import/Export ${title}`}
+            iconForMobile={<MdImportExport size={20} />}
+          >
+            <>Import/Export {title}</>
+          </ThemeButton>
+        )}
+      </span>
       <Menu
         id="import-export-links"
         anchorEl={anchorEl}
