@@ -262,7 +262,7 @@ const InvoiceDetails = () => {
           <Box className="control-buttons-v1">
             {invoiceData ? (
               <>
-                {invoiceData?.fieldTicket?.length ? (
+                {invoiceData?.fieldTicket?.length && invoiceData?.status !== INVOICE_STATUS.cancelled ? (
                   <>
                     <ThemeButton
                       onClick={(e) => {
