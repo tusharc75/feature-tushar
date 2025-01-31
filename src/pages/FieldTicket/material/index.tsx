@@ -15,7 +15,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { calculatePrice, calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
+import { calculatePriceNew, calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import {
@@ -513,7 +513,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           Object.assign(element, calValues);
           material.push(element);
         });
-        let priceData: any = await calculatePrice(fieldTicketData, material);
+        let priceData: any = await calculatePriceNew(fieldTicketData, material);
         if (fieldTicketData?.pricingCondition?.optionValue) {
           priceData = priceData?.filter((e) => e.conditionId === fieldTicketData?.pricingCondition?.optionValue);
         }
@@ -526,23 +526,32 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
     const tempMaterial = [...material];
     if (priceData) {
       tempMaterial.forEach((element) => {
-        const rateResult = priceData?.filter(
-          (e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit
-        );
         if (element.listPrice) {
           const priceFieldName = `price_${fieldTicketData?.currency?.toLowerCase()}`;
           element[priceFieldName] = element.listPrice;
           const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
           Object.assign(element, calValues);
-        } else if (rateResult.length && rateResult[0].mrp) {
-          const priceFieldName = `price_${fieldTicketData?.currency?.toLowerCase()}`;
-          element[priceFieldName] = rateResult[0].mrp;
-          element['pricingCondition'] = rateResult[0].conditionId;
-          element['pricingMethod'] = rateResult[0].pricingMethod?.trim();
-          const calValues1 = autoCalculateSpecificFields({ pricingMethod: element['pricingMethod'] }, element, allFields);
-          Object.assign(element, calValues1);
-          const calValues2 = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
-          Object.assign(element, calValues2);
+        } else {
+          let rateList = [];
+          let changeUnit = false;
+          rateList = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit);
+          if (!rateList?.length) {
+            rateList = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type);
+            changeUnit = true;
+          }
+          if (rateList.length && rateList[0].mrp) {
+            const priceFieldName = `price_${fieldTicketData?.currency?.toLowerCase()}`;
+            if (changeUnit) {
+              element['unit'] = rateList[0].unit?.trim();
+            }
+            element[priceFieldName] = rateList[0].mrp;
+            element['pricingCondition'] = rateList[0].conditionId;
+            element['pricingMethod'] = rateList[0].pricingMethod?.trim();
+            const calValues1 = autoCalculateSpecificFields({ pricingMethod: element['pricingMethod'] }, element, allFields);
+            Object.assign(element, calValues1);
+            const calValues2 = autoCalculateSpecificFields({ [priceFieldName]: rateList[0].mrp }, element, allFields);
+            Object.assign(element, calValues2);
+          }
         }
       });
     }
