@@ -95,6 +95,39 @@ export const calculatePrice = (rentalManagementData: any = null, arr: any[]) => 
     }
 };
 
+export const calculatePriceNew = (rentalManagementData: any = null, arr: any[]) => {
+    if (rentalManagementData) {
+        const data: any = {};
+        data.conditionType = [PRICING_SETUP_TYPE.rent];
+        const material: any = []
+        arr?.forEach((ele) => {
+            const obj = {
+                materialId: ele?.materialId,
+                materialType: ele?.type,
+                qty: ele?.qty,
+                currency: rentalManagementData?.currency
+            }
+            material.push(obj)
+        })
+        data.material = material;
+        data.supplier = [];
+        data.customer = [rentalManagementData?.customerAccount?.optionValue];
+        data.warehouse = [rentalManagementData?.warehouse?.optionValue];
+        data.address = rentalManagementData?.shippingAddress?.optionValue ? [rentalManagementData?.shippingAddress?.optionValue] : [];
+        return new Promise((resolve, reject) => {
+            axiosInstance()
+                .post(pricingCondition.api + `/calculatePrice-new`, data)
+                .then(({ data: { data } }) => {
+                    resolve(data);
+                })
+                .catch((err) => {
+                    reject(err);
+                });
+        });
+    }
+};
+
+
 export const sumOnParent = (parent, child, fields, currency) => {
     const resetFields = []
     fields.forEach((element) => {
