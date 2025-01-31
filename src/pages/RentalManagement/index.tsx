@@ -36,7 +36,6 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageRentalManagementDialog from './ManageRental';
 import { rentalJobClearOffline, rentalJobOfflineUpdate } from './rentalOfflineHelper';
 import queryString from 'query-string';
-import { VITE_APP_ENV } from 'src/config';
 
 const RentalManagement = () => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -472,27 +471,23 @@ const RentalManagement = () => {
           asyncExport={true}
           asyncImport={true}
           resource={sidebarResource.rentalManagement}
-          extraImportExportLinks={
-            ['production']?.includes(VITE_APP_ENV)
-              ? []
-              : [
-                  {
-                    title: 'With Material Template',
-                    api: `${rentalManagement.api}/template?materialType=true`,
-                    type: 'download'
-                  },
-                  {
-                    title: 'With Material Export',
-                    api: `${rentalManagement.api}/template?export=true&materialType=true`,
-                    type: 'export'
-                  },
-                  {
-                    title: 'With Material Import',
-                    api: `${rentalManagement.api}/import?materialType=true`,
-                    type: 'import'
-                  }
-                ]
-          }
+          extraImportExportLinks={[
+            {
+              title: 'With Material Template',
+              api: `${rentalManagement.api}/template?materialType=true`,
+              type: 'download'
+            },
+            {
+              title: 'With Material Export',
+              api: `${rentalManagement.api}/template?export=true&materialType=true`,
+              type: 'export'
+            },
+            {
+              title: 'With Material Import',
+              api: `${rentalManagement.api}/import?materialType=true`,
+              type: 'import'
+            }
+          ]}
         />
       </div>
       <CustomContainer>
@@ -532,12 +527,11 @@ const RentalManagement = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${
-              deleteRecord
-                ? `${resources?.rentalManagement?.titleSingular?.toLowerCase()} :
+            message={`Are you sure you want to delete ${deleteRecord
+              ? `${resources?.rentalManagement?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.rentalJobName}`
-                : `selected ${resources?.rentalManagement?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.rentalManagement?.titlePlural?.toLowerCase()}`
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
