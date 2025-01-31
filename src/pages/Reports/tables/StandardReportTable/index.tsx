@@ -450,7 +450,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
           setIsColumnsLoading(false);
         }
 
-        data = data.map((u: any) => {
+        data = data?.map((u: any) => {
           let finalObject: any = prepareDataForGrid(u);
           return finalObject;
         });
@@ -606,7 +606,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
   useEffect(() => {
     if ([`dailyVolumeReport`, 'volumeReport', 'rentalVolumeReport']?.includes(resourceCamelCase) && footerData) {
       const dataKeys = Object.keys(footerData);
-      const newColumns = columns.map((col: any, index) => {
+      const newColumns = columns?.map((col: any, index) => {
         if (index === 0) {
           return { ...col, Footer: 'Total' };
         }
@@ -651,7 +651,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
               </ThemeButton>
             )}
             <span id="importExportLinks" className="space-x-2">
-              {['inUsedSerializedAsset', 'lostAssets'].includes(resourceCamelCase) ? (
+              {['inUsedSerializedAsset', 'lostAssets', 'assetUtilization', 'invoiceDetails', 'inventoryHistory', 'purchaseOrderDetails', 'purchaseOrderActualReceivedDetails'].includes(resourceCamelCase) ? (
                 <AsynImportExportMenu
                   resource={sidebarResource.report}
                   subResource={selectedReport.resource}
@@ -729,6 +729,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
       {!showGrid && !customReportData && selectedReport?.type != 'custom-report' && (
         <Filter
           onClose={() => {
+            dispatch({ type: 'onlyFilter', filters: {} });
             setShowGrid(true);
           }}
           loading={isColumnsLoading}

@@ -115,7 +115,7 @@ const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false, wa
           )}
         </Grid>
         <Grid>
-          <Box style={{ marginTop: '7px' }}>
+          <Box>
             <HtmlTooltip title={<Typography>{info}</Typography>}>
               <InfoIcon color="disabled" />
             </HtmlTooltip>
@@ -1011,11 +1011,13 @@ const FormTypes = (props) => {
           slotProps={{
             input: {
               inputComponent: CustomFormat as any,
-              allowNegative: false,
-              onValueChange: (values) => {
-                handleChange(name, values.value);
+              inputProps: {
+                allowNegative: false,
+                onValueChange: (values) => {
+                  handleChange(name, values.value);
+                },
+                selectedCurrencyCode: selectedCurrencyCode
               },
-              selectedCurrencyCode: selectedCurrencyCode,
               startAdornment: startAdornment ? (
                 startAdornment
               ) : (
@@ -1266,8 +1268,8 @@ const FormTypes = (props) => {
           warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
           doNotShowInfoTooltip={doNotShowInfoTooltip}
         >
-          <Grid container spacing={1}>
-            <Grid style={{ flexGrow: 1 }}>
+          <div className="flex gap-1">
+            <div className="flex-grow">
               <Autocomplete
                 {...rest}
                 limitTags={2}
@@ -1385,10 +1387,10 @@ const FormTypes = (props) => {
                   />
                 )}
               />
-            </Grid>
+            </div>
 
             {!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) && (
-              <div style={{ marginTop: '7px' }}>
+              <div className="mt-[2px] max-h-fit flex-shrink-0">
                 <HtmlTooltip title={`Add ${fieldData?.fieldLabel}`}>
                   <IconButton onClick={() => setOptionSaveDialog(true)} size="small" color="primary">
                     <AddCircleIcon />
@@ -1409,7 +1411,7 @@ const FormTypes = (props) => {
                 )}
               </div>
             )}
-          </Grid>
+          </div>
         </InfoLabel>
       </>
     ) : type === 'vlookupDropdown' && fieldData && !fieldData?.isvlookupReverse ? (
@@ -1951,12 +1953,8 @@ const FormTypes = (props) => {
         warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
         warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
       >
-        <Grid container spacing={1}>
-          <Grid
-            size={{
-              xs: !lookup && (addAdditionalOption || fieldData?.addAdditionalOption) ? 10 : 12
-            }}
-          >
+        <div className="flex gap-1">
+          <div className="flex-grow">
             <Autocomplete
               {...rest}
               limitTags={2}
@@ -2104,10 +2102,10 @@ const FormTypes = (props) => {
                 />
               )}
             />
-          </Grid>
+          </div>
           {!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) && (
-            <Grid size={{ xs: 2 }}>
-              <Box style={{ marginTop: '7px' }}>
+            <div className="mt-[2px] max-h-fit flex-shrink-0">
+              <Box>
                 <IconButton onClick={() => setOptionSaveDialog(true)} size="small" color="primary">
                   <AddCircleIcon />
                 </IconButton>
@@ -2125,9 +2123,9 @@ const FormTypes = (props) => {
                   />
                 )}
               </Box>
-            </Grid>
+            </div>
           )}
-        </Grid>
+        </div>
       </InfoLabel>
     ) : type === 'switch' ? (
       <InfoLabel
@@ -2419,7 +2417,7 @@ const FormTypes = (props) => {
         <input accept="image/*" style={{ display: 'none' }} id="multiple-images-button" multiple={false} type="file" onChange={readImageFile} />
         <div className="flex items-center gap-2">
           <label htmlFor="multiple-images-button">
-            <ThemeButton disabled={readingImage} buttonType="theme">
+            <ThemeButton disabled={readingImage} buttonType="theme" component="span">
               Upload image(s)
             </ThemeButton>
           </label>

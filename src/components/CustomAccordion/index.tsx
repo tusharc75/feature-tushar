@@ -3,14 +3,12 @@ import MuiAccordion, { accordionClasses, AccordionProps } from '@mui/material/Ac
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import MuiAccordionSummary, { accordionSummaryClasses, AccordionSummaryProps } from '@mui/material/AccordionSummary';
 import { styled } from '@mui/styles';
+import { cn } from 'src/constants/helpers';
 
 const Accordion = styled((props: AccordionProps) => <MuiAccordion disableGutters elevation={0} {...props} />)(({ theme }) => ({
-  border: '0',
-  borderRadius: '4px',
-  boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.06) !important',
-  '&:not(:last-child)': {
-    borderBottom: 0
-  },
+  borderRadius: '6px !important',
+  boxShadow: 'unset !important',
+  border: '1px solid var(--common-border-color) !important',
   '&:before': {
     display: 'none'
   },
@@ -47,7 +45,7 @@ const AccordionSummary = styled((props: AccordionSummaryProps) => <MuiAccordionS
 const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
   display: 'block',
   padding: '16px',
-  border: '1px solid var(--accordion-details-border)',
+  borderTop: '1px solid var(--accordion-details-border)',
   borderRadius: '0px 0px 6px 6px'
 }));
 

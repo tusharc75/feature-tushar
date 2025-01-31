@@ -4,7 +4,7 @@ import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase, map, uniq } from 'lodash';
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -21,9 +21,11 @@ import CreateInvoiceDialog from './CreateInvoice';
 import InvoiceDialog from './InvoiceDialog';
 import axios, { CancelTokenSource } from 'axios';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import InvoiceDataDialog from 'src/pages/RentalManagement/ProgressiveBilling/InvoiceDataDialog';
 
 const GenerateInvoice = ({ resourceRendered = null }) => {
   const toastConfig = useContext(CustomToastContext);
+  const invoicePolicyRef = useRef(null);
 
   const {
     state: { permissions, selectedEntity, resources }
@@ -45,6 +47,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
 
   const [resourceList, setResourceList] = useState([]);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [openInvoiceDataDialog, setOpenInvoiceDataDialog] = useState({ open: false, data: null });
 
   const GENERATE_RESOURCE = [
     {
@@ -112,7 +115,11 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   }, []);
 
   useEffect(() => {
-    if(selectedResource){
+    fetchPolicy();
+  }, []);
+
+  useEffect(() => {
+    if (selectedResource) {
       fetchGridColumns();
     }
   }, [selectedResource]);
@@ -149,6 +156,19 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
       });
     }
     setColumns([...newColumns, ...extraColumns, ...getStaticFields(), ActionsRenderer]);
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.invoice}`);
+      if (data) {
+        invoicePolicyRef.current = data;
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
   };
 
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
@@ -207,6 +227,42 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
     return deepFilter;
   };
 
+  const createInvoice = (resourceData, invoiceData = null) => {
+    axiosInstance()
+      .post(`/generate-invoice/create`, {
+        resource: selectedResource?.resource,
+        referenceIds: resourceData?.map((e) => e._id),
+        extraInvoiceData: invoiceData
+      })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        window.open(`${routes.invoiceDetail.path}/${data?.data?._id}`)
+        setCreateInvoiceDialog({ open: false, data: null });
+        dispatch({ type: 'selection', selectedRecords: [] });
+        setOpenInvoiceDataDialog({ open: false, data: null });
+        fetchData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleCreateInvoice = (rows) => {
+    if (selectedResource?.resource === sidebarResource.fieldTicket && invoicePolicyRef?.current?.policy?.hideFieldTicketInvoiceCreateDialog) {
+      if (invoicePolicyRef?.current?.policy?.fieldTicketInvoiceFields?.length > 0) {
+        setOpenInvoiceDataDialog({ open: true, data: rows });
+      } else {
+        createInvoice(rows);
+      }
+    } else {
+      setCreateInvoiceDialog({ open: true, data: rows });
+    }
+  };
+
   const ActionsRenderer = {
     accessor: 'action',
     Header: 'Actions',
@@ -225,7 +281,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
                 <IconButton
                   size="small"
                   onClick={() => {
-                    setCreateInvoiceDialog({ open: true, data: [row?.original] });
+                    handleCreateInvoice([row?.original]);
                   }}
                 >
                   <NoteAddIcon fontSize="small" color="primary" />
@@ -255,7 +311,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
               <IconButton
                 size="small"
                 onClick={() => {
-                  setCreateInvoiceDialog({ open: true, data: [row?.original] });
+                  handleCreateInvoice([row?.original]);
                 }}
               >
                 <NoteAddIcon fontSize="small" color="primary" />
@@ -381,7 +437,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
         <MenuItem
           disabled={checkUniqCreateInvoice()}
           onClick={() => {
-            setCreateInvoiceDialog({ open: true, data: selectedRecords });
+            handleCreateInvoice(selectedRecords);
           }}
         >
           Create Invoice
@@ -398,7 +454,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   return selectedResource ? (
     <Fragment>
       <Grid container className="headerbox">
-        <Grid size={{md:4, sm:11, xs:10}}>
+        <Grid size={{ md: 4, sm: 11, xs: 10 }}>
           <CustomBreadCrumbs
             routes={[
               {
@@ -411,7 +467,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
             ]}
           />
         </Grid>
-        <Grid size={{md:8, sm:1, xs:2}} />
+        <Grid size={{ md: 8, sm: 1, xs: 2 }} />
       </Grid>
       <div className="main-container">
         <ListingPageHeader
@@ -459,6 +515,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
               onClose={() => setCreateInvoiceDialog({ open: false, data: null })}
               resource={selectedResource.resource}
               progressiveBilling={selectedResource.progressiveBilling}
+              invoiceResourceData={invoicePolicyRef.current}
               onSuccess={() => {
                 setCreateInvoiceDialog({ open: false, data: null });
                 dispatch({ type: 'selection', selectedRecords: [] });
@@ -486,6 +543,17 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
               fetchData();
             }}
             resource={selectedResource.resource}
+          />
+        )}
+        {openInvoiceDataDialog.open && (
+          <InvoiceDataDialog
+            onClose={() => {
+              setOpenInvoiceDataDialog({ open: false, data: null });
+            }}
+            invoiceFields={invoicePolicyRef?.current?.policy?.fieldTicketInvoiceFields}
+            onSuccess={(data) => {
+              createInvoice(openInvoiceDataDialog.data, data);
+            }}
           />
         )}
       </div>

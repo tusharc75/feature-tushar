@@ -473,7 +473,7 @@ const Productpackage = ({
         : nonSerializeAsset?.filter((e) => e._id === parent._id).length +
         data?.nonSerializedInventory?.filter((d) => d?._id === parent?._id)?.reduce((sum, row) => sum + row?.qty || 0, 0);
       parent.canDelete =
-        parent.type === MATERIAL_TYPE.service && parent?.serviceLog
+        parent.type === MATERIAL_TYPE.service && parent?.serviceLog?.length
           ? false
           : parent?.assetQty > 0 || data.inventory?.filter((e) => e.isReplaced && e._id === parent._id)?.length
             ? false
@@ -565,7 +565,7 @@ const Productpackage = ({
         ? inventory?.filter((e) => e._id === _subRow._id).length + productSerialNumbers?.filter((e) => e._id === _subRow._id).length
         : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
       _subRow.canDelete =
-        _subRow.type === MATERIAL_TYPE.service && _subRow?.serviceLog ? false : _subRow?.assetQty > 0 ? false : _subRow?.status ? false : true;
+        _subRow.type === MATERIAL_TYPE.service && _subRow?.serviceLog?.length ? false : _subRow?.assetQty > 0 ? false : _subRow?.status ? false : true;
       _subRow.nonSerializedQty =
         _subRow.type === MATERIAL_TYPE.product &&
           !_subRow.serializedProduct &&
@@ -587,7 +587,10 @@ const Productpackage = ({
       );
     });
 
-    if ((subRows.length === 0 || subRows?.filter((s) => s.type === MATERIAL_TYPE.package && !s.isValid)?.length > 0) && parent.type === MATERIAL_TYPE.package) {
+    if (
+      (subRows.length === 0 || subRows?.filter((s) => s.type === MATERIAL_TYPE.package && !s.isValid)?.length > 0) &&
+      parent.type === MATERIAL_TYPE.package
+    ) {
       parent.isValid = false;
     }
     if (subRows?.length && rentalPolicyData?.servicePriceRequired) {
@@ -855,7 +858,7 @@ const Productpackage = ({
 
   const onSaveInlineEdit = (inputField, updatedData) => {
     if (inputField.hasOwnProperty('qty')) {
-      if (inputField['qty'] === 0) {
+      if (!inputField['qty']) {
         toastConfig.setToastConfig({
           open: true,
           type: 'error',
@@ -911,17 +914,15 @@ const Productpackage = ({
         const child: any = flattenArray(dataRows).filter((e) => e.parentId === rowData?._id);
         if (child?.length) {
           child?.forEach((e) => {
-            let qty = parseFloat(inputField['qty']) * e?.qty
-            console.log(qty)
+            let qty = parseFloat(inputField['qty']) * e?.qty;
             if (qty < e?.assetQty || qty < e?.nonSerializedQty) {
               isValid = false;
               return;
             }
-          })
-        }
-        else {
-          const qty = getParentMultiplier(material, rowData) * parseFloat(inputField['qty'])
-          if ((qty < rowData?.assetQty || qty < rowData?.nonSerializedQty)) {
+          });
+        } else {
+          const qty = getParentMultiplier(material, rowData) * parseFloat(inputField['qty']);
+          if (qty < rowData?.assetQty || qty < rowData?.nonSerializedQty) {
             isValid = false;
           }
         }
@@ -1029,39 +1030,25 @@ const Productpackage = ({
   const actionButtonmenuItems = () => {
     return (
       <>
-        <HtmlTooltip
-          title={selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry) ? 'Select records to edit' : 'Bulk edit selected records'}
-          enterTouchDelay={0}
-          arrow
-          placement="top"
+        <MenuItem
+          id={'bulk-edit-menu-item'}
+          disabled={selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)}
+          onClick={() => {
+            setIsProductEdit({ open: true, data: null, showSaveAndNext: false });
+            setIsBulkEdit(true);
+          }}
         >
-          <MenuItem
-            id={'bulk-edit-menu-item'}
-            disabled={selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)}
-            onClick={() => {
-              setIsProductEdit({ open: true, data: null, showSaveAndNext: false });
-              setIsBulkEdit(true);
-            }}
-          >
-            Bulk Edit
-          </MenuItem>
-        </HtmlTooltip>
-        <HtmlTooltip
-          title={Boolean(selectedRecords && selectedRecords?.some((r) => r?.canDelete)) ? 'Delete selected records' : 'Select records to delete'}
-          enterTouchDelay={0}
-          arrow
-          placement="top"
+          Bulk Edit
+        </MenuItem>
+        <MenuItem
+          id={'delete-menu-item'}
+          disabled={isDeleting || !selectedRecords?.some((r) => r?.canDelete)}
+          onClick={() => {
+            handleDeleteMultiple();
+          }}
         >
-          <MenuItem
-            id={'delete-menu-item'}
-            disabled={isDeleting || !selectedRecords?.some((r) => r?.canDelete)}
-            onClick={() => {
-              handleDeleteMultiple();
-            }}
-          >
-            Delete
-          </MenuItem>
-        </HtmlTooltip>
+          Delete
+        </MenuItem>
       </>
     );
   };

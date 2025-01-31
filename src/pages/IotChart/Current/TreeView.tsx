@@ -3,10 +3,10 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import HistoryIcon from '@mui/icons-material/History';
 import { Box, Dialog, IconButton, Theme, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import MuiAccordion from '@mui/material/Accordion';
-import MuiAccordionDetails from '@mui/material/AccordionDetails';
-import MuiAccordionSummary from '@mui/material/AccordionSummary';
-import { withStyles } from '@mui/styles';
+// import MuiAccordion from '@mui/material/Accordion';
+// import MuiAccordionDetails from '@mui/material/AccordionDetails';
+// import MuiAccordionSummary from '@mui/material/AccordionSummary';
+// import { withStyles } from '@mui/styles';
 import { useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -14,57 +14,12 @@ import { cn, CustomDialogTransition, dateTimeFormat24Hours, displayDateTime } fr
 import Chart from '../Helper/Chart';
 import FilterModel from '../Helper/FilterModel';
 import dayjs from 'dayjs';
-
-const Accordion = withStyles({
-  root: {
-    boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.06)',
-    borderRadius: '0.5rem !important',
-    border: '1px solid var(--common-border-color) !important',
-    overflow: 'hidden',
-    '&:not(:last-child)': {
-      borderBottom: 0
-    },
-    '&:before': {
-      display: 'none'
-    },
-    '&$expanded': {
-      margin: 'auto',
-      boxShadow: '0px 17.7266px 35.4532px rgba(0, 0, 0, 0.03)'
-    }
-  },
-  expanded: {}
-})(MuiAccordion);
-
-const AccordionSummary = withStyles({
-  root: {
-    padding: '0 8px',
-    minHeight: 48,
-    '&$expanded': {
-      minHeight: 48,
-      backgroundColor: 'var(--dark-secondary, white)',
-      borderBottom: '0px !important'
-    }
-  },
-  content: {
-    '&$expanded': {
-      margin: '12px 0'
-    }
-  },
-  expanded: {}
-})(MuiAccordionSummary);
-
-const AccordionDetails = withStyles((theme: Theme) => ({
-  root: {
-    display: 'block',
-    padding: theme.spacing(2),
-    borderRadius: '0px 0px 0.5rem 0.5rem'
-  }
-}))(MuiAccordionDetails);
+import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 
 export default function TreeView({ expandedAccordition, setExpandedAccordition, category, currentData, assetId, deviceTemplate = null }) {
   const [dateFilters, setDateFilters] = useState({
-    from: new Date(dayjs().subtract(8, 'day').format('MM/DD/YYYY')),
-    to: new Date(),
+    from: dayjs.tz().subtract(8, 'day').format('MM/DD/YYYY'),
+    to: dayjs.tz().toDate(),
     intervals: 'perCycle'
   });
 
@@ -72,8 +27,8 @@ export default function TreeView({ expandedAccordition, setExpandedAccordition, 
 
   const handleClose = () => {
     setDateFilters({
-      from: new Date(dayjs().subtract(8, 'day').format('MM/DD/YYYY')),
-      to: new Date(),
+      from: dayjs.tz().subtract(8, 'day').format('MM/DD/YYYY'),
+      to: dayjs.tz().toDate(),
       intervals: 'perCycle'
     });
     setDataPoint(null);
@@ -92,7 +47,6 @@ export default function TreeView({ expandedAccordition, setExpandedAccordition, 
       >
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header" className="![border:1px_solid_var(--commono-border-color)]">
           <div className="flex w-full items-center">
-            <IconButton size="small"> {expandedAccordition[category?._id] ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
             <div className="flex flex-grow justify-between gap-2 p-[5px]">
               <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }} className="truncate">
                 {category?.iotDataPointsCategoryName}
@@ -106,7 +60,9 @@ export default function TreeView({ expandedAccordition, setExpandedAccordition, 
               {expandedAccordition[category?._id] && currentData?.filter((d) => d?.category?.optionValue === category?._id)?.length ? (
                 <h6 className="line-clamp-1 text-right text-sm font-normal leading-[1.5] text-gray-500 dark:text-gray-300 max-sm:text-xs">
                   <span className="max-md:sr-only">Last Updated -</span>
-                  <span>{displayDateTime(currentData?.filter((d) => d?.category?.optionValue === category?._id)[0]?.time, dateTimeFormat24Hours)}</span>
+                  <span>
+                    {displayDateTime(currentData?.filter((d) => d?.category?.optionValue === category?._id)[0]?.time, dateTimeFormat24Hours)}
+                  </span>
                 </h6>
               ) : null}
             </div>

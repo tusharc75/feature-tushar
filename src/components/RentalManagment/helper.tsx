@@ -127,6 +127,11 @@ export const sumOnParent = (parent, child, fields, currency) => {
     const sumValues: any = {}
     const minMaxDates: any = {}
 
+
+    const totalPriceFieldName = `totalPrice_${currency?.toLowerCase()}`
+    const discountFieldName = `discount_${currency?.toLowerCase()}`
+    const taxFieldName = `tax_${currency?.toLowerCase()}`
+
     resetFields.forEach((_field: any) => {
         sumValues[_field.fieldName] = 0;
         minMaxDates[_field.fieldName] = null;
@@ -179,7 +184,23 @@ export const sumOnParent = (parent, child, fields, currency) => {
                 }
             }
         })
+
+        const originalRow = { ...row }
+
+        const calValues = autoCalculateSpecificFields({ [totalPriceFieldName]: row[totalPriceFieldName] * row?.qty }, row, fields)
+        Object.assign(row, calValues)
+
+        if (originalRow[discountFieldName]) {
+            const calValues = autoCalculateSpecificFields({ [discountFieldName]: originalRow[discountFieldName] * row?.qty }, row, fields)
+            Object.assign(row, calValues)
+        }
+
+        if (originalRow[taxFieldName]) {
+            const calValues = autoCalculateSpecificFields({ [taxFieldName]: originalRow[taxFieldName] * row?.qty }, row, fields)
+            Object.assign(row, calValues)
+        }
     })
+
     return parent;
 }
 
@@ -267,7 +288,7 @@ export const getNestedSubRows = (obj, original) => {
     }
 };
 
-export const bulkUpdate = (values, selectedProducts, material, allFields, currency, priorityToParent = false) => {
+export const bulkUpdate = (values, selectedProducts, material, allFields, currency, priorityToParent = false, childMatrialUpdate: any = []) => {
 
     var rows: any = []
 
@@ -279,7 +300,10 @@ export const bulkUpdate = (values, selectedProducts, material, allFields, curren
 
     let parentIds = []
 
-    selectedProducts.forEach(element => {
+    selectedProducts.forEach((element: any) => {
+        if (childMatrialUpdate?.length && !childMatrialUpdate?.includes(element.type)) {
+            return;
+        }
         const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
         if (element?.parentId) {
             rows.push({ ...element, ...calValues })

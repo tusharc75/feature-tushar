@@ -24,6 +24,7 @@ import {
   yupSchema
 } from '../../constants/helpers';
 import InputField from 'src/components/Helpers/InputField';
+import dayjs from 'dayjs';
 
 export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId, isClone }) {
   const { api } = budget;
@@ -89,7 +90,7 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
 
   const onSubmit = (values) => {
     setLoading(true);
-    values['year'] = values['year'].format('YYYY');
+    values['year'] = dayjs(values['year']).format('YYYY');
     if (budgetId && !isClone) {
       values._id = budgetId;
       axiosInstance()
@@ -185,11 +186,6 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
                       values={values}
                       setFieldValue={(name, value) => {
                         setFieldValue(name, value);
-                        if (name === 'entity') {
-                          if (initialData?.fields?.some((e) => e.fieldName === 'salesRep')) {
-                            setFieldValue('salesRep', '');
-                          }
-                        }
                       }}
                       touched={touched}
                       fieldsData={initialData.fields}

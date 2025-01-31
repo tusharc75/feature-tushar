@@ -49,13 +49,13 @@ const Filters = ({
         isStatus
           ? setStatusPeriodDate((prevState) => ({
             ...prevState,
-            [`from_statusPeriod`]: new Date(dayjs().subtract(1, 'month').toDate()),
-            [`to_statusPeriod`]: new Date()
+            [`from_statusPeriod`]: dayjs.tz().subtract(1, 'month').toDate(),
+            [`to_statusPeriod`]: dayjs.tz().toDate()
           }))
           : setBetweenDate((prevState) => ({
             ...prevState,
-            [`from_${field.fieldName}`]: new Date(dayjs().subtract(1, 'month').toDate()),
-            [`to_${field.fieldName}`]: new Date()
+            [`from_${field.fieldName}`]: dayjs.tz().subtract(1, 'month').toDate(),
+            [`to_${field.fieldName}`]: dayjs.tz().toDate()
           }));
 
         break;
@@ -64,13 +64,13 @@ const Filters = ({
         isStatus
           ? setStatusPeriodDate((prevState) => ({
             ...prevState,
-            [`from_statusPeriod`]: new Date(dayjs().subtract(3, 'month').toDate()),
-            [`to_statusPeriod`]: new Date()
+            [`from_statusPeriod`]: dayjs.tz().subtract(3, 'month').toDate(),
+            [`to_statusPeriod`]: dayjs.tz().toDate()
           }))
           : setBetweenDate((prevState) => ({
             ...prevState,
-            [`from_${field.fieldName}`]: new Date(dayjs().subtract(3, 'month').toDate()),
-            [`to_${field.fieldName}`]: new Date()
+            [`from_${field.fieldName}`]: dayjs.tz().subtract(3, 'month').toDate(),
+            [`to_${field.fieldName}`]: dayjs.tz().toDate()
           }));
         break;
 
@@ -79,13 +79,13 @@ const Filters = ({
         isStatus
           ? setStatusPeriodDate((prevState) => ({
             ...prevState,
-            [`from_statusPeriod`]: new Date(dayjs().subtract(6, 'month').toDate()),
-            [`to_statusPeriod`]: new Date()
+            [`from_statusPeriod`]: dayjs.tz().subtract(6, 'month').toDate(),
+            [`to_statusPeriod`]: dayjs.tz().toDate()
           }))
           : setBetweenDate((prevState) => ({
             ...prevState,
-            [`from_${field.fieldName}`]: new Date(dayjs().subtract(6, 'month').toDate()),
-            [`to_${field.fieldName}`]: new Date()
+            [`from_${field.fieldName}`]: dayjs.tz().subtract(6, 'month').toDate(),
+            [`to_${field.fieldName}`]: dayjs.tz().toDate()
           }));
         break;
 
@@ -94,13 +94,13 @@ const Filters = ({
         isStatus
           ? setStatusPeriodDate((prevState) => ({
             ...prevState,
-            [`from_statusPeriod`]: new Date(dayjs().subtract(1, 'year').toDate()),
-            [`to_statusPeriod`]: new Date()
+            [`from_statusPeriod`]: dayjs.tz().subtract(1, 'year').toDate(),
+            [`to_statusPeriod`]: dayjs.tz().toDate()
           }))
           : setBetweenDate((prevState) => ({
             ...prevState,
-            [`from_${field.fieldName}`]: new Date(dayjs().subtract(1, 'year').toDate()),
-            [`to_${field.fieldName}`]: new Date()
+            [`from_${field.fieldName}`]: dayjs.tz().subtract(1, 'year').toDate(),
+            [`to_${field.fieldName}`]: dayjs.tz().toDate()
           }));
         break;
 

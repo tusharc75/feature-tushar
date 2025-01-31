@@ -1,5 +1,4 @@
 import { Box, IconButton, MenuItem } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 import Add from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -50,15 +49,7 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit, resourc
   const fetchFields = async () => {
     var data = await fetch_child_resource_fields(CHILD_RESOURCE.demandOrderDetail, demandOrderData?.currency, allowedToEdit);
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = generateColumns(
-      renderedFrom,
-      data?.map((e) => {
-        return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName };
-      }),
-      null,
-      false,
-      demandOrderData?.currency || 'USD'
-    );
+    const newColumns = generateColumns(renderedFrom, data, null, false, demandOrderData?.currency || 'USD');
     let coloum: any = [
       {
         accessor: 'index',
@@ -162,28 +153,33 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit, resourc
       disableSortBy: true,
       canDrag: false,
       Cell: ({ row, table }) => (
-        <Grid container spacing={1}>
-          <IconButton
-            size="small"
-            aria-label="Details"
-            disabled={allowedToEdit ? false : true}
-            onClick={() => {
-              onMaterialEdit(row, table.getRowModel().rows);
-            }}
-          >
-            <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
-          </IconButton>
-          <IconButton
-            size="small"
-            aria-label="Details"
-            onClick={() => {
-              const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-              setDeleteData(obj);
-            }}
-          >
-            <DeleteIcon fontSize="small" color="error" />
-          </IconButton>
-        </Grid>
+        <>
+          <HtmlTooltip title='Edit'>
+            <IconButton
+              size="small"
+              aria-label="Details"
+              disabled={allowedToEdit ? false : true}
+              onClick={() => {
+                onMaterialEdit(row, table.getRowModel().rows);
+              }}
+            >
+              <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+            </IconButton>
+          </HtmlTooltip>
+          <HtmlTooltip title='Delete'>
+            <IconButton
+              size="small"
+              aria-label="Details"
+              onClick={() => {
+                const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                setDeleteData(obj);
+              }}
+            >
+              <DeleteIcon fontSize="small" color="error" />
+            </IconButton>
+          </HtmlTooltip>
+
+        </>
       )
     });
     setColumns(coloum);
@@ -203,7 +199,6 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit, resourc
         parent.description =
           parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
         parent.qty = parent.qty;
-        parent.qtyDisplay = parent.qty;
         parent.subRows = generateNestedData(data.material, parent);
       });
 
@@ -237,7 +232,6 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit, resourc
             ? _subRow?.packageDetail?.packageDescription
             : _subRow?.serviceDetail?.serviceDescription;
       _subRow.qty = _subRow.qty;
-      _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
@@ -255,8 +249,7 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit, resourc
       element.parentId = addDialog.parentId;
       material.push(element);
     });
-    axiosInstance()
-      .post(`${routes?.demandOrder?.path}/material/${demandOrderData._id}`, { material })
+    axiosInstance().post(`${routes?.demandOrder?.path}/material/${demandOrderData._id}`, { material })
       .then(({ data }) => {
         setAddDialog({ open: false, type: '', parentId: null });
         toastConfig.setToastConfig({
@@ -281,7 +274,6 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit, resourc
       .then(({ data }) => {
         setUpdating(false);
         fetchData();
-        fetchDemadOrderData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -316,9 +308,6 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit, resourc
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
-    if (inputField.hasOwnProperty('qtyDisplay')) {
-      inputField['qty'] = inputField['qtyDisplay'];
-    }
     let rows: any = [{ ...rowData, ...updatedData }];
     rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData, demandOrderData?.currency);
     handleSaveData(rows);
@@ -386,15 +375,13 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit, resourc
         </MenuItem>
         <MenuItem
           onClick={() => {
-            const dataToDelete = selectedRecords
-              ?.filter((e) => !e.hideSelection)
-              .map((rec: any) => {
-                const obj: any = {};
-                obj.id = rec._id;
-                obj.type = rec?.type;
-                obj.materialId = rec?.materialId;
-                return obj;
-              });
+            const dataToDelete = selectedRecords?.filter((e) => !e.hideSelection).map((rec: any) => {
+              const obj: any = {};
+              obj.id = rec._id;
+              obj.type = rec?.type;
+              obj.materialId = rec?.materialId;
+              return obj;
+            });
             setDeleteData(dataToDelete);
           }}
         >
@@ -442,12 +429,7 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit, resourc
       {deleteData && (
         <ConfirmationDialog
           open={true}
-          message={`Are you sure you want to delete ${
-            deleteData
-              ? `${resources?.demandOrder?.titleSingular?.toLowerCase()} :
-            ${deleteData?.demandOrderNumber || ''}`
-              : `selected ${resources?.demandOrder?.titlePlural?.toLowerCase()}`
-          } ?`}
+          message={`Are you sure you want to delete selected records?`}
           onClose={() => setDeleteData(null)}
           onOk={() => handleDelete(deleteData)}
           okBtnLoading={isDeleting}

@@ -2092,6 +2092,7 @@ export const PURCHASE_REQUISITION_STATUS = {
 
 export const DEMAND_ORDER_STATUS = {
   new: 'New',
+  inProgress: 'In-Progress',
   converted: 'Converted'
 };
 

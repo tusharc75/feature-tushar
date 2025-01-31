@@ -22,17 +22,28 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import NoDataCell from '../Helpers/NoDataCell';
 import routes from '../Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { FiExternalLink } from 'react-icons/fi';
 
 const renderedFrom = 'import-export';
 
-const ImportExportDialog = ({ handleClose, type, resource, subResource, referenceId, handleExport, api, additionalParams, refresh }) => {
+const ImportExportDialog = ({
+  handleClose,
+  type,
+  resource,
+  subResource,
+  referenceId,
+  handleExport,
+  api,
+  apiUrl = null,
+  additionalParams,
+  refresh
+}) => {
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const [columns, setColumns] = useState(null);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [downloading, setDownloading] = useState({ loading: false, type: null });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, pageSizes } = state;
-
 
   const [refreshInterval, setRefreshInterval] = useState(true);
 
@@ -41,7 +52,7 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
       fetchData();
     }, 10000);
     if (!refreshInterval) {
-      clearInterval(interval)
+      clearInterval(interval);
     }
     return () => clearInterval(interval);
   }, [refreshInterval]);
@@ -71,10 +82,11 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
           let finalObject = prepareDataForGrid(u);
           return {
             ...finalObject,
-            user: u?.user
+            user: u?.user?.concatedName,
+            userId: u?.user?._id
           };
         });
-        setRefreshInterval(data?.data?.find((e) => e.status === IMPORT_EXPORT_STATUS.inProgress))
+        setRefreshInterval(data?.data?.find((e) => e.status === IMPORT_EXPORT_STATUS.inProgress));
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -101,10 +113,16 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
         Header: 'User',
         Cell: ({ row }) => {
           return row.original?.user ? (
-            <div>
-              <a className="link text-truncate" href={`${routes.userDetail.path}/${row.original?.user?._id}`} target="_blank">
-                {row.original?.user?.concatedName}
-              </a>
+            <div className="flex items-center gap-1">
+              <p>{row.original.user}</p>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.userDetail.path}/${row.original.userId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
             </div>
           ) : (
             <NoDataCell />
@@ -212,7 +230,7 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
         importApi = `${importApi}?${additionalParams}`;
       }
       axiosInstance()
-        .post(importApi, formData, { responseType: 'blob', headers: { 'Content-Type': 'multipart/form-data' } })
+        .post(apiUrl ? apiUrl : importApi, formData, { responseType: 'blob', headers: { 'Content-Type': 'multipart/form-data' } })
         .then(() => {
           toastConfig.setToastConfig({
             open: true,
@@ -296,6 +314,7 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
             hideSelection={true}
             showFilters={false}
             showArrangeView={false}
+            isClientSideGrid={true}
           />
         ) : (
           <Box p={2} height={300}>

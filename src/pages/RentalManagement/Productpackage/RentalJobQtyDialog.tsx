@@ -7,7 +7,7 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import axiosInstance from '../../../axios/axiosInstance';
 import { isArray, uniqBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema, fieldLabelToFieldName } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, fieldLabelToFieldName, MATERIAL_TYPE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '..//../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -276,11 +276,17 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
   const handleSubmit = async (values) => {
     let currency = rentalManagementData?.currency?.toLowerCase()
     if (isBulkedit) {
-      if (values[`price_${currency}`] && selectedProducts?.find((e) => !e.parentId) && !selectedProducts?.every((e) => !e.parentId)) {
+      if (values[`price_${currency}`] && selectedProducts?.find((e) => !e.parentId)
+        && !selectedProducts?.every((e) => !e.parentId) && (!user?.user?.brandPolicy?.rentalPackagePriceMaterialWise
+          || !user?.user?.brandPolicy?.rentalPackagePriceMaterialWise?.length)) {
         setShowSelectionConfirmationDialog({ open: true, type: '' });
       }
       else {
-        const rows = bulkUpdate(values, selectedProducts, material, allFields, rentalManagementData?.currency);
+        let childMatrialUpdate = []
+        if (user?.user?.brandPolicy?.rentalPackagePriceMaterialWise && user?.user?.brandPolicy?.rentalPackagePriceMaterialWise?.length) {
+          childMatrialUpdate = [...user?.user?.brandPolicy?.rentalPackagePriceMaterialWise, MATERIAL_TYPE.package]
+        }
+        const rows = bulkUpdate(values, selectedProducts, material, allFields, rentalManagementData?.currency, false, childMatrialUpdate);
         handleSaveData(rows);
       }
     } else {

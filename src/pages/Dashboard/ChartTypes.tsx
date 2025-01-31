@@ -68,12 +68,7 @@ const ChartTypes = ({
     state: { selectedEntity, user }
   } = useData();
 
-  const getDefaultFilter = (filters) => {
-    const defaultFilters = filters?.filter((f) => f.default);
-    return defaultFilters?.length ? defaultFilters[0] : {};
-  };
-
-  const currency = user?.user?.currency || 'USD';
+  const currency = user?.user?.brandCurrency || 'USD';
   const [chartData, setChartData] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
   const [tableView, setTableView] = React.useState(false);
@@ -91,20 +86,23 @@ const ChartTypes = ({
   }, []);
 
   React.useEffect(() => {
-    if (!filterValues) return;
-    const keys = Object.keys(filterValues);
-    let values = [];
-    keys.forEach((key: string) => {
-      if (!filterValues[key]) return;
-      const isEmpty = Array.isArray(filterValues[key]) ? Object.keys(filterValues[key]).length === 0 : filterValues[key] === 0;
-      if (!isEmpty) {
-        values.push(key);
+    if (filterValues) {
+      const keys = Object.keys(filterValues);
+      let values = [];
+      keys.forEach((key: string) => {
+        if (!filterValues[key]) return;
+        const isEmpty = Array.isArray(filterValues[key]) ? Object.keys(filterValues[key]).length === 0 : filterValues[key] === 0;
+        if (!isEmpty) {
+          values.push(key);
+        }
+      });
+      if (values.length > 0) {
+        setInvisible(false);
+      } else {
+        setInvisible(true);
       }
-    });
-    if (values.length > 0) {
-      setInvisible(false);
     } else {
-      setInvisible(true);
+      setInvisible(false);
     }
   }, [filterValues]);
 
@@ -144,7 +142,6 @@ const ChartTypes = ({
   };
 
   React.useEffect(() => {
-    if (!filterValues) return;
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
