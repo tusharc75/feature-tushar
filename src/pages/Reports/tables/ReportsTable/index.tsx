@@ -282,7 +282,6 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
           ...deepFiltersP
             ?.filter((d) => {
               const isoDate = dayjs(d?.term);
-              console.log('aaaaaa', d?.term instanceof Date);
               const hasTermLength = isoDate.isValid() && d?.term instanceof Date ? true : d?.term?.length ? true : false;
               if (isStatusPeriod) {
                 return hasTermLength && !['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field);
