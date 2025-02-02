@@ -1,7 +1,7 @@
 import { Box, IconButton, MenuItem } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -28,6 +28,10 @@ const Expenses = (selectedExpenseData) => {
   const pathSegments = window.location.href.split('/');
   const pid = pathSegments[pathSegments.length - 1].split('?')[0];
   const [deleteData, setDeleteData] = useState(null);
+
+  const currentDataRef = useRef([]);
+
+  const deletedIdsRef = useRef(new Set());
 
   useEffect(() => {
     fetchGridColumns();
@@ -97,10 +101,10 @@ const Expenses = (selectedExpenseData) => {
         const queryString = getQueryString(expense);
         return axiosInstance().get(`${expenses.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
       });
-
+  
       const results = await Promise.all(promises);
-
-      let allRows = [];
+  
+      let fetchedRows = [];
       results.forEach((response) => {
         const data = response?.data?.data || [];
         const rows = data.map((u) => {
@@ -109,11 +113,20 @@ const Expenses = (selectedExpenseData) => {
           finalObject['canDelete'] = permissions?.expenses?.isDelete;
           return finalObject;
         });
-        allRows = [...allRows, ...rows];
+        fetchedRows = [...fetchedRows, ...rows];
       });
-
-      dispatch({ type: 'initialize', data: allRows, count: allRows.length });
-
+  
+      const deduplicatedFetchedRows = Array.from(
+        new Map(fetchedRows.map((item) => [item._id, item])).values()
+      );
+  
+      const filteredRows = deduplicatedFetchedRows.filter(
+        (row) => !deletedIdsRef.current.has(row._id)
+      );
+  
+      currentDataRef.current = filteredRows;
+      dispatch({ type: 'initialize', data: filteredRows, count: filteredRows.length });
+  
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
@@ -146,7 +159,12 @@ const Expenses = (selectedExpenseData) => {
       <>
         <HtmlTooltip title={'Delete'}>
           <span>
-            <IconButton size="small" aria-label="Delete" disabled={!row?.original?.canDelete} onClick={() => setDeleteData([row?.original?._id])}>
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              disabled={row?.original?.canDelete }
+              onClick={() => setDeleteData([row?.original?._id])}
+            >
               <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
             </IconButton>
           </span>
