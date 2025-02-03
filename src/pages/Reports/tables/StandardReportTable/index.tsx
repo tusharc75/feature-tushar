@@ -334,7 +334,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
         ...deepFiltersP
           ?.filter((d) => {
             const isoDate = dayjs(d?.term);
-            const hasTermLength = isoDate.isValid() ? true : d?.term?.length ? true : false;
+            const hasTermLength = isoDate.isValid() && d?.term instanceof Date ? true : d?.term?.length ? true : false;
             if (isStatusPeriod) {
               return hasTermLength && !['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field);
             }
@@ -342,7 +342,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
           })
           ?.map((d) => {
             const isoDate = dayjs(d?.term);
-            const term = isoDate.isValid() ? dateFormatToSend(d?.term) : d?.term;
+            const term = isoDate.isValid() && d?.term instanceof Date ? dateFormatToSend(d?.term) : d?.term;
             if (filterTerm[d?.field] === '$nin' && isArray(term)) {
               return {
                 ...d,
@@ -651,7 +651,15 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
               </ThemeButton>
             )}
             <span id="importExportLinks" className="space-x-2">
-              {['inUsedSerializedAsset', 'lostAssets', 'assetUtilization', 'invoiceDetails'].includes(resourceCamelCase) ? (
+              {[
+                'inUsedSerializedAsset',
+                'lostAssets',
+                'assetUtilization',
+                'invoiceDetails',
+                'inventoryHistory',
+                'purchaseOrderDetails',
+                'purchaseOrderActualReceivedDetails'
+              ].includes(resourceCamelCase) ? (
                 <AsynImportExportMenu
                   resource={sidebarResource.report}
                   subResource={selectedReport.resource}
@@ -659,7 +667,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
                   permissions={permissions?.report}
                   module={selectedReport.resource}
                   api={`/report/${selectedReport.resource}`}
-                  afterImportCompleted={() => { }}
+                  afterImportCompleted={() => {}}
                   isExportCount={true}
                   exportCount={0}
                   ids={[]}

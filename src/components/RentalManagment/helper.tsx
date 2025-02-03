@@ -95,6 +95,39 @@ export const calculatePrice = (rentalManagementData: any = null, arr: any[]) => 
     }
 };
 
+export const calculatePriceNew = (rentalManagementData: any = null, arr: any[]) => {
+    if (rentalManagementData) {
+        const data: any = {};
+        data.conditionType = [PRICING_SETUP_TYPE.rent];
+        const material: any = []
+        arr?.forEach((ele) => {
+            const obj = {
+                materialId: ele?.materialId,
+                materialType: ele?.type,
+                qty: ele?.qty,
+                currency: rentalManagementData?.currency
+            }
+            material.push(obj)
+        })
+        data.material = material;
+        data.supplier = [];
+        data.customer = [rentalManagementData?.customerAccount?.optionValue];
+        data.warehouse = [rentalManagementData?.warehouse?.optionValue];
+        data.address = rentalManagementData?.shippingAddress?.optionValue ? [rentalManagementData?.shippingAddress?.optionValue] : [];
+        return new Promise((resolve, reject) => {
+            axiosInstance()
+                .post(pricingCondition.api + `/calculatePrice-new`, data)
+                .then(({ data: { data } }) => {
+                    resolve(data);
+                })
+                .catch((err) => {
+                    reject(err);
+                });
+        });
+    }
+};
+
+
 export const sumOnParent = (parent, child, fields, currency) => {
     const resetFields = []
     fields.forEach((element) => {
@@ -126,6 +159,11 @@ export const sumOnParent = (parent, child, fields, currency) => {
     })
     const sumValues: any = {}
     const minMaxDates: any = {}
+
+
+    const totalPriceFieldName = `totalPrice_${currency?.toLowerCase()}`
+    const discountFieldName = `discount_${currency?.toLowerCase()}`
+    const taxFieldName = `tax_${currency?.toLowerCase()}`
 
     resetFields.forEach((_field: any) => {
         sumValues[_field.fieldName] = 0;
@@ -179,7 +217,23 @@ export const sumOnParent = (parent, child, fields, currency) => {
                 }
             }
         })
+
+        const originalRow = { ...row }
+
+        const calValues = autoCalculateSpecificFields({ [totalPriceFieldName]: row[totalPriceFieldName] * row?.qty }, row, fields)
+        Object.assign(row, calValues)
+
+        if (originalRow[discountFieldName]) {
+            const calValues = autoCalculateSpecificFields({ [discountFieldName]: originalRow[discountFieldName] * row?.qty }, row, fields)
+            Object.assign(row, calValues)
+        }
+
+        if (originalRow[taxFieldName]) {
+            const calValues = autoCalculateSpecificFields({ [taxFieldName]: originalRow[taxFieldName] * row?.qty }, row, fields)
+            Object.assign(row, calValues)
+        }
     })
+
     return parent;
 }
 

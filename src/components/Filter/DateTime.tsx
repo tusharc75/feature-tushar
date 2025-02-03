@@ -125,7 +125,7 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, required = false, si
             onChange={(date: any) => {
               setDeepFilters([
                 ...deepFilters?.filter((d) => d?.field !== `from_${fieldData?.fieldName}`),
-                { field: `from_${fieldData?.fieldName}`, term: date }
+                { field: `from_${fieldData?.fieldName}`, term: dayjs(date).toDate() }
               ]);
             }}
           />
@@ -145,7 +145,7 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, required = false, si
             onChange={(date: any) => {
               setDeepFilters([
                 ...deepFilters?.filter((d) => d?.field !== `to_${fieldData?.fieldName}`),
-                { field: `to_${fieldData?.fieldName}`, term: date }
+                { field: `to_${fieldData?.fieldName}`, term: dayjs(date).toDate() }
               ]);
             }}
           />
