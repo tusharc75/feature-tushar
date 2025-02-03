@@ -1,5 +1,6 @@
 import { Box } from '@mui/material';
 import { Edit } from '@mui/icons-material';
+import SendIcon from '@mui/icons-material/Send';
 import queryString from 'query-string';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
@@ -89,6 +90,7 @@ const ExpenseReportDetailsPage = () => {
         setAllowedToEdit(permissions?.expenseReport?.isUpdate);
         setAllowedToDelete(permissions?.expenseReport?.isDelete && data?.canDelete);
         setExpenseReportData(data);
+        console.log(expenseReportData.status);
       })
       .catch((err) => {
         setLoadingDetails(false);
@@ -134,6 +136,20 @@ const ExpenseReportDetailsPage = () => {
     }
   };
 
+  const handleStatusChange = async (status) => {
+    await axiosInstance().patch(`${expenseReport.api}/status/${expenseReportData._id}`, {
+      status
+    });
+    if (expenseReportData?.selectedExpenses?.length > 0) {
+      for (let expense of expenseReportData.selectedExpenses) {
+          await axiosInstance().patch(`${expenses.api}/status/${expense._id}`, {
+            status
+          });
+      }
+    }
+    fetchData();
+  };
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -157,6 +173,18 @@ const ExpenseReportDetailsPage = () => {
                 mobileTooltip={'Edit'}
               >
                 Edit
+              </ThemeButton>
+              <ThemeButton
+                buttonType="theme"
+                iconForMobile={<SendIcon />}
+                onClick={() => {
+                  handleStatusChange(
+                    expenseReportData?.status === EXPENSE_STATUS.awaitingApproval ? EXPENSE_STATUS.recalled : EXPENSE_STATUS.awaitingApproval
+                  );
+                }}
+                mobileTooltip={expenseReportData?.status === EXPENSE_STATUS.awaitingApproval ? 'Recall' : 'Send For Approval'}
+              >
+                {expenseReportData?.status === EXPENSE_STATUS.awaitingApproval ? 'Recall' : 'Send For Approval'}
               </ThemeButton>
             </Fragment>
             {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}

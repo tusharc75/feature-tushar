@@ -269,6 +269,9 @@ const routes = {
   expenseReportDetail:{
     path:'/expense-report/detail'
   },
+  expenseApproval:{
+    path:'/expense-approval'
+  },
   salesOrder: {
     path: '/sales-order'
   },
