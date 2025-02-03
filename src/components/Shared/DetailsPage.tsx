@@ -320,7 +320,7 @@ const Details = (props: DetailProps) => {
             <Typography title={value === '-' || Array.isArray(value) ? '' : value} className={`${classes.fieldText} flex-grow`} variant="body2">
               <span className={`text-truncate block text-gray-500 dark:text-gray-400`}>{value}</span>
             </Typography>
-            <PreviewFile fileName={value} showDownload />
+            <PreviewFile fileName={value} />
           </div>
         );
       }
@@ -337,7 +337,7 @@ const Details = (props: DetailProps) => {
                     <Typography className={`${classes.fieldText} flex-grow`} variant="body2">
                       <span className={`text-truncate block text-gray-500 dark:text-gray-400`}>{d.fileName}</span>
                     </Typography>
-                    <PreviewFile fileName={d.fileName} showDownload />
+                    <PreviewFile fileName={d.fileName} />
                   </div>
                 );
               })}

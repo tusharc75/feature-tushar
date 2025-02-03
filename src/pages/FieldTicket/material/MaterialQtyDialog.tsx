@@ -7,7 +7,7 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import axiosInstance from '../../../axios/axiosInstance';
 import { isArray, uniqBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE, MATERIAL_TYPE, displayDate } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE, MATERIAL_TYPE, displayDate, PRICING_SETUP_TYPE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -18,13 +18,14 @@ import FormTypes from '../../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import { bulkUpdate, calculatePrice, calculateRowsField } from '../../../components/RentalManagment/helper';
+import { bulkUpdate, calculateRowsField } from '../../../components/RentalManagment/helper';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 import dayjs from 'dayjs';
+import { getPricingConditions } from 'src/components/PricingCondition';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -167,7 +168,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
       }
       setPriceMethodListConst(pricingMethodOptions);
       if (!isOffline) {
-        await getAllPricingCondition(rowData, unitOptions, pricingMethodOptions);
+        await getAllPricingCondition(rowData, pricingMethodOptions);
       } else {
         setPriceMethodList(pricingMethodOptions);
       }
@@ -282,17 +283,13 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
     }
   };
 
-  async function getAllPricingCondition(values: any, unitOptions: any, pricingMethodOptions: any) {
+  async function getAllPricingCondition(values: any, pricingMethodOptions: any) {
     if (rowData) {
-      let priceData: any = await calculatePrice(fieldTicketData, [
-        {
-          materialId: rowData.materialId,
-          type: rowData.type,
-          qty: 1,
-          pricingMethod: pricingMethodOptions?.map((d) => d.optionLabel).join() || '',
-          unit: unitOptions?.map((d) => d.optionLabel)
-        }
-      ]);
+      let priceData: any = await getPricingConditions(fieldTicketData, [{
+        materialId: rowData.materialId,
+        type: rowData.type,
+        qty: 1,
+      }], PRICING_SETUP_TYPE.rent);
       if (fieldTicketData?.pricingCondition?.optionValue) {
         priceData = priceData?.filter((e) => e.conditionId === fieldTicketData?.pricingCondition?.optionValue);
       }
