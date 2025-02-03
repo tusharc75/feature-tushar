@@ -1054,7 +1054,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             {`Create ${resources?.sublease?.titleSingular}`}
           </MenuItem>
         )}
-        {selectedRecords.length && assetAssignedProduct?.length ? (
+        {permissions?.productInventory?.isRead && selectedRecords.length && assetAssignedProduct?.length ? (
           <MenuItem
             onClick={() => {
               setAssignSerialNumbersDialog(true);
@@ -1062,7 +1062,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           >
             {`Assign Serial Numbers`}
           </MenuItem>
-        ) : selectedRecords.length && nonSerializedProduct?.length ? (
+        ) : permissions?.productInventory?.isRead && selectedRecords.length && nonSerializedProduct?.length ? (
           <>
             <MenuItem
               onClick={() => {

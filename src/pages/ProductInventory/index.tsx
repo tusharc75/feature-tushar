@@ -338,7 +338,7 @@ const InventoryProduct = () => {
 
     let deepFilter = `?warehouse=${tempPlantId}&page=${page}&limit=${limit}`;
     if (isExport) {
-      deepFilter = `&warehouse=${tempPlantId}`;
+      deepFilter = `?warehouse=${tempPlantId}`;
     }
 
     if (storageLocationId) {
