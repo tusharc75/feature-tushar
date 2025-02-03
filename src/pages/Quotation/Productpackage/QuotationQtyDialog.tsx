@@ -212,7 +212,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
 
   async function getAllPricingCondition(values: any, unitOptions: any, pricingMethodOptions: any) {
     if (rowData) {
-      let conditionType = (quotationData.type === QUOTATION_TYPE.salesOrder || quotationData.type === QUOTATION_TYPE.repairOrder) ? PRICING_SETUP_TYPE.price : PRICING_SETUP_TYPE.rent;
+      let conditionType = [QUOTATION_TYPE.salesOrder, QUOTATION_TYPE.repairOrder].includes(quotationData.type) ? PRICING_SETUP_TYPE.price : PRICING_SETUP_TYPE.rent;
       let priceData: any = await getPricingConditions(
         quotationData,
         [
