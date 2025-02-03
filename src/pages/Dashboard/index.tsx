@@ -75,7 +75,7 @@ const Dashboard = () => {
   const fetchDashboards = () => {
     setDashboardLoading(true);
     axiosInstance()
-      .get('/dashboard-master/role-wise')
+      .get('/dashboard-master/my-dashboard')
       .then(({ data: { data } }) => {
         if (data?.length) {
           const savedSelected = localStorage.getItem('selectedDashboard');
