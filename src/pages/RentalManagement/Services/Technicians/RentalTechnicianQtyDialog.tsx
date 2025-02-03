@@ -3,7 +3,7 @@ import { Box, Dialog } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Form, Formik } from 'formik';
-import { CustomDialogTransition, arrayToDropwdownOption, getObjKeys, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
+import { CustomDialogTransition, PRICING_SETUP_TYPE, arrayToDropwdownOption, getObjKeys, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -15,6 +15,7 @@ import { FaDiceOne } from 'react-icons/fa';
 import { calculatePrice, fetch_rental_technician_fields } from 'src/components/RentalManagment/helper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { getPricingConditions } from 'src/components/PricingCondition';
 
 const rateChangeFields = ['pricingMethod', 'pricingCondition'];
 
@@ -92,13 +93,15 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
 
   async function getAllPricingCondition(values: any, pricingMethodOptions: any) {
     if (technicianData) {
-      const priceData: any = await calculatePrice(rentalManagementData, [
+      let priceData: any = await getPricingConditions(rentalManagementData, [
         {
           materialId: values.competence,
           type: technicianData.type,
-          pricingMethod: pricingMethodOptions?.map((d) => d.optionLabel).join() || ''
         }
-      ]);
+      ], PRICING_SETUP_TYPE.rent);
+      if (rentalManagementData?.pricingCondition?.optionValue) {
+        priceData = priceData?.filter((e) => e.conditionId === rentalManagementData?.pricingCondition?.optionValue);
+      }
 
       setPriceConditionListConst(priceData || []);
       updateRateChangeState(values, priceData, pricingMethodOptions);

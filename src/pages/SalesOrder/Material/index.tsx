@@ -37,6 +37,7 @@ import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import ManageLeadTime from 'src/components/LeadTime/ManageLeadTime';
 import { ownerAndColaborator } from 'src/constants/messageHelpers';
+import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
 
 const renderedFrom = `${camelCase(sidebarResource.salesOrder)}_Material`;
 
@@ -343,22 +344,16 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
       material.push(element);
     });
 
-    const priceData: any = await calculatePrice(material);
-    material.forEach((element) => {
-      const rateResult = priceData?.filter(
-        (e) =>
-          e.materialId === element.materialId &&
-          e.materialType === element.type &&
-          e.unit === element.unit &&
-          e.pricingMethod === element.pricingMethod
-      );
-      if (rateResult.length && rateResult[0].mrp) {
-        const priceFieldName = `price_${salesOrderData?.currency?.toLowerCase()}`;
-        element[priceFieldName] = rateResult[0].mrp;
-        const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
+    let priceData: any = await getPricingConditions(salesOrderData, material, PRICING_SETUP_TYPE.price);
+    if (salesOrderData?.pricingCondition?.optionValue) {
+      priceData = priceData?.filter((e) => e.conditionId === salesOrderData?.pricingCondition?.optionValue);
+    }
+    if (priceData) {
+      material.forEach((element) => {
+        const calValues = getPricingValue(element, priceData, salesOrderData?.currency, allFields);
         Object.assign(element, calValues);
-      }
-    });
+      });
+    }
 
     axiosInstance()
       .post(`${salesOrder.api}/material/${salesOrderData._id}`, { material })
@@ -545,45 +540,6 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
     setRecordToUpdate(row.original);
   };
 
-  const calculatePrice = (arr: any[]) => {
-    if (salesOrderData) {
-      const data: any = {};
-      data.conditionType = [PRICING_SETUP_TYPE.price];
-      const material: any = [];
-      arr?.forEach((ele) => {
-        const obj = {
-          materialId: ele?.materialId,
-          materialType: ele?.type,
-          qty: ele?.qty,
-          pricingMethod: ele?.pricingMethod,
-          currency: salesOrderData?.currency
-        };
-        if (isArray(ele?.unit)) {
-          ele?.unit?.forEach((e) => {
-            material.push({ ...obj, unit: e });
-          });
-        } else {
-          material.push({ ...obj, unit: ele?.unit });
-        }
-      });
-      data.material = material;
-      data.supplier = [];
-      data.customer = [salesOrderData?.customerAccount?.optionValue];
-      data.warehouse = [salesOrderData?.warehouse?.optionValue];
-      data.address = salesOrderData?.shippingAddress?.optionValue ? [salesOrderData?.shippingAddress?.optionValue] : [];
-      return new Promise((resolve, reject) => {
-        axiosInstance()
-          .post(pricingCondition.api + `/calculatePrice`, data)
-          .then(({ data: { data } }) => {
-            resolve(data);
-          })
-          .catch((err) => {
-            reject(err);
-          });
-      });
-    }
-  };
-
   const addButtonMenuItems = () => {
     return (
       <>
@@ -743,7 +699,6 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
       )}
       {isProductEdit.open && (
         <SalesOrderQtyDialog
-          calculatePrice={calculatePrice}
           onClose={() => {
             setIsProductEdit({ open: false, isBulkedit: false, showSaveAndNext: false });
             setRecordToUpdate(null);

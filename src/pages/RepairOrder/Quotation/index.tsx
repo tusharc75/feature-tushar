@@ -804,7 +804,6 @@ const Quotation = ({
       )}
       {isProductEdit.open && (
         <QuotationQtyDialog
-          calculatePrice={calculatePrice}
           onClose={() => {
             setIsProductEdit({ open: false, isBulkedit: false, showSaveAndNext: false });
             setRecordToUpdate(null);

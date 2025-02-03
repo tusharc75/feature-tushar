@@ -6,7 +6,7 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import { uniqBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE, sublease, PRICING_SETUP_TYPE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '..//../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -20,13 +20,13 @@ import { bulkUpdate, calculateRowsField } from 'src/components/RentalManagment/h
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import dayjs from 'dayjs';
+import { getPricingConditions } from 'src/components/PricingCondition';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
   handleSaveData: VoidFunction | any;
   subleaseData: any;
   rowData?: object | any;
-  calculatePrice?: VoidFunction | any;
   material: any[];
   selectedProducts: any[];
   isBulkedit: any;
@@ -36,7 +36,6 @@ interface EditDialogProps {
 const rateChangeFields = ['unit', 'pricingMethod', 'pricingCondition'];
 
 const QtyDialog: FC<EditDialogProps> = ({
-  calculatePrice,
   onClose,
   handleSaveData,
   subleaseData,
@@ -125,7 +124,7 @@ const QtyDialog: FC<EditDialogProps> = ({
         pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.pricingMethod);
       }
       setPriceMethodListConst(pricingMethodOptions);
-      await getAllPricingCondition(rowData, unitOptions, pricingMethodOptions);
+      await getAllPricingCondition(rowData, pricingMethodOptions);
       data.forEach((element) => {
         if (element.fieldName === 'unit') {
           element.option = unitOptions;
@@ -182,17 +181,18 @@ const QtyDialog: FC<EditDialogProps> = ({
     }
   };
 
-  async function getAllPricingCondition(values: any, unitOptions: any, pricingMethodOptions: any) {
+  async function getAllPricingCondition(values: any, pricingMethodOptions: any) {
     if (rowData) {
-      const priceData: any = await calculatePrice([
+      let priceData: any = await getPricingConditions(subleaseData,[
         {
           materialId: rowData.materialId,
           type: rowData.type,
           qty: 1,
-          pricingMethod: pricingMethodOptions?.map((d) => d.optionLabel).join() || '',
-          unit: unitOptions?.map((d) => d.optionLabel)
         }
-      ]);
+      ], PRICING_SETUP_TYPE.rent);
+      if (subleaseData?.pricingCondition?.optionValue) {
+        priceData = priceData?.filter((e) => e.conditionId === subleaseData?.pricingCondition?.optionValue);
+      }
       setPriceConditionListConst(priceData || []);
       updateRateChangeState(values, priceData, pricingMethodOptions);
     }

@@ -27,6 +27,7 @@ import AdditionalCostDialog from './AdditionalCostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
+import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
 
 const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, allowedToEdit }) => {
   const renderedFrom = `${camelCase(sidebarResource.invoice)}_Material`;
@@ -369,18 +370,18 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
         material.push(element);
       });
     }
-    const priceData: any = await calculatePrice(material);
-    material.forEach((element) => {
-      const rateResult = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit);
-      if (rateResult.length && rateResult[0].mrp) {
-        const priceFieldName = `price_${invoiceData?.currency?.toLowerCase()}`;
-        element[priceFieldName] = rateResult[0].mrp;
-        element['pricingCondition'] = rateResult[0].conditionId;
-        element['pricingMethod'] = rateResult[0].pricingMethod;
-        const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
+    const conditionType = invoiceData?.salesOrder ? PRICING_SETUP_TYPE.price : PRICING_SETUP_TYPE.rent;
+    let priceData: any = await getPricingConditions(invoiceData, material, conditionType);
+    if (invoiceData?.pricingCondition?.optionValue) {
+      priceData = priceData?.filter((e) => e.conditionId === invoiceData?.pricingCondition?.optionValue);
+    }
+    if (priceData) {
+      material.forEach((element) => {
+        const calValues = getPricingValue(element, priceData, invoiceData?.currency, allFields);
         Object.assign(element, calValues);
-      }
-    });
+      });
+    }
+
     setAssetAssignedProduct([]);
     axiosInstance()
       .post(`${routes?.invoice?.path}/material/${invoiceData._id}`, { material })
@@ -544,45 +545,6 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
     }
   };
 
-  const calculatePrice = (arr: any[]) => {
-    if (invoiceData) {
-      const data: any = {};
-      data.conditionType = [invoiceData?.salesOrder ? PRICING_SETUP_TYPE.price : PRICING_SETUP_TYPE.rent];
-      const material: any = [];
-      arr?.forEach((ele) => {
-        const obj = {
-          materialId: ele?.materialId,
-          materialType: ele?.type,
-          qty: ele?.qty,
-          pricingMethod: ele?.pricingMethod,
-          currency: invoiceData?.currency
-        };
-        if (isArray(ele?.unit)) {
-          ele?.unit?.forEach((e) => {
-            material.push({ ...obj, unit: e });
-          });
-        } else {
-          material.push({ ...obj, unit: ele?.unit });
-        }
-      });
-      data.material = material;
-      data.supplier = [];
-      data.customer = [invoiceData?.customerAccount?.optionValue];
-      data.warehouse = [invoiceData?.warehouse?.optionValue];
-      data.address = invoiceData?.shippingAddress?.optionValue ? [invoiceData?.shippingAddress?.optionValue] : [];
-      return new Promise((resolve, reject) => {
-        axiosInstance()
-          .post(pricingCondition.api + `/calculatePrice`, data)
-          .then(({ data: { data } }) => {
-            resolve(data);
-          })
-          .catch((err) => {
-            reject(err);
-          });
-      });
-    }
-  };
-
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     let rows: any = [{ ...rowData, ...updatedData }];
@@ -728,7 +690,6 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
       )}
       {materialEdit.open && (
         <MaterialDialog
-          calculatePrice={calculatePrice}
           onClose={() => {
             setMaterialEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
           }}

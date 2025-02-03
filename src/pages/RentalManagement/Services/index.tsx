@@ -24,13 +24,14 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { calculatePrice, calculateRowsField, fetch_rental_product_fields, getNestedSubRows } from '../../../components/RentalManagment/helper';
+import { calculateRowsField, fetch_rental_product_fields, getNestedSubRows } from '../../../components/RentalManagment/helper';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import {
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_TYPE,
   deliveryTicket,
   MATERIAL_TYPE,
+  PRICING_SETUP_TYPE,
   RENTAL_STATUS,
   rentalManagement
 } from '../../../constants/helpers';
@@ -40,6 +41,7 @@ import Technicians from './Technicians';
 import { FiExternalLink } from 'react-icons/fi';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
+import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
 
 const Services = ({
   rentalManagementData,
@@ -536,29 +538,29 @@ const Services = ({
     if (material.filter((d) => d.listPrice === null || d.listPrice === undefined || d.listPrice === 0).length === 0) {
       AddMaterial(material, []);
     } else {
-      const priceData: any = await calculatePrice(rentalManagementData, material);
+      let priceData: any = await getPricingConditions(rentalManagementData, material, PRICING_SETUP_TYPE.rent);
+        if (rentalManagementData?.pricingCondition?.optionValue) {
+          priceData = priceData?.filter((e) => e.conditionId === rentalManagementData?.pricingCondition?.optionValue);
+        }
       AddMaterial(material, priceData);
     }
   };
 
   const AddMaterial = async (material, priceData) => {
     const tempMaterial = [...material];
-    tempMaterial.forEach((element) => {
-      const rateResult = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit);
-      if (element.listPrice) {
-        const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
-        element[priceFieldName] = element.listPrice;
-        const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
-        Object.assign(element, calValues);
-      } else if (rateResult.length && rateResult[0].mrp) {
-        const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
-        element[priceFieldName] = rateResult[0].mrp;
-        element['pricingCondition'] = rateResult[0].conditionId;
-        element['pricingMethod'] = rateResult[0].pricingMethod?.trim();
-        const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
-        Object.assign(element, calValues);
-      }
-    });
+    if (priceData) {
+      tempMaterial.forEach((element) => {
+        if (element.listPrice) {
+          const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
+          element[priceFieldName] = element.listPrice;
+          const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
+          Object.assign(element, calValues);
+        } else {
+          const calValues = getPricingValue(element, priceData, rentalManagementData?.currency, allFields);
+          Object.assign(element, calValues);
+        }
+      });
+    }
     axiosInstance()
       .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material: tempMaterial })
       .then(() => {

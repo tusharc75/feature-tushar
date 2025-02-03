@@ -41,6 +41,7 @@ import AdditionalCostDialog from './AdditionalCostDialog';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import ManageLeadTime from 'src/components/LeadTime/ManageLeadTime';
+import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
 
 const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, renderedFrom, stepFullScreen, version, allowedToEdit, updateDOASetup }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -428,18 +429,17 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       material.push(element);
     });
 
-    const priceData: any = await calculatePrice(material);
-    material.forEach((element) => {
-      const rateResult = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit);
-      if (rateResult.length && rateResult[0].mrp) {
-        const priceFieldName = `price_${quotationData?.currency?.toLowerCase()}`;
-        element[priceFieldName] = rateResult[0].mrp;
-        element['pricingCondition'] = rateResult[0].conditionId;
-        element['pricingMethod'] = rateResult[0].pricingMethod;
-        const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
+    const conditionType = quotationData.type === QUOTATION_TYPE.salesOrder ? PRICING_SETUP_TYPE.price : PRICING_SETUP_TYPE.rent;
+    let priceData: any = await getPricingConditions(quotationData, material, conditionType);
+    if (quotationData?.pricingCondition?.optionValue) {
+      priceData = priceData?.filter((e) => e.conditionId === quotationData?.pricingCondition?.optionValue);
+    }
+    if (priceData) {
+      material.forEach((element) => {
+        const calValues = getPricingValue(element, priceData, quotationData?.currency, allFields);
         Object.assign(element, calValues);
-      }
-    });
+      });
+    }
 
     axiosInstance()
       .post(`${quotation.api}/productpackage/${quotationData._id}/${versionId}`, { material })
@@ -619,45 +619,6 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     }
 
     setRecordToUpdate(row.original);
-  };
-
-  const calculatePrice = (arr: any[]) => {
-    if (quotationData) {
-      const data: any = {};
-      data.conditionType = quotationData.type === QUOTATION_TYPE.salesOrder ? [PRICING_SETUP_TYPE.price] : [PRICING_SETUP_TYPE.rent];
-      const material: any = [];
-      arr?.forEach((ele) => {
-        const obj = {
-          materialId: ele?.materialId,
-          materialType: ele?.type,
-          qty: ele?.qty,
-          pricingMethod: ele?.pricingMethod,
-          currency: quotationData?.currency
-        };
-        if (isArray(ele?.unit)) {
-          ele?.unit?.forEach((e) => {
-            material.push({ ...obj, unit: e });
-          });
-        } else {
-          material.push({ ...obj, unit: ele?.unit });
-        }
-      });
-      data.material = material;
-      data.supplier = [];
-      data.customer = [quotationData?.customerAccount?.optionValue];
-      data.warehouse = [quotationData?.warehouse?.optionValue];
-      data.address = quotationData?.shippingAddress?.optionValue ? [quotationData?.shippingAddress?.optionValue] : [];
-      return new Promise((resolve, reject) => {
-        axiosInstance()
-          .post(pricingCondition.api + `/calculatePrice`, data)
-          .then(({ data: { data } }) => {
-            resolve(data);
-          })
-          .catch((err) => {
-            reject(err);
-          });
-      });
-    }
   };
 
   const handelAskPriceToSupplier = (content, contactId, selectedFields = [], otherAttachments = []) => {
@@ -931,7 +892,6 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       )}
       {isProductEdit.open && (
         <QuotationQtyDialog
-          calculatePrice={calculatePrice}
           onClose={() => {
             setIsProductEdit({ open: false, isBulkedit: false, showSaveAndNext: false });
             setRecordToUpdate(null);
