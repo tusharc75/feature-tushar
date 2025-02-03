@@ -486,45 +486,6 @@ const Quotation = ({
     setRecordToUpdate(rowData?.original);
   };
 
-  const calculatePrice = (arr: any[]) => {
-    if (quotationData) {
-      const data: any = {};
-      data.conditionType = [PRICING_SETUP_TYPE.price];
-      const material: any = [];
-      arr?.forEach((ele) => {
-        const obj = {
-          materialId: ele?.materialId,
-          materialType: ele?.type,
-          qty: ele?.qty,
-          pricingMethod: ele?.pricingMethod,
-          currency: quotationData?.currency
-        };
-        if (isArray(ele?.unit)) {
-          ele?.unit?.forEach((e) => {
-            material.push({ ...obj, unit: e });
-          });
-        } else {
-          material.push({ ...obj, unit: ele?.unit });
-        }
-      });
-      data.material = material;
-      data.supplier = [];
-      data.customer = [quotationData?.customerAccount?.optionValue];
-      data.warehouse = [quotationData?.warehouse?.optionValue];
-      data.address = quotationData?.shippingAddress?.optionValue ? [quotationData?.shippingAddress?.optionValue] : [];
-      return new Promise((resolve, reject) => {
-        axiosInstance()
-          .post(pricingCondition.api + `/calculatePrice`, data)
-          .then(({ data: { data } }) => {
-            resolve(data);
-          })
-          .catch((err) => {
-            reject(err);
-          });
-      });
-    }
-  };
-
   const handleChangeVersion = (versionNumber) => {
     setCurrentVersion(versionNumber);
     setShowAllVersionStatus(false);
