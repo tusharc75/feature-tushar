@@ -1,8 +1,6 @@
-import React from 'react';
 import { Dialog } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import ChartTypes from './ChartTypes';
 import { CustomDialogTransition } from 'src/constants/helpers';
 
