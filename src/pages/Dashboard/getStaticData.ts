@@ -13,6 +13,8 @@ async function getStaticData(chart: ChartDataType, data: any, currencyTo: string
   const labels = [];
   const budget = [];
   const volumeBudgetData = [];
+  const marginBudgetData = [];
+  const bookedMarginData = [];
   const volumeUnit = data[0]?.volumeUnit;
 
   data = data.sort((a, b) => {
@@ -29,25 +31,33 @@ async function getStaticData(chart: ChartDataType, data: any, currencyTo: string
         getExchangeRates(displayDateTime(d.date, 'YYYY-MM-DD').format(), d.totalBookedCost || 0, currencyFrom, currencyTo),
         getExchangeRates(displayDateTime(d.date, 'YYYY-MM-DD').format(), d.totalOfferedValue || 0, currencyFrom, currencyTo),
         getExchangeRates(displayDateTime(d.date, 'YYYY-MM-DD').format(), d.totalOfferedCost || 0, currencyFrom, currencyTo),
-        getExchangeRates(displayDateTime(d.date, 'YYYY-MM-DD').format(), d.budget || 0, currencyFrom, currencyTo)
+        getExchangeRates(displayDateTime(d.date, 'YYYY-MM-DD').format(), d.budget || 0, currencyFrom, currencyTo),
+        getExchangeRates(displayDateTime(d.date, 'YYYY-MM-DD').format(), d.marginBudget || 0, currencyFrom, currencyTo),
+        getExchangeRates(displayDateTime(d.date, 'YYYY-MM-DD').format(), d.totalBookedMargin || 0, currencyFrom, currencyTo)
       ]);
       const bookedValue: any = salesData[0]?.rates[currencyTo];
       const bookedCost: any = salesData[1]?.rates[currencyTo];
       const offeredValue: any = salesData[2]?.rates[currencyTo];
       const offeredCost: any = salesData[3]?.rates[currencyTo];
       const budgetData: any = salesData[4]?.rates[currencyTo];
+      const marginBudget: any = salesData[5]?.rates[currencyTo];
+      const bookedMargin: any = salesData[6]?.rates[currencyTo];
 
       bookedValueData.push(bookedValue || 0);
       bookedCostData.push(bookedCost || 0);
       offeredValueData.push(offeredValue || 0);
       offeredCostData.push(offeredCost || 0);
       budget.push(budgetData || 0);
+      marginBudgetData.push(marginBudget || 0);
+      bookedMarginData.push(bookedMargin || 0);
     } else {
       bookedValueData.push(d.totalBookedValue || 0);
       bookedCostData.push(d.totalBookedCost || 0);
       offeredValueData.push(d.totalOfferedValue || 0);
       offeredCostData.push(d.totalOfferedCost || 0);
       budget.push(d.budget || 0);
+      marginBudgetData.push(d.marginBudget || 0);
+      bookedMarginData.push(d.totalBookedMargin || 0);
     }
 
     bookedVolumeData.push(d.totalBookedVolume || 0);
@@ -66,12 +76,14 @@ async function getStaticData(chart: ChartDataType, data: any, currencyTo: string
   let totalOfferedVolume = offeredVolumeData.reduce((acc, val) => acc + val);
   let totalBudget = budget.reduce((acc, val) => acc + val);
   let volumeBudget = volumeBudgetData.reduce((acc, val) => acc + val);
+  let marginBudget = marginBudgetData.reduce((acc, val) => acc + val);
 
   const grossMargin = totalBookedValue === 0 && totalBookedCost === 0 ? 0 : totalBookedValue - totalBookedCost;
   const offeredMargin = totalOfferedValue === 0 && totalOfferedCost === 0 ? 0 : totalOfferedValue - totalOfferedCost;
   const grossMarginPercent = totalBookedValue !== 0 && totalBookedCost !== 0 ? ((totalBookedValue - totalBookedCost) / totalBookedValue) * 100 : 0;
   const offeredMarginPercent =
     totalOfferedValue !== 0 && totalOfferedCost !== 0 ? ((totalOfferedValue - totalOfferedCost) / totalOfferedValue) * 100 : 0;
+  const grossMarginPercentBudget = marginBudget !== 0 && totalBudget !== 0 ? (marginBudget / totalBudget) * 100 : 0;
 
   const cardData = {
     offeredData: [
@@ -99,16 +111,16 @@ async function getStaticData(chart: ChartDataType, data: any, currencyTo: string
           ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, totalOfferedValue).fullFormatAmount
           : 0
       },
-      {
-        ['Total Booked Cost']: totalBookedCost
-          ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, totalBookedCost).fullFormatAmount
-          : 0,
-        ['Hit Ratio']:
-          totalBookedCost && totalOfferedCost ? (isNaN(totalBookedCost / totalOfferedCost) ? 0 : (totalBookedCost / totalOfferedCost) * 100) : 0,
-        ['Total Offered Cost']: totalOfferedCost
-          ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, totalOfferedCost).fullFormatAmount
-          : 0
-      },
+      // {
+      //   ['Total Booked Cost']: totalBookedCost
+      //     ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, totalBookedCost).fullFormatAmount
+      //     : 0,
+      //   ['Hit Ratio']:
+      //     totalBookedCost && totalOfferedCost ? (isNaN(totalBookedCost / totalOfferedCost) ? 0 : (totalBookedCost / totalOfferedCost) * 100) : 0,
+      //   ['Total Offered Cost']: totalOfferedCost
+      //     ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, totalOfferedCost).fullFormatAmount
+      //     : 0
+      // },
       {
         ['Booked Gross Margin']: `${
           grossMargin ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, grossMargin).fullFormatAmount : 0
@@ -132,6 +144,13 @@ async function getStaticData(chart: ChartDataType, data: any, currencyTo: string
           : 0,
         ['Hit Ratio']: totalBookedValue && totalBudget ? (isNaN(totalBookedValue / totalBudget) ? 0 : (totalBookedValue / totalBudget) * 100) : 0,
         ['Total Budget']: totalBudget ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, totalBudget).fullFormatAmount : 0
+      },
+      {
+        ['Booked Gross Margin']: `${
+          grossMargin ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, grossMargin).fullFormatAmount : 0
+        } (${grossMarginPercent > 0 ? grossMarginPercent.toFixed(2) : 0}%)`,
+        ['Hit Ratio']: grossMargin && marginBudget ? (isNaN(grossMargin / marginBudget) ? 0 : (grossMargin / marginBudget) * 100) : 0,
+        ['Total Budget Gross Margin']: `${marginBudget ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, marginBudget).fullFormatAmount : 0} (${grossMarginPercentBudget > 0 ? grossMarginPercentBudget.toFixed(2) : 0}%)`
       }
     ]
   };
