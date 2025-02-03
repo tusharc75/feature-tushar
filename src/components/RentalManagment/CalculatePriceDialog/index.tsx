@@ -31,8 +31,6 @@ const CalculatePriceDialog = ({ handleSucess, onClose, referenceData, material }
         materialId: ele?.materialId,
         materialType: ele?.type,
         qty: ele?.qty,
-        pricingMethod: ele?.pricingMethod?.split(',')[0],
-        unit: ele?.unit,
         currency: referenceData?.currency
       }));
     data.supplier = [];
