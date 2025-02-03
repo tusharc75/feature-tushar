@@ -13,7 +13,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { expenses, getUniqueCurrencies, sidebarResource } from '../../constants/helpers';
+import { EXPENSE_STATUS, expenses, getUniqueCurrencies, sidebarResource } from '../../constants/helpers';
 import Step from '../DynamicForm/Step';
 import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
 
@@ -90,7 +90,7 @@ const ExpenseDetailsPage = () => {
         setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data.currency)?.symbolNative);
         setLoadingDetails(false);
         setAllowedToEdit(permissions?.expenses?.isUpdate);
-        setAllowedToDelete(permissions?.expenses?.isDelete);
+        setAllowedToDelete(permissions?.expenses?.isDelete && data.status === EXPENSE_STATUS.unreported);
         setExpensesData(data);
       })
       .catch((err) => {

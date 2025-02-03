@@ -23,7 +23,8 @@ import {
   sidebarResource,
   getObjKeys,
   GenerateResourceLineNumber,
-  getUniqueCurrencies
+  getUniqueCurrencies,
+  EXPENSE_STATUS
 } from '../../../constants/helpers';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
@@ -45,6 +46,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null,isRedirectToDetailPa
   const [title, setTitle] = useState('');
   const [textFields, setTextFields] = useState([]);
   const [currencySymbol, setCurrencySymbol] = useState(null);
+  const [isDisabled, setIsDisabled] = useState(false);
 
   const addTextField = () => {
     setTextFields([...textFields, { id: textFields.length, description: '', amount: '' }]);
@@ -95,6 +97,9 @@ const ManageExpenses = ({ isClone = false, expenseId = null,isRedirectToDetailPa
               } else {
                 setValue(data.totalAmount);
                 setTextFields(data.lineItems);
+                if(data.status !== EXPENSE_STATUS.unreported){
+                  setIsDisabled(true);
+                }
                 setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data.currency)?.symbolNative);
                 setTitle(`Edit - ${data.expenseNumber}`);
                 setInitialData({
@@ -234,7 +239,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null,isRedirectToDetailPa
                         required
                         type="number"
                         size="small"
-                        disabled={textFields.length > 0}
+                        disabled={textFields.length > 0 || isDisabled}
                         value={showItemizeDialog ? calculateTotal() : value}
                         onChange={handleChange}
                         fullWidth
@@ -246,7 +251,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null,isRedirectToDetailPa
                       />
                     </Grid>
                     <Grid size={{ xs: 6, sm: 6, md: 6, lg: 6 }} sx={{display:'flex',justifyContent:'flex-end'}}>
-                      <ThemeButton buttonType="transparent" onClick={() => setShowItemizeDialog(true)}>
+                      <ThemeButton buttonType="transparent" disabled={isDisabled} onClick={() => setShowItemizeDialog(true)}>
                         Itemize
                       </ThemeButton>
                     </Grid>

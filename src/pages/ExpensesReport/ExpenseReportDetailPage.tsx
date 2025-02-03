@@ -87,7 +87,7 @@ const ExpenseReportDetailsPage = () => {
       .then(({ data: { data } }) => {
         setLoadingDetails(false);
         setAllowedToEdit(permissions?.expenseReport?.isUpdate);
-        setAllowedToDelete(permissions?.expenseReport?.isDelete);
+        setAllowedToDelete(permissions?.expenseReport?.isDelete && data?.canDelete);
         setExpenseReportData(data);
       })
       .catch((err) => {
@@ -117,7 +117,7 @@ const ExpenseReportDetailsPage = () => {
         for (let expense of expenseReportData.selectedExpenses) {
           try {
             await axiosInstance().patch(`${expenses.api}/status/${expense._id}`, {
-              status: EXPENSE_STATUS.unreported,
+              status: EXPENSE_STATUS.unreported
             });
           } catch (error) {
             toastConfig.setToastConfig(error);
@@ -133,7 +133,6 @@ const ExpenseReportDetailsPage = () => {
       setShowConfirmBox(false);
     }
   };
-
 
   return (
     <Box className="main-container-v1">
@@ -223,7 +222,6 @@ const ExpenseReportDetailsPage = () => {
       )}
       {openUpdateDialog && (
         <ManageExpenseReports
-          isClone={false}
           expenseReportId={id}
           fetchReportData={fetchData}
           onClose={() => setOpenUpdateDialog(false)}
