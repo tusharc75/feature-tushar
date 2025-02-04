@@ -23,6 +23,9 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, required = false, si
       } else if (timeFrame === '1-year') {
         fromDate = dayjs.tz().subtract(1, 'year').toDate();
         toDate = dayjs.tz().toDate();
+      } else if (timeFrame === 'current-year') {
+        fromDate = dayjs.tz().startOf('year').toDate();
+        toDate = dayjs.tz().endOf('year').toDate();
       }
       setDeepFilters([
         ...deepFilters?.filter((d) => d?.field !== `from_${fieldData?.fieldName}` && d?.field !== `to_${fieldData?.fieldName}`),
@@ -66,13 +69,15 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, required = false, si
     if (fromDate && toDate) {
       const differenceInMonths = toDate.diff(fromDate, 'month');
       const differenceInDays = toDate.diff(fromDate, 'day');
-      if (differenceInMonths === 1 && [28, 29, 30, 31]?.includes(differenceInDays)) {
+      if (fromDate.isSame(fromDate.startOf('year'), 'day') && [364, 365, 366]?.includes(differenceInDays)) {
+        setTimeFrame('current-year');
+      } else if (differenceInMonths === 1 && [28, 29, 30, 31]?.includes(differenceInDays)) {
         setTimeFrame('1-month');
       } else if (differenceInMonths === 3 && [88, 89, 90, 91, 92]?.includes(differenceInDays)) {
         setTimeFrame('3-months');
       } else if (differenceInMonths === 6 && [178, 179, 180, 181, 182, 183, 184]?.includes(differenceInDays)) {
         setTimeFrame('6-months');
-      } else if (differenceInMonths === 12 && [365, 366]?.includes(differenceInDays)) {
+      } else if (differenceInMonths === 12 && [364, 365, 366]?.includes(differenceInDays)) {
         setTimeFrame('1-year');
       } else {
         setTimeFrame('custom');
@@ -106,6 +111,7 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, required = false, si
               <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
               <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
               <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
+              <MenuItem value={'current-year'}>Current Year</MenuItem>
               <MenuItem value={'custom'}>Custom</MenuItem>
             </Select>
           </FormControl>
