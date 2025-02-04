@@ -17,7 +17,6 @@ import {
   expenses,
 } from '../../constants/helpers';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { useHistory } from 'react-router-dom';
 
 function AddExpenses({
   open,
