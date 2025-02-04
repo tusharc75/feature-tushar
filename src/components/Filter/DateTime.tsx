@@ -3,8 +3,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import dayjs from 'dayjs';
+import { getTimeFrame } from 'src/components/Filter/utils';
 
-const DateTime = ({ fieldData, deepFilters, setDeepFilters, required = false, sidebarIcon = null }) => {
+const DateTime = ({ fieldData, deepFilters, setDeepFilters, required = false, sidebarIcon = null, selectedUserFilter = null }) => {
   const [timeFrame, setTimeFrame] = useState<any>('custom');
 
   const handleDuration = useCallback(
@@ -67,23 +68,10 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, required = false, si
     const fromDate = dayjs(deepFilters?.find((item) => item.field === `from_${fieldData?.fieldName}`)?.term);
     const toDate = dayjs(deepFilters?.find((item) => item.field === `to_${fieldData?.fieldName}`)?.term);
     if (fromDate && toDate) {
-      const differenceInMonths = toDate.diff(fromDate, 'month');
-      const differenceInDays = toDate.diff(fromDate, 'day');
-      if (fromDate.isSame(fromDate.startOf('year'), 'day') && [364, 365, 366]?.includes(differenceInDays)) {
-        setTimeFrame('current-year');
-      } else if (differenceInMonths === 1 && [28, 29, 30, 31]?.includes(differenceInDays)) {
-        setTimeFrame('1-month');
-      } else if (differenceInMonths === 3 && [88, 89, 90, 91, 92]?.includes(differenceInDays)) {
-        setTimeFrame('3-months');
-      } else if (differenceInMonths === 6 && [178, 179, 180, 181, 182, 183, 184]?.includes(differenceInDays)) {
-        setTimeFrame('6-months');
-      } else if (differenceInMonths === 12 && [364, 365, 366]?.includes(differenceInDays)) {
-        setTimeFrame('1-year');
-      } else {
-        setTimeFrame('custom');
-      }
+      const timeFrame = getTimeFrame(fromDate, toDate);
+      setTimeFrame(timeFrame);
     }
-  }, []);
+  }, [selectedUserFilter]);
 
   return (
     <>

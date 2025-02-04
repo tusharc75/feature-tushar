@@ -1,10 +1,10 @@
 import { Autocomplete, Box, Dialog, FormControl, IconButton, MenuItem, Select, TextField, useMediaQuery } from '@mui/material';
 import { Close } from '@mui/icons-material';
-import { uniqBy } from 'lodash';
+import { isEmpty, uniqBy } from 'lodash';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { BsFillFunnelFill } from 'react-icons/bs';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { getErrors, isCLearFilterButtonVisible, useClassForFewSeconds } from 'src/components/Filter/utils';
+import { getErrors, getTimeFrame, isCLearFilterButtonVisible, useClassForFewSeconds } from 'src/components/Filter/utils';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { cn, CustomDialogTransition } from 'src/constants/helpers';
 import SaveFilterDialog from 'src/components/CustomReactTable/GridFilter/SaveFilterDialog';
@@ -15,6 +15,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { createFilterSetData } from 'src/components/CustomReactTable';
 import Filters from 'src/components/Filter/Filters';
+import dayjs from 'dayjs';
 
 const Filter = ({
   onClose,
@@ -171,8 +172,35 @@ const Filter = ({
   };
 
   const isDisable = () => {
-    if (deepFilters && deepFilters?.length && deepFilters?.filter((d) => d?.term?.length)?.length) return false;
+    const dateFilters: any = {};
+    if (
+      deepFilters &&
+      deepFilters?.length &&
+      deepFilters?.filter((d) => {
+        const isoDate = dayjs(d?.term);
+        if (isoDate.isValid() && d?.term instanceof Date) {
+          dateFilters[d?.field?.split('_')[1]] = {
+            ...dateFilters[d?.field?.split('_')[1]],
+            [d?.field?.split('_')[0]]: d?.term
+          };
+        }
+        const hasTermLength = isoDate.isValid() && d?.term instanceof Date ? false : d?.term?.length ? true : false;
+        return hasTermLength;
+      })?.length
+    )
+      return false;
     if (filterByIds && filterByIds?.length && filterByIds?.filter((d) => d?.term?.length)?.length) return false;
+    if (
+      !isEmpty(dateFilters) &&
+      Object.keys(dateFilters)?.every((_key) => {
+        const timeFrame = getTimeFrame(dayjs(dateFilters[_key]?.from), dayjs(dateFilters[_key]?.to));
+        if (timeFrame != 'custom') {
+          return true;
+        }
+        return false;
+      })
+    )
+      return false;
     return true;
   };
 
@@ -258,6 +286,7 @@ const Filter = ({
             errors={errors}
             loading={loading}
             isVisibleFilterSet={isVisibleFilterSet}
+            selectedUserFilter={selectedUserFilter}
           />
         </CustomDialogContent>
         <div className="flex justify-between px-[--px] py-[--py] pt-0">

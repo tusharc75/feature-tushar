@@ -674,6 +674,35 @@ export const createFilterSetData = (val, columns) => {
           field: v,
           term: val?.filterValue[v]
         });
+      } else if (col?.fieldData?.type === 'date') {
+        let fromDate: any = '';
+        let toDate: any = '';
+        if (val?.filterValue[v] === '1-month') {
+          fromDate = dayjs.tz().subtract(1, 'month').toDate();
+          toDate = dayjs.tz().toDate();
+        } else if (val?.filterValue[v] === '3-months') {
+          fromDate = dayjs.tz().subtract(3, 'month').toDate();
+          toDate = dayjs.tz().toDate();
+        } else if (val?.filterValue[v] === '6-months') {
+          fromDate = dayjs.tz().subtract(6, 'month').toDate();
+          toDate = dayjs.tz().toDate();
+        } else if (val?.filterValue[v] === '1-year') {
+          fromDate = dayjs.tz().subtract(1, 'year').toDate();
+          toDate = dayjs.tz().toDate();
+        } else if (val?.filterValue[v] === 'current-year') {
+          fromDate = dayjs.tz().startOf('year').toDate();
+          toDate = dayjs.tz().endOf('year').toDate();
+        }
+        if (fromDate && toDate) {
+          deepFilter.push({
+            field: `from_${v}`,
+            term: fromDate
+          });
+          deepFilter.push({
+            field: `to_${v}`,
+            term: toDate
+          });
+        }
       } else {
         deepFilter.push({
           field: v,

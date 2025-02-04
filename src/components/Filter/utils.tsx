@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { startCase } from 'lodash';
 import { useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -137,4 +138,23 @@ export const useClassForFewSeconds = (cName: string, duration = 1000) => {
     }, duration);
   };
   return { className, addClass };
+};
+
+export const getTimeFrame = (fromDate, toDate) => {
+  const differenceInMonths = toDate.diff(fromDate, 'month');
+  const differenceInDays = toDate.diff(fromDate, 'day');
+  const isSameDay = toDate.format('MM-DD-YYYY') === dayjs().format('MM-DD-YYYY');
+  if (fromDate.isSame(fromDate.startOf('year'), 'day') && [364, 365, 366]?.includes(differenceInDays)) {
+    return 'current-year';
+  } else if (isSameDay && differenceInMonths === 1 && [28, 29, 30, 31]?.includes(differenceInDays)) {
+    return '1-month';
+  } else if (isSameDay && differenceInMonths === 3 && [88, 89, 90, 91, 92]?.includes(differenceInDays)) {
+    return '3-months';
+  } else if (isSameDay && differenceInMonths === 6 && [178, 179, 180, 181, 182, 183, 184]?.includes(differenceInDays)) {
+    return '6-months';
+  } else if (isSameDay && differenceInMonths === 12 && [364, 365, 366]?.includes(differenceInDays)) {
+    return '1-year';
+  } else {
+    return 'custom';
+  }
 };

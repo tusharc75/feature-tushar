@@ -69,6 +69,7 @@ const GridHeader = ({
   const [currentFomValue, setCurrentFomValue] = useState({});
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [coloums, setColoums] = useState(null);
+  const [isLoading, setLoading] = useState(false);
   const [deepFilters, setDeepFilters] = useState([]);
   const [filterByIds, setFilterByIds] = useState([]);
   const [filterTerm, setFilterTerm] = useState({});
@@ -89,6 +90,22 @@ const GridHeader = ({
     setIsFilterOpen(false);
   };
 
+  useEffect(() => {
+    fetchAllColumns();
+  }, [resource]);
+
+  const fetchAllColumns = async () => {
+    try {
+      setLoading(true);
+      const columns = await fetchFieldOptions({ resource, sidebarResource, toastConfig });
+      setColoums(columns);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      toastConfig.setToastConfig(error);
+    }
+  };
+
   const handleApplyFilter = () => {
     const filters = createFilterData(coloums, filterByIds, deepFilters, filterTerm);
     const fromValue = filtermodelToFormValue(filters);
@@ -99,7 +116,7 @@ const GridHeader = ({
   };
 
   useEffect(() => {
-    if (!resource || !showFilters) return;
+    if (!resource || !showFilters || !coloums) return;
     const filters = getTempFilter(renderedFrom);
     const applyDefaultFilter = async () => {
       try {
@@ -135,7 +152,7 @@ const GridHeader = ({
     };
     applyDefaultFilter();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resource]);
+  }, [resource, coloums]);
 
   return (
     <div className={`my-[8px] flex flex-wrap items-center justify-between gap-[8px]`}>
@@ -175,7 +192,7 @@ const GridHeader = ({
             resource={resource}
             handleClose={handleFilterClose}
             coloums={coloums}
-            setColoums={setColoums}
+            loading={isLoading}
             deepFilters={deepFilters}
             setDeepFilters={setDeepFilters}
             filterByIds={filterByIds}
@@ -207,12 +224,7 @@ const GridHeader = ({
         </div>
         <div className="buttons flex flex-wrap gap-[8px] ">
           {showFilters && (
-            <ThemeButton
-              onClick={handleFilterOpen}
-              startIcon={<BiFilterAlt />}
-              mobileTooltip="Apply Filters"
-              iconForMobile={<BiFilterAlt />}
-            >
+            <ThemeButton onClick={handleFilterOpen} startIcon={<BiFilterAlt />} mobileTooltip="Apply Filters" iconForMobile={<BiFilterAlt />}>
               {'Filters'}
             </ThemeButton>
           )}
