@@ -339,6 +339,8 @@ const DeliveryTicket = () => {
             ids={selectedRecords?.map((obj) => obj._id)}
             onExportToExcelSuccess={fetchData}
             additionalParams={getQueryString(true)}
+            asyncExport={true}
+            resource={sidebarResource.deliveryTicket}
           />
         </div>
 
