@@ -7,7 +7,7 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import axiosInstance from '../../../axios/axiosInstance';
 import { isArray, uniqBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema, fieldLabelToFieldName, MATERIAL_TYPE } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, fieldLabelToFieldName, MATERIAL_TYPE, PRICING_SETUP_TYPE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '..//../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -17,7 +17,7 @@ import FormTypes from '../../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import { bulkUpdate, calculatePrice, calculateRowsField, fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
+import { bulkUpdate, calculateRowsField, fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -26,6 +26,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import dayjs from 'dayjs';
 import SelectionConfirmationDialog from 'src/components/Helpers/SelectionConfirmationDialog';
 import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
+import { getPricingConditions } from 'src/components/PricingCondition';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -192,7 +193,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
         pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.pricingMethod);
       }
       setPriceMethodListConst(pricingMethodOptions);
-      await getAllPricingCondition(rowData, unitOptions, pricingMethodOptions);
+      await getAllPricingCondition(rowData, pricingMethodOptions);
       data.forEach((element) => {
         if (element.fieldName === 'unit') {
           element.option = unitOptions;
@@ -318,17 +319,15 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
     setShowSelectionConfirmationDialog({ open: false, type: '' });
   }
 
-  async function getAllPricingCondition(values: any, unitOptions: any, pricingMethodOptions: any) {
+  async function getAllPricingCondition(values: any, pricingMethodOptions: any) {
     if (rowData) {
-      const priceData: any = await calculatePrice(rentalManagementData, [
+      let priceData: any = await getPricingConditions(rentalManagementData, [
         {
           materialId: rowData.materialId,
           type: rowData.type,
           qty: 1,
-          pricingMethod: pricingMethodOptions?.map((d) => d.optionLabel).join() || '',
-          unit: unitOptions?.map((d) => d.optionLabel)
         }
-      ]);
+      ], PRICING_SETUP_TYPE.rent);
       setPriceConditionListConst(priceData || []);
       updateRateChangeState(values, priceData, pricingMethodOptions);
     }

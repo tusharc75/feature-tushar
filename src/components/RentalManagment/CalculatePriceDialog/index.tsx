@@ -31,8 +31,6 @@ const CalculatePriceDialog = ({ handleSucess, onClose, referenceData, material }
         materialId: ele?.materialId,
         materialType: ele?.type,
         qty: ele?.qty,
-        pricingMethod: ele?.pricingMethod?.split(',')[0],
-        unit: ele?.unit,
         currency: referenceData?.currency
       }));
     data.supplier = [];
@@ -40,7 +38,7 @@ const CalculatePriceDialog = ({ handleSucess, onClose, referenceData, material }
     data.warehouse = [referenceData?.warehouse?.optionValue];
     data.address = referenceData?.shippingAddress?.optionValue ? [referenceData?.shippingAddress?.optionValue] : [];
     axiosInstance()
-      .post(pricingCondition.api + `/calculatePrice`, data)
+      .post(pricingCondition.api + `/calculatePrice-new`, data)
       .then(({ data: { data } }) => {
         data = data.filter((d) => d.mrp !== undefined && d.mrp !== null);
         handleSucess(data);

@@ -5,7 +5,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE, PRICING_SETUP_TYPE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -22,12 +22,12 @@ import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import dayjs from 'dayjs';
+import { getPricingConditions } from 'src/components/PricingCondition';
 interface EditDialogProps {
   onClose: VoidFunction | any;
   handleSaveData: VoidFunction | any;
   invoiceData: any;
   rowData?: object | any;
-  calculatePrice?: VoidFunction | any;
   material: any[];
   selectedProducts: any[];
   isBulkedit: any;
@@ -37,7 +37,6 @@ interface EditDialogProps {
 const rateChangeFields = ['unit', 'pricingMethod', 'pricingCondition'];
 
 const MaterialDialog: FC<EditDialogProps> = ({
-  calculatePrice,
   onClose,
   handleSaveData,
   invoiceData,
@@ -143,7 +142,7 @@ const MaterialDialog: FC<EditDialogProps> = ({
         pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.pricingMethod);
       }
       setPriceMethodListConst(pricingMethodOptions);
-      await getAllPricingCondition(rowData, unitOptions, pricingMethodOptions);
+      await getAllPricingCondition(rowData, pricingMethodOptions);
       data.forEach((element) => {
         if (rowData?.type === 'serializedAsset') {
           if (element.fieldName === 'qty') {
@@ -238,17 +237,16 @@ const MaterialDialog: FC<EditDialogProps> = ({
     }
   };
 
-  async function getAllPricingCondition(values: any, unitOptions: any, pricingMethodOptions: any) {
+  async function getAllPricingCondition(values: any, pricingMethodOptions: any) {
     if (rowData) {
-      const priceData: any = await calculatePrice([
+      const conditionType = invoiceData?.salesOrder ? PRICING_SETUP_TYPE.price : PRICING_SETUP_TYPE.rent;
+      let priceData: any = await getPricingConditions(invoiceData, [
         {
           materialId: rowData.materialId,
           type: rowData.type,
           qty: 1,
-          pricingMethod: pricingMethodOptions?.map((d) => d.optionLabel).join() || '',
-          unit: unitOptions?.map((d) => d.optionLabel)
         }
-      ]);
+      ], conditionType);
       setPriceConditionListConst(priceData || []);
       updateRateChangeState(values, priceData, pricingMethodOptions);
     }
