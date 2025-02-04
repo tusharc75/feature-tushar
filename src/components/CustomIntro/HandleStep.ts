@@ -302,7 +302,7 @@ export class HandleSteps {
     this.getCurrentStep();
   }
 
-  getCurrentStep(dirty = false, index = this.currentIndex) {
+  async getCurrentStep(dirty = false, index = this.currentIndex) {
     if (!this.steps[index]) return;
     if (this.currentStepData?.index === index && !dirty) return this.currentStepData;
     this.findingElement = true;
@@ -328,10 +328,11 @@ export class HandleSteps {
       this.retry = 0;
       this.findingElement = false;
       this.clicked = false;
-      this.sendUpdateSignal();
-      const { bottom, height, left, right, top, width, x, y } = element?.getBoundingClientRect();
-      const positionData = { bottom, height, left: left + window.scrollX, right, top: top + window.scrollY, width, x, y };
 
+      const { bottom, height, left, right, top, width, x, y } = await this.smoothScroll(element);
+
+      this.sendUpdateSignal();
+      const positionData = { bottom, height, left: left + window.scrollX, right, top: top + window.scrollY, width, x, y };
       this.currentStepData = {
         ...activeStep,
         positionData,
@@ -438,7 +439,44 @@ export class HandleSteps {
     this.sendUpdateSignal();
   }
 
-  scrollToCurrentStep(element: HTMLElement) {
+  private getScrollParent(node?: HTMLElement | null): HTMLElement | null {
+    if (node == null || !node) {
+      return null;
+    }
+    if (node.scrollHeight > node.clientHeight) {
+      return node;
+    } else {
+      return this.getScrollParent(node.parentNode as HTMLElement);
+    }
+  }
+
+  smoothScroll(elem: HTMLElement, options: ScrollIntoViewOptions = { behavior: 'smooth', block: 'center', inline: 'center' }): Promise<DomRect> {
+    return new Promise((resolve) => {
+      if (!(elem instanceof Element)) {
+        console.error('Argument 1 must be an Element');
+      }
+      let same = 0;
+      let lastPos = null;
+      const scrollOptions = Object.assign({ behavior: 'smooth' }, options);
+      elem.scrollIntoView(scrollOptions);
+      requestAnimationFrame(check);
+      function check() {
+        const newPos = elem.getBoundingClientRect().top;
+        if (newPos === lastPos) {
+          if (same++ > 2) {
+            const domRect = elem.getBoundingClientRect();
+            return resolve(domRect);
+          }
+        } else {
+          same = 0;
+          lastPos = newPos;
+        }
+        requestAnimationFrame(check);
+      }
+    });
+  }
+
+  async scrollToCurrentStep(element: HTMLElement) {
     element.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
   }
 
