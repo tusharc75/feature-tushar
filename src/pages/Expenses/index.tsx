@@ -19,6 +19,7 @@ import {
   prepareDataForGrid,
   expenses,
   sidebarResource,
+  EXPENSE_STATUS,
 } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
@@ -126,18 +127,18 @@ const Expenses = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
+        <HtmlTooltip title={row?.original?.canDelete && row?.original?.status === EXPENSE_STATUS.unreported ? 'Delete' : 'You can not delete it is reported'}>
           <span>
             <IconButton
               size="small"
               aria-label="Delete"
-              disabled={row?.original?.canDelete ? false : true}
+              disabled={row?.original?.canDelete && row?.original?.status !== EXPENSE_STATUS.unreported  ? true : false}
               onClick={() => {
                 setDeleteRecord(row.original);
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete && row?.original?.status !== EXPENSE_STATUS.unreported ? 'disabled' : 'error'} />
             </IconButton>
           </span>
         </HtmlTooltip>

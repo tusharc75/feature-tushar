@@ -16,7 +16,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { gridLoadingTimeout, prepareDataForGrid, expenseReport, sidebarResource, expenses, EXPENSE_STATUS } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import { deleteDisable } from 'src/constants/messageHelpers';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ManageExpenseReports from 'src/pages/ExpensesReport/ManageExpenseReports';
 
@@ -34,7 +34,7 @@ const ExpenseReport = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [showManageExpenseReportDialog, setShowManageExpenseReportDialog] = useState({ open: false, isClone: false, idToClone: null });
+  const [showManageExpenseReportDialog, setShowManageExpenseReportDialog] = useState({ open: false, idToClone: null });
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
@@ -84,20 +84,6 @@ const ExpenseReport = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={permissions?.expenseReport?.isCreate ? 'Clone' : cloneDisable}>
-          <span>
-            <IconButton
-              size="small"
-              aria-label="Clone"
-              disabled={permissions?.expenseReport?.isCreate ? false : true}
-              onClick={() => {
-                setShowManageExpenseReportDialog({ open: true, isClone: true, idToClone: row.original._id });
-              }}
-            >
-              <FileCopyIcon fontSize="small" color={permissions?.expenseReport?.isCreate ? 'primary' : 'disabled'} />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
         <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
@@ -159,7 +145,7 @@ const ExpenseReport = () => {
       let rows = data.map((u) => {
         let finalObject: any = prepareDataForGrid(u, user);
         finalObject['isChecked'] = false;
-        finalObject['canDelete'] = permissions?.expenseReport?.isDelete;
+        finalObject['canDelete'] = permissions?.expenseReport?.isDelete && u.canDelete;
         return finalObject;
       });
       dispatch({ type: 'initialize', data: rows, count: count });
@@ -264,7 +250,7 @@ const ExpenseReport = () => {
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
           addButtonOnclick={() => {
-            setShowManageExpenseReportDialog({ open: true, isClone: false, idToClone: null });
+            setShowManageExpenseReportDialog({ open: true, idToClone: null });
           }}
           isAddButtonVisible={permissions?.expenseReport?.isCreate}
         />
@@ -305,13 +291,12 @@ const ExpenseReport = () => {
       </CustomContainer>
       {showManageExpenseReportDialog.open && (
         <ManageExpenseReports
-          isClone={showManageExpenseReportDialog.isClone}
           expenseReportId={showManageExpenseReportDialog.idToClone}
           fetchReportData={fetchData}
-          onClose={() => setShowManageExpenseReportDialog({ open: false, isClone: false, idToClone: null })}
+          onClose={() => setShowManageExpenseReportDialog({ open: false, idToClone: null })}
           onSuccess={(data) => {
             history.push(`${routes?.expenseReportDetail?.path}/${data._id}`);
-            setShowManageExpenseReportDialog({ open: false, isClone: false, idToClone: null });
+            setShowManageExpenseReportDialog({ open: false, idToClone: null });
           }}
         />
       )}

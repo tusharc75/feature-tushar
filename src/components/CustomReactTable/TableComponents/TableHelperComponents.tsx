@@ -1,7 +1,7 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Checkbox, CheckboxProps, CircularProgress, IconButton, TableCell, TextField } from '@mui/material';
-import { Check, DragIndicator, Edit, ExpandLess, ExpandMore } from '@mui/icons-material';
+import { Check, CheckBoxOutlined, DragIndicator, Edit, ExpandLess, ExpandMore } from '@mui/icons-material';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Column, ColumnDef, Header, Table, flexRender } from '@tanstack/react-table';
 import { eq, isEqual } from 'lodash';
@@ -257,6 +257,8 @@ export const IndeterminateCheckbox = React.forwardRef(({ indeterminate, from, st
     <Checkbox
       size="small"
       ref={resolvedRef}
+      indeterminate={indeterminate}
+      indeterminateIcon={<CheckBoxOutlined />}
       {...rest}
       checked={rest.checked ? true : false}
       color="primary"

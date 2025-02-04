@@ -15,13 +15,14 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { calculatePriceNew, calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
+import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import {
   CHILD_RESOURCE,
   FIELD_TICKET_STATUS,
   MATERIAL_TYPE,
+  PRICING_SETUP_TYPE,
   SERVICE_TYPE,
   asyncForEach,
   fieldTicket,
@@ -53,6 +54,7 @@ import {
 } from '../walkmeSteps';
 import { nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
+import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
 
 const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep, handleChangeStatus, resourcePolicy, fetchData }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Material`;
@@ -513,10 +515,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           Object.assign(element, calValues);
           material.push(element);
         });
-        let priceData: any = await calculatePriceNew(fieldTicketData, material);
-        if (fieldTicketData?.pricingCondition?.optionValue) {
-          priceData = priceData?.filter((e) => e.conditionId === fieldTicketData?.pricingCondition?.optionValue);
-        }
+        let priceData: any = await getPricingConditions(fieldTicketData, material, PRICING_SETUP_TYPE.rent);
         AddMaterial(material, priceData);
       }
     }
@@ -532,26 +531,8 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
           Object.assign(element, calValues);
         } else {
-          let rateList = [];
-          let changeUnit = false;
-          rateList = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit);
-          if (!rateList?.length) {
-            rateList = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type);
-            changeUnit = true;
-          }
-          if (rateList.length && rateList[0].mrp) {
-            const priceFieldName = `price_${fieldTicketData?.currency?.toLowerCase()}`;
-            if (changeUnit) {
-              element['unit'] = rateList[0].unit?.trim();
-            }
-            element[priceFieldName] = rateList[0].mrp;
-            element['pricingCondition'] = rateList[0].conditionId;
-            element['pricingMethod'] = rateList[0].pricingMethod?.trim();
-            const calValues1 = autoCalculateSpecificFields({ pricingMethod: element['pricingMethod'] }, element, allFields);
-            Object.assign(element, calValues1);
-            const calValues2 = autoCalculateSpecificFields({ [priceFieldName]: rateList[0].mrp }, element, allFields);
-            Object.assign(element, calValues2);
-          }
+          const calValues = getPricingValue(element, priceData, fieldTicketData?.currency, allFields);
+          Object.assign(element, calValues);
         }
       });
     }

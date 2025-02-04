@@ -27,6 +27,7 @@ import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
+import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
 
 const Material = ({ creditMemoData, allowedToEdit, fetchCreditMemoData }) => {
   const renderedFrom = `${camelCase(sidebarResource.creditMemo)}_Material`;
@@ -363,18 +364,14 @@ const Material = ({ creditMemoData, allowedToEdit, fetchCreditMemoData }) => {
         material.push(element);
       });
     }
-    const priceData: any = await calculatePrice(material);
-    material.forEach((element) => {
-      const rateResult = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit);
-      if (rateResult.length && rateResult[0].mrp) {
-        const priceFieldName = `price_${creditMemoData?.currency?.toLowerCase()}`;
-        element[priceFieldName] = rateResult[0].mrp;
-        element['pricingCondition'] = rateResult[0].conditionId;
-        element['pricingMethod'] = rateResult[0].pricingMethod;
-        const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
+    const conditionType = creditMemoData?.salesOrder ? PRICING_SETUP_TYPE.price : PRICING_SETUP_TYPE.rent;
+    let priceData: any = await getPricingConditions(creditMemoData, material, conditionType);
+    if (priceData) {
+      material.forEach((element) => {
+        const calValues = getPricingValue(element, priceData, creditMemoData?.currency, allFields);
         Object.assign(element, calValues);
-      }
-    });
+      });
+    }
     setAssetAssignedProduct([]);
     axiosInstance()
       .post(`${routes?.creditMemo?.path}/material/${creditMemoData._id}`, { material })
@@ -535,45 +532,6 @@ const Material = ({ creditMemoData, allowedToEdit, fetchCreditMemoData }) => {
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
-    }
-  };
-
-  const calculatePrice = (arr: any[]) => {
-    if (creditMemoData) {
-      const data: any = {};
-      data.conditionType = [creditMemoData?.salesOrder ? PRICING_SETUP_TYPE.price : PRICING_SETUP_TYPE.rent];
-      const material: any = [];
-      arr?.forEach((ele) => {
-        const obj = {
-          materialId: ele?.materialId,
-          materialType: ele?.type,
-          qty: ele?.qty,
-          pricingMethod: ele?.pricingMethod,
-          currency: creditMemoData?.currency
-        };
-        if (isArray(ele?.unit)) {
-          ele?.unit?.forEach((e) => {
-            material.push({ ...obj, unit: e });
-          });
-        } else {
-          material.push({ ...obj, unit: ele?.unit });
-        }
-      });
-      data.material = material;
-      data.supplier = [];
-      data.customer = [creditMemoData?.customerAccount?.optionValue];
-      data.warehouse = [creditMemoData?.warehouse?.optionValue];
-      data.address = creditMemoData?.shippingAddress?.optionValue ? [creditMemoData?.shippingAddress?.optionValue] : [];
-      return new Promise((resolve, reject) => {
-        axiosInstance()
-          .post(pricingCondition.api + `/calculatePrice`, data)
-          .then(({ data: { data } }) => {
-            resolve(data);
-          })
-          .catch((err) => {
-            reject(err);
-          });
-      });
     }
   };
 
@@ -760,7 +718,6 @@ const Material = ({ creditMemoData, allowedToEdit, fetchCreditMemoData }) => {
       )}
       {materialEdit.open && (
         <MaterialDialog
-          calculatePrice={calculatePrice}
           onClose={() => {
             setMaterialEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
           }}

@@ -1,7 +1,8 @@
-import { Box, IconButton, MenuItem } from '@mui/material';
+import { Box, IconButton, MenuItem, Paper, Table, TableBody, TableCell, TableContainer, TableRow } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -28,6 +29,9 @@ const Expenses = (selectedExpenseData) => {
   const pathSegments = window.location.href.split('/');
   const pid = pathSegments[pathSegments.length - 1].split('?')[0];
   const [deleteData, setDeleteData] = useState(null);
+  const [subtotal, setSubtotal] = useState(0);
+  const currentDataRef = useRef([]);
+  const deletedIdsRef = useRef(new Set());
 
   useEffect(() => {
     fetchGridColumns();
@@ -100,7 +104,7 @@ const Expenses = (selectedExpenseData) => {
 
       const results = await Promise.all(promises);
 
-      let allRows = [];
+      let fetchedRows = [];
       results.forEach((response) => {
         const data = response?.data?.data || [];
         const rows = data.map((u) => {
@@ -109,10 +113,17 @@ const Expenses = (selectedExpenseData) => {
           finalObject['canDelete'] = permissions?.expenses?.isDelete;
           return finalObject;
         });
-        allRows = [...allRows, ...rows];
+        fetchedRows = [...fetchedRows, ...rows];
       });
 
-      dispatch({ type: 'initialize', data: allRows, count: allRows.length });
+      const deduplicatedFetchedRows = Array.from(new Map(fetchedRows.map((item) => [item._id, item])).values());
+      const filteredRows = deduplicatedFetchedRows.filter((row) => !deletedIdsRef.current.has(row._id));
+      
+      const sum = filteredRows.reduce((acc, row) => acc + (Number(row.totalAmount) || 0), 0);
+      setSubtotal(sum);
+
+      currentDataRef.current = filteredRows;
+      dispatch({ type: 'initialize', data: filteredRows, count: filteredRows.length });
 
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
@@ -125,7 +136,7 @@ const Expenses = (selectedExpenseData) => {
 
   const handleDelete = async (rows) => {
     axiosInstance()
-      .put(`${routes.expenseReport.path}/expenses/${pid}/remove`, { ids:rows })
+      .put(`${routes.expenseReport.path}/expenses/${pid}/remove`, { ids: rows })
       .then(({ data }) => {
         dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
@@ -184,7 +195,7 @@ const Expenses = (selectedExpenseData) => {
         />
         {columns ? (
           <CustomReactTable
-            height={'calc(100vh - 200px)'}
+            height={'calc(100vh - 450px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}
@@ -198,6 +209,21 @@ const Expenses = (selectedExpenseData) => {
             <CommonSkeleton lenArray={[...Array(8).keys()]} />
           </Box>
         )}
+        <Grid container justifyContent="flex-end" className="mt-2">
+          <Grid >
+            <TableContainer component={Paper}>
+              <Table sx={{ minWidth: 400 }} aria-label="spanning table">
+                <TableBody>
+                  <TableRow>
+                    <TableCell rowSpan={3} />
+                    <TableCell colSpan={2}>Subtotal</TableCell>
+                    <TableCell align="right">{` ${subtotal}`}</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Grid>
+        </Grid>
         {deleteData && (
           <ConfirmationDialog
             open={true}

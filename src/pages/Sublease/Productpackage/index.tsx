@@ -26,6 +26,7 @@ import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateAddStepEditProduct } from 'src/pages/Sublease/walkmeSteps';
+import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
 
 const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchData, renderedFrom, allowedToEdit, stepFullScreen }) => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -281,22 +282,13 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       material.push(element);
     });
 
-    const priceData: any = await calculatePrice(material);
-    material.forEach((element) => {
-      const rateResult = priceData?.filter(
-        (e) =>
-          e.materialId === element.materialId &&
-          e.materialType === element.type &&
-          e.unit === element.unit &&
-          e.pricingMethod === element.pricingMethod
-      );
-      if (rateResult.length && rateResult[0].mrp) {
-        const priceFieldName = `price_${subleaseData?.currency?.toLowerCase()}`;
-        element[priceFieldName] = rateResult[0].mrp;
-        const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
+    let priceData: any = await getPricingConditions(subleaseData, material, PRICING_SETUP_TYPE.rent);
+    if (priceData) {
+      material.forEach((element) => {
+        const calValues = getPricingValue(element, priceData, subleaseData?.currency, allFields);
         Object.assign(element, calValues);
-      }
-    });
+      });
+    }
 
     axiosInstance()
       .post(`${sublease.api}/productpackage/${subleaseData._id}`, { material })
@@ -347,45 +339,6 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
   const openMaterial = (rowData) => {
     setIsProductEdit({ open: true, isBulkedit: false });
     setRecordToUpdate(rowData);
-  };
-
-  const calculatePrice = (arr: any[]) => {
-    if (subleaseData) {
-      const data: any = {};
-      data.conditionType = [PRICING_SETUP_TYPE.rent];
-      const material: any = [];
-      arr?.forEach((ele) => {
-        const obj = {
-          materialId: ele?.materialId,
-          materialType: ele?.type,
-          qty: ele?.qty,
-          pricingMethod: ele?.pricingMethod,
-          currency: subleaseData?.currency
-        };
-        if (isArray(ele?.unit)) {
-          ele?.unit?.forEach((e) => {
-            material.push({ ...obj, unit: e });
-          });
-        } else {
-          material.push({ ...obj, unit: ele?.unit });
-        }
-      });
-      data.material = material;
-      data.supplier = [subleaseData?.supplierAccount?.optionValue];
-      data.customer = [];
-      data.warehouse = [];
-      data.address = subleaseData?.shippingAddress?.optionValue ? [subleaseData?.shippingAddress?.optionValue] : [];
-      return new Promise((resolve, reject) => {
-        axiosInstance()
-          .post(pricingCondition.api + `/calculatePrice`, data)
-          .then(({ data: { data } }) => {
-            resolve(data);
-          })
-          .catch((err) => {
-            reject(err);
-          });
-      });
-    }
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
@@ -515,7 +468,6 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       )}
       {isProductEdit.open && (
         <QtyDialog
-          calculatePrice={calculatePrice}
           onClose={() => {
             setIsProductEdit({ open: false, isBulkedit: false });
             setRecordToUpdate(null);

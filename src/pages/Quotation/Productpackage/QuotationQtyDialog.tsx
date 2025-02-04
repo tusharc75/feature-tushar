@@ -5,7 +5,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE, QUOTATION_TYPE, PRICING_SETUP_TYPE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -22,13 +22,13 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import dayjs from 'dayjs';
+import { getPricingConditions } from 'src/components/PricingCondition';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
   handleSaveData: VoidFunction | any;
   quotationData: any;
   rowData?: object | any;
-  calculatePrice?: VoidFunction | any;
   material: any[];
   selectedProducts: any[];
   isBulkedit: any;
@@ -40,7 +40,6 @@ interface EditDialogProps {
 const rateChangeFields = ['unit', 'pricingMethod', 'pricingCondition'];
 
 const QuotationQtyDialog: FC<EditDialogProps> = ({
-  calculatePrice,
   onClose,
   handleSaveData,
   quotationData,
@@ -213,15 +212,18 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
 
   async function getAllPricingCondition(values: any, unitOptions: any, pricingMethodOptions: any) {
     if (rowData) {
-      const priceData: any = await calculatePrice([
-        {
-          materialId: rowData.materialId,
-          type: rowData.type,
-          qty: 1,
-          pricingMethod: pricingMethodOptions?.map((d) => d.optionLabel).join() || '',
-          unit: unitOptions?.map((d) => d.optionLabel)
-        }
-      ]);
+      let conditionType = [QUOTATION_TYPE.salesOrder, QUOTATION_TYPE.repairOrder].includes(quotationData.type) ? PRICING_SETUP_TYPE.price : PRICING_SETUP_TYPE.rent;
+      let priceData: any = await getPricingConditions(
+        quotationData,
+        [
+          {
+            materialId: rowData.materialId,
+            type: rowData.type,
+            qty: 1
+          }
+        ],
+        conditionType
+      );
       setPriceConditionListConst(priceData || []);
       updateRateChangeState(values, priceData, pricingMethodOptions);
     }
