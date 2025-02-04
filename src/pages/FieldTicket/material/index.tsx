@@ -516,9 +516,6 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           material.push(element);
         });
         let priceData: any = await getPricingConditions(fieldTicketData, material, PRICING_SETUP_TYPE.rent);
-        if (fieldTicketData?.pricingCondition?.optionValue) {
-          priceData = priceData?.filter((e) => e.conditionId === fieldTicketData?.pricingCondition?.optionValue);
-        }
         AddMaterial(material, priceData);
       }
     }

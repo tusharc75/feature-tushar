@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import CellTooltip from 'src/components/CustomReactTable/Cells/CellTooltip';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 
@@ -8,8 +8,9 @@ type FreeStyleMultiSelectProps = {
 };
 
 const FreeStyleMultiSelect = ({ value, mode = 'table' }: FreeStyleMultiSelectProps) => {
+  const optionList = useMemo(() => value.split(',').map((d) => d.trim()), [value]);
+
   if (!value || typeof value !== 'string') return mode === 'table' ? <NoDataCell /> : <>'--'</>;
-  const optionList = value.split(',').map((d) => d.trim());
 
   return (
     <CellTooltip

@@ -22,6 +22,7 @@ import InvoiceDialog from './InvoiceDialog';
 import axios, { CancelTokenSource } from 'axios';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import InvoiceDataDialog from 'src/pages/RentalManagement/ProgressiveBilling/InvoiceDataDialog';
+import ManageInvoiceDialog from '../Invoice/ManageInvoiceDialog';
 
 const GenerateInvoice = ({ resourceRendered = null }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -48,6 +49,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   const [resourceList, setResourceList] = useState([]);
   const [isDownloading, setIsDownloading] = useState(false);
   const [openInvoiceDataDialog, setOpenInvoiceDataDialog] = useState({ open: false, data: null });
+  const [openManageInvoiceDialog, setOpenManageInvoiceDialog] = useState({ open: false, _id: null });
 
   const GENERATE_RESOURCE = [
     {
@@ -240,7 +242,11 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
           type: 'success',
           message: data.message
         });
-        window.open(`${routes.invoiceDetail.path}/${data?.data?._id}`)
+        if (selectedResource?.resource === sidebarResource.fieldTicket) {
+          setOpenManageInvoiceDialog({ open: true, _id: data?.data?._id });
+        } else {
+          window.open(`${routes.invoiceDetail.path}/${data?.data?._id}`)
+        }
         setCreateInvoiceDialog({ open: false, data: null });
         dispatch({ type: 'selection', selectedRecords: [] });
         setOpenInvoiceDataDialog({ open: false, data: null });
@@ -553,6 +559,19 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
             invoiceFields={invoicePolicyRef?.current?.policy?.fieldTicketInvoiceFields}
             onSuccess={(data) => {
               createInvoice(openInvoiceDataDialog.data, data);
+            }}
+          />
+        )}
+        {openManageInvoiceDialog.open && (
+          <ManageInvoiceDialog
+            isClone={false}
+            invoiceId={openManageInvoiceDialog?._id}
+            onClose={() => {
+              setOpenManageInvoiceDialog({ open: false, _id: null });
+            }}
+            onSuccess={() => {
+              setOpenManageInvoiceDialog({ open: false, _id: null });
+              fetchData();
             }}
           />
         )}

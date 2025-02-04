@@ -1,22 +1,8 @@
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { displayDate } from 'src/constants/helpers';
-import routes from '../../Helpers/Routes';
 
 export const headerName = {
   firstName: 'Name'
-};
-
-export const detailPagePath = {
-  leads: routes?.leadDetail?.path,
-  owner: routes?.userDetail?.path,
-  user: routes?.userDetail?.path,
-  collaborator: routes?.userDetail?.path,
-  rental: routes.rentalManagementDetail.path,
-  deliveryPerson: routes?.userDetail?.path,
-  pDFTemplate: routes?.quotePdfTemplateDetail?.path,
-  subMarketSegment: routes?.marketSegment?.path,
-  customerContact: routes?.customerContactDetail?.path,
-  supplierContact: routes?.supplierContactDetail?.path
 };
 
 export const getStaticFields = () => {
@@ -82,10 +68,7 @@ export const getCompletedByField = () => {
       disableFilters: true,
       cell: ({ row }) =>
         row?.original?.completedBy ? (
-          <h5
-            className="createBy"
-            title={`${row?.original?.completedBy} • ${displayDate(row?.original?.completedByDate)}`}
-          >
+          <h5 className="createBy" title={`${row?.original?.completedBy} • ${displayDate(row?.original?.completedByDate)}`}>
             {row?.original?.completedBy}
             <span className="hidden">&nbsp;-&nbsp;</span>
             <span className="createdAtTime badge-date">{displayDate(row?.original?.completedByDate)}</span>

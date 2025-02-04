@@ -32,7 +32,7 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { useTableReducer } from 'src/components/CustomReactTable';
 import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
 
-const ManageExpenseReports = ({ isClone = false, fetchReportData, expenseReportId = null, onClose, onSuccess }) => {
+const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose, onSuccess }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -47,7 +47,8 @@ const ManageExpenseReports = ({ isClone = false, fetchReportData, expenseReportI
   const { state } = useTableReducer();
   const { selectedRecords } = state;
   const [showAddExistingExpenseModal, setShowAddExistingExpenseModal] = useState(false);
-  const [showManageExpensesDialog, setShowManageExpensesDialog] = useState({ open: false, isClone: false, idToClone: null });
+  const [showManageExpensesDialog, setShowManageExpensesDialog] = useState({ open: false, idToClone: null });
+  const [isAllowedToEdit, setIsAllowedToEdit] = useState(true);
 
   useEffect(() => {
     axiosInstance()
@@ -59,23 +60,15 @@ const ManageExpenseReports = ({ isClone = false, fetchReportData, expenseReportI
           axiosInstance()
             .get(`${expenseReport.api}/` + expenseReportId)
             .then(({ data: { data } }) => {
-              if (isClone) {
-                const { _id, brand, createdBy, history, reportTitle, updatedBy, ...rest } = data;
-                setTitle(`Clone - ${reportTitle}`);
-                setInitialData({
-                  fields: fieldsDataForCreate,
-                  values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
-                });
-              } else {
-                setTitle(`Edit - ${data.reportTitle}`);
-                setSelectedExpense(data.selectedExpenses);
-                // const excludedFields = ['reportTitle', 'fromDate', 'toDate', 'status'];
-                // fieldsDataForUpdate = fieldsDataForUpdate.filter((field) => !['reportTitle','status']?.includes(field?.fieldName));
-                setInitialData({
-                  fields: fieldsDataForUpdate,
-                  values: { ...getObjKeysWithValues(data, fieldsDataForUpdate) }
-                });
-              }
+              setTitle(`Edit - ${data.reportTitle}`);
+              setSelectedExpense(data.expenses);
+              setIsAllowedToEdit(false);
+              // const excludedFields = ['reportTitle', 'fromDate', 'toDate', 'status'];
+              // fieldsDataForUpdate = fieldsDataForUpdate.filter((field) => !['reportTitle','status']?.includes(field?.fieldName));
+              setInitialData({
+                fields: fieldsDataForUpdate,
+                values: { ...getObjKeysWithValues(data, fieldsDataForUpdate) }
+              });
             })
             .catch((error) => {
               toastConfig.setToastConfig(error);
@@ -98,11 +91,11 @@ const ManageExpenseReports = ({ isClone = false, fetchReportData, expenseReportI
   const handleSubmit = (value) => {
     setIsSubmitting(true);
     const { fields, values, ...data } = value;
-    data.selectedExpenses = selectedExpense;
+    data.expenses = selectedExpense;
 
     const status = EXPENSE_STATUS.unSubmitted;
 
-    if (expenseReportId && !isClone) {
+    if (expenseReportId) {
       data._id = expenseReportId;
 
       axiosInstance()
@@ -185,7 +178,7 @@ const ManageExpenseReports = ({ isClone = false, fetchReportData, expenseReportI
         </MenuItem>
         <MenuItem
           onClick={() => {
-            setShowManageExpensesDialog({ open: true, isClone: false, idToClone: null });
+            setShowManageExpensesDialog({ open: true, idToClone: null });
           }}
         >
           {`Create New ${resources?.expenses?.titlePlural}`}
@@ -239,14 +232,16 @@ const ManageExpenseReports = ({ isClone = false, fetchReportData, expenseReportI
                     resource={sidebarResource.expenseReport}
                     referenceId={expenseReportId || null}
                   />
-                  <DetailsPageHeader
-                    isAddButtonVisible={true}
-                    addButtonMenuItems={addButtonMenuItems()}
-                    isActionButtonVisible={false}
-                    actionButtonProps={{ disabled: selectedRecords.length === 0 }}
-                    hasXpadding
-                  />
-                  {selectedExpense.length>0 && (
+                  {isAllowedToEdit && (
+                    <DetailsPageHeader
+                      isAddButtonVisible={true}
+                      addButtonMenuItems={addButtonMenuItems()}
+                      isActionButtonVisible={false}
+                      actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+                      hasXpadding
+                    />
+                  )}
+                  {selectedExpense.length > 0 && isAllowedToEdit && (
                     <div className="mt-2">
                       <Expenses selectedExpenseData={selectedExpense} />
                     </div>
@@ -307,11 +302,10 @@ const ManageExpenseReports = ({ isClone = false, fetchReportData, expenseReportI
               )}
               {showManageExpensesDialog.open && (
                 <ManageExpenses
-                  isClone={showManageExpensesDialog.isClone}
                   expenseId={showManageExpensesDialog.idToClone}
-                  onClose={() => setShowManageExpensesDialog({ open: false, isClone: false, idToClone: null })}
+                  onClose={() => setShowManageExpensesDialog({ open: false, idToClone: null })}
                   onSuccess={(data) => {
-                    setShowManageExpensesDialog({ open: false, isClone: false, idToClone: null });
+                    setShowManageExpensesDialog({ open: false, idToClone: null });
                     setSelectedExpense((prevExpenses) => {
                       const updatedExpenses = prevExpenses.filter((exp) => exp._id !== data._id);
                       return [...updatedExpenses, data];
