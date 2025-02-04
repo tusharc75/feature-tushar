@@ -183,9 +183,6 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
           qty: 1,
         }
       ], PRICING_SETUP_TYPE.price);
-      if (salesOrderData?.pricingCondition?.optionValue) {
-        priceData = priceData?.filter((e) => e.conditionId === salesOrderData?.pricingCondition?.optionValue);
-      }
       setPriceConditionListConst(priceData || []);
       updateRateChangeState(values, priceData, pricingMethodOptions);
     }

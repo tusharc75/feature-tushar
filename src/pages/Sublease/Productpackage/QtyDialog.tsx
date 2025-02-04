@@ -190,9 +190,6 @@ const QtyDialog: FC<EditDialogProps> = ({
           qty: 1,
         }
       ], PRICING_SETUP_TYPE.rent);
-      if (subleaseData?.pricingCondition?.optionValue) {
-        priceData = priceData?.filter((e) => e.conditionId === subleaseData?.pricingCondition?.optionValue);
-      }
       setPriceConditionListConst(priceData || []);
       updateRateChangeState(values, priceData, pricingMethodOptions);
     }

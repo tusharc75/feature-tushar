@@ -283,9 +283,6 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     });
 
     let priceData: any = await getPricingConditions(subleaseData, material, PRICING_SETUP_TYPE.rent);
-    if (subleaseData?.pricingCondition?.optionValue) {
-      priceData = priceData?.filter((e) => e.conditionId === subleaseData?.pricingCondition?.optionValue);
-    }
     if (priceData) {
       material.forEach((element) => {
         const calValues = getPricingValue(element, priceData, subleaseData?.currency, allFields);

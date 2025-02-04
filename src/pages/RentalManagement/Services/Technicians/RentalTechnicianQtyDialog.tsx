@@ -99,9 +99,6 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
           type: technicianData.type,
         }
       ], PRICING_SETUP_TYPE.rent);
-      if (rentalManagementData?.pricingCondition?.optionValue) {
-        priceData = priceData?.filter((e) => e.conditionId === rentalManagementData?.pricingCondition?.optionValue);
-      }
 
       setPriceConditionListConst(priceData || []);
       updateRateChangeState(values, priceData, pricingMethodOptions);

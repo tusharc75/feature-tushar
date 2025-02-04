@@ -224,9 +224,6 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
         ],
         conditionType
       );
-      if (quotationData?.pricingCondition?.optionValue) {
-        priceData = priceData?.filter((e) => e.conditionId === quotationData?.pricingCondition?.optionValue);
-      }
       setPriceConditionListConst(priceData || []);
       updateRateChangeState(values, priceData, pricingMethodOptions);
     }

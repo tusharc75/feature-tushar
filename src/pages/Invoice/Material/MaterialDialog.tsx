@@ -247,9 +247,6 @@ const MaterialDialog: FC<EditDialogProps> = ({
           qty: 1,
         }
       ], conditionType);
-      if (invoiceData?.pricingCondition?.optionValue) {
-        priceData = priceData?.filter((e) => e.conditionId === invoiceData?.pricingCondition?.optionValue);
-      }
       setPriceConditionListConst(priceData || []);
       updateRateChangeState(values, priceData, pricingMethodOptions);
     }

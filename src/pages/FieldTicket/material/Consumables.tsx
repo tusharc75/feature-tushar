@@ -414,7 +414,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
       });
       if (fieldTicketData?.pricingCondition?.optionValue) {
         const priceData: any = await getPricingConditions(fieldTicketData, material, PRICING_SETUP_TYPE.rent);
-        AddMaterial(material, priceData?.filter((e) => e.conditionId === fieldTicketData?.pricingCondition?.optionValue));
+        AddMaterial(material, priceData);
       } else {
         AddMaterial(material, null);
       }

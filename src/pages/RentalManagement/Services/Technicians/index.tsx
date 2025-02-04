@@ -322,9 +322,6 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
     });
 
     let priceData: any = await getPricingConditions(rentalManagementData, technician, PRICING_SETUP_TYPE.rent);
-    if (rentalManagementData?.pricingCondition?.optionValue) {
-      priceData = priceData?.filter((e) => e.conditionId === rentalManagementData?.pricingCondition?.optionValue);
-    }
     AddMaterial(technician, priceData);
   };
 

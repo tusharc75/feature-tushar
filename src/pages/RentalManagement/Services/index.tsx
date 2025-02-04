@@ -539,9 +539,6 @@ const Services = ({
       AddMaterial(material, []);
     } else {
       let priceData: any = await getPricingConditions(rentalManagementData, material, PRICING_SETUP_TYPE.rent);
-        if (rentalManagementData?.pricingCondition?.optionValue) {
-          priceData = priceData?.filter((e) => e.conditionId === rentalManagementData?.pricingCondition?.optionValue);
-        }
       AddMaterial(material, priceData);
     }
   };

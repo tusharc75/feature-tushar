@@ -345,9 +345,6 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
     });
 
     let priceData: any = await getPricingConditions(salesOrderData, material, PRICING_SETUP_TYPE.price);
-    if (salesOrderData?.pricingCondition?.optionValue) {
-      priceData = priceData?.filter((e) => e.conditionId === salesOrderData?.pricingCondition?.optionValue);
-    }
     if (priceData) {
       material.forEach((element) => {
         const calValues = getPricingValue(element, priceData, salesOrderData?.currency, allFields);

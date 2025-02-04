@@ -25,7 +25,11 @@ export const getPricingConditions = (referenceData: any, material: any[], condit
       axiosInstance()
         .post(pricingCondition.api + `/calculatePrice-new`, data)
         .then(({ data: { data } }) => {
-          resolve(data);
+          let pricingData = data;
+          if (referenceData?.pricingCondition?.optionValue) {
+            pricingData = data?.filter((e) => e.conditionId === referenceData?.pricingCondition?.optionValue);
+          }
+          resolve(pricingData);
         })
         .catch((err) => {
           reject(err);
