@@ -61,7 +61,7 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
             .get(`${expenseReport.api}/` + expenseReportId)
             .then(({ data: { data } }) => {
               setTitle(`Edit - ${data.reportTitle}`);
-              setSelectedExpense(data.selectedExpenses);
+              setSelectedExpense(data.expenses);
               setIsAllowedToEdit(false);
               // const excludedFields = ['reportTitle', 'fromDate', 'toDate', 'status'];
               // fieldsDataForUpdate = fieldsDataForUpdate.filter((field) => !['reportTitle','status']?.includes(field?.fieldName));
@@ -91,7 +91,7 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
   const handleSubmit = (value) => {
     setIsSubmitting(true);
     const { fields, values, ...data } = value;
-    data.selectedExpenses = selectedExpense;
+    data.expenses = selectedExpense;
 
     const status = EXPENSE_STATUS.unSubmitted;
 

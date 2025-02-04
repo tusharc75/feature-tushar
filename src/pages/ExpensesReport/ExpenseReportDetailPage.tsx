@@ -114,8 +114,8 @@ const ExpenseReportDetailsPage = () => {
     try {
       await axiosInstance().put(`${expenseReport.api}/remove`, { ids: [expenseReportData._id] });
 
-      if (expenseReportData?.selectedExpenses?.length > 0) {
-        for (let expense of expenseReportData.selectedExpenses) {
+      if (expenseReportData?.expenses?.length > 0) {
+        for (let expense of expenseReportData.expenses) {
           try {
             await axiosInstance().patch(`${expenses.api}/status/${expense._id}`, {
               status: EXPENSE_STATUS.unreported
@@ -139,8 +139,8 @@ const ExpenseReportDetailsPage = () => {
     await axiosInstance().patch(`${expenseReport.api}/status/${expenseReportData._id}`, {
       status
     });
-    if (expenseReportData?.selectedExpenses?.length > 0) {
-      for (let expense of expenseReportData.selectedExpenses) {
+    if (expenseReportData?.expenses?.length > 0) {
+      for (let expense of expenseReportData.expenses) {
           await axiosInstance().patch(`${expenses.api}/status/${expense._id}`, {
             status
           });
@@ -211,7 +211,7 @@ const ExpenseReportDetailsPage = () => {
           <Box>
             {!loadingDetails && expenseReportData && fields ? (
               <div className="mt-2">
-                <Expenses selectedExpenseData={expenseReportData?.selectedExpenses} />
+                <Expenses selectedExpenseData={expenseReportData?.expenses} />
               </div>
             ) : (
               <div className="p-2">
