@@ -91,34 +91,6 @@ function PricingConditionsDetailsPage() {
     setFormsData(setFieldsInAscendingOrder(initialData.fields));
   }, [initialData.fields]);
 
-  // useEffect(() => {
-  //     //materialType can be =["product","packages","productCategory"]
-  //     //conditionType can be =["Price","Rent","Discount","Charge","Tax"]
-  //     const data: any = {}
-  //     data.conditionType = ["Rent", "Discount", "Tax", "Charge"]
-  //     data.material = [{
-  //         materialId: "6189410150203b247444ff55",
-  //         materialType: "product",
-  //         qty: 5,
-  //         pricingMethod: "perHour",
-  //         unit: "well",
-  //         currency: "USD"
-  //     }, {
-  //         materialId: "6189410150203b247444ff55",
-  //         materialType: "product",
-  //         qty: 50,
-  //         pricingMethod: "perDay",
-  //         unit: "Two Well Pad",
-  //         currency: "USD"
-  //     }]
-  //     data.supplier = [];
-  //     data.customer = [];
-  //     data.warehouse = [];
-  //     axiosInstance().post(pricingConditionApi + `/calculatePrice`, data).then(({ data: { data } }) => {
-  //
-  //     })
-  // }, []);
-
   const getPricingConditionsFields = () => {
     axiosInstance()
       .get(`/field?resource=Pricing Condition`)

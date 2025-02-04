@@ -12,7 +12,7 @@ import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { orderBy, uniq, map, uniqBy } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { FaDiceOne } from 'react-icons/fa';
-import { calculatePrice, fetch_rental_technician_fields } from 'src/components/RentalManagment/helper';
+import { fetch_rental_technician_fields } from 'src/components/RentalManagment/helper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { getPricingConditions } from 'src/components/PricingCondition';
@@ -99,7 +99,6 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
           type: technicianData.type,
         }
       ], PRICING_SETUP_TYPE.rent);
-
       setPriceConditionListConst(priceData || []);
       updateRateChangeState(values, priceData, pricingMethodOptions);
     }
