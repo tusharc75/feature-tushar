@@ -1,41 +1,24 @@
 import { Popover } from '@mui/material';
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { PreviewFile } from 'src/components/PreviewFile';
 import { getFileIconSrc } from 'src/constants/helpers';
 import { IoCaretDown } from 'react-icons/io5';
 
 export const MultiFileCell = ({ data }: { data: { fileName: string; size: string }[] | string }) => {
-  let fileIcons = [];
-
   const [anchorEl, setAnchorEl] = useState<HTMLSpanElement | HTMLDivElement | null>(null);
 
   const handleClick = (event: React.MouseEvent<HTMLSpanElement | HTMLDivElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setAnchorEl(null);
-  };
+  }, []);
 
   const open = Boolean(anchorEl);
 
-  if (Array.isArray(data)) {
-    fileIcons = data.map((d, i) => {
-      const Icon = getFileIconSrc(d.fileName || '');
-      return (
-        <span key={i} title={d.fileName} className=" single-row flex items-center gap-2">
-          <span className="flex-shrink-0">
-            <Icon />
-          </span>
-          <span className=" truncate">{d.fileName}</span>
-          <span className="button-span flex-shrink-0">
-            <PreviewFile fileName={d.fileName} />
-          </span>
-        </span>
-      );
-    });
-  }
+  const fileIcons = useMemo(() => getFileIcons({ data }), [data]);
 
   if (fileIcons.length > 0)
     return (
@@ -102,4 +85,26 @@ export const MultiFileCell = ({ data }: { data: { fileName: string; size: string
       </div>
     );
   return <NoDataCell />;
+};
+
+const getFileIcons = ({ data }) => {
+  let fileIcons = [];
+  if (Array.isArray(data)) {
+    fileIcons = data.map((d, i) => {
+      const Icon = getFileIconSrc(d.fileName || '');
+      return (
+        <span key={i} title={d.fileName} className=" single-row flex items-center gap-2">
+          <span className="flex-shrink-0">
+            <Icon />
+          </span>
+          <span className=" truncate">{d.fileName}</span>
+          <span className="button-span flex-shrink-0">
+            <PreviewFile fileName={d.fileName} />
+          </span>
+        </span>
+      );
+    });
+  }
+
+  return fileIcons;
 };
