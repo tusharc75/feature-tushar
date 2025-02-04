@@ -66,7 +66,7 @@ const SerializedAssetDetailsPage = () => {
   const [showRepairJobDialog, setShowRepairJobDialog] = useState(false);
 
   const [assetDetails, setAssetDetails] = useState(null);
-  const [fields, setFields] = useState([]);
+  const [fields, setFields] = useState(null);
 
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState({ open: false, assetLogFields: null, updateStatus: null });
@@ -120,10 +120,10 @@ const SerializedAssetDetailsPage = () => {
           dayjs.duration(data?.totalUtilization).asMinutes() % 60
         )}`;
         delete data?.totalUtilization;
-      }   
-      
+      }
+
       if (data.totalInUseTimeAfterLastRepair) {
-        if(permissions?.repairOrder?.isRead || permissions?.repairJob?.isRead){
+        if (permissions?.repairOrder?.isRead || permissions?.repairJob?.isRead) {
           data[`totalInUseTimeAfterLastRepairHours`] = `${round(dayjs.duration(data?.totalInUseTimeAfterLastRepair).asHours())}:${Math.floor(
             dayjs.duration(data?.totalInUseTimeAfterLastRepair).asMinutes() % 60
           )}`;
@@ -287,7 +287,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: assetDetails.status }] })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -546,7 +546,7 @@ const SerializedAssetDetailsPage = () => {
           )}
           {assetDetails && <DetailsPageHeader mainPoints={mainPoints} />}
           <Box>
-            {loading || !fields.length ? (
+            {loading || !fields ? (
               <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </div>

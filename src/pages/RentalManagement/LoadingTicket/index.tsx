@@ -1327,9 +1327,6 @@ const LoadingTicket = ({
       if (matchedAsset) {
         const { _id, ...assetData } = matchedAsset;
         obj.assetData = assetData;
-        if (r?.status === RENTAL_INTERNAL_ASSET_STATUS.inUse) {
-          obj.rentalAssetsDataHistory = true;
-        }
       }
       assetsAdd.push(obj);
     });

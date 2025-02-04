@@ -6,7 +6,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { Link } from 'react-router-dom';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { dateFormatToSend, displayDateTime, INVENTORY_HISTORY_TYPE, RENTAL_INTERNAL_ASSET_STATUS, sidebarResource } from 'src/constants/helpers';
+import { ASSET_STATUS, dateFormatToSend, displayDateTime, INVENTORY_HISTORY_TYPE, sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import DurationFilter from 'src/components/DurationFilter';
 import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -14,7 +14,8 @@ import { camelCase, cloneDeep, uniq } from 'lodash';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import { Visibility } from '@mui/icons-material';
-import RentalAssetHistoryDialog from 'src/pages/SerializedAsset/RentalAssetHistoryDialog';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import RentalAssetHistoryDialog from 'src/pages/SerializedAsset/AssetHistory/RentalAssetHistoryDialog';
 
 const AssetHistory = ({ id, refresh, resourceData, fields }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -26,9 +27,9 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
     from: null,
     to: null
   });
-  const [column, setColumn] = useState([]);
+  const [column, setColumn] = useState(null);
   const [tabValue, setTabValue] = useState(0);
-  const [rentalAssetHistory, setRentalAssetHistory] = useState({ open: false, rentalId: null });
+  const [rentalAssetHistory, setRentalAssetHistory] = useState({ open: false, rentalJob: null });
   const [statusChangeFields, setStatusChangeFields] = useState(null);
 
   const {
@@ -145,323 +146,324 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
 
   const { page, limit, filters, sorting } = state;
 
-  const columns = [
-    {
-      accessor: 'reference',
-      Header: 'Reference',
-      disableFilters: true,
-      disableSortBy: false,
-      disabled: true,
-      Cell: ({ row }) => (
-        <div>
-          {row.original.reference ? (
-            row.original.type === 'Loading Ticket' ||
-              row.original.type === 'Receiving Ticket' ||
-              row.original.type === 'Return Ticket' ||
-              row.original.type === 'Delivery Ticket' ? (
-              <Link
-                className="link"
-                title={row.original.reference}
-                to={`${routes.deliveryTicketDetail.path}/${row.original.referenceId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {row.original.reference}
-              </Link>
-            ) : row.original.type?.toLowerCase() === 'repair' ? (
-              <Link
-                className="link"
-                title={row.original.reference}
-                to={`${routes.repairJobDetail.path}/${row.original.referenceId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {row.original.reference}
-              </Link>
-            ) : row.original.type === 'Work Order' ? (
-              <Link
-                className="link"
-                title={row.original.reference}
-                to={`${routes?.workOrderDetail?.path}/${row.original.referenceId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {row.original.reference}
-              </Link>
-            ) : row.original.type === 'Repair Order' ? (
-              <Link
-                className="link"
-                title={row.original.reference}
-                to={`${routes?.repairOrderDetail.path}/${row.original.referenceId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {row.original.reference}
-              </Link>
-            ) : row.original.type?.toLowerCase() === 'rental' ? (
-              <Link
-                className="link"
-                title={row.original.reference}
-                to={`${routes.rentalManagementDetail.path}/${row.original.referenceId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {row.original.reference}
-              </Link>
-            ) : row.original.type === 'Transfer Assets' ? (
-              <Link
-                className="link"
-                title={row.original.reference}
-                to={`${routes.transferAssetDetail.path}/${row.original.referenceId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {row.original.reference}
-              </Link>
-            ) : row.original.type?.toLowerCase().includes('purchase') ? (
-              <Link
-                className="link"
-                title={row.original.reference}
-                to={`${routes.purchaseOrderDetail.path}/${row.original.referenceId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {row.original.reference}
-              </Link>
-            ) : row.original.type?.toLowerCase().includes('sublease') ? (
-              <Link
-                className="link"
-                title={row.original.reference}
-                to={`${routes.subleaseDetail.path}/${row.original.referenceId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {row.original.reference}
-              </Link>
-            ) : row.original?.type === 'Bulk Asset Creation' ? (
-              <Link
-                className="link"
-                title={row.original.reference}
-                to={`${routes.bulkAssetCreationDetail.path}/${row.original.referenceId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {row.original.reference}
-              </Link>
-            ) : row.original?.type === 'Transfer Inventory' ? (
-              <Link
-                className="link"
-                title={row.original.reference}
-                to={`${routes.transferInventoryDetail.path}/${row.original.referenceId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {row.original.reference}
-              </Link>
-            ) : row.original?.type === 'Job' ? (
-              <Link
-                className="link"
-                title={row.original.reference}
-                to={`${routes.jobDetail.path}/${row.original.referenceId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {row.original.reference}
-              </Link>
-            ) : row.original?.type === 'Quotation' ? (
-              <Link
-                className="link"
-                title={row.original.reference}
-                to={`${routes.quotationDetail.path}/${row.original.referenceId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {row.original.reference}
-              </Link>
-            ) : row.original?.type === sidebarResource.planning ? (
-              <Link
-                className="link"
-                title={row.original.reference}
-                to={`${routes.planningDetail.path}/${row.original.referenceId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {row.original.reference}
-              </Link>
-            ) : row.original?.type === sidebarResource.deals ? (
-              <Link
-                className="link"
-                title={row.original.reference}
-                to={`${routes.dealDetail.path}/${row.original.referenceId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {row.original.reference}
-              </Link>
-            ) : row?.original?.type === sidebarResource.assemblyOrder ? (
-              <Link
-                className="link"
-                title={row.original.reference}
-                to={`${routes.assemblyOrderDetail.path}/${row.original.referenceId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {row.original.reference}
-              </Link>
-            ) : (
-              row.original.reference
-            )
-          ) : (
-            <NoDataCell />
-          )}
-        </div>
-      )
-    },
-    {
-      accessor: 'type',
-      Header: 'Type',
-      disabled: true,
-      Cell: ({ row }) => (row.original?.type ? <div>{row.original?.type}</div> : <NoDataCell />)
-    },
-    {
-      accessor: 'date',
-      Header: 'Date & Time',
-      disabled: true,
-      disableFilters: true,
-      disableSortBy: false,
-      Cell: ({ row }) =>
-        row.original?.date ? (
-          <div className="createBy" title={`${displayDateTime(row.original?.date)}`}>
-            {displayDateTime(row.original?.date)}
-          </div>
-        ) : (
-          <NoDataCell />
-        )
-    },
-    {
-      accessor: 'days',
-      Header: 'Days',
-      disableFilters: true,
-      disableSortBy: false,
-      Cell: ({ row }) => <div>{row.original?.days ? <span>{row.original?.days}</span> : <span>Less than a day</span>}</div>
-    },
-    {
-      accessor: 'status',
-      Header: 'Status',
-      Cell: ({ row }) => (row.original?.status ? <div>{row.original?.status}</div> : <NoDataCell />)
-    },
-    {
-      accessor: 'comments',
-      Header: 'Comment',
-      Cell: ({ row }) =>
-        row.original?.comments ? (
-          <div>
-            <p title={row.original?.comments}>{row.original?.comments}</p>
-          </div>
-        ) : (
-          <NoDataCell />
-        )
-    },
-    {
-      accessor: 'warehouse',
-      Header: resources?.warehouse?.titleSingular,
-      Cell: ({ row }) => (
-        <div>
-          {row.original?.warehouse ? (
-            permissions?.warehouse?.isRead ? (
-              <Link
-                className="link"
-                title={row.original?.warehouse}
-                to={`${routes.warehouseDetail.path}/${row.original?.warehouseId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {row.original?.warehouse}
-              </Link>
-            ) : (
-              <span>{row.original?.warehouse}</span>
-            )
-          ) : (
-            <NoDataCell />
-          )}
-        </div>
-      )
-    },
-    {
-      accessor: 'location',
-      Header: 'Location',
-      Cell: ({ row }) => (row.original?.location ? <div>{row.original?.location}</div> : <NoDataCell />)
-    },
-    {
-      accessor: 'ownerType',
-      Header: 'Owner Type',
-      Cell: ({ row }) => (row.original?.ownerType ? <div>{row.original?.ownerType}</div> : <NoDataCell />)
-    },
-    {
-      accessor: 'owner',
-      Header: 'Owner',
-      Cell: ({ row }) => (row.original?.owner ? <div>{row.original?.owner}</div> : <NoDataCell />)
-    },
-    {
-      accessor: 'transactionDate',
-      Header: 'Actual Transaction Date',
-      disableFilters: true,
-      disableSortBy: true,
-      Cell: ({ row }) => (
-        <>
-          {row?.original?.transactionDate ? (
-            <h5 className="text-truncate" title={displayDateTime(row?.original?.transactionDate)}>
-              {displayDateTime(row?.original?.transactionDate)}
-            </h5>
-          ) : (
-            <NoDataCell />
-          )}
-        </>
-      )
-    },
-    {
-      accessor: 'actions',
-      Header: 'Actions',
-      minWidth: 100,
-      width: 100,
-      sticky: 'right',
-      disableFilters: true,
-      disableSortBy: true,
-      canDrag: false,
-      Cell: ({ row }) => (
-        <>
-          {row?.original?.referencedRentalJobId && row?.original?.status === RENTAL_INTERNAL_ASSET_STATUS.inUse ? (
-            <>
-              <IconButton onClick={() => setRentalAssetHistory({ open: true, rentalId: row.original?.referencedRentalJobId })}>
-                <Visibility />
-              </IconButton>
-            </>
-          ) : (
-            <NoDataCell />
-          )}
-        </>
-      )
-    }
-  ];
-
   useEffect(() => {
-    let statusChangeFieldColumns = [];
-    statusChangeFieldColumns = uniq(resourceData?.policy?.statusChangeFields?.flatMap((ele) => ele.fields));
-    const statusChangeField = fields?.filter((ele) => [...statusChangeFieldColumns]?.includes(ele.fieldData.fieldName));
-    setStatusChangeFields(statusChangeField);
-    let extraColumns = generateColumns(
-      renderedFrom,
-      statusChangeField?.map((field) => {
-        const f = cloneDeep(field);
-        const fieldData = f.fieldData;
-        fieldData.fieldName = `assetData.${fieldData.fieldName}`;
-        f.fieldData = fieldData;
-        return f;
-      })?.filter((_field) => !columns?.map((c) => c?.accessor).includes(_field?.fieldData?.fieldName)),
-      routes.serializedAssetDetail.path,
-      true
-    );
-    setColumn([...columns, ...extraColumns]);
+    if (fields) {
+      const columns = [
+        {
+          accessor: 'reference',
+          Header: 'Reference',
+          disableFilters: true,
+          disableSortBy: false,
+          disabled: true,
+          Cell: ({ row }) => (
+            <div>
+              {row.original.reference ? (
+                row.original.type === 'Loading Ticket' ||
+                  row.original.type === 'Receiving Ticket' ||
+                  row.original.type === 'Return Ticket' ||
+                  row.original.type === 'Delivery Ticket' ? (
+                  <Link
+                    className="link"
+                    title={row.original.reference}
+                    to={`${routes.deliveryTicketDetail.path}/${row.original.referenceId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {row.original.reference}
+                  </Link>
+                ) : row.original.type?.toLowerCase() === 'repair' ? (
+                  <Link
+                    className="link"
+                    title={row.original.reference}
+                    to={`${routes.repairJobDetail.path}/${row.original.referenceId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {row.original.reference}
+                  </Link>
+                ) : row.original.type === 'Work Order' ? (
+                  <Link
+                    className="link"
+                    title={row.original.reference}
+                    to={`${routes?.workOrderDetail?.path}/${row.original.referenceId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {row.original.reference}
+                  </Link>
+                ) : row.original.type === 'Repair Order' ? (
+                  <Link
+                    className="link"
+                    title={row.original.reference}
+                    to={`${routes?.repairOrderDetail.path}/${row.original.referenceId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {row.original.reference}
+                  </Link>
+                ) : row.original.type?.toLowerCase() === 'rental' ? (
+                  <Link
+                    className="link"
+                    title={row.original.reference}
+                    to={`${routes.rentalManagementDetail.path}/${row.original.referenceId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {row.original.reference}
+                  </Link>
+                ) : row.original.type === 'Transfer Assets' ? (
+                  <Link
+                    className="link"
+                    title={row.original.reference}
+                    to={`${routes.transferAssetDetail.path}/${row.original.referenceId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {row.original.reference}
+                  </Link>
+                ) : row.original.type?.toLowerCase().includes('purchase') ? (
+                  <Link
+                    className="link"
+                    title={row.original.reference}
+                    to={`${routes.purchaseOrderDetail.path}/${row.original.referenceId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {row.original.reference}
+                  </Link>
+                ) : row.original.type?.toLowerCase().includes('sublease') ? (
+                  <Link
+                    className="link"
+                    title={row.original.reference}
+                    to={`${routes.subleaseDetail.path}/${row.original.referenceId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {row.original.reference}
+                  </Link>
+                ) : row.original?.type === 'Bulk Asset Creation' ? (
+                  <Link
+                    className="link"
+                    title={row.original.reference}
+                    to={`${routes.bulkAssetCreationDetail.path}/${row.original.referenceId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {row.original.reference}
+                  </Link>
+                ) : row.original?.type === 'Transfer Inventory' ? (
+                  <Link
+                    className="link"
+                    title={row.original.reference}
+                    to={`${routes.transferInventoryDetail.path}/${row.original.referenceId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {row.original.reference}
+                  </Link>
+                ) : row.original?.type === 'Job' ? (
+                  <Link
+                    className="link"
+                    title={row.original.reference}
+                    to={`${routes.jobDetail.path}/${row.original.referenceId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {row.original.reference}
+                  </Link>
+                ) : row.original?.type === 'Quotation' ? (
+                  <Link
+                    className="link"
+                    title={row.original.reference}
+                    to={`${routes.quotationDetail.path}/${row.original.referenceId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {row.original.reference}
+                  </Link>
+                ) : row.original?.type === sidebarResource.planning ? (
+                  <Link
+                    className="link"
+                    title={row.original.reference}
+                    to={`${routes.planningDetail.path}/${row.original.referenceId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {row.original.reference}
+                  </Link>
+                ) : row.original?.type === sidebarResource.deals ? (
+                  <Link
+                    className="link"
+                    title={row.original.reference}
+                    to={`${routes.dealDetail.path}/${row.original.referenceId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {row.original.reference}
+                  </Link>
+                ) : row?.original?.type === sidebarResource.assemblyOrder ? (
+                  <Link
+                    className="link"
+                    title={row.original.reference}
+                    to={`${routes.assemblyOrderDetail.path}/${row.original.referenceId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {row.original.reference}
+                  </Link>
+                ) : (
+                  row.original.reference
+                )
+              ) : (
+                <NoDataCell />
+              )}
+            </div>
+          )
+        },
+        {
+          accessor: 'type',
+          Header: 'Type',
+          disabled: true,
+          Cell: ({ row }) => (row.original?.type ? <div>{row.original?.type}</div> : <NoDataCell />)
+        },
+        {
+          accessor: 'date',
+          Header: 'Date & Time',
+          disabled: true,
+          disableFilters: true,
+          disableSortBy: false,
+          Cell: ({ row }) =>
+            row.original?.date ? (
+              <div className="createBy" title={`${displayDateTime(row.original?.date)}`}>
+                {displayDateTime(row.original?.date)}
+              </div>
+            ) : (
+              <NoDataCell />
+            )
+        },
+        {
+          accessor: 'days',
+          Header: 'Days',
+          disableFilters: true,
+          disableSortBy: false,
+          Cell: ({ row }) => <div>{row.original?.days ? <span>{row.original?.days}</span> : <span>Less than a day</span>}</div>
+        },
+        {
+          accessor: 'status',
+          Header: 'Status',
+          Cell: ({ row }) => (row.original?.status ? <div>{row.original?.status}</div> : <NoDataCell />)
+        },
+        {
+          accessor: 'comments',
+          Header: 'Comment',
+          Cell: ({ row }) =>
+            row.original?.comments ? (
+              <div>
+                <p title={row.original?.comments}>{row.original?.comments}</p>
+              </div>
+            ) : (
+              <NoDataCell />
+            )
+        },
+        {
+          accessor: 'warehouse',
+          Header: resources?.warehouse?.titleSingular,
+          Cell: ({ row }) => (
+            <div>
+              {row.original?.warehouse ? (
+                permissions?.warehouse?.isRead ? (
+                  <Link
+                    className="link"
+                    title={row.original?.warehouse}
+                    to={`${routes.warehouseDetail.path}/${row.original?.warehouseId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {row.original?.warehouse}
+                  </Link>
+                ) : (
+                  <span>{row.original?.warehouse}</span>
+                )
+              ) : (
+                <NoDataCell />
+              )}
+            </div>
+          )
+        },
+        {
+          accessor: 'location',
+          Header: 'Location',
+          Cell: ({ row }) => (row.original?.location ? <div>{row.original?.location}</div> : <NoDataCell />)
+        },
+        {
+          accessor: 'ownerType',
+          Header: 'Owner Type',
+          Cell: ({ row }) => (row.original?.ownerType ? <div>{row.original?.ownerType}</div> : <NoDataCell />)
+        },
+        {
+          accessor: 'owner',
+          Header: 'Owner',
+          Cell: ({ row }) => (row.original?.owner ? <div>{row.original?.owner}</div> : <NoDataCell />)
+        },
+        {
+          accessor: 'transactionDate',
+          Header: 'Actual Transaction Date',
+          disableFilters: true,
+          disableSortBy: true,
+          Cell: ({ row }) => (
+            <>
+              {row?.original?.transactionDate ? (
+                <h5 className="text-truncate" title={displayDateTime(row?.original?.transactionDate)}>
+                  {displayDateTime(row?.original?.transactionDate)}
+                </h5>
+              ) : (
+                <NoDataCell />
+              )}
+            </>
+          )
+        },
+        {
+          accessor: 'actions',
+          Header: 'Actions',
+          minWidth: 100,
+          width: 100,
+          sticky: 'right',
+          disableFilters: true,
+          disableSortBy: true,
+          canDrag: false,
+          Cell: ({ row }) => (
+            <div>
+              {row?.original?.rentalJob && row?.original?.status === ASSET_STATUS.inUse && (
+                <HtmlTooltip title='Rental Asset Data History'>
+                  <IconButton
+                    size="small"
+                    onClick={() => setRentalAssetHistory({ open: true, rentalJob: row?.original?.rentalJob })}>
+                    <Visibility color="primary" fontSize='small' />
+                  </IconButton>
+                </HtmlTooltip>
+              )}
+            </div>
+          )
+        }
+      ];
+      let statusChangeFieldColumns = [];
+      statusChangeFieldColumns = uniq(resourceData?.policy?.statusChangeFields?.flatMap((ele) => ele.fields));
+      const statusChangeField = fields?.filter((ele) => [...statusChangeFieldColumns]?.includes(ele.fieldData.fieldName));
+      setStatusChangeFields(statusChangeField);
+      let extraColumns = generateColumns(
+        renderedFrom,
+        statusChangeField?.map((field) => {
+          const f = cloneDeep(field);
+          const fieldData = f.fieldData;
+          fieldData.fieldName = `assetData.${fieldData.fieldName}`;
+          f.fieldData = fieldData;
+          return f;
+        })?.filter((_field) => !columns?.map((c) => c?.accessor).includes(_field?.fieldData?.fieldName)),
+        routes.serializedAssetDetail.path,
+        true
+      );
+      setColumn([...columns, ...extraColumns]);
+    }
   }, [fields]);
 
   useEffect(() => {
@@ -521,6 +523,7 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
           id: index + 1,
           reference: u?.reference?.optionLabel,
           referenceId: u?.reference?.optionValue,
+          rentalJob: u?.reference?.rentalJob || null,
           warehouse: u?.warehouse?.optionLabel,
           warehouseId: u?.warehouse?.optionValue
         }));
@@ -577,8 +580,8 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
       {rentalAssetHistory.open && (
         <RentalAssetHistoryDialog
           asset={id}
-          onClose={() => setRentalAssetHistory({ open: false, rentalId: null })}
-          rentalId={rentalAssetHistory.rentalId}
+          onClose={() => setRentalAssetHistory({ open: false, rentalJob: null })}
+          rentalJob={rentalAssetHistory.rentalJob}
           fields={statusChangeFields}
         />
       )}
