@@ -1721,26 +1721,6 @@ export const formatTotalforTableFooter = (num: number): number => {
  * @returns It returns a coverted amount in numbers
  */
 
-export const getExchangeRates = (date: string, amount: number, currencyFrom: string, currencyTo: string) => {
-  if (!currencyFrom || !currencyTo) return;
-
-  if (currencyFrom === currencyTo) return;
-
-  if (amount <= 0) return;
-
-  return new Promise(async (resolve, reject) => {
-    try {
-      const host = 'api.frankfurter.app';
-      const res = await fetch(`https://${host}/${date}?amount=${amount}&from=${currencyFrom}&to=${currencyTo}`);
-      const data = await res.json();
-
-      resolve(data);
-    } catch (error) {
-      reject(error);
-    }
-  });
-};
-
 export const b64toBlob = (dataURI: string) => {
   var byteString = atob(dataURI.split(',')[1]);
   var ab = new ArrayBuffer(byteString.length);
