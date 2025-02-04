@@ -4,7 +4,7 @@ import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import { ListingPageHeader } from '../PageHeaders';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import CustomReactTable, { gridFilterParser, useTableReducer } from '../CustomReactTable';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import NoDataCell from '../Helpers/NoDataCell';
@@ -52,64 +52,67 @@ const AssignSerialNumbersDialog = ({
   const [serialNumberCount, setSerialNumberCount] = useState(0);
   const [addserialNumber, setAddserialNumber] = useState(false);
 
-  const columns = [
-    {
-      accessor: 'serialNumber',
-      Header: 'Serial Number',
-      Cell: ({ row }) => (
-        <>
-          {row?.original?.serialNumber ? (
-            <h5 className="text-truncate" title={row?.original?.serialNumber}>
-              {row?.original?.serialNumber}
-            </h5>
-          ) : (
-            <NoDataCell />
-          )}
-        </>
-      )
-    },
-    {
-      accessor: 'warehouse',
-      Header: resources?.warehouse?.titleSingular,
-      Cell: ({ row }) => (
-        <>
-          {row?.original?.warehouse ? (
-            <h5 className="text-truncate" title={row?.original?.warehouse}>
-              {row?.original?.warehouse}
-            </h5>
-          ) : (
-            <NoDataCell />
-          )}
-        </>
-      )
-    },
-    {
-      accessor: 'status',
-      Header: 'Status',
-      Cell: ({ row }) => (
-        <h5 className="text-truncate" title={row?.original?.status}>
-          {row?.original?.status}
-        </h5>
-      )
-    },
-    {
-      accessor: 'createdBy',
-      Header: 'Created By',
-      disableFilters: true,
-      Cell: ({ row }) => (
-        <>
-          {row?.original?.createdBy ? (
-            <h5 className="createBy" title={`${row?.original?.createdBy} • ${displayDate(row?.original?.createdByDate)}`}>
-              {row?.original?.createdBy}
-              <span className="createdAtTime badge-date">{displayDate(row?.original?.createdByDate)}</span>
-            </h5>
-          ) : (
-            <NoDataCell />
-          )}
-        </>
-      )
-    }
-  ];
+  const columns = useMemo(
+    () => [
+      {
+        accessor: 'serialNumber',
+        Header: 'Serial Number',
+        Cell: ({ row }) => (
+          <>
+            {row?.original?.serialNumber ? (
+              <h5 className="text-truncate" title={row?.original?.serialNumber}>
+                {row?.original?.serialNumber}
+              </h5>
+            ) : (
+              <NoDataCell />
+            )}
+          </>
+        )
+      },
+      {
+        accessor: 'warehouse',
+        Header: resources?.warehouse?.titleSingular,
+        Cell: ({ row }) => (
+          <>
+            {row?.original?.warehouse ? (
+              <h5 className="text-truncate" title={row?.original?.warehouse}>
+                {row?.original?.warehouse}
+              </h5>
+            ) : (
+              <NoDataCell />
+            )}
+          </>
+        )
+      },
+      {
+        accessor: 'status',
+        Header: 'Status',
+        Cell: ({ row }) => (
+          <h5 className="text-truncate" title={row?.original?.status}>
+            {row?.original?.status}
+          </h5>
+        )
+      },
+      {
+        accessor: 'createdBy',
+        Header: 'Created By',
+        disableFilters: true,
+        Cell: ({ row }) => (
+          <>
+            {row?.original?.createdBy ? (
+              <h5 className="createBy" title={`${row?.original?.createdBy} • ${displayDate(row?.original?.createdByDate)}`}>
+                {row?.original?.createdBy}
+                <span className="createdAtTime badge-date">{displayDate(row?.original?.createdByDate)}</span>
+              </h5>
+            ) : (
+              <NoDataCell />
+            )}
+          </>
+        )
+      }
+    ],
+    [resources?.warehouse?.titleSingular]
+  );
 
   useEffect(() => {
     if (selectedProduct && selectedWarehouse) {
@@ -346,11 +349,7 @@ const AssignSerialNumbersDialog = ({
         {!selectedProduct || !selectedWarehouse ? (
           <HtmlTooltip title={'Please Select Product'}>
             <span>
-              <ThemeButton
-                disabled={true}
-              >
-                Add New Serial Numbers
-              </ThemeButton>
+              <ThemeButton disabled={true}>Add New Serial Numbers</ThemeButton>
             </span>
           </HtmlTooltip>
         ) : serialNumberCount ? (

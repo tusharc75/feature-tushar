@@ -1,7 +1,8 @@
+import { memo } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 
-export const ExternalLinkCell = ({ value, link, endComma = false, startComma = false }) => {
+export const ExternalLinkCellImpl = ({ value, link, endComma = false, startComma = false }) => {
   return (
     <p className="flex items-center justify-between gap-2 text-[13px] font-normal">
       <span className=" min-w-0 truncate">
@@ -27,3 +28,5 @@ const RenderLink = ({ link, value, className = '' }) => {
     </>
   );
 };
+
+export const ExternalLinkCell = memo(ExternalLinkCellImpl);
