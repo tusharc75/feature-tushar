@@ -105,42 +105,6 @@ export default function Contact(props) {
     let data = response?.data?.data;
 
     let newColumns = generateColumns(contactResource, data, `/${contactRoute}/detail`, true);
-    if (contactResource.includes('customer')) {
-      newColumns = [
-        ...newColumns,
-        {
-          accessor: 'relatedLead',
-          Header: 'Related Lead',
-          minWidth: 150,
-          width: 150,
-          Cell: ({ row }) =>
-            row?.original?.relatedLead ? (
-              row?.original?.relatedLeadEntity === selectedEntity ? (
-                <Link className="link" to={`${routes.leadDetail.path}/${row?.original?.relatedLeadId}`} title={row?.original?.relatedLead}>
-                  {row?.original?.relatedLead}
-                </Link>
-              ) : hasAccessToEntity(row?.original?.relatedLeadEntity) ? (
-                <span
-                  className="link"
-                  onClick={() => {
-                    handleEntityChange(row?.original?.relatedLeadEntity);
-                    history.replace(`${routes.leadDetail.path}/${row?.original?.relatedLeadId}`);
-                  }}
-                  title={row?.original?.relatedLead}
-                >
-                  {row?.original?.relatedLead}
-                </span>
-              ) : (
-                <span title={row?.original?.relatedLead}>
-                  <CustomRenderCell value={row?.original?.relatedLead} />
-                </span>
-              )
-            ) : (
-              <NoDataCell />
-            )
-        }
-      ];
-    }
     let staticFields = getStaticFields();
     staticFields.forEach((field) => {
       newColumns.push(checkStaticField(sidebarResource.projectSales, field));
@@ -493,11 +457,10 @@ export default function Contact(props) {
           {showDeleteConfirmBox ? (
             <ConfirmationDialog
               open={showDeleteConfirmBox}
-              message={`Are you sure you want to delete ${
-                deleteRecord
-                  ? `${resources?.[contactResource]?.titleSingular?.toLowerCase()} : ${deleteRecord?.concatedName}`
-                  : `selected ${resources?.[contactResource]?.titlePlural?.toLowerCase()}`
-              } ?`}
+              message={`Are you sure you want to delete ${deleteRecord
+                ? `${resources?.[contactResource]?.titleSingular?.toLowerCase()} : ${deleteRecord?.concatedName}`
+                : `selected ${resources?.[contactResource]?.titlePlural?.toLowerCase()}`
+                } ?`}
               onClose={() => {
                 setShowDeleteConfirmBox(false);
                 setDeleteRecord(null);
@@ -515,7 +478,7 @@ export default function Contact(props) {
               onClose={() => {
                 setShowCreateContactDialog({ open: false, isClone: false, idToClone: null });
               }}
-              onSuccess={() => {}}
+              onSuccess={() => { }}
               isRedirectToDetailPage={true}
             />
           )}
