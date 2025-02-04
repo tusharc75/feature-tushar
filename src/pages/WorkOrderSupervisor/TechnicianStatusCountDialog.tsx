@@ -81,33 +81,3 @@ const TechniciansStatusCountDialog: React.FC<TechniciansStatusCountDialogProps> 
 };
 
 export default TechniciansStatusCountDialog;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
