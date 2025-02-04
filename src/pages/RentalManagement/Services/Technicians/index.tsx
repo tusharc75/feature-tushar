@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../../components/Helpers/CommonSkeleton';
 import routes from '../../../../components/Helpers/Routes';
 import Grid from '@mui/material/Grid2';
 import axiosInstance from 'src/axios/axiosInstance';
-import { prepareDataForGrid, rentalManagement, sidebarResource } from 'src/constants/helpers';
+import { prepareDataForGrid, PRICING_SETUP_TYPE, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { IconButton, Menu, MenuItem } from '@mui/material';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -22,9 +22,10 @@ import { CustomOfflineContext } from '../../../../StateProvider/OfflineContext/O
 import RentalTechnicianQtyDialog from './RentalTechnicianQtyDialog';
 import { camelCase } from 'lodash';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
-import { calculatePrice, fetch_rental_technician_fields } from 'src/components/RentalManagment/helper';
+import { fetch_rental_technician_fields } from 'src/components/RentalManagment/helper';
 import { FiExternalLink } from 'react-icons/fi';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
 
 const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, services }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -320,26 +321,15 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
       technician.push(element);
     });
 
-    const priceData = (await calculatePrice(rentalManagementData, technician)) || [];
+    let priceData: any = await getPricingConditions(rentalManagementData, technician, PRICING_SETUP_TYPE.rent);
     AddMaterial(technician, priceData);
   };
 
   const AddMaterial = async (technician, priceData) => {
     const tempMaterial = [...technician];
     tempMaterial.forEach((element) => {
-      const rateResult = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type);
-      if (rateResult.length && rateResult[0].mrp) {
-        const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
-        element[priceFieldName] = rateResult[0].mrp;
-        element['pricingCondition'] = rateResult[0].conditionId;
-        element['pricingMethod'] = rateResult[0].pricingMethod?.trim();
-        const calValues = autoCalculateSpecificFields(
-          { [priceFieldName]: rateResult[0].mrp, pricingMethod: element.pricingMethod },
-          element,
-          allFields
-        );
-        Object.assign(element, calValues);
-      }
+      const calValues = getPricingValue(element, priceData, rentalManagementData?.currency, allFields);
+      Object.assign(element, calValues);
       delete element.materialId;
     });
 
@@ -365,9 +355,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
         {allowedToEdit && (
           <Box display="flex" justifyContent="space-between" mb={2}>
             <Box display="flex" gap={'8px'} flexWrap={'wrap'}>
-              <ThemeButton
-                startIcon={<Add />}
-                onClick={() => setTechnicianDialog(true)}>
+              <ThemeButton startIcon={<Add />} onClick={() => setTechnicianDialog(true)}>
                 Add
               </ThemeButton>
             </Box>

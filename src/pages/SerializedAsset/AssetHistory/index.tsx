@@ -1,18 +1,20 @@
 import { useState, useEffect, useContext } from 'react';
-import { Box } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { Link } from 'react-router-dom';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { dateFormatToSend, displayDateTime, INVENTORY_HISTORY_TYPE, sidebarResource } from 'src/constants/helpers';
+import { dateFormatToSend, displayDateTime, INVENTORY_HISTORY_TYPE, RENTAL_INTERNAL_ASSET_STATUS, sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import DurationFilter from 'src/components/DurationFilter';
 import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { camelCase, cloneDeep, uniq } from 'lodash';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
+import { Visibility } from '@mui/icons-material';
+import RentalAssetHistoryDialog from 'src/pages/SerializedAsset/RentalAssetHistoryDialog';
 
 const AssetHistory = ({ id, refresh, resourceData, fields }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -26,6 +28,7 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
   });
   const [column, setColumn] = useState([]);
   const [tabValue, setTabValue] = useState(0);
+  const [rentalAssetHistory, setRentalAssetHistory] = useState({ open: false, rentalId: null });
 
   const {
     state: { permissions, resources }
@@ -414,6 +417,29 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
           )}
         </>
       )
+    },
+    {
+      accessor: 'actions',
+      Header: 'Actions',
+      minWidth: 100,
+      width: 100,
+      sticky: 'right',
+      disableFilters: true,
+      disableSortBy: true,
+      canDrag: false,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.referencedRentalJobId && row?.original?.status === RENTAL_INTERNAL_ASSET_STATUS.inUse ? (
+            <>
+              <IconButton onClick={() => setRentalAssetHistory({ open: true, rentalId: row.original?.referencedRentalJobId })}>
+                <Visibility />
+              </IconButton>
+            </>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
     }
   ];
 
@@ -547,6 +573,14 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
         <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
+      )}
+      {rentalAssetHistory.open && (
+        <RentalAssetHistoryDialog
+          asset={id}
+          onClose={() => setRentalAssetHistory({ open: false, rentalId: null })}
+          rentalId={rentalAssetHistory.rentalId}
+          cols={column?.filter((col) => col?.accessor?.toString().startsWith('assetData.'))}
+        />
       )}
     </Box>
   );

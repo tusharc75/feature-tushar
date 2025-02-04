@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import CellDialog from 'src/components/CustomReactTable/Cells/CellDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 
@@ -8,8 +9,8 @@ type RichTextEditorCellProps = {
 };
 
 function RichTextEditorCell({ field, original, enableDilaog = true }: RichTextEditorCellProps) {
-  const textContent = original?.[field.fieldName] ? original?.[field.fieldName] : "";
-  const NoData = enableDilaog ? <NoDataCell /> : <span className="block">-</span>;
+  const textContent = useMemo(() => (original?.[field.fieldName] ? original?.[field.fieldName] : ''), [field.fieldName, original]);
+  const NoData = useMemo(() => (enableDilaog ? <NoDataCell /> : <span className="block">-</span>), [enableDilaog]);
 
   if (!textContent) return NoData;
 
