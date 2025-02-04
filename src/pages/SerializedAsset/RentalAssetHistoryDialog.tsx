@@ -3,10 +3,10 @@ import { Box, Dialog, } from '@mui/material';
 import axiosInstance from '../../axios/axiosInstance';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { CustomDialogTransition, sidebarResource } from '../../constants/helpers';
+import { CustomDialogTransition, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import { camelCase } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';
-import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, useTableReducer, useColumns } from 'src/components/CustomReactTable';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -15,11 +15,13 @@ import routes from 'src/components/Helpers/Routes';
 
 const renderedFrom = `${camelCase(sidebarResource?.serializedAsset)}_rentalAssetHistory`;
 
-const RentalAssetHistory = ({ asset, rentalId, cols, onClose }) => {
+const RentalAssetHistory = ({ asset, rentalId, fields, onClose }) => {
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [columns, setColumns] = useState(null);
+
+  const { generateColumns } = useColumns();
 
   const rentalJobColumn = {
     accessor: 'rentalManagement',
@@ -46,12 +48,14 @@ const RentalAssetHistory = ({ asset, rentalId, cols, onClose }) => {
   };
 
   useEffect(() => {
-    const newColumns: any = [rentalJobColumn, ...(cols?.map((col) => {
+    let cols = generateColumns(renderedFrom, fields)?.map((col) => {
       const { Footer, ...rest } = col;
       return rest;
-    })), getStaticFields()[0]];
+    });
+    const newColumns: any = [rentalJobColumn, ...cols, getStaticFields()[0]];
     setColumns(newColumns);
-  }, [cols]);
+  }, [fields]);
+
 
   useEffect(() => {
     if (rentalId && asset) {
@@ -66,15 +70,7 @@ const RentalAssetHistory = ({ asset, rentalId, cols, onClose }) => {
       .get(`/history/rental-asset-history?rental=${rentalId}&asset=${asset}`)
       .then(({ data: { data } }) => {
         data = data?.map((u) => {
-          let finalRow: any = {};
-          Object.keys(u?.assetData || {})?.forEach((key) => {
-            finalRow[`assetData.${key}`] = u?.assetData[key];
-          });
-          finalRow['createdBy'] = u?.createdBy?.user?.concatedName;
-          finalRow['createdByDate'] = u?.createdBy?.date;
-          finalRow['createdById'] = u?.createdBy?.user?._id;
-          finalRow['rentalJobId'] = u?.rentalJob?.optionValue;
-          finalRow['rentalJob'] = u?.rentalJob?.optionLabel;
+          let finalRow: any = prepareDataForGrid(u);
           return finalRow;
         });
         dispatch({ type: 'initialize', data: data, count: data?.length });

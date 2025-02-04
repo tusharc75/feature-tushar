@@ -29,6 +29,7 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
   const [column, setColumn] = useState([]);
   const [tabValue, setTabValue] = useState(0);
   const [rentalAssetHistory, setRentalAssetHistory] = useState({ open: false, rentalId: null });
+  const [statusChangeFields, setStatusChangeFields] = useState(null);
 
   const {
     state: { permissions, resources }
@@ -446,18 +447,17 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
   useEffect(() => {
     let statusChangeFieldColumns = [];
     statusChangeFieldColumns = uniq(resourceData?.policy?.statusChangeFields?.flatMap((ele) => ele.fields));
-    let statusChangeFields = fields
-      ?.filter((ele) => [...statusChangeFieldColumns]?.includes(ele.fieldData.fieldName))
-      .map((field) => {
+    const statusChangeField = fields?.filter((ele) => [...statusChangeFieldColumns]?.includes(ele.fieldData.fieldName));
+    setStatusChangeFields(statusChangeField);
+    let extraColumns = generateColumns(
+      renderedFrom,
+      statusChangeField?.map((field) => {
         const f = cloneDeep(field);
         const fieldData = f.fieldData;
         fieldData.fieldName = `assetData.${fieldData.fieldName}`;
         f.fieldData = fieldData;
         return f;
-      });
-    let extraColumns = generateColumns(
-      renderedFrom,
-      statusChangeFields?.filter((_field) => !columns?.map((c) => c?.accessor).includes(_field?.fieldData?.fieldName)),
+      })?.filter((_field) => !columns?.map((c) => c?.accessor).includes(_field?.fieldData?.fieldName)),
       routes.serializedAssetDetail.path,
       true
     );
@@ -579,7 +579,7 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
           asset={id}
           onClose={() => setRentalAssetHistory({ open: false, rentalId: null })}
           rentalId={rentalAssetHistory.rentalId}
-          cols={column?.filter((col) => col?.accessor?.toString().startsWith('assetData.'))}
+          fields={statusChangeFields}
         />
       )}
     </Box>
