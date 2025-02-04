@@ -1,5 +1,5 @@
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
-import React from 'react';
+import React, { memo } from 'react';
 
 type RenderCellTableProps<T> = {
   columns: RenderCellTableColumnDef<T>[];
@@ -19,7 +19,7 @@ export type RenderCellTableColumnDef<T> = {
   width?: string;
 };
 
-function RenderCellTable<T extends GenericRowData>({ columns, data, dataMaxHeight = '400px', enableDilaog = true }: RenderCellTableProps<T>) {
+function RenderCellTableImpl<T extends GenericRowData>({ columns, data, dataMaxHeight = '400px', enableDilaog = true }: RenderCellTableProps<T>) {
   return (
     <TableContainer component={Paper} elevation={0} style={{ maxHeight: dataMaxHeight ? dataMaxHeight : 'auto' }}>
       <Table stickyHeader size={enableDilaog ? 'medium' : 'small'}>
@@ -50,5 +50,7 @@ function RenderCellTable<T extends GenericRowData>({ columns, data, dataMaxHeigh
     </TableContainer>
   );
 }
+
+const RenderCellTable = memo(RenderCellTableImpl);
 
 export default RenderCellTable;

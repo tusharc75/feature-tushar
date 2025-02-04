@@ -8,8 +8,8 @@ import { RnderTableProps } from 'src/components/CustomReactTable/TableComponents
 import { VirtualTableBody } from 'src/components/CustomReactTable/TableComponents/VirtualTable/Body';
 import { VirtualTableHead } from 'src/components/CustomReactTable/TableComponents/VirtualTable/Head';
 import { getStickyPosition } from 'src/components/CustomReactTable/utils';
-import { TColType } from '../TableHelperComponents';
 import { cn } from 'src/constants/helpers';
+import { TColType } from '../TableHelperComponents';
 
 const VirtualTableImpl = forwardRef(function (
   {
@@ -59,18 +59,20 @@ const VirtualTableImpl = forwardRef(function (
 ) {
   const [parentRef, setParentRef] = useState<HTMLDivElement>(null);
 
+  const rangeExtractor = React.useCallback(
+    (range: Range, ...rest) => {
+      return [...new Set([...stickyColumns.leftIndexes, ...defaultRangeExtractor(range), ...stickyColumns.rightIndexes])];
+    },
+    [stickyColumns.leftIndexes, stickyColumns.rightIndexes]
+  );
+
   const columnVirtualizer = useVirtualizer({
     count: columns?.length || 1,
     estimateSize: (index) => sizes[index] || 200,
     getScrollElement: () => parentRef,
     horizontal: true,
     overscan: 2,
-    rangeExtractor: React.useCallback(
-      (range: Range, ...rest) => {
-        return [...new Set([...stickyColumns.leftIndexes, ...defaultRangeExtractor(range), ...stickyColumns.rightIndexes])];
-      },
-      [stickyColumns.leftIndexes, stickyColumns.rightIndexes]
-    )
+    rangeExtractor
   });
 
   useEffect(() => {
@@ -78,6 +80,7 @@ const VirtualTableImpl = forwardRef(function (
   }, [columns.length, sizes]);
 
   const virtualColumns = columnVirtualizer.getVirtualItems();
+
   const totalColumnSize = columnVirtualizer.getTotalSize();
 
   return (
@@ -162,7 +165,7 @@ const VirtualTableImpl = forwardRef(function (
                 {table?.getFooterGroups().map((footerGroup) => {
                   return (
                     <tr key={footerGroup.id} className="!flex ">
-                      {virtualColumns.map((vc) => {
+                      {columnVirtualizer.getVirtualItems().map((vc) => {
                         const header = footerGroup.headers[vc?.index];
                         if (!header) return null;
                         if (exportTableView && excludedColumns.includes(header.column.columnDef.id)) return null;

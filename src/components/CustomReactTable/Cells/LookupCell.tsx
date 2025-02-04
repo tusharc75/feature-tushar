@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 
-const LookupCell = ({ field, original }) => {
+const LookupCellImpl = ({ field, original }) => {
   const text = useMemo(() => getText({ original, field }), [field, original]);
   return (
     <div>
@@ -12,6 +12,7 @@ const LookupCell = ({ field, original }) => {
   );
 };
 
+const LookupCell = memo(LookupCellImpl);
 export default LookupCell;
 
 const getText = ({ original, field }) => {

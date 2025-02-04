@@ -1,5 +1,5 @@
 import { isArray } from 'lodash';
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import CellDialog from 'src/components/CustomReactTable/Cells/CellDialog';
 import RenderCellTable, { RenderCellTableColumnDef } from 'src/components/CustomReactTable/Cells/RenderCellTable';
@@ -13,7 +13,7 @@ type GroupSignatureCellProps = {
   enableDilaog?: boolean;
 };
 
-function GroupSignatureCell({ field, original, enableDilaog = true }: GroupSignatureCellProps) {
+function GroupSignatureCellImpl({ field, original, enableDilaog = true }: GroupSignatureCellProps) {
   const signatures = useMemo(() => (isArray(original?.[field.fieldName]) ? original?.[field.fieldName] : []), [field.fieldName, original]);
 
   const NoData = useMemo(() => (enableDilaog ? <NoDataCell /> : <span className="block">-</span>), [enableDilaog]);
@@ -56,5 +56,6 @@ function GroupSignatureCell({ field, original, enableDilaog = true }: GroupSigna
     </CellDialog>
   );
 }
+const GroupSignatureCell = memo(GroupSignatureCellImpl);
 
 export default GroupSignatureCell;
