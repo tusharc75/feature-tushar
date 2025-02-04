@@ -83,7 +83,12 @@ const getButtonStyle = ({ buttonType = 'default', mode = 'dark', iconForMobile =
           border: '1px solid var(--common-red-border-color)',
           color: '#d43e3e',
           opacity: 0.7
-        }
+        },
+        '&:hover': {
+          backgroundColor: 'var(--common-red-border-color)',
+          color: 'white'
+        },
+        fontWeight: '600'
       };
       break;
     }

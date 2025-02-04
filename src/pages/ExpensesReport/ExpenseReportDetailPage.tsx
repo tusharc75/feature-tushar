@@ -90,7 +90,6 @@ const ExpenseReportDetailsPage = () => {
         setAllowedToEdit(permissions?.expenseReport?.isUpdate);
         setAllowedToDelete(permissions?.expenseReport?.isDelete && data?.canDelete);
         setExpenseReportData(data);
-        console.log(expenseReportData.status);
       })
       .catch((err) => {
         setLoadingDetails(false);

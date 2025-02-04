@@ -14,13 +14,14 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { gridLoadingTimeout, prepareDataForGrid, expenseApproval, sidebarResource, EXPENSE_STATUS } from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, expenseApproval, sidebarResource, EXPENSE_STATUS, expenseReport, expenses } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import DeleteIcon from '@mui/icons-material/Delete';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Grid from '@mui/material/Grid2';
 
 let expenseApprovalTimeout;
 
@@ -39,105 +40,26 @@ const ExpenseApproval = () => {
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
+  const [reportData, setReportData] = useState(null);
+  const [subtotal, setSubtotal] = useState(0);
 
   const { generateColumns, checkStaticField } = useColumns();
 
-  // useEffect(() => {
-  //   fetchGridColumns();
-  // }, []);
+  useEffect(() => {
+    let millisec = Object.keys(search).length > 0 ? 600 : 5;
+    if (expenseApprovalTimeout) {
+      clearTimeout(expenseApprovalTimeout);
+    }
+    expenseApprovalTimeout = setTimeout(() => {
+      fetchData();
+    }, millisec);
+  }, [search]);
 
-  // const fetchGridColumns = async () => {
-  //   let data;
-  //   const response = await axiosInstance().get(`/field?resource=${sidebarResource.expenses}`);
-  //   data = response?.data?.data;
-  //   const newColumns = generateColumns(renderedFrom, data, routes?.expensesDetail?.path, true);
-  //   let staticFields = getStaticFields();
-  //   staticFields.forEach((field) => {
-  //     newColumns.push(checkStaticField(renderedFrom, field));
-  //   });
-  //   const extracolumns: any = [
-  //     ...newColumns,
-  //     {
-  //       accessor: 'totalAmount',
-  //       Header: 'Total Amount',
-  //       minWidth: 100,
-  //       width: 150,
-  //       disableFilters: true,
-  //       disableSortBy: false,
-  //       canDrag: true,
-  //       Cell: ({ row }) => {
-  //         return row?.original?.totalAmount ? (
-  //           <div>
-  //             <p className="text-truncate">{row?.original?.totalAmount}</p>
-  //           </div>
-  //         ) : (
-  //           <NoDataCell />
-  //         );
-  //       }
-  //     }
-  //   ];
-  //   setColumns([...extracolumns, ActionsRenderer]);
-  // };
-
-  // useEffect(() => {
-  //   let millisec = Object.keys(search).length > 0 ? 600 : 5;
-  //   if (expenseApprovalTimeout) {
-  //     clearTimeout(expenseApprovalTimeout);
-  //   }
-  //   expenseApprovalTimeout = setTimeout(() => {
-  //     fetchData();
-  //   }, millisec);
-  // }, [search]);
-
-  // useEffect(() => {
-  //   const cancelTokenSource = axios.CancelToken.source();
-  //   fetchData(cancelTokenSource);
-  //   return () => cancelTokenSource.cancel();
-  // }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
-
-  // const ActionsRenderer = {
-  //   accessor: 'action',
-  //   Header: 'Actions',
-  //   minWidth: 100,
-  //   width: 110,
-  //   sticky: 'right',
-  //   disableFilters: true,
-  //   disableSortBy: true,
-  //   canDrag: false,
-  //   Cell: ({ row }) => (
-  //     <>
-  //       <HtmlTooltip title={permissions?.expenseApprovsl?.isCreate ? 'Clone' : cloneDisable}>
-  //         <span>
-  //           <IconButton
-  //             size="small"
-  //             aria-label="Clone"
-  //             disabled={permissions?.expenses?.isCreate ? false : true}
-  //             onClick={() => {
-  //               setShowManageExpensesDialog({ open: true, isClone: true, idToClone: row.original._id });
-  //             }}
-  //           >
-  //             <FileCopyIcon fontSize="small" color={permissions?.expenses?.isCreate ? 'primary' : 'disabled'} />
-  //           </IconButton>
-  //         </span>
-  //       </HtmlTooltip>
-  //       <HtmlTooltip title={row?.original?.canDelete && row?.original?.status !== EXPENSE_STATUS.unSubmitted ? 'Delete' : 'You can not delete because it is Reported'}>
-  //         <span>
-  //           <IconButton
-  //             size="small"
-  //             aria-label="Delete"
-  //             disabled={row?.original?.canDelete && row?.original?.status !== EXPENSE_STATUS.unSubmitted  ? false : true}
-  //             onClick={() => {
-  //               setDeleteRecord(row.original);
-  //               setShowDeleteConfirmBox(true);
-  //             }}
-  //           >
-  //             <DeleteIcon fontSize="small" color={row?.original?.canDelete && row?.original?.status !== EXPENSE_STATUS.unSubmitted ? 'error' : 'disabled'} />
-  //           </IconButton>
-  //         </span>
-  //       </HtmlTooltip>
-  //     </>
-  //   )
-  // };
+  useEffect(() => {
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
+  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -175,13 +97,16 @@ const ExpenseApproval = () => {
     try {
       let data: any = [],
         count;
-      const response: any = await axiosInstance().get(`${expenseApproval.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
+      const response: any = await axiosInstance().get(`${expenseReport.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
       data = response?.data?.data;
       count = response?.data?.count;
-      let rows = data.map((u) => {
+      data=data.filter((item) => item.status === EXPENSE_STATUS.awaitingApproval)
+      setReportData(data);
+      calculateTotal();
+      let rows = data?.map((u) => {
         let finalObject: any = prepareDataForGrid(u, user);
         finalObject['isChecked'] = false;
-        finalObject['canDelete'] = permissions?.expenseApproval?.isDelete;
+        finalObject['canDelete'] = permissions?.expenseReport?.isDelete && u.canDelete;
         return finalObject;
       });
       dispatch({ type: 'initialize', data: rows, count: count });
@@ -198,38 +123,34 @@ const ExpenseApproval = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  // const handleDeleteExpenses = async () => {
-  //   let recordsToDelete = [];
-  //   if (deleteRecord?._id) {
-  //     recordsToDelete.push(deleteRecord?._id);
-  //   } else {
-  //     recordsToDelete = selectedRecords.map((o) => o._id);
-  //   }
-  //   if (recordsToDelete.length > 0) {
-  //     setDeleteLoading(true);
-  //     axiosInstance()
-  //       .put(`${expenseApproval.api}/remove`, {
-  //         ids: recordsToDelete
-  //       })
-  //       .then(({ data }) => {
-  //         toastConfig.setToastConfig({
-  //           open: true,
-  //           type: 'success',
-  //           message: data.message
-  //         });
-  //         dispatch({ type: 'selection', selectedRecords: [] });
-  //         setShowDeleteConfirmBox(false);
-  //         setDeleteLoading(false);
-  //         if (deleteRecord) setDeleteRecord({});
-  //         fetchData();
-  //       })
-  //       .catch((error) => {
-  //         toastConfig.setToastConfig(error);
-  //         setShowDeleteConfirmBox(false);
-  //         setDeleteLoading(false);
-  //       });
-  //   }
-  // };
+    const handleStatusChange = async (status) => {
+      for (let report of reportData) {
+      await axiosInstance().patch(`${expenseReport.api}/status/${report._id}`, {
+        status
+      });
+      if (report?.selectedExpenses?.length > 0) {
+        for (let expense of report.selectedExpenses) {
+            await axiosInstance().patch(`${expenses.api}/status/${expense._id}`, {
+              status
+            });
+        }
+      }
+    }
+      fetchData();
+    };
+
+    const calculateTotal = () => {
+      let sum = 0;
+      for (let report of reportData) {
+        if (report?.selectedExpenses?.length > 0) {
+          for (let expense of report.selectedExpenses) {
+             sum = expense?.reduce((acc, row) => acc + (Number(row.totalAmount) || 0), 0); 
+          }
+        }
+      };
+      return setSubtotal(sum);
+    };
+
 
   const ActionMenuItems = () => {
     return (
@@ -263,20 +184,26 @@ const ExpenseApproval = () => {
           actionMenuItems={<ActionMenuItems />}
           isAddButtonVisible={false}
         />
-        <Card sx={{ maxWidth: 345 }}>
-          <CardContent>
-            <Typography gutterBottom variant="h5" component="div">
-              Lizard
-            </Typography>
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              Total Expense
-            </Typography>
-          </CardContent>
-          <CardActions>
-            <ThemeButton buttonType='yellow'>Approve</ThemeButton>
-            <ThemeButton buttonType='red'>Reject</ThemeButton>
-          </CardActions>
-        </Card>
+        <Grid container spacing={2} className="mt-3">
+          {reportData?.map((report) => (
+            <Grid size={{xs:12, sm:6, md:4}} key={report._id}>
+              <Card sx={{ maxWidth: 345 }}>
+                <CardContent>
+                  <Typography gutterBottom variant="h5" component="div">
+                    {report.reportTitle}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                    {`Total Expense: ${report.totalAmount || 'N/A'}`}
+                  </Typography>
+                </CardContent>
+                <CardActions>
+                  <ThemeButton buttonType="themeBorder" onClick={() => handleStatusChange(EXPENSE_STATUS.approved)}>Approve</ThemeButton>
+                  <ThemeButton buttonType="red" onClick={() => handleStatusChange(EXPENSE_STATUS.rejected)}>Reject</ThemeButton>
+                </CardActions>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
       </CustomContainer>
     </div>
   );
