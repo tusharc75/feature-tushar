@@ -113,7 +113,6 @@ const MemoizedCellRenderer = memo(
 export const MemoizedSingleRow = memo(
   ({
     virtualColumns,
-    virtualization,
     state,
     setWholeRowsCellColor,
     row,
@@ -146,7 +145,7 @@ export const MemoizedSingleRow = memo(
               <Fragment key={virtualColumns.index}>
                 <MemoizedCellRenderer
                   key={virtualColumns.index}
-                  virtualStyles={{ position: 'absolute', left: virtualCell.start }}
+                  virtualStyles={{ position: 'absolute', transform: `translateX(${virtualCell.start}px)`, willChange: 'transform' }}
                   state={state}
                   cell={cell}
                   setWholeRowsCellColor={setWholeRowsCellColor}

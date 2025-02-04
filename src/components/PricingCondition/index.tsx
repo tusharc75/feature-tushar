@@ -17,15 +17,19 @@ export const getPricingConditions = (referenceData: any, material: any[], condit
       rows.push(obj)
     })
     data.material = rows;
-    data.supplier = [];
-    data.customer = [referenceData?.customerAccount?.optionValue];
-    data.warehouse = [referenceData?.warehouse?.optionValue];
+    data.supplier = referenceData?.supplierAccount?.optionValue ? [referenceData?.supplierAccount?.optionValue] : [];
+    data.customer = referenceData?.customerAccount?.optionValue ? [referenceData?.customerAccount?.optionValue] : [];
+    data.warehouse = referenceData?.warehouse?.optionValue ? [referenceData?.warehouse?.optionValue] : [];
     data.address = referenceData?.shippingAddress?.optionValue ? [referenceData?.shippingAddress?.optionValue] : [];
     return new Promise((resolve, reject) => {
       axiosInstance()
         .post(pricingCondition.api + `/calculatePrice-new`, data)
         .then(({ data: { data } }) => {
-          resolve(data);
+          let pricingData = data;
+          if (referenceData?.pricingCondition?.optionValue) {
+            pricingData = data?.filter((e) => e.conditionId === referenceData?.pricingCondition?.optionValue);
+          }
+          resolve(pricingData);
         })
         .catch((err) => {
           reject(err);

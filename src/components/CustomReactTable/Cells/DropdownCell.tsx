@@ -1,6 +1,6 @@
-import { Popover, Popper } from '@mui/material';
+import { Popper } from '@mui/material';
 import { camelCase, isArray, isObject } from 'lodash';
-import { useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { IoCaretDown } from 'react-icons/io5';
 import { ExternalLinkCell } from 'src/components/CustomReactTable/Cells/ExternalLinkCell';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -16,79 +16,104 @@ const getMore = (data) => {
   }
 };
 
-function DropdownCell({ permissions, permissionForLinks, field, original }) {
+function DropdownCellImpl({ permissions, permissionForLinks, field, original }) {
   const [anchorEl, setAnchorEl] = useState<HTMLSpanElement | HTMLDivElement | null>(null);
 
-  const handleClick = (event: React.MouseEvent<HTMLSpanElement | HTMLDivElement>) => {
-    event.stopPropagation();
-    event.preventDefault();
-    if (Boolean(anchorEl)) {
-      setAnchorEl(null);
-    } else {
-      setAnchorEl(event.currentTarget);
-    }
-  };
-  const handleMouseOver = (event: React.MouseEvent<HTMLSpanElement | HTMLDivElement>) => {
+  const handleClick = useCallback(
+    (event: React.MouseEvent<HTMLSpanElement | HTMLDivElement>) => {
+      event.stopPropagation();
+      event.preventDefault();
+      if (Boolean(anchorEl)) {
+        setAnchorEl(null);
+      } else {
+        setAnchorEl(event.currentTarget);
+      }
+    },
+    [anchorEl]
+  );
+
+  const handleMouseOver = useCallback((event: React.MouseEvent<HTMLSpanElement | HTMLDivElement>) => {
     event.stopPropagation();
     event.preventDefault();
     setAnchorEl(event.currentTarget);
-  };
+  }, []);
 
-  const handleClose = (e: React.MouseEvent<HTMLSpanElement | HTMLDivElement>) => {
+  const handleClose = useCallback((e: React.MouseEvent<HTMLSpanElement | HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setAnchorEl(null);
-  };
+  }, []);
 
   const open = Boolean(anchorEl);
 
   let joinedFieldName = field?.fieldName.indexOf(' ') > 0 ? camelCase(field?.fieldName) : field?.fieldName;
 
-  let pathName = routes[`${camelCase(field?.lookupResource)}Detail`]?.path
-    ? routes[`${camelCase(field?.lookupResource)}Detail`]?.path
-    : `/${camelCase(field?.lookupResource)}/detail`;
+  let pathName = useMemo(
+    () =>
+      routes[`${camelCase(field?.lookupResource)}Detail`]?.path
+        ? routes[`${camelCase(field?.lookupResource)}Detail`]?.path
+        : `/${camelCase(field?.lookupResource)}/detail`,
+    [field?.lookupResource]
+  );
 
-  const optionLabel = isArray(original?.[field?.fieldName])
-    ? original?.[field?.fieldName][0]?.optionLabel
-    : isObject(original?.[field?.fieldName])
-      ? original?.[field?.fieldName]?.optionLabel
-      : original?.[field?.fieldName];
+  const optionLabel = useMemo(
+    () =>
+      isArray(original?.[field?.fieldName])
+        ? original?.[field?.fieldName][0]?.optionLabel
+        : isObject(original?.[field?.fieldName])
+          ? original?.[field?.fieldName]?.optionLabel
+          : original?.[field?.fieldName],
+    [field?.fieldName, original]
+  );
 
-  const optionValue = isArray(original?.[field?.fieldName])
-    ? original?.[field?.fieldName][0]?.optionValue
-    : isObject(original?.[field?.fieldName])
-      ? original?.[field?.fieldName]?.optionValue
-      : original?.[`${field?.fieldName}Id`];
+  const optionValue = useMemo(
+    () =>
+      isArray(original?.[field?.fieldName])
+        ? original?.[field?.fieldName][0]?.optionValue
+        : isObject(original?.[field?.fieldName])
+          ? original?.[field?.fieldName]?.optionValue
+          : original?.[`${field?.fieldName}Id`],
+    [field?.fieldName, original]
+  );
 
-  const more = isArray(original?.[field?.fieldName]) ? getMore(original?.[field?.fieldName]) : original[`rest${joinedFieldName}`];
+  const more = useMemo(
+    () => (isArray(original?.[field?.fieldName]) ? getMore(original?.[field?.fieldName]) : original[`rest${joinedFieldName}`]),
+    [field?.fieldName, joinedFieldName, original]
+  );
 
-  const getTitle = (data, enableLink: boolean = true) => {
-    if (data.length) {
-      const resultComponents = [];
-      const resultStrings = [];
+  const getTitle = useCallback(
+    (data, enableLink: boolean = true) => {
+      if (data.length) {
+        const resultComponents = [];
+        const resultStrings = [];
 
-      data.forEach((o, index) =>
-        o?.optionLabel
-          ? resultComponents.push(
-              <ExternalLinkCell
-                key={o?.optionLabel}
-                link={o.optionValue && enableLink ? `${pathName}/${o.optionValue}` : null}
-                value={o?.optionLabel}
-                endComma={index !== data?.length - 1}
-                startComma={index === 0}
-              />
-            )
-          : typeof o !== 'string'
-            ? resultStrings.push(o, index !== data?.length - 1 ? ', ' : '')
-            : ''
-      );
+        data.forEach((o, index) =>
+          o?.optionLabel
+            ? resultComponents.push(
+                <ExternalLinkCell
+                  key={o?.optionLabel}
+                  link={o.optionValue && enableLink ? `${pathName}/${o.optionValue}` : null}
+                  value={o?.optionLabel}
+                  endComma={index !== data?.length - 1}
+                  startComma={index === 0}
+                />
+              )
+            : typeof o !== 'string'
+              ? resultStrings.push(o, index !== data?.length - 1 ? ', ' : '')
+              : ''
+        );
 
-      return [...resultComponents, resultStrings];
-    }
-    return '';
-  };
+        return [...resultComponents, resultStrings];
+      }
+      return '';
+    },
+    [pathName]
+  );
 
-  const isDataLink = permissions[permissionForLinks[field?.lookupResource]]?.isRead || permissions[camelCase(field?.lookupResource)]?.isRead;
+  const isDataLink = useMemo(
+    () => permissions[permissionForLinks[field?.lookupResource]]?.isRead || permissions[camelCase(field?.lookupResource)]?.isRead,
+    [field?.lookupResource, permissionForLinks, permissions]
+  );
 
   return (
     <div className="flex items-center">
@@ -140,5 +165,6 @@ function DropdownCell({ permissions, permissionForLinks, field, original }) {
     </div>
   );
 }
+const DropdownCell = memo(DropdownCellImpl);
 
 export default DropdownCell;
