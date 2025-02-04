@@ -211,7 +211,7 @@ const ExpenseReportDetailsPage = () => {
           <Box>
             {!loadingDetails && expenseReportData && fields ? (
               <div className="mt-2">
-                <Expenses selectedExpenseData={expenseReportData?.expenses} />
+                <Expenses selectedExpenseData={expenseReportData?.expenses} showAddButton={true} />
               </div>
             ) : (
               <div className="p-2">

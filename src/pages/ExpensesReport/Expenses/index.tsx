@@ -16,7 +16,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 
-const Expenses = (selectedExpenseData) => {
+const Expenses = ({selectedExpenseData, showAddButton}) => {
   const renderedFrom = camelCase(sidebarResource?.expenses);
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -39,7 +39,7 @@ const Expenses = (selectedExpenseData) => {
 
   useEffect(() => {
     fetchData();
-  }, [selectedEntity, selectedExpenseData?.selectedExpenseData]);
+  }, [selectedEntity, selectedExpenseData]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -97,7 +97,7 @@ const Expenses = (selectedExpenseData) => {
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     try {
-      const promises = (selectedExpenseData?.selectedExpenseData || []).map((expense) => {
+      const promises = (selectedExpenseData || []).map((expense) => {
         const queryString = getQueryString(expense);
         return axiosInstance().get(`${expenses.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
       });
@@ -187,7 +187,7 @@ const Expenses = (selectedExpenseData) => {
     <div className="main-container-v1">
       <>
         <DetailsPageHeader
-          isAddButtonVisible={false}
+          isAddButtonVisible={showAddButton}
           isActionButtonVisible={true}
           actionButtonMenuItems={actionButtonMenuItems()}
           actionButtonProps={{ disabled: selectedRecords.length === 0 }}

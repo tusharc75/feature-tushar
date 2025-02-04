@@ -40,6 +40,12 @@ const ExpenseApproval = () => {
   }, [search]);
 
   useEffect(() => {
+    if (reportData) {
+      calculateTotal();
+    }
+  }, [reportData]);
+
+  useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
@@ -123,7 +129,7 @@ const ExpenseApproval = () => {
       fetchData();
     };
 
-    const calculateTotal = () => {
+    const calculateTotal = async () => {
       let sum = 0;
       for (let report of reportData || []) {
         if (report?.expenses?.length > 0) {
