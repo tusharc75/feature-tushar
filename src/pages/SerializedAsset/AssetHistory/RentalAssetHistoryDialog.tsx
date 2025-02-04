@@ -1,73 +1,87 @@
 import { useState, useEffect, useContext } from 'react';
 import { Box, Dialog, } from '@mui/material';
-import axiosInstance from '../../axios/axiosInstance';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { CustomDialogTransition, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import axiosInstance from '../../../axios/axiosInstance';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { CustomDialogTransition, displayDateTime, prepareDataForGrid, sidebarResource } from '../../../constants/helpers';
 import { camelCase } from 'lodash';
-import { isMobile, isTablet } from 'react-device-detect';
-import CustomReactTable, { getStaticFields, useTableReducer, useColumns } from 'src/components/CustomReactTable';
+import CustomReactTable, { useTableReducer, useColumns } from 'src/components/CustomReactTable';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { Link } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
 
-const renderedFrom = `${camelCase(sidebarResource?.serializedAsset)}_rentalAssetHistory`;
 
-const RentalAssetHistory = ({ asset, rentalId, fields, onClose }) => {
+const RentalAssetHistoryDialog = ({ asset, rentalJob, fields, onClose }) => {
+
+  const renderedFrom = `${camelCase(sidebarResource?.serializedAsset)}_rentalAssetHistory`;
+
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [fullScreen, setFullScreen] = useState(true);
   const [columns, setColumns] = useState(null);
 
   const { generateColumns } = useColumns();
 
-  const rentalJobColumn = {
-    accessor: 'rentalManagement',
-    Header: 'Rental Job',
-    disableFilters: true,
-    disableSortBy: true,
-    Cell: ({ row }) => (
-      <>
-        {row?.original?.rentalJobId ? (
-          <Link
-            className="link"
-            title={row.original.rentalJob}
-            to={`${routes.rentalManagementDetail.path}/${row?.original?.rentalJobId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {row.original.rentalJob}
-          </Link>
+  useEffect(() => {
+    const extraColumn = [{
+      accessor: 'rentalJob',
+      Header: 'Rental Job',
+      disableFilters: true,
+      disableSortBy: true,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.rentalJobId ? (
+            <Link
+              className="link"
+              title={row.original.rentalJob}
+              to={`${routes.rentalManagementDetail.path}/${row?.original?.rentalJobId}`}
+              target="_blank"
+            >
+              {row.original.rentalJob}
+            </Link>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      ),
+    },
+    {
+      accessor: 'date',
+      Header: 'Date & Time',
+      disabled: true,
+      disableFilters: true,
+      disableSortBy: false,
+      Cell: ({ row }) =>
+        row.original?.date ? (
+          <div title={`${displayDateTime(row.original?.date)}`}>
+            {displayDateTime(row.original?.date)}
+          </div>
         ) : (
           <NoDataCell />
-        )}
-      </>
-    )
-  };
-
-  useEffect(() => {
-    let cols = generateColumns(renderedFrom, fields)?.map((col) => {
+        )
+    }];
+    let columns = generateColumns(renderedFrom, fields)?.map((col) => {
       const { Footer, ...rest } = col;
       return rest;
     });
-    const newColumns: any = [rentalJobColumn, ...cols, getStaticFields()[0]];
+    const newColumns: any = [...extraColumn, ...columns];
     setColumns(newColumns);
   }, [fields]);
 
 
   useEffect(() => {
-    if (rentalId && asset) {
+    if (rentalJob && asset) {
       fetchData();
     }
-  }, [rentalId, asset]);
+  }, [rentalJob, asset]);
 
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     axiosInstance()
-      .get(`/history/rental-asset-history?rental=${rentalId}&asset=${asset}`)
+      .get(`/history/rental-asset-data-history?rentalJob=${rentalJob}&asset=${asset}`)
       .then(({ data: { data } }) => {
         data = data?.map((u) => {
           let finalRow: any = prepareDataForGrid(u);
@@ -84,8 +98,7 @@ const RentalAssetHistory = ({ asset, rentalId, fields, onClose }) => {
 
   return (
     <Dialog
-      maxWidth="md"
-      fullScreen={fullScreen || isMobile || isTablet}
+      fullScreen={fullScreen}
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
       open={true}
@@ -93,7 +106,7 @@ const RentalAssetHistory = ({ asset, rentalId, fields, onClose }) => {
       fullWidth
     >
       <CustomDialogHeader
-        title={`Rental Asset History`}
+        title={`Rental Asset Data History`}
         onClose={onClose}
         isMinimized={!fullScreen}
         onMinimizeMaximize={() => {
@@ -105,7 +118,7 @@ const RentalAssetHistory = ({ asset, rentalId, fields, onClose }) => {
       <CustomDialogContent>
         {columns ? (
           <CustomReactTable
-            height={'calc(100vh - 300px)'}
+            height={'calc(100vh - 200px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}
@@ -114,6 +127,7 @@ const RentalAssetHistory = ({ asset, rentalId, fields, onClose }) => {
             showFilters={false}
             hideSelection={true}
             isClientSideGrid={true}
+            showArrangeView={false}
           />
         ) : (
           <Box p={2} height={500}>
@@ -125,4 +139,4 @@ const RentalAssetHistory = ({ asset, rentalId, fields, onClose }) => {
   );
 };
 
-export default RentalAssetHistory;
+export default RentalAssetHistoryDialog;

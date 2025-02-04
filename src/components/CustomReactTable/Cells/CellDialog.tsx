@@ -1,5 +1,5 @@
 import { Dialog } from '@mui/material';
-import React from 'react';
+import React, { memo } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition } from 'src/constants/helpers';
@@ -11,7 +11,7 @@ type CellDialogProps = {
   enableDilaog?: boolean;
 };
 
-const CellDialog = ({ children, dialogTitle = 'View', text = 'View', enableDilaog = true }: CellDialogProps) => {
+const CellDialogImpl = ({ children, dialogTitle = 'View', text = 'View', enableDilaog = true }: CellDialogProps) => {
   const [open, setOpen] = React.useState(false);
   const onClose = () => setOpen(false);
 
@@ -33,5 +33,7 @@ const CellDialog = ({ children, dialogTitle = 'View', text = 'View', enableDilao
     </>
   );
 };
+
+const CellDialog = memo(CellDialogImpl);
 
 export default CellDialog;

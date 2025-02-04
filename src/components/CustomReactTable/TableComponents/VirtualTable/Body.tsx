@@ -3,8 +3,6 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { Fragment, memo, useEffect } from 'react';
 import { CellRenderer } from '../TableHelperComponents';
 
-// const MemoizedCellRenderer = memo(CellRenderer);
-
 export const VirtualTableBody = memo(
   ({
     onRowClick,
@@ -105,10 +103,7 @@ export const VirtualTableBody = memo(
   }
 );
 
-const MemoizedCellRenderer = memo(
-  CellRenderer
-  //  (prev, next) => prev.cell === next.cell
-);
+const MemoizedCellRenderer = memo(CellRenderer);
 
 export const MemoizedSingleRow = memo(
   ({

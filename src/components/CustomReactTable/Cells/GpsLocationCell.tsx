@@ -1,11 +1,11 @@
 import { IconButton } from '@mui/material';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import GoogleMaps from 'src/components/GoogleMap';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
-const GpsLocationCell = ({ value }) => {
+const GpsLocationCellImpl = ({ value }) => {
   const [viewMap, setViewMap] = useState({ open: false, locationName: null, longitude: null, latitude: null });
 
   return (
@@ -43,5 +43,7 @@ const GpsLocationCell = ({ value }) => {
     </div>
   );
 };
+
+const GpsLocationCell = memo(GpsLocationCellImpl);
 
 export default GpsLocationCell;
