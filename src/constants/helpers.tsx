@@ -292,6 +292,7 @@ export const sidebarResource = {
   repairJob: 'Repair Job',
   expenses: 'Expenses',
   expenseReport: 'Expense Report',
+  expenseApproval: 'Expense Approval',
   salesOrder: 'Sales Order',
   invoice: 'Invoice',
   eCommercePolicy: 'e-Commerce Policy',
@@ -518,6 +519,11 @@ export const expenseReport = {
   resource: 'expenseReport',
   api: '/expense-report'
 };
+
+export const expenseApproval = {
+  resource: 'expenseApproval',
+  api: '/expense-approval'
+}
 
 export const repairOrder = {
   resource: 'repairOrder',
