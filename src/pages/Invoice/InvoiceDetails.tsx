@@ -495,7 +495,6 @@ const InvoiceDetails = () => {
       {openUpdateDialog && (
         <ManageInvoiceDialog
           isClone={false}
-          open={openUpdateDialog}
           invoiceId={id}
           invoiceData={invoiceData}
           onClose={() => {
