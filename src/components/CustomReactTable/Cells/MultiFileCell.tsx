@@ -1,11 +1,11 @@
 import { Popover } from '@mui/material';
-import { useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { PreviewFile } from 'src/components/PreviewFile';
 import { getFileIconSrc } from 'src/constants/helpers';
 import { IoCaretDown } from 'react-icons/io5';
 
-export const MultiFileCell = ({ data }: { data: { fileName: string; size: string }[] | string }) => {
+const MultiFileCellImpl = ({ data }: { data: { fileName: string; size: string }[] | string }) => {
   const [anchorEl, setAnchorEl] = useState<HTMLSpanElement | HTMLDivElement | null>(null);
 
   const handleClick = (event: React.MouseEvent<HTMLSpanElement | HTMLDivElement>) => {
@@ -86,6 +86,8 @@ export const MultiFileCell = ({ data }: { data: { fileName: string; size: string
     );
   return <NoDataCell />;
 };
+
+export const MultiFileCell = memo(MultiFileCellImpl);
 
 const getFileIcons = ({ data }) => {
   let fileIcons = [];

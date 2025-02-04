@@ -1,5 +1,5 @@
 import { Popper } from '@mui/material';
-import { useCallback, useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { IoCaretDown } from 'react-icons/io5';
 
 type CellToltipProps = {
@@ -9,7 +9,7 @@ type CellToltipProps = {
   title?: string;
 } & React.HTMLAttributes<HTMLSpanElement>;
 
-function CellTooltip({ children, more, tooltipChildren, title = '', ...rest }: CellToltipProps) {
+function CellTooltipImpl({ children, more, tooltipChildren, title = '', ...rest }: CellToltipProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLSpanElement | HTMLDivElement | null>(null);
 
   const handleClick = useCallback(
@@ -82,5 +82,7 @@ function CellTooltip({ children, more, tooltipChildren, title = '', ...rest }: C
     </span>
   );
 }
+
+const CellTooltip = memo(CellTooltipImpl);
 
 export default CellTooltip;

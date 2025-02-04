@@ -51,7 +51,7 @@ const ManagePurchaseOrder = ({
   useEffect(() => {
     if (walkmeInstance && !isStepDataSet.current && initialData?.fields?.length > 0) {
       isStepDataSet.current = true;
-      const ignoreField = ['currency', 'owner', 'pdfTemplate'];
+      const ignoreField = ['currency', 'pdfTemplate'];
       walkmeInstance.instance.insertAtCurrentIndex([...generateStepsFormfieldData(initialData?.fields, ignoreField)]);
       walkmeInstance.handleNext();
     }

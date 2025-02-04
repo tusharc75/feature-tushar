@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { memo, useState } from 'react';
 import CarouselDialog from 'src/components/CarouselDialog';
 
-export const MultiImageCell = ({ images }: { images: string[] }) => {
+const MultiImageCellImpl = ({ images }: { images: string[] }) => {
   const [dialogData, setDialogData] = useState<{ index: number; open: boolean; images: string[] } | null>(null);
 
   return (
@@ -13,3 +13,5 @@ export const MultiImageCell = ({ images }: { images: string[] }) => {
     </>
   );
 };
+
+export const MultiImageCell = memo(MultiImageCellImpl);
