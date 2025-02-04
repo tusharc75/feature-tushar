@@ -137,42 +137,6 @@ export default function Account(props) {
       }
     });
 
-    if (accountResource.includes('customer')) {
-      newColumns = [
-        ...newColumns,
-        {
-          accessor: 'relatedLead',
-          Header: 'Related Lead',
-          minWidth: 150,
-          width: 150,
-          Cell: ({ row }) =>
-            row?.original?.lead ? (
-              row?.original?.leadEntity === selectedEntity ? (
-                <Link className="link" to={`${routes.leadDetail.path}/${row?.original?.leadId}`} title={row?.original?.lead}>
-                  {row?.original?.lead}
-                </Link>
-              ) : hasAccessToEntity(row?.original?.leadEntity) ? (
-                <span
-                  className="link"
-                  onClick={() => {
-                    handleEntityChange(row?.original?.leadEntity);
-                    history.replace(`${routes.leadDetail.path}/${row?.original?.leadId}`);
-                  }}
-                  title={row?.original?.lead}
-                >
-                  {row?.original?.lead}
-                </span>
-              ) : (
-                <span title={row?.original?.lead}>
-                  <CustomRenderCell value={row?.original?.lead} />
-                </span>
-              )
-            ) : (
-              <NoDataCell />
-            )
-        }
-      ];
-    }
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
@@ -761,7 +725,7 @@ const LeftSideContents = ({ selectedIndex, setSelectedIndex, menuOptionSelection
           >
             <Paper>
               <ClickAwayListener onClickAway={handleClose}>
-                <MenuList id="menu" style={{ backgroundColor: 'transparent', fontSize: '10px' }}>
+                <MenuList id="menu">
                   {options.map((option, index) => (
                     <MenuItem key={option} selected={index === selectedIndex} onClick={(event) => handleMenuItemClick(event, index)}>
                       {option}

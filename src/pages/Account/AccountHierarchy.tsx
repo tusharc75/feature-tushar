@@ -126,43 +126,6 @@ export default function AccountHierarchy({
         o.minWidth = 300;
       }
     });
-
-    if (accountResource.includes('customer')) {
-      newColumns = [
-        ...newColumns,
-        {
-          accessor: 'relatedLead',
-          Header: 'Related Lead',
-          minWidth: 150,
-          width: 150,
-          Cell: ({ row }) =>
-            row?.original?.lead ? (
-              row?.original?.leadEntity === selectedEntity ? (
-                <Link className="link" to={`${routes.leadDetail.path}/${row?.original?.leadId}`} title={row?.original?.lead}>
-                  {row?.original?.lead}
-                </Link>
-              ) : hasAccessToEntity(row?.original?.leadEntity) ? (
-                <span
-                  className="link"
-                  onClick={() => {
-                    handleEntityChange(row?.original?.leadEntity);
-                    history.replace(`${routes.leadDetail.path}/${row?.original?.leadId}`);
-                  }}
-                  title={row?.original?.lead}
-                >
-                  {row?.original?.lead}
-                </span>
-              ) : (
-                <span title={row?.original?.lead}>
-                  <CustomRenderCell value={row?.original?.lead} />
-                </span>
-              )
-            ) : (
-              <NoDataCell />
-            )
-        }
-      ];
-    }
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 

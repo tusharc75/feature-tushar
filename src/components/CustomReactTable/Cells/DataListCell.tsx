@@ -1,7 +1,7 @@
 import { camelCase, isArray, isObject } from 'lodash';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 
 const getTitle = (data) => {
   if (data?.length) {
@@ -20,7 +20,7 @@ const getMore = (data) => {
   }
 };
 
-function DataListCell({ field, original }) {
+function DataListCellImpl({ field, original }) {
   const joinedFieldName = useMemo(() => (field?.fieldName.indexOf(' ') > 0 ? camelCase(field?.fieldName) : field?.fieldName), [field?.fieldName]);
 
   const optionLabel = useMemo(
@@ -63,5 +63,7 @@ function DataListCell({ field, original }) {
     </div>
   );
 }
+
+const DataListCell = memo(DataListCellImpl);
 
 export default DataListCell;
