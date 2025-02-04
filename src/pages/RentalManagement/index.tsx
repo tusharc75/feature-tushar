@@ -3,7 +3,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase, isArray, isObject } from 'lodash';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
@@ -127,6 +127,70 @@ const RentalManagement = () => {
     }
   ];
 
+  const ActionsRenderer = useMemo(
+    () => ({
+      accessor: 'action',
+      Header: 'Actions',
+      minWidth: 100,
+      width: 100,
+      sticky: 'right',
+      disableFilters: true,
+      disableSortBy: true,
+      canDrag: false,
+      Cell: ({ row }) => (
+        <>
+          <HideWhenOffline>
+            {permissions?.iotChart?.isRead && (
+              <HtmlTooltip title={`View ${resources?.iotChart?.titlePlural}`} placement="top" arrow enterTouchDelay={0}>
+                <span>
+                  <IconButton
+                    color="inherit"
+                    size="small"
+                    onClick={() => {
+                      history.push(`${routes.iotChart.path}?referenceData=${row?.original?.shippingAddressId}`);
+                    }}
+                  >
+                    <IOTIcon size={20} />
+                  </IconButton>
+                </span>
+              </HtmlTooltip>
+            )}
+            <HtmlTooltip title={permissions?.rentalManagement?.isCreate ? 'Clone' : cloneDisable} placement="top" arrow enterTouchDelay={0}>
+              <span>
+                <IconButton
+                  size="small"
+                  aria-label="Clone"
+                  disabled={permissions?.rentalManagement?.isCreate ? false : true}
+                  onClick={() => {
+                    setShowManageRentalManagementDialog({ open: true, isClone: true, idToClone: row?.original?._id });
+                  }}
+                >
+                  <FileCopyIcon fontSize="small" color={permissions?.rentalManagement?.isCreate ? 'primary' : 'disabled'} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+            <HtmlTooltip title={row?.original.canDelete ? 'Delete' : deleteDisable} placement="top" arrow enterTouchDelay={0}>
+              <span>
+                <IconButton
+                  size="small"
+                  aria-label="Delete"
+                  disabled={row?.original.canDelete ? false : true}
+                  onClick={() => {
+                    setDeleteRecord(row.original);
+                    setShowDeleteConfirmBox(true);
+                  }}
+                >
+                  <DeleteIcon fontSize="small" color={row?.original.canDelete ? 'error' : 'disabled'} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          </HideWhenOffline>
+        </>
+      )
+    }),
+    [history, permissions?.iotChart?.isRead, permissions?.rentalManagement?.isCreate, resources?.iotChart?.titlePlural]
+  );
+
   const fetchGridColumns = async () => {
     let data;
     if (isOffline) {
@@ -173,67 +237,6 @@ const RentalManagement = () => {
       newColumns.push(checkStaticField(renderedFrom, field));
     });
     setColumns([...newColumns, ActionsRenderer]);
-  };
-
-  const ActionsRenderer = {
-    accessor: 'action',
-    Header: 'Actions',
-    minWidth: 100,
-    width: 100,
-    sticky: 'right',
-    disableFilters: true,
-    disableSortBy: true,
-    canDrag: false,
-    Cell: ({ row }) => (
-      <>
-        <HideWhenOffline>
-          {permissions?.iotChart?.isRead && (
-            <HtmlTooltip title={`View ${resources?.iotChart?.titlePlural}`} placement="top" arrow enterTouchDelay={0}>
-              <span>
-                <IconButton
-                  color="inherit"
-                  size="small"
-                  onClick={() => {
-                    history.push(`${routes.iotChart.path}?referenceData=${row?.original?.shippingAddressId}`);
-                  }}
-                >
-                  <IOTIcon size={20} />
-                </IconButton>
-              </span>
-            </HtmlTooltip>
-          )}
-          <HtmlTooltip title={permissions?.rentalManagement?.isCreate ? 'Clone' : cloneDisable} placement="top" arrow enterTouchDelay={0}>
-            <span>
-              <IconButton
-                size="small"
-                aria-label="Clone"
-                disabled={permissions?.rentalManagement?.isCreate ? false : true}
-                onClick={() => {
-                  setShowManageRentalManagementDialog({ open: true, isClone: true, idToClone: row?.original?._id });
-                }}
-              >
-                <FileCopyIcon fontSize="small" color={permissions?.rentalManagement?.isCreate ? 'primary' : 'disabled'} />
-              </IconButton>
-            </span>
-          </HtmlTooltip>
-          <HtmlTooltip title={row?.original.canDelete ? 'Delete' : deleteDisable} placement="top" arrow enterTouchDelay={0}>
-            <span>
-              <IconButton
-                size="small"
-                aria-label="Delete"
-                disabled={row?.original.canDelete ? false : true}
-                onClick={() => {
-                  setDeleteRecord(row.original);
-                  setShowDeleteConfirmBox(true);
-                }}
-              >
-                <DeleteIcon fontSize="small" color={row?.original.canDelete ? 'error' : 'disabled'} />
-              </IconButton>
-            </span>
-          </HtmlTooltip>
-        </HideWhenOffline>
-      </>
-    )
   };
 
   const getQueryString = (isExport = false) => {
@@ -527,11 +530,12 @@ const RentalManagement = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord
-              ? `${resources?.rentalManagement?.titleSingular?.toLowerCase()} :
+            message={`Are you sure you want to delete ${
+              deleteRecord
+                ? `${resources?.rentalManagement?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.rentalJobName}`
-              : `selected ${resources?.rentalManagement?.titlePlural?.toLowerCase()}`
-              } ?`}
+                : `selected ${resources?.rentalManagement?.titlePlural?.toLowerCase()}`
+            } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

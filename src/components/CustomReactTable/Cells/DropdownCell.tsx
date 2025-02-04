@@ -1,6 +1,6 @@
-import { Popover, Popper } from '@mui/material';
+import { Popper } from '@mui/material';
 import { camelCase, isArray, isObject } from 'lodash';
-import { useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { IoCaretDown } from 'react-icons/io5';
 import { ExternalLinkCell } from 'src/components/CustomReactTable/Cells/ExternalLinkCell';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -16,7 +16,7 @@ const getMore = (data) => {
   }
 };
 
-function DropdownCell({ permissions, permissionForLinks, field, original }) {
+function DropdownCellImpl({ permissions, permissionForLinks, field, original }) {
   const [anchorEl, setAnchorEl] = useState<HTMLSpanElement | HTMLDivElement | null>(null);
 
   const handleClick = useCallback(
@@ -165,5 +165,6 @@ function DropdownCell({ permissions, permissionForLinks, field, original }) {
     </div>
   );
 }
+const DropdownCell = memo(DropdownCellImpl);
 
 export default DropdownCell;
