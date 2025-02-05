@@ -1,8 +1,7 @@
 import { Box, IconButton } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { camelCase } from 'lodash';
-import { Fragment, useEffect, useState } from 'react';
-import { isMobile } from 'react-device-detect';
+import { useEffect, useState } from 'react';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
@@ -38,36 +37,26 @@ const CycleCountPInventory = () => {
       {
         accessor: 'inventoryCycle',
         Header: 'Cycle Code',
-        width: 120,
-        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (row.original?.inventoryCycle ? <p className="text-truncate">{row.original?.inventoryCycle}</p> : <NoDataCell />)
       },
       {
         accessor: 'productCategory',
         Header: 'Product Category',
-        width: 120,
-        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (row.original?.productCategory ? <p className="text-truncate">{row.original?.productCategory}</p> : <NoDataCell />)
       },
       {
         accessor: 'warehouse',
         Header: 'Warehouse',
-        width: 120,
-        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (row.original?.warehouse ? <p className="text-truncate">{row.original?.warehouse}</p> : <NoDataCell />)
       },
       {
         accessor: 'status',
         Header: 'Status',
-        width: 120,
-        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (row.original?.status ? <p className="text-truncate">{row.original?.status}</p> : <NoDataCell />)
       },
       {
         accessor: 'user',
         Header: 'User',
-        width: 120,
-        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (row.original?.user ? <p className="text-truncate">{row.original?.user}</p> : <NoDataCell />)
       },
       ...getStaticFields(),

@@ -148,11 +148,24 @@ const ImportExportDialog = ({
         Cell: ({ row }) => (
           <>
             {row?.original?.status === IMPORT_EXPORT_STATUS.inProgress && <CircularProgress size={20} aria-disabled />}
+            {row?.original?.importFileName &&
+              <HtmlTooltip title={'Download Imported File'}>
+                <IconButton
+                  size="small"
+                  aria-label="Delete"
+                  onClick={() => {
+                    handleDownloadFile(row?.original?._id, true);
+                  }}
+                >
+                  <GetApp color={'primary'} fontSize="small" />
+                </IconButton>
+              </HtmlTooltip>
+            }
             {row?.original?.fileName &&
               ((type === IMPORT_EXPORT_TYPE.export &&
                 [IMPORT_EXPORT_STATUS.completed, IMPORT_EXPORT_STATUS.partialComplete]?.includes(row?.original?.status)) ||
                 (type === IMPORT_EXPORT_TYPE.import && row?.original?.status === IMPORT_EXPORT_STATUS.error)) && (
-                <HtmlTooltip title={'Download'}>
+                <HtmlTooltip title={type === IMPORT_EXPORT_TYPE.import && row?.original?.status === IMPORT_EXPORT_STATUS.error ? 'Download Error File' : 'Download'}>
                   <IconButton
                     size="small"
                     aria-label="Delete"
@@ -171,10 +184,14 @@ const ImportExportDialog = ({
     setColumns(columns);
   };
 
-  const handleDownloadFile = (fileId) => {
+  const handleDownloadFile = (fileId, importFileName = false) => {
     setDownloading({ loading: true, type: 'file' });
+    let api = `/import-export/download-file/${fileId}`
+    if (importFileName) {
+      api += `?importFileName=1`
+    }
     axiosInstance()
-      .get(`/import-export/download-file/${fileId}`, { responseType: 'arraybuffer' })
+      .get(api, { responseType: 'arraybuffer' })
       .then((data) => {
         setDownloading({ loading: false, type: null });
         let fileText = data.data;
@@ -187,7 +204,6 @@ const ImportExportDialog = ({
         });
       })
       .catch((error) => {
-        console.error(error, 'error');
         toastConfig.setToastConfig(error);
         setDownloading({ loading: false, type: null });
       });
@@ -315,6 +331,7 @@ const ImportExportDialog = ({
             showFilters={false}
             showArrangeView={false}
             isClientSideGrid={true}
+            isFullScreen={fullScreen}
           />
         ) : (
           <Box p={2} height={300}>

@@ -19,23 +19,17 @@ const BidsPage = ({ bids }) => {
       {
         accessor: 'user',
         Header: 'User',
-        width: 120,
-        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.user}</p>
       },
       {
         accessor: 'amount',
         Header: 'Amount',
-        width: 120,
-        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.amount}</p>
       },
 
       {
         accessor: 'date',
         Header: 'Date',
-        width: 120,
-        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => <p className="text-truncate">{displayDateTime(row?.original?.date)}</p>
       }
     ];
@@ -66,7 +60,7 @@ const BidsPage = ({ bids }) => {
           state={state}
           dispatch={dispatch}
           renderedFrom={renderedFrom}
-          refreshGrid={() => {}}
+          refreshGrid={() => { }}
           isClientSideGrid={true}
           hideSelection={true}
         />
