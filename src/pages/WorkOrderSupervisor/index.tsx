@@ -94,7 +94,6 @@ const WorkOrderSupervisor = () => {
   const [selectedServiceData, setSelectedServiceData] = useState(null);
   const [openWorkOrderScheduler, setOpenWorkOrderScheduler] = useState(false);
   const [openTechnicianStatusCount, setOpenTechnicianStatusCount] = useState(false);
-  const [techniciansData, setTechniciansData] = useState([]);
   const [viewType, setViewType] = useState<ViewType>(() => {
     return (localStorage.getItem(`${renderedFrom}_view`) as ViewType) || 'card-view';
   });
@@ -114,26 +113,6 @@ const WorkOrderSupervisor = () => {
   useEffect(() => {
     resetSelectedRecords();
   }, [globalFilters]);
-
-  useEffect(() => {
-    const fetchUserStatusCounts = async () => {
-      try {
-        const response = await axiosInstance().get('/work-order/work-order-planning/technician-status-counts');
-        const responseData = response.data?.data || {};
-
-        const transformedData = Object.keys(responseData).map((key) => ({
-          userId: responseData[key].userId,
-          userName: responseData[key].userName,
-          statuses: responseData[key].statuses,
-        }));
-
-        setTechniciansData(transformedData);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchUserStatusCounts();
-  }, []);
 
   const ref: any = useRef();
 
@@ -981,7 +960,6 @@ const WorkOrderSupervisor = () => {
         <TechniciansStatusCountDialog
           open={openTechnicianStatusCount}
           onClose={() => setOpenTechnicianStatusCount(false)}
-          technicians={techniciansData}
         />
       )}
 

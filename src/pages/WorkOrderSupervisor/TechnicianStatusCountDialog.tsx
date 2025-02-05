@@ -5,28 +5,43 @@ import {
   Avatar,
   Grid,
 } from '@mui/material';
-
 import Dialog from '@mui/material/Dialog';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
-
-interface Technician {
-  userId: string;
-  userName: string;
-  statuses: { [status: string]: number };
-}
+import axiosInstance from 'src/axios/axiosInstance';
+import { useEffect, useState } from 'react';
 
 interface TechniciansStatusCountDialogProps {
   open: boolean;
   onClose: () => void;
-  technicians: Technician[];
 }
 
 const TechniciansStatusCountDialog: React.FC<TechniciansStatusCountDialogProps> = ({
   open,
   onClose,
-  technicians,
 }) => {
+
+  const [techniciansData, setTechniciansData] = useState([]);
+  useEffect(() => {
+    const fetchUserStatusCounts = async () => {
+      try {
+        const response = await axiosInstance().get('/work-order/work-order-planning/technician-status-counts');
+        const responseData = response.data?.data || {};
+
+        const transformedData = Object.keys(responseData).map((key) => ({
+          userId: responseData[key].userId,
+          userName: responseData[key].userName,
+          statuses: responseData[key].statuses,
+        }));
+
+        setTechniciansData(transformedData);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchUserStatusCounts();
+  }, []);
+
   return (
     <Dialog open={true} fullWidth>
       <CustomDialogHeader
@@ -36,7 +51,7 @@ const TechniciansStatusCountDialog: React.FC<TechniciansStatusCountDialogProps> 
         title={`Technician`}
       />
       <CustomDialogContent>
-          {technicians.map((technician) => (
+          {techniciansData.map((technician) => (
             <Grid
               item
               key={technician.userId}
