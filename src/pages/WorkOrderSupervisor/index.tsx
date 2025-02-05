@@ -887,7 +887,7 @@ const WorkOrderSupervisor = () => {
       </div>
       {assignTechnicianDialog.open && (
         <AssignUserDialog
-          warehouse={assignTechnicianDialog.multiple ? selectedRecordsS[0]?.warehouse?.optionValue : selectedServiceData?.warehouse}
+          warehouse={assignTechnicianDialog.multiple ? selectedRecordsS[0]?.warehouse?.optionValue : selectedServiceData?.warehouse?.optionValue}
           workOrderData={
             assignTechnicianDialog.multiple
               ? selectedRecordsS?.map((r) => ({
@@ -945,7 +945,6 @@ const WorkOrderSupervisor = () => {
           }}
         />
       )}
-
       {openWorkOrderScheduler && (
         <WorkOrderSchedulerDialog
           onClose={() => setOpenWorkOrderScheduler(false)}
@@ -955,7 +954,6 @@ const WorkOrderSupervisor = () => {
           }}
         />
       )}
-
       {isOpen.open && (
         <WorkOrderDetailDialog
           workOrderId={isOpen?.id}
@@ -964,7 +962,6 @@ const WorkOrderSupervisor = () => {
           }}
         />
       )}
-
       {consumablesDialog.open && (
         <AssignProductDialog
           handleCloseDialog={() => setConsumablesDialog({ open: false, multiple: false })}

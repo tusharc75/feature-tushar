@@ -2,7 +2,6 @@ import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile } from 'react-device-detect';
 import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -52,7 +51,6 @@ const ScheduleReport = () => {
       {
         accessor: 'scheduleName',
         Header: 'Schedule Name',
-        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) =>
           row?.original?.scheduleName ? (
             <p
@@ -72,38 +70,32 @@ const ScheduleReport = () => {
       {
         accessor: 'resource',
         Header: 'Report',
-        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (row?.original?.resource ? <p className="text-truncate">{row.original.resource}</p> : <NoDataCell />)
       },
       {
         accessor: 'subscribeUsers',
         Header: 'Subscribe Users',
-        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (row?.original?.subscribeUsers?.length ? <p className="text-truncate">{row.original.subscribeUsers}</p> : <NoDataCell />)
       },
       {
         accessor: 'frequency',
         Header: 'Frequency',
-        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (row?.original?.frequency ? <p className="text-truncate">{row.original.frequency}</p> : <NoDataCell />)
       },
       {
         accessor: 'day',
         Header: 'Day',
-        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (row?.original?.day ? <p className="text-truncate">{row.original.day}</p> : <NoDataCell />)
       },
       {
         accessor: 'reportAction',
         Header: 'Report Action',
-        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) =>
           row?.original?.reportAction ? <p className="text-truncate">{row.original.reportAction}</p> : <p className="text-truncate">{'Email'}</p>
       },
       {
         accessor: 'time',
         Header: 'Time',
-        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (row?.original?.time ? <p className="text-truncate">{row.original.time}</p> : <NoDataCell />)
       },
       ...getStaticFields(),

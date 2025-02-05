@@ -326,6 +326,8 @@ const PurchaseOrder = () => {
             fetchPurchaseOrder();
           }}
           additionalParams={getQueryString(true)}
+          asyncExport={true}
+          resource={sidebarResource.purchaseOrder}
         />
       </div>
       <CustomContainer>
