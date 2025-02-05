@@ -315,6 +315,7 @@ const ImportExportDialog = ({
             showFilters={false}
             showArrangeView={false}
             isClientSideGrid={true}
+            isFullScreen={fullScreen}
           />
         ) : (
           <Box p={2} height={300}>
