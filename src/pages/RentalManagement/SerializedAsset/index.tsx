@@ -686,9 +686,9 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           !_subRow.serializedProduct &&
           _subRow.assetAssignedQty === 0 &&
           _subRow?.status &&
-          loadingTicketProducts?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)?.length > 0
+          loadingTicketProducts?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)?.length > 0
           ? loadingTicketProducts
-            ?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)
+            ?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)
             ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
           : _subRow.assetAssignedQty;
       _subRow.isSublease = subleaseProduct?.some((e) => e.materialId === _subRow.materialId);
