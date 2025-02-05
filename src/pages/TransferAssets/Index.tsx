@@ -279,6 +279,8 @@ const TransferAsset = () => {
           onExportToExcelSuccess={() => {
             fetchData();
           }}
+          asyncExport={true}
+          resource={sidebarResource.transferAsset}
           additionalParams={getQueryString(true)}
         />
       </div>
