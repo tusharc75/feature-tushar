@@ -22,6 +22,7 @@ import {
   checkIsAllowedToDelete,
   customerAccount,
   customerContact,
+  dateFormatToSend,
   getDefaultMyRecordType,
   gridLoadingTimeout,
   prepareDataForGrid,
@@ -36,6 +37,7 @@ import AllVersionStatus from './AllVersionStatus';
 import ManageQuoteDialog from './ManageQuote/ManageQuoteDialog';
 import axios, { CancelTokenSource } from 'axios';
 import './style.scss';
+import dayjs from 'dayjs';
 
 const QuoteBuilders = () => {
   const renderedFrom = camelCase(sidebarResource?.quoteBuilder);
@@ -96,6 +98,20 @@ const QuoteBuilders = () => {
   useEffect(() => {
     fetchGridColumns();
   }, []);
+
+  useEffect(() => {
+    if (columns) {
+      const filterVal = {};
+      filterVal['quoteDate'] = {
+        filter: {
+          from: dateFormatToSend(dayjs.tz().startOf('year').toDate()),
+          to: dateFormatToSend(dayjs.tz().endOf('year').toDate())
+        }
+      };
+      dispatch({ type: 'filter', filters: filterVal });
+    }
+  }, [columns]);
+
 
   const fetchGridColumns = async () => {
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.quoteBuilder}&entity=${selectedEntity}&view=true`);
@@ -538,7 +554,7 @@ const QuoteBuilders = () => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {}}
+            onSelect={() => { }}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -611,7 +627,7 @@ const QuoteBuilders = () => {
           quoteId={showVersionsDialog.id}
           quoteData={showVersionsDialog.quoteData}
           quotePermissions={permissions?.quoteBuilder}
-          fetchQuoteData={() => {}}
+          fetchQuoteData={() => { }}
           handleChangeVersionFromAllVersion={(versionNumber) => {
             history.push(`quotes/detail/${showVersionsDialog.id}`, {
               versionNumber: `${versionNumber}`,
