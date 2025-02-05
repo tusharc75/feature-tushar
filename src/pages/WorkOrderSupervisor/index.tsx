@@ -48,6 +48,7 @@ import { BiFilterAlt } from 'react-icons/bi';
 import dayjs from 'dayjs';
 import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
 import { queryStringPlanned } from 'src/pages/WorkOrderSupervisor/helper';
+import TechniciansStatusCountDialog from 'src/pages/WorkOrderSupervisor/TechnicianStatusCountDialog';
 
 const LIMIT = 25;
 
@@ -92,6 +93,7 @@ const WorkOrderSupervisor = () => {
 
   const [selectedServiceData, setSelectedServiceData] = useState(null);
   const [openWorkOrderScheduler, setOpenWorkOrderScheduler] = useState(false);
+  const [openTechnicianStatusCount, setOpenTechnicianStatusCount] = useState(false);
   const [viewType, setViewType] = useState<ViewType>(() => {
     return (localStorage.getItem(`${renderedFrom}_view`) as ViewType) || 'card-view';
   });
@@ -644,6 +646,15 @@ const WorkOrderSupervisor = () => {
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ ...routes.workOrderSupervisor, title: resources?.workOrderSupervisor?.titlePlural }]} />
         <div className="flex items-center gap-2">
+          <ThemeButton
+            iconForMobile={false}
+            onClick={() => {
+              setOpenTechnicianStatusCount(true);
+            }}
+            mobileTooltip={`Technicians`}
+          >
+            Technicians
+          </ThemeButton>
           {permissions?.workOrderPlanning?.isRead && (
             <ThemeButton
               iconForMobile={false}
@@ -944,6 +955,14 @@ const WorkOrderSupervisor = () => {
           }}
         />
       )}
+
+      {openTechnicianStatusCount && (
+        <TechniciansStatusCountDialog
+          open={openTechnicianStatusCount}
+          onClose={() => setOpenTechnicianStatusCount(false)}
+        />
+      )}
+
 
       {isOpen.open && (
         <WorkOrderDetailDialog
