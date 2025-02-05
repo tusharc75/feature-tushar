@@ -8,7 +8,7 @@ type FreeStyleMultiSelectProps = {
 };
 
 const FreeStyleMultiSelectImpl = ({ value, mode = 'table' }: FreeStyleMultiSelectProps) => {
-  const optionList = useMemo(() => value.split(',').map((d) => d.trim()), [value]);
+  const optionList = useMemo(() => value?.split(',').map((d) => d.trim()), [value]);
 
   if (!value || typeof value !== 'string') return mode === 'table' ? <NoDataCell /> : <>'--'</>;
 
