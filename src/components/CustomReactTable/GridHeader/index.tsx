@@ -69,7 +69,6 @@ const GridHeader = ({
   const [currentFomValue, setCurrentFomValue] = useState({});
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [coloums, setColoums] = useState(null);
-  const [isLoading, setLoading] = useState(false);
   const [deepFilters, setDeepFilters] = useState([]);
   const [filterByIds, setFilterByIds] = useState([]);
   const [filterTerm, setFilterTerm] = useState({});
@@ -90,24 +89,8 @@ const GridHeader = ({
     setIsFilterOpen(false);
   };
 
-  useEffect(() => {
-    fetchAllColumns();
-  }, [resource]);
-
-  const fetchAllColumns = async () => {
-    try {
-      setLoading(true);
-      const columns = await fetchFieldOptions({ resource, sidebarResource, toastConfig });
-      setColoums(columns);
-      setLoading(false);
-    } catch (error) {
-      setLoading(false);
-      toastConfig.setToastConfig(error);
-    }
-  };
-
   const handleApplyFilter = () => {
-    const filters = createFilterData(coloums, filterByIds, deepFilters, filterTerm);
+    const filters = createFilterData(filterByIds, deepFilters, filterTerm);
     const fromValue = filtermodelToFormValue(filters);
     dispatch({ type: 'filter', filters });
     setTempFilter(renderedFrom, { formValues: fromValue || {}, filters });
@@ -116,7 +99,7 @@ const GridHeader = ({
   };
 
   useEffect(() => {
-    if (!resource || !showFilters || !coloums) return;
+    if (!resource || !showFilters) return;
     const filters = getTempFilter(renderedFrom);
     const applyDefaultFilter = async () => {
       try {
@@ -131,7 +114,7 @@ const GridHeader = ({
           setDeepFilters(deepFilter);
           setFilterTerm(defaultFilter?.filterTerm || {});
           let deepFilterP;
-          if (defaultFilter?.filterValue) deepFilterP = createFilterData(coloums, filterById, deepFilter, defaultFilter?.filterTerm);
+          if (defaultFilter?.filterValue) deepFilterP = createFilterData(filterById, deepFilter, defaultFilter?.filterTerm);
           if (defaultFilter && deepFilterP) {
             dispatch({ type: 'filter', filters: deepFilterP });
             if (defaultFilter.sortBy) {
@@ -152,7 +135,7 @@ const GridHeader = ({
     };
     applyDefaultFilter();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resource, coloums]);
+  }, [resource]);
 
   return (
     <div className={`my-[8px] flex flex-wrap items-center justify-between gap-[8px]`}>
@@ -192,7 +175,7 @@ const GridHeader = ({
             resource={resource}
             handleClose={handleFilterClose}
             coloums={coloums}
-            loading={isLoading}
+            setColoums={setColoums}
             deepFilters={deepFilters}
             setDeepFilters={setDeepFilters}
             filterByIds={filterByIds}

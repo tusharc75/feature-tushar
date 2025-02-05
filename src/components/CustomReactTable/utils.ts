@@ -602,16 +602,8 @@ export const createFilterModel = (formValues, coloums) => {
   return Object.fromEntries(filterModel);
 };
 
-export const createFilterData = (coloums, filterByIds, deepFilters, filterTerm) => {
+export const createFilterData = (filterByIds, deepFilters, filterTerm) => {
   const filterModel = new Map();
-
-  const dateFields: any = [];
-  coloums
-    ?.filter((c) => c?.fieldData?.type === 'date')
-    ?.map((c) => {
-      dateFields.push(`from_${c?.fieldData?.fieldName}`);
-      dateFields.push(`to_${c?.fieldData?.fieldName}`);
-    });
 
   if (filterByIds?.length > 0) {
     filterByIds
@@ -630,32 +622,25 @@ export const createFilterData = (coloums, filterByIds, deepFilters, filterTerm) 
   if (deepFilters?.length > 0) {
     deepFilters
       ?.filter((d) => {
-        const hasTermLength = d?.term?.length ? true : false;
-        if (dateFields?.length > 0) {
-          return hasTermLength && !dateFields?.includes(d?.field);
+        if (d?.type === 'date') {
+          const isoFromDate = dayjs(d?.term?.from);
+          const isoToDate = dayjs(d?.term?.to);
+          if (d?.duration === 'custom')
+            return (isoFromDate.isValid() && d?.term?.from instanceof Date) || (isoToDate.isValid() && d?.term?.to instanceof Date);
+          else return isoFromDate.isValid() && d?.term?.from instanceof Date && isoToDate.isValid() && d?.term?.to instanceof Date;
         }
-        return hasTermLength;
+        return d?.term?.length ? true : false;
       })
       ?.map((d) => {
-        filterModel.set(d?.field, { filter: d?.term, ['$nin']: filterTerm[d?.field] === '$nin' ? true : false });
-      });
-
-    coloums
-      ?.filter((c) => c?.fieldData?.type === 'date')
-      ?.map((f) => {
-        if (deepFilters?.some((d) => [`from_${f?.fieldData?.fieldName}`, `to_${f?.fieldData?.fieldName}`].includes(d?.field))) {
-          const fromDate = deepFilters?.find((d) => d?.field === `from_${f?.fieldData?.fieldName}`)
-            ? dateFormatToSend(deepFilters?.find((d) => d?.field === `from_${f?.fieldData?.fieldName}`)?.term)
-            : null;
-          const toDate = deepFilters?.find((d) => d?.field === `to_${f?.fieldData?.fieldName}`)
-            ? dateFormatToSend(deepFilters?.find((d) => d?.field === `to_${f?.fieldData?.fieldName}`)?.term)
-            : null;
-          filterModel.set(f?.fieldData?.fieldName, {
+        if (d?.type === 'date') {
+          filterModel.set(d?.field, {
             filter: {
-              from: fromDate,
-              to: toDate
+              from: d?.term?.from ? dateFormatToSend(d?.term?.from) : null,
+              to: d?.term?.to ? dateFormatToSend(d?.term?.to) : null
             }
           });
+        } else {
+          filterModel.set(d?.field, { filter: d?.term, ['$nin']: filterTerm[d?.field] === '$nin' ? true : false });
         }
       });
   }
@@ -695,12 +680,13 @@ export const createFilterSetData = (val, columns) => {
         }
         if (fromDate && toDate) {
           deepFilter.push({
-            field: `from_${v}`,
-            term: fromDate
-          });
-          deepFilter.push({
-            field: `to_${v}`,
-            term: toDate
+            field: v,
+            type: 'date',
+            duration: val?.filterValue[v],
+            term: {
+              from: fromDate,
+              to: toDate
+            }
           });
         }
       } else {

@@ -104,6 +104,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
             });
           } else {
             deepFilter.push({
+              ...f,
               field: f?.term,
               term: f?.value
             });
@@ -275,6 +276,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
   };
 
   const getQueryString = (isExport = false, deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
+    console.log('deepFiltersP', deepFiltersP);
     let filterQuery = ``;
     let deepFilter = [];
     let newDeepFilter = [...deepFiltersP];
@@ -326,43 +328,54 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
       }
     }
 
+    const dateFilter: any = [];
+    const statusPeriodDateFilter: any = [];
+
     const isStatusPeriod =
       resourceStartCase === sidebarResource.serializedAsset && resourceColumns?.some((r) => r?.fieldData?.fieldName === 'status');
+
     if (deepFiltersP?.length > 0) {
       deepFilter = [
         ...deepFilter,
         ...deepFiltersP
           ?.filter((d) => {
-            const isoDate = dayjs(d?.term);
-            const hasTermLength = isoDate.isValid() && d?.term instanceof Date ? true : d?.term?.length ? true : false;
-            if (isStatusPeriod) {
-              return hasTermLength && !['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field);
+            if (d?.type === 'date') {
+              if (isStatusPeriod && 'statusPeriod' === d?.field) {
+                statusPeriodDateFilter.push({ field: `from_${d?.field}`, term: d?.term?.from });
+                statusPeriodDateFilter.push({ field: `to_${d?.field}`, term: d?.term?.to });
+              } else {
+                dateFilter.push({ field: `from_${d?.field}`, term: d?.term?.from });
+                dateFilter.push({ field: `to_${d?.field}`, term: d?.term?.to });
+              }
+              return false;
             }
-            return hasTermLength;
+            return d?.term?.length ? true : false;
           })
           ?.map((d) => {
-            const isoDate = dayjs(d?.term);
-            const term = isoDate.isValid() && d?.term instanceof Date ? dateFormatToSend(d?.term) : d?.term;
-            if (filterTerm[d?.field] === '$nin' && isArray(term)) {
+            if (filterTerm[d?.field] === '$nin' && isArray(d?.term)) {
               return {
-                ...d,
-                term: { $nin: term }
+                field: d?.field,
+                term: { $nin: d?.term }
               };
             }
             return {
-              ...d,
-              term
+              field: d?.field,
+              term: d?.term
             };
           })
       ];
     }
 
-    if (isStatusPeriod && deepFiltersP?.filter((d) => d?.term && ['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field))) {
-      deepFiltersP
-        ?.filter((d) => d?.term && ['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field))
-        ?.forEach((ele) => {
-          filterQuery = `${filterQuery}${ele?.field}=${ele?.term}&`;
-        });
+    if (dateFilter?.length > 0) {
+      deepFilter = [...deepFilter, ...dateFilter?.filter((d) => dayjs(d?.term).isValid())?.map((d) => ({ ...d, term: dateFormatToSend(d?.term) }))];
+    }
+
+    if (statusPeriodDateFilter?.length > 0) {
+      statusPeriodDateFilter?.forEach((d) => {
+        if (d?.term) {
+          filterQuery = `${filterQuery}${d?.field}=${d?.term}&`;
+        }
+      });
     }
 
     if (deepFilter && deepFilter.length > 0) {

@@ -4,7 +4,7 @@ import { isEmpty, uniqBy } from 'lodash';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { BsFillFunnelFill } from 'react-icons/bs';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { getErrors, getTimeFrame, isCLearFilterButtonVisible, useClassForFewSeconds } from 'src/components/Filter/utils';
+import { getErrors, isCLearFilterButtonVisible, useClassForFewSeconds } from 'src/components/Filter/utils';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { cn, CustomDialogTransition } from 'src/constants/helpers';
 import SaveFilterDialog from 'src/components/CustomReactTable/GridFilter/SaveFilterDialog';
@@ -68,15 +68,7 @@ const Filter = ({
 
   useEffect(() => {
     if (deepFilters?.length > 0) {
-      setSelectedField(
-        columns?.filter((c) => {
-          let fieldName = c?.fieldData?.fieldName;
-          if (c?.fieldData?.type === 'date') {
-            fieldName = `from_${fieldName}`;
-          }
-          return fieldName === deepFilters[0]?.field;
-        })[0]?.fieldData
-      );
+      setSelectedField(columns?.filter((c) => c?.fieldData?.fieldName === deepFilters[0]?.field)[0]?.fieldData);
     } else if (filterByIds?.length > 0) {
       setSelectedField(columns?.filter((c) => c?.fieldData?.fieldName === filterByIds[0]?.field)[0]?.fieldData);
     }
@@ -172,35 +164,18 @@ const Filter = ({
   };
 
   const isDisable = () => {
-    const dateFilters: any = {};
     if (
       deepFilters &&
       deepFilters?.length &&
       deepFilters?.filter((d) => {
-        const isoDate = dayjs(d?.term);
-        if (isoDate.isValid() && d?.term instanceof Date) {
-          dateFilters[d?.field?.split('_')[1]] = {
-            ...dateFilters[d?.field?.split('_')[1]],
-            [d?.field?.split('_')[0]]: d?.term
-          };
+        if (d?.type === 'date') {
+          return d?.duration !== 'custom';
         }
-        const hasTermLength = isoDate.isValid() && d?.term instanceof Date ? false : d?.term?.length ? true : false;
-        return hasTermLength;
+        return d?.term?.length ? true : false;
       })?.length
     )
       return false;
     if (filterByIds && filterByIds?.length && filterByIds?.filter((d) => d?.term?.length)?.length) return false;
-    if (
-      !isEmpty(dateFilters) &&
-      Object.keys(dateFilters)?.every((_key) => {
-        const timeFrame = getTimeFrame(dayjs(dateFilters[_key]?.from), dayjs(dateFilters[_key]?.to));
-        if (timeFrame != 'custom') {
-          return true;
-        }
-        return false;
-      })
-    )
-      return false;
     return true;
   };
 

@@ -11,7 +11,7 @@ function GridFilter({
   resource,
   handleClose,
   coloums,
-  loading,
+  setColoums,
   deepFilters,
   setDeepFilters,
   filterByIds,
@@ -28,10 +28,24 @@ function GridFilter({
   }: any = useData();
 
   const [userFilters, setUserFilters] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchUserFilters();
+    fetchAllColumns();
   }, []);
+
+  const fetchAllColumns = async () => {
+    try {
+      setLoading(true);
+      const columns = await fetchFieldOptions({ resource, sidebarResource, toastConfig });
+      setColoums(columns);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   const fetchUserFilters = () => {
     axiosInstance()

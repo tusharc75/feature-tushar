@@ -1,6 +1,5 @@
 import { Box, Checkbox, Dialog, FormControlLabel, Radio, RadioGroup, TextField } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
-import dayjs from 'dayjs';
 import { Form, Formik } from 'formik';
 import { isEmpty, startCase } from 'lodash';
 import { Fragment, useContext, useState } from 'react';
@@ -9,7 +8,6 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { getTimeFrame } from 'src/components/Filter/utils';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { boolean, object, string } from 'yup';
@@ -54,7 +52,6 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, columns, filter
   });
 
   const handleSubmit = (values) => {
-    const dateFilters: any = {};
     const obj: any = {};
     filterByIds
       ?.filter((f) => f?.term?.length > 0)
@@ -64,28 +61,18 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, columns, filter
 
     deepFilters
       ?.filter((f) => {
-        const isoDate = dayjs(f?.term);
-        if (isoDate.isValid() && f?.term instanceof Date) {
-          dateFilters[f?.field?.split('_')[1]] = {
-            ...dateFilters[f?.field?.split('_')[1]],
-            [f?.field?.split('_')[0]]: f?.term
-          };
+        if (f?.type === 'date') {
+          return f?.duration !== 'custom';
         }
-        const hasTermLength = isoDate.isValid() && f?.term instanceof Date ? false : f?.term?.length ? true : false;
-        return hasTermLength;
+        return f?.term?.length ? true : false;
       })
       ?.map((f) => {
-        obj[f?.field] = f?.term;
-      });
-
-    if (!isEmpty(dateFilters)) {
-      Object.keys(dateFilters)?.map((_key) => {
-        const timeFrame = getTimeFrame(dayjs(dateFilters[_key]?.from), dayjs(dateFilters[_key]?.to));
-        if (timeFrame != 'custom') {
-          obj[_key] = timeFrame;
+        if (f?.type === 'date') {
+          obj[f?.field] = f?.duration;
+        } else {
+          obj[f?.field] = f?.term;
         }
       });
-    }
 
     const data = {
       title: values?.title,
