@@ -291,7 +291,6 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
                   open={showAddExistingExpenseModal}
                   onClose={() => setShowAddExistingExpenseModal(false)}
                   fullScreen
-                  selectedExpense={selectedExpense}
                   setFullScreen={setFullScreen}
                   isSubmitting={isSubmitting}
                   onSave={handleSaveExpenses}

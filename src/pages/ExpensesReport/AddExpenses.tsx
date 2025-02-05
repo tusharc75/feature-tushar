@@ -23,8 +23,7 @@ function AddExpenses({
   onClose,
   fullScreen,
   setFullScreen,
-  isSubmitting,
-  selectedExpense,
+  isSubmitting=null,
   onSave,
   fetchReportData
 }) {
