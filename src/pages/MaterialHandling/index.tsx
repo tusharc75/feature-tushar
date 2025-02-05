@@ -19,6 +19,7 @@ import { BiFilterAlt } from 'react-icons/bi';
 import DisplayFilterChip from 'src/pages/Reports/tables/DisplayFilterChip';
 import Filter from 'src/components/Filter';
 import { isEmpty } from 'lodash';
+import dayjs from 'dayjs';
 
 let cancelTokenSource = null;
 
@@ -98,35 +99,45 @@ const MaterialHandling = () => {
     }
 
     let deepFilter = [];
-
     if (deepFiltersP?.length > 0) {
       deepFilter = [
         ...deepFilter,
         ...deepFiltersP
-          ?.filter((d) => d?.term?.length && !['from_createDate', 'to_createDate']?.includes(d?.field))
+          ?.filter((d) => {
+            if (d?.type === 'date') {
+              if (d?.duration === 'custom')
+                return (
+                  (dayjs(d?.term?.from).isValid() && d?.term?.from instanceof Date) || (dayjs(d?.term?.to).isValid() && d?.term?.to instanceof Date)
+                );
+              else
+                return (
+                  dayjs(d?.term?.from).isValid() && d?.term?.from instanceof Date && dayjs(d?.term?.from).isValid() && d?.term?.from instanceof Date
+                );
+            }
+            return d?.term?.length ? true : false;
+          })
           ?.map((d) => {
+            if (d?.type === 'date') {
+              return {
+                field: 'createdate',
+                term: {
+                  ...(d?.term?.from ? { from: d?.term?.from } : {}),
+                  ...(d?.term?.to ? { to: d?.term?.to } : {})
+                }
+              };
+            }
             if (filterTerm[d?.field] === '$nin' && Array.isArray(d?.term)) {
               return {
-                ...d,
+                field: d?.field,
                 term: { $nin: d?.term }
               };
             }
-            return d;
+            return {
+              field: d?.field,
+              term: d?.term
+            };
           })
       ];
-    }
-
-    if (
-      deepFiltersP?.length > 0 &&
-      (deepFiltersP?.some((f) => f?.field === 'from_createDate') || deepFiltersP?.some((f) => f?.field === 'to_createDate'))
-    ) {
-      deepFilter.push({
-        field: 'createdate',
-        term: {
-          from: deepFiltersP?.find((f) => f?.field === 'from_createDate')?.term,
-          to: deepFiltersP?.find((f) => f?.field === 'to_createDate')?.term
-        }
-      });
     }
 
     if (deepFilter?.length) {

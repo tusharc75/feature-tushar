@@ -90,7 +90,7 @@ const GridHeader = ({
   };
 
   const handleApplyFilter = () => {
-    const filters = createFilterData(coloums, filterByIds, deepFilters, filterTerm);
+    const filters = createFilterData(filterByIds, deepFilters, filterTerm);
     const fromValue = filtermodelToFormValue(filters);
     dispatch({ type: 'filter', filters });
     setTempFilter(renderedFrom, { formValues: fromValue || {}, filters });
@@ -114,7 +114,7 @@ const GridHeader = ({
           setDeepFilters(deepFilter);
           setFilterTerm(defaultFilter?.filterTerm || {});
           let deepFilterP;
-          if (defaultFilter?.filterValue) deepFilterP = createFilterData(coloums, filterById, deepFilter, defaultFilter?.filterTerm);
+          if (defaultFilter?.filterValue) deepFilterP = createFilterData(filterById, deepFilter, defaultFilter?.filterTerm);
           if (defaultFilter && deepFilterP) {
             dispatch({ type: 'filter', filters: deepFilterP });
             if (defaultFilter.sortBy) {
@@ -207,12 +207,7 @@ const GridHeader = ({
         </div>
         <div className="buttons flex flex-wrap gap-[8px] ">
           {showFilters && (
-            <ThemeButton
-              onClick={handleFilterOpen}
-              startIcon={<BiFilterAlt />}
-              mobileTooltip="Apply Filters"
-              iconForMobile={<BiFilterAlt />}
-            >
+            <ThemeButton onClick={handleFilterOpen} startIcon={<BiFilterAlt />} mobileTooltip="Apply Filters" iconForMobile={<BiFilterAlt />}>
               {'Filters'}
             </ThemeButton>
           )}

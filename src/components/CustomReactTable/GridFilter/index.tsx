@@ -27,12 +27,12 @@ function GridFilter({
     state: { resources }
   }: any = useData();
 
-  const [loading, setLoading] = useState(false);
   const [userFilters, setUserFilters] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetchAllColumns();
     fetchUserFilters();
+    fetchAllColumns();
   }, []);
 
   const fetchAllColumns = async () => {
