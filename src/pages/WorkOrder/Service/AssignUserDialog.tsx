@@ -30,8 +30,9 @@ type Status = {
   [K in StatusOrder]: number;
 };
 
-const initialClass = ['-right-full', 'opacity-0'];
+const initialClass = ['-right-[--w]', 'opacity-0'];
 const delayedClass = ['right-0', 'opacity-100'];
+const ANIMATION_DURATION = 300;
 
 const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceData = null, competencies, handleClose, handleSucess, warehouse }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -78,7 +79,7 @@ const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceDa
       } else {
         handleClose();
       }
-    }, 150);
+    }, ANIMATION_DURATION);
   };
 
   const handleAssignUser = () => {
@@ -146,8 +147,12 @@ const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceDa
   return (
     <>
       <div
-        className={cn('backdrop fixed inset-0 z-[1301] cursor-pointer bg-black/50 opacity-0 transition-opacity', className[1])}
+        className={cn(
+          'backdrop fixed inset-0 z-[1301] cursor-pointer bg-black/50 opacity-0 transition-opacity [backdrop-filter:blur(1px)] dark:bg-white/15',
+          className[1]
+        )}
         onClick={() => handleClosePanel()}
+        style={{ transitionDuration: `${ANIMATION_DURATION}ms` }}
       />
       <div
         aria-labelledby="customized-dialog-title"
@@ -155,6 +160,7 @@ const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceDa
           'fixed top-0 z-[1301] flex h-dvh w-[--w] flex-col bg-[--dark-primary,white] transition-all [--w:min(100%,470px)]',
           className[0]
         )}
+        style={{ transitionDuration: `${ANIMATION_DURATION}ms` }}
       >
         <div className="flex items-center justify-between gap-2 border-b p-4">
           <h5 className="text-xl font-semibold leading-[24px]">Assign Technician</h5>
