@@ -26,7 +26,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
 
-const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, onSuccess, open }) => {
+const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, onSuccess }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -38,6 +38,7 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [cloneHeading, setCloneHeading] = useState('');
+  const [invoiceNumber, setInvoiceNumber] = useState('');
 
   useEffect(() => {
     setLoading(true);
@@ -70,6 +71,7 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
             });
             setLoading(false);
           } else {
+            setInvoiceNumber(data?.invoiceNumber);
             setInitialData({
               fields: fieldsDataForUpdate,
               values: getObjKeysWithValues(data, fieldsDataForUpdate)
@@ -161,7 +163,7 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
             setShowConfirmDialog(true);
           }
         }}
-        open={open}
+        open={true}
       >
         {initialData?.fields?.length ? (
           <Formik
@@ -177,7 +179,7 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
                   title={
                     !invoiceId
                       ? `Create ${resources?.invoice?.titleSingular}`
-                      : `${isClone ? `Clone - ${cloneHeading}` : `Update ${invoiceData?.invoiceNumber}`}`
+                      : `${isClone ? `Clone - ${cloneHeading}` : `Update ${invoiceData?.invoiceNumber || invoiceNumber}`}`
                   }
                   onClose={() => {
                     if (isEqual(initialData.values, values)) {

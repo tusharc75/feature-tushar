@@ -8,7 +8,6 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { AssetAvailabilityIcon } from 'src/assets/svg/svgIcons';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
 import { flattenArray } from 'src/constants/columns';
 import { ownerAndColaborator, rentalManagementMessage } from 'src/constants/messageHelpers';
 import ManagePackageDialog from 'src/pages/Packages/ManagePackageDialog';
@@ -33,6 +32,7 @@ import {
   DELIVERY_TICKET_TYPE,
   deliveryTicket,
   MATERIAL_TYPE,
+  PRICING_SETUP_TYPE,
   RENTAL_STATUS,
   rentalManagement
 } from '../../../constants/helpers';
@@ -55,7 +55,7 @@ import {
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import AssignManagedPackagesDialog from 'src/components/AssignRolesDialog/AssignManagedPackagesDialog';
 import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
-import { getPricingValue } from 'src/components/PricingCondition';
+import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
 
 const Productpackage = ({
   rentalManagementData,
@@ -91,7 +91,6 @@ const Productpackage = ({
   const [allFields, setAllFields] = useState(null);
   const [addchildDialog, setAddchildDialog] = useState({ open: false, parentId: null, type: null, top: null, bottom: null });
   const [showConfirmationDialog, setShowConfirmationDialog] = useState({ open: false, data: null });
-  const [priceDataDialog, setPriceDataDialog] = useState({ open: false, material: null });
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [openAssetAvailibility, setOpenAssetAvailibility] = useState(false);
   const [costFields, setCostFields] = useState([]);
@@ -630,11 +629,8 @@ const Productpackage = ({
       element.listPrice = d.listPrice ? d.listPrice : null;
       material.push(element);
     });
-    if (material.filter((d) => d.listPrice === null).length === 0) {
-      AddMaterial(material, []);
-    } else {
-      setPriceDataDialog({ open: true, material: material });
-    }
+    let priceData: any = await getPricingConditions(rentalManagementData, material, PRICING_SETUP_TYPE.rent);
+    AddMaterial(material, priceData);
   };
 
   const handleAddManagedPackages = async (rows) => {
@@ -680,12 +676,10 @@ const Productpackage = ({
           fetchRentalManagementData();
         }
         setIsSubmitting(false);
-        setPriceDataDialog({ open: false, material: null });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
         setIsSubmitting(false);
-        setPriceDataDialog({ open: false, material: null });
       });
   };
 
@@ -1254,20 +1248,6 @@ const Productpackage = ({
           }}
           onClose={() => {
             setShowConfirmationDialog({ open: false, data: {} });
-          }}
-        />
-      )}
-      {priceDataDialog.open && (
-        <CalculatePriceDialog
-          referenceData={rentalManagementData}
-          material={priceDataDialog.material}
-          handleSucess={(data) => {
-            console.log(data)
-            AddMaterial(priceDataDialog.material, data);
-          }}
-          onClose={() => {
-            AddMaterial(priceDataDialog.material, null);
-            setPriceDataDialog({ open: false, material: null });
           }}
         />
       )}

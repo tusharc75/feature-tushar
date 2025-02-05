@@ -453,7 +453,6 @@ const Invoice = () => {
       {showManageDialog.open && (
         <ManageInvoiceDialog
           isClone={showManageDialog.isClone}
-          open={showManageDialog.open}
           invoiceId={showManageDialog.idToClone}
           onClose={() => setShowManageDialog({ open: false, isClone: false, idToClone: null })}
           onSuccess={() => {

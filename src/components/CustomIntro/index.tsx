@@ -92,7 +92,7 @@ const CustomIntro = () => {
   const [_s, setWalkMeInstance] = useStore((store) => store[WALK_ME_INSTANCE]);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, setUpdateSignal] = useState<number>(0);
-  let handleSteps = useRef<HandleSteps | null>(null);
+  const handleSteps = useRef<HandleSteps | null>(null);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
   const [arrowRef, setArrowRef] = React.useState(null);
@@ -111,6 +111,7 @@ const CustomIntro = () => {
 
   const handleNext = (checkForStepInsertion = true) => {
     clearTimeout(timeout);
+
     if (checkForStepInsertion) {
       if (currentStepData?.element.tagName === 'IFRAME') {
         const frame = currentStepData?.element as HTMLIFrameElement;
