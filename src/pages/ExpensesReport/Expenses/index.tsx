@@ -320,6 +320,7 @@ const Expenses = ({ selectedExpenseData, showAddButton, reportData=null }) => {
             setFullScreen={setFullScreen}
             onSave={handleSaveAndSubmit}
             fetchReportData={fetchData}
+            isSubmitting={isSubmitting}
           />
         )}
         {showManageExpensesDialog.open && (
