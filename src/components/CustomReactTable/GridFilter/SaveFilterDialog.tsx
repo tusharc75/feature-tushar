@@ -48,7 +48,7 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, columns, filter
     sorting: filterData?.sorting || false,
     sortBy: filterData?.sortBy || '',
     orderBy: filterData?.orderBy || '',
-    access: filterData?.access || ''
+    access: filterData?.access || 'private'
   });
 
   const handleSubmit = (values) => {
@@ -212,7 +212,7 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, columns, filter
                   </div>
                 )}
                 <Box>
-                  <RadioGroup>
+                  <RadioGroup row>
                     <FormControlLabel
                       control={
                         <Radio
