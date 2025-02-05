@@ -225,6 +225,8 @@ const TransactionLock = () => {
             fetchData();
           }}
           additionalParams={getQueryString(true)}
+          asyncExport={true}
+          resource={sidebarResource.transactionLock}
         />
       </div>
       <CustomContainer>

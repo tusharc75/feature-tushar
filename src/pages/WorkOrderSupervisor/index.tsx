@@ -570,7 +570,7 @@ const WorkOrderSupervisor = () => {
         viewType === 'table-view'
           ? tableViewStatus === WORKORDER_SERVICE_STATUS.planned
             ? [createRepairOrderButton]
-            : [assignTechnicianButton, ...(canShowWorkStationButton ? [assignWorkStationButton] : []) , addProductConsumablesButton]
+            : [assignTechnicianButton, ...(canShowWorkStationButton ? [assignWorkStationButton] : []), addProductConsumablesButton]
           : selectedRecords?.every((r) => r?.status === WORKORDER_SERVICE_STATUS.planned)
             ? [...(viewType === 'card-view' ? [createRepairOrderButton] : [])]
             : selectedRecords?.every((r) => r?.status !== WORKORDER_SERVICE_STATUS.planned)
@@ -876,7 +876,7 @@ const WorkOrderSupervisor = () => {
       </div>
       {assignTechnicianDialog.open && (
         <AssignUserDialog
-          warehouse={assignTechnicianDialog.multiple ? selectedRecordsS[0]?.warehouse?.optionValue : selectedServiceData?.warehouse}
+          warehouse={assignTechnicianDialog.multiple ? selectedRecordsS[0]?.warehouse?.optionValue : selectedServiceData?.warehouse?.optionValue}
           workOrderData={
             assignTechnicianDialog.multiple
               ? selectedRecordsS?.map((r) => ({
@@ -934,7 +934,6 @@ const WorkOrderSupervisor = () => {
           }}
         />
       )}
-
       {openWorkOrderScheduler && (
         <WorkOrderSchedulerDialog
           onClose={() => setOpenWorkOrderScheduler(false)}
@@ -944,7 +943,6 @@ const WorkOrderSupervisor = () => {
           }}
         />
       )}
-
       {isOpen.open && (
         <WorkOrderDetailDialog
           workOrderId={isOpen?.id}
@@ -953,7 +951,6 @@ const WorkOrderSupervisor = () => {
           }}
         />
       )}
-
       {consumablesDialog.open && (
         <AssignProductDialog
           handleCloseDialog={() => setConsumablesDialog({ open: false, multiple: false })}
