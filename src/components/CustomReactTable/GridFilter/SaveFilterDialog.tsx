@@ -1,7 +1,7 @@
 import { Box, Checkbox, Dialog, FormControlLabel, Radio, RadioGroup, TextField } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Form, Formik } from 'formik';
-import { startCase } from 'lodash';
+import { isEmpty, startCase } from 'lodash';
 import { Fragment, useContext, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -60,9 +60,18 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, columns, filter
       });
 
     deepFilters
-      ?.filter((f) => f?.term?.length > 0)
+      ?.filter((f) => {
+        if (f?.type === 'date') {
+          return f?.duration !== 'custom';
+        }
+        return f?.term?.length ? true : false;
+      })
       ?.map((f) => {
-        obj[f?.field] = f?.term;
+        if (f?.type === 'date') {
+          obj[f?.field] = f?.duration;
+        } else {
+          obj[f?.field] = f?.term;
+        }
       });
 
     const data = {

@@ -24,7 +24,9 @@ type FilterObjectArray = {
 };
 type Filter = {
   field: string;
-  term: string | string[] | Object[];
+  term: string | string[] | Object | Object[];
+  type?: string;
+  duration?: string;
 };
 type Object = {
   optionValue: string;
@@ -86,9 +88,9 @@ const DisplayFilterChip = ({
     const otherData = [],
       dateObj = {};
     uniqueFilters?.forEach((d) => {
-      if (d.field.startsWith('from_') || d.field.startsWith('to_')) {
-        const title = d.field.replace('from_', '').replace('to_', '');
-        dateObj[title] = dateObj[title] ? `${dateObj[title]} - ${displayDate(d.term)}` : displayDate(d.term);
+      if (d?.type === 'date') {
+        const term: any = d?.term;
+        dateObj[d.field] = `${term?.from ? `${displayDate(term?.from)} - ` : ''}${term?.to ? displayDate(term?.to) : ''}`;
       } else {
         otherData.push(d);
       }
@@ -211,11 +213,7 @@ const RenderDates = <D extends Dates>({ data, handleClearFilter, colNameMap, sig
           {data.term}
         </span>
         {!disableClear && (
-          <IconButton
-            size="small"
-            style={buttonStyle}
-            onClick={() => handleClearFilter([`from_${camelCase(data.field)}`, `to_${camelCase(data.field)}`])}
-          >
+          <IconButton size="small" style={buttonStyle} onClick={() => handleClearFilter([data.field])}>
             <Close fontSize="inherit" />
           </IconButton>
         )}

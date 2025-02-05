@@ -4,7 +4,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import dayjs from 'dayjs';
 
-const DateTime = ({ fieldData, deepFilters, setDeepFilters, required = false, sidebarIcon = null }) => {
+const DateTime = ({ fieldData, deepFilters, setDeepFilters, required = false, sidebarIcon = null, selectedUserFilter = null }) => {
   const [timeFrame, setTimeFrame] = useState<any>('custom');
 
   const handleDuration = useCallback(
@@ -28,11 +28,8 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, required = false, si
         toDate = dayjs.tz().endOf('year').toDate();
       }
       setDeepFilters([
-        ...deepFilters?.filter((d) => d?.field !== `from_${fieldData?.fieldName}` && d?.field !== `to_${fieldData?.fieldName}`),
-        ...[
-          { field: `from_${fieldData?.fieldName}`, term: fromDate },
-          { field: `to_${fieldData?.fieldName}`, term: toDate }
-        ]
+        ...deepFilters?.filter((d) => d?.field !== fieldData?.fieldName),
+        { field: fieldData?.fieldName, type: 'date', duration: timeFrame, term: { from: fromDate, to: toDate } }
       ]);
     },
     [deepFilters, fieldData?.fieldName, setDeepFilters]
@@ -51,39 +48,24 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, required = false, si
   }, []);
 
   const isDatePresent = useMemo(() => {
-    const found = deepFilters.find((d) => {
-      if (d?.field === `from_${fieldData?.fieldName}`) {
-        return Boolean(d.term);
+    const found = deepFilters?.find((d) => {
+      if (d?.field === fieldData?.fieldName) {
+        return Boolean(d?.term?.from) || Boolean(d?.term?.to);
       }
-      if (d?.field === `to_${fieldData?.fieldName}`) {
-        return Boolean(d.term);
-      }
-      return true;
     });
     return Boolean(found);
   }, [deepFilters, fieldData?.fieldName]);
 
   useEffect(() => {
-    const fromDate = dayjs(deepFilters?.find((item) => item.field === `from_${fieldData?.fieldName}`)?.term);
-    const toDate = dayjs(deepFilters?.find((item) => item.field === `to_${fieldData?.fieldName}`)?.term);
-    if (fromDate && toDate) {
-      const differenceInMonths = toDate.diff(fromDate, 'month');
-      const differenceInDays = toDate.diff(fromDate, 'day');
-      if (fromDate.isSame(fromDate.startOf('year'), 'day') && [364, 365, 366]?.includes(differenceInDays)) {
-        setTimeFrame('current-year');
-      } else if (differenceInMonths === 1 && [28, 29, 30, 31]?.includes(differenceInDays)) {
-        setTimeFrame('1-month');
-      } else if (differenceInMonths === 3 && [88, 89, 90, 91, 92]?.includes(differenceInDays)) {
-        setTimeFrame('3-months');
-      } else if (differenceInMonths === 6 && [178, 179, 180, 181, 182, 183, 184]?.includes(differenceInDays)) {
-        setTimeFrame('6-months');
-      } else if (differenceInMonths === 12 && [364, 365, 366]?.includes(differenceInDays)) {
-        setTimeFrame('1-year');
-      } else {
-        setTimeFrame('custom');
-      }
+    const data = deepFilters?.find((d) => d?.field === fieldData?.fieldName);
+    setTimeFrame(data?.duration || 'custom');
+    if (data) {
+      setDeepFilters([
+        ...deepFilters?.filter((d) => d?.field !== fieldData?.fieldName),
+        { field: fieldData?.fieldName, duration: data?.duration, type: 'date', term: { from: data?.term?.from, to: data?.term?.to } }
+      ]);
     }
-  }, []);
+  }, [selectedUserFilter]);
 
   return (
     <>
@@ -124,14 +106,15 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, required = false, si
             name={`from_${fieldData?.fieldName}`}
             label={`From ${fieldData?.fieldLabel}`}
             value={
-              deepFilters?.find((d) => d?.field === `from_${fieldData?.fieldName}`)?.term
-                ? deepFilters?.find((d) => d?.field === `from_${fieldData?.fieldName}`)?.term
+              deepFilters?.find((d) => d?.field === fieldData?.fieldName)?.term?.from
+                ? deepFilters?.find((d) => d?.field === fieldData?.fieldName)?.term?.from
                 : null
             }
             onChange={(date: any) => {
+              const _data = deepFilters?.find((d) => d?.field === fieldData?.fieldName)?.term;
               setDeepFilters([
-                ...deepFilters?.filter((d) => d?.field !== `from_${fieldData?.fieldName}`),
-                { field: `from_${fieldData?.fieldName}`, term: dayjs(date).toDate() }
+                ...deepFilters?.filter((d) => d?.field !== fieldData?.fieldName),
+                { field: fieldData?.fieldName, type: 'date', duration: 'custom', term: { from: dayjs(date).toDate(), to: _data?.to || '' } }
               ]);
             }}
           />
@@ -144,14 +127,15 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, required = false, si
             name={`to_${fieldData?.fieldName}`}
             label={`To ${fieldData?.fieldLabel}`}
             value={
-              deepFilters?.find((d) => d?.field === `to_${fieldData?.fieldName}`)?.term
-                ? deepFilters?.find((d) => d?.field === `to_${fieldData?.fieldName}`)?.term
+              deepFilters?.find((d) => d?.field === fieldData?.fieldName)?.term?.to
+                ? deepFilters?.find((d) => d?.field === fieldData?.fieldName)?.term?.to
                 : null
             }
             onChange={(date: any) => {
+              const _data = deepFilters?.find((d) => d?.field === fieldData?.fieldName)?.term;
               setDeepFilters([
-                ...deepFilters?.filter((d) => d?.field !== `to_${fieldData?.fieldName}`),
-                { field: `to_${fieldData?.fieldName}`, term: dayjs(date).toDate() }
+                ...deepFilters?.filter((d) => d?.field !== fieldData?.fieldName),
+                { field: fieldData?.fieldName, type: 'date', duration: 'custom', term: { from: _data?.from || '', to: dayjs(date).toDate() } }
               ]);
             }}
           />
