@@ -268,20 +268,28 @@ const WorkOrderSupervisor = () => {
       {
         type: 'tooltip',
         accessor: 'tooltip',
-        renderer: (data) => <RenderAssignOptions openAssignHandler={openAssignHandler} data={data} permissions={permissions} resources={resources} isCreateRepairOrderDisabled={isCreateRepairOrderDisabled} />
+        renderer: (data) => (
+          <RenderAssignOptions
+            openAssignHandler={openAssignHandler}
+            data={data}
+            permissions={permissions}
+            resources={resources}
+            isCreateRepairOrderDisabled={isCreateRepairOrderDisabled}
+          />
+        )
       }
     ];
 
-    let tempvisibleColumns = []
+    let tempvisibleColumns = [];
     if (permissions?.workOrderPlanning?.isRead) {
-      tempvisibleColumns.push(WORKORDER_SERVICE_STATUS.planned)
+      tempvisibleColumns.push(WORKORDER_SERVICE_STATUS.planned);
     }
     tempvisibleColumns = [
       ...tempvisibleColumns,
       WORKORDER_SERVICE_STATUS.pending,
       WORKORDER_SERVICE_STATUS.inProgress,
       WORKORDER_SERVICE_STATUS.completed
-    ]
+    ];
 
     dispatch({
       type: 'initialize',
@@ -570,28 +578,36 @@ const WorkOrderSupervisor = () => {
         viewType === 'table-view'
           ? tableViewStatus === WORKORDER_SERVICE_STATUS.planned
             ? [createRepairOrderButton]
-            : [assignTechnicianButton, ...(canShowWorkStationButton ? [assignWorkStationButton] : []) , addProductConsumablesButton]
+            : [assignTechnicianButton, ...(canShowWorkStationButton ? [assignWorkStationButton] : []), addProductConsumablesButton]
           : selectedRecords?.every((r) => r?.status === WORKORDER_SERVICE_STATUS.planned)
             ? [...(viewType === 'card-view' ? [createRepairOrderButton] : [])]
             : selectedRecords?.every((r) => r?.status !== WORKORDER_SERVICE_STATUS.planned)
-              ? [assignTechnicianButton, ...(canShowWorkStationButton ? [assignWorkStationButton] : []), ...(viewType === 'card-view' ? [addProductConsumablesButton] : [])]
+              ? [
+                  assignTechnicianButton,
+                  ...(canShowWorkStationButton ? [assignWorkStationButton] : []),
+                  ...(viewType === 'card-view' ? [addProductConsumablesButton] : [])
+                ]
               : [
-                assignTechnicianButton,
-                ...(canShowWorkStationButton ? [assignWorkStationButton] : []),
-                ...(viewType === 'card-view' ? [addProductConsumablesButton, createRepairOrderButton] : [])
-              ]
+                  assignTechnicianButton,
+                  ...(canShowWorkStationButton ? [assignWorkStationButton] : []),
+                  ...(viewType === 'card-view' ? [addProductConsumablesButton, createRepairOrderButton] : [])
+                ]
     };
     return data;
   }, [resources?.workStations?.titlePlural, selectedRecords, selectedRecordsS, selectedRecordsP, viewType, tableViewStatus]);
 
   const statusMenuItems = useMemo(() => {
     return [
-      ...(permissions?.workOrderPlanning?.isRead ? [{
-        label: WORKORDER_SERVICE_STATUS.planned,
-        selected: tableViewStatus === WORKORDER_SERVICE_STATUS.planned,
-        value: WORKORDER_SERVICE_STATUS.planned,
-        startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.planned]
-      }] : []),
+      ...(permissions?.workOrderPlanning?.isRead
+        ? [
+            {
+              label: WORKORDER_SERVICE_STATUS.planned,
+              selected: tableViewStatus === WORKORDER_SERVICE_STATUS.planned,
+              value: WORKORDER_SERVICE_STATUS.planned,
+              startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.planned]
+            }
+          ]
+        : []),
       {
         label: WORKORDER_SERVICE_STATUS.pending,
         selected: tableViewStatus === WORKORDER_SERVICE_STATUS.pending,
@@ -666,7 +682,7 @@ const WorkOrderSupervisor = () => {
               {`${resources?.workOrder?.titlePlural}`}
             </ThemeButton>
           )}
-          {moreButtonMenuItems?.find((e) => e.visible) &&
+          {moreButtonMenuItems?.find((e) => e.visible) && (
             <ButtonMenu
               showChevron={true}
               items={moreButtonMenuItems}
@@ -681,7 +697,7 @@ const WorkOrderSupervisor = () => {
                 )) as any
               }
             />
-          }
+          )}
         </div>
       </div>
       <div className="main-container">
@@ -709,7 +725,7 @@ const WorkOrderSupervisor = () => {
                 </>
               ) : (
                 <div className="flex">
-                  <ToggleButtonGroup size="small" exclusive value={resourceType} onChange={(e, newVal) => { }}>
+                  <ToggleButtonGroup size="small" exclusive value={resourceType} onChange={(e, newVal) => {}}>
                     <ToggleButton value={'workOrder'} onClick={() => setResourceType('workOrder')}>
                       {resources?.workOrder?.titleSingular}
                     </ToggleButton>
@@ -813,12 +829,7 @@ const WorkOrderSupervisor = () => {
         )}
         {viewType === 'calendar-view' && (
           <div className="pt-2">
-            <WorkOrderCalendar
-              getFilterQuery={getQueryString}
-              filterQuery={filterQuery}
-              reference={resourceType}
-              ref={ref}
-              setOpen={setOpen} />
+            <WorkOrderCalendar getFilterQuery={getQueryString} filterQuery={filterQuery} reference={resourceType} ref={ref} setOpen={setOpen} />
           </div>
         )}
         {viewType === 'table-view' && (
@@ -880,15 +891,15 @@ const WorkOrderSupervisor = () => {
           workOrderData={
             assignTechnicianDialog.multiple
               ? selectedRecordsS?.map((r) => ({
-                uniqueId: r?.uniqueId,
-                workOrderId: r?.workOrder
-              }))
+                  uniqueId: r?.uniqueId,
+                  workOrderId: r?.workOrder
+                }))
               : [
-                {
-                  uniqueId: selectedServiceData?.uniqueId,
-                  workOrderId: selectedServiceData?.workOrder
-                }
-              ]
+                  {
+                    uniqueId: selectedServiceData?.uniqueId,
+                    workOrderId: selectedServiceData?.workOrder
+                  }
+                ]
           }
           assignedUsers={
             assignTechnicianDialog.multiple
@@ -914,15 +925,15 @@ const WorkOrderSupervisor = () => {
           workOrderData={
             workStationAssignDialog.multiple
               ? selectedRecordsS?.map((r) => ({
-                uniqueId: r?.uniqueId,
-                workOrderId: r?.workOrder
-              }))
+                  uniqueId: r?.uniqueId,
+                  workOrderId: r?.workOrder
+                }))
               : [
-                {
-                  uniqueId: selectedServiceData?.uniqueId,
-                  workOrderId: selectedServiceData?._id
-                }
-              ]
+                  {
+                    uniqueId: selectedServiceData?.uniqueId,
+                    workOrderId: selectedServiceData?._id
+                  }
+                ]
           }
           workStations={workStationAssignDialog.multiple ? selectedRecordsS[0]?.assignedWorkStations : selectedServiceData?.assignedWorkStations}
           handleClose={() => {
