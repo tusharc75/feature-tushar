@@ -45,7 +45,7 @@ const Expenses = ({ selectedExpenseData, showAddButton, reportData=null }) => {
 
   useEffect(() => {
     fetchData();
-  }, [selectedEntity, selectedExpenseData, selectedExpense]);
+  }, [selectedEntity, selectedExpenseData, selectedExpense, reportData]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -164,42 +164,49 @@ const Expenses = ({ selectedExpenseData, showAddButton, reportData=null }) => {
       });
   };
 
-  const handleSaveAndSubmit = async (newExpenses) => {
-    setIsSubmitting(true);
-  
-    const updatedExpenses = [...newExpenses, ...selectedExpense];
-    setSelectedExpense(updatedExpenses);
-    const expense = [...reportData.expenses, ...updatedExpenses]
-    const payload = {
-      _id: reportData._id,
-      reportTitle : reportData.reportTitle,
-      status: reportData.status,
-      expenses: expense,
-    };
-  
-    try {
-      const response = await axiosInstance().put(`${expenseReport.api}`, payload);
-      const status = EXPENSE_STATUS.unSubmitted;
-  
-      await Promise.all(
-        updatedExpenses.map((expense) =>
-          axiosInstance().patch(`${expenses.api}/status/${expense._id}`, { status })
-        )
-      );
-      fetchData();
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: response.data.message,
-      }); 
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
-  
-    setIsSubmitting(false);
-  };
-  
+const updateExpensesStatus = async (expenseList) => {
+  await Promise.all(
+    expenseList.map((expense) =>
+      axiosInstance().patch(`${expenses.api}/status/${expense._id}`, { status : EXPENSE_STATUS.unSubmitted })
+    )
+  );
+  fetchData();
+};
 
+const handleSaveAndSubmit = async (newExpenses) => {
+  setIsSubmitting(true);
+
+  const newExpensesArr = Array.isArray(newExpenses) ? newExpenses : [newExpenses];
+
+  const updatedExpenses = [...newExpensesArr, ...selectedExpense];
+  setSelectedExpense(updatedExpenses);
+
+  const expense = [...reportData.expenses, ...updatedExpenses];
+  const payload = {
+    _id: reportData._id,
+    reportTitle: reportData.reportTitle,
+    status: reportData.status,
+    expenses: expense,
+  };
+
+  try {
+    const response = await axiosInstance().put(`${expenseReport.api}`, payload);
+    
+    await updateExpensesStatus(updatedExpenses);
+
+    fetchData();
+    toastConfig.setToastConfig({
+      open: true,
+      type: 'success',
+      message: response.data.message,
+    });
+  } catch (error) {
+    toastConfig.setToastConfig(error);
+  }
+
+  setIsSubmitting(false);
+};
+  
   const ActionsRenderer = {
     accessor: 'action',
     Header: 'Actions',
@@ -325,12 +332,10 @@ const Expenses = ({ selectedExpenseData, showAddButton, reportData=null }) => {
           <ManageExpenses
             expenseId={showManageExpensesDialog.idToClone}
             onClose={() => setShowManageExpensesDialog({ open: false, idToClone: null })}
-            onSuccess={(data) => {
+            onSuccess={async (data) => {
               setShowManageExpensesDialog({ open: false, idToClone: null });
-              setSelectedExpense((prevExpenses) => {
-                const updatedExpenses = prevExpenses.filter((exp) => exp._id !== data._id);
-                return [...updatedExpenses, data];
-              });
+              await handleSaveAndSubmit(data);
+              fetchData();
             }}
             isRedirectToDetailPage={false}
           />
