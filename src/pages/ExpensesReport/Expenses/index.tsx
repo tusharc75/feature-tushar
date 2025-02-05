@@ -29,8 +29,6 @@ const Expenses = ({ selectedExpenseData, showAddButton, reportData=null }) => {
   const [columns, setColumns] = useState(null);
   const { generateColumns, checkStaticField } = useColumns();
   const { selectedRecords } = state;
-  const pathSegments = window.location.href.split('/');
-  const pid = pathSegments[pathSegments.length - 1].split('?')[0];
   const [deleteData, setDeleteData] = useState(null);
   const [subtotal, setSubtotal] = useState(0);
   const currentDataRef = useRef([]);
@@ -158,7 +156,7 @@ const Expenses = ({ selectedExpenseData, showAddButton, reportData=null }) => {
 
   const handleDelete = async (rows) => {
     axiosInstance()
-      .put(`${routes.expenseReport.path}/expenses/${pid}/remove`, { ids: rows })
+      .put(`${routes.expenseReport.path}/expenses/${reportData._id}/remove`, { ids: rows })
       .then(({ data }) => {
         dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
