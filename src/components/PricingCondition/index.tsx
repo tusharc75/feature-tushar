@@ -23,7 +23,7 @@ export const getPricingConditions = (referenceData: any, material: any[], condit
     data.address = referenceData?.shippingAddress?.optionValue ? [referenceData?.shippingAddress?.optionValue] : [];
     return new Promise((resolve, reject) => {
       axiosInstance()
-        .post(pricingCondition.api + `/calculatePrice-new`, data)
+        .post(pricingCondition.api + `/material-pricing-data`, data)
         .then(({ data: { data } }) => {
           let pricingData = data;
           if (referenceData?.pricingCondition?.optionValue) {
