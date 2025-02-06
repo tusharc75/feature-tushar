@@ -52,7 +52,9 @@ const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceDa
     setContainerRef(container);
     document.body.appendChild(container);
     document.body.style.overflow = 'hidden';
-    document.body.style.paddingRight = `6px`;
+    if (document.body.scrollHeight > window.innerHeight) {
+      document.body.style.paddingRight = `6px`;
+    }
 
     return () => {
       document.body.removeChild(container);
