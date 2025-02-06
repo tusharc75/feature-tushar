@@ -21,6 +21,7 @@ const timeframeList = [
   { label: 'Last 1 Month', value: '1-month' },
   { label: 'Last 3 Months', value: '3-months' },
   { label: 'Last 6 Months', value: '6-months' },
+  { label: 'Current Year', value: 'current-year' },
   { label: 'Last 1 Year', value: '1-year' }
 ] as const;
 
@@ -86,6 +87,15 @@ function DateRangePicker({ className, date, setDate, horizontal = 'center' }: Da
         const data = {
           from: dayjs.tz().subtract(1, 'year').toDate(),
           to: dayjs.tz().toDate()
+        };
+        setMonth(data.from);
+        handleDateChange(data);
+        break;
+      }
+      case 'current-year': {
+        const data = {
+          from: dayjs.tz().startOf('year').toDate(),
+          to: dayjs.tz().endOf('year').toDate()
         };
         setMonth(data.from);
         handleDateChange(data);
