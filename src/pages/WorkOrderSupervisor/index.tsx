@@ -224,6 +224,28 @@ const WorkOrderSupervisor = () => {
       isRead: permissions && permissions?.productionOrder ? permissions?.productionOrder?.isRead : false,
       isCreate: permissions && permissions?.productionOrder ? permissions?.productionOrder?.isCreate : false,
       isUpdate: permissions && permissions?.productionOrder ? permissions?.productionOrder?.isUpdate : false
+    },
+    {
+      fieldData: {
+        _id: '630dc2429gc81869052385b5',
+        fieldName: 'serializedAsset',
+        fieldLabel: resources?.serializedAsset?.titlePlural,
+        lookup: true,
+        lookupResource: sidebarResource.serializedAsset,
+        resource: sidebarResource.workOrderSupervisor,
+        type: 'dropDown',
+        order: 4,
+        required: false,
+        sectionName: 'Work Order Superviser Filter',
+        isTooltip: false,
+        editAble: false,
+        brand: user?.brand,
+        roleType: 0,
+        sectionProperties: ''
+      },
+      isRead: permissions && permissions?.serializedAsset ? permissions?.serializedAsset?.isRead : false,
+      isCreate: permissions && permissions?.serializedAsset ? permissions?.serializedAsset?.isCreate : false,
+      isUpdate: permissions && permissions?.serializedAsset ? permissions?.serializedAsset?.isUpdate : false
     }
   ];
 
@@ -237,6 +259,13 @@ const WorkOrderSupervisor = () => {
           data?.status === WORKORDER_SERVICE_STATUS.planned
             ? `${routes?.serializedAssetDetail?.path}/${data?.serializedAssetId}`
             : `${routes?.workOrderDetail?.path}/${data?.workOrder}`,
+        target: '_blank'
+      },
+      {
+        accessor: 'serializedAssetNumber',
+        title: resources?.serializedAsset?.titleSingular,
+        type: 'link',
+        link: (data) => `${routes.serializedAssetDetail.path}/${data?.serializedAsset?.optionValue}`,
         target: '_blank'
       },
       {
@@ -371,6 +400,7 @@ const WorkOrderSupervisor = () => {
                 newObj['serviceName'] = newObj?.service?.optionLabel;
                 newObj['assignedUser'] = newObj?.assignedUsers?.map((e) => e?.optionLabel)?.toString();
                 newObj['workStation'] = newObj?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString();
+                newObj['serializedAssetNumber'] = newObj?.serializedAsset?.optionLabel;
                 return newObj;
               });
             }
