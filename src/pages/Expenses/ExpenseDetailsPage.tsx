@@ -139,7 +139,7 @@ const ExpenseDetailsPage = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <Fragment>
-              <ThemeButton
+              {expensesData?.status !== EXPENSE_STATUS.approved && <ThemeButton
                 iconForMobile={<Edit />}
                 disabled={!allowedToEdit}
                 onClick={() => {
@@ -148,7 +148,7 @@ const ExpenseDetailsPage = () => {
                 mobileTooltip={'Edit'}
               >
                 Edit
-              </ThemeButton>
+              </ThemeButton>}
             </Fragment>
             {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
           </Box>

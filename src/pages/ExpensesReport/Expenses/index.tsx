@@ -139,7 +139,7 @@ const Expenses = ({ selectedExpenseData, showAddButton, reportData=null }) => {
         (row) => !deletedIdsRef.current.has(row._id)
       );
   
-      const sum = filteredRows.reduce((acc, row) => acc + (Number(row.totalAmount) || 0), 0);
+      const sum = filteredRows.reduce((acc, row) => acc + (Number(row.totalAmount) || 0), 0).toFixed(2);
       setSubtotal(sum);
   
       currentDataRef.current = filteredRows;
@@ -154,9 +154,16 @@ const Expenses = ({ selectedExpenseData, showAddButton, reportData=null }) => {
     }
   };
 
-  const handleDelete = async (rows) => {
+  const handleDelete = async () => {
+    let recordsToDelete = [];
+    if (deleteData?._id) {
+      recordsToDelete.push(deleteData?._id);
+    } else {
+      recordsToDelete = selectedRecords.map((o) => o._id);
+    }
+
     axiosInstance()
-      .put(`${routes.expenseReport.path}/expenses/${reportData._id}/remove`, { ids: rows })
+      .put(`${routes.expenseReport.path}/expenses/${reportData._id}/remove`, { ids: recordsToDelete })
       .then(({ data }) => {
         dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
@@ -314,7 +321,7 @@ const handleSaveAndSubmit = async (newExpenses) => {
             open={true}
             message={`Are you sure you want to delete the record(s)?`}
             onClose={() => setDeleteData(null)}
-            onOk={() => handleDelete(deleteData)}
+            onOk={() => handleDelete()}
           />
         )}
         {showAddExistingExpenseModal && (
