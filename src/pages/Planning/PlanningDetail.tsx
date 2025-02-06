@@ -74,7 +74,6 @@ const PlanningDetail = () => {
       setAllowedToDelete(
         permissions?.planning?.isDelete && checkIsAllowedToDelete(user, sidebarResource.planning, data.owner.optionValue) && data?.canDelete
       );
-      console.log(data);
       setPlanningData(data);
       setLoading(false);
     } catch (error) {

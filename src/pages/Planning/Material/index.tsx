@@ -341,7 +341,6 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
   };
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
-    console.log(rows);
     setUpdating(true);
     axiosInstance()
       .put(`${routes.planning.path}/material/${planningData._id}`, { material: rows })
