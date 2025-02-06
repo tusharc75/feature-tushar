@@ -19,7 +19,7 @@ const getText = ({ original, field }) => {
   const key = `rest${field.fieldName}`;
   let text = Array.isArray(original[field.fieldName])
     ? original[field.fieldName]?.map((e) => e?.optionLabel)?.toString()
-    : ['string', 'number']?.includes(typeof original[field.fieldName])
+    : original[field.fieldName]
       ? original[field.fieldName]
       : '';
 
