@@ -61,6 +61,38 @@ function reducer(state: TInitialChatboxState, action: TChatboxActions): TInitial
       };
       break;
     }
+
+    case 'setMessage': {
+      const lastMessage = state.messages[state.messages.length - 1];
+      if (lastMessage?.role === 'assistant') {
+        Object.assign(lastMessage, {
+          _id: `${Date.now()}`,
+          content: action.payload.reply.content,
+          role: 'assistant',
+          fields: action.payload.fields,
+          question: action.payload.history.message
+        });
+      } else {
+        state.messages.push({
+          _id: `${Date.now()}`,
+          content: action.payload.reply.content,
+          role: 'assistant',
+          fields: action.payload.fields,
+          question: action.payload.history.message
+        });
+      }
+
+      newState = {
+        ...newState,
+        isSendButtonDisabled: false,
+        messages: [...state.messages],
+        chats: [...state.chats, action.payload.history],
+        loading: false,
+        status: action.payload.status,
+        ...(!state.chatId ? { chatId: action.payload._id } : {})
+      };
+      break;
+    }
     case 'setGlobalLoading': {
       newState = { ...newState, globalLoading: action.payload };
       break;
@@ -107,6 +139,7 @@ export type TInitialChatboxState = {
   selectedTopics: Topics[];
   chats: History[];
   globalLoading: boolean;
+  status?: string;
 };
 
 export type TMessage = {
@@ -129,7 +162,8 @@ export type TChatboxActions =
   | { type: 'setChats'; payload: History[] }
   | { type: 'reset' }
   | { type: 'setFullScreen'; payload: boolean }
-  | { type: 'disableSendButton'; payload: boolean };
+  | { type: 'disableSendButton'; payload: boolean }
+  | { type: 'setMessage'; payload: ReplyBody };
 
 export const useChatboxReducer = (): [TInitialChatboxState, React.Dispatch<TChatboxActions>] => {
   const [state, dispatch] = useReducer(reducer, intialState);
