@@ -31,7 +31,7 @@ const RentalAssetHistoryDialog = ({ asset, rentalJob, fields, onClose }) => {
       disableFilters: true,
       disableSortBy: true,
       Cell: ({ row }) => (
-        <>
+        <div>
           {row?.original?.rentalJobId ? (
             <Link
               className="link"
@@ -44,7 +44,7 @@ const RentalAssetHistoryDialog = ({ asset, rentalJob, fields, onClose }) => {
           ) : (
             <NoDataCell />
           )}
-        </>
+        </div>
       ),
     },
     {
@@ -104,6 +104,7 @@ const RentalAssetHistoryDialog = ({ asset, rentalJob, fields, onClose }) => {
       open={true}
       onClose={onClose}
       fullWidth
+      maxWidth="md"
     >
       <CustomDialogHeader
         title={`Rental Asset Data History`}

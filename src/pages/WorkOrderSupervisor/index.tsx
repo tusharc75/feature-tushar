@@ -22,6 +22,7 @@ import {
   REPAIR_ORDER_TYPE,
   WORKORDER_SERVICE_STATUS,
   cn,
+  dateFormatToSend,
   sidebarResource,
   workOrder,
   workOrderColormap,
@@ -99,8 +100,8 @@ const WorkOrderSupervisor = () => {
   const [repairOrderDialog, setRepairOrderDialog] = useState(false);
 
   const [globalFilters, setGlobalFilters] = useState<DateRange>({
-    from: new Date(dayjs.tz().startOf('month').format('YYYY/MM/DD')),
-    to: new Date(dayjs.tz().endOf('month').format('YYYY/MM/DD'))
+    from: dayjs.tz().startOf('year').toDate(),
+    to: dayjs.tz().endOf('year').toDate()
   });
   const [resourceType, setResourceType] = useState('workOrder');
   const [isOpen, setOpen] = useState({ open: false, id: null });
@@ -446,7 +447,7 @@ const WorkOrderSupervisor = () => {
       }
 
       if (globalFilters && selectDateFilter) {
-        deepFilter = `${deepFilter}&from=${dayjs(globalFilters.from).format('YYYY/MM/DD')}&to=${dayjs(globalFilters.to).format('YYYY/MM/DD')}`;
+        deepFilter = `${deepFilter}&from=${dateFormatToSend(globalFilters.from)}&to=${dateFormatToSend(globalFilters.to)}`;
       }
       return `${deepFilter}`;
     },
@@ -613,15 +614,15 @@ const WorkOrderSupervisor = () => {
             ? [...(viewType === 'card-view' ? [createRepairOrderButton] : [])]
             : selectedRecords?.every((r) => r?.status !== WORKORDER_SERVICE_STATUS.planned)
               ? [
-                  assignTechnicianButton,
-                  ...(canShowWorkStationButton ? [assignWorkStationButton] : []),
-                  ...(viewType === 'card-view' ? [addProductConsumablesButton] : [])
-                ]
+                assignTechnicianButton,
+                ...(canShowWorkStationButton ? [assignWorkStationButton] : []),
+                ...(viewType === 'card-view' ? [addProductConsumablesButton] : [])
+              ]
               : [
-                  assignTechnicianButton,
-                  ...(canShowWorkStationButton ? [assignWorkStationButton] : []),
-                  ...(viewType === 'card-view' ? [addProductConsumablesButton, createRepairOrderButton] : [])
-                ]
+                assignTechnicianButton,
+                ...(canShowWorkStationButton ? [assignWorkStationButton] : []),
+                ...(viewType === 'card-view' ? [addProductConsumablesButton, createRepairOrderButton] : [])
+              ]
     };
     return data;
   }, [resources?.workStations?.titlePlural, selectedRecords, selectedRecordsS, selectedRecordsP, viewType, tableViewStatus]);
@@ -630,13 +631,13 @@ const WorkOrderSupervisor = () => {
     return [
       ...(permissions?.workOrderPlanning?.isRead
         ? [
-            {
-              label: WORKORDER_SERVICE_STATUS.planned,
-              selected: tableViewStatus === WORKORDER_SERVICE_STATUS.planned,
-              value: WORKORDER_SERVICE_STATUS.planned,
-              startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.planned]
-            }
-          ]
+          {
+            label: WORKORDER_SERVICE_STATUS.planned,
+            selected: tableViewStatus === WORKORDER_SERVICE_STATUS.planned,
+            value: WORKORDER_SERVICE_STATUS.planned,
+            startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.planned]
+          }
+        ]
         : []),
       {
         label: WORKORDER_SERVICE_STATUS.pending,
@@ -755,7 +756,7 @@ const WorkOrderSupervisor = () => {
                 </>
               ) : (
                 <div className="flex">
-                  <ToggleButtonGroup size="small" exclusive value={resourceType} onChange={(e, newVal) => {}}>
+                  <ToggleButtonGroup size="small" exclusive value={resourceType} onChange={(e, newVal) => { }}>
                     <ToggleButton value={'workOrder'} onClick={() => setResourceType('workOrder')}>
                       {resources?.workOrder?.titleSingular}
                     </ToggleButton>
@@ -921,15 +922,15 @@ const WorkOrderSupervisor = () => {
           workOrderData={
             assignTechnicianDialog.multiple
               ? selectedRecordsS?.map((r) => ({
-                  uniqueId: r?.uniqueId,
-                  workOrderId: r?.workOrder
-                }))
+                uniqueId: r?.uniqueId,
+                workOrderId: r?.workOrder
+              }))
               : [
-                  {
-                    uniqueId: selectedServiceData?.uniqueId,
-                    workOrderId: selectedServiceData?.workOrder
-                  }
-                ]
+                {
+                  uniqueId: selectedServiceData?.uniqueId,
+                  workOrderId: selectedServiceData?.workOrder
+                }
+              ]
           }
           assignedUsers={
             assignTechnicianDialog.multiple
@@ -955,15 +956,15 @@ const WorkOrderSupervisor = () => {
           workOrderData={
             workStationAssignDialog.multiple
               ? selectedRecordsS?.map((r) => ({
-                  uniqueId: r?.uniqueId,
-                  workOrderId: r?.workOrder
-                }))
+                uniqueId: r?.uniqueId,
+                workOrderId: r?.workOrder
+              }))
               : [
-                  {
-                    uniqueId: selectedServiceData?.uniqueId,
-                    workOrderId: selectedServiceData?._id
-                  }
-                ]
+                {
+                  uniqueId: selectedServiceData?.uniqueId,
+                  workOrderId: selectedServiceData?._id
+                }
+              ]
           }
           workStations={workStationAssignDialog.multiple ? selectedRecordsS[0]?.assignedWorkStations : selectedServiceData?.assignedWorkStations}
           handleClose={() => {

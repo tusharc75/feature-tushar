@@ -185,7 +185,7 @@ const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceDa
         style={{ transitionDuration: `${ANIMATION_DURATION}ms` }}
       >
         <div className="flex items-center justify-between gap-2 border-b p-4">
-          <h5 className="text-xl font-semibold leading-[24px]">Assign Technician</h5>
+          <h5 className="text-xl font-semibold leading-[24px]">Assign Technicians</h5>
           <IconButton size="small" onClick={() => handleClosePanel()}>
             <Close />
           </IconButton>
@@ -194,7 +194,7 @@ const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceDa
           <SearchBox fullWidth value={searchedValue} onChange={handleSearch} />
           <ThemeButton
             buttonType="theme"
-            loading={isAssignButtonLoading}
+            isLoading={isAssignButtonLoading}
             onClick={(e) => {
               e.preventDefault();
               handleAssignUser();
@@ -216,10 +216,10 @@ const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceDa
                     <li className="list-none rounded-md border px-[18px] py-[10px]">
                       <div className="mb-2 flex items-start justify-between">
                         <div className="flex items-center">
-                          <Avatar src={user.avatar}>
-                            <FaUser size={20} />
+                          <Avatar src={user.avatar} sx={{ width: 30, height: 30 }} >
+                            <FaUser size={15} />
                           </Avatar>
-                          <p className="ml-[10px] text-[12px] font-semibold">{user.optionLabel}</p>
+                          <p className="ml-[10px] text-[14px] font-semibold">{user.optionLabel}</p>
                         </div>
                         <Checkbox checked={Boolean(findUser(user))} onChange={() => handleSelect(user)} size="small" />
                       </div>
@@ -227,9 +227,9 @@ const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceDa
                         {statusOrder.map((d) => {
                           if (user.status[d] === undefined) return null;
                           return (
-                            <li className="flex items-center gap-1 rounded-[5px] border px-[8px] py-[2px] text-[12px] font-normal leading-4">
+                            <li className="flex items-center gap-1 rounded-[5px] border px-[8px] py-[2px]  text-[12px] font-normal leading-4">
                               <span className="[&_svg]:block [&_svg]:size-[16px]">{workOrderIconMap[d]}</span>
-                              <span>
+                              <span className='text-[14px]'>
                                 {d} - {user.status[d]}
                               </span>
                             </li>
