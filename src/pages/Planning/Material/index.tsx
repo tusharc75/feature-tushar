@@ -45,7 +45,8 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
   const [isUpdating, setUpdating] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [assetAssignedProduct, setAssetAssignedProduct] = useState([]);
-
+  const [material, setMaterial] = useState([]);
+   
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
@@ -218,6 +219,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
     var data: any = [];
     const response = await axiosInstance().get(`${routes.planning.path}/material/${planningData._id}`);
     data = response?.data?.data;
+    setMaterial(JSON.parse(JSON.stringify(data.material)));
     let rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
@@ -339,6 +341,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
   };
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
+    console.log(rows);
     setUpdating(true);
     axiosInstance()
       .put(`${routes.planning.path}/material/${planningData._id}`, { material: rows })
@@ -547,6 +550,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
           planningData={planningData}
           handleUpdate={handleSaveData}
           loadingEdit={isUpdating}
+          material={material}
           bulkEdit={materialEdit.bulkedit}
           showSaveAndNext={materialEdit.showSaveAndNext}
         />
