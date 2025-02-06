@@ -175,7 +175,7 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
       <CustomDialogHeader title={`Select ${resources?.rentalManagement?.titleSingular}`} onClose={onClose}></CustomDialogHeader>
       <div className="listing-grid p-3">
         <Box mb={2}>
-          <Grid size={{xs:12, sm:12, md:12}} container justifyContent={'flex-end'}>
+          <Grid size={{ xs: 12, sm: 12, md: 12 }} container justifyContent={'flex-end'}>
             <ThemeButton
               onClick={() => {
                 setShowRentalDialog(true);
@@ -237,7 +237,7 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
           rentalManagementData={selectedRecords[0]}
           onSuccess={(_selectedPackage) => {
             setSelectedPackage(_selectedPackage);
-            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingAvailableStatus ? ASSET_STATUS.available : ASSET_STATUS.underReview;
+            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingStatus ? user?.user?.brandPolicy?.rentalReceivingStatus : ASSET_STATUS.underReview;
             const statusPolicy = checkAssetPolicy(receivingStatus);
             if (statusPolicy && ![ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(productInventory[0]?.status)) {
               setOpenAssetDataDialog({
@@ -259,7 +259,7 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
         <AssetDetailsChangeDialog
           ids={openAssetDataDialog._ids}
           statusPolicy={openAssetDataDialog.statusPolicy}
-          setAssetsData={() => {}}
+          setAssetsData={() => { }}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: null, data: null })}
           onSuccess={(_assetData) => {
             if (openAssetDataDialog.type === 'underReview') {
