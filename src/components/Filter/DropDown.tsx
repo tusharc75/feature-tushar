@@ -49,8 +49,13 @@ const DropDown = ({
           page = 0;
           setPage(0);
         }
-
         let query = `sa-field/options?resource=${fieldData?.lookupResource}&limit=25&page=${page}&entity=${selectedEntity}&search=${searchVal}`;
+        if (fieldData?.lookupDependentOn && filterByIds?.some((f) => f?.field === fieldData?.lookupDependentOn && f?.term?.length > 0)) {
+          query = `${query}&lookupDependentOn=${fieldData?.lookupDependentOn}&lookupDependentOnValue=${filterByIds?.find((f) => f?.field === fieldData?.lookupDependentOn)?.term?.map((t) => t?.optionValue)}`;
+          if (fieldData?.lookupDependentOnField) {
+            query = `${query}&lookupDependentOnField=${fieldData?.lookupDependentOnField}`;
+          }
+        }
         const response = await axiosInstance().get(query);
         let data = response?.data?.data;
 
