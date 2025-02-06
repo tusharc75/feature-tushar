@@ -76,6 +76,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   const [productSerialNumbers, setProductSerialNumbers] = useState([]);
   const [nonSerializedInventory, setNonSerializedInventory] = useState([]);
   const [assetPolicyData, setAssetPolicyData] = useState(null);
+  const [allLoadingTicketProducts, setAllLoadingTicketProducts] = useState([]);
 
   const {
     state: { user, permissions, selectedEntity, resources }
@@ -403,13 +404,14 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           if (element.ticketType === DELIVERY_TICKET_TYPE.loading && element?.products?.length) {
             element?.products?.forEach((ele) => {
               loadingTicketProducts.push({
-                ...ele
+                ...ele,
+                warehouse: element.pickupFrom.optionValue
               });
             });
           }
         });
       }
-
+      setAllLoadingTicketProducts(loadingTicketProducts);
       const material = data.material;
 
       let rows = data.material.filter((e) => e.parentId === null)?.filter((ele) => checkProductInside(ele, material) === true);
@@ -991,6 +993,26 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     setAnchorLinkActionEl(null);
   };
 
+const validateRemoveInventory = (uniqueId, materialId)=>{
+  let cnt = 0;
+  nonSerializedInventory?.forEach((_inventory)=>{
+    if(_inventory.product.optionValue===materialId && _inventory._id===uniqueId){
+      const plant = _inventory.warehouse.optionValue;
+      const ticketQtySum = allLoadingTicketProducts?.filter((ticket)=> ticket.uniqueId===uniqueId && ticket.product===materialId && ticket.warehouse===plant)?.reduce((sum,ticket)=> sum+=ticket.qty,0) || 0;
+      if(_inventory.qty>ticketQtySum){
+        cnt+=_inventory.qty-ticketQtySum;
+      }
+    }
+  })
+  return cnt;
+}
+
+const getPlantWiseValidQty=(uniqueId, materialId, warehouse, inventoryCnt)=>{
+  const ticketQtySum = allLoadingTicketProducts?.filter((ticket)=> ticket.uniqueId===uniqueId && ticket.product===materialId && ticket.warehouse===warehouse)?.reduce((sum,ticket)=> sum+=ticket.qty,0) || 0;
+  if(inventoryCnt > ticketQtySum) return inventoryCnt - ticketQtySum;
+  return 0;
+}
+
   const rightSideContents = () => {
     return (
       <>
@@ -1080,15 +1102,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             </MenuItem>
           </>
         ) : null}
-        {selectedRecords?.filter((e) => !e.status)?.length > 0 &&
-          nonSerializedInventory
-            ?.filter((e) =>
-              selectedRecords
-                ?.filter((e) => !e.status)
-                ?.map((ele) => ele?._id)
-                ?.includes(e?._id)
-            )
-            ?.some((e) => e?.qty > 0) && (
+        {selectedRecords?.filter((e) => validateRemoveInventory(e?._id, e.materialId))?.length > 0 && (
             <MenuItem
               onClick={() => {
                 setAddNonSerializedInventoryDialog({ open: true, type: 'remove' });
@@ -1285,18 +1299,23 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             addNonSerializedInventoryDialog.type === 'add'
               ? nonSerializedProduct
               : selectedRecords
-                ?.filter((r) => r?.type === MATERIAL_TYPE.product && !r?.productDetail?.serializedProduct && r?.realAssetAssignedQty > 0)
+                ?.filter((r) => r?.type === MATERIAL_TYPE.product && !r?.productDetail?.serializedProduct && validateRemoveInventory(r?._id, r?.materialId))
                 ?.map((s) => ({
                   ...s,
                   _id: s._id,
                   id: s.materialId,
                   productName: s.productDetail?.productName,
-                  qty: s.realAssetAssignedQty
+                  qty: validateRemoveInventory(s?._id, s?.materialId)
                 }))
           }
           referenceId={rentalManagementData?._id}
           type={addNonSerializedInventoryDialog.type}
-          nonSerializedInventory={nonSerializedInventory}
+          nonSerializedInventory={addNonSerializedInventoryDialog.type === 'add' ? nonSerializedInventory : nonSerializedInventory?.map((m)=> {
+            return {
+              ...m,
+              qty: getPlantWiseValidQty(m?._id, m.product.optionValue, m?.warehouse?.optionValue, m?.qty)
+            }
+          })}
         />
       )}
       {showConfirmBox && (
