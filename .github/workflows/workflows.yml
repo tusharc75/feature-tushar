@@ -49,8 +49,9 @@ jobs:
         if: success()
         run: |
           sed -i "s|image: .*|image: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:${{ env.TIMESTAMP }}|g" deployment.yaml
-      # Step 7: Deploy to EKS
-      - name: 'Deploy to EKS'
-        if: success()
-        run: |
-          kubectl apply -f deployment.yaml
+          
+      - name: Update Kubernetes Deployment
+          env:
+            DEPLOYMENT_NAME: frontend-deployment
+          run: |
+            kubectl set image deployment/$DEPLOYMENT_NAME frontend=$IMAGE_URI
