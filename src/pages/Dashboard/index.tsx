@@ -66,7 +66,6 @@ const Dashboard = () => {
           frequency: frequencyData
         });
       } catch (error) {
-        alert(JSON.stringify(error));
       }
     })();
     fetchDashboards();
