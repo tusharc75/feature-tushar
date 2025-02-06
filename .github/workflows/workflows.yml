@@ -49,6 +49,7 @@ jobs:
         if: success()
         run: |
           sed -i "s|image: .*|image: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:${{ env.TIMESTAMP }}|g" deployment.yaml
+
           
       - name: Update Kubernetes Deployment
           env:
