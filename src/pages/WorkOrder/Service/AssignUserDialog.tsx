@@ -1,7 +1,9 @@
-import { Add, Close } from '@mui/icons-material';
+import { Close } from '@mui/icons-material';
 import { Avatar, Box, Checkbox, IconButton, Typography } from '@mui/material';
 import { isArray } from 'lodash';
 import { useCallback, useContext, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { FaUser } from 'react-icons/fa';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
@@ -42,6 +44,22 @@ const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceDa
   const { className, revertClass } = useDelayedClass(initialClass, delayedClass, 10);
   const [searchedValue, setSearchedValue] = useState('');
   const [isAssignButtonLoading, setIsAssignButtonLoading] = useState(false);
+  const [containerRef, setContainerRef] = useState<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = document.createElement('div');
+    container.id = 'assign-user-panel';
+    setContainerRef(container);
+    document.body.appendChild(container);
+    document.body.style.overflow = 'hidden';
+    document.body.style.paddingRight = `6px`;
+
+    return () => {
+      document.body.removeChild(container);
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    };
+  }, []);
 
   useEffect(() => {
     fetchUserList();
@@ -144,11 +162,13 @@ const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceDa
     [findUser, selectedUsers]
   );
 
-  return (
+  if (!containerRef) return null;
+  return createPortal(
     <>
       <div
+        aria-hidden="true"
         className={cn(
-          'backdrop fixed inset-0 z-[1301] cursor-pointer bg-black/50 opacity-0 transition-opacity [backdrop-filter:blur(1px)] dark:bg-white/15',
+          'backdrop fixed inset-0 z-[1300] cursor-pointer bg-black/50 opacity-0 transition-opacity [backdrop-filter:blur(1px)] dark:bg-white/15',
           className[1]
         )}
         onClick={() => handleClosePanel()}
@@ -157,7 +177,7 @@ const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceDa
       <div
         aria-labelledby="customized-dialog-title"
         className={cn(
-          'fixed top-0 z-[1301] flex h-dvh w-[--w] flex-col bg-[--dark-primary,white] transition-all [--w:min(100%,470px)]',
+          'fixed top-0 z-[1300] flex h-dvh w-[--w] flex-col bg-[--dark-primary,white] transition-all [--w:min(100%,470px)]',
           className[0]
         )}
         style={{ transitionDuration: `${ANIMATION_DURATION}ms` }}
@@ -173,37 +193,29 @@ const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceDa
           <ThemeButton
             buttonType="theme"
             loading={isAssignButtonLoading}
-            disabled={selectedUsers.length === 0}
             onClick={(e) => {
               e.preventDefault();
               handleAssignUser();
             }}
-            startIcon={<Add />}
           >
-            Assign
+            Save
           </ThemeButton>
         </div>
-        <div className="content flex-grow overflow-auto p-[18px] pt-0">
+        <div className="content relative flex-grow overflow-auto p-[18px] pt-0">
           {userList ? (
             <>
               {userList?.length === 0 ? (
                 <Box mb={2}>
                   <Typography>None of the technicians have selected competencies.</Typography>
                 </Box>
-              ) : (
+              ) : filteredUsers.length > 0 ? (
                 <ul className="list-none space-y-2">
                   {filteredUsers.map((user) => (
                     <li className="list-none rounded-md border px-[18px] py-[10px]">
                       <div className="mb-2 flex items-start justify-between">
                         <div className="flex items-center">
-                          <Avatar
-                            src={user.avatar}
-                            sx={{
-                              background: 'transparent'
-                            }}
-                            className="border !border-[#777575] !text-[#777575] dark:border-gray-300 dark:!text-gray-300"
-                          >
-                            {user.optionLabel[0].toUpperCase()}
+                          <Avatar src={user.avatar}>
+                            <FaUser size={20} />
                           </Avatar>
                           <p className="ml-[10px] text-[12px] font-semibold">{user.optionLabel}</p>
                         </div>
@@ -225,6 +237,10 @@ const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceDa
                     </li>
                   ))}
                 </ul>
+              ) : (
+                <div className="absolute inset-0 flex select-none items-center justify-center">
+                  <p className="text-gray-400 dark:text-gray-600">No Technicians found</p>
+                </div>
               )}
             </>
           ) : (
@@ -234,7 +250,9 @@ const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceDa
           )}
         </div>
       </div>
-    </>
+    </>,
+    containerRef,
+    'modal'
   );
 };
 export default AssignUserDialog;
