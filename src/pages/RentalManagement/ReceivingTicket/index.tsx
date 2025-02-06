@@ -375,9 +375,10 @@ const ReceivingTicket = ({
         ) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.inTransitDeliveredLoadingTicket });
         } else if (e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered || e?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) {
+          const receivingStatus = user?.user?.brandPolicy?.rentalReceivingStatus ? user?.user?.brandPolicy?.rentalReceivingStatus : ASSET_STATUS.underReview;
           if (e?.isReplaced && e?.type === 'Asset') {
             errorMessages.push({ index: e.index, message: rentalManagementMessage.ticketCanNotCancelledForReplaceedAssets });
-          } else if (![ASSET_STATUS.underReview, ASSET_STATUS.available]?.includes(e?.status) && e?.type === 'Asset') {
+          } else if (![receivingStatus]?.includes(e?.status) && e?.type === 'Asset') {
             errorMessages.push({ index: e.index, message: rentalManagementMessage.statusURForCancelReceiving });
           } else if (![RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return, 'Returned']?.includes(e?.rentalAssetStatus)) {
             errorMessages.push({ index: e.index, message: rentalManagementMessage.rentalStatusCompleteCancelReceiving });
@@ -1565,7 +1566,7 @@ const ReceivingTicket = ({
     if (rentalManagementData?.processor?.optionValue) {
       data['processor'] = rentalManagementData?.processor?.optionValue;
     }
-    const receivingStatus = user?.user?.brandPolicy?.rentalReceivingAvailableStatus ? ASSET_STATUS.available : ASSET_STATUS.underReview;
+    const receivingStatus = user?.user?.brandPolicy?.rentalReceivingStatus ? user?.user?.brandPolicy?.rentalReceivingStatus : ASSET_STATUS.underReview;
     const statusPolicy = checkAssetPolicy(receivingStatus);
     if (statusPolicy && selectedRecords?.filter((e) => e.type === 'Asset')?.length) {
       setOpenAssetDetailDialog({
@@ -2406,7 +2407,7 @@ const ReceivingTicket = ({
           products={selectedRecords.filter((d: any) => d?.type === 'Product')}
           onSuccess={(data) => {
             setShowQtyDialog({ data: data, open: false });
-            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingAvailableStatus ? ASSET_STATUS.available : ASSET_STATUS.underReview;
+            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingStatus ? user?.user?.brandPolicy?.rentalReceivingStatus : ASSET_STATUS.underReview;
             const statusPolicy = checkAssetPolicy(receivingStatus);
             if (statusPolicy && selectedRecords?.filter((e) => e.type === 'Asset')?.length) {
               setOpenAssetDetailDialog((ps: any) => ({ ...ps, open: true }));
