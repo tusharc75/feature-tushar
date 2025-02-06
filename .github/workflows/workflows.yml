@@ -44,12 +44,6 @@ jobs:
             --region ${{ secrets.AWS_REGION }} \
             --name ${{ secrets.EKS_CLUSTER_NAME }} \
             --role-arn ${{ secrets.EKS_ROLE_ARN }}
-      # Step 6: Update the deployment file with new image tag
-      - name: 'Update Deployment Image'
-        if: success()
-        run: |
-          sed -i "s|image: .*|image: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:${{ env.TIMESTAMP }}|g" deployment.yaml
-
 
       - name: Update Kubernetes Deployment
         env:
