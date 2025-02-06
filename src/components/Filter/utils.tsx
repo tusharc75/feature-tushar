@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { startCase } from 'lodash';
 import { useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -5,25 +6,28 @@ import { displayDate } from 'src/constants/helpers';
 
 export const getLabel = (field: ColumnDefaultT, values: { field: string; term: string | any[] }[]) => {
   if (field?.type === 'date') {
-    const found = values?.filter((d) => [`from_${field?.fieldName}`, `to_${field?.fieldName}`].includes(d?.field)).filter((d) => d.term);
-    if (found.length > 0) {
-      let formattedMessage = '';
-      found.forEach((d) => {
-        if ((d.field as string).startsWith('from_')) {
-          formattedMessage += `From: ${displayDate(d.term)}`;
-        } else if ((d.field as string).startsWith('to_')) {
-          formattedMessage += `${found.length === 2 ? ', ' : ''}To: ${displayDate(d.term)}`;
-        }
-      });
+    const value: any = values?.find((d) => d?.field === field?.fieldName)?.term;
+    if (value?.from || value?.to) {
+      let formattedMessage = `${value?.from ? `From: ${displayDate(value?.from)}` : ''} ${value?.to ? `To: ${displayDate(value?.to)}` : ''}`;
       return (
         <HtmlTooltip title={formattedMessage}>
-          <span>{found.length}</span>
+          <span>{value?.from && value?.to ? 2 : 1}</span>
         </HtmlTooltip>
       );
     }
   } else {
-    const value = values?.find((d) => d?.field === field?.fieldName)?.term;
+    const value: any = values?.find((d) => d?.field === field?.fieldName)?.term;
     if (!value) return '';
+    if (field?.type === 'date') {
+      if (value?.from || value?.to) {
+        let formattedMessage = `${value?.from ? `From: ${displayDate(value?.from)}` : ''} ${value?.to ? `To: ${displayDate(value?.to)}` : ''}`;
+        return (
+          <HtmlTooltip title={formattedMessage}>
+            <span>{value?.from && value?.to ? 2 : 1}</span>
+          </HtmlTooltip>
+        );
+      }
+    }
     if (field?.type === 'checkBox' && value) {
       return (
         <HtmlTooltip title={value}>
@@ -99,8 +103,8 @@ export const getErrors = (
 
   for (const c of defaultColumns) {
     if (c?.type === 'date') {
-      const isBothValuePresent =
-        values?.find((d) => d?.field === `from_${c?.fieldName}`)?.term && values?.find((d) => d?.field === `to_${c?.fieldName}`)?.term;
+      const value: any = values?.find((d) => d?.field === c?.fieldName)?.term;
+      const isBothValuePresent = value?.from && value?.to;
       if (!isBothValuePresent) {
         errors[c.fieldName] = true;
         errorColumns.push(c);

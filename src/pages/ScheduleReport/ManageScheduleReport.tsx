@@ -145,6 +145,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
           });
         } else {
           deepFilter.push({
+            ..._f,
             field: _f?.term,
             term: _f?.value
           });
@@ -322,13 +323,6 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
 
   const handleSubmit = (values: ValueTypes) => {
     const filters = [];
-    const dateFields: any = ['from_statusPeriod', 'to_statusPeriod'];
-    filterColumns
-      ?.filter((c) => c?.fieldData?.type === 'date')
-      ?.map((c) => {
-        dateFields.push(`from_${c?.fieldData?.fieldName}`);
-        dateFields.push(`to_${c?.fieldData?.fieldName}`);
-      });
 
     filterByIds?.forEach((d) => {
       if (d?.field && d?.term?.length > 0) {
@@ -344,11 +338,15 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
     });
 
     deepFilters?.forEach((d) => {
-      if (dateFields?.includes(d?.field) && dayjs(d?.term).isValid()) {
-        filters.push({
-          term: d?.field,
-          value: d?.term
-        });
+      if (d?.type === 'date') {
+        if (dayjs(d?.term?.from).isValid() && d?.term?.from instanceof Date && dayjs(d?.term?.to).isValid() && d?.term?.to instanceof Date) {
+          filters.push({
+            term: d?.field,
+            value: d?.term,
+            duration: d?.duration,
+            type: d?.type
+          });
+        }
       } else if (d?.field && d?.term?.length > 0) {
         let obj = {
           type: 'multiSelect',
@@ -771,9 +769,11 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
             </Fragment>
           )}
         </Formik>
-      ) : <Box p={2} height={500}>
-        <CommonSkeleton lenArray={[...Array(10).keys()]} />
-      </Box>}
+      ) : (
+        <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
     </Dialog>
   );
 };

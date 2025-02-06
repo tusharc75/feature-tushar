@@ -28,7 +28,8 @@ const Filters = ({
   reportConfig = null,
   loading = false,
   errors = {},
-  isVisibleFilterSet = false
+  isVisibleFilterSet = false,
+  selectedUserFilter = null
 }) => {
   const [selectedField, setSelectedField] = useState(null);
   const [filteredOptions, setFilteredOptions] = useState([]);
@@ -188,6 +189,7 @@ const Filters = ({
             deepFilters={deepFilters}
             setDeepFilters={setDeepFilters}
             sidebarIcon={isMobile && <ToggleSidebar toggleSidebar={() => toggleSidebar()} />}
+            selectedUserFilter={selectedUserFilter}
           />
         ) : (
           <div className="min-h-[75px] py-[15px]">

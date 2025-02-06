@@ -20,9 +20,9 @@ const DisplayChips = (props) => {
         if (currentColumn?.type === 'date') {
           const dateValue =
             element.filter.from && element.filter.to
-              ? `${element.filter.from ? displayDate(element.filter.from) : null} - ${element.filter.to ? displayDate(element.filter.to) : null}`
+              ? `${element.filter.from ? element.filter.from : null} - ${element.filter.to ? element.filter.to : null}`
               : element.filter.from || element.filter.to
-                ? `${element.filter.from ? `${displayDate(element.filter.from)} (From Date)` : ''} ${element.filter.to ? `${displayDate(element.filter.to)} (To Date)` : ''}`
+                ? `${element.filter.from ? `${element.filter.from} (From Date)` : ''} ${element.filter.to ? `${element.filter.to} (To Date)` : ''}`
                 : null;
           const data = { title: currentColumn?.Header || _.startCase(keys[i]), value: dateValue, name: keys[i] };
           filterData.push(data);

@@ -181,7 +181,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
         }
       });
       setPriceMethodListConst(pricingMethodOptions);
-      await getAllPricingCondition(rowData, unitOptions, pricingMethodOptions);
+      await getAllPricingCondition(rowData, pricingMethodOptions);
       if (rowData?.actualStartDate === '' || rowData?.actualStartDate === '') {
         data = data.filter((e) => !['actualStartDate', 'actualEndDate', 'actualJobDuration'].includes(e.fieldName));
       }
@@ -210,7 +210,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
     }
   };
 
-  async function getAllPricingCondition(values: any, unitOptions: any, pricingMethodOptions: any) {
+  async function getAllPricingCondition(values: any, pricingMethodOptions: any) {
     if (rowData) {
       let conditionType = [QUOTATION_TYPE.salesOrder, QUOTATION_TYPE.repairOrder].includes(quotationData.type) ? PRICING_SETUP_TYPE.price : PRICING_SETUP_TYPE.rent;
       let priceData: any = await getPricingConditions(
