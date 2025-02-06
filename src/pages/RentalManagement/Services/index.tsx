@@ -598,7 +598,7 @@ const Services = ({
   const handleDelete = (rows) => {
     setDeleting(true);
     axiosInstance()
-      .put(`${rentalManagement.api}/productpackage/${rentalManagementData?._id}/delete`, { ids: rows })
+      .put(`${rentalManagement.api}/productpackage/${rentalManagementData?._id}/delete`, { ids: rows?.map((e) => e.id) })
       .then(() => {
         setDeleting(false);
         fetchData();

@@ -777,10 +777,10 @@ const Productpackage = ({
   const handleDelete = (rows) => {
     setDeleting(true);
     const cost = rows?.filter((ele) => ele.type === MATERIAL_TYPE.manualEntry).map((e) => e?.id);
-    const products = rows?.filter((ele) => ele.type !== MATERIAL_TYPE.manualEntry);
-    if (products?.length) {
+    const material = rows?.filter((ele) => ele.type !== MATERIAL_TYPE.manualEntry).map((e) => e?.id);
+    if (material?.length) {
       axiosInstance()
-        .put(`${rentalManagement.api}/productpackage/${rentalManagementData?._id}/delete`, { ids: products })
+        .put(`${rentalManagement.api}/productpackage/${rentalManagementData?._id}/delete`, { ids: material })
         .then(() => {
           setDeleting(false);
           fetchData();
