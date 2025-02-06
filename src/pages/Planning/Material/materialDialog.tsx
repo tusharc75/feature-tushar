@@ -12,7 +12,6 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import InputField from 'src/components/Helpers/InputField';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
-import Planning from '..';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 const MaterialDialog = ({ onClose, materialData, planningData, handleUpdate, loadingEdit, bulkEdit, showSaveAndNext, material }) => {
