@@ -1,7 +1,6 @@
 export type Field = {
   primary: boolean;
   field: string;
-  label?: string;
   type: string;
   order: number;
   value?: string;
@@ -48,8 +47,6 @@ export type ReplyBody = {
   fields: Field[];
   scrapData: ScrapData;
   data?: FormValueStateObj;
-  status?: string;
-  error?: string;
 };
 
 export type Reply = {

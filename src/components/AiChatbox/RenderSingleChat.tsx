@@ -1,4 +1,4 @@
-import { CircularProgress, IconButton, Typography } from '@mui/material';
+import { IconButton, Typography } from '@mui/material';
 import { Skeleton } from '@mui/material';
 import { useContext, useRef, useState } from 'react';
 import { BsStars } from 'react-icons/bs';
@@ -21,16 +21,12 @@ const RenderSingleChat = ({
   message,
   loading = false,
   chatId,
-  align = 'left',
-  status = '',
-  error = ''
+  align = 'left'
 }: {
   message?: TMessage;
   loading?: boolean;
   chatId?: string;
   align?: 'left' | 'right';
-  status?: string;
-  error?: string;
 }) => {
   const isUserMessage = message?.role === 'user' || false;
   const toastConfig = useContext(CustomToastContext);
@@ -68,15 +64,6 @@ const RenderSingleChat = ({
           </span>
         )}
 
-        {error && (
-          <Typography
-            component={'pre'}
-            variant="body2"
-            className="!ml-[46px] whitespace-pre-wrap rounded-3xl bg-[#f4f4f4] px-[20px] py-[10px] text-[#fa3232] dark:bg-[#1e4358] dark:text-[#ffa8a8]"
-          >
-            {error}
-          </Typography>
-        )}
         {loading ? (
           <div
             className={cn(
