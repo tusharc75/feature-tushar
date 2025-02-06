@@ -1,5 +1,5 @@
 import { Form, Formik } from 'formik';
-import { Dispatch, Fragment, useEffect, useMemo, useState } from 'react';
+import { Dispatch, Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { TChatboxActions, TInitialChatboxState } from 'src/components/AiChatbox/chatboxReducer';
 import { Field } from 'src/components/AiChatbox/types';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
@@ -22,18 +22,31 @@ type RenderFieldsProps = {
 
 const RenderFields = ({ fields, handleSubmit, disabled = false, setState, state, isDefaultMode }: RenderFieldsProps) => {
   const { fullScreen } = state;
+  const extractData = useRef({});
   const updatedFields = useMemo(() => {
-    return fields
+    const preFillData = {};
+    const newFields = fields
       ?.filter((f) => {
-        if (f.value) {
+        if (f.value && !f.option) {
+          preFillData[f.field] = f.value;
           return false;
         }
         if (f.lookupDependentOn) {
           return false;
         }
+
+        if (f.option && f.value) {
+          const isValid = f.option.some((o) => o.optionLabel === f.value);
+          if (isValid) {
+            preFillData[f.field] = f.value;
+            return false;
+          }
+        }
         return true;
       })
       .map((d) => ({ ...d, ...(d.option ? { option: d.option.map((o) => ({ ...o, optionValue: o.optionLabel })) } : {}) }));
+    extractData.current = preFillData;
+    return newFields;
   }, [fields]);
   const [fieldTypes, setFieldType] = useState({});
 
@@ -44,7 +57,7 @@ const RenderFields = ({ fields, handleSubmit, disabled = false, setState, state,
   }, [updatedFields, disabled, setState]);
 
   const handleSubmitWithFormattedData = (data: { [key: string]: string }) => {
-    const formattedData = { ...data };
+    const formattedData = { ...extractData.current, ...data };
 
     for (const key of Object.keys(formattedData)) {
       if (fieldTypes[key] === 'date' && formattedData[key]) {
@@ -79,7 +92,7 @@ const RenderFields = ({ fields, handleSubmit, disabled = false, setState, state,
                       errors={errors}
                       disabled={disabled}
                       touched={touched}
-                      label={field.field}
+                      label={field.label || field.field}
                       name={field.field}
                       type={field.type}
                       options={field.option}
