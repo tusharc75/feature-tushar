@@ -63,15 +63,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
   const fetchFields = async () => {
     var data = await fetch_child_resource_fields(CHILD_RESOURCE.subleaseProduct, subleaseData?.currency, allowedToEdit);
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = generateColumns(
-      renderedFrom,
-      data?.map((e) => {
-        return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName };
-      }),
-      null,
-      false,
-      subleaseData?.currency
-    );
+    const newColumns = generateColumns(renderedFrom, data, null, false, subleaseData?.currency);
     let coloum: any = [
       {
         accessor: 'index',
@@ -216,7 +208,6 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       parent.detail = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productName : parent.packageDetail?.packageName;
       parent.description =
         parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productDescription : parent.packageDetail?.packageDescription;
-      parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.assetQty = inventory?.filter((e) => e._id === parent._id).length;
       parent.hideSelection = parent.assetQty > 0 ? true : false;
@@ -228,7 +219,6 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           _subRow.index = i + 1 + '.' + (j + 1);
           _subRow.detail = _subRow.productDetail?.productName;
           _subRow.description = _subRow.productDetail?.productDescription;
-          _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
           _subRow.isValid = _subRow['finalPrice_' + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
           _subRow.assetQty = inventory?.filter((e) => e._id === _subRow._id).length;
           _subRow.canDelete = _subRow.assetQty === 0 && allowedToEdit ? true : false;
@@ -342,10 +332,17 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
-    const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
-    if (inputField.hasOwnProperty('qtyDisplay')) {
-      inputField['qty'] = inputField['qtyDisplay'];
+    if (inputField.hasOwnProperty('qty')) {
+      if (!inputField['qty']) {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'error',
+          message: 'Please enter valid quantity'
+        });
+        return;
+      }
     }
+    const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     if (inputField['qty'] < rowData?.assetQty) {
       toastConfig.setToastConfig({
         open: true,

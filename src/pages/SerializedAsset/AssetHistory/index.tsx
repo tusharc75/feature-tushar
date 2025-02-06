@@ -6,7 +6,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { Link } from 'react-router-dom';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { ASSET_STATUS, dateFormatToSend, displayDateTime, INVENTORY_HISTORY_TYPE, sidebarResource } from 'src/constants/helpers';
+import { ASSET_STATUS, dateFormatToSend, DELIVERY_TICKET_STATUS, displayDateTime, INVENTORY_HISTORY_TYPE, sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import DurationFilter from 'src/components/DurationFilter';
 import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -30,7 +30,7 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
   const [column, setColumn] = useState(null);
   const [tabValue, setTabValue] = useState(0);
   const [rentalAssetHistory, setRentalAssetHistory] = useState({ open: false, rentalJob: null });
-  const [statusChangeFields, setStatusChangeFields] = useState(null);
+  const [reservedStatusFields, setReservedStatusFields] = useState(null);
 
   const {
     state: { permissions, resources }
@@ -148,6 +148,9 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
 
   useEffect(() => {
     if (fields) {
+
+      const reservedStatusField = resourceData?.policy?.statusChangeFields?.find((e) => e.status === ASSET_STATUS.reserved)?.fields || []
+
       const columns = [
         {
           accessor: 'reference',
@@ -433,15 +436,17 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
           canDrag: false,
           Cell: ({ row }) => (
             <div>
-              {row?.original?.rentalJob && row?.original?.status === ASSET_STATUS.inUse && (
-                <HtmlTooltip title='Rental Asset Data History'>
-                  <IconButton
-                    size="small"
-                    onClick={() => setRentalAssetHistory({ open: true, rentalJob: row?.original?.rentalJob })}>
-                    <Visibility color="primary" fontSize='small' />
-                  </IconButton>
-                </HtmlTooltip>
-              )}
+              {reservedStatusField?.length && row?.original?.referenceData?.rentalJob &&
+                row?.original?.referenceData?.status !== DELIVERY_TICKET_STATUS.cancelled
+                && row?.original?.status === ASSET_STATUS.inUse && (
+                  <HtmlTooltip title='Rental Asset Data History'>
+                    <IconButton
+                      size="small"
+                      onClick={() => setRentalAssetHistory({ open: true, rentalJob: row?.original?.referenceData?.rentalJob })}>
+                      <Visibility color="primary" fontSize='small' />
+                    </IconButton>
+                  </HtmlTooltip>
+                )}
             </div>
           )
         }
@@ -449,7 +454,8 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
       let statusChangeFieldColumns = [];
       statusChangeFieldColumns = uniq(resourceData?.policy?.statusChangeFields?.flatMap((ele) => ele.fields));
       const statusChangeField = fields?.filter((ele) => [...statusChangeFieldColumns]?.includes(ele.fieldData.fieldName));
-      setStatusChangeFields(statusChangeField);
+      setReservedStatusFields(fields?.filter((ele) => reservedStatusField?.includes(ele.fieldData.fieldName)));
+
       let extraColumns = generateColumns(
         renderedFrom,
         statusChangeField?.map((field) => {
@@ -464,7 +470,7 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
       );
       setColumn([...columns, ...extraColumns]);
     }
-  }, [fields]);
+  }, [fields, resourceData]);
 
   useEffect(() => {
     if (id) {
@@ -523,7 +529,7 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
           id: index + 1,
           reference: u?.reference?.optionLabel,
           referenceId: u?.reference?.optionValue,
-          rentalJob: u?.reference?.rentalJob || null,
+          referenceData: u?.reference,
           warehouse: u?.warehouse?.optionLabel,
           warehouseId: u?.warehouse?.optionValue
         }));
@@ -582,7 +588,7 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
           asset={id}
           onClose={() => setRentalAssetHistory({ open: false, rentalJob: null })}
           rentalJob={rentalAssetHistory.rentalJob}
-          fields={statusChangeFields}
+          fields={reservedStatusFields}
         />
       )}
     </Box>
