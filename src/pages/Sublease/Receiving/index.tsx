@@ -57,15 +57,7 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
 
   const fetchFields = async () => {
     var data = await fetch_child_resource_fields(CHILD_RESOURCE.subleaseProduct, subleaseData?.currency, false);
-    const newColumns = generateColumns(
-      renderedFrom,
-      data?.map((e) => {
-        return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName };
-      }),
-      null,
-      false,
-      subleaseData?.currency
-    );
+    const newColumns = generateColumns(renderedFrom, data, null, false, subleaseData?.currency);
     let coloum: any = [
       {
         accessor: 'index',
@@ -105,11 +97,12 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
               aria-label="Details"
               onClick={() => {
                 window.open(
-                  `${row.original.type === MATERIAL_TYPE.product
-                    ? routes.productDetail.path
-                    : row.original.type === MATERIAL_TYPE.package
-                      ? routes.packagesDetail.path
-                      : routes.serializedAssetDetail.path
+                  `${
+                    row.original.type === MATERIAL_TYPE.product
+                      ? routes.productDetail.path
+                      : row.original.type === MATERIAL_TYPE.package
+                        ? routes.packagesDetail.path
+                        : routes.serializedAssetDetail.path
                   }/${row.original.materialId}`
                 );
               }}
@@ -155,7 +148,6 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
       parent.detail = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productName : parent.packageDetail?.packageName;
       parent.description =
         parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productDescription : parent.packageDetail?.packageDescription;
-      parent.qtyDisplay = parent.qty;
       parent.assetQty = assets?.filter((e) => e._id === parent._id).length;
       parent.subRows = generateNestedRows(parent, data.material, assets);
     });
@@ -179,7 +171,7 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
       _subRow.index = parent.index + '.' + (subRows?.length + 1);
       _subRow.detail = _subRow.productDetail?.productName;
       _subRow.description = _subRow.productDetail?.productDescription;
-      _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
+      _subRow.qty = parent.qty * _subRow.qty;
       _subRow.assetQty = assets?.filter((e) => e._id === _subRow._id).length;
       _subRow.subRows = generateNestedRows(_subRow, material, assets);
       subRows.push(_subRow);
@@ -190,7 +182,7 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
       _asset.type = MATERIAL_TYPE.serializedAsset;
       _asset.materialId = _asset?.inventory;
       _asset.detail = _asset?.inventoryDetail?.assetNumber;
-      _asset.qtyDisplay = 1;
+      _asset.qty = 1;
       _asset.parentId = parent?._id;
       _asset._id = _asset?.inventory;
       subRows.push(_asset);
@@ -201,12 +193,12 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
   const previewDownloadProps =
     columns && pdfColumns
       ? {
-        fileName: `${resources?.sublease?.titleSingular}-${subleaseData?.subleaseName}`,
-        resource: sidebarResource.sublease,
-        referenceId: subleaseData?._id,
-        columns: [...columns?.filter((c) => c?.accessor != 'action'), ...pdfColumns],
-        defaultColumns: ['index', 'type', 'detail', 'description', 'qty']
-      }
+          fileName: `${resources?.sublease?.titleSingular}-${subleaseData?.subleaseName}`,
+          resource: sidebarResource.sublease,
+          referenceId: subleaseData?._id,
+          columns: [...columns?.filter((c) => c?.accessor != 'action'), ...pdfColumns],
+          defaultColumns: ['index', 'type', 'detail', 'description', 'qty']
+        }
       : null;
 
   const rightSideContents = () => {
@@ -231,8 +223,8 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
               selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
                 ? selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.map((d) => d?._id)
                 : treeToFlatArray(dataRows, 'subRows')
-                  .filter((f) => f.type === MATERIAL_TYPE.serializedAsset)
-                  ?.map((d) => d?._id)
+                    .filter((f) => f.type === MATERIAL_TYPE.serializedAsset)
+                    ?.map((d) => d?._id)
             }
           />
         )}
@@ -243,7 +235,7 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
             onClick={() => {
               setReceiveDialog(true);
             }}
-            buttonType='theme'
+            buttonType="theme"
           >
             Receive
           </ThemeButton>
@@ -291,7 +283,7 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
             ?.map((d) => ({
               uniqueId: d?._id,
               materialId: d?.materialId,
-              qty: d?.qtyDisplay,
+              qty: d?.qty,
               assetQty: d?.assetQty,
               productName: d?.productDetail?.productName
             }))}
