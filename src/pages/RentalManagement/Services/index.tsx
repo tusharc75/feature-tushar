@@ -33,7 +33,8 @@ import {
   MATERIAL_TYPE,
   PRICING_SETUP_TYPE,
   RENTAL_STATUS,
-  rentalManagement
+  rentalManagement,
+  sidebarResource
 } from '../../../constants/helpers';
 import { findOne, objectStore } from '../../../constants/indexdbhelper';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
@@ -42,6 +43,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
 import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
+import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 
 const Services = ({
   rentalManagementData,
@@ -85,7 +87,7 @@ const Services = ({
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
-  const [isRateRequired, setIsRateRequired] = useState(false);
+  const [submitState, setSubmitState] = useState({ open: false, values: null, rowData: null });
 
   useEffect(() => {
     fetchFields();
@@ -333,7 +335,6 @@ const Services = ({
       rows = rows.filter((e) => e.type === MATERIAL_TYPE.service || (e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType === 'Service'));
 
       const isPriceRequired = allFields?.filter((el) => el.fieldName === 'price' && el.required).length > 0;
-      setIsRateRequired(isPriceRequired);
 
       const currency = rentalManagementData?.currency?.toLowerCase();
 
@@ -675,9 +676,8 @@ const Services = ({
         return;
       }
     }
-    let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(material, inputField, allFields, updatedData, rentalManagementData?.currency);
-    handleSaveData(rows);
+    const calValues = autoCalculateSpecificFields(inputField, rowData, allFields)
+    setSubmitState({ open: true, values: { ...rowData, ...calValues }, rowData: rowData })
   };
 
   const addButtonMenuItems = () => {
@@ -908,6 +908,23 @@ const Services = ({
           isRedirectToDetailPage={false}
         />
       )}
+      {submitState.open &&
+        <MaterialUpdateActions
+          resource={sidebarResource.rentalManagement}
+          referenceData={rentalManagementData}
+          allFields={allFields}
+          material={material}
+          rowData={submitState.rowData}
+          handleUpdateData={(rows) => {
+            handleSaveData(rows);
+            setSubmitState({ open: false, values: null, rowData: null })
+          }}
+          values={submitState.values}
+          handleClose={() => {
+            setSubmitState({ open: false, values: null, rowData: null })
+          }}
+        />
+      }
     </Fragment>
   );
 };
