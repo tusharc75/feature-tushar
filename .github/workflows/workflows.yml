@@ -50,6 +50,7 @@ jobs:
           aws eks update-kubeconfig \
             --region ${AWS_REGION} \
             --name ${EKS_CLUSTER_NAME} \
-            --role-arn ${EKS_ROLE_ARN}
+            --profile AdministratorAccess-194722417414
+
           # Update the deployment
-          kubectl set image deployment/${DEPLOYMENT_NAME} frontend=${IMAGE_URI} --profile AdministratorAccess-194722417414
+          kubectl set image deployment/${DEPLOYMENT_NAME} frontend=${IMAGE_URI}
