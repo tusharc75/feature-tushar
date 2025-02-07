@@ -263,13 +263,12 @@ export const calculateRowsField = async (material: any[], values: any, fields: a
             await calculateParentRows(material, rows, fields, rowData, parent, currency)
             rows = [...rows, ...parent]
         }
-    }
-    else {
-        const child = material.filter((e) => e.parentId === rowData._id);
-        if (child?.length) {
+    } else {
+        const parents = material.filter((e) => e.parentId === rowData._id);
+        if (parents?.length) {
             if (newRowData[`finalPrice_${currency}`] !== rowData[`finalPrice_${currency}`]) {
-                if (child?.find((e) => e[`finalPrice_${currency}`]) && newRowData[`qty`] !== rowData[`qty`] && newRowData[`price_${currency}`] === rowData[`price_${currency}`]) {
-                    const tempParent = sumOnParent([newRowData], child, fields, currency)
+                if (parents?.find((e) => e[`finalPrice_${currency}`]) && newRowData[`qty`] !== rowData[`qty`] && newRowData[`price_${currency}`] === rowData[`price_${currency}`]) {
+                    const tempParent = sumOnParent([newRowData], parents, fields, currency)
                     rows.push(tempParent[0])
                 }
                 else {
@@ -277,6 +276,8 @@ export const calculateRowsField = async (material: any[], values: any, fields: a
                     childs = resetValueZero(material, fields, rowData._id)
                 }
             }
+        } else {
+            rows.push(newRowData);
         }
     }
     const result: any = [];
