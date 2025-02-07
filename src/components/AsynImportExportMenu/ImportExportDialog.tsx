@@ -23,6 +23,7 @@ import NoDataCell from '../Helpers/NoDataCell';
 import routes from '../Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { FiExternalLink } from 'react-icons/fi';
+import { AiOutlineFileExclamation } from "react-icons/ai";
 
 const renderedFrom = 'import-export';
 
@@ -162,8 +163,7 @@ const ImportExportDialog = ({
               </HtmlTooltip>
             }
             {row?.original?.fileName &&
-              ((type === IMPORT_EXPORT_TYPE.export &&
-                [IMPORT_EXPORT_STATUS.completed, IMPORT_EXPORT_STATUS.partialComplete]?.includes(row?.original?.status)) ||
+              ((type === IMPORT_EXPORT_TYPE.export && [IMPORT_EXPORT_STATUS.completed, IMPORT_EXPORT_STATUS.partialComplete]?.includes(row?.original?.status)) ||
                 (type === IMPORT_EXPORT_TYPE.import && row?.original?.status === IMPORT_EXPORT_STATUS.error)) && (
                 <HtmlTooltip title={type === IMPORT_EXPORT_TYPE.import && row?.original?.status === IMPORT_EXPORT_STATUS.error ? 'Download Error File' : 'Download'}>
                   <IconButton
@@ -173,8 +173,10 @@ const ImportExportDialog = ({
                       handleDownloadFile(row?.original?._id);
                     }}
                   >
-                    <GetApp color={'primary'} fontSize="small" />
-                  </IconButton>
+                    {type === IMPORT_EXPORT_TYPE.import && row?.original?.status === IMPORT_EXPORT_STATUS.error
+                      ? <AiOutlineFileExclamation size={20} style={{ color: "red" }} /> :
+                      <GetApp color={'primary'} fontSize="small" />
+                    } </IconButton>
                 </HtmlTooltip>
               )}
           </>

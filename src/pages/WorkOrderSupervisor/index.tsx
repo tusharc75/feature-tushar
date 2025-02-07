@@ -34,9 +34,9 @@ import WorkOrderDetailDialog from 'src/pages/WorkOrderSupervisor/WorkOrderDetail
 import WorkOrderList, { WorkOrderListRef } from 'src/pages/WorkOrderSupervisor/WorkOrderList';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import routes from '../../components/Helpers/Routes';
-import AssignUserDialog from '../WorkOrder/Service/AssignUserDialog';
+import AssignTechniciansDialog from '../WorkOrder/Service/AssignTechniciansDialog';
 import AssignWorkStationDialog from '../WorkOrder/Service/AssignWorkStationDialog';
-import { camelCase, map, uniq, uniqBy } from 'lodash';
+import { camelCase, isEqual, map, uniq, uniqBy } from 'lodash';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import { useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
@@ -531,7 +531,7 @@ const WorkOrderSupervisor = () => {
   };
 
   const assignTechnicianButton = {
-    label: 'Assign Technician',
+    label: 'Assign Technicians',
     disabled: selectedRecordsS?.some((r) => r?.status === WORKORDER_SERVICE_STATUS.completed) || selectedRecordsS?.length === 0,
     onClick: () => {
       if (viewType === 'table-view') {
@@ -541,6 +541,7 @@ const WorkOrderSupervisor = () => {
       }
     }
   };
+
 
   const assignWorkStationButton = {
     label: `Assign ${resources?.workStations?.titlePlural}`,
@@ -917,7 +918,7 @@ const WorkOrderSupervisor = () => {
         )}
       </div>
       {assignTechnicianDialog.open && (
-        <AssignUserDialog
+        <AssignTechniciansDialog
           warehouse={assignTechnicianDialog.multiple ? selectedRecordsS[0]?.warehouse?.optionValue : selectedServiceData?.warehouse?.optionValue}
           workOrderData={
             assignTechnicianDialog.multiple
@@ -934,9 +935,8 @@ const WorkOrderSupervisor = () => {
           }
           assignedUsers={
             assignTechnicianDialog.multiple
-              ? selectedRecordsS?.length === 1
-                ? selectedRecordsS[0]?.assignedUsers
-                : []
+              ? selectedRecordsS?.every(val => isEqual(val?.assignedUsers, selectedRecordsS[0]?.assignedUsers))
+                ? selectedRecordsS[0]?.assignedUsers : []
               : selectedServiceData?.assignedUsers
           }
           reference={'service'}
@@ -966,7 +966,11 @@ const WorkOrderSupervisor = () => {
                 }
               ]
           }
-          workStations={workStationAssignDialog.multiple ? selectedRecordsS[0]?.assignedWorkStations : selectedServiceData?.assignedWorkStations}
+          workStations={workStationAssignDialog.multiple
+            ? selectedRecordsS?.every(val => isEqual(val?.assignedWorkStations, selectedRecordsS[0]?.assignedWorkStations))
+              ? selectedRecordsS[0]?.assignedWorkStations : []
+            : selectedServiceData?.assignedWorkStations
+          }
           handleClose={() => {
             setWorkStationAssignDialog({ open: false, multiple: false });
           }}
@@ -1095,7 +1099,7 @@ const RenderAssignOptions = ({ openAssignHandler, data, permissions, resources, 
                   setAnchorEl(null);
                 }}
               >
-                {'Assign Technician'}
+                {'Assign Technicians'}
               </MenuItem>
               {permissions?.workStations?.isRead && (
                 <MenuItem
