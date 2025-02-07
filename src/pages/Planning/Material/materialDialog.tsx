@@ -11,12 +11,15 @@ import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import InputField from 'src/components/Helpers/InputField';
+import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
-const MaterialDialog = ({ onClose, materialData, planningData, handleUpdate, loadingEdit, bulkEdit, showSaveAndNext }) => {
+const MaterialDialog = ({ onClose, materialData, planningData, handleUpdate, loadingEdit, bulkEdit, showSaveAndNext, material }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [saveAndNext, setSaveAndNext] = useState(false);
   const [allFields, setAllFields] = useState([]);
+  const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
 
   useEffect(() => {
     fetchFields();
@@ -69,7 +72,7 @@ const MaterialDialog = ({ onClose, materialData, planningData, handleUpdate, loa
     }
   };
 
-  const handleSubmit = (values) => {
+  const handleSubmit = async (values) => {
     let returnData = [];
     if (bulkEdit) {
       for (const x in values) {
@@ -83,8 +86,15 @@ const MaterialDialog = ({ onClose, materialData, planningData, handleUpdate, loa
       });
       handleUpdate(returnData);
     } else {
-      returnData = [{ _id: materialData._id, ...values }];
-      handleUpdate(returnData, saveAndNext);
+      if (materialData.parentId && !showConfirmationDialog) {
+        setShowConfirmationDialog(true);
+      }
+      else {
+        const rows = await calculateRowsField(material, values, allFields, materialData, planningData?.currency);
+        handleUpdate(rows, saveAndNext);
+        setShowConfirmationDialog(false);
+
+      }
     }
   };
 
@@ -166,6 +176,18 @@ const MaterialDialog = ({ onClose, materialData, planningData, handleUpdate, loa
                   Save
                 </ThemeButton>
               </CustomDialogFooter>
+              {showConfirmationDialog && (
+                <ConfirmationDialog
+                  open={showConfirmationDialog}
+                  message="Would you prefer to override the parent-level price configuration?"
+                  onOk={() => {
+                    submitForm();
+                  }}
+                  onClose={() => {
+                    setShowConfirmationDialog(false);
+                  }}
+                />
+              )}
             </Fragment>
           )}
         </Formik>
