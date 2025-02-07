@@ -996,11 +996,11 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
 const validateRemoveInventory = (uniqueId, materialId)=>{
   let cnt = 0;
   nonSerializedInventory?.forEach((_inventory)=>{
-    if(_inventory.product.optionValue===materialId && _inventory._id===uniqueId){
-      const plant = _inventory.warehouse.optionValue;
-      const ticketQtySum = allLoadingTicketProducts?.filter((ticket)=> ticket.uniqueId===uniqueId && ticket.product===materialId && ticket.warehouse===plant)?.reduce((sum,ticket)=> sum+=ticket.qty,0) || 0;
-      if(_inventory.qty>ticketQtySum){
-        cnt+=_inventory.qty-ticketQtySum;
+    if(_inventory?.product?.optionValue===materialId && _inventory?._id===uniqueId){
+      const plant = _inventory?.warehouse?.optionValue;
+      const ticketQtySum = allLoadingTicketProducts?.filter((ticket)=> ticket?.uniqueId===uniqueId && ticket?.product===materialId && ticket?.warehouse===plant)?.reduce((sum,ticket)=> sum+=ticket?.qty,0) || 0;
+      if(_inventory?.qty>ticketQtySum){
+        cnt+=_inventory?.qty-ticketQtySum;
       }
     }
   })
@@ -1008,7 +1008,7 @@ const validateRemoveInventory = (uniqueId, materialId)=>{
 }
 
 const getPlantWiseValidQty=(uniqueId, materialId, warehouse, inventoryCnt)=>{
-  const ticketQtySum = allLoadingTicketProducts?.filter((ticket)=> ticket.uniqueId===uniqueId && ticket.product===materialId && ticket.warehouse===warehouse)?.reduce((sum,ticket)=> sum+=ticket.qty,0) || 0;
+  const ticketQtySum = allLoadingTicketProducts?.filter((ticket)=> ticket?.uniqueId===uniqueId && ticket?.product===materialId && ticket?.warehouse===warehouse)?.reduce((sum,ticket)=> sum+=ticket?.qty,0) || 0;
   if(inventoryCnt > ticketQtySum) return inventoryCnt - ticketQtySum;
   return 0;
 }
@@ -1102,7 +1102,7 @@ const getPlantWiseValidQty=(uniqueId, materialId, warehouse, inventoryCnt)=>{
             </MenuItem>
           </>
         ) : null}
-        {selectedRecords?.filter((e) => validateRemoveInventory(e?._id, e.materialId))?.length > 0 && (
+        {selectedRecords?.filter((e) => validateRemoveInventory(e?._id, e?.materialId))?.length > 0 && (
             <MenuItem
               onClick={() => {
                 setAddNonSerializedInventoryDialog({ open: true, type: 'remove' });
@@ -1313,7 +1313,7 @@ const getPlantWiseValidQty=(uniqueId, materialId, warehouse, inventoryCnt)=>{
           nonSerializedInventory={addNonSerializedInventoryDialog.type === 'add' ? nonSerializedInventory : nonSerializedInventory?.map((m)=> {
             return {
               ...m,
-              qty: getPlantWiseValidQty(m?._id, m.product.optionValue, m?.warehouse?.optionValue, m?.qty)
+              qty: getPlantWiseValidQty(m?._id, m?.product?.optionValue, m?.warehouse?.optionValue, m?.qty)
             }
           })}
         />
