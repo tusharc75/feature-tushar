@@ -936,7 +936,18 @@ const WorkOrderSupervisor = () => {
             assignTechnicianDialog.multiple
               ? selectedRecordsS?.length === 1
                 ? selectedRecordsS[0]?.assignedUsers
-                : []
+                : (() => {
+                    const firstAssigned = selectedRecordsS[0]?.assignedUsers || [];
+                    const allSame = selectedRecordsS.every(record => {
+                      const assigned = record?.assignedUsers || [];
+                      if (assigned.length !== firstAssigned.length) return false;
+                      const firstIds = firstAssigned.map(user => user.optionValue).sort();
+                      const currentIds = assigned.map(user => user.optionValue).sort();
+                      return JSON.stringify(firstIds) === JSON.stringify(currentIds);
+                    });
+                    
+                    return allSame ? firstAssigned : [];
+                  })()
               : selectedServiceData?.assignedUsers
           }
           reference={'service'}
