@@ -36,7 +36,7 @@ const initialClass = ['-right-[--w]', 'opacity-0'];
 const delayedClass = ['right-0', 'opacity-100'];
 const ANIMATION_DURATION = 300;
 
-const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceData = null, competencies, handleClose, handleSucess, warehouse }) => {
+const AssignTechniciansDialog = ({ workOrderData, assignedUsers, reference, referenceData = null, competencies, handleClose, handleSucess, warehouse }) => {
   const toastConfig = useContext(CustomToastContext);
   const [userList, setUserList] = useState<User[]>(null);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
@@ -284,4 +284,4 @@ const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceDa
     'modal'
   );
 };
-export default AssignUserDialog;
+export default AssignTechniciansDialog;
