@@ -44,6 +44,7 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
           EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
           EKS_ROLE_ARN: ${{ secrets.EKS_ROLE_ARN }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
         run: |
           # Configure AWS credentials and update kubeconfig
           aws eks update-kubeconfig \
