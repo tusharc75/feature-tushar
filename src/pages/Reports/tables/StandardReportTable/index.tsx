@@ -276,7 +276,6 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
   };
 
   const getQueryString = (isExport = false, deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
-    console.log('deepFiltersP', deepFiltersP);
     let filterQuery = ``;
     let deepFilter = [];
     let newDeepFilter = [...deepFiltersP];
@@ -684,7 +683,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
                   permissions={permissions?.report}
                   module={selectedReport.resource}
                   api={`/report/${selectedReport.resource}`}
-                  afterImportCompleted={() => {}}
+                  afterImportCompleted={() => { }}
                   isExportCount={true}
                   exportCount={0}
                   ids={[]}
