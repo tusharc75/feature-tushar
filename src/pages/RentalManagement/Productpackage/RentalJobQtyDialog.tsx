@@ -292,10 +292,12 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       }
     } else {
       let childResetAlert = false;
-      if (!rowData.parentId && material?.find((e) => e.parentId === rowData?._id)) {
-        if (values[`finalPrice_${currency}`] !== rowData[`finalPrice_${currency}`] &&
-          material?.find((e) => e.parentId === rowData?._id && e[`finalPrice_${currency}`])) {
-          childResetAlert = true;
+      const child = material?.filter((e) => e.parentId === rowData?._id);
+      if (child?.length && !rowData.parentId) {
+        if (child?.find((e) => e[`finalPrice_${currency}`]) && values[`finalPrice_${currency}`] !== rowData[`finalPrice_${currency}`]) {
+          if (values[`qty`] === rowData[`qty`]) {
+            childResetAlert = true;
+          }
         }
       }
       if (childResetAlert && !showConfirmationDialog.open) {

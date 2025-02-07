@@ -53,7 +53,6 @@ const Chatbox = (props: ChatboxProps) => {
     async (question: string) => {
       setState({ type: 'initUserMessage', payload: question });
       try {
-        console.log(question);
         socket.current = io(`${backendApi?.replace('/api', '')}/ai/chat`, {
           path: backendApi?.includes('/api') ? '/api/socket.io' : '/socket.io',
           auth: {
