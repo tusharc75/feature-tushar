@@ -52,4 +52,4 @@ jobs:
             --name ${EKS_CLUSTER_NAME} \
             --role-arn ${EKS_ROLE_ARN}
           # Update the deployment
-          kubectl set image deployment/${DEPLOYMENT_NAME} frontend=${IMAGE_URI}
+          kubectl set image deployment/${DEPLOYMENT_NAME} frontend=${IMAGE_URI} --profile AdministratorAccess-194722417414
