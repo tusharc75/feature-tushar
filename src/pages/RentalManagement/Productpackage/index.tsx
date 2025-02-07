@@ -104,7 +104,6 @@ const Productpackage = ({
   const [addExistingManagedPackages, setAddExistingManagedPackages] = useState(false);
 
   const { isOffline } = useContext(CustomOfflineContext);
-  const [isRateRequired, setIsRateRequired] = useState(false);
   const [submitState, setSubmitState] = useState({ open: false, values: null, rowData: null });
 
   useEffect(() => {
@@ -429,7 +428,6 @@ const Productpackage = ({
     rows = [...products, ...packages, ...additionalCosts];
 
     const isPriceRequired = allFields?.filter((el) => el.fieldName === 'price' && el.required).length > 0;
-    setIsRateRequired(isPriceRequired);
 
     const currency = rentalManagementData?.currency?.toLowerCase();
 
