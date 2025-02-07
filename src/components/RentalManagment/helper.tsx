@@ -206,6 +206,38 @@ export const resetValueZero = (material, fields, parentId) => {
     return result;
 }
 
+export const resetObjectValueZero = (fields, row) => {
+    const resetFields = []
+    fields.forEach((element) => {
+        if (element.type === "converter" || element.type === "currencyAmount" || element.isConverter === true) {
+            if (element.type !== "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
+                element.displayUnits.forEach((_unit) => {
+                    resetFields.push(element.fieldName + "_" + _unit.toLowerCase())
+                })
+            }
+            else if (element.type === "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
+                element.displayUnits.forEach((_unit) => {
+                    element.displayCurrency.forEach((_currency) => {
+                        resetFields.push(element.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase())
+                    })
+                })
+            }
+            else if (element.type === "currencyAmount") {
+                element.displayCurrency.forEach((_currency) => {
+                    resetFields.push(element.fieldName + "_" + _currency.toLowerCase())
+                })
+            }
+        }
+        else if (element.type === "percent") {
+            resetFields.push(element.fieldName)
+        }
+    })
+    resetFields.forEach((fieldName) => {
+        row[fieldName] = 0;
+    })
+    return row;
+}
+
 const calculateParentRows = (material: any[], rows: any, fields: any[], rowData: any, parent: any, currency: any) => {
     let tempParent: any = material.filter((e) => e._id === rowData.parentId)
     const sameParent: any = material.filter((e) => e.parentId === rowData.parentId && e._id !== rowData._id)
@@ -276,10 +308,10 @@ export const bulkUpdate = (values, selectedProducts, material, allFields, curren
     let parentIds = []
 
     selectedProducts.forEach((element: any) => {
+        let calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
         if (childMatrialUpdate?.length && !childMatrialUpdate?.includes(element.type)) {
-            return;
+            calValues = resetObjectValueZero(allFields, calValues)
         }
-        const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
         if (element?.parentId) {
             rows.push({ ...element, ...calValues })
             parentIds.push(element?.parentId)
@@ -339,7 +371,6 @@ export const getParentWellNumber = (material, _id) => {
         return materialData?.wellNumber
     }
 }
-
 
 export const getUniqueWellNumber = (data) => {
     const wellNumber: any = [];
