@@ -405,7 +405,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             element?.products?.forEach((ele) => {
               loadingTicketProducts.push({
                 ...ele,
-                warehouse: element.pickupFrom.optionValue
+                warehouse: element?.pickupFrom?.optionValue
               });
             });
           }
