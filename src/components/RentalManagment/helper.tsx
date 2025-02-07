@@ -267,7 +267,7 @@ export const calculateRowsField = async (material: any[], values: any, fields: a
         const child = material.filter((e) => e.parentId === rowData._id);
         if (child?.length) {
             if (newRowData[`finalPrice_${currency}`] !== rowData[`finalPrice_${currency}`]) {
-                if (childs?.find((e) => e[`finalPrice_${currency}`]) && newRowData[`qty`] !== rowData[`qty`] && newRowData[`price_${currency}`] === rowData[`price_${currency}`]) {
+                if (child?.find((e) => e[`finalPrice_${currency}`]) && newRowData[`qty`] !== rowData[`qty`] && newRowData[`price_${currency}`] === rowData[`price_${currency}`]) {
                     const tempParent = sumOnParent([newRowData], child, fields, currency)
                     rows.push(tempParent[0])
                 }
