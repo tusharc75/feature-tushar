@@ -263,8 +263,7 @@ export const calculateRowsField = async (material: any[], values: any, fields: a
             await calculateParentRows(material, rows, fields, rowData, parent, currency)
             rows = [...rows, ...parent]
         }
-    }
-    else {
+    } else {
         const child = material.filter((e) => e.parentId === rowData._id);
         if (child?.length) {
             if (newRowData[`finalPrice_${currency}`] !== rowData[`finalPrice_${currency}`]) {
@@ -277,6 +276,8 @@ export const calculateRowsField = async (material: any[], values: any, fields: a
                     childs = resetValueZero(material, fields, rowData._id)
                 }
             }
+        } else {
+            rows.push(newRowData);
         }
     }
     const result: any = [];
