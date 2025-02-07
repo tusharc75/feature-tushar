@@ -34,7 +34,8 @@ import {
   MATERIAL_TYPE,
   PRICING_SETUP_TYPE,
   RENTAL_STATUS,
-  rentalManagement
+  rentalManagement,
+  sidebarResource
 } from '../../../constants/helpers';
 import { findOne, objectStore } from '../../../constants/indexdbhelper';
 import AssetAvailability from '../AssetAvailability';
@@ -56,6 +57,7 @@ import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageD
 import AssignManagedPackagesDialog from 'src/components/AssignRolesDialog/AssignManagedPackagesDialog';
 import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
 import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
+import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 
 const Productpackage = ({
   rentalManagementData,
@@ -85,12 +87,10 @@ const Productpackage = ({
   const [isDeleting, setDeleting] = useState(false);
 
   const [material, setMaterial] = useState([]);
-  const [isInlineEdit, setIsInlineEdit] = useState(false);
   const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
   const [columns, setColumns] = useState(null);
   const [allFields, setAllFields] = useState(null);
   const [addchildDialog, setAddchildDialog] = useState({ open: false, parentId: null, type: null, top: null, bottom: null });
-  const [showConfirmationDialog, setShowConfirmationDialog] = useState({ open: false, data: null });
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [openAssetAvailibility, setOpenAssetAvailibility] = useState(false);
   const [costFields, setCostFields] = useState([]);
@@ -104,7 +104,7 @@ const Productpackage = ({
   const [addExistingManagedPackages, setAddExistingManagedPackages] = useState(false);
 
   const { isOffline } = useContext(CustomOfflineContext);
-  const [isRateRequired, setIsRateRequired] = useState(false);
+  const [submitState, setSubmitState] = useState({ open: false, values: null, rowData: null });
 
   useEffect(() => {
     fetchFields();
@@ -428,7 +428,6 @@ const Productpackage = ({
     rows = [...products, ...packages, ...additionalCosts];
 
     const isPriceRequired = allFields?.filter((el) => el.fieldName === 'price' && el.required).length > 0;
-    setIsRateRequired(isPriceRequired);
 
     const currency = rentalManagementData?.currency?.toLowerCase();
 
@@ -827,10 +826,6 @@ const Productpackage = ({
     setIsBulkEdit(false);
   };
 
-  const handleOpen = (data) => {
-    setIsProductEdit({ open: true, data: data, showSaveAndNext: false });
-    setIsBulkEdit(false);
-  };
 
   const handleDeleteMultiple = () => {
     const obj: any = [];
@@ -844,7 +839,8 @@ const Productpackage = ({
     setDeleteData(obj);
   };
 
-  const onSaveInlineEdit = (inputField, updatedData) => {
+  const onSaveInlineEdit = async (inputField, updatedData) => {
+    const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     if (inputField.hasOwnProperty('qty')) {
       if (!inputField['qty']) {
         toastConfig.setToastConfig({
@@ -852,87 +848,40 @@ const Productpackage = ({
           type: 'error',
           message: 'Please enter valid quantity'
         });
-        setShowConfirmationDialog({ open: false, data: {} });
+        return;
+      }
+      let isValid = true;
+      const child: any = flattenArray(dataRows).filter((e) => e.parentId === rowData?._id);
+      if (child?.length) {
+        child?.forEach((e) => {
+          let qty = parseFloat(inputField['qty']) * e?.qty;
+          if (qty < e?.assetQty || qty < e?.nonSerializedQty) {
+            isValid = false;
+            return;
+          }
+        });
+      } else {
+        const qty = getParentMultiplier(material, rowData) * parseFloat(inputField['qty']);
+        if (qty < rowData?.assetQty || qty < rowData?.nonSerializedQty) {
+          isValid = false;
+        }
+      }
+      if (!isValid) {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'error',
+          message: 'The quantity is less than what was assigned.'
+        });
         return;
       }
     }
-    setIsInlineEdit(true);
-    const currency = rentalManagementData?.currency.toLowerCase();
-    const requiredItems = [];
-    allFields.forEach(({ fieldName, required, type }) => {
-      fieldName = type === 'currencyAmount' ? `${fieldName}_${currency}` : fieldName;
-      if (required) {
-        if (isNaN(updatedData[fieldName]) && !updatedData[fieldName]) {
-          requiredItems.push(fieldName);
-        } else if (!isNaN(updatedData[fieldName]) && updatedData[fieldName] <= 0) {
-          requiredItems.push(fieldName);
-        }
-      }
-    });
-
-    for (const field of Object.keys(inputField)) {
-      if (inputField[field] === '' || isNaN(inputField[field])) {
-        requiredItems.push(field);
-      }
-    }
-
-    if (requiredItems.length > 0 && updatedData.type !== MATERIAL_TYPE.manualEntry) {
-      handleOpen({
-        ...updatedData,
-        detail: updatedData.type === 'product' ? updatedData?.productDetail?.productName : updatedData?.packageDetail?.packageName
-      });
+    let rows: any = [{ ...rowData, ...updatedData }];
+    if (updatedData.type === MATERIAL_TYPE.manualEntry) {
+      rows = await calculateRowsField(flattenArray(dataRows), inputField, costFields, rowData, rentalManagementData?.currency);
+      handleSaveCostData(rows);
     } else {
-      onConfirmSave(inputField, updatedData);
-    }
-  };
-
-  const onConfirmSave = async (inputField, updatedData) => {
-    const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
-    if (rowData.parentId && !showConfirmationDialog.open && isRateRequired) {
-      setShowConfirmationDialog({
-        open: true,
-        data: {
-          inputField,
-          updatedData
-        }
-      });
-    } else {
-      if (inputField.hasOwnProperty('qty')) {
-        let isValid = true;
-        const child: any = flattenArray(dataRows).filter((e) => e.parentId === rowData?._id);
-        if (child?.length) {
-          child?.forEach((e) => {
-            let qty = parseFloat(inputField['qty']) * e?.qty;
-            if (qty < e?.assetQty || qty < e?.nonSerializedQty) {
-              isValid = false;
-              return;
-            }
-          });
-        } else {
-          const qty = getParentMultiplier(material, rowData) * parseFloat(inputField['qty']);
-          if (qty < rowData?.assetQty || qty < rowData?.nonSerializedQty) {
-            isValid = false;
-          }
-        }
-        if (!isValid) {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'error',
-            message: 'The quantity is less than what was assigned.'
-          });
-          setShowConfirmationDialog({ open: false, data: {} });
-          return;
-        }
-      }
-      let rows: any = [{ ...rowData, ...updatedData }];
-      if (updatedData.type === MATERIAL_TYPE.manualEntry) {
-        rows = await calculateRowsField(flattenArray(dataRows), inputField, costFields, rowData, rentalManagementData?.currency);
-        handleSaveCostData(rows);
-      } else {
-        rows = await calculateRowsField(material, inputField, allFields, rowData, rentalManagementData?.currency);
-        handleSaveData(rows);
-      }
-      setShowConfirmationDialog({ open: false, data: {} });
+      const calValues = autoCalculateSpecificFields(inputField, rowData, allFields)
+      setSubmitState({ open: true, values: { ...rowData, ...calValues }, rowData: rowData })
     }
   };
 
@@ -1095,9 +1044,6 @@ const Productpackage = ({
           onClose={() => {
             setIsProductEdit({ open: false, data: null, showSaveAndNext: false });
             setIsBulkEdit(false);
-            if (isInlineEdit) {
-              setIsInlineEdit(false);
-            }
           }}
           isBulkedit={isBulkEdit}
           handleSaveData={handleSaveData}
@@ -1109,8 +1055,6 @@ const Productpackage = ({
           loading={isUpdating}
           showSaveAndNext={isProductEdit.showSaveAndNext}
           from={'product'}
-          isInlineEdit={isInlineEdit}
-          isRateRequired={isRateRequired}
         />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'newPackage' && (
@@ -1239,18 +1183,23 @@ const Productpackage = ({
           </MenuList>
         </Popover>
       )}
-      {showConfirmationDialog.open && (
-        <ConfirmationDialog
-          open={true}
-          message="Would you prefer to override the product-level price configuration?"
-          onOk={() => {
-            onConfirmSave(showConfirmationDialog.data?.inputField, showConfirmationDialog.data?.updatedData);
+      {submitState.open &&
+        <MaterialUpdateActions
+          resource={sidebarResource.rentalManagement}
+          referenceData={rentalManagementData}
+          allFields={allFields}
+          material={material}
+          rowData={submitState.rowData}
+          handleUpdateData={(rows) => {
+            handleSaveData(rows);
+            setSubmitState({ open: false, values: null, rowData: null })
           }}
-          onClose={() => {
-            setShowConfirmationDialog({ open: false, data: {} });
+          values={submitState.values}
+          handleClose={() => {
+            setSubmitState({ open: false, values: null, rowData: null })
           }}
         />
-      )}
+      }
       {openAssetAvailibility && (
         <AssetAvailability
           rentalId={rentalManagementData?._id}

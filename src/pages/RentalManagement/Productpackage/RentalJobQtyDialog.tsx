@@ -6,8 +6,7 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import axiosInstance from '../../../axios/axiosInstance';
 import { isArray, uniqBy } from 'lodash';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema, fieldLabelToFieldName, MATERIAL_TYPE, PRICING_SETUP_TYPE } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, fieldLabelToFieldName, PRICING_SETUP_TYPE, sidebarResource } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '..//../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -17,16 +16,16 @@ import FormTypes from '../../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import { bulkUpdate, calculateRowsField, fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
+import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import dayjs from 'dayjs';
-import SelectionConfirmationDialog from 'src/components/Helpers/SelectionConfirmationDialog';
 import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
 import { getPricingConditions } from 'src/components/PricingCondition';
+import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -39,9 +38,7 @@ interface EditDialogProps {
   loading: any;
   from?: any;
   isQtyOnly?: Boolean;
-  isInlineEdit?: Boolean;
   showSaveAndNext?: Boolean;
-  isRateRequired: Boolean;
   dataRows?: any
 }
 
@@ -56,18 +53,14 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
   selectedProducts,
   isBulkedit,
   loading,
-  isRateRequired,
   isQtyOnly = false,
   from,
-  isInlineEdit = false,
   showSaveAndNext = false,
   dataRows = []
 }) => {
   const ref = useRef(null);
 
   const toastConfig = useContext(CustomToastContext);
-  const [showConfirmationDialog, setShowConfirmationDialog] = useState({ open: false, type: '' });
-  const [showSelectionConfirmationDialog, setShowSelectionConfirmationDialog] = useState({ open: false, type: '' });
 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [allFields, setAllFields] = useState([]);
@@ -82,6 +75,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
   const [priceMethodListConst, setPriceMethodListConst] = useState([]);
   const [priceConditionList, setPriceConditionList] = useState([]);
   const [priceMethodList, setPriceMethodList] = useState([]);
+
+  const [submitState, setSubmitState] = useState({ open: false, values: null });
 
   const {
     state: { user }
@@ -110,21 +105,6 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
     }
   };
 
-  useEffect(() => {
-    if (ref.current && Object.keys(initialData).length > 0 && isInlineEdit) {
-      const { setErrors, setTouched } = ref.current;
-      let errors: any = {};
-      let touched: any = {};
-      initialData.fields.forEach(({ fieldName, required, fieldLabel }) => {
-        if (required && !initialData.values[fieldName]) {
-          errors[fieldName] = fieldLabel + ' is a required field';
-          touched[fieldName] = true;
-        }
-      });
-      setErrors(errors);
-      setTouched(touched);
-    }
-  }, [initialData, ref.current, isInlineEdit]);
 
   const fetchData = async () => {
     setFetchingData(true);
@@ -275,51 +255,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
   };
 
   const handleSubmit = async (values) => {
-    let currency = rentalManagementData?.currency?.toLowerCase()
-    if (isBulkedit) {
-      const rentalPackagePriceMaterialWise = user?.user?.brandPolicy?.rentalPackagePriceMaterialWise && user?.user?.brandPolicy?.rentalPackagePriceMaterialWise?.length
-      if (values[`price_${currency}`] && selectedProducts?.find((e) => !e.parentId)
-        && !selectedProducts?.every((e) => !e.parentId) && !rentalPackagePriceMaterialWise) {
-        setShowSelectionConfirmationDialog({ open: true, type: '' });
-      }
-      else {
-        let childMatrialUpdate = []
-        if (rentalPackagePriceMaterialWise) {
-          childMatrialUpdate = [...user?.user?.brandPolicy?.rentalPackagePriceMaterialWise, MATERIAL_TYPE.package]
-        }
-        const rows = bulkUpdate(values, selectedProducts, material, allFields, rentalManagementData?.currency, false, childMatrialUpdate);
-        handleSaveData(rows);
-      }
-    } else {
-      let childResetAlert = false;
-      const child = material?.filter((e) => e.parentId === rowData?._id);
-      if (child?.length && !rowData.parentId) {
-        if (child?.find((e) => e[`finalPrice_${currency}`]) && values[`finalPrice_${currency}`] !== rowData[`finalPrice_${currency}`]) {
-          if (values[`qty`] === rowData[`qty`]) {
-            childResetAlert = true;
-          }
-        }
-      }
-      if (childResetAlert && !showConfirmationDialog.open) {
-        setShowConfirmationDialog({ open: true, type: 'child' });
-      } else {
-        const rows = await calculateRowsField(
-          material,
-          values,
-          allFields,
-          rowData,
-          rentalManagementData?.currency);
-        handleSaveData(rows, saveAndNext);
-        setShowConfirmationDialog({ open: false, type: '' });
-      }
-    }
+    setSubmitState({ open: true, values: values })
   };
-
-  const handleUpdateBulk = async (values, type) => {
-    const rows = bulkUpdate(values, selectedProducts, material, allFields, rentalManagementData?.currency, type === 'Parent' ? true : false);
-    handleSaveData(rows);
-    setShowSelectionConfirmationDialog({ open: false, type: '' });
-  }
 
   async function getAllPricingCondition(values: any, pricingMethodOptions: any) {
     if (rowData) {
@@ -377,9 +314,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
     let estimateStartDate = dayjs(values?.estimateStartDate);
     let estimateEndDate = dayjs(values?.estimateEndDate);
     if (isBulkedit) {
-      const maxEstimateStartDate = rowData
-        ?.map((r) => r?.estimateStartDate)
-        ?.reduce((max, current) => (dayjs(current).isAfter(dayjs(max)) ? current : max));
+      const maxEstimateStartDate = selectedProducts?.map((r) => r?.estimateStartDate)?.reduce((max, current) => (dayjs(current).isAfter(dayjs(max)) ? current : max));
       const estimateStartDateE = dayjs(maxEstimateStartDate);
       if (estimateEndDate.diff(estimateStartDateE, 'day') < 0) {
         errors['estimateEndDate'] = 'Please enter valid estimate end date';
@@ -728,33 +663,6 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                   Save
                 </ThemeButton>
               </CustomDialogFooter>
-              {showConfirmationDialog.open && (
-                <ConfirmationDialog
-                  open={showConfirmationDialog.open}
-                  message={showConfirmationDialog.type === 'child' ?
-                    "This action will remove the child line items pricing. Any field update that changes final price will remove the child line items pricing" : ""}
-                  onOk={() => {
-                    submitForm();
-                  }}
-                  onClose={() => {
-                    setShowConfirmationDialog({ open: false, type: '' });
-                  }}
-                />
-              )}
-              {showSelectionConfirmationDialog.open && (
-                <SelectionConfirmationDialog
-                  open={showSelectionConfirmationDialog.open}
-                  message={"Would you like to apply the price at the parent level or the child level?"}
-                  onOk={(type) => {
-                    handleUpdateBulk(values, type)
-                  }}
-                  onClose={() => {
-                    setShowSelectionConfirmationDialog({ open: false, type: '' });
-                  }}
-                  selection1={'Parent'}
-                  selection2={'Child'}
-                />
-              )}
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
                   open={showConfirmDialog}
@@ -768,6 +676,30 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                   }}
                 />
               ) : null}
+              {submitState.open &&
+                <MaterialUpdateActions
+                  resource={sidebarResource.rentalManagement}
+                  referenceData={rentalManagementData}
+                  allFields={allFields}
+                  material={material}
+                  isBulkedit={isBulkedit}
+                  selectedRecords={selectedProducts}
+                  rowData={rowData}
+                  handleUpdateData={(rows) => {
+                    if (isBulkedit) {
+                      handleSaveData(rows);
+                    }
+                    else {
+                      handleSaveData(rows, saveAndNext);
+                    }
+                    setSubmitState({ open: false, values: null })
+                  }}
+                  values={submitState.values}
+                  handleClose={() => {
+                    setSubmitState({ open: false, values: null })
+                  }}
+                />
+              }
             </Fragment>
           )}
         </Formik>
