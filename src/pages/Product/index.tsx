@@ -61,7 +61,7 @@ const Product = () => {
   const [productColumns, setProductColumns] = useState(null);
   const [openScheduledMaintenance, setOpenScheduledMaintenance] = useState(false);
   const {
-    state: { permissions, selectedEntity, resources }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   const { generateColumns } = useColumns();
   useEffect(() => {
@@ -420,11 +420,13 @@ const Product = () => {
               }
             ]}
           />
-          <HtmlTooltip title={'Schedule Maintenance'}>
-            <IconButton size="small" aria-label="Schedule Maintenance" onClick={() => setOpenScheduledMaintenance(true)}>
-              <HandymanIcon fontSize="small" color={'primary'} />
-            </IconButton>
-          </HtmlTooltip>
+          {permissions?.product.isUpdate && user?.user?.brandPolicy?.serializedProductScheduledMaintenance && (
+            <HtmlTooltip title={'Schedule Maintenance'}>
+              <IconButton size="small" aria-label="Schedule Maintenance" onClick={() => setOpenScheduledMaintenance(true)}>
+                <HandymanIcon fontSize="small" color={'primary'} />
+              </IconButton>
+            </HtmlTooltip>
+          )}
         </div>
       </div>
       <CustomContainer>
