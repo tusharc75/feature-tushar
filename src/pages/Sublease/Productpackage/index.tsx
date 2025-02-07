@@ -2,14 +2,12 @@ import { Box, IconButton, MenuItem } from '@mui/material';
 import Add from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import { isArray } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
 import { ownerAndColaborator, subleaseMessage } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -20,13 +18,14 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, pricingCondition, sublease } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, pricingCondition, sidebarResource, sublease } from '../../../constants/helpers';
 import QtyDialog from './QtyDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateAddStepEditProduct } from 'src/pages/Sublease/walkmeSteps';
 import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
+import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 
 const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchData, renderedFrom, allowedToEdit, stepFullScreen }) => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -51,6 +50,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
   const [allFields, setAllFields] = useState([]);
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitState, setSubmitState] = useState({ open: false, values: null, rowData: null });
 
   useEffect(() => {
     fetchFields();
@@ -351,9 +351,8 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       });
       return;
     }
-    let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData, subleaseData?.currency);
-    handleSaveData(rows);
+    const calValues = autoCalculateSpecificFields(inputField, rowData, allFields);
+    setSubmitState({ open: true, values: { ...rowData, ...calValues }, rowData: rowData });
   };
 
   const addButtonMenuitems = () => {
@@ -476,6 +475,23 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           material={material}
           selectedProducts={selectedRecords}
           loading={isUpdating}
+        />
+      )}
+      {submitState.open && (
+        <MaterialUpdateActions
+          resource={sidebarResource.sublease}
+          referenceData={subleaseData}
+          allFields={allFields}
+          material={material}
+          rowData={submitState.rowData}
+          handleUpdateData={(rows) => {
+            handleSaveData(rows);
+            setSubmitState({ open: false, values: null, rowData: null });
+          }}
+          values={submitState.values}
+          handleClose={() => {
+            setSubmitState({ open: false, values: null, rowData: null });
+          }}
         />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'product' && (
