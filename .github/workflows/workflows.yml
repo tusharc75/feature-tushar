@@ -37,20 +37,48 @@ jobs:
           # Push the Docker image to ECR
           docker push $IMAGE_URI
       # Step 5: Update kubeconfig for EKS access with SSO role
+      # - name: 'Deploy to EKS'
+      #   if: success()
+      #   env:
+      #     DEPLOYMENT_NAME: frontend-deployment
+      #     AWS_REGION: ${{ secrets.AWS_REGION }}
+      #     EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
+      #     EKS_ROLE_ARN: ${{ secrets.EKS_ROLE_ARN }}
+      #     aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+      #   run: |
+      #     # Configure AWS credentials and update kubeconfig
+      #     aws eks update-kubeconfig \
+      #       --region ${AWS_REGION} \
+      #       --name ${EKS_CLUSTER_NAME} \
+      #       --profile AdministratorAccess-194722417414
+
       - name: 'Deploy to EKS'
         if: success()
         env:
           DEPLOYMENT_NAME: frontend-deployment
           AWS_REGION: ${{ secrets.AWS_REGION }}
           EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
-          EKS_ROLE_ARN: ${{ secrets.EKS_ROLE_ARN }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
         run: |
-          # Configure AWS credentials and update kubeconfig
+          # First, configure AWS credentials file
+          mkdir -p ~/.aws
+          # Create config file
+          cat > ~/.aws/config << EOF
+          [profile AdministratorAccess-194722417414]
+          region = ${AWS_REGION}
+          output = json
+          EOF
+          # Create credentials file
+          cat > ~/.aws/credentials << EOF
+          [AdministratorAccess-194722417414]
+          aws_access_key_id = ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key = ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_session_token = ${{ secrets.AWS_SESSION_TOKEN }}
+          EOF
+          # Now use the profile
           aws eks update-kubeconfig \
             --region ${AWS_REGION} \
             --name ${EKS_CLUSTER_NAME} \
             --profile AdministratorAccess-194722417414
 
-          # Update the deployment
+      #     # Update the deployment
           kubectl set image deployment/${DEPLOYMENT_NAME} frontend=${IMAGE_URI}
