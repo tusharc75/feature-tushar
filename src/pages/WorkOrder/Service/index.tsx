@@ -28,7 +28,7 @@ import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import ConsumablesDialog from '../Consumables/ConsumablesDialog';
 import Quotation from '../Quotation';
-import AssignUserDialog from './AssignUserDialog';
+import AssignUserDialog from './AssignTechniciansDialog';
 import AssignWorkStationDialog from './AssignWorkStationDialog';
 import AttachmentDialog from './AttachmentDialog';
 import Comments from './Comments';
