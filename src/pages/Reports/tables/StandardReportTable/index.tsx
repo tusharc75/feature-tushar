@@ -671,7 +671,11 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
                 'invoiceDetails',
                 'inventoryHistory',
                 'purchaseOrderDetails',
-                'purchaseOrderActualReceivedDetails'
+                'purchaseOrderActualReceivedDetails',
+                'userSession',
+                'numberOfAssetsByStatus',
+                'serializedAssetStatistics',
+                'averagePriceBySupplier'
               ].includes(resourceCamelCase) ? (
                 <AsynImportExportMenu
                   resource={sidebarResource.report}
