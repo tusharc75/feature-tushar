@@ -37,16 +37,18 @@ jobs:
           # Push the Docker image to ECR
           docker push $IMAGE_URI
       # Step 5: Update kubeconfig for EKS access with SSO role
-      - name: 'Update kubeconfig for EKS'
+      - name: 'Deploy to EKS'
         if: success()
-        run: |
-          aws eks update-kubeconfig \
-            --region ${{ secrets.AWS_REGION }} \
-            --name ${{ secrets.EKS_CLUSTER_NAME }} \
-            --role-arn ${{ secrets.EKS_ROLE_ARN }}
-
-      - name: Update Kubernetes Deployment
         env:
           DEPLOYMENT_NAME: frontend-deployment
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
+          EKS_ROLE_ARN: ${{ secrets.EKS_ROLE_ARN }}
         run: |
-          kubectl set image deployment/$DEPLOYMENT_NAME frontend=$IMAGE_URI
+          # Configure AWS credentials and update kubeconfig
+          aws eks update-kubeconfig \
+            --region ${AWS_REGION} \
+            --name ${EKS_CLUSTER_NAME} \
+            --role-arn ${EKS_ROLE_ARN}
+          # Update the deployment
+          kubectl set image deployment/${DEPLOYMENT_NAME} frontend=${IMAGE_URI}
