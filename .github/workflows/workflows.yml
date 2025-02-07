@@ -1,15 +1,17 @@
 name: Deploy to EKS
+ 
 on:
   push:
     branches:
       - uat
+ 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Checkout the repository code
       - name: 'Checkout GitHub repository'
         uses: actions/checkout@v3
+ 
       - name: 'Configure AWS Credentials'
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -17,11 +19,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ secrets.AWS_REGION }}
-      # Step 3: Login to Amazon ECR
+ 
       - name: 'Login to Amazon ECR'
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-      # Step 4: Build and tag the Docker image with a timestamp
+ 
       - name: 'Build and Push Image to ECR'
         if: success()
         id: build
@@ -36,22 +38,7 @@ jobs:
           docker build -t $IMAGE_URI .
           # Push the Docker image to ECR
           docker push $IMAGE_URI
-      # Step 5: Update kubeconfig for EKS access with SSO role
-      # - name: 'Deploy to EKS'
-      #   if: success()
-      #   env:
-      #     DEPLOYMENT_NAME: frontend-deployment
-      #     AWS_REGION: ${{ secrets.AWS_REGION }}
-      #     EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
-      #     EKS_ROLE_ARN: ${{ secrets.EKS_ROLE_ARN }}
-      #     aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-      #   run: |
-      #     # Configure AWS credentials and update kubeconfig
-      #     aws eks update-kubeconfig \
-      #       --region ${AWS_REGION} \
-      #       --name ${EKS_CLUSTER_NAME} \
-      #       --profile AdministratorAccess-194722417414
-
+ 
       - name: 'Deploy to EKS'
         if: success()
         env:
@@ -59,7 +46,7 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
           EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
         run: |
-          # First, configure AWS credentials file
+          # Configure AWS credentials file
           mkdir -p ~/.aws
           # Create config file
           cat > ~/.aws/config << EOF
@@ -74,11 +61,10 @@ jobs:
           aws_secret_access_key = ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_session_token = ${{ secrets.AWS_SESSION_TOKEN }}
           EOF
-          # Now use the profile
+          # Update kubeconfig
           aws eks update-kubeconfig \
             --region ${AWS_REGION} \
             --name ${EKS_CLUSTER_NAME} \
             --profile AdministratorAccess-194722417414
-
-      #     # Update the deployment
+          # Update the deployment
           kubectl set image deployment/${DEPLOYMENT_NAME} frontend=${IMAGE_URI}
