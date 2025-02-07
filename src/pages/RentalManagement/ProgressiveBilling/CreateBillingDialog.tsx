@@ -1083,7 +1083,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           selectedProducts={[]}
           loading={isSubmitting}
           isQtyOnly={true}
-          isRateRequired={false}
         />
       )}
       {openInvoiceDataDialog && (

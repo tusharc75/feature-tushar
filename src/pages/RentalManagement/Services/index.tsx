@@ -862,7 +862,6 @@ const Services = ({
           loading={isUpdating}
           from={'service'}
           showSaveAndNext={isProductEdit.showSaveAndNext}
-          isRateRequired={isRateRequired}
         />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'service' && (
