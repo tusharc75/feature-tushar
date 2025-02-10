@@ -33,6 +33,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import axios, { CancelTokenSource } from 'axios';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createPurchaseOrderFlow } from './walkmeSteps';
+import CustomContent from 'src/pages/PurchaseOrder/CustomContent';
 
 const PurchaseOrder = () => {
   let renderedFrom = camelCase(sidebarResource.purchaseOrder);
@@ -377,6 +378,8 @@ const PurchaseOrder = () => {
             showFilters={true}
             resource={sidebarResource.purchaseOrder}
             setWholeRowsCellColor={(rowData) => (rowData.deleted ? 'error' : '')}
+            expanderWithCustomContent={false} // set this flag to true to show custom expand component
+            customContent={CustomContent}
           />
         ) : (
           <Box p={2} height={500}>
