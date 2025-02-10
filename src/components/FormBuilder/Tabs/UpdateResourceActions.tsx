@@ -38,7 +38,7 @@ export default function UpdateResourceActions({ onClose, onSuccess, resource, re
   const toastConfig = useContext(CustomToastContext);
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [initialValues, setInitialValues] = useState(null);
+  const [initialValues, setInitialValues] = useState({ updateResourceActions: [] });
   const [submitting, setSubmitting] = useState(false);
   const [fields, setFields] = useState([]);
 
@@ -49,8 +49,6 @@ export default function UpdateResourceActions({ onClose, onSuccess, resource, re
   useEffect(() => {
     if (resourceData?.updateResourceActions?.length) {
       setInitialValues({ updateResourceActions: resourceData?.updateResourceActions });
-    } else {
-      setInitialValues({ updateResourceActions: [{ checkFields: [{ fieldName: '', value: '', operator: '' }], updateField: '', updateValue: '' }] });
     }
   }, [resourceData]);
 
@@ -189,7 +187,9 @@ export default function UpdateResourceActions({ onClose, onSuccess, resource, re
           )}
         </Formik>
       ) : (
-        <CommonSkeleton lenArray={[...Array(6).keys()]} />
+        <Box height={500}>
+          <CommonSkeleton lenArray={[...Array(6).keys()]} />
+        </Box>
       )}
     </Dialog>
   );
