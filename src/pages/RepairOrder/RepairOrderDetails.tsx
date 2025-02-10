@@ -306,7 +306,7 @@ const RepairOrderDetails = () => {
           <Box className="control-buttons-v1 ">
             {repairOrderData ? (
               <>
-                {allowedToEdit && 
+                {allowedToEdit &&
                   !repairOrderData?.deleted &&
                   permissions?.repairOrder?.isUpdate &&
                   permissions?.transferAsset?.isCreate &&
@@ -387,8 +387,8 @@ const RepairOrderDetails = () => {
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
-          {repairOrderData?.deleted ? null : <CustomTab value={1}>Details</CustomTab>}
-          {!(isMobile && !isTablet && !repairOrderData?.deleted) ? <CustomTab value={2}>Views</CustomTab> : null}
+          {!repairOrderData?.deleted && <CustomTab value={1}>Details</CustomTab>}
+          {!(isMobile && !isTablet) && !repairOrderData?.deleted && <CustomTab value={2}>Views</CustomTab>}
           {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
 
