@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { Autocomplete, Box, CircularProgress, Dialog, IconButton, TextField, Typography } from '@mui/material';
+import { Autocomplete, Box, Dialog, IconButton, TextField, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from 'src/constants/helpers';
@@ -10,10 +10,10 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { getResourceField } from 'src/components/FormBuilder/helper';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { AddCircleOutline, RemoveCircleOutline } from '@mui/icons-material';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import FormTypes from 'src/components/Helpers/FormTypes';
 
 export default function UpdateResourceActions({ onClose, onSuccess, resource, resourceData }) {
   const OPERATOR = [
@@ -24,6 +24,10 @@ export default function UpdateResourceActions({ onClose, onSuccess, resource, re
     {
       optionLabel: 'Less than or equals',
       optionValue: 'lessThanOrEquals'
+    },
+    {
+      optionLabel: 'Equals To',
+      optionValue: 'equalsTo'
     },
     {
       optionLabel: 'Greater than',
@@ -73,7 +77,10 @@ export default function UpdateResourceActions({ onClose, onSuccess, resource, re
 
   const getResourceFieldList = async (resource) => {
     try {
-      const data: any = await getResourceField(resource, true);
+      let {
+        data: { data }
+      } = await axiosInstance().get(`/field?resource=${resource}`);
+      data = data?.filter((obj) => obj?.isCreate).map((d: any) => d.fieldData);
       setFields(data);
     } catch (e) {}
   };
@@ -187,7 +194,7 @@ export default function UpdateResourceActions({ onClose, onSuccess, resource, re
           )}
         </Formik>
       ) : (
-        <Box height={500}>
+        <Box height={'h-fit'} padding={2}>
           <CommonSkeleton lenArray={[...Array(6).keys()]} />
         </Box>
       )}
@@ -266,26 +273,18 @@ const Card = ({ values, index, parentRemove, setFieldValue, errors, touched, fie
                       />
                     </Grid>
                     <Grid size={{ sm: 3, md: 3, lg: 3 }}>
-                      <TextField
-                        margin="none"
-                        size="small"
-                        type="text"
-                        label="Value"
-                        variant="outlined"
-                        fullWidth
-                        value={values?.updateResourceActions?.[index]?.checkFields?.[i]?.value ?? ''}
-                        error={
-                          touched?.updateResourceActions?.[index]?.checkFields?.[i]?.value &&
-                          Boolean(errors[`updateResourceActions.${index}.checkFields.${i}.value`])
-                        }
-                        helperText={
-                          touched?.updateResourceActions?.[index]?.checkFields?.[i]?.value &&
-                          errors[`updateResourceActions.${index}.checkFields.${i}.value`]
-                        }
-                        onChange={(e) => {
-                          setFieldValue(`updateResourceActions.${index}.checkFields.${i}.value`, e.target.value || '');
-                        }}
-                      />
+                      {values?.updateResourceActions?.[index]?.checkFields?.[i]?.fieldName ? (
+                        <DynamicFormField
+                          fieldName={values?.updateResourceActions?.[index]?.checkFields?.[i]?.fieldName}
+                          value={values.updateResourceActions?.[index]?.checkFields?.[i]?.value}
+                          error={errors[`updateResourceActions.${index}.checkFields.${i}.value`]}
+                          touched={touched?.updateResourceActions?.[index]?.checkFields?.[i]?.value}
+                          formikField={`updateResourceActions.${index}.checkFields.${i}.value`}
+                          field={fields?.find((f) => f.fieldName === values?.updateResourceActions?.[index]?.checkFields?.[i]?.fieldName)}
+                          setFieldValue={setFieldValue}
+                          label={'Value'}
+                        />
+                      ) : null}
                     </Grid>
                     <Box className=" ml-auto max-w-fit" display="flex" justifyContent="space-between" alignItems="center">
                       <HtmlTooltip title={'Remove'}>
@@ -330,20 +329,18 @@ const Card = ({ values, index, parentRemove, setFieldValue, errors, touched, fie
             />
           </Grid>
           <Grid size={{ sm: 3, md: 3, lg: 3 }}>
-            <TextField
-              margin="none"
-              size="small"
-              type="text"
-              label="Update Value"
-              variant="outlined"
-              fullWidth
-              value={values?.updateResourceActions?.[index]?.updateValue ?? ''}
-              error={touched?.updateResourceActions?.[index]?.updateValue && Boolean(errors[`updateResourceActions.${index}.updateValue`])}
-              helperText={touched?.updateResourceActions?.[index]?.updateValue && errors[`updateResourceActions.${index}.updateValue`]}
-              onChange={(e) => {
-                setFieldValue(`updateResourceActions.${index}.updateValue`, e.target.value || '');
-              }}
-            />
+            {values?.updateResourceActions?.[index]?.updateField ? (
+              <DynamicFormField
+                fieldName={values?.updateResourceActions?.[index]?.updateField}
+                value={values.updateResourceActions?.[index]?.updateValue}
+                error={errors[`updateResourceActions.${index}.updateValue`]}
+                touched={touched?.updateResourceActions?.[index]?.updateValue}
+                formikField={`updateResourceActions.${index}.updateValue`}
+                field={fields?.find((f) => f.fieldName === values?.updateResourceActions?.[index]?.updateField)}
+                setFieldValue={setFieldValue}
+                label={'Update Value'}
+              />
+            ) : null}
           </Grid>
         </Grid>
       </Box>
@@ -355,5 +352,36 @@ const Card = ({ values, index, parentRemove, setFieldValue, errors, touched, fie
         </HtmlTooltip>
       </Box>
     </Box>
+  );
+};
+
+const DynamicFormField = ({ fieldName, value, field, setFieldValue, formikField, error, touched, label }) => {
+  return (
+    <FormTypes
+      {...field}
+      values={{
+        [fieldName]: value
+      }}
+      errors={{
+        [fieldName]: error
+      }}
+      touched={{
+        [fieldName]: touched
+      }}
+      fieldData={field}
+      label={label}
+      name={field.fieldName}
+      type={field.type}
+      options={field.option || []}
+      disabled={false}
+      setFieldValue={(name, value) => {
+        setFieldValue(formikField, value);
+      }}
+      required={false}
+      fullWidth
+      isTooltip={field?.isTooltip || false}
+      tooltipMessage={field?.tooltipMessage || ''}
+      size="small"
+    />
   );
 };
