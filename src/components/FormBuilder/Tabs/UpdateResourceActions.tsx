@@ -92,7 +92,7 @@ export default function UpdateResourceActions({ onClose, onSuccess, resource, re
         if (!cnd?.updateField) {
           errors[`updateResourceActions.${index}.updateField`] = 'Update field is Required';
         }
-        if (!cnd?.updateValue) {
+        if (!cnd?.updateValue || (Array.isArray(cnd.updateValue) && !cnd?.updateValue?.length)) {
           errors[`updateResourceActions.${index}.updateValue`] = 'Update value is Required';
         }
         if (cnd?.checkFields?.length > 0) {
@@ -100,7 +100,7 @@ export default function UpdateResourceActions({ onClose, onSuccess, resource, re
             if (!c?.fieldName) {
               errors[`updateResourceActions.${index}.checkFields.${i}.fieldName`] = 'Field name is Required';
             }
-            if (!c?.value) {
+            if (!c?.value|| (Array.isArray(c.value) && !c?.value?.length)) {
               errors[`updateResourceActions.${index}.checkFields.${i}.value`] = 'Value is Required';
             }
             if (!c?.operator) {
