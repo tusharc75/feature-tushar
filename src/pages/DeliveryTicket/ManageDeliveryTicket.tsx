@@ -317,27 +317,30 @@ const ManageDeliveryTicket = ({
         var isDeliveryToStorageLocationDisable = false;
 
         if ((assets || products) && referenceType && referenceData) {
-          if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.transferInventory) {
-          } else if (
-            user?.user?.brandPolicy?.storageLocation &&
-            ((referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob && user?.user?.brandPolicy?.rentalInventoryDebit) ||
-              referenceType === DELIVERY_TICKET_REFERENCE_TYPE.subcontractAssembly)
-          ) {
-            if (ticketType === DELIVERY_TICKET_TYPE.loading) {
-              fieldsDataForCreate = fieldsDataForCreate?.filter((e) => !['deliveryToStorageLocation']?.includes(e.fieldName));
-              fieldsDataForCreate?.forEach((element) => {
-                if (element?.fieldName === 'pickupFromStorageLocation') {
-                  element.required = true;
-                }
-              });
+          if (user?.user?.brandPolicy?.storageLocation) {
+            if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.transferInventory) {
             }
-            if ([DELIVERY_TICKET_TYPE.return, DELIVERY_TICKET_TYPE.receiving]?.includes(ticketType)) {
-              fieldsDataForCreate = fieldsDataForCreate?.filter((e) => !['pickupFromStorageLocation']?.includes(e.fieldName));
-              fieldsDataForCreate?.forEach((element) => {
-                if (element?.fieldName === 'deliveryToStorageLocation') {
-                  element.required = true;
-                }
-              });
+            else if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob && user?.user?.brandPolicy?.rentalInventoryDebit) {
+              if (referenceData?.pickupFromType === DELIVERY_FROM_TO_TYPE.plant) {
+                fieldsDataForCreate?.forEach((element) => {
+                  if (element?.fieldName === 'pickupFromStorageLocation') {
+                    element.required = true;
+                  }
+                });
+              }
+              else {
+                fieldsDataForCreate = fieldsDataForCreate?.filter((e) => !['pickupFromStorageLocation']?.includes(e.fieldName));
+              }
+              if (referenceData?.deliveryTo === DELIVERY_FROM_TO_TYPE.plant) {
+                fieldsDataForCreate?.forEach((element) => {
+                  if (element?.fieldName === 'deliveryToStorageLocation') {
+                    element.required = true;
+                  }
+                });
+              }
+              else {
+                fieldsDataForCreate = fieldsDataForCreate?.filter((e) => !['deliveryToStorageLocation']?.includes(e.fieldName));
+              }
             }
           } else {
             fieldsDataForCreate = fieldsDataForCreate?.filter(
