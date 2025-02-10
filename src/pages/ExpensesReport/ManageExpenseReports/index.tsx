@@ -164,6 +164,12 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
     setSelectedExpense(updatedExpenses);
   };
 
+  const handleDeleteRows = (rowIds) => {
+    setSelectedExpense((prevExpenses) =>
+      prevExpenses.filter((expense) => !rowIds.includes(expense._id))
+    );
+  };
+
   const addButtonMenuItems = () => {
     return (
       <>
@@ -241,7 +247,7 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
                   )}
                   {selectedExpense.length > 0 && isAllowedToEdit && (
                     <div className="mt-2">
-                      <Expenses selectedExpenseData={selectedExpense} showAddButton={false} />
+                      <Expenses selectedExpenseData={selectedExpense} showAddButton={false} removeRow={handleDeleteRows} />
                     </div>
                   )}
                 </Form>
@@ -264,7 +270,7 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
                   isLoading={isSubmitting}
                   buttonType="theme"
                   id="dialog-save-button"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || selectedExpense.length===0}
                   onClick={(e) => {
                     submitForm();
                   }}

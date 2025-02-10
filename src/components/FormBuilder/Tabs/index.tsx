@@ -29,6 +29,7 @@ import Notifications from 'src/components/FormBuilder/Tabs/Notifications';
 import PolicyDialog from 'src/components/FormBuilder/Tabs/policyDialog';
 import { AddOutlined, ExpandLess, ExpandMore } from '@mui/icons-material';
 import routes from 'src/components/Helpers/Routes';
+import UpdateResourceActions from 'src/components/FormBuilder/Tabs/UpdateResourceActions';
 
 const DynamicTabs = ({ workflowId = null, resource }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -43,6 +44,7 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
   const [openPolicy, setOpenPolicy] = useState(false);
   const [openSetting, setOpenSetting] = useState(false);
   const [openAction, setOpenAction] = useState(false);
+  const [openUpdateResourceActions, setOpenUpdateResourceActions] = useState(false);
   const [openNotifications, setOpenNotifications] = useState(false);
 
   const fetchData = useCallback(
@@ -179,6 +181,18 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
             </HtmlTooltip>
           )}
           {!workflowId && (
+            <HtmlTooltip title={'Update Resource Actions'}>
+              <IconButton
+                aria-label="Actions"
+                onClick={() => {
+                  setOpenUpdateResourceActions(true);
+                }}
+              >
+                <BuildIcon fontSize="small" color={'primary'} />
+              </IconButton>
+            </HtmlTooltip>
+          )}
+          {!workflowId && (
             <HtmlTooltip title={'Notifications'}>
               <IconButton
                 aria-label="Notifications"
@@ -272,6 +286,20 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
             resource={resource}
             resourceData={resourceData}
           />
+        )}
+
+        {openUpdateResourceActions && (
+          <UpdateResourceActions
+          onClose={() => {
+            setOpenUpdateResourceActions(false);
+          }}
+          onSuccess={() => {
+            fetchData();
+            setOpenUpdateResourceActions(false);
+          }}
+          resource={resource}
+          resourceData={resourceData}
+        />
         )}
 
         {openNotifications && (

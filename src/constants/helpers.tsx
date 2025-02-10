@@ -262,6 +262,7 @@ export const sidebarResource = {
   productCategory: 'Product Category',
   productInventory: 'Product Inventory',
   serializedAsset: 'Serialized Asset',
+  serializedAssetInspection: 'Serialized Asset Inspection',
   priceTemplate: 'Price Template',
   product: 'Product',
   productTemplate: 'Product Template',
@@ -662,6 +663,14 @@ export const serializedAsset = {
   permission: 'serializedAsset',
   resource: 'Serialized Asset'
 };
+
+export const serializedAssetInspection = {
+  api: '/serialized-asset/serialized-asset-inspection',
+  route: '/serialized-asset/serialized-asset-inspection',
+  permission: 'serializedAsset',
+  resource: 'Serialized Asset'
+};
+
 
 export const serializedAssetsCertification = {
   api: '/serialized-assets-certification',
