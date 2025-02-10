@@ -306,7 +306,8 @@ const RepairOrderDetails = () => {
           <Box className="control-buttons-v1 ">
             {repairOrderData ? (
               <>
-                {allowedToEdit &&
+                {allowedToEdit && 
+                  !repairOrderData?.deleted &&
                   permissions?.repairOrder?.isUpdate &&
                   permissions?.transferAsset?.isCreate &&
                   resourceData?.policy?.showTransferAssets &&
@@ -322,7 +323,7 @@ const RepairOrderDetails = () => {
                       {`Create ${resources?.transferAsset?.titleSingular}`}
                     </ThemeButton>
                   )}
-                {permissions?.repairOrder?.isUpdate && [REPAIR_ORDER_STATUS.completed].includes(repairOrderData?.status) && (
+                {permissions?.repairOrder?.isUpdate && !repairOrderData?.deleted && [REPAIR_ORDER_STATUS.completed].includes(repairOrderData?.status) && (
                   <HtmlTooltip title={allowedToEdit ? '' : `Owner or Collaborator can reopen ${resources?.repairOrder?.titleSingular}`}>
                     <ThemeButton
                       onClick={() =>
@@ -335,13 +336,14 @@ const RepairOrderDetails = () => {
                     </ThemeButton>
                   </HtmlTooltip>
                 )}
-                {permissions?.repairOrder?.isUpdate && allowedToEdit && repairOrderData?.canComplete && stepNames[currentStep] === 'Slip' && (
+                {permissions?.repairOrder?.isUpdate && allowedToEdit && !repairOrderData?.deleted && repairOrderData?.canComplete && stepNames[currentStep] === 'Slip' && (
                   <ButtonWithPulse onClick={() => updateOrderStatus(REPAIR_ORDER_STATUS.completed)} id={'header-button-complete'}>
                     Complete
                   </ButtonWithPulse>
                 )}
                 {permissions?.repairOrder?.isUpdate &&
                   allowedToEdit &&
+                  !repairOrderData?.deleted &&
                   ['Add Assets', 'Work Order'].includes(stepNames[currentStep]) &&
                   [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                     quotationVersionData?.status
@@ -358,6 +360,7 @@ const RepairOrderDetails = () => {
                   )}
                 {permissions?.repairOrder?.isUpdate &&
                   allowedToEdit &&
+                  !repairOrderData?.deleted &&
                   ![REPAIR_ORDER_STATUS.completed].includes(repairOrderData?.status) &&
                   !(
                     [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
@@ -368,7 +371,7 @@ const RepairOrderDetails = () => {
                       {'Edit'}
                     </ThemeButton>
                   )}
-                {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                {allowedToDelete && !repairOrderData?.deleted && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
@@ -384,8 +387,8 @@ const RepairOrderDetails = () => {
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
-          <CustomTab value={1}>Details</CustomTab>
-          {!(isMobile && !isTablet) && <CustomTab value={2}>Views</CustomTab>}
+          {repairOrderData?.deleted ? null : <CustomTab value={1}>Details</CustomTab>}
+          {!(isMobile && !isTablet && !repairOrderData?.deleted) ? <CustomTab value={2}>Views</CustomTab> : null}
           {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
 

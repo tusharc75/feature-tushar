@@ -171,12 +171,7 @@ const PolicyDialog = ({ resourceData, resource, onClose, onSuccess }) => {
                 <ThemeButton buttonType="transparent" onClick={onClose}>
                   Cancel
                 </ThemeButton>
-                <ThemeButton
-                  disabled={isSubmitting}
-                  buttonType="theme"
-                  onClick={submitForm}
-                  isLoading={isSubmitting}
-                >
+                <ThemeButton disabled={isSubmitting} buttonType="theme" onClick={submitForm} isLoading={isSubmitting}>
                   Save
                 </ThemeButton>
               </CustomDialogFooter>
@@ -224,7 +219,7 @@ const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource
       <>
         {!loading ? (
           <Grid container spacing={2}>
-            <Grid size={{lg:6, md:6, sm:6, xs:12}}>
+            <Grid size={{ lg: 6, md: 6, sm: 6, xs: 12 }}>
               <DropDownField
                 options={options}
                 error={null}
@@ -258,7 +253,7 @@ const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource
     }
     return (
       <Grid container spacing={2}>
-        <Grid size={{lg:6, md:6, sm:6, xs:12}}>
+        <Grid size={{ lg: 6, md: 6, sm: 6, xs: 12 }}>
           <Autocomplete
             fullWidth
             size="small"
@@ -390,7 +385,7 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
             </HtmlTooltip>
           </div>
           {initialData?.fieldsData?.map((value, index) => (
-            <div className="mb-4 mt-4 flex items-center justify-between gap-1 border border-[var(--common-border-color)] p-2" key={index}>
+            <div className="my-2 flex items-center justify-between gap-1 rounded-md border border-[var(--common-border-color)] p-2" key={index}>
               <div className="grid w-[94%] gap-2 sm:grid-cols-1 md:grid-cols-3">
                 {initialData?.fields?.map((field) =>
                   field?.type === 'checkBox' ? (
@@ -499,7 +494,7 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                     onChange(null, updatedData);
                   }}
                 >
-                  <RemoveCircleOutline fontSize="small" />
+                  <RemoveCircleOutline fontSize="small" color={'error'} />
                 </IconButton>
               </HtmlTooltip>
             </div>
