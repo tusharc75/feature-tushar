@@ -36,7 +36,7 @@ import AddExpenses from 'src/pages/ExpensesReport/AddExpenses';
 import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
 import { isMobile, isTablet } from 'react-device-detect';
 
-const Expenses = ({ selectedExpenseData, showAddButton, reportData = null }) => {
+const Expenses = ({ selectedExpenseData, showAddButton, reportData = null, removeRow }) => {
   const renderedFrom = camelCase(sidebarResource?.expenses);
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -167,24 +167,6 @@ const Expenses = ({ selectedExpenseData, showAddButton, reportData = null }) => 
       }, gridLoadingTimeout);
     } catch (error) {
       dispatch({ type: 'loading', loading: false });
-      toastConfig.setToastConfig(error);
-    }
-  };
-
-  const handleDelete = async () => {
-    try {
-      const { data } = await axiosInstance().put(
-        `${routes.expenseReport.path}/expenses/${reportData._id}/remove`,
-        { ids: deleteData }
-      );
-      deleteData.forEach((id) => deletedIdsRef.current.add(id));
-      
-      setSelectedExpense((prev) => prev.filter((expense) => !deleteData.includes(expense._id)));
-      
-      dispatch({ type: 'selection', selectedRecords: [] });      
-      fetchData();
-      setDeleteData(null);
-    } catch (error) {
       toastConfig.setToastConfig(error);
     }
   };
@@ -342,7 +324,7 @@ const Expenses = ({ selectedExpenseData, showAddButton, reportData = null }) => 
             open={true}
             message={`Are you sure you want to delete the record(s)?`}
             onClose={() => setDeleteData(null)}
-            onOk={() => handleDelete()}
+            onOk={() => removeRow(deleteData) }
           />
         )}
         {showAddExistingExpenseModal && (
