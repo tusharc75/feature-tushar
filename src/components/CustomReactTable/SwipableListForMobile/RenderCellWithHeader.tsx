@@ -15,7 +15,7 @@ const CellShell = ({ children, field, currentEditingCellPosition, submitInput, c
         onClick={() => {
           handleCellClick({ cell, dispatch, row, setCellValue });
         }}
-        className={`text-[12px_!important]  [&>*]:[font-size:12px_!important] [&>*]:[font-weight:500_!important] [&>div]:[flex-wrap:wrap_!important] [&_*]:[white-space:unset_!important] [&_h5]:[font-size:12px_!important]`}
+        className={`text-[12px_!important] [&>*]:[font-size:12px_!important] [&>div]:[flex-wrap:wrap_!important] [&_*]:!font-semibold [&_*]:[white-space:unset_!important] [&_h5]:[font-size:12px_!important]`}
       >
         {children}
       </span>
