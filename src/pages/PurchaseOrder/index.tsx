@@ -378,8 +378,7 @@ const PurchaseOrder = () => {
             showFilters={true}
             resource={sidebarResource.purchaseOrder}
             setWholeRowsCellColor={(rowData) => (rowData.deleted ? 'error' : '')}
-            expanderWithCustomContent={true}
-            // customContent={({ row }) => <CustomContent row={row} />}
+            expanderWithCustomContent={false} // set this flag to true to show custom expand component
             customContent={CustomContent}
           />
         ) : (

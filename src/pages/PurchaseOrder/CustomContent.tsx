@@ -1,4 +1,3 @@
-import { Refresh } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
 import { camelCase, startCase } from 'lodash';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
@@ -6,7 +5,6 @@ import { FiExternalLink } from 'react-icons/fi';
 import axiosInstance from 'src/axios/axiosInstance';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
@@ -57,21 +55,6 @@ export type Row = {
 // columnCache stores column data on the first row expansion and for subsequent row expansions, setColumns gets column data from this cache.
 let columnCache = null;
 
-// The cache stores purchaseOrderData and rowsData on the first row expansion, and for subsequent expansions of the same row, data is retrieved from the cache
-const cache = {};
-const setCache = (row: Row, key: string, data) => {
-  if (!cache[row._id]) {
-    cache[row._id] = {};
-  }
-  cache[row._id][key] = data;
-};
-const getCache = (row: Row, key) => {
-  return cache[row._id]?.[key] ?? null;
-};
-const resetCache = (row: Row) => {
-  cache[row._id] = {};
-};
-
 const renderedFrom = `${camelCase(sidebarResource.purchaseOrder)}_grid-4`;
 
 const CustomContent = React.memo(
@@ -79,20 +62,17 @@ const CustomContent = React.memo(
     const toastConfig = useContext(CustomToastContext);
     const { generateColumns } = useColumns();
     const { state, dispatch } = useTableReducer({ renderedFrom });
-    const { loading, initialDataLoaded } = state;
-    const [purchaseOrderData, setPurchaseOrderData] = useState(getCache(row, 'purchaseOrderData'));
+    const [purchaseOrderData, setPurchaseOrderData] = useState(null);
     const [columns, setColumns] = useState(columnCache);
 
     const fetchPurchaseOrderData = useCallback(
       async (callback?: (purchaseOrderData: any) => Promise<void> | void) => {
-        if (getCache(row, 'purchaseOrderData')) return;
         dispatch({ type: 'loading', loading: true });
         try {
           const {
             data: { data }
           } = await axiosInstance().get(`${purchaseOrder.api}/${row?._id}`);
           setPurchaseOrderData(data);
-          setCache(row, 'purchaseOrderData', data);
           if (typeof callback === 'function') callback(data);
         } catch (error) {
           toastConfig.setToastConfig(error);
@@ -219,12 +199,6 @@ const CustomContent = React.memo(
     );
 
     const fetchProduct = useCallback(async () => {
-      const cachedData = getCache(row, 'rows');
-      if (cachedData) {
-        dispatch({ type: 'initialize', data: cachedData, count: cachedData?.length });
-        dispatch({ type: 'loading', loading: false });
-        return;
-      }
       dispatch({ type: 'loading', loading: true });
       dispatch({ type: 'selection', selectedRecords: [] });
       try {
@@ -315,11 +289,10 @@ const CustomContent = React.memo(
 
         dispatch({ type: 'initialize', data: rows, count: rows?.length });
         dispatch({ type: 'loading', loading: false });
-        setCache(row, 'rows', rows);
       } catch (error) {
         toastConfig.setToastConfig(error);
       }
-    }, [dispatch, purchaseOrderData?._id, row, toastConfig]);
+    }, [dispatch, purchaseOrderData?._id, toastConfig]);
 
     useEffect(() => {
       fetchPurchaseOrderData(fetchColumns);
@@ -329,22 +302,8 @@ const CustomContent = React.memo(
       if (purchaseOrderData) fetchProduct();
     }, [purchaseOrderData]);
 
-    const refresh = useCallback(() => {
-      resetCache(row);
-      fetchPurchaseOrderData();
-    }, [fetchPurchaseOrderData, row]);
-
-    const isLoading = loading || !initialDataLoaded;
-
     return (
       <>
-        <div className="absolute left-[19px] size-[24px]">
-          <HtmlTooltip title={isLoading ? 'Loading' : 'Refresh'}>
-            <IconButton disabled={isLoading} size="small" onClick={refresh} sx={{ background: 'var(--dark-primary, white)' }}>
-              <Refresh style={{ fontSize: '20px' }} className={`${isLoading ? 'animate-spin' : ''}`} />
-            </IconButton>
-          </HtmlTooltip>
-        </div>
         <div className="max-w-full">
           {columns ? (
             <CustomReactTable
