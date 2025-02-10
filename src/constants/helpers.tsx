@@ -671,7 +671,6 @@ export const serializedAssetInspection = {
   resource: 'Serialized Asset'
 };
 
-
 export const serializedAssetsCertification = {
   api: '/serialized-assets-certification',
   route: '/serialized-assets-certification',
@@ -2698,6 +2697,16 @@ export const REPORT_LIST = [
     key: 'standardReport',
     type: 'sytelineInvoiceIntegration',
     section: REPORT_SECTIONS.integration
+  },
+  {
+    title: 'Monthly Revenue Report',
+    permission: 'iotChart',
+    key: 'standardReport',
+    type: 'monthlyRevenueReport',
+    defaultColumn: true,
+    isExportPdf: true,
+    isSendMail: true,
+    section: REPORT_SECTIONS.iot
   }
 ];
 
