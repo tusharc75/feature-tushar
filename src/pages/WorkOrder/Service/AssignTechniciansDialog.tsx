@@ -11,6 +11,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { cn, workOrder, WORKORDER_SERVICE_STATUS, workOrderIconMap } from 'src/constants/helpers';
 import { useDelayedClass } from 'src/hooks';
+import WorkOrderStatusDialog from 'src/pages/WorkOrder/Service/WorkOrderStatusDialog';
 
 const statusOrder = [
   WORKORDER_SERVICE_STATUS.planned,
@@ -45,6 +46,9 @@ const AssignTechniciansDialog = ({ workOrderData, assignedUsers, reference, refe
   const [searchedValue, setSearchedValue] = useState('');
   const [isAssignButtonLoading, setIsAssignButtonLoading] = useState(false);
   const [containerRef, setContainerRef] = useState<HTMLDivElement>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState('');
+  const [selectedUser, setSelectedUser] = useState('');
 
   useEffect(() => {
     const container = document.createElement('div');
@@ -174,6 +178,12 @@ const AssignTechniciansDialog = ({ workOrderData, assignedUsers, reference, refe
     }
   }, [isAllSelected, userList]);
 
+  const handleOpenDialog = (status: string, assignedUser: string) => {
+    setSelectedStatus(status);
+    setSelectedUser(assignedUser);
+    setIsDialogOpen(true);
+  };
+
   if (!containerRef) return null;
   return createPortal(
     <>
@@ -254,7 +264,7 @@ const AssignTechniciansDialog = ({ workOrderData, assignedUsers, reference, refe
                         {statusOrder.map((d) => {
                           if (user.status[d] === undefined) return null;
                           return (
-                            <li className="flex items-center gap-1 rounded-[5px] border px-[8px] py-[2px]  text-[12px] font-normal leading-4">
+                            <li className="flex items-center gap-1 rounded-[5px] border px-[8px] py-[2px]  text-[12px] font-normal leading-4" onClick={() => handleOpenDialog(d, user.optionValue)}>
                               <span className="[&_svg]:block [&_svg]:size-[16px]">{workOrderIconMap[d]}</span>
                               <span className="text-[14px]">
                                 {d} - {user.status[d]}
@@ -279,6 +289,12 @@ const AssignTechniciansDialog = ({ workOrderData, assignedUsers, reference, refe
           )}
         </div>
       </div>
+      <WorkOrderStatusDialog 
+        open={isDialogOpen} 
+        onClose={() => setIsDialogOpen(false)} 
+        status={selectedStatus} 
+        assignedUser={selectedUser} 
+      />
     </>,
     containerRef,
     'modal'
