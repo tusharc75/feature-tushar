@@ -5,7 +5,7 @@ import { Cancel } from '@mui/icons-material';
 import HistoryIcon from '@mui/icons-material/History';
 import TrackChangesIcon from '@mui/icons-material/TrackChanges';
 import { startCase } from 'lodash';
-import { useContext, useEffect, useState, useRef } from 'react';
+import { useContext, useEffect, useState, useRef, useMemo } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -219,10 +219,10 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
                   </HtmlTooltip>
                 } */}
               {permissions?.purchaseOrder?.isUpdate &&
-                row?.original?.type === MATERIAL_TYPE.product &&
-                allowedToEdit &&
-                row?.original?.qty - (row?.original?.rejectQuantity || 0) &&
-                ![PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? (
+              row?.original?.type === MATERIAL_TYPE.product &&
+              allowedToEdit &&
+              row?.original?.qty - (row?.original?.rejectQuantity || 0) &&
+              ![PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? (
                 <HtmlTooltip title="Reject">
                   <span>
                     <IconButton
@@ -382,7 +382,7 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
     }
   };
 
-  const LeftSideContents = () => {
+  const leftSideContents = useMemo(() => {
     return (
       <>
         {permissions?.purchaseOrder?.isUpdate && allowedToEdit && (
@@ -394,7 +394,7 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
             onClick={() => {
               setReceiveDialog(true);
             }}
-            buttonType='theme'
+            buttonType="theme"
           >
             Receive
           </ThemeButton>
@@ -408,35 +408,38 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
             onClick={() => {
               setRejectDialog(true);
             }}
-            buttonType='theme'
+            buttonType="theme"
           >
             Reject
           </ThemeButton>
         )}
       </>
     );
-  };
+  }, [allowedToEdit, permissions?.purchaseOrder?.isUpdate, selectedRecords]);
 
-  const previewDownloadProps = {
-    fileName: `${resources?.purchaseOrder?.titleSingular}-${purchaseOrderData?.purchaseOrderNumber}`,
-    resource: sidebarResource.purchaseOrder,
-    referenceId: purchaseOrderData?._id,
-    columns: columns,
-    isSendEmail: true,
-    button1Title: 'Ordered',
-    button2Title: 'Received',
-    defaultColumns: [
-      'index',
-      'type',
-      'detail',
-      'description',
-      'qty',
-      `price_${purchaseOrderData?.currency?.toLowerCase()}`,
-      `totalPrice_${purchaseOrderData?.currency?.toLowerCase()}`,
-      `tax_${purchaseOrderData?.currency?.toLowerCase()}`,
-      `finalPrice_${purchaseOrderData?.currency?.toLowerCase()}`
-    ]
-  };
+  const previewDownloadProps = useMemo(
+    () => ({
+      fileName: `${resources?.purchaseOrder?.titleSingular}-${purchaseOrderData?.purchaseOrderNumber}`,
+      resource: sidebarResource.purchaseOrder,
+      referenceId: purchaseOrderData?._id,
+      columns: columns,
+      isSendEmail: true,
+      button1Title: 'Ordered',
+      button2Title: 'Received',
+      defaultColumns: [
+        'index',
+        'type',
+        'detail',
+        'description',
+        'qty',
+        `price_${purchaseOrderData?.currency?.toLowerCase()}`,
+        `totalPrice_${purchaseOrderData?.currency?.toLowerCase()}`,
+        `tax_${purchaseOrderData?.currency?.toLowerCase()}`,
+        `finalPrice_${purchaseOrderData?.currency?.toLowerCase()}`
+      ]
+    }),
+    [columns, purchaseOrderData?._id, purchaseOrderData?.currency, purchaseOrderData?.purchaseOrderNumber, resources?.purchaseOrder?.titleSingular]
+  );
 
   return (
     <>
@@ -444,7 +447,7 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
         isAddButtonVisible={false}
         isActionButtonVisible={false}
         previewDownloadProps={previewDownloadProps}
-        leftSideContents={<LeftSideContents />}
+        leftSideContents={leftSideContents}
         hasXpadding={true}
       />
       <Grid size={{ xs: 12, md: 12, sm: 12 }}>
