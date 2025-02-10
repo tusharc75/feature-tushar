@@ -22,7 +22,7 @@ export const VirtualTableBody = memo(
     virtualPaddingLeft,
     expanderWithCustomContent = false,
     customContentHeight = 300,
-    customContent = null,
+    customContent: CustomContent = null,
     isClientSideGrid,
     parentRef,
     footerRowFound
@@ -87,10 +87,14 @@ export const VirtualTableBody = memo(
                   virtualRow={virtualRow}
                   onRowClick={onRowClick}
                 />
-                {expanderWithCustomContent && customContent ? (
-                  <Collapse in={isExpanded} unmountOnExit>
-                    <div className="custom-content pl-[70px]" style={{ height: customContentHeight }}>
-                      {customContent({ row: row.original })}
+                {expanderWithCustomContent && CustomContent ? (
+                  <Collapse
+                    in={isExpanded}
+                    unmountOnExit
+                    className="custom-content relative max-w-full overflow-auto  overscroll-contain border-b bg-gray-100 dark:bg-gray-700"
+                  >
+                    <div style={{ height: customContentHeight, maxWidth: parentRef.clientWidth }} className=" sticky left-0 py-4 pl-[70px] pr-4">
+                      {isExpanded && <CustomContent row={row.original} height={customContentHeight - 32} />}
                     </div>
                   </Collapse>
                 ) : null}
