@@ -590,6 +590,10 @@ $isAppliedBillDark: #234623;
     }
   }
 
+  tr {
+    height: 45px;
+  }
+
   th {
     position: relative;
     &:not(:nth-last-child(2)):not(:last-child)::after {
