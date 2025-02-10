@@ -187,7 +187,7 @@ const RepairOrder = () => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = false;
           finalObject['canDelete'] =
-            permissions?.repairOrder?.isDelete && checkIsAllowedToDelete(user, sidebarResource.repairOrder, finalObject?.ownerId) && u?.canDelete;
+            permissions?.repairOrder?.isDelete && checkIsAllowedToDelete(user, sidebarResource.repairOrder, finalObject?.ownerId) && u?.canDelete && !u?.deleted;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -330,6 +330,7 @@ const RepairOrder = () => {
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.repairOrder}
+            setWholeRowsCellColor={(rowData) => (rowData.deleted ? 'error' : '')}
           />
         ) : (
           <Box p={2} height={500}>
