@@ -135,6 +135,25 @@ const ExpenseReportDetailsPage = () => {
     }
   };
 
+  const handleDeleteExpense = async (expenseIds: string[]) => {
+    try {
+      await axiosInstance().put(
+        `${routes.expenseReport.path}/expenses/${expenseReportData._id}/remove`,
+        { ids: expenseIds }
+      );
+
+      for (let expenseId of expenseIds) {
+        await axiosInstance().patch(`${expenses.api}/status/${expenseId}`, {
+          status: EXPENSE_STATUS.unreported
+        });
+      }
+
+      fetchData();
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
   const handleStatusChange = async (status) => {
     await axiosInstance().patch(`${expenseReport.api}/status/${expenseReportData._id}`, {
       status
@@ -215,7 +234,7 @@ const ExpenseReportDetailsPage = () => {
           <Box>
             {!loadingDetails && expenseReportData && fields ? (
               <div className="mt-2">
-                <Expenses selectedExpenseData={expenseReportData?.expenses} showAddButton={true} reportData={expenseReportData}/>
+                <Expenses selectedExpenseData={expenseReportData?.expenses} showAddButton={true} reportData={expenseReportData} removeRow={handleDeleteExpense} />
               </div>
             ) : (
               <div className="p-2">
