@@ -3,7 +3,7 @@ import { Image } from '@mui/icons-material';
 import InfoIcon from '@mui/icons-material/Info';
 import { isArray, isObject } from 'lodash';
 import camelCase from 'lodash/camelCase';
-import { useCallback } from 'react';
+import { memo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useGridMetaData } from 'src/components/CustomReactTable/ArrangeView/utils';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
@@ -505,17 +505,7 @@ export function useColumns() {
             ...commonFieldData,
             editable: Boolean(field?.isColumnEditable),
             ...(Boolean(field?.isColumnEditable) && ['dropDown', 'multiSelect']?.includes(field.type) ? { option: field?.option } : {}),
-            cell: ({ row }) => (
-              <div>
-                {row?.original?.[field?.fieldName] ? (
-                  <h5 className="text-truncate" title={row?.original?.[field?.fieldName]}>
-                    {row?.original?.[field?.fieldName]}
-                  </h5>
-                ) : (
-                  <NoDataCell />
-                )}
-              </div>
-            )
+            cell: ({ row }: any) => <DropDownMultiSelect row={row} field={field} />
           });
         }
       });
@@ -526,3 +516,17 @@ export function useColumns() {
 
   return { generateColumns, checkStaticField, getColumnHiddenStatus };
 }
+
+const DropDownMultiSelect = memo(({ row, field }: any) => {
+  return (
+    <div>
+      {row?.original?.[field?.fieldName] ? (
+        <h5 className="text-truncate" title={row?.original?.[field?.fieldName]}>
+          {row?.original?.[field?.fieldName]}
+        </h5>
+      ) : (
+        <NoDataCell />
+      )}
+    </div>
+  );
+});

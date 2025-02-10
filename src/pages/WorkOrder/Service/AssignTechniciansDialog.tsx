@@ -1,7 +1,7 @@
-import { Close } from '@mui/icons-material';
-import { Avatar, Box, Checkbox, IconButton, Typography } from '@mui/material';
+import { CheckBoxOutlined, Close } from '@mui/icons-material';
+import { Avatar, Box, Checkbox, FormControlLabel, IconButton, Typography } from '@mui/material';
 import { isArray } from 'lodash';
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { FaUser } from 'react-icons/fa';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -11,6 +11,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { cn, workOrder, WORKORDER_SERVICE_STATUS, workOrderIconMap } from 'src/constants/helpers';
 import { useDelayedClass } from 'src/hooks';
+import TechnicianHistoryDialog from 'src/pages/WorkOrder/Service/TechnicianHistoryDialog';
 
 const statusOrder = [
   WORKORDER_SERVICE_STATUS.planned,
@@ -36,7 +37,7 @@ const initialClass = ['-right-[--w]', 'opacity-0'];
 const delayedClass = ['right-0', 'opacity-100'];
 const ANIMATION_DURATION = 300;
 
-const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceData = null, competencies, handleClose, handleSucess, warehouse }) => {
+const AssignTechniciansDialog = ({ workOrderData, assignedUsers, reference, referenceData = null, competencies, handleClose, handleSucess, warehouse }) => {
   const toastConfig = useContext(CustomToastContext);
   const [userList, setUserList] = useState<User[]>(null);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
@@ -45,6 +46,8 @@ const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceDa
   const [searchedValue, setSearchedValue] = useState('');
   const [isAssignButtonLoading, setIsAssignButtonLoading] = useState(false);
   const [containerRef, setContainerRef] = useState<HTMLDivElement>(null);
+  const [showTechnicianHistory, setShowTechnicianHistory] = useState({ open: false, user: null, status: null });
+
 
   useEffect(() => {
     const container = document.createElement('div');
@@ -164,6 +167,17 @@ const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceDa
     [findUser, selectedUsers]
   );
 
+  const isAllSelected = useMemo(() => selectedUsers?.length === userList?.length, [selectedUsers?.length, userList?.length]);
+  const indeterminate = useMemo(() => !isAllSelected && selectedUsers.length > 0, [isAllSelected, selectedUsers.length]);
+  const handleCheckAll = useCallback(() => {
+    if (isAllSelected) {
+      setSelectedUsers([]);
+    } else {
+      setSelectedUsers(userList);
+    }
+  }, [isAllSelected, userList]);
+
+
   if (!containerRef) return null;
   return createPortal(
     <>
@@ -203,6 +217,23 @@ const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceDa
             Save
           </ThemeButton>
         </div>
+        <div className="px-[18px] text-right">
+          <span className="mr-[30px]">
+            <FormControlLabel
+              control={
+                <Checkbox
+                  onChange={() => handleCheckAll()}
+                  checked={isAllSelected}
+                  indeterminate={indeterminate}
+                  indeterminateIcon={<CheckBoxOutlined />}
+                  size={'small'}
+                />
+              }
+              labelPlacement="start"
+              label={<span className="select-none">Select All</span>}
+            />
+          </span>
+        </div>
         <div className="content relative flex-grow overflow-auto p-[18px] pt-0">
           {userList ? (
             <>
@@ -216,7 +247,7 @@ const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceDa
                     <li className="list-none rounded-md border px-[18px] py-[10px]">
                       <div className="mb-2 flex items-start justify-between">
                         <div className="flex items-center">
-                          <Avatar src={user.avatar} sx={{ width: 30, height: 30 }} >
+                          <Avatar src={user.avatar} sx={{ width: 30, height: 30 }}>
                             <FaUser size={15} />
                           </Avatar>
                           <p className="ml-[10px] text-[14px] font-semibold">{user.optionLabel}</p>
@@ -227,9 +258,12 @@ const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceDa
                         {statusOrder.map((d) => {
                           if (user.status[d] === undefined) return null;
                           return (
-                            <li className="flex items-center gap-1 rounded-[5px] border px-[8px] py-[2px]  text-[12px] font-normal leading-4">
+                            <li className="cursor-pointer flex items-center gap-1 rounded-[5px] border px-[8px] py-[2px]  text-[12px] font-normal leading-4"
+                              onClick={() => {
+                                setShowTechnicianHistory({ open: true, user: user, status: d })
+                              }}>
                               <span className="[&_svg]:block [&_svg]:size-[16px]">{workOrderIconMap[d]}</span>
-                              <span className='text-[14px]'>
+                              <span className="text-[14px]">
                                 {d} - {user.status[d]}
                               </span>
                             </li>
@@ -247,14 +281,24 @@ const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceDa
             </>
           ) : (
             <>
-              <CommonSkeleton lenArray={[...Array(3).keys()]} xs={12} sm={12} md={12} lg={12} />
+              <CommonSkeleton
+                lenArray={[...Array(3).keys()]}
+                xs={12} sm={12} md={12} lg={12} />
             </>
           )}
         </div>
       </div>
+      {showTechnicianHistory.open && (
+        <TechnicianHistoryDialog
+          onClose={() => setShowTechnicianHistory({ open: false, user: null, status: null })}
+          status={showTechnicianHistory.status}
+          user={showTechnicianHistory.user.optionValue}
+          userName={showTechnicianHistory.user.optionLabel}
+        />
+      )}
     </>,
     containerRef,
     'modal'
   );
 };
-export default AssignUserDialog;
+export default AssignTechniciansDialog;

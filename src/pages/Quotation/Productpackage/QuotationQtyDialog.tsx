@@ -5,7 +5,15 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE, QUOTATION_TYPE, PRICING_SETUP_TYPE } from '../../../constants/helpers';
+import {
+  getObjKeysWithValues,
+  getObjKeys,
+  yupSchema,
+  CHILD_RESOURCE,
+  QUOTATION_TYPE,
+  PRICING_SETUP_TYPE,
+  sidebarResource
+} from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -23,6 +31,7 @@ import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceFi
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import dayjs from 'dayjs';
 import { getPricingConditions } from 'src/components/PricingCondition';
+import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -51,7 +60,6 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
   showSaveAndNext,
   loadingEdit
 }) => {
-  const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [allFields, setAllFields] = useState([]);
   const [fields, setFields] = useState([]);
@@ -66,6 +74,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
   const [priceMethodListConst, setPriceMethodListConst] = useState([]);
   const [priceConditionList, setPriceConditionList] = useState([]);
   const [pricingMethodList, setPricingMethodList] = useState([]);
+  const [submitState, setSubmitState] = useState({ open: false, values: null });
 
   useEffect(() => {
     fetchFields();
@@ -212,7 +221,9 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
 
   async function getAllPricingCondition(values: any, pricingMethodOptions: any) {
     if (rowData) {
-      let conditionType = [QUOTATION_TYPE.salesOrder, QUOTATION_TYPE.repairOrder].includes(quotationData.type) ? PRICING_SETUP_TYPE.price : PRICING_SETUP_TYPE.rent;
+      let conditionType = [QUOTATION_TYPE.salesOrder, QUOTATION_TYPE.repairOrder].includes(quotationData.type)
+        ? PRICING_SETUP_TYPE.price
+        : PRICING_SETUP_TYPE.rent;
       let priceData: any = await getPricingConditions(
         quotationData,
         [
@@ -303,18 +314,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
   };
 
   const handleSubmit = async (values) => {
-    if (isBulkedit) {
-      const rows = bulkUpdate(values, selectedProducts, material, allFields, quotationData?.currency);
-      handleSaveData(rows);
-    } else {
-      if (rowData.parentId && !showConfirmationDialog) {
-        setShowConfirmationDialog(true);
-      } else {
-        const rows = await calculateRowsField(material, values, allFields, rowData, quotationData?.currency);
-        handleSaveData(rows, saveAndNext);
-        setShowConfirmationDialog(false);
-      }
-    }
+    setSubmitState({ open: true, values: values });
   };
 
   function validate(values) {
@@ -631,15 +631,26 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
                   Save
                 </ThemeButton>
               </CustomDialogFooter>
-              {showConfirmationDialog && (
-                <ConfirmationDialog
-                  open={showConfirmationDialog}
-                  message="Would you prefer to override the parent-level price configuration?"
-                  onOk={() => {
-                    submitForm();
+              {submitState.open && (
+                <MaterialUpdateActions
+                  resource={sidebarResource.quotation}
+                  referenceData={quotationData}
+                  allFields={allFields}
+                  material={material}
+                  isBulkedit={isBulkedit}
+                  selectedRecords={selectedProducts}
+                  rowData={rowData}
+                  handleUpdateData={(rows) => {
+                    if (isBulkedit) {
+                      handleSaveData(rows);
+                    } else {
+                      handleSaveData(rows, saveAndNext);
+                    }
+                    setSubmitState({ open: false, values: null });
                   }}
-                  onClose={() => {
-                    setShowConfirmationDialog(false);
+                  values={submitState.values}
+                  handleClose={() => {
+                    setSubmitState({ open: false, values: null });
                   }}
                 />
               )}

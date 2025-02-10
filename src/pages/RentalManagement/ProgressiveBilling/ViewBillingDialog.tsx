@@ -503,7 +503,6 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
           selectedProducts={[]}
           loading={isLoadingUpdate}
           isQtyOnly={true}
-          isRateRequired={false}
         />
       )}
       {viewBillDialogConfirm.open && (

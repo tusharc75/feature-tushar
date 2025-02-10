@@ -154,6 +154,9 @@ const routes = {
   serializedAsset: {
     path: '/serialized-asset'
   },
+  serializedAssetInspection: {
+    path: '/serialized-assets-inspection'
+  },
   serializedAssetsCertification: {
     path: '/serialized-assets-certification'
   },

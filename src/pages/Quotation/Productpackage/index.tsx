@@ -3,7 +3,7 @@ import Add from '@mui/icons-material/Add';
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import { isArray, startCase, uniqBy } from 'lodash';
+import { startCase, uniqBy } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
@@ -29,7 +29,6 @@ import {
   PRICING_SETUP_TYPE,
   QUOTATION_TYPE,
   SERVICE_TYPE,
-  pricingCondition,
   quotation,
   sidebarResource,
   supplierContact
@@ -42,11 +41,12 @@ import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceFi
 import { FiExternalLink } from 'react-icons/fi';
 import ManageLeadTime from 'src/components/LeadTime/ManageLeadTime';
 import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
+import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 
 const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, renderedFrom, stepFullScreen, version, allowedToEdit, updateDOASetup }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions }
+    state: { user }
   }: any = useData();
   const { generateColumns } = useColumns();
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -81,6 +81,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [showCostDialog, setShowCostDialog] = useState({ open: false, showSaveAndNext: false });
   const [costFields, setCostFields] = useState([]);
+  const [submitState, setSubmitState] = useState({ open: false, values: null, rowData: null });
   const versionId = quotationData?.versions[version]?._id || null;
 
   useEffect(() => {
@@ -660,6 +661,8 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       rows = await calculateRowsField(flattenArray(dataRows), inputField, costFields, updatedData, quotationData?.currency);
       handleSaveCostData(rows);
     } else {
+      const calValues = autoCalculateSpecificFields(inputField, rowData, allFields);
+      setSubmitState({ open: true, values: { ...rowData, ...calValues }, rowData: rowData });
       rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData, quotationData?.currency);
       handleSaveData(rows);
     }
@@ -901,6 +904,23 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           material={material}
           selectedProducts={selectedRecords}
           showSaveAndNext={isProductEdit?.showSaveAndNext}
+        />
+      )}
+      {submitState.open && (
+        <MaterialUpdateActions
+          resource={sidebarResource.quotation}
+          referenceData={quotationData}
+          allFields={allFields}
+          material={material}
+          rowData={submitState.rowData}
+          handleUpdateData={(rows) => {
+            handleSaveData(rows);
+            setSubmitState({ open: false, values: null, rowData: null });
+          }}
+          values={submitState.values}
+          handleClose={() => {
+            setSubmitState({ open: false, values: null, rowData: null });
+          }}
         />
       )}
       {showCostDialog.open && (
