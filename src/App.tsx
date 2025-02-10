@@ -279,6 +279,7 @@ import ExpenseDetailsPage from 'src/pages/Expenses/ExpenseDetailsPage';
 import ExpenseReport from 'src/pages/ExpensesReport';
 import ExpenseReportDetailsPage from 'src/pages/ExpensesReport/ExpenseReportDetailPage';
 import ExpenseApproval from 'src/pages/ExpenseApproval';
+import SerializedAssetInspection from './pages/SerializedAssetsInspection';
 
 var notificationInterval: any = null;
 
@@ -594,6 +595,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.serializedAsset.path}>
               <SerializedAsset />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.serializedAssetInspection.path}>
+              <SerializedAssetInspection />
             </PrivateRoute>
             <PrivateRoute exact path={routes.serializedAssetsCertification.path}>
               <SerializedAssetsCertification />
