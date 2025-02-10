@@ -74,7 +74,13 @@ export const resourcePolicy = [
         fieldLabel: 'Show Rental Add Material',
         type: 'checkBox',
         defaultValue: false
-      }
+      },
+      {
+        fieldName: 'addPackageChild',
+        fieldLabel: 'Add Package Child',
+        type: 'checkBox',
+        defaultValue: false
+      },
     ]
   },
   {

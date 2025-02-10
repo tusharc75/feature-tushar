@@ -71,7 +71,7 @@ const TableComponent = forwardRef(function (
   const { columns, orderedColumns } = useMemo(() => {
     const columns = [];
     const orderedColumns = sortedColumns
-      ?.filter((d) => visibleColumns[d.id])
+      ?.filter((d) => visibleColumns[d.id] !== false)
       .reduce((acc, curr, index) => {
         columns.push(curr);
         acc[curr.id] = index;

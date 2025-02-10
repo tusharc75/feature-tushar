@@ -90,7 +90,8 @@ const CustomReactTable = ({
   expanderWithCustomContent = false,
   customContentHeight = 300,
   customContent = null,
-  isFullScreen = false
+  isFullScreen = false,
+  showTableHead = true
 }) => {
   const {
     currentEditingCellPosition,
@@ -534,26 +535,28 @@ const CustomReactTable = ({
       )}
       <div className="react-table-v8 [&_.show-in-export]:!hidden">
         <div className="table-container-v1" style={{ position: 'relative' }}>
-          <GridHeader
-            handleTableExport={handleTableExport}
-            isClientSideGrid={isClientSideGrid}
-            resource={resource}
-            dispatch={dispatch}
-            renderedFrom={renderedFrom}
-            showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
-            hideSelection={hideSelection}
-            showFilters={showFilters}
-            table={table}
-            showArrangeView={showArrangeView}
-            newColumns={newColumns}
-            refreshGrid={refreshGrid}
-            setSelectedReportView={setSelectedReportView}
-            selectedReportView={selectedReportView}
-            state={state}
-            expander={expander}
-            hideExportTable={hideExportTable}
-            topLeftSlot={topLeftSlot}
-          />
+          {showTableHead && (
+            <GridHeader
+              handleTableExport={handleTableExport}
+              isClientSideGrid={isClientSideGrid}
+              resource={resource}
+              dispatch={dispatch}
+              renderedFrom={renderedFrom}
+              showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
+              hideSelection={hideSelection}
+              showFilters={showFilters}
+              table={table}
+              showArrangeView={showArrangeView}
+              newColumns={newColumns}
+              refreshGrid={refreshGrid}
+              setSelectedReportView={setSelectedReportView}
+              selectedReportView={selectedReportView}
+              state={state}
+              expander={expander}
+              hideExportTable={hideExportTable}
+              topLeftSlot={topLeftSlot}
+            />
+          )}
           {!isMobileView && !showOnlyMobileView && (
             <div className="relative" ref={tableContainerRef}>
               <TableComponent
