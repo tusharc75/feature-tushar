@@ -1674,9 +1674,8 @@ const ReceivingTicket = ({
             type: 'success',
             message: `Received Successfully`
           });
-          if (
-            receivingTicketId?.length &&
-            selectedRecords?.filter((e) => e.type === 'Asset')?.length &&
+          if (receivingTicketId?.length &&
+            selectedRecords?.filter((e) => e.type === 'Asset' && !e.subleaseAsset)?.length &&
             user?.user?.brandPolicy?.rentalRepairAutoCreate
           ) {
             toastConfig.setToastConfig({
