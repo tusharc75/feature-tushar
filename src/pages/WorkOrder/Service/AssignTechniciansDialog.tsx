@@ -289,12 +289,13 @@ const AssignTechniciansDialog = ({ workOrderData, assignedUsers, reference, refe
           )}
         </div>
       </div>
-      <WorkOrderStatusDialog 
-        open={isDialogOpen} 
-        onClose={() => setIsDialogOpen(false)} 
-        status={selectedStatus} 
-        assignedUser={selectedUser} 
-      />
+      {isDialogOpen && (
+        <WorkOrderStatusDialog
+          onClose={() => setIsDialogOpen(false)}
+          status={selectedStatus}
+          assignedUser={selectedUser}
+        />
+      )}
     </>,
     containerRef,
     'modal'
