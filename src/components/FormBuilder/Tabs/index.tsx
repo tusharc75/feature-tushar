@@ -27,7 +27,7 @@ import Setting from 'src/components/FormBuilder/Tabs/Setting';
 import Actions from 'src/components/FormBuilder/Tabs/Actions';
 import Notifications from 'src/components/FormBuilder/Tabs/Notifications';
 import PolicyDialog from 'src/components/FormBuilder/Tabs/policyDialog';
-import { AddOutlined, ExpandLess, ExpandMore } from '@mui/icons-material';
+import { AddOutlined, ExpandLess, ExpandMore, Sync } from '@mui/icons-material';
 import routes from 'src/components/Helpers/Routes';
 import UpdateResourceActions from 'src/components/FormBuilder/Tabs/UpdateResourceActions';
 
@@ -188,7 +188,7 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
                   setOpenUpdateResourceActions(true);
                 }}
               >
-                <BuildIcon fontSize="small" color={'primary'} />
+                <Sync fontSize="small" color={'primary'} />
               </IconButton>
             </HtmlTooltip>
           )}
@@ -290,16 +290,16 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
 
         {openUpdateResourceActions && (
           <UpdateResourceActions
-          onClose={() => {
-            setOpenUpdateResourceActions(false);
-          }}
-          onSuccess={() => {
-            fetchData();
-            setOpenUpdateResourceActions(false);
-          }}
-          resource={resource}
-          resourceData={resourceData}
-        />
+            onClose={() => {
+              setOpenUpdateResourceActions(false);
+            }}
+            onSuccess={() => {
+              fetchData();
+              setOpenUpdateResourceActions(false);
+            }}
+            resource={resource}
+            resourceData={resourceData}
+          />
         )}
 
         {openNotifications && (
