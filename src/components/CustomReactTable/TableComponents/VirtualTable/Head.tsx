@@ -43,7 +43,8 @@ export const VirtualTableHead = memo(
         ))}
       </thead>
     );
-  }
+  },
+  (prev, next) => prev.virtualColumns === next.virtualColumns && prev.vtableData === next.vtableData
 ) as typeof VirtualTableHead;
 
 const SingleRow = memo(
@@ -88,5 +89,6 @@ const SingleRow = memo(
         </SortableContext>
       </tr>
     );
-  }
+  },
+  (prev, next) => prev.virtualColumns === next.virtualColumns && prev.vtableData === next.vtableData
 );

@@ -61,10 +61,8 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
             .get(`${expenseReport.api}/` + expenseReportId)
             .then(({ data: { data } }) => {
               setTitle(`Edit - ${data.reportTitle}`);
-              setSelectedExpense(data.selectedExpenses);
+              setSelectedExpense(data.expenses);
               setIsAllowedToEdit(false);
-              // const excludedFields = ['reportTitle', 'fromDate', 'toDate', 'status'];
-              // fieldsDataForUpdate = fieldsDataForUpdate.filter((field) => !['reportTitle','status']?.includes(field?.fieldName));
               setInitialData({
                 fields: fieldsDataForUpdate,
                 values: { ...getObjKeysWithValues(data, fieldsDataForUpdate) }
@@ -91,7 +89,7 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
   const handleSubmit = (value) => {
     setIsSubmitting(true);
     const { fields, values, ...data } = value;
-    data.selectedExpenses = selectedExpense;
+    data.expenses = selectedExpense;
 
     const status = EXPENSE_STATUS.unSubmitted;
 
@@ -243,7 +241,7 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
                   )}
                   {selectedExpense.length > 0 && isAllowedToEdit && (
                     <div className="mt-2">
-                      <Expenses selectedExpenseData={selectedExpense} />
+                      <Expenses selectedExpenseData={selectedExpense} showAddButton={false} />
                     </div>
                   )}
                 </Form>
@@ -293,7 +291,6 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
                   open={showAddExistingExpenseModal}
                   onClose={() => setShowAddExistingExpenseModal(false)}
                   fullScreen
-                  selectedExpense={selectedExpense}
                   setFullScreen={setFullScreen}
                   isSubmitting={isSubmitting}
                   onSave={handleSaveExpenses}

@@ -21,7 +21,7 @@ import { AutoCompleteIcon } from 'src/assets/svg/svgIcons';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import { flattenArray } from 'src/constants/columns';
-import AssignUserDialog from 'src/pages/WorkOrder/Service/AssignUserDialog';
+import AssignTechniciansDialog from 'src/pages/WorkOrder/Service/AssignTechniciansDialog';
 import AssignWorkStationDialog from 'src/pages/WorkOrder/Service/AssignWorkStationDialog';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
@@ -783,7 +783,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
       )}
 
       {userAssignDialog.open && (
-        <AssignUserDialog
+        <AssignTechniciansDialog
           warehouse={assemblyOrderData?.warehouse?.optionValue}
           workOrderData={selectedRecords
             .filter((e) => e.type === MATERIAL_TYPE.service)

@@ -8,7 +8,6 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { AssetAvailabilityIcon } from 'src/assets/svg/svgIcons';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
 import { flattenArray } from 'src/constants/columns';
 import { ownerAndColaborator, rentalManagementMessage } from 'src/constants/messageHelpers';
 import ManagePackageDialog from 'src/pages/Packages/ManagePackageDialog';
@@ -33,8 +32,10 @@ import {
   DELIVERY_TICKET_TYPE,
   deliveryTicket,
   MATERIAL_TYPE,
+  PRICING_SETUP_TYPE,
   RENTAL_STATUS,
-  rentalManagement
+  rentalManagement,
+  sidebarResource
 } from '../../../constants/helpers';
 import { findOne, objectStore } from '../../../constants/indexdbhelper';
 import AssetAvailability from '../AssetAvailability';
@@ -55,6 +56,8 @@ import {
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import AssignManagedPackagesDialog from 'src/components/AssignRolesDialog/AssignManagedPackagesDialog';
 import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
+import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
+import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 
 const Productpackage = ({
   rentalManagementData,
@@ -84,13 +87,10 @@ const Productpackage = ({
   const [isDeleting, setDeleting] = useState(false);
 
   const [material, setMaterial] = useState([]);
-  const [isInlineEdit, setIsInlineEdit] = useState(false);
   const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
   const [columns, setColumns] = useState(null);
   const [allFields, setAllFields] = useState(null);
   const [addchildDialog, setAddchildDialog] = useState({ open: false, parentId: null, type: null, top: null, bottom: null });
-  const [showConfirmationDialog, setShowConfirmationDialog] = useState({ open: false, data: null });
-  const [priceDataDialog, setPriceDataDialog] = useState({ open: false, material: null });
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [openAssetAvailibility, setOpenAssetAvailibility] = useState(false);
   const [costFields, setCostFields] = useState([]);
@@ -104,7 +104,7 @@ const Productpackage = ({
   const [addExistingManagedPackages, setAddExistingManagedPackages] = useState(false);
 
   const { isOffline } = useContext(CustomOfflineContext);
-  const [isRateRequired, setIsRateRequired] = useState(false);
+  const [submitState, setSubmitState] = useState({ open: false, values: null, rowData: null });
 
   useEffect(() => {
     fetchFields();
@@ -428,7 +428,6 @@ const Productpackage = ({
     rows = [...products, ...packages, ...additionalCosts];
 
     const isPriceRequired = allFields?.filter((el) => el.fieldName === 'price' && el.required).length > 0;
-    setIsRateRequired(isPriceRequired);
 
     const currency = rentalManagementData?.currency?.toLowerCase();
 
@@ -629,11 +628,8 @@ const Productpackage = ({
       element.listPrice = d.listPrice ? d.listPrice : null;
       material.push(element);
     });
-    if (material.filter((d) => d.listPrice === null).length === 0) {
-      AddMaterial(material, []);
-    } else {
-      setPriceDataDialog({ open: true, material: material });
-    }
+    let priceData: any = await getPricingConditions(rentalManagementData, material, PRICING_SETUP_TYPE.rent);
+    AddMaterial(material, priceData);
   };
 
   const handleAddManagedPackages = async (rows) => {
@@ -658,20 +654,13 @@ const Productpackage = ({
     const tempMaterial = [...material];
     if (priceData) {
       tempMaterial.forEach((element) => {
-        const rateResult = priceData?.filter(
-          (e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit
-        );
         if (element.listPrice) {
           const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
           element[priceFieldName] = element.listPrice;
           const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
           Object.assign(element, calValues);
-        } else if (rateResult.length && rateResult[0].mrp) {
-          const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
-          element[priceFieldName] = rateResult[0].mrp;
-          element['pricingCondition'] = rateResult[0].conditionId;
-          element['pricingMethod'] = rateResult[0].pricingMethod?.trim();
-          const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
+        } else {
+          const calValues = getPricingValue(element, priceData, rentalManagementData?.currency, allFields);
           Object.assign(element, calValues);
         }
         delete element.listPrice;
@@ -686,12 +675,10 @@ const Productpackage = ({
           fetchRentalManagementData();
         }
         setIsSubmitting(false);
-        setPriceDataDialog({ open: false, material: null });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
         setIsSubmitting(false);
-        setPriceDataDialog({ open: false, material: null });
       });
   };
 
@@ -789,10 +776,10 @@ const Productpackage = ({
   const handleDelete = (rows) => {
     setDeleting(true);
     const cost = rows?.filter((ele) => ele.type === MATERIAL_TYPE.manualEntry).map((e) => e?.id);
-    const products = rows?.filter((ele) => ele.type !== MATERIAL_TYPE.manualEntry);
-    if (products?.length) {
+    const material = rows?.filter((ele) => ele.type !== MATERIAL_TYPE.manualEntry).map((e) => e?.id);
+    if (material?.length) {
       axiosInstance()
-        .put(`${rentalManagement.api}/productpackage/${rentalManagementData?._id}/delete`, { ids: products })
+        .put(`${rentalManagement.api}/productpackage/${rentalManagementData?._id}/delete`, { ids: material })
         .then(() => {
           setDeleting(false);
           fetchData();
@@ -839,10 +826,6 @@ const Productpackage = ({
     setIsBulkEdit(false);
   };
 
-  const handleOpen = (data) => {
-    setIsProductEdit({ open: true, data: data, showSaveAndNext: false });
-    setIsBulkEdit(false);
-  };
 
   const handleDeleteMultiple = () => {
     const obj: any = [];
@@ -856,7 +839,8 @@ const Productpackage = ({
     setDeleteData(obj);
   };
 
-  const onSaveInlineEdit = (inputField, updatedData) => {
+  const onSaveInlineEdit = async (inputField, updatedData) => {
+    const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     if (inputField.hasOwnProperty('qty')) {
       if (!inputField['qty']) {
         toastConfig.setToastConfig({
@@ -864,87 +848,40 @@ const Productpackage = ({
           type: 'error',
           message: 'Please enter valid quantity'
         });
-        setShowConfirmationDialog({ open: false, data: {} });
+        return;
+      }
+      let isValid = true;
+      const child: any = flattenArray(dataRows).filter((e) => e.parentId === rowData?._id);
+      if (child?.length) {
+        child?.forEach((e) => {
+          let qty = parseFloat(inputField['qty']) * e?.qty;
+          if (qty < e?.assetQty || qty < e?.nonSerializedQty) {
+            isValid = false;
+            return;
+          }
+        });
+      } else {
+        const qty = getParentMultiplier(material, rowData) * parseFloat(inputField['qty']);
+        if (qty < rowData?.assetQty || qty < rowData?.nonSerializedQty) {
+          isValid = false;
+        }
+      }
+      if (!isValid) {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'error',
+          message: 'The quantity is less than what was assigned.'
+        });
         return;
       }
     }
-    setIsInlineEdit(true);
-    const currency = rentalManagementData?.currency.toLowerCase();
-    const requiredItems = [];
-    allFields.forEach(({ fieldName, required, type }) => {
-      fieldName = type === 'currencyAmount' ? `${fieldName}_${currency}` : fieldName;
-      if (required) {
-        if (isNaN(updatedData[fieldName]) && !updatedData[fieldName]) {
-          requiredItems.push(fieldName);
-        } else if (!isNaN(updatedData[fieldName]) && updatedData[fieldName] <= 0) {
-          requiredItems.push(fieldName);
-        }
-      }
-    });
-
-    for (const field of Object.keys(inputField)) {
-      if (inputField[field] === '' || isNaN(inputField[field])) {
-        requiredItems.push(field);
-      }
-    }
-
-    if (requiredItems.length > 0 && updatedData.type !== MATERIAL_TYPE.manualEntry) {
-      handleOpen({
-        ...updatedData,
-        detail: updatedData.type === 'product' ? updatedData?.productDetail?.productName : updatedData?.packageDetail?.packageName
-      });
+    let rows: any = [{ ...rowData, ...updatedData }];
+    if (updatedData.type === MATERIAL_TYPE.manualEntry) {
+      rows = await calculateRowsField(flattenArray(dataRows), inputField, costFields, rowData, rentalManagementData?.currency);
+      handleSaveCostData(rows);
     } else {
-      onConfirmSave(inputField, updatedData);
-    }
-  };
-
-  const onConfirmSave = async (inputField, updatedData) => {
-    const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
-    if (rowData.parentId && !showConfirmationDialog.open && isRateRequired) {
-      setShowConfirmationDialog({
-        open: true,
-        data: {
-          inputField,
-          updatedData
-        }
-      });
-    } else {
-      if (inputField.hasOwnProperty('qty')) {
-        let isValid = true;
-        const child: any = flattenArray(dataRows).filter((e) => e.parentId === rowData?._id);
-        if (child?.length) {
-          child?.forEach((e) => {
-            let qty = parseFloat(inputField['qty']) * e?.qty;
-            if (qty < e?.assetQty || qty < e?.nonSerializedQty) {
-              isValid = false;
-              return;
-            }
-          });
-        } else {
-          const qty = getParentMultiplier(material, rowData) * parseFloat(inputField['qty']);
-          if (qty < rowData?.assetQty || qty < rowData?.nonSerializedQty) {
-            isValid = false;
-          }
-        }
-        if (!isValid) {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'error',
-            message: 'The quantity is less than what was assigned.'
-          });
-          setShowConfirmationDialog({ open: false, data: {} });
-          return;
-        }
-      }
-      let rows: any = [{ ...rowData, ...updatedData }];
-      if (updatedData.type === MATERIAL_TYPE.manualEntry) {
-        rows = await calculateRowsField(flattenArray(dataRows), inputField, costFields, updatedData, rentalManagementData?.currency);
-        handleSaveCostData(rows);
-      } else {
-        rows = await calculateRowsField(material, inputField, allFields, updatedData, rentalManagementData?.currency);
-        handleSaveData(rows);
-      }
-      setShowConfirmationDialog({ open: false, data: {} });
+      const calValues = autoCalculateSpecificFields(inputField, rowData, allFields)
+      setSubmitState({ open: true, values: { ...rowData, ...calValues }, rowData: rowData })
     }
   };
 
@@ -1107,9 +1044,6 @@ const Productpackage = ({
           onClose={() => {
             setIsProductEdit({ open: false, data: null, showSaveAndNext: false });
             setIsBulkEdit(false);
-            if (isInlineEdit) {
-              setIsInlineEdit(false);
-            }
           }}
           isBulkedit={isBulkEdit}
           handleSaveData={handleSaveData}
@@ -1121,8 +1055,6 @@ const Productpackage = ({
           loading={isUpdating}
           showSaveAndNext={isProductEdit.showSaveAndNext}
           from={'product'}
-          isInlineEdit={isInlineEdit}
-          isRateRequired={isRateRequired}
         />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'newPackage' && (
@@ -1251,31 +1183,23 @@ const Productpackage = ({
           </MenuList>
         </Popover>
       )}
-      {showConfirmationDialog.open && (
-        <ConfirmationDialog
-          open={true}
-          message="Would you prefer to override the product-level price configuration?"
-          onOk={() => {
-            onConfirmSave(showConfirmationDialog.data?.inputField, showConfirmationDialog.data?.updatedData);
-          }}
-          onClose={() => {
-            setShowConfirmationDialog({ open: false, data: {} });
-          }}
-        />
-      )}
-      {priceDataDialog.open && (
-        <CalculatePriceDialog
+      {submitState.open &&
+        <MaterialUpdateActions
+          resource={sidebarResource.rentalManagement}
           referenceData={rentalManagementData}
-          material={priceDataDialog.material}
-          handleSucess={(data) => {
-            AddMaterial(priceDataDialog.material, data);
+          allFields={allFields}
+          material={material}
+          rowData={submitState.rowData}
+          handleUpdateData={(rows) => {
+            handleSaveData(rows);
+            setSubmitState({ open: false, values: null, rowData: null })
           }}
-          onClose={() => {
-            AddMaterial(priceDataDialog.material, null);
-            setPriceDataDialog({ open: false, material: null });
+          values={submitState.values}
+          handleClose={() => {
+            setSubmitState({ open: false, values: null, rowData: null })
           }}
         />
-      )}
+      }
       {openAssetAvailibility && (
         <AssetAvailability
           rentalId={rentalManagementData?._id}

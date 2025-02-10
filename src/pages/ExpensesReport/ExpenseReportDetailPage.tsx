@@ -114,8 +114,8 @@ const ExpenseReportDetailsPage = () => {
     try {
       await axiosInstance().put(`${expenseReport.api}/remove`, { ids: [expenseReportData._id] });
 
-      if (expenseReportData?.selectedExpenses?.length > 0) {
-        for (let expense of expenseReportData.selectedExpenses) {
+      if (expenseReportData?.expenses?.length > 0) {
+        for (let expense of expenseReportData.expenses) {
           try {
             await axiosInstance().patch(`${expenses.api}/status/${expense._id}`, {
               status: EXPENSE_STATUS.unreported
@@ -139,8 +139,8 @@ const ExpenseReportDetailsPage = () => {
     await axiosInstance().patch(`${expenseReport.api}/status/${expenseReportData._id}`, {
       status
     });
-    if (expenseReportData?.selectedExpenses?.length > 0) {
-      for (let expense of expenseReportData.selectedExpenses) {
+    if (expenseReportData?.expenses?.length > 0) {
+      for (let expense of expenseReportData.expenses) {
           await axiosInstance().patch(`${expenses.api}/status/${expense._id}`, {
             status
           });
@@ -163,6 +163,8 @@ const ExpenseReportDetailsPage = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <Fragment>
+            {expenseReportData?.status !== EXPENSE_STATUS.approved && (
+              <>
               <ThemeButton
                 iconForMobile={<Edit />}
                 disabled={!allowedToEdit}
@@ -173,7 +175,7 @@ const ExpenseReportDetailsPage = () => {
               >
                 Edit
               </ThemeButton>
-              <ThemeButton
+               <ThemeButton
                 buttonType="theme"
                 iconForMobile={<SendIcon />}
                 onClick={() => {
@@ -185,6 +187,8 @@ const ExpenseReportDetailsPage = () => {
               >
                 {expenseReportData?.status === EXPENSE_STATUS.awaitingApproval ? 'Recall' : 'Send For Approval'}
               </ThemeButton>
+              </>
+              )}
             </Fragment>
             {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
           </Box>
@@ -211,7 +215,7 @@ const ExpenseReportDetailsPage = () => {
           <Box>
             {!loadingDetails && expenseReportData && fields ? (
               <div className="mt-2">
-                <Expenses selectedExpenseData={expenseReportData?.selectedExpenses} />
+                <Expenses selectedExpenseData={expenseReportData?.expenses} showAddButton={true} reportData={expenseReportData}/>
               </div>
             ) : (
               <div className="p-2">

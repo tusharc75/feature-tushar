@@ -55,47 +55,6 @@ export const fetch_rental_quotation_fields = async (currency, isOffline) => {
     return data;
 }
 
-export const calculatePrice = (rentalManagementData: any = null, arr: any[]) => {
-    if (rentalManagementData) {
-        const data: any = {};
-        data.conditionType = [PRICING_SETUP_TYPE.rent];
-        const material: any = []
-        arr?.forEach((ele) => {
-            const obj = {
-                materialId: ele?.materialId,
-                materialType: ele?.type,
-                qty: ele?.qty,
-                pricingMethod: ele?.pricingMethod,
-                currency: rentalManagementData?.currency
-            }
-            if (isArray(ele?.unit)) {
-                ele?.unit?.forEach((e) => {
-                    material.push({ ...obj, unit: e })
-                })
-            }
-            else {
-                material.push({ ...obj, unit: ele?.unit })
-            }
-        })
-        data.material = material;
-        data.supplier = [];
-        data.customer = [rentalManagementData?.customerAccount?.optionValue];
-        data.warehouse = [rentalManagementData?.warehouse?.optionValue];
-        data.address = rentalManagementData?.shippingAddress?.optionValue ? [rentalManagementData?.shippingAddress?.optionValue] : [];
-        return new Promise((resolve, reject) => {
-            axiosInstance()
-                .post(pricingCondition.api + `/calculatePrice`, data)
-                .then(({ data: { data } }) => {
-                    resolve(data);
-                })
-                .catch((err) => {
-                    reject(err);
-                });
-        });
-    }
-};
-
-
 export const sumOnParent = (parent, child, fields, currency) => {
     const resetFields = []
     fields.forEach((element) => {
@@ -295,15 +254,31 @@ export const calculateRowsField = async (material: any[], values: any, fields: a
     let childs: any = []
 
     const calValues = autoCalculateSpecificFields(values, { ...values, ...rowData }, fields)
-    rows.push({ ...rowData, ...calValues })
+    const newRowData = { ...rowData, ...calValues }
 
-    if (values[`finalPrice_${currency}`] !== rowData[`finalPrice_${currency}`]) {
-        if (rowData.parentId) {
+    if (rowData.parentId) {
+        rows.push(newRowData)
+        if (newRowData[`finalPrice_${currency}`] !== rowData[`finalPrice_${currency}`]) {
             let parent: any = []
             await calculateParentRows(material, rows, fields, rowData, parent, currency)
             rows = [...rows, ...parent]
         }
-        childs = resetValueZero(material, fields, rowData._id)
+    } else {
+        const child = material.filter((e) => e.parentId === rowData._id);
+        if (child?.length) {
+            if (newRowData[`finalPrice_${currency}`] !== rowData[`finalPrice_${currency}`]) {
+                if (child?.find((e) => e[`finalPrice_${currency}`]) && newRowData[`qty`] !== rowData[`qty`] && newRowData[`price_${currency}`] === rowData[`price_${currency}`]) {
+                    const tempParent = sumOnParent([newRowData], child, fields, currency)
+                    rows.push(tempParent[0])
+                }
+                else {
+                    rows.push(newRowData)
+                    childs = resetValueZero(material, fields, rowData._id)
+                }
+            }
+        } else {
+            rows.push(newRowData);
+        }
     }
     const result: any = [];
     [...rows, ...childs]?.forEach((e: any) => {
@@ -397,7 +372,6 @@ export const getParentWellNumber = (material, _id) => {
         return materialData?.wellNumber
     }
 }
-
 
 export const getUniqueWellNumber = (data) => {
     const wellNumber: any = [];

@@ -2,14 +2,12 @@ import { Box, IconButton, MenuItem } from '@mui/material';
 import Add from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import { isArray } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
 import { ownerAndColaborator, subleaseMessage } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -20,12 +18,14 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, pricingCondition, sublease } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, pricingCondition, sidebarResource, sublease } from '../../../constants/helpers';
 import QtyDialog from './QtyDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateAddStepEditProduct } from 'src/pages/Sublease/walkmeSteps';
+import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
+import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 
 const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchData, renderedFrom, allowedToEdit, stepFullScreen }) => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -50,6 +50,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
   const [allFields, setAllFields] = useState([]);
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitState, setSubmitState] = useState({ open: false, values: null, rowData: null });
 
   useEffect(() => {
     fetchFields();
@@ -62,15 +63,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
   const fetchFields = async () => {
     var data = await fetch_child_resource_fields(CHILD_RESOURCE.subleaseProduct, subleaseData?.currency, allowedToEdit);
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = generateColumns(
-      renderedFrom,
-      data?.map((e) => {
-        return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName };
-      }),
-      null,
-      false,
-      subleaseData?.currency
-    );
+    const newColumns = generateColumns(renderedFrom, data, null, false, subleaseData?.currency);
     let coloum: any = [
       {
         accessor: 'index',
@@ -215,7 +208,6 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       parent.detail = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productName : parent.packageDetail?.packageName;
       parent.description =
         parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productDescription : parent.packageDetail?.packageDescription;
-      parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.assetQty = inventory?.filter((e) => e._id === parent._id).length;
       parent.hideSelection = parent.assetQty > 0 ? true : false;
@@ -227,7 +219,6 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           _subRow.index = i + 1 + '.' + (j + 1);
           _subRow.detail = _subRow.productDetail?.productName;
           _subRow.description = _subRow.productDetail?.productDescription;
-          _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
           _subRow.isValid = _subRow['finalPrice_' + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
           _subRow.assetQty = inventory?.filter((e) => e._id === _subRow._id).length;
           _subRow.canDelete = _subRow.assetQty === 0 && allowedToEdit ? true : false;
@@ -281,22 +272,13 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       material.push(element);
     });
 
-    const priceData: any = await calculatePrice(material);
-    material.forEach((element) => {
-      const rateResult = priceData?.filter(
-        (e) =>
-          e.materialId === element.materialId &&
-          e.materialType === element.type &&
-          e.unit === element.unit &&
-          e.pricingMethod === element.pricingMethod
-      );
-      if (rateResult.length && rateResult[0].mrp) {
-        const priceFieldName = `price_${subleaseData?.currency?.toLowerCase()}`;
-        element[priceFieldName] = rateResult[0].mrp;
-        const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
+    let priceData: any = await getPricingConditions(subleaseData, material, PRICING_SETUP_TYPE.rent);
+    if (priceData) {
+      material.forEach((element) => {
+        const calValues = getPricingValue(element, priceData, subleaseData?.currency, allFields);
         Object.assign(element, calValues);
-      }
-    });
+      });
+    }
 
     axiosInstance()
       .post(`${sublease.api}/productpackage/${subleaseData._id}`, { material })
@@ -349,50 +331,18 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     setRecordToUpdate(rowData);
   };
 
-  const calculatePrice = (arr: any[]) => {
-    if (subleaseData) {
-      const data: any = {};
-      data.conditionType = [PRICING_SETUP_TYPE.rent];
-      const material: any = [];
-      arr?.forEach((ele) => {
-        const obj = {
-          materialId: ele?.materialId,
-          materialType: ele?.type,
-          qty: ele?.qty,
-          pricingMethod: ele?.pricingMethod,
-          currency: subleaseData?.currency
-        };
-        if (isArray(ele?.unit)) {
-          ele?.unit?.forEach((e) => {
-            material.push({ ...obj, unit: e });
-          });
-        } else {
-          material.push({ ...obj, unit: ele?.unit });
-        }
-      });
-      data.material = material;
-      data.supplier = [subleaseData?.supplierAccount?.optionValue];
-      data.customer = [];
-      data.warehouse = [];
-      data.address = subleaseData?.shippingAddress?.optionValue ? [subleaseData?.shippingAddress?.optionValue] : [];
-      return new Promise((resolve, reject) => {
-        axiosInstance()
-          .post(pricingCondition.api + `/calculatePrice`, data)
-          .then(({ data: { data } }) => {
-            resolve(data);
-          })
-          .catch((err) => {
-            reject(err);
-          });
-      });
-    }
-  };
-
   const onSaveInlineEdit = async (inputField, updatedData) => {
-    const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
-    if (inputField.hasOwnProperty('qtyDisplay')) {
-      inputField['qty'] = inputField['qtyDisplay'];
+    if (inputField.hasOwnProperty('qty')) {
+      if (!inputField['qty']) {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'error',
+          message: 'Please enter valid quantity'
+        });
+        return;
+      }
     }
+    const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     if (inputField['qty'] < rowData?.assetQty) {
       toastConfig.setToastConfig({
         open: true,
@@ -401,9 +351,8 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       });
       return;
     }
-    let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData, subleaseData?.currency);
-    handleSaveData(rows);
+    const calValues = autoCalculateSpecificFields(inputField, rowData, allFields);
+    setSubmitState({ open: true, values: { ...rowData, ...calValues }, rowData: rowData });
   };
 
   const addButtonMenuitems = () => {
@@ -515,7 +464,6 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       )}
       {isProductEdit.open && (
         <QtyDialog
-          calculatePrice={calculatePrice}
           onClose={() => {
             setIsProductEdit({ open: false, isBulkedit: false });
             setRecordToUpdate(null);
@@ -527,6 +475,23 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           material={material}
           selectedProducts={selectedRecords}
           loading={isUpdating}
+        />
+      )}
+      {submitState.open && (
+        <MaterialUpdateActions
+          resource={sidebarResource.sublease}
+          referenceData={subleaseData}
+          allFields={allFields}
+          material={material}
+          rowData={submitState.rowData}
+          handleUpdateData={(rows) => {
+            handleSaveData(rows);
+            setSubmitState({ open: false, values: null, rowData: null });
+          }}
+          values={submitState.values}
+          handleClose={() => {
+            setSubmitState({ open: false, values: null, rowData: null });
+          }}
         />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'product' && (

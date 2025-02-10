@@ -702,6 +702,8 @@ const SerializedAsset = () => {
             fetchData();
           }}
           additionalParams={getQueryString(true)}
+          asyncExport={true}
+          resource={sidebarResource.serializedAsset}
         />
       </div>
       <CustomContainer>

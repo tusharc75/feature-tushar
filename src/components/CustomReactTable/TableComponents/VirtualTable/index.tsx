@@ -8,8 +8,8 @@ import { RnderTableProps } from 'src/components/CustomReactTable/TableComponents
 import { VirtualTableBody } from 'src/components/CustomReactTable/TableComponents/VirtualTable/Body';
 import { VirtualTableHead } from 'src/components/CustomReactTable/TableComponents/VirtualTable/Head';
 import { getStickyPosition } from 'src/components/CustomReactTable/utils';
-import { TColType } from '../TableHelperComponents';
 import { cn } from 'src/constants/helpers';
+import { TColType } from '../TableHelperComponents';
 
 const VirtualTableImpl = forwardRef(function (
   {
@@ -59,18 +59,20 @@ const VirtualTableImpl = forwardRef(function (
 ) {
   const [parentRef, setParentRef] = useState<HTMLDivElement>(null);
 
+  const rangeExtractor = React.useCallback(
+    (range: Range, ...rest) => {
+      return [...new Set([...stickyColumns.leftIndexes, ...defaultRangeExtractor(range), ...stickyColumns.rightIndexes])];
+    },
+    [stickyColumns.leftIndexes, stickyColumns.rightIndexes]
+  );
+
   const columnVirtualizer = useVirtualizer({
     count: columns?.length || 1,
     estimateSize: (index) => sizes[index] || 200,
     getScrollElement: () => parentRef,
     horizontal: true,
     overscan: 2,
-    rangeExtractor: React.useCallback(
-      (range: Range, ...rest) => {
-        return [...new Set([...stickyColumns.leftIndexes, ...defaultRangeExtractor(range), ...stickyColumns.rightIndexes])];
-      },
-      [stickyColumns.leftIndexes, stickyColumns.rightIndexes]
-    )
+    rangeExtractor
   });
 
   useEffect(() => {
@@ -78,10 +80,37 @@ const VirtualTableImpl = forwardRef(function (
   }, [columns.length, sizes]);
 
   const virtualColumns = columnVirtualizer.getVirtualItems();
+
   const totalColumnSize = columnVirtualizer.getTotalSize();
 
   return (
     <>
+      {!loading && !error && rows.length === 0 && initialDataLoaded && (
+        <>
+          <Box className=" absolute inset-0 top-[46px] z-50 m-auto flex h-fit w-fit select-none items-center justify-center">
+            <div className=" rounded-lg px-10 py-5 text-center">
+              <p>No data found</p>
+            </div>
+          </Box>
+        </>
+      )}
+      {(loading || error || !initialDataLoaded) && (
+        <Box className="absolute inset-0 z-50 flex h-full w-full items-center justify-center bg-[rgba(255,255,255,0.2)] dark:bg-[rgba(0,0,0,0.1)]">
+          <div className="rounded-lg bg-[white] px-10 py-5 text-center shadow-md dark:bg-[var(--dark-secondary)]">
+            {error ? (
+              <>
+                <Error className="mx-auto mb-2" />
+                <p>Something Went Wrong</p>
+              </>
+            ) : loading || !initialDataLoaded ? (
+              <>
+                <CircularProgress />
+                <p>Loading...</p>
+              </>
+            ) : null}
+          </div>
+        </Box>
+      )}
       <div
         style={{
           display: 'block',
@@ -95,33 +124,6 @@ const VirtualTableImpl = forwardRef(function (
         className="isolate z-10 border bg-[var(--dark-primary,_white)] max-[900px]:min-h-[500px]"
         ref={setParentRef}
       >
-        {!loading && !error && rows.length === 0 && initialDataLoaded && (
-          <>
-            <Box className=" absolute inset-0 top-[46px] -z-10 m-auto flex h-fit w-fit select-none items-center justify-center">
-              <div className=" rounded-lg px-10 py-5 text-center">
-                <p>No data found</p>
-              </div>
-            </Box>
-          </>
-        )}
-        {(loading || error || !initialDataLoaded) && (
-          <Box className="absolute inset-0 z-50 flex h-full w-full items-center justify-center bg-[rgba(255,255,255,0.2)] dark:bg-[rgba(0,0,0,0.1)]">
-            <div className="rounded-lg bg-[white] px-10 py-5 text-center shadow-md dark:bg-[var(--dark-secondary)]">
-              {error ? (
-                <>
-                  <Error className="mx-auto mb-2" />
-                  <p>Something Went Wrong</p>
-                </>
-              ) : loading || !initialDataLoaded ? (
-                <>
-                  <CircularProgress />
-                  <p>Loading...</p>
-                </>
-              ) : null}
-            </div>
-          </Box>
-        )}
-
         <MaUTable ref={tableRef} size="small" className="tableWrap sticky table" style={{ width: `max(${totalColumnSize}px, 100%)` }}>
           <VirtualTableHead
             table={table}
@@ -163,7 +165,7 @@ const VirtualTableImpl = forwardRef(function (
                 {table?.getFooterGroups().map((footerGroup) => {
                   return (
                     <tr key={footerGroup.id} className="!flex ">
-                      {virtualColumns.map((vc) => {
+                      {columnVirtualizer.getVirtualItems().map((vc) => {
                         const header = footerGroup.headers[vc?.index];
                         if (!header) return null;
                         if (exportTableView && excludedColumns.includes(header.column.columnDef.id)) return null;

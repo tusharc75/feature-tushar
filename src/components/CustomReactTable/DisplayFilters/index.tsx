@@ -43,8 +43,6 @@ function DisplayFilters({
     delete filterTermP[col?.fieldName];
     if (col && col?.lookup) {
       setFilterByIds(filterByIds?.filter((f) => f?.field != name));
-    } else if (col && col?.type === 'date') {
-      setDeepFilters(deepFilters?.filter((f) => ![`from_${name}`, `to_${name}`]?.includes(f?.field)));
     } else {
       setDeepFilters(deepFilters?.filter((f) => f?.field != name));
     }

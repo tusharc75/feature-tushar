@@ -89,7 +89,8 @@ const CustomReactTable = ({
   topLeftSlot = null,
   expanderWithCustomContent = false,
   customContentHeight = 300,
-  customContent = null
+  customContent = null,
+  isFullScreen = false
 }) => {
   const {
     currentEditingCellPosition,
@@ -299,7 +300,7 @@ const CustomReactTable = ({
     } else {
       setNewColumns([...hookColumns]);
     }
-  }, [visibleColumns, columnSavedSizes, hookColumns, table]);
+  }, [visibleColumns, columnSavedSizes, hookColumns, table, isFullScreen]);
 
   const isAllRowsExpanded = table.getIsAllRowsExpanded();
 

@@ -25,7 +25,7 @@ import AssetDetailsChangeDialog from 'src/pages/RentalManagement/ReceivingTicket
 import { generateAutoCompleteSteps, nextButtonStep } from 'src/pages/RepairOrder/walkmeSteps';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
-import AssignUserDialog from 'src/pages/WorkOrder/Service/AssignUserDialog';
+import AssignTechniciansDialog from 'src/pages/WorkOrder/Service/AssignTechniciansDialog';
 import AssignWorkStationDialog from 'src/pages/WorkOrder/Service/AssignWorkStationDialog';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
@@ -1407,7 +1407,7 @@ const WorkOrder = ({
             />
           )}
           {userAssignDialog && (
-            <AssignUserDialog
+            <AssignTechniciansDialog
               warehouse={repairOrderData?.warehouse?.optionValue}
               workOrderData={selectedRecords
                 .filter((e) => e.type === 'service')

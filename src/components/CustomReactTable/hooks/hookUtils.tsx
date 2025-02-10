@@ -1,22 +1,9 @@
+import { memo } from 'react';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { displayDate } from 'src/constants/helpers';
-import routes from '../../Helpers/Routes';
 
 export const headerName = {
   firstName: 'Name'
-};
-
-export const detailPagePath = {
-  leads: routes?.leadDetail?.path,
-  owner: routes?.userDetail?.path,
-  user: routes?.userDetail?.path,
-  collaborator: routes?.userDetail?.path,
-  rental: routes.rentalManagementDetail.path,
-  deliveryPerson: routes?.userDetail?.path,
-  pDFTemplate: routes?.quotePdfTemplateDetail?.path,
-  subMarketSegment: routes?.marketSegment?.path,
-  customerContact: routes?.customerContactDetail?.path,
-  supplierContact: routes?.supplierContactDetail?.path
 };
 
 export const getStaticFields = () => {
@@ -32,16 +19,7 @@ export const getStaticFields = () => {
       show: true,
       minSize: 185,
       disableFilters: true,
-      cell: ({ row }) =>
-        row?.original?.createdBy ? (
-          <h5 className="createBy" title={`${row?.original?.createdBy} • ${displayDate(row?.original?.createdByDate)}`}>
-            {row?.original?.createdBy}
-            <span className="hidden">&nbsp;-&nbsp;</span>
-            <span className="createdAtTime badge-date">{displayDate(row?.original?.createdByDate)}</span>
-          </h5>
-        ) : (
-          <NoDataCell />
-        )
+      cell: ({ row }) => <CreatedByCell row={row} />
     },
     {
       id: 'updatedBy',
@@ -54,18 +32,33 @@ export const getStaticFields = () => {
       minSize: 185,
       show: true,
       disableFilters: true,
-      cell: ({ row }) =>
-        row?.original?.updatedBy ? (
-          <h5 className="updateBy" title={`${row?.original?.updatedBy} • ${displayDate(row?.original?.updatedByDate)}`}>
-            {row?.original?.updatedBy}&nbsp;
-            <span className="updatedAtTime badge-date">{displayDate(row?.original?.updatedByDate)}</span>
-          </h5>
-        ) : (
-          <NoDataCell />
-        )
+      cell: ({ row }) => <UpdatedByCell row={row} />
     }
   ];
 };
+
+const CreatedByCell = memo(({ row }: any) => {
+  return row?.original?.createdBy ? (
+    <h5 className="createBy" title={`${row?.original?.createdBy} • ${displayDate(row?.original?.createdByDate)}`}>
+      {row?.original?.createdBy}
+      <span className="hidden">&nbsp;-&nbsp;</span>
+      <span className="createdAtTime badge-date">{displayDate(row?.original?.createdByDate)}</span>
+    </h5>
+  ) : (
+    <NoDataCell />
+  );
+});
+
+const UpdatedByCell = memo(({ row }: any) => {
+  return row?.original?.updatedBy ? (
+    <h5 className="updateBy" title={`${row?.original?.updatedBy} • ${displayDate(row?.original?.updatedByDate)}`}>
+      {row?.original?.updatedBy}&nbsp;
+      <span className="updatedAtTime badge-date">{displayDate(row?.original?.updatedByDate)}</span>
+    </h5>
+  ) : (
+    <NoDataCell />
+  );
+});
 
 export const getCompletedByField = () => {
   return [
@@ -80,22 +73,22 @@ export const getCompletedByField = () => {
       show: true,
       minSize: 185,
       disableFilters: true,
-      cell: ({ row }) =>
-        row?.original?.completedBy ? (
-          <h5
-            className="createBy"
-            title={`${row?.original?.completedBy} • ${displayDate(row?.original?.completedByDate)}`}
-          >
-            {row?.original?.completedBy}
-            <span className="hidden">&nbsp;-&nbsp;</span>
-            <span className="createdAtTime badge-date">{displayDate(row?.original?.completedByDate)}</span>
-          </h5>
-        ) : (
-          <NoDataCell />
-        )
+      cell: ({ row }) => <CompletedByCell row={row} />
     }
   ];
 };
+
+const CompletedByCell = memo(({ row }: any) => {
+  return row?.original?.completedBy ? (
+    <h5 className="createBy" title={`${row?.original?.completedBy} • ${displayDate(row?.original?.completedByDate)}`}>
+      {row?.original?.completedBy}
+      <span className="hidden">&nbsp;-&nbsp;</span>
+      <span className="createdAtTime badge-date">{displayDate(row?.original?.completedByDate)}</span>
+    </h5>
+  ) : (
+    <NoDataCell />
+  );
+});
 
 export const getSortedColumns = (columns = []) => {
   return columns.sort(function (a, b) {

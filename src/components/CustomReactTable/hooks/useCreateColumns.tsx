@@ -1,5 +1,5 @@
 import { IconButton, useMediaQuery } from '@mui/material';
-import { useCallback, useMemo } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { FaAngleDown, FaAngleRight } from 'react-icons/fa';
 import { IndeterminateCheckbox, TColType } from '../TableComponents/TableHelperComponents';
 import { childrenProperty, insertChildRowIntoTable } from '../utils';

@@ -3,7 +3,7 @@ import Add from '@mui/icons-material/Add';
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import { isArray, startCase, uniqBy } from 'lodash';
+import { startCase, uniqBy } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
@@ -29,7 +29,6 @@ import {
   PRICING_SETUP_TYPE,
   QUOTATION_TYPE,
   SERVICE_TYPE,
-  pricingCondition,
   quotation,
   sidebarResource,
   supplierContact
@@ -41,11 +40,13 @@ import AdditionalCostDialog from './AdditionalCostDialog';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import ManageLeadTime from 'src/components/LeadTime/ManageLeadTime';
+import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
+import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 
 const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, renderedFrom, stepFullScreen, version, allowedToEdit, updateDOASetup }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions }
+    state: { user }
   }: any = useData();
   const { generateColumns } = useColumns();
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -80,6 +81,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [showCostDialog, setShowCostDialog] = useState({ open: false, showSaveAndNext: false });
   const [costFields, setCostFields] = useState([]);
+  const [submitState, setSubmitState] = useState({ open: false, values: null, rowData: null });
   const versionId = quotationData?.versions[version]?._id || null;
 
   useEffect(() => {
@@ -428,18 +430,14 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       material.push(element);
     });
 
-    const priceData: any = await calculatePrice(material);
-    material.forEach((element) => {
-      const rateResult = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit);
-      if (rateResult.length && rateResult[0].mrp) {
-        const priceFieldName = `price_${quotationData?.currency?.toLowerCase()}`;
-        element[priceFieldName] = rateResult[0].mrp;
-        element['pricingCondition'] = rateResult[0].conditionId;
-        element['pricingMethod'] = rateResult[0].pricingMethod;
-        const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
+    const conditionType = quotationData.type === QUOTATION_TYPE.salesOrder ? PRICING_SETUP_TYPE.price : PRICING_SETUP_TYPE.rent;
+    let priceData: any = await getPricingConditions(quotationData, material, conditionType);
+    if (priceData) {
+      material.forEach((element) => {
+        const calValues = getPricingValue(element, priceData, quotationData?.currency, allFields);
         Object.assign(element, calValues);
-      }
-    });
+      });
+    }
 
     axiosInstance()
       .post(`${quotation.api}/productpackage/${quotationData._id}/${versionId}`, { material })
@@ -621,45 +619,6 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     setRecordToUpdate(row.original);
   };
 
-  const calculatePrice = (arr: any[]) => {
-    if (quotationData) {
-      const data: any = {};
-      data.conditionType = quotationData.type === QUOTATION_TYPE.salesOrder ? [PRICING_SETUP_TYPE.price] : [PRICING_SETUP_TYPE.rent];
-      const material: any = [];
-      arr?.forEach((ele) => {
-        const obj = {
-          materialId: ele?.materialId,
-          materialType: ele?.type,
-          qty: ele?.qty,
-          pricingMethod: ele?.pricingMethod,
-          currency: quotationData?.currency
-        };
-        if (isArray(ele?.unit)) {
-          ele?.unit?.forEach((e) => {
-            material.push({ ...obj, unit: e });
-          });
-        } else {
-          material.push({ ...obj, unit: ele?.unit });
-        }
-      });
-      data.material = material;
-      data.supplier = [];
-      data.customer = [quotationData?.customerAccount?.optionValue];
-      data.warehouse = [quotationData?.warehouse?.optionValue];
-      data.address = quotationData?.shippingAddress?.optionValue ? [quotationData?.shippingAddress?.optionValue] : [];
-      return new Promise((resolve, reject) => {
-        axiosInstance()
-          .post(pricingCondition.api + `/calculatePrice`, data)
-          .then(({ data: { data } }) => {
-            resolve(data);
-          })
-          .catch((err) => {
-            reject(err);
-          });
-      });
-    }
-  };
-
   const handelAskPriceToSupplier = (content, contactId, selectedFields = [], otherAttachments = []) => {
     let data: any = {
       material: selectedRecords?.map((d) => {
@@ -702,6 +661,8 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       rows = await calculateRowsField(flattenArray(dataRows), inputField, costFields, updatedData, quotationData?.currency);
       handleSaveCostData(rows);
     } else {
+      const calValues = autoCalculateSpecificFields(inputField, rowData, allFields);
+      setSubmitState({ open: true, values: { ...rowData, ...calValues }, rowData: rowData });
       rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData, quotationData?.currency);
       handleSaveData(rows);
     }
@@ -931,7 +892,6 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       )}
       {isProductEdit.open && (
         <QuotationQtyDialog
-          calculatePrice={calculatePrice}
           onClose={() => {
             setIsProductEdit({ open: false, isBulkedit: false, showSaveAndNext: false });
             setRecordToUpdate(null);
@@ -944,6 +904,23 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           material={material}
           selectedProducts={selectedRecords}
           showSaveAndNext={isProductEdit?.showSaveAndNext}
+        />
+      )}
+      {submitState.open && (
+        <MaterialUpdateActions
+          resource={sidebarResource.quotation}
+          referenceData={quotationData}
+          allFields={allFields}
+          material={material}
+          rowData={submitState.rowData}
+          handleUpdateData={(rows) => {
+            handleSaveData(rows);
+            setSubmitState({ open: false, values: null, rowData: null });
+          }}
+          values={submitState.values}
+          handleClose={() => {
+            setSubmitState({ open: false, values: null, rowData: null });
+          }}
         />
       )}
       {showCostDialog.open && (

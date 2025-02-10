@@ -1,7 +1,7 @@
 import { Box, IconButton } from '@mui/material';
 import { Info } from '@mui/icons-material';
 import axios, { CancelTokenSource } from 'axios';
-import { uniqBy } from 'lodash';
+import { isEqual, uniqBy } from 'lodash';
 import React, { Dispatch, useContext, useEffect, useImperativeHandle, useState } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -22,7 +22,7 @@ import {
   WORKORDER_SERVICE_STATUS,
   workOrderSupervisor
 } from 'src/constants/helpers';
-import AssignUserDialog from 'src/pages/WorkOrder/Service/AssignUserDialog';
+import AssignTechniciansDialog from 'src/pages/WorkOrder/Service/AssignTechniciansDialog';
 import AssignWorkStationDialog from 'src/pages/WorkOrder/Service/AssignWorkStationDialog';
 import WorkOrderDetailDialog from 'src/pages/WorkOrderSupervisor/WorkOrderDetailDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -110,41 +110,41 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
           ...(status === WORKORDER_SERVICE_STATUS.planned
             ? [serializedAssetColumn]
             : [
-                {
-                  accessor: 'workOrderNumber',
-                  Header: 'Work Order Number',
-                  Cell: ({ row }) =>
-                    row?.original?.workOrderNumber && row.original.workOrder ? (
-                      <div>
-                        <h5
-                          className="link text-truncate"
-                          onClick={() => {
-                            setServiceOpen({ open: true, id: row?.original?.workOrder });
-                          }}
-                        >
-                          {row.original.workOrderNumber}
-                        </h5>
-                        <IconButton
-                          size="small"
-                          onClick={() => {
-                            window.open(`${routes?.workOrderDetail?.path}/${row.original.workOrder}`);
-                          }}
-                        >
-                          <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                        </IconButton>
-                        <Box ml={1}>
-                          {row?.original?.canPerformInfo ? (
-                            <HtmlTooltip title={row?.original?.canPerformInfo} arrow placement="top" enterTouchDelay={0}>
-                              <Info className="text-red-500 [font-size:20px_!important]" />
-                            </HtmlTooltip>
-                          ) : null}
-                        </Box>
-                      </div>
-                    ) : (
-                      <NoDataCell />
-                    )
-                }
-              ]),
+              {
+                accessor: 'workOrderNumber',
+                Header: 'Work Order Number',
+                Cell: ({ row }) =>
+                  row?.original?.workOrderNumber && row.original.workOrder ? (
+                    <div>
+                      <h5
+                        className="link text-truncate"
+                        onClick={() => {
+                          setServiceOpen({ open: true, id: row?.original?.workOrder });
+                        }}
+                      >
+                        {row.original.workOrderNumber}
+                      </h5>
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          window.open(`${routes?.workOrderDetail?.path}/${row.original.workOrder}`);
+                        }}
+                      >
+                        <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                      </IconButton>
+                      <Box ml={1}>
+                        {row?.original?.canPerformInfo ? (
+                          <HtmlTooltip title={row?.original?.canPerformInfo} arrow placement="top" enterTouchDelay={0}>
+                            <Info className="text-red-500 [font-size:20px_!important]" />
+                          </HtmlTooltip>
+                        ) : null}
+                      </Box>
+                    </div>
+                  ) : (
+                    <NoDataCell />
+                  )
+              }
+            ]),
           {
             accessor: 'service',
             Header: 'Service',
@@ -169,37 +169,37 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
           },
           ...(status === WORKORDER_SERVICE_STATUS.planned
             ? [
-                {
-                  accessor: 'product',
-                  Header: resources?.product?.titleSingular,
-                  disableFilters: true,
-                  disableSortBy: true,
-                  Cell: ({ row }) =>
-                    row.original['product'] && row.original.productId ? (
-                      <div className="flex items-center gap-1">
-                        <h5 className="text-truncate">{row.original.product}</h5>
-                        <IconButton
-                          size="small"
-                          onClick={() => {
-                            window.open(`${routes?.productDetail?.path}/${row.original.productId}`);
-                          }}
-                        >
-                          <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                        </IconButton>
-                      </div>
-                    ) : (
-                      <NoDataCell />
-                    )
-                },
-                {
-                  accessor: 'dueDate',
-                  Header: 'Due Date',
-                  disableFilters: true,
-                  disableSortBy: true,
-                  Cell: ({ row }) =>
-                    row.original['dueDate'] ? <h5 className="text-truncate">{displayDate(row.original.dueDate)}</h5> : <NoDataCell />
-                }
-              ]
+              {
+                accessor: 'product',
+                Header: resources?.product?.titleSingular,
+                disableFilters: true,
+                disableSortBy: true,
+                Cell: ({ row }) =>
+                  row.original['product'] && row.original.productId ? (
+                    <div className="flex items-center gap-1">
+                      <h5 className="text-truncate">{row.original.product}</h5>
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          window.open(`${routes?.productDetail?.path}/${row.original.productId}`);
+                        }}
+                      >
+                        <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                      </IconButton>
+                    </div>
+                  ) : (
+                    <NoDataCell />
+                  )
+              },
+              {
+                accessor: 'dueDate',
+                Header: 'Due Date',
+                disableFilters: true,
+                disableSortBy: true,
+                Cell: ({ row }) =>
+                  row.original['dueDate'] ? <h5 className="text-truncate">{displayDate(row.original.dueDate)}</h5> : <NoDataCell />
+              }
+            ]
             : []),
 
           {
@@ -245,28 +245,28 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
           ...(status === WORKORDER_SERVICE_STATUS.planned
             ? []
             : [
-                {
-                  accessor: 'rentalJob',
-                  Header: resources?.rentalManagement?.titleSingular,
-                  Cell: ({ row }) =>
-                    row?.original['rentalJob'] ? (
-                      <div className="flex items-center gap-1">
-                        <h5 className=" text-truncate">{row.original.rentalJob}</h5>
-                        <IconButton
-                          size="small"
-                          onClick={() => {
-                            window.open(`${routes?.rentalManagementDetail?.path}/${row.original.rentalJobId}`);
-                          }}
-                        >
-                          <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                        </IconButton>
-                      </div>
-                    ) : (
-                      <NoDataCell />
-                    )
-                },
-                serializedAssetColumn
-              ])
+              {
+                accessor: 'rentalJob',
+                Header: resources?.rentalManagement?.titleSingular,
+                Cell: ({ row }) =>
+                  row?.original['rentalJob'] ? (
+                    <div className="flex items-center gap-1">
+                      <h5 className=" text-truncate">{row.original.rentalJob}</h5>
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          window.open(`${routes?.rentalManagementDetail?.path}/${row.original.rentalJobId}`);
+                        }}
+                      >
+                        <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                      </IconButton>
+                    </div>
+                  ) : (
+                    <NoDataCell />
+                  )
+              },
+              serializedAssetColumn
+            ])
         ];
         const finalColumns = [
           ...extraColumns.slice(0, 2),
@@ -341,7 +341,8 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
                   : u?.assemblyOrder
                     ? sidebarResource.assemblyOrder
                     : '';
-
+              finalObject.assignedUsers = u?.assignedUsers
+              finalObject.assignedWorkStations = u?.assignedWorkStations
               finalObject.type = type;
               return finalObject;
             });
@@ -488,13 +489,12 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
           />
         )}
         {assignTechnicianDialog && (
-          <AssignUserDialog
+          <AssignTechniciansDialog
             warehouse={selectedRecords[0]?.warehouseId}
             workOrderData={selectedRecords?.map((r) => ({ uniqueId: r?.uniqueId, workOrderId: r?.workOrder }))}
-            assignedUsers={
-              selectedRecords?.length === 1 && selectedRecords[0]?.assignedUsers && selectedRecords[0]?.assignedUsersId
-                ? [{ optionLabel: selectedRecords[0]?.assignedUsers, optionValue: selectedRecords[0]?.assignedUsersId }]
-                : []
+            assignedUsers={selectedRecords?.length === 1 ||
+              selectedRecords?.every(val => isEqual(val?.assignedUsers, selectedRecords[0]?.assignedUsers))
+              ? selectedRecords[0]?.assignedUsers : []
             }
             reference={'service'}
             handleClose={() => {
@@ -511,10 +511,9 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
           <AssignWorkStationDialog
             warehouse={selectedRecords[0]?.warehouseId}
             workOrderData={selectedRecords?.map((r) => ({ uniqueId: r?.uniqueId, workOrderId: r?.workOrder }))}
-            workStations={
-              selectedRecords?.length === 1 && selectedRecords[0]?.assignedWorkStations && selectedRecords[0]?.assignedWorkStationsId
-                ? [{ optionLabel: selectedRecords[0]?.assignedWorkStations, optionValue: selectedRecords[0]?.assignedWorkStationsId }]
-                : []
+            workStations={selectedRecords?.length === 1 ||
+              selectedRecords?.every(val => isEqual(val?.assignedWorkStations, selectedRecords[0]?.assignedWorkStations))
+              ? selectedRecords[0]?.assignedWorkStations : []
             }
             handleClose={() => {
               setWorkStationAssignDialog(false);

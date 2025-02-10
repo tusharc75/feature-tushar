@@ -157,7 +157,7 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
             buttonType="theme"
             disabled={!selectedPackage || isSubmitting}
             onClick={(e) => {
-              const receivingStatus = user?.user?.brandPolicy?.rentalReceivingAvailableStatus ? ASSET_STATUS.available : ASSET_STATUS.underReview;
+              const receivingStatus = user?.user?.brandPolicy?.rentalReceivingStatus ? user?.user?.brandPolicy?.rentalReceivingStatus : ASSET_STATUS.underReview;
               const statusPolicy = checkAssetPolicy(receivingStatus);
               if (statusPolicy) {
                 setOpenAssetDataDialog({ open: true, statusPolicy: statusPolicy?.statusPolicy, _ids: statusPolicy?.assetIds });
@@ -177,7 +177,7 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
           setAssetsData={() => { }}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null })}
           onSuccess={(data) => {
-            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingAvailableStatus ? ASSET_STATUS.available : ASSET_STATUS.underReview;
+            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingStatus ? user?.user?.brandPolicy?.rentalReceivingStatus : ASSET_STATUS.underReview;
             if (openAssetDataDialog.statusPolicy?.status === receivingStatus) {
               setUnderReviewAssetData(data);
               handlePerformUnderReview();

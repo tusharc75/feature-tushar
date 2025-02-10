@@ -1,5 +1,5 @@
 import { Popper } from '@mui/material';
-import { useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { IoCaretDown } from 'react-icons/io5';
 
 type CellToltipProps = {
@@ -9,29 +9,36 @@ type CellToltipProps = {
   title?: string;
 } & React.HTMLAttributes<HTMLSpanElement>;
 
-function CellTooltip({ children, more, tooltipChildren, title = '', ...rest }: CellToltipProps) {
+function CellTooltipImpl({ children, more, tooltipChildren, title = '', ...rest }: CellToltipProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLSpanElement | HTMLDivElement | null>(null);
 
-  const handleClick = (event: React.MouseEvent<HTMLSpanElement | HTMLDivElement>) => {
-    event.stopPropagation();
-    event.preventDefault();
-    if (Boolean(anchorEl)) {
-      setAnchorEl(null);
-    } else {
-      setAnchorEl(event.currentTarget);
-    }
-  };
-  const handleMouseOver = (event: React.MouseEvent<HTMLSpanElement | HTMLDivElement>) => {
-    event.stopPropagation();
-    event.preventDefault();
-    setAnchorEl(event.currentTarget);
-  };
+  const handleClick = useCallback(
+    (event: React.MouseEvent<HTMLSpanElement | HTMLDivElement>) => {
+      event.stopPropagation();
+      event.preventDefault();
+      if (Boolean(anchorEl)) {
+        setAnchorEl(null);
+      } else {
+        setAnchorEl(event.currentTarget);
+      }
+    },
+    [anchorEl]
+  );
 
-  const handleClose = (e: React.MouseEvent<HTMLSpanElement | HTMLDivElement>) => {
+  const handleMouseOver = useCallback(
+    () => (event: React.MouseEvent<HTMLSpanElement | HTMLDivElement>) => {
+      event.stopPropagation();
+      event.preventDefault();
+      setAnchorEl(event.currentTarget);
+    },
+    []
+  );
+
+  const handleClose = useCallback((e: React.MouseEvent<HTMLSpanElement | HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setAnchorEl(null);
-  };
+  }, []);
 
   const open = Boolean(anchorEl);
 
@@ -75,5 +82,7 @@ function CellTooltip({ children, more, tooltipChildren, title = '', ...rest }: C
     </span>
   );
 }
+
+const CellTooltip = memo(CellTooltipImpl);
 
 export default CellTooltip;

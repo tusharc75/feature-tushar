@@ -1,6 +1,6 @@
 import { Autocomplete, Box, Dialog, FormControl, IconButton, MenuItem, Select, TextField, useMediaQuery } from '@mui/material';
 import { Close } from '@mui/icons-material';
-import { uniqBy } from 'lodash';
+import { isEmpty, uniqBy } from 'lodash';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { BsFillFunnelFill } from 'react-icons/bs';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -15,6 +15,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { createFilterSetData } from 'src/components/CustomReactTable';
 import Filters from 'src/components/Filter/Filters';
+import dayjs from 'dayjs';
 
 const Filter = ({
   onClose,
@@ -67,15 +68,7 @@ const Filter = ({
 
   useEffect(() => {
     if (deepFilters?.length > 0) {
-      setSelectedField(
-        columns?.filter((c) => {
-          let fieldName = c?.fieldData?.fieldName;
-          if (c?.fieldData?.type === 'date') {
-            fieldName = `from_${fieldName}`;
-          }
-          return fieldName === deepFilters[0]?.field;
-        })[0]?.fieldData
-      );
+      setSelectedField(columns?.filter((c) => c?.fieldData?.fieldName === deepFilters[0]?.field)[0]?.fieldData);
     } else if (filterByIds?.length > 0) {
       setSelectedField(columns?.filter((c) => c?.fieldData?.fieldName === filterByIds[0]?.field)[0]?.fieldData);
     }
@@ -171,7 +164,17 @@ const Filter = ({
   };
 
   const isDisable = () => {
-    if (deepFilters && deepFilters?.length && deepFilters?.filter((d) => d?.term?.length)?.length) return false;
+    if (
+      deepFilters &&
+      deepFilters?.length &&
+      deepFilters?.filter((d) => {
+        if (d?.type === 'date') {
+          return d?.duration !== 'custom';
+        }
+        return d?.term?.length ? true : false;
+      })?.length
+    )
+      return false;
     if (filterByIds && filterByIds?.length && filterByIds?.filter((d) => d?.term?.length)?.length) return false;
     return true;
   };
@@ -258,6 +261,7 @@ const Filter = ({
             errors={errors}
             loading={loading}
             isVisibleFilterSet={isVisibleFilterSet}
+            selectedUserFilter={selectedUserFilter}
           />
         </CustomDialogContent>
         <div className="flex justify-between px-[--px] py-[--py] pt-0">

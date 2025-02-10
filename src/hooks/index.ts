@@ -10,6 +10,7 @@ import { useScrollController } from './useScrollController';
 import useFavorites from 'src/hooks/useFavourites';
 import useVoiceRecognition from './useVoiceRecognition';
 import useDropZone from 'src/hooks/useDropzone';
+import useDelayedClass from 'src/hooks/useDelayedClass';
 
 export * from './useDropzone';
 
@@ -25,5 +26,6 @@ export {
   useScrollController,
   useFavorites,
   useVoiceRecognition,
-  useDropZone
+  useDropZone,
+  useDelayedClass
 };

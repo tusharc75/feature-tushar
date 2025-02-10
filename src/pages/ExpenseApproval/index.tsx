@@ -1,25 +1,16 @@
-import { Box, Button, Card, CardActions, CardContent, IconButton, MenuItem, Typography } from '@mui/material';
-import FileCopyIcon from '@mui/icons-material/FileCopy';
+import { Card, CardActions, CardContent, MenuItem, Typography } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { gridLoadingTimeout, prepareDataForGrid, expenseApproval, sidebarResource, EXPENSE_STATUS, expenseReport, expenses } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
-import DeleteIcon from '@mui/icons-material/Delete';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Grid from '@mui/material/Grid2';
 
@@ -27,23 +18,16 @@ let expenseApprovalTimeout;
 
 const ExpenseApproval = () => {
   const renderedFrom = camelCase(sidebarResource?.expenseApproval);
-
   const toastConfig = useContext(CustomToastContext);
-  const history = useHistory();
   const {
     state: { user, permissions, selectedEntity, resources }
   }: any = useData();
-
-  const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const [columns, setColumns] = useState(null);
   const [reportData, setReportData] = useState(null);
   const [subtotal, setSubtotal] = useState(0);
-
-  const { generateColumns, checkStaticField } = useColumns();
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -54,6 +38,12 @@ const ExpenseApproval = () => {
       fetchData();
     }, millisec);
   }, [search]);
+
+  useEffect(() => {
+    if (reportData) {
+      calculateTotal();
+    }
+  }, [reportData]);
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
@@ -128,8 +118,8 @@ const ExpenseApproval = () => {
       await axiosInstance().patch(`${expenseReport.api}/status/${report._id}`, {
         status
       });
-      if (report?.selectedExpenses?.length > 0) {
-        for (let expense of report.selectedExpenses) {
+      if (report?.expenses?.length > 0) {
+        for (let expense of report.expenses) {
             await axiosInstance().patch(`${expenses.api}/status/${expense._id}`, {
               status
             });
@@ -139,18 +129,15 @@ const ExpenseApproval = () => {
       fetchData();
     };
 
-    const calculateTotal = () => {
+    const calculateTotal = async () => {
       let sum = 0;
-      for (let report of reportData) {
-        if (report?.selectedExpenses?.length > 0) {
-          for (let expense of report.selectedExpenses) {
-             sum = expense?.reduce((acc, row) => acc + (Number(row.totalAmount) || 0), 0); 
-          }
+      for (let report of reportData || []) {
+        if (report?.expenses?.length > 0) {
+          sum += report.expenses.reduce((acc, expense) => acc + (Number(expense.totalAmount) || 0), 0);
         }
-      };
-      return setSubtotal(sum);
-    };
-
+      }
+      setSubtotal(sum);
+    };    
 
   const ActionMenuItems = () => {
     return (
@@ -193,7 +180,7 @@ const ExpenseApproval = () => {
                     {report.reportTitle}
                   </Typography>
                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    {`Total Expense: ${report.totalAmount || 'N/A'}`}
+                    {`Total Expense: ${subtotal || 'N/A'}`}
                   </Typography>
                 </CardContent>
                 <CardActions>

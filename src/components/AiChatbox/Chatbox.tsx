@@ -1,4 +1,4 @@
-import { IconButton } from '@mui/material';
+import { CircularProgress, IconButton, Typography } from '@mui/material';
 import { Close } from '@mui/icons-material';
 import { Dispatch, useCallback, useContext, useEffect, useRef } from 'react';
 import { BsStars } from 'react-icons/bs';
@@ -16,6 +16,8 @@ import { scrollToBottom } from 'src/components/AiChatbox/utils';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { cn } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { io, Socket } from 'socket.io-client';
+import { backendApi } from 'src/config';
 
 type ChatboxPopupProps = {
   mode?: 'popup';
@@ -40,31 +42,87 @@ const Chatbox = (props: ChatboxProps) => {
 
   const toastConfig = useContext(CustomToastContext);
 
-  const { chatId, loading, messages, isSendButtonDisabled, fullScreen, selectedTopics, globalLoading } = state;
+  const { chatId, loading, messages, isSendButtonDisabled, fullScreen, selectedTopics, globalLoading, status: aiStatus, error: aiError } = state;
   const { pathname } = useLocation();
   const scrollContainer = useRef<HTMLDivElement>(null);
+  const token = localStorage.getItem('token');
+
+  let socket = useRef<Socket>(null);
 
   const sendMessage = useCallback(
     async (question: string) => {
       setState({ type: 'initUserMessage', payload: question });
       try {
+        socket.current = io(`${backendApi?.replace('/api', '')}/ai/chat`, {
+          path: backendApi?.includes('/api') ? '/api/socket.io' : '/socket.io',
+          auth: {
+            token
+          },
+          reconnectionAttempts: 5,
+          reconnectionDelay: 5000,
+          transports: ['websocket', 'pooling']
+        });
+
         let payload: { question: string; _id?: string; topicIds: string[] } = {
           question,
           topicIds: selectedTopics.map((d) => d._id)
         };
+
         if (chatId) {
           payload = { ...payload, _id: chatId };
         }
-        const {
-          data: { data }
-        } = await axiosInstance().post('/generative-ai/chat/ask', payload);
-        setState({ type: 'setNewAssistantMessage', payload: data });
+
+        socket.current.on('ready', () => {
+          socket.current.emit('message', payload);
+        });
+
+        socket.current.on('data', (d) => {
+          if (d.ask_user_input) {
+            d.fields = [
+              {
+                primary: false,
+                field: 'User Input',
+                label: d.ask_user_input,
+                type: 'singleLine',
+                order: 1
+              }
+            ];
+          }
+
+          setState({ type: 'setMessage', payload: d });
+        });
       } catch (error) {
         toastConfig.setToastConfig(error);
         setState({ type: 'setError', error: error.message || '' });
       }
     },
-    [chatId, setState, toastConfig, selectedTopics]
+    [chatId]
+  );
+
+  const submitForm = useCallback(
+    async (question: string) => {
+      try {
+        let payload: { question: string; _id?: string; topicIds: string[] } = {
+          question,
+          topicIds: selectedTopics.map((d) => d._id)
+        };
+
+        if (chatId) {
+          payload = { ...payload, _id: chatId };
+        }
+
+        socket.current.emit('message', payload);
+
+        socket.current.on('data', (d) => {
+          if (d.error) setState({ type: 'setError', error: d.error || '' });
+          else setState({ type: 'setMessage', payload: d });
+        });
+      } catch (error) {
+        toastConfig.setToastConfig(error);
+        setState({ type: 'setError', error: error.message || '' });
+      }
+    },
+    [chatId]
   );
 
   useEffect(() => {
@@ -84,9 +142,9 @@ const Chatbox = (props: ChatboxProps) => {
       for (let i = 0; i < Object.keys(obj).length; i++) {
         query += `${Object.keys(obj)[i]}: ${Object.values(obj)[i]}\n`;
       }
-      sendMessage(query);
+      submitForm(query);
     },
-    [sendMessage]
+    [submitForm]
   );
 
   const resetChat = () => {
@@ -151,7 +209,7 @@ const Chatbox = (props: ChatboxProps) => {
               <>
                 {messages.length > 0 &&
                   messages?.map((message, i) => {
-                    return <RenderSingleChat message={message} chatId={chatId} />;
+                    return <RenderSingleChat message={message} chatId={chatId} error={aiError} />;
                   })}
                 {loading && <RenderSingleChat loading={true} chatId={chatId} align="left" />}
                 {messages[messages.length - 1]?.fields && (
@@ -168,6 +226,15 @@ const Chatbox = (props: ChatboxProps) => {
               </>
             )}
           </div>
+          {aiStatus && (
+            <Typography
+              component={'pre'}
+              variant="body2"
+              className="!ml-[46px] whitespace-pre-wrap rounded-3xl bg-[#f4f4f4] px-[20px] py-[10px] text-[black] dark:bg-[#1e4358] dark:text-[white]"
+            >
+              <CircularProgress /> {aiStatus}
+            </Typography>
+          )}
         </div>
         <div
           className={cn(

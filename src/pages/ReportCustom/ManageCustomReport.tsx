@@ -178,6 +178,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
           });
         } else {
           deepFilter.push({
+            ..._f,
             field: _f?.term,
             term: _f?.value
           });
@@ -236,11 +237,15 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
     });
 
     deepFilters?.forEach((d) => {
-      if (dateFields?.includes(d?.field) && dayjs(d?.term).isValid()) {
-        filters.push({
-          term: d?.field,
-          value: d?.term
-        });
+      if (d?.type === 'date') {
+        if (dayjs(d?.term?.from).isValid() && d?.term?.from instanceof Date && dayjs(d?.term?.to).isValid() && d?.term?.to instanceof Date) {
+          filters.push({
+            term: d?.field,
+            value: d?.term,
+            duration: d?.duration,
+            type: d?.type
+          });
+        }
       } else if (d?.field && d?.term?.length > 0) {
         let obj = {
           type: 'multiSelect',

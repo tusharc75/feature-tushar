@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react';
 import CellDialog from 'src/components/CustomReactTable/Cells/CellDialog';
 import RenderCellTable, { GenericRowData, RenderCellTableColumnDef } from 'src/components/CustomReactTable/Cells/RenderCellTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -9,29 +10,33 @@ type NumberCellProps = {
   enableDilaog?: boolean;
 };
 
-const NumberCell = ({ rowData, field, enableDilaog = true }: NumberCellProps) => {
+const NumberCellImpl = ({ rowData, field, enableDilaog = true }: NumberCellProps) => {
   const data = rowData[field.fieldName] as any & GenericRowData;
   const subFields = field.subFields;
-  const isDataArray = typeof Array.isArray(data);
-  const isSubFieldArray = typeof Array.isArray(subFields);
+  const isDataArray = useMemo(() => typeof Array.isArray(data), [data]);
+  const isSubFieldArray = useMemo(() => typeof Array.isArray(subFields), [subFields]);
+  const columns: RenderCellTableColumnDef<any>[] = useMemo(
+    () =>
+      subFields.map((d) => {
+        const column: RenderCellTableColumnDef<any> = {
+          head: d.fieldLabel,
+          accessor: d.fieldName,
+          cell: (row) => (
+            <p>
+              <span className={cn('p-0', enableDilaog ? 'line-clamp-2' : 'line-clamp-1')} title={row[d.fieldName]}>
+                {row[d.fieldName]}
+              </span>
+            </p>
+          ),
+          width: '150px'
+        };
+        return column;
+      }),
+    [enableDilaog, subFields]
+  );
+
   if (!data || !subFields || !isDataArray || !isSubFieldArray || data.length === 0)
     return enableDilaog ? <NoDataCell /> : <span className="block">-</span>;
-
-  const columns: RenderCellTableColumnDef<any>[] = subFields.map((d) => {
-    const column: RenderCellTableColumnDef<any> = {
-      head: d.fieldLabel,
-      accessor: d.fieldName,
-      cell: (row) => (
-        <p>
-          <span className={cn('p-0', enableDilaog ? 'line-clamp-2' : 'line-clamp-1')} title={row[d.fieldName]}>
-            {row[d.fieldName]}
-          </span>
-        </p>
-      ),
-      width: '150px'
-    };
-    return column;
-  });
 
   return (
     <>
@@ -42,4 +47,5 @@ const NumberCell = ({ rowData, field, enableDilaog = true }: NumberCellProps) =>
   );
 };
 
+const NumberCell = memo(NumberCellImpl);
 export default NumberCell;

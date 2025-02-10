@@ -5,7 +5,15 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE } from '../../../constants/helpers';
+import {
+  getObjKeysWithValues,
+  getObjKeys,
+  yupSchema,
+  CHILD_RESOURCE,
+  QUOTATION_TYPE,
+  PRICING_SETUP_TYPE,
+  sidebarResource
+} from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -22,13 +30,14 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import dayjs from 'dayjs';
+import { getPricingConditions } from 'src/components/PricingCondition';
+import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
   handleSaveData: VoidFunction | any;
   quotationData: any;
   rowData?: object | any;
-  calculatePrice?: VoidFunction | any;
   material: any[];
   selectedProducts: any[];
   isBulkedit: any;
@@ -40,7 +49,6 @@ interface EditDialogProps {
 const rateChangeFields = ['unit', 'pricingMethod', 'pricingCondition'];
 
 const QuotationQtyDialog: FC<EditDialogProps> = ({
-  calculatePrice,
   onClose,
   handleSaveData,
   quotationData,
@@ -52,7 +60,6 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
   showSaveAndNext,
   loadingEdit
 }) => {
-  const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [allFields, setAllFields] = useState([]);
   const [fields, setFields] = useState([]);
@@ -67,6 +74,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
   const [priceMethodListConst, setPriceMethodListConst] = useState([]);
   const [priceConditionList, setPriceConditionList] = useState([]);
   const [pricingMethodList, setPricingMethodList] = useState([]);
+  const [submitState, setSubmitState] = useState({ open: false, values: null });
 
   useEffect(() => {
     fetchFields();
@@ -182,7 +190,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
         }
       });
       setPriceMethodListConst(pricingMethodOptions);
-      await getAllPricingCondition(rowData, unitOptions, pricingMethodOptions);
+      await getAllPricingCondition(rowData, pricingMethodOptions);
       if (rowData?.actualStartDate === '' || rowData?.actualStartDate === '') {
         data = data.filter((e) => !['actualStartDate', 'actualEndDate', 'actualJobDuration'].includes(e.fieldName));
       }
@@ -211,17 +219,22 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
     }
   };
 
-  async function getAllPricingCondition(values: any, unitOptions: any, pricingMethodOptions: any) {
+  async function getAllPricingCondition(values: any, pricingMethodOptions: any) {
     if (rowData) {
-      const priceData: any = await calculatePrice([
-        {
-          materialId: rowData.materialId,
-          type: rowData.type,
-          qty: 1,
-          pricingMethod: pricingMethodOptions?.map((d) => d.optionLabel).join() || '',
-          unit: unitOptions?.map((d) => d.optionLabel)
-        }
-      ]);
+      let conditionType = [QUOTATION_TYPE.salesOrder, QUOTATION_TYPE.repairOrder].includes(quotationData.type)
+        ? PRICING_SETUP_TYPE.price
+        : PRICING_SETUP_TYPE.rent;
+      let priceData: any = await getPricingConditions(
+        quotationData,
+        [
+          {
+            materialId: rowData.materialId,
+            type: rowData.type,
+            qty: 1
+          }
+        ],
+        conditionType
+      );
       setPriceConditionListConst(priceData || []);
       updateRateChangeState(values, priceData, pricingMethodOptions);
     }
@@ -301,18 +314,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
   };
 
   const handleSubmit = async (values) => {
-    if (isBulkedit) {
-      const rows = bulkUpdate(values, selectedProducts, material, allFields, quotationData?.currency);
-      handleSaveData(rows);
-    } else {
-      if (rowData.parentId && !showConfirmationDialog) {
-        setShowConfirmationDialog(true);
-      } else {
-        const rows = await calculateRowsField(material, values, allFields, rowData, quotationData?.currency);
-        handleSaveData(rows, saveAndNext);
-        setShowConfirmationDialog(false);
-      }
-    }
+    setSubmitState({ open: true, values: values });
   };
 
   function validate(values) {
@@ -629,15 +631,26 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
                   Save
                 </ThemeButton>
               </CustomDialogFooter>
-              {showConfirmationDialog && (
-                <ConfirmationDialog
-                  open={showConfirmationDialog}
-                  message="Would you prefer to override the parent-level price configuration?"
-                  onOk={() => {
-                    submitForm();
+              {submitState.open && (
+                <MaterialUpdateActions
+                  resource={sidebarResource.quotation}
+                  referenceData={quotationData}
+                  allFields={allFields}
+                  material={material}
+                  isBulkedit={isBulkedit}
+                  selectedRecords={selectedProducts}
+                  rowData={rowData}
+                  handleUpdateData={(rows) => {
+                    if (isBulkedit) {
+                      handleSaveData(rows);
+                    } else {
+                      handleSaveData(rows, saveAndNext);
+                    }
+                    setSubmitState({ open: false, values: null });
                   }}
-                  onClose={() => {
-                    setShowConfirmationDialog(false);
+                  values={submitState.values}
+                  handleClose={() => {
+                    setSubmitState({ open: false, values: null });
                   }}
                 />
               )}

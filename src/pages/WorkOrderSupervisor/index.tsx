@@ -22,6 +22,7 @@ import {
   REPAIR_ORDER_TYPE,
   WORKORDER_SERVICE_STATUS,
   cn,
+  dateFormatToSend,
   sidebarResource,
   workOrder,
   workOrderColormap,
@@ -33,9 +34,9 @@ import WorkOrderDetailDialog from 'src/pages/WorkOrderSupervisor/WorkOrderDetail
 import WorkOrderList, { WorkOrderListRef } from 'src/pages/WorkOrderSupervisor/WorkOrderList';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import routes from '../../components/Helpers/Routes';
-import AssignUserDialog from '../WorkOrder/Service/AssignUserDialog';
+import AssignTechniciansDialog from '../WorkOrder/Service/AssignTechniciansDialog';
 import AssignWorkStationDialog from '../WorkOrder/Service/AssignWorkStationDialog';
-import { camelCase, map, uniq, uniqBy } from 'lodash';
+import { camelCase, isEqual, map, uniq, uniqBy } from 'lodash';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import { useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
@@ -99,8 +100,8 @@ const WorkOrderSupervisor = () => {
   const [repairOrderDialog, setRepairOrderDialog] = useState(false);
 
   const [globalFilters, setGlobalFilters] = useState<DateRange>({
-    from: new Date(dayjs.tz().startOf('month').format('YYYY/MM/DD')),
-    to: new Date(dayjs.tz().endOf('month').format('YYYY/MM/DD'))
+    from: dayjs.tz().startOf('year').toDate(),
+    to: dayjs.tz().endOf('year').toDate()
   });
   const [resourceType, setResourceType] = useState('workOrder');
   const [isOpen, setOpen] = useState({ open: false, id: null });
@@ -224,6 +225,28 @@ const WorkOrderSupervisor = () => {
       isRead: permissions && permissions?.productionOrder ? permissions?.productionOrder?.isRead : false,
       isCreate: permissions && permissions?.productionOrder ? permissions?.productionOrder?.isCreate : false,
       isUpdate: permissions && permissions?.productionOrder ? permissions?.productionOrder?.isUpdate : false
+    },
+    {
+      fieldData: {
+        _id: '630dc2429gc81869052385b5',
+        fieldName: 'serializedAsset',
+        fieldLabel: resources?.serializedAsset?.titlePlural,
+        lookup: true,
+        lookupResource: sidebarResource.serializedAsset,
+        resource: sidebarResource.workOrderSupervisor,
+        type: 'dropDown',
+        order: 4,
+        required: false,
+        sectionName: 'Work Order Superviser Filter',
+        isTooltip: false,
+        editAble: false,
+        brand: user?.brand,
+        roleType: 0,
+        sectionProperties: ''
+      },
+      isRead: permissions && permissions?.serializedAsset ? permissions?.serializedAsset?.isRead : false,
+      isCreate: permissions && permissions?.serializedAsset ? permissions?.serializedAsset?.isCreate : false,
+      isUpdate: permissions && permissions?.serializedAsset ? permissions?.serializedAsset?.isUpdate : false
     }
   ];
 
@@ -237,6 +260,13 @@ const WorkOrderSupervisor = () => {
           data?.status === WORKORDER_SERVICE_STATUS.planned
             ? `${routes?.serializedAssetDetail?.path}/${data?.serializedAssetId}`
             : `${routes?.workOrderDetail?.path}/${data?.workOrder}`,
+        target: '_blank'
+      },
+      {
+        accessor: 'serializedAssetNumber',
+        title: resources?.serializedAsset?.titleSingular,
+        type: 'link',
+        link: (data) => `${routes.serializedAssetDetail.path}/${data?.serializedAsset?.optionValue}`,
         target: '_blank'
       },
       {
@@ -268,20 +298,28 @@ const WorkOrderSupervisor = () => {
       {
         type: 'tooltip',
         accessor: 'tooltip',
-        renderer: (data) => <RenderAssignOptions openAssignHandler={openAssignHandler} data={data} permissions={permissions} resources={resources} isCreateRepairOrderDisabled={isCreateRepairOrderDisabled} />
+        renderer: (data) => (
+          <RenderAssignOptions
+            openAssignHandler={openAssignHandler}
+            data={data}
+            permissions={permissions}
+            resources={resources}
+            isCreateRepairOrderDisabled={isCreateRepairOrderDisabled}
+          />
+        )
       }
     ];
 
-    let tempvisibleColumns = []
+    let tempvisibleColumns = [];
     if (permissions?.workOrderPlanning?.isRead) {
-      tempvisibleColumns.push(WORKORDER_SERVICE_STATUS.planned)
+      tempvisibleColumns.push(WORKORDER_SERVICE_STATUS.planned);
     }
     tempvisibleColumns = [
       ...tempvisibleColumns,
       WORKORDER_SERVICE_STATUS.pending,
       WORKORDER_SERVICE_STATUS.inProgress,
       WORKORDER_SERVICE_STATUS.completed
-    ]
+    ];
 
     dispatch({
       type: 'initialize',
@@ -363,6 +401,7 @@ const WorkOrderSupervisor = () => {
                 newObj['serviceName'] = newObj?.service?.optionLabel;
                 newObj['assignedUser'] = newObj?.assignedUsers?.map((e) => e?.optionLabel)?.toString();
                 newObj['workStation'] = newObj?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString();
+                newObj['serializedAssetNumber'] = newObj?.serializedAsset?.optionLabel;
                 return newObj;
               });
             }
@@ -408,7 +447,7 @@ const WorkOrderSupervisor = () => {
       }
 
       if (globalFilters && selectDateFilter) {
-        deepFilter = `${deepFilter}&from=${dayjs(globalFilters.from).format('YYYY/MM/DD')}&to=${dayjs(globalFilters.to).format('YYYY/MM/DD')}`;
+        deepFilter = `${deepFilter}&from=${dateFormatToSend(globalFilters.from)}&to=${dateFormatToSend(globalFilters.to)}`;
       }
       return `${deepFilter}`;
     },
@@ -492,7 +531,7 @@ const WorkOrderSupervisor = () => {
   };
 
   const assignTechnicianButton = {
-    label: 'Assign Technician',
+    label: 'Assign Technicians',
     disabled: selectedRecordsS?.some((r) => r?.status === WORKORDER_SERVICE_STATUS.completed) || selectedRecordsS?.length === 0,
     onClick: () => {
       if (viewType === 'table-view') {
@@ -502,6 +541,7 @@ const WorkOrderSupervisor = () => {
       }
     }
   };
+
 
   const assignWorkStationButton = {
     label: `Assign ${resources?.workStations?.titlePlural}`,
@@ -570,11 +610,15 @@ const WorkOrderSupervisor = () => {
         viewType === 'table-view'
           ? tableViewStatus === WORKORDER_SERVICE_STATUS.planned
             ? [createRepairOrderButton]
-            : [assignTechnicianButton, ...(canShowWorkStationButton ? [assignWorkStationButton] : []) , addProductConsumablesButton]
+            : [assignTechnicianButton, ...(canShowWorkStationButton ? [assignWorkStationButton] : []), addProductConsumablesButton]
           : selectedRecords?.every((r) => r?.status === WORKORDER_SERVICE_STATUS.planned)
             ? [...(viewType === 'card-view' ? [createRepairOrderButton] : [])]
             : selectedRecords?.every((r) => r?.status !== WORKORDER_SERVICE_STATUS.planned)
-              ? [assignTechnicianButton, ...(canShowWorkStationButton ? [assignWorkStationButton] : []), ...(viewType === 'card-view' ? [addProductConsumablesButton] : [])]
+              ? [
+                assignTechnicianButton,
+                ...(canShowWorkStationButton ? [assignWorkStationButton] : []),
+                ...(viewType === 'card-view' ? [addProductConsumablesButton] : [])
+              ]
               : [
                 assignTechnicianButton,
                 ...(canShowWorkStationButton ? [assignWorkStationButton] : []),
@@ -586,12 +630,16 @@ const WorkOrderSupervisor = () => {
 
   const statusMenuItems = useMemo(() => {
     return [
-      ...(permissions?.workOrderPlanning?.isRead ? [{
-        label: WORKORDER_SERVICE_STATUS.planned,
-        selected: tableViewStatus === WORKORDER_SERVICE_STATUS.planned,
-        value: WORKORDER_SERVICE_STATUS.planned,
-        startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.planned]
-      }] : []),
+      ...(permissions?.workOrderPlanning?.isRead
+        ? [
+          {
+            label: WORKORDER_SERVICE_STATUS.planned,
+            selected: tableViewStatus === WORKORDER_SERVICE_STATUS.planned,
+            value: WORKORDER_SERVICE_STATUS.planned,
+            startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.planned]
+          }
+        ]
+        : []),
       {
         label: WORKORDER_SERVICE_STATUS.pending,
         selected: tableViewStatus === WORKORDER_SERVICE_STATUS.pending,
@@ -666,7 +714,7 @@ const WorkOrderSupervisor = () => {
               {`${resources?.workOrder?.titlePlural}`}
             </ThemeButton>
           )}
-          {moreButtonMenuItems?.find((e) => e.visible) &&
+          {moreButtonMenuItems?.find((e) => e.visible) && (
             <ButtonMenu
               showChevron={true}
               items={moreButtonMenuItems}
@@ -681,7 +729,7 @@ const WorkOrderSupervisor = () => {
                 )) as any
               }
             />
-          }
+          )}
         </div>
       </div>
       <div className="main-container">
@@ -813,12 +861,7 @@ const WorkOrderSupervisor = () => {
         )}
         {viewType === 'calendar-view' && (
           <div className="pt-2">
-            <WorkOrderCalendar
-              getFilterQuery={getQueryString}
-              filterQuery={filterQuery}
-              reference={resourceType}
-              ref={ref}
-              setOpen={setOpen} />
+            <WorkOrderCalendar getFilterQuery={getQueryString} filterQuery={filterQuery} reference={resourceType} ref={ref} setOpen={setOpen} />
           </div>
         )}
         {viewType === 'table-view' && (
@@ -875,8 +918,8 @@ const WorkOrderSupervisor = () => {
         )}
       </div>
       {assignTechnicianDialog.open && (
-        <AssignUserDialog
-          warehouse={assignTechnicianDialog.multiple ? selectedRecordsS[0]?.warehouse?.optionValue : selectedServiceData?.warehouse}
+        <AssignTechniciansDialog
+          warehouse={assignTechnicianDialog.multiple ? selectedRecordsS[0]?.warehouse?.optionValue : selectedServiceData?.warehouse?.optionValue}
           workOrderData={
             assignTechnicianDialog.multiple
               ? selectedRecordsS?.map((r) => ({
@@ -892,9 +935,8 @@ const WorkOrderSupervisor = () => {
           }
           assignedUsers={
             assignTechnicianDialog.multiple
-              ? selectedRecordsS?.length === 1
-                ? selectedRecordsS[0]?.assignedUsers
-                : []
+              ? selectedRecordsS?.every(val => isEqual(val?.assignedUsers, selectedRecordsS[0]?.assignedUsers))
+                ? selectedRecordsS[0]?.assignedUsers : []
               : selectedServiceData?.assignedUsers
           }
           reference={'service'}
@@ -924,7 +966,11 @@ const WorkOrderSupervisor = () => {
                 }
               ]
           }
-          workStations={workStationAssignDialog.multiple ? selectedRecordsS[0]?.assignedWorkStations : selectedServiceData?.assignedWorkStations}
+          workStations={workStationAssignDialog.multiple
+            ? selectedRecordsS?.every(val => isEqual(val?.assignedWorkStations, selectedRecordsS[0]?.assignedWorkStations))
+              ? selectedRecordsS[0]?.assignedWorkStations : []
+            : selectedServiceData?.assignedWorkStations
+          }
           handleClose={() => {
             setWorkStationAssignDialog({ open: false, multiple: false });
           }}
@@ -934,7 +980,6 @@ const WorkOrderSupervisor = () => {
           }}
         />
       )}
-
       {openWorkOrderScheduler && (
         <WorkOrderSchedulerDialog
           onClose={() => setOpenWorkOrderScheduler(false)}
@@ -944,7 +989,6 @@ const WorkOrderSupervisor = () => {
           }}
         />
       )}
-
       {isOpen.open && (
         <WorkOrderDetailDialog
           workOrderId={isOpen?.id}
@@ -953,7 +997,6 @@ const WorkOrderSupervisor = () => {
           }}
         />
       )}
-
       {consumablesDialog.open && (
         <AssignProductDialog
           handleCloseDialog={() => setConsumablesDialog({ open: false, multiple: false })}
@@ -1056,7 +1099,7 @@ const RenderAssignOptions = ({ openAssignHandler, data, permissions, resources, 
                   setAnchorEl(null);
                 }}
               >
-                {'Assign Technician'}
+                {'Assign Technicians'}
               </MenuItem>
               {permissions?.workStations?.isRead && (
                 <MenuItem

@@ -24,15 +24,17 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { calculatePrice, calculateRowsField, fetch_rental_product_fields, getNestedSubRows } from '../../../components/RentalManagment/helper';
+import { calculateRowsField, fetch_rental_product_fields, getNestedSubRows } from '../../../components/RentalManagment/helper';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import {
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_TYPE,
   deliveryTicket,
   MATERIAL_TYPE,
+  PRICING_SETUP_TYPE,
   RENTAL_STATUS,
-  rentalManagement
+  rentalManagement,
+  sidebarResource
 } from '../../../constants/helpers';
 import { findOne, objectStore } from '../../../constants/indexdbhelper';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
@@ -40,6 +42,8 @@ import Technicians from './Technicians';
 import { FiExternalLink } from 'react-icons/fi';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
+import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
+import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 
 const Services = ({
   rentalManagementData,
@@ -83,7 +87,7 @@ const Services = ({
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
-  const [isRateRequired, setIsRateRequired] = useState(false);
+  const [submitState, setSubmitState] = useState({ open: false, values: null, rowData: null });
 
   useEffect(() => {
     fetchFields();
@@ -331,7 +335,6 @@ const Services = ({
       rows = rows.filter((e) => e.type === MATERIAL_TYPE.service || (e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType === 'Service'));
 
       const isPriceRequired = allFields?.filter((el) => el.fieldName === 'price' && el.required).length > 0;
-      setIsRateRequired(isPriceRequired);
 
       const currency = rentalManagementData?.currency?.toLowerCase();
 
@@ -536,29 +539,26 @@ const Services = ({
     if (material.filter((d) => d.listPrice === null || d.listPrice === undefined || d.listPrice === 0).length === 0) {
       AddMaterial(material, []);
     } else {
-      const priceData: any = await calculatePrice(rentalManagementData, material);
+      let priceData: any = await getPricingConditions(rentalManagementData, material, PRICING_SETUP_TYPE.rent);
       AddMaterial(material, priceData);
     }
   };
 
   const AddMaterial = async (material, priceData) => {
     const tempMaterial = [...material];
-    tempMaterial.forEach((element) => {
-      const rateResult = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit);
-      if (element.listPrice) {
-        const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
-        element[priceFieldName] = element.listPrice;
-        const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
-        Object.assign(element, calValues);
-      } else if (rateResult.length && rateResult[0].mrp) {
-        const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
-        element[priceFieldName] = rateResult[0].mrp;
-        element['pricingCondition'] = rateResult[0].conditionId;
-        element['pricingMethod'] = rateResult[0].pricingMethod?.trim();
-        const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
-        Object.assign(element, calValues);
-      }
-    });
+    if (priceData) {
+      tempMaterial.forEach((element) => {
+        if (element.listPrice) {
+          const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
+          element[priceFieldName] = element.listPrice;
+          const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
+          Object.assign(element, calValues);
+        } else {
+          const calValues = getPricingValue(element, priceData, rentalManagementData?.currency, allFields);
+          Object.assign(element, calValues);
+        }
+      });
+    }
     axiosInstance()
       .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material: tempMaterial })
       .then(() => {
@@ -599,7 +599,7 @@ const Services = ({
   const handleDelete = (rows) => {
     setDeleting(true);
     axiosInstance()
-      .put(`${rentalManagement.api}/productpackage/${rentalManagementData?._id}/delete`, { ids: rows })
+      .put(`${rentalManagement.api}/productpackage/${rentalManagementData?._id}/delete`, { ids: rows?.map((e) => e.id) })
       .then(() => {
         setDeleting(false);
         fetchData();
@@ -676,9 +676,8 @@ const Services = ({
         return;
       }
     }
-    let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(material, inputField, allFields, updatedData, rentalManagementData?.currency);
-    handleSaveData(rows);
+    const calValues = autoCalculateSpecificFields(inputField, rowData, allFields)
+    setSubmitState({ open: true, values: { ...rowData, ...calValues }, rowData: rowData })
   };
 
   const addButtonMenuItems = () => {
@@ -863,7 +862,6 @@ const Services = ({
           loading={isUpdating}
           from={'service'}
           showSaveAndNext={isProductEdit.showSaveAndNext}
-          isRateRequired={isRateRequired}
         />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'service' && (
@@ -910,6 +908,23 @@ const Services = ({
           isRedirectToDetailPage={false}
         />
       )}
+      {submitState.open &&
+        <MaterialUpdateActions
+          resource={sidebarResource.rentalManagement}
+          referenceData={rentalManagementData}
+          allFields={allFields}
+          material={material}
+          rowData={submitState.rowData}
+          handleUpdateData={(rows) => {
+            handleSaveData(rows);
+            setSubmitState({ open: false, values: null, rowData: null })
+          }}
+          values={submitState.values}
+          handleClose={() => {
+            setSubmitState({ open: false, values: null, rowData: null })
+          }}
+        />
+      }
     </Fragment>
   );
 };

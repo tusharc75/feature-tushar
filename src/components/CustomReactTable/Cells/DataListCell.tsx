@@ -1,6 +1,7 @@
 import { camelCase, isArray, isObject } from 'lodash';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { memo, useMemo } from 'react';
 
 const getTitle = (data) => {
   if (data?.length) {
@@ -19,16 +20,23 @@ const getMore = (data) => {
   }
 };
 
-function DataListCell({ field, original }) {
-  let joinedFieldName = field?.fieldName.indexOf(' ') > 0 ? camelCase(field?.fieldName) : field?.fieldName;
+function DataListCellImpl({ field, original }) {
+  const joinedFieldName = useMemo(() => (field?.fieldName.indexOf(' ') > 0 ? camelCase(field?.fieldName) : field?.fieldName), [field?.fieldName]);
 
-  const optionLabel = isArray(original?.[field?.fieldName])
-    ? original?.[field?.fieldName][0]?.optionLabel
-    : isObject(original?.[field?.fieldName])
-      ? original?.[field?.fieldName]?.optionLabel
-      : original?.[field?.fieldName];
+  const optionLabel = useMemo(
+    () =>
+      isArray(original?.[field?.fieldName])
+        ? original?.[field?.fieldName][0]?.optionLabel
+        : isObject(original?.[field?.fieldName])
+          ? original?.[field?.fieldName]?.optionLabel
+          : original?.[field?.fieldName],
+    [field?.fieldName, original]
+  );
 
-  const more = isArray(original?.[field?.fieldName]) ? getMore(original?.[field?.fieldName]) : original[`rest${joinedFieldName}`];
+  const more = useMemo(
+    () => (isArray(original?.[field?.fieldName]) ? getMore(original?.[field?.fieldName]) : original[`rest${joinedFieldName}`]),
+    [field?.fieldName, joinedFieldName, original]
+  );
 
   return (
     <div className="d-flex">
@@ -55,5 +63,7 @@ function DataListCell({ field, original }) {
     </div>
   );
 }
+
+const DataListCell = memo(DataListCellImpl);
 
 export default DataListCell;

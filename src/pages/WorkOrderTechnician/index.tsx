@@ -208,7 +208,7 @@ const WorkOrderTechnician = () => {
         {
           disabled:
             selectedRecords?.length &&
-            selectedRecords?.filter((s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length ===
+              selectedRecords?.filter((s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length ===
               selectedRecords?.length
               ? false
               : true,
