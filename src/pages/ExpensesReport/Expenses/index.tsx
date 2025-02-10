@@ -1,4 +1,14 @@
-import { Box, IconButton, MenuItem, Paper, Table, TableBody, TableCell, TableContainer, TableRow } from '@mui/material';
+import {
+  Box,
+  IconButton,
+  MenuItem,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow
+} from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
@@ -6,7 +16,14 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { EXPENSE_STATUS, expenseReport, expenses, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import {
+  EXPENSE_STATUS,
+  expenseReport,
+  expenses,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  sidebarResource
+} from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -19,7 +36,7 @@ import AddExpenses from 'src/pages/ExpensesReport/AddExpenses';
 import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
 import { isMobile, isTablet } from 'react-device-detect';
 
-const Expenses = ({ selectedExpenseData, showAddButton, reportData=null }) => {
+const Expenses = ({ selectedExpenseData, showAddButton, reportData = null }) => {
   const renderedFrom = camelCase(sidebarResource?.expenses);
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -155,65 +172,64 @@ const Expenses = ({ selectedExpenseData, showAddButton, reportData=null }) => {
   };
 
   const handleDelete = async () => {
-    let recordsToDelete = [];
-    if (deleteData?._id) {
-      recordsToDelete.push(deleteData?._id);
-    } else {
-      recordsToDelete = selectedRecords.map((o) => o._id);
+    try {
+      const { data } = await axiosInstance().put(
+        `${routes.expenseReport.path}/expenses/${reportData._id}/remove`,
+        { ids: deleteData }
+      );
+      deleteData.forEach((id) => deletedIdsRef.current.add(id));
+      
+      setSelectedExpense((prev) => prev.filter((expense) => !deleteData.includes(expense._id)));
+      
+      dispatch({ type: 'selection', selectedRecords: [] });      
+      fetchData();
+      setDeleteData(null);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const updateExpensesStatus = async (expenseList) => {
+    await Promise.all(
+      expenseList.map((expense) =>
+        axiosInstance().patch(`${expenses.api}/status/${expense._id}`, { status: EXPENSE_STATUS.unSubmitted })
+      )
+    );
+    fetchData();
+  };
+
+  const handleSaveAndSubmit = async (newExpenses) => {
+    setIsSubmitting(true);
+
+    const newExpensesArr = Array.isArray(newExpenses) ? newExpenses : [newExpenses];
+
+    const updatedExpenses = [...newExpensesArr, ...selectedExpense];
+    setSelectedExpense(updatedExpenses);
+
+    const expense = [...reportData.expenses, ...updatedExpenses];
+    const payload = {
+      _id: reportData._id,
+      reportTitle: reportData.reportTitle,
+      status: reportData.status,
+      expenses: expense,
+    };
+
+    try {
+      const response = await axiosInstance().put(`${expenseReport.api}`, payload);
+      await updateExpensesStatus(updatedExpenses);
+      fetchData();
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: response.data.message,
+      });
+    } catch (error) {
+      toastConfig.setToastConfig(error);
     }
 
-    axiosInstance()
-      .put(`${routes.expenseReport.path}/expenses/${reportData._id}/remove`, { ids: recordsToDelete })
-      .then(({ data }) => {
-        dispatch({ type: 'selection', selectedRecords: [] });
-        fetchData();
-        setDeleteData(null);
-      });
+    setIsSubmitting(false);
   };
 
-const updateExpensesStatus = async (expenseList) => {
-  await Promise.all(
-    expenseList.map((expense) =>
-      axiosInstance().patch(`${expenses.api}/status/${expense._id}`, { status : EXPENSE_STATUS.unSubmitted })
-    )
-  );
-  fetchData();
-};
-
-const handleSaveAndSubmit = async (newExpenses) => {
-  setIsSubmitting(true);
-
-  const newExpensesArr = Array.isArray(newExpenses) ? newExpenses : [newExpenses];
-
-  const updatedExpenses = [...newExpensesArr, ...selectedExpense];
-  setSelectedExpense(updatedExpenses);
-
-  const expense = [...reportData.expenses, ...updatedExpenses];
-  const payload = {
-    _id: reportData._id,
-    reportTitle: reportData.reportTitle,
-    status: reportData.status,
-    expenses: expense,
-  };
-
-  try {
-    const response = await axiosInstance().put(`${expenseReport.api}`, payload);
-    
-    await updateExpensesStatus(updatedExpenses);
-
-    fetchData();
-    toastConfig.setToastConfig({
-      open: true,
-      type: 'success',
-      message: response.data.message,
-    });
-  } catch (error) {
-    toastConfig.setToastConfig(error);
-  }
-
-  setIsSubmitting(false);
-};
-  
   const ActionsRenderer = {
     accessor: 'action',
     Header: 'Actions',
@@ -227,7 +243,12 @@ const handleSaveAndSubmit = async (newExpenses) => {
       <>
         <HtmlTooltip title={'Delete'}>
           <span>
-            <IconButton size="small" aria-label="Delete" disabled={!row?.original?.canDelete} onClick={() => setDeleteData([row?.original?._id])}>
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              disabled={!row?.original?.canDelete}
+              onClick={() => setDeleteData([row?.original?._id])}
+            >
               <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
             </IconButton>
           </span>
