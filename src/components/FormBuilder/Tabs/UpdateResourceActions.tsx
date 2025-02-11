@@ -197,14 +197,14 @@ const Card = ({ values, index, parentRemove, setFieldValue, errors, touched, fie
   return (
     <li className="flex list-none items-center gap-2">
       <fieldset className="flex-grow space-y-2 rounded-md border px-3 pb-3">
-        <legend className=" text-right">
+        <legend className="text-right">
           <HtmlTooltip title={'Remove'}>
             <IconButton size="small" aria-label="close" onClick={() => parentRemove(index)}>
               <RemoveCircleOutline fontSize="small" color={'error'} />
             </IconButton>
           </HtmlTooltip>
         </legend>
-        <fieldset className="rounded-md  p-3">
+        <fieldset className="rounded-md border border-dashed border-gray-200 p-3 dark:border-gray-800">
           <legend className="text-sm font-semibold">Conditions</legend>
           <div className="space-y-4">
             <FieldArray name={`updateResourceActions.${index}.checkFields`}>
@@ -311,7 +311,7 @@ const Card = ({ values, index, parentRemove, setFieldValue, errors, touched, fie
             </FieldArray>
           </div>
         </fieldset>
-        <fieldset className="rounded-md  p-3">
+        <fieldset className="rounded-md  border border-dashed border-gray-200 p-3 dark:border-gray-800">
           <legend className="text-sm font-semibold">Actions</legend>
           <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
             <Autocomplete

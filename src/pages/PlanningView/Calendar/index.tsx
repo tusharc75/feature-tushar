@@ -18,7 +18,7 @@ import dayjs from 'dayjs';
 import { camelCase, groupBy } from 'lodash';
 import { forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { View, dayjsLocalizer } from 'react-big-calendar';
-import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss';
+import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
