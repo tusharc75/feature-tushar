@@ -433,16 +433,17 @@ const Productpackage = ({
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.service
-        ? parent.serviceDetail
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-        : parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.manualEntry
-            ? parent.detail
+      parent.detail = `${
+        parent.type === MATERIAL_TYPE.service
+          ? parent.serviceDetail
+            ? parent.serviceDetail?.serviceName
             : parent.packageDetail?.packageName
-        }`;
+          : parent.type === MATERIAL_TYPE.product
+            ? parent.productDetail?.productName
+            : parent.type === MATERIAL_TYPE.manualEntry
+              ? parent.detail
+              : parent.packageDetail?.packageName
+      }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -470,7 +471,7 @@ const Productpackage = ({
       parent.assetQty = parent.serializedProduct
         ? inventory?.filter((e) => e._id === parent._id).length + productSerialNumbers?.filter((e) => e._id === parent._id).length
         : nonSerializeAsset?.filter((e) => e._id === parent._id).length +
-        data?.nonSerializedInventory?.filter((d) => d?._id === parent?._id)?.reduce((sum, row) => sum + row?.qty || 0, 0);
+          data?.nonSerializedInventory?.filter((d) => d?._id === parent?._id)?.reduce((sum, row) => sum + row?.qty || 0, 0);
       parent.canDelete =
         parent.type === MATERIAL_TYPE.service && parent?.serviceLog?.length
           ? false
@@ -483,13 +484,13 @@ const Productpackage = ({
                 : true;
       parent.nonSerializedQty =
         parent.type === MATERIAL_TYPE.product &&
-          !parent.serializedProduct &&
-          parent.assetQty === 0 &&
-          parent?.status &&
-          loadingTicketProducts?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)?.length > 0
+        !parent.serializedProduct &&
+        parent.assetQty === 0 &&
+        parent?.status &&
+        loadingTicketProducts?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)?.length > 0
           ? loadingTicketProducts
-            ?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)
-            ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+              ?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)
+              ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
           : 0;
       parent.subRows = generateNestedData(
         data.material,
@@ -539,14 +540,15 @@ const Productpackage = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.service
-        ? _subRow.serviceDetail?.serviceName
-        : _subRow.type === MATERIAL_TYPE.package
-          ? _subRow.packageDetail?.packageName
-          : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow.productDetail?.productName
-            : ''
-        } `;
+      _subRow.detail = `${
+        _subRow.type === MATERIAL_TYPE.service
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.type === MATERIAL_TYPE.package
+            ? _subRow.packageDetail?.packageName
+            : _subRow.type === MATERIAL_TYPE.product
+              ? _subRow.productDetail?.productName
+              : ''
+      } `;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
@@ -564,16 +566,22 @@ const Productpackage = ({
         ? inventory?.filter((e) => e._id === _subRow._id).length + productSerialNumbers?.filter((e) => e._id === _subRow._id).length
         : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
       _subRow.canDelete =
-        _subRow.type === MATERIAL_TYPE.service && _subRow?.serviceLog?.length ? false : _subRow?.assetQty > 0 ? false : _subRow?.status ? false : true;
+        _subRow.type === MATERIAL_TYPE.service && _subRow?.serviceLog?.length
+          ? false
+          : _subRow?.assetQty > 0
+            ? false
+            : _subRow?.status
+              ? false
+              : true;
       _subRow.nonSerializedQty =
         _subRow.type === MATERIAL_TYPE.product &&
-          !_subRow.serializedProduct &&
-          _subRow.assetQty === 0 &&
-          _subRow?.status &&
-          loadingTicketProducts?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)?.length > 0
+        !_subRow.serializedProduct &&
+        _subRow.assetQty === 0 &&
+        _subRow?.status &&
+        loadingTicketProducts?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)?.length > 0
           ? loadingTicketProducts
-            ?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)
-            ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+              ?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)
+              ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
           : 0;
       _subRow.subRows = generateNestedData(
         material,
@@ -826,7 +834,6 @@ const Productpackage = ({
     setIsBulkEdit(false);
   };
 
-
   const handleDeleteMultiple = () => {
     const obj: any = [];
     const dataToDelete = selectedRecords && selectedRecords.filter((e) => e.canDelete);
@@ -880,8 +887,8 @@ const Productpackage = ({
       rows = await calculateRowsField(flattenArray(dataRows), inputField, costFields, rowData, rentalManagementData?.currency);
       handleSaveCostData(rows);
     } else {
-      const calValues = autoCalculateSpecificFields(inputField, rowData, allFields)
-      setSubmitState({ open: true, values: { ...rowData, ...calValues }, rowData: rowData })
+      const calValues = autoCalculateSpecificFields(inputField, rowData, allFields);
+      setSubmitState({ open: true, values: { ...rowData, ...calValues }, rowData: rowData });
     }
   };
 
@@ -1128,6 +1135,7 @@ const Productpackage = ({
           handleClose={() => {
             setAddExistingManagedPackages(false);
           }}
+          extraFilterById={[{ field: 'warehouse', term: { $in: [rentalManagementData?.warehouse?.optionValue] } }]}
           isSubmitting={isSubmitting}
         />
       )}
@@ -1183,7 +1191,7 @@ const Productpackage = ({
           </MenuList>
         </Popover>
       )}
-      {submitState.open &&
+      {submitState.open && (
         <MaterialUpdateActions
           resource={sidebarResource.rentalManagement}
           referenceData={rentalManagementData}
@@ -1192,14 +1200,14 @@ const Productpackage = ({
           rowData={submitState.rowData}
           handleUpdateData={(rows) => {
             handleSaveData(rows);
-            setSubmitState({ open: false, values: null, rowData: null })
+            setSubmitState({ open: false, values: null, rowData: null });
           }}
           values={submitState.values}
           handleClose={() => {
-            setSubmitState({ open: false, values: null, rowData: null })
+            setSubmitState({ open: false, values: null, rowData: null });
           }}
         />
-      }
+      )}
       {openAssetAvailibility && (
         <AssetAvailability
           rentalId={rentalManagementData?._id}
