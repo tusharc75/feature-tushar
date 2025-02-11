@@ -291,7 +291,7 @@ export const DisassemblyOrder = () => {
             disassemblyOrderId={showManageDiassemblyOrder.idToClone}
             onClose={() => setShowManageDiassemblyOrder({ open: false, isClone: false, idToClone: null })}
             onSuccess={(data) => {
-              history.push(`${routes.disassemblyOrder.path}`);
+              history.push(`${routes.disassemblyOrder.path}/${data._id}`);
               setShowManageDiassemblyOrder({ open: false, isClone: false, idToClone: null });
               fetchData();
             }}
