@@ -1,6 +1,6 @@
 import { CircularProgress, TextField } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
-import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss';
+import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 
 const RenderFilter = ({ filtered, lookupResource, selectedLookUpResourceData, setSelectedLookUpResourceData, lookupLoading }) => {
   return (
