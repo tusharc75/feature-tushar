@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import dayjs from 'dayjs';
 import { kebabCase } from 'lodash';
-import { forwardRef, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import { forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { View, dayjsLocalizer } from 'react-big-calendar';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -32,6 +32,8 @@ import '../PlanningView/Calendar/calendarView.scss';
 const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
+
+const localizer = dayjsLocalizer(dayjs);
 
 function WorkOrderCalendar({ getFilterQuery, filterQuery, reference, setOpen }, ref) {
   const {
@@ -126,44 +128,47 @@ function WorkOrderCalendar({ getFilterQuery, filterQuery, reference, setOpen }, 
     }
   }, [view]);
 
-  const onNavigate = (date) => {
-    if (view === 'month') {
-      setDateRange({
-        estimateStartDate: dayjs(date).startOf('month').format('MM/DD/YYYY'),
-        estimateEndDate: dayjs(date).endOf('month').format('MM/DD/YYYY')
-      });
-    } else if (view === 'week') {
-      setDateRange({
-        estimateStartDate: dayjs(date).startOf('week').format('MM/DD/YYYY'),
-        estimateEndDate: dayjs(date).endOf('week').format('MM/DD/YYYY')
-      });
-    } else if (view === 'day') {
-      setDateRange({
-        estimateStartDate: dayjs(date).format('MM/DD/YYYY'),
-        estimateEndDate: dayjs(date).format('MM/DD/YYYY')
-      });
-    } else if (view === 'agenda') {
-      setDateRange({
-        estimateStartDate: dayjs(date).format('MM/DD/YYYY'),
-        estimateEndDate: dayjs(date).add(1, 'month').format('MM/DD/YYYY')
-      });
-    }
-  };
+  const onNavigate = useCallback(
+    (date) => {
+      if (view === 'month') {
+        setDateRange({
+          estimateStartDate: dayjs(date).startOf('month').format('MM/DD/YYYY'),
+          estimateEndDate: dayjs(date).endOf('month').format('MM/DD/YYYY')
+        });
+      } else if (view === 'week') {
+        setDateRange({
+          estimateStartDate: dayjs(date).startOf('week').format('MM/DD/YYYY'),
+          estimateEndDate: dayjs(date).endOf('week').format('MM/DD/YYYY')
+        });
+      } else if (view === 'day') {
+        setDateRange({
+          estimateStartDate: dayjs(date).format('MM/DD/YYYY'),
+          estimateEndDate: dayjs(date).format('MM/DD/YYYY')
+        });
+      } else if (view === 'agenda') {
+        setDateRange({
+          estimateStartDate: dayjs(date).format('MM/DD/YYYY'),
+          estimateEndDate: dayjs(date).add(1, 'month').format('MM/DD/YYYY')
+        });
+      }
+    },
+    [view]
+  );
 
-  const setEventStyle = () => {
+  const eventStyle = useMemo(() => {
     let backgroundColor = themeMode === 'light' ? 'rgb(234, 239, 254)' : 'rgb(185, 183, 219)';
     let color = '#000';
 
     return {
-      backgroundColor,
-      color,
-      borderRadius: '4px',
-      border: 'none',
-      padding: '8px 16px'
+      style: {
+        backgroundColor,
+        color,
+        borderRadius: '4px',
+        border: 'none',
+        padding: '8px 16px'
+      }
     };
-  };
-
-  const localizer = dayjsLocalizer(dayjs);
+  }, [themeMode]);
 
   return (
     <>
@@ -182,19 +187,14 @@ function WorkOrderCalendar({ getFilterQuery, filterQuery, reference, setOpen }, 
           onView={setView}
           view={view}
           eventPropGetter={(obj: any) => {
-            const style = setEventStyle();
-            return {
-              style
-            };
+            return eventStyle;
           }}
           components={{
             agenda: {
               event: ({ event }) => <EventAgenda event={event} setOpen={setOpen} />
             }
           }}
-          onNavigate={(date) => {
-            onNavigate(date);
-          }}
+          onNavigate={onNavigate}
           onSelectEvent={(data: any, event: any) => {
             if (reference === 'repairOrder') {
               fetchRepairOrderCompetencies(data.id);
