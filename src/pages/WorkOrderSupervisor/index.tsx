@@ -253,27 +253,24 @@ const WorkOrderSupervisor = () => {
   useEffect(() => {
     const cardDataRows: datarowInterface[] = [
       {
-        accessor: 'workOrderNumber',
-        title: 'Work Order',
-        type: 'title',
-        link: (data) =>
-          data?.status === WORKORDER_SERVICE_STATUS.planned
-            ? `${routes?.serializedAssetDetail?.path}/${data?.serializedAssetId}`
-            : `${routes?.workOrderDetail?.path}/${data?.workOrder}`,
-        target: '_blank'
-      },
-      {
-        accessor: 'serializedAssetNumber',
-        title: resources?.serializedAsset?.titleSingular,
-        type: 'link',
-        link: (data) => `${routes.serializedAssetDetail.path}/${data?.serializedAsset?.optionValue}`,
-        target: '_blank'
-      },
-      {
         accessor: 'serviceName',
         title: resources?.serviceMaster?.titleSingular,
+        type: 'title',
+        link: (data) => `${routes?.serviceMasterDetail?.path}/${data?.service?.optionValue}`,
+        target: '_blank'
+      },
+      {
+        accessor: 'workOrderNumber',
+        title: resources?.workOrder?.titleSingular,
         type: 'link',
-        link: (data) => `${routes.serviceMasterDetail.path}/${data?.service?.optionValue}`,
+        link: (data) => `${routes?.workOrderDetail?.path}/${data?.workOrder}`,
+        target: '_blank'
+      },
+      {
+        accessor: 'repairOrderNumber',
+        type: 'link',
+        title: resources?.repairOrder?.titleSingular,
+        link: (data) => `${routes?.repairOrderDetail?.path}/${data?.repairOrder?.optionValue}`,
         target: '_blank'
       },
       {
@@ -284,10 +281,10 @@ const WorkOrderSupervisor = () => {
         target: '_blank'
       },
       {
-        accessor: 'repairOrderNumber',
+        accessor: 'serializedAsset',
+        title: resources?.serializedAsset?.titleSingular,
         type: 'link',
-        title: resources?.repairOrder?.titleSingular,
-        link: (data) => `${routes?.repairOrderDetail?.path}/${data?.repairOrder?.optionValue}`,
+        link: (data) => `${routes.serializedAssetDetail.path}/${data?.serializedAssetId}`,
         target: '_blank'
       },
       { accessor: 'spoolNumber', title: 'Spool Number', type: 'text' },
@@ -378,7 +375,6 @@ const WorkOrderSupervisor = () => {
               countC = count;
               rows = dataD?.map((item) => {
                 const newObj = { ...item };
-                newObj['workOrderNumber'] = newObj?.asset?.assetNumber;
                 newObj['serializedAsset'] = newObj?.asset?.assetNumber;
                 newObj['serializedAssetId'] = newObj?.asset?._id;
                 newObj['repairOrderNumber'] = newObj?.repairOrder?.optionLabel;
@@ -401,7 +397,8 @@ const WorkOrderSupervisor = () => {
                 newObj['serviceName'] = newObj?.service?.optionLabel;
                 newObj['assignedUser'] = newObj?.assignedUsers?.map((e) => e?.optionLabel)?.toString();
                 newObj['workStation'] = newObj?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString();
-                newObj['serializedAssetNumber'] = newObj?.serializedAsset?.optionLabel;
+                newObj['serializedAsset'] = item?.serializedAsset?.optionLabel;
+                newObj['serializedAssetId'] = item?.serializedAsset?.optionValue;
                 return newObj;
               });
             }
