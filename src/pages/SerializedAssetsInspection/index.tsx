@@ -56,7 +56,7 @@ const SerializedAssetInspection = () => {
   const [warehouseOptions, setWarehouseOptions] = useState([]);
   const [selectedWarehouse, setSelectedWarehouse] = useState(null);
   const [subleaseAsset, setSubleaseAsset] = useState(false);
-
+  const [statusOptions, setStatusOptions] = useState(null);
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
   const [showReasonDialog, setShowReasonDialog] = useState(false);
   const [status, setStatus] = useState('');
@@ -156,6 +156,7 @@ const SerializedAssetInspection = () => {
       .then(({ data: { data } }) => {
         data?.some((o) => {
           if (o?.fieldData?.fieldName === 'status') {
+            setStatusOptions([...o.fieldData.option]);
             setAllowUpdateStatus(o?.isUpdate);
             return true;
           }
@@ -348,24 +349,43 @@ const SerializedAssetInspection = () => {
     if (!permissions?.serializedAsset?.isUpdate || !allowUpdateStatus || !selectedRecords?.length) {
       return null;
     }
+    const otherStatuses = new Set<string>();
     return (
       <>
-        {Object.entries(ASSET_STATUS).map(([key, label]) => {
-        if (SYSTEM_ASSET_STATUS.includes(label) && label !== ASSET_STATUS.repair && label !== ASSET_STATUS.inRepair) {
-          return null;
-        }
-        
-        const isDisabled = selectedRecords?.some((record) => record.status === label);
-
-        return (
-          <MenuItem key={key} onClick={() => handleStatusChange(label)} disabled={isDisabled}>
-            {`Status Change - ${label}`}
+        {Object.entries(statusOptions).map(([key, status]: any) => {
+          if (
+            SYSTEM_ASSET_STATUS.includes(status?.optionLabel) &&
+            status?.optionLabel !== statusOptions.repair &&
+            status?.optionLabel !== ASSET_STATUS.inRepair
+          ) {
+            return null;
+          }
+  
+          if (!Object.values(ASSET_STATUS).includes(status.optionLabel)) {
+            otherStatuses.add(status.optionLabel);
+          }
+  
+          const isDisabled = selectedRecords.some(
+            (record) => record.status === status?.optionLabel
+          );
+  
+          return (
+            <MenuItem key={key} onClick={() => handleStatusChange(status?.optionLabel)} disabled={isDisabled}>
+              {`Status Change - ${status?.optionLabel}`}
+            </MenuItem>
+          );
+        })}
+  
+        {/* Render additional statuses */}
+        {[...otherStatuses].map((status, index) => (
+          <MenuItem key={`other-${index}`} onClick={() => handleStatusChange(status)}>
+            {`Status Change - ${status}`}
           </MenuItem>
-        );
-      })}
+        ))}
       </>
     );
   };
+  
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
