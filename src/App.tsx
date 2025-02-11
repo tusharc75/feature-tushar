@@ -282,7 +282,6 @@ import ExpenseApproval from 'src/pages/ExpenseApproval';
 import SerializedAssetInspection from './pages/SerializedAssetsInspection';
 import { DisassemblyOrder } from 'src/pages/DisassemblyOrder';
 import DisassemblyOrderDetailsPage from 'src/pages/DisassemblyOrder/DiassemblyDetailPage';
-
 var notificationInterval: any = null;
 
 function App() {
