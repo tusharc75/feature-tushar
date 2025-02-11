@@ -78,6 +78,11 @@ const routes = {
     path: '/activity',
     data: {}
   },
+  disassemblyOrder: {
+    path: '/disassembly-order',
+    data: {}
+
+  },
   activityEmail: {
     path: '/email',
     data: {}
@@ -260,20 +265,20 @@ const routes = {
   repairJobDetail: {
     path: '/repair-job/detail'
   },
-  expenses:{
-    path:'/expenses'
+  expenses: {
+    path: '/expenses'
   },
-  expensesDetail:{
-    path:'/expenses/detail'
+  expensesDetail: {
+    path: '/expenses/detail'
   },
-  expenseReport:{
-    path:'/expense-report'
+  expenseReport: {
+    path: '/expense-report'
   },
-  expenseReportDetail:{
-    path:'/expense-report/detail'
+  expenseReportDetail: {
+    path: '/expense-report/detail'
   },
-  expenseApproval:{
-    path:'/expense-approval'
+  expenseApproval: {
+    path: '/expense-approval'
   },
   salesOrder: {
     path: '/sales-order'

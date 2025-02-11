@@ -280,6 +280,7 @@ import ExpenseReport from 'src/pages/ExpensesReport';
 import ExpenseReportDetailsPage from 'src/pages/ExpensesReport/ExpenseReportDetailPage';
 import ExpenseApproval from 'src/pages/ExpenseApproval';
 import SerializedAssetInspection from './pages/SerializedAssetsInspection';
+import { DisassemblyOrder } from 'src/pages/DisassemblyOrder';
 
 var notificationInterval: any = null;
 
@@ -925,6 +926,10 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.demandOrder.path}>
               <DemandOrder />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.disassemblyOrder.path}`}>
+              <DisassemblyOrder />
+
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.demandOrderDetail.path}/:id`}>
               <DemandOrderDetails />
