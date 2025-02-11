@@ -360,11 +360,11 @@ const SerializedAssetInspection = () => {
           ) {
             return null;
           }
-  
+          //adding others 
           if (!Object.values(ASSET_STATUS).includes(status.optionLabel)) {
             otherStatuses.add(status.optionLabel);
           }
-  
+          // if same 
           const isDisabled = selectedRecords.some(
             (record) => record.status === status?.optionLabel
           );
@@ -375,8 +375,7 @@ const SerializedAssetInspection = () => {
             </MenuItem>
           );
         })}
-  
-        {/* Render additional statuses */}
+        {/* other status */}
         {[...otherStatuses].map((status, index) => (
           <MenuItem key={`other-${index}`} onClick={() => handleStatusChange(status)}>
             {`Status Change - ${status}`}
