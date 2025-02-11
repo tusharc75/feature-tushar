@@ -1,4 +1,4 @@
-import { Card, CardActions, CardContent, MenuItem, Typography } from '@mui/material';
+import { Box, IconButton, MenuItem, Typography } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -7,12 +7,15 @@ import { ListingPageHeader } from 'src/components/PageHeaders';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import CustomContainer from '../../components/CustomContainer';
-import { gridLoadingTimeout, prepareDataForGrid, expenseApproval, sidebarResource, EXPENSE_STATUS, expenseReport, expenses } from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, EXPENSE_STATUS, expenseReport } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Grid from '@mui/material/Grid2';
+import { isMobile } from 'react-device-detect';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import Requests from 'src/pages/ExpenseApproval/Requests';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import RefreshIcon from '@mui/icons-material/Refresh';
 
 let expenseApprovalTimeout;
 
@@ -25,9 +28,9 @@ const ExpenseApproval = () => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [reportData, setReportData] = useState(null);
-  const [subtotal, setSubtotal] = useState(0);
+  const [selectedExpenseReport, setSelectedExpenseReport] = useState(null);
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -38,12 +41,6 @@ const ExpenseApproval = () => {
       fetchData();
     }, millisec);
   }, [search]);
-
-  useEffect(() => {
-    if (reportData) {
-      calculateTotal();
-    }
-  }, [reportData]);
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
@@ -82,6 +79,7 @@ const ExpenseApproval = () => {
   };
 
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
+    setSelectedExpenseReport(null);
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     try {
@@ -90,9 +88,11 @@ const ExpenseApproval = () => {
       const response: any = await axiosInstance().get(`${expenseReport.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
       data = response?.data?.data;
       count = response?.data?.count;
-      data=data.filter((item) => item.status === EXPENSE_STATUS.awaitingApproval)
+      data = data.filter((item) => item.status === EXPENSE_STATUS.awaitingApproval || item.status === EXPENSE_STATUS.approved);
+      if (data?.length && !isMobile) {
+        setSelectedExpenseReport(data[0]);
+      }
       setReportData(data);
-      calculateTotal();
       let rows = data?.map((u) => {
         let finalObject: any = prepareDataForGrid(u, user);
         finalObject['isChecked'] = false;
@@ -113,32 +113,6 @@ const ExpenseApproval = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-    const handleStatusChange = async (status) => {
-      for (let report of reportData) {
-      await axiosInstance().patch(`${expenseReport.api}/status/${report._id}`, {
-        status
-      });
-      if (report?.expenses?.length > 0) {
-        for (let expense of report.expenses) {
-            await axiosInstance().patch(`${expenses.api}/status/${expense._id}`, {
-              status
-            });
-        }
-      }
-    }
-      fetchData();
-    };
-
-    const calculateTotal = async () => {
-      let sum = 0;
-      for (let report of reportData || []) {
-        if (report?.expenses?.length > 0) {
-          sum += report.expenses.reduce((acc, expense) => acc + (Number(expense.totalAmount) || 0), 0);
-        }
-      }
-      setSubtotal(sum);
-    };    
-
   const ActionMenuItems = () => {
     return (
       <MenuItem
@@ -158,11 +132,13 @@ const ExpenseApproval = () => {
   };
 
   return (
-    <div className="main-container-v1">
-      <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ ...routes.expenseApproval, title: resources?.expenseApproval?.titlePlural }]} />
-      </div>
-      <CustomContainer>
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
+          <CustomBreadCrumbs routes={[{ ...routes.expenseApproval, title: resources?.expenseApproval?.titlePlural }]} />
+        </Box>
+      </Box>
+      <div className="mb-4 flex items-center justify-end">
         <ListingPageHeader
           searchValue={search}
           onSearch={handleSearch}
@@ -171,28 +147,109 @@ const ExpenseApproval = () => {
           actionMenuItems={<ActionMenuItems />}
           isAddButtonVisible={false}
         />
-        <Grid container spacing={2} className="mt-3">
-          {reportData?.map((report) => (
-            <Grid size={{xs:12, sm:6, md:4}} key={report._id}>
-              <Card sx={{ maxWidth: 345 }}>
-                <CardContent>
-                  <Typography gutterBottom variant="h5" component="div">
-                    {report.reportTitle}
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    {`Total Expense: ${subtotal || 'N/A'}`}
-                  </Typography>
-                </CardContent>
-                <CardActions>
-                  <ThemeButton buttonType="themeBorder" onClick={() => handleStatusChange(EXPENSE_STATUS.approved)}>Approve</ThemeButton>
-                  <ThemeButton buttonType="red" onClick={() => handleStatusChange(EXPENSE_STATUS.rejected)}>Reject</ThemeButton>
-                </CardActions>
-              </Card>
+        <div className="flex gap-2">
+          <HtmlTooltip title="Refresh">
+            <IconButton size="small" onClick={() => fetchData()}>
+              <RefreshIcon />
+            </IconButton>
+          </HtmlTooltip>
+        </div>
+      </div>
+      <Box className={`detail-container-v1`}>
+        {reportData ? (
+          reportData?.length > 0 ? (
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, md: 4, lg: 3 }}>
+                <Box className="container-with-border" p={2}>
+                  <Box style={{ maxHeight: isMobile ? 'calc(100vh - 100px)' : 'calc(100vh - 220px)', overflow: 'auto' }}>
+                    {reportData?.map((report) => {
+                        const reportTotal = report.expenses?.reduce(
+                          (acc, expense) => acc + (Number(expense.totalAmount) || 0),
+                          0
+                        ) || 0;
+                      return (
+                        <Box
+                          mb={2}
+                          key={report._id}
+                          onClick={() => {
+                            setSelectedExpenseReport(report);
+                          }}
+                          style={
+                            {
+                              cursor: 'pointer',
+                              backgroundColor: 'var(--dark-secondary, white)',
+                              '--card-color-primary': 'var(--dark-primary-text, #2A3042)',
+                              '--card-color-secondary': 'var(--dark-secondary-text, #5B5B5B)',
+                              border:
+                                selectedExpenseReport === report ? '2.5px solid var(--new_theme_color)' : '1px solid var(--common-border-color)',
+                              borderRadius: '8px'
+                            } as React.CSSProperties
+                          }
+                        >
+                          <Box p={2}>
+                            <Box display="flex">
+                              <Typography
+                                variant="subtitle2"
+                                style={{ color: 'var(--card-color-primary)', fontSize: 15, marginBottom: 8, fontWeight: 600 }}
+                              >
+                                Report Title : <span style={{ color: 'var(--card-color-secondary)' }}>{report.reportTitle}</span>
+                              </Typography>
+                            </Box>
+                            <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 600 }}>
+                              Total Amount : <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{reportTotal || 'N/A'}</span>
+                            </Typography>
+                            <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 600 }}>
+                              <Box
+                                component="span"
+                                sx={{
+                                  display: 'inline-block',
+                                  backgroundColor: report?.status === EXPENSE_STATUS.approved ? '#E6FFFA' : '#FFF9E6',
+                                  color: report?.status === EXPENSE_STATUS.approved ? '#0097A7' : '#FF9800',
+                                  fontWeight: 600,
+                                  padding: '4px 12px',
+                                  borderRadius: '16px',
+                                  fontSize: '0.875rem',
+                                  border: report?.status === EXPENSE_STATUS.approved ? '1px solid #80DEEA' : '1px solid #ffad33',
+                                }}
+                              >
+                                {report?.status}
+                              </Box>
+                            </Typography>
+                          </Box>
+                        </Box>
+                      );
+                    })}
+                  </Box>
+                </Box>
+              </Grid>
+              <Grid size={{ xs: 12, md: 8, lg: 9 }}>
+                {selectedExpenseReport && (
+                  <>
+                    {isMobile ? (
+                      <>
+                        <Requests referenceId={selectedExpenseReport?._id} fetchDataMaster={fetchData} isMobile={isMobile} />
+                      </>
+                    ) : (
+                      <Box className="container-with-border " p={3}>
+                        <Requests referenceId={selectedExpenseReport?._id} fetchDataMaster={fetchData} />
+                      </Box>
+                    )}
+                  </>
+                )}
+              </Grid>
             </Grid>
-          ))}
-        </Grid>
-      </CustomContainer>
-    </div>
+          ) : (
+            <Box style={{ minHeight: 'calc(100vh - 349px)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <Typography>No Request Pending !</Typography>
+            </Box>
+          )
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
+      </Box>
+    </Box>
   );
 };
 

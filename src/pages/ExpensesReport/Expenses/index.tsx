@@ -20,6 +20,7 @@ import {
   EXPENSE_STATUS,
   expenseReport,
   expenses,
+  getUniqueCurrencies,
   gridLoadingTimeout,
   prepareDataForGrid,
   sidebarResource
@@ -86,7 +87,7 @@ const Expenses = ({ selectedExpenseData, showAddButton, reportData = null, remov
         Cell: ({ row }) => {
           return row?.original?.totalAmount ? (
             <div>
-              <p className="text-truncate">{row?.original?.totalAmount}</p>
+              <p className="text-truncate">{getUniqueCurrencies().find((d) => d.currencyCode === row?.original?.currency)?.symbolNative} {row?.original?.totalAmount}</p>
             </div>
           ) : (
             <NoDataCell />
@@ -223,15 +224,15 @@ const Expenses = ({ selectedExpenseData, showAddButton, reportData = null, remov
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={'Delete'}>
+        <HtmlTooltip title={row?.original?.canDelete && row?.original?.status !== EXPENSE_STATUS.awaitingApproval && row?.original?.status !== EXPENSE_STATUS.approved ? 'Delete' : 'Expense is Awaiting Approval'}>
           <span>
             <IconButton
               size="small"
               aria-label="Delete"
-              disabled={!row?.original?.canDelete}
+              disabled={row?.original?.canDelete && reportData?.status !== EXPENSE_STATUS.awaitingApproval && reportData?.status !== EXPENSE_STATUS.approved ? true : false}
               onClick={() => setDeleteData([row?.original?._id])}
             >
-              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete && row?.original?.status !== EXPENSE_STATUS.awaitingApproval && row?.original?.status !== EXPENSE_STATUS.approved ? 'error' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -280,14 +281,14 @@ const Expenses = ({ selectedExpenseData, showAddButton, reportData = null, remov
   return (
     <div className="main-container-v1">
       <>
-        <DetailsPageHeader
+        {reportData?.status !== EXPENSE_STATUS.awaitingApproval && <DetailsPageHeader
           isAddButtonVisible={showAddButton}
           isActionButtonVisible={true}
           actionButtonMenuItems={actionButtonMenuItems()}
           addButtonMenuItems={addButtonMenuItems()}
           actionButtonProps={{ disabled: selectedRecords.length === 0 }}
           hasXpadding
-        />
+        />}
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 450px)'}
@@ -311,8 +312,8 @@ const Expenses = ({ selectedExpenseData, showAddButton, reportData = null, remov
                 <TableBody>
                   <TableRow>
                     <TableCell rowSpan={3} />
-                    <TableCell colSpan={2}>Subtotal</TableCell>
-                    <TableCell align="right">{` ${subtotal}`}</TableCell>
+                    <TableCell colSpan={2} sx={{ fontWeight: 'bold', fontSize: '1.1rem' }}><strong>Total :</strong></TableCell>
+                    <TableCell align="right" sx={{ fontSize: '1rem' }}>{`${subtotal}`}</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
