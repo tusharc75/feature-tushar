@@ -205,7 +205,7 @@ const Card = ({ values, index, parentRemove, setFieldValue, errors, touched, fie
           </HtmlTooltip>
         </legend>
         <fieldset className="rounded-md border border-dashed border-gray-200 p-3 dark:border-gray-800">
-          <legend className="text-sm font-semibold">Conditions</legend>
+          <legend className="px-1 text-sm font-semibold">Conditions</legend>
           <div className="space-y-4">
             <FieldArray name={`updateResourceActions.${index}.checkFields`}>
               {({ push, remove }) => (
@@ -312,7 +312,7 @@ const Card = ({ values, index, parentRemove, setFieldValue, errors, touched, fie
           </div>
         </fieldset>
         <fieldset className="rounded-md  border border-dashed border-gray-200 p-3 dark:border-gray-800">
-          <legend className="text-sm font-semibold">Actions</legend>
+          <legend className="px-1 text-sm  font-semibold">Actions</legend>
           <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
             <Autocomplete
               options={fields}
