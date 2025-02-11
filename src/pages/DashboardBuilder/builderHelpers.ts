@@ -113,6 +113,5 @@ export const defaultFormConfigs: IFormDataType = {
 
 export const frequencyData = [
   { optionLabel: 'Monthly', optionValue: 'month' },
-  { optionLabel: 'Weekly', optionValue: 'week' },
   { optionLabel: 'Daily', optionValue: 'day' }
 ];
