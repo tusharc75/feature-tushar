@@ -678,11 +678,13 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       }
 
       return {
-        backgroundColor,
-        color,
-        borderRadius: '4px',
-        border: 'none',
-        padding: '8px 16px'
+        style: {
+          backgroundColor,
+          color,
+          borderRadius: '4px',
+          border: 'none',
+          padding: '8px 16px'
+        }
       };
     },
     [themeMode]
@@ -785,12 +787,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 views={['month', 'week', 'day', 'agenda']}
                 onView={setView}
                 view={view}
-                eventPropGetter={(obj: any) => {
-                  const style = setEventStyle(obj);
-                  return {
-                    style
-                  };
-                }}
+                eventPropGetter={setEventStyle}
                 onNavigate={(date) => {
                   onNavigate(date);
                 }}
@@ -815,12 +812,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 views={['month', 'week', 'day', 'agenda']}
                 onView={setView}
                 view={view}
-                eventPropGetter={(obj: any) => {
-                  const style = setEventStyle(obj);
-                  return {
-                    style
-                  };
-                }}
+                eventPropGetter={setEventStyle}
                 onNavigate={(date) => {
                   onNavigate(date);
                 }}
