@@ -281,7 +281,7 @@ const Expenses = ({ selectedExpenseData, showAddButton, reportData = null, remov
   return (
     <div className="main-container-v1">
       <>
-        {reportData?.status !== EXPENSE_STATUS.awaitingApproval && <DetailsPageHeader
+        {reportData?.status !== EXPENSE_STATUS.awaitingApproval && reportData?.status !== EXPENSE_STATUS.approved && <DetailsPageHeader
           isAddButtonVisible={showAddButton}
           isActionButtonVisible={true}
           actionButtonMenuItems={actionButtonMenuItems()}
