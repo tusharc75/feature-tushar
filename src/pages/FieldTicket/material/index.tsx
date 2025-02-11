@@ -537,7 +537,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
       });
     }
     await axiosInstance()
-      .post(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material: tempMaterial })
+      .post(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material: tempMaterial, addPackageChild: resourcePolicy.addPackageChild })
       .then(() => {
         if (fieldTicketData?.status === FIELD_TICKET_STATUS.new) {
           handleChangeStatus(FIELD_TICKET_STATUS.inProgress);
