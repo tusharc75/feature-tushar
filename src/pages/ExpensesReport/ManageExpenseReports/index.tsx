@@ -49,6 +49,7 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
   const [showAddExistingExpenseModal, setShowAddExistingExpenseModal] = useState(false);
   const [showManageExpensesDialog, setShowManageExpensesDialog] = useState({ open: false, idToClone: null });
   const [isAllowedToEdit, setIsAllowedToEdit] = useState(true);
+  const [editing, setEditing] = useState(false);
 
   useEffect(() => {
     axiosInstance()
@@ -63,6 +64,7 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
               setTitle(`Edit - ${data.reportTitle}`);
               setSelectedExpense(data.expenses);
               setIsAllowedToEdit(false);
+              setEditing(true);
               setInitialData({
                 fields: fieldsDataForUpdate,
                 values: { ...getObjKeysWithValues(data, fieldsDataForUpdate) }
@@ -195,7 +197,7 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
     <Dialog
       maxWidth="md"
       fullWidth
-      fullScreen
+      fullScreen={editing ? (fullScreen || isMobile || isTablet) : true}
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
       onClose={(e, reason) => {
@@ -323,7 +325,7 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
         </Formik>
       ) : (
         <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          <CommonSkeleton lenArray={[...(editing ? Array(6) : Array(10)).keys()]} />
         </Box>
       )}
     </Dialog>

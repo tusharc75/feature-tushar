@@ -147,17 +147,21 @@ export const sumOnParent = (parent, child, fields, currency) => {
 
         const originalRow = { ...row }
 
-        const calValues = autoCalculateSpecificFields({ [totalPriceFieldName]: row[totalPriceFieldName] * row?.qty }, row, fields)
-        Object.assign(row, calValues)
-
-        if (originalRow[discountFieldName]) {
-            const calValues = autoCalculateSpecificFields({ [discountFieldName]: originalRow[discountFieldName] * row?.qty }, row, fields)
+        if (fields?.find((e) => e.fieldName === 'totalPrice')) {
+            const calValues = autoCalculateSpecificFields({ [totalPriceFieldName]: row[totalPriceFieldName] * row?.qty }, row, fields)
             Object.assign(row, calValues)
         }
-
-        if (originalRow[taxFieldName]) {
-            const calValues = autoCalculateSpecificFields({ [taxFieldName]: originalRow[taxFieldName] * row?.qty }, row, fields)
-            Object.assign(row, calValues)
+        if (fields?.find((e) => e.fieldName === 'discount')) {
+            if (originalRow[discountFieldName]) {
+                const calValues = autoCalculateSpecificFields({ [discountFieldName]: originalRow[discountFieldName] * row?.qty }, row, fields)
+                Object.assign(row, calValues)
+            }
+        }
+        if (fields?.find((e) => e.fieldName === 'tax')) {
+            if (originalRow[taxFieldName]) {
+                const calValues = autoCalculateSpecificFields({ [taxFieldName]: originalRow[taxFieldName] * row?.qty }, row, fields)
+                Object.assign(row, calValues)
+            }
         }
     })
 
@@ -267,7 +271,8 @@ export const calculateRowsField = async (material: any[], values: any, fields: a
         const child = material.filter((e) => e.parentId === rowData._id);
         if (child?.length) {
             if (newRowData[`finalPrice_${currency}`] !== rowData[`finalPrice_${currency}`]) {
-                if (child?.find((e) => e[`finalPrice_${currency}`]) && newRowData[`qty`] !== rowData[`qty`] && newRowData[`price_${currency}`] === rowData[`price_${currency}`]) {
+                if (child?.find((e) => e[`finalPrice_${currency}`])
+                    && newRowData[`qty`] !== rowData[`qty`] && newRowData[`price_${currency}`] === rowData[`price_${currency}`]) {
                     const tempParent = sumOnParent([newRowData], child, fields, currency)
                     rows.push(tempParent[0])
                 }
@@ -275,6 +280,9 @@ export const calculateRowsField = async (material: any[], values: any, fields: a
                     rows.push(newRowData)
                     childs = resetValueZero(material, fields, rowData._id)
                 }
+            }
+            else {
+                rows.push(newRowData);
             }
         } else {
             rows.push(newRowData);
