@@ -3083,7 +3083,6 @@ export const DIASSEMBLY_ORDER_STATUS = {
   new: 'New',
   inProgress: 'In-Progress',
   closed: 'Closed'
-
 }
 
 export const WORK_FLOW_STATUS = {

@@ -280,8 +280,10 @@ import ExpenseReport from 'src/pages/ExpensesReport';
 import ExpenseReportDetailsPage from 'src/pages/ExpensesReport/ExpenseReportDetailPage';
 import ExpenseApproval from 'src/pages/ExpenseApproval';
 import SerializedAssetInspection from './pages/SerializedAssetsInspection';
-import { DisassemblyOrder } from 'src/pages/DisassemblyOrder';
-import DisassemblyOrderDetailsPage from 'src/pages/DisassemblyOrder/DiassemblyDetailPage';
+import DisassemblyOrder from 'src/pages/DisassemblyOrder';
+import DisassemblyOrderDetail from 'src/pages/DisassemblyOrder/DisassemblyOrderDetail';
+
+
 var notificationInterval: any = null;
 
 function App() {
@@ -927,15 +929,14 @@ function App() {
             <PrivateRoute exact path={routes.demandOrder.path}>
               <DemandOrder />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.disassemblyOrder.path}`}>
-              <DisassemblyOrder />
-
-            </PrivateRoute>
             <PrivateRoute exact path={`${routes.demandOrderDetail.path}/:id`}>
               <DemandOrderDetails />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.disassemblyOrder.path}/:id`}>
-              <DisassemblyOrderDetailsPage />
+            <PrivateRoute exact path={`${routes.disassemblyOrder.path}`}>
+              <DisassemblyOrder />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.disassemblyOrderDetail.path}/:id`}>
+              <DisassemblyOrderDetail />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.expenses.path}`}>
               <Expenses />
