@@ -351,8 +351,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       });
       return;
     }
-    const calValues = autoCalculateSpecificFields(inputField, rowData, allFields);
-    setSubmitState({ open: true, values: { ...rowData, ...calValues }, rowData: rowData });
+    setSubmitState({ open: true, values: inputField, rowData: rowData });
   };
 
   const addButtonMenuitems = () => {
