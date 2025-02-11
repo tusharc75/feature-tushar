@@ -260,20 +260,20 @@ const routes = {
   repairJobDetail: {
     path: '/repair-job/detail'
   },
-  expenses:{
-    path:'/expenses'
+  expenses: {
+    path: '/expenses'
   },
-  expensesDetail:{
-    path:'/expenses/detail'
+  expensesDetail: {
+    path: '/expenses/detail'
   },
-  expenseReport:{
-    path:'/expense-report'
+  expenseReport: {
+    path: '/expense-report'
   },
-  expenseReportDetail:{
-    path:'/expense-report/detail'
+  expenseReportDetail: {
+    path: '/expense-report/detail'
   },
-  expenseApproval:{
-    path:'/expense-approval'
+  expenseApproval: {
+    path: '/expense-approval'
   },
   salesOrder: {
     path: '/sales-order'
@@ -737,6 +737,12 @@ const routes = {
   },
   scheduleAndDispatch: {
     path: '/schedule-and-dispatch'
+  },
+  disassemblyOrder: {
+    path: '/disassembly-order',
+  },
+  disassemblyOrderDetail: {
+    path: '/disassembly-order/detail',
   },
 };
 
