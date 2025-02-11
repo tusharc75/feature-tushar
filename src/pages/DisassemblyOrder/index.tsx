@@ -1,6 +1,6 @@
 import { camelCase } from "lodash"
 import CustomBreadCrumbs from "src/components/CustomBreadCrumbs";
-import { DIASSEMBLY_ORDER_STATUS, disassemblyOrder, EXPENSE_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from "src/constants/helpers"
+import { disassemblyOrder, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from "src/constants/helpers"
 import routes from "src/components/Helpers/Routes";
 import { useData } from "src/StateProvider/Provider";
 import ImportExportLinks from "src/components/Helpers/ImportExportLinks";
@@ -9,10 +9,9 @@ import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomT
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from "src/components/CustomReactTable";
 import axiosInstance from "src/axios/axiosInstance";
 import HtmlTooltip from "src/components/CustomTooltipTitle";
-import { cloneDisable } from "src/constants/messageHelpers";
+import { cloneDisable, deleteDisable } from "src/constants/messageHelpers";
 import { Box, IconButton, MenuItem } from "@mui/material";
-import { FileCopyIcon } from "src/assets/svg/svgIcons";
-import { GridDeleteIcon } from "@mui/x-data-grid";
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import axios, { CancelTokenSource } from "axios";
 import CustomContainer from "src/components/CustomContainer";
 import { ListingPageHeader } from "src/components/PageHeaders";
@@ -21,12 +20,13 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { ManageDiassemblyOrder } from "src/pages/DisassemblyOrder/ManageDiassemblyOrder";
 import { useHistory } from 'react-router-dom';
 import DeleteIcon from '@mui/icons-material/Delete';
-export const DisassemblyOrder = () => {
+
+const DisassemblyOrder = () => {
+
   const renderedFrom = camelCase(sidebarResource?.disassemblyOrder);
   const {
     state: { user, permissions, selectedEntity, resources }
   }: any = useData();
-
 
   const toastConfig = useContext(CustomToastContext);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -36,25 +36,26 @@ export const DisassemblyOrder = () => {
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
-  const { generateColumns, checkStaticField } = useColumns();
+  const { generateColumns } = useColumns();
   const history = useHistory();
+
   useEffect(() => {
     fetchGridColumns();
   }, []);
+
+  useEffect(() => {
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
+  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.disassemblyOrder}`);
     data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes?.disassemblyOrder?.path, true);
-    let staticFields = getStaticFields();
-    staticFields.forEach((field) => {
-      newColumns.push(checkStaticField(renderedFrom, field));
-    });
-    setColumns([...newColumns, ActionsRenderer]);
-
+    const newColumns = generateColumns(renderedFrom, data, routes?.disassemblyOrderDetail?.path, true);
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   }
-
 
   const ActionsRenderer = {
     accessor: 'action',
@@ -77,22 +78,22 @@ export const DisassemblyOrder = () => {
                 setShowManageDiassemblyOrder({ open: true, isClone: true, idToClone: row.original._id });
               }}
             >
-              <FileCopyIcon fontSize="small" color={permissions?.expenses?.isCreate ? 'primary' : 'disabled'} />
+              <FileCopyIcon fontSize="small" color={permissions?.disassemblyOrder?.isCreate ? 'primary' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title={row?.original?.canDelete && row?.original?.status === DIASSEMBLY_ORDER_STATUS.new ? 'Delete' : 'You can not delete it is reported'}>
+        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
               size="small"
               aria-label="Delete"
-              disabled={row?.original?.canDelete && row?.original?.status !== DIASSEMBLY_ORDER_STATUS.new ? true : false}
+              disabled={row?.original?.canDelete ? false : true}
               onClick={() => {
                 setDeleteRecord(row.original);
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon fontSize="small" color={row?.original?.canDelete && row?.original?.status !== DIASSEMBLY_ORDER_STATUS.new ? 'disabled' : 'error'} />
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -130,6 +131,7 @@ export const DisassemblyOrder = () => {
     return deepFilter;
 
   }
+
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
@@ -148,29 +150,21 @@ export const DisassemblyOrder = () => {
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
-
-
     } catch (error) {
       dispatch({ type: 'loading', loading: false });
       toastConfig.setToastConfig(error);
-
     }
   }
-
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
   }
 
-
   const handleDeleteDisassemblyOrder = async () => {
     let recordsToDelete = deleteRecord?._id ? [deleteRecord._id] : selectedRecords.map((u) => u._id);
     setDeleteLoading(true);
     try {
-      const response = await axiosInstance().put(`${disassemblyOrder.api}/remove`, {
-        ids: recordsToDelete
-      });
-
+      const response = await axiosInstance().put(`${disassemblyOrder.api}/remove`, { ids: recordsToDelete });
       toastConfig.setToastConfig({
         open: true,
         type: "success",
@@ -181,7 +175,6 @@ export const DisassemblyOrder = () => {
       setDeleteLoading(false);
       fetchData();
     } catch (error) {
-      console.error("Delete failed:", error.response?.data || error);
       toastConfig.setToastConfig(error);
       setShowDeleteConfirmBox(false);
       setDeleteLoading(false);
@@ -206,11 +199,6 @@ export const DisassemblyOrder = () => {
     )
   }
 
-  useEffect(() => {
-    const cancelTokenSource = axios.CancelToken.source();
-    fetchData(cancelTokenSource);
-    return () => cancelTokenSource.cancel();
-  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
   return (
     <div className="main-container-v1">
       <div className="headerbox-v1">
@@ -231,11 +219,8 @@ export const DisassemblyOrder = () => {
           }}
           additionalParams={getQueryString(true)}
         />
-
       </div>
-
       <CustomContainer>
-
         <ListingPageHeader
           searchValue={search}
           onSearch={handleSearch}
@@ -247,7 +232,6 @@ export const DisassemblyOrder = () => {
           }}
           isAddButtonVisible={permissions?.disassemblyOrder?.isCreate}
         />
-
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
@@ -283,20 +267,17 @@ export const DisassemblyOrder = () => {
           />
         ) : null}
       </CustomContainer>
-
-      {
-        showManageDiassemblyOrder.open && (
-          <ManageDiassemblyOrder
-            isClone={showManageDiassemblyOrder.isClone}
-            disassemblyOrderId={showManageDiassemblyOrder.idToClone}
-            onClose={() => setShowManageDiassemblyOrder({ open: false, isClone: false, idToClone: null })}
-            onSuccess={(data) => {
-              history.push(`${routes.disassemblyOrder.path}`);
-              setShowManageDiassemblyOrder({ open: false, isClone: false, idToClone: null });
-              fetchData();
-            }}
-          />
-        )}
+      {showManageDiassemblyOrder.open && (
+        <ManageDiassemblyOrder
+          isClone={showManageDiassemblyOrder.isClone}
+          disassemblyOrderId={showManageDiassemblyOrder.idToClone}
+          onClose={() => setShowManageDiassemblyOrder({ open: false, isClone: false, idToClone: null })}
+          onSuccess={() => { }}
+          isRedirectToDetailPage={true}
+        />
+      )}
     </div>
   )
 }
+
+export default DisassemblyOrder;
