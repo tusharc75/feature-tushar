@@ -887,8 +887,7 @@ const Productpackage = ({
       rows = await calculateRowsField(flattenArray(dataRows), inputField, costFields, rowData, rentalManagementData?.currency);
       handleSaveCostData(rows);
     } else {
-      const calValues = autoCalculateSpecificFields(inputField, rowData, allFields);
-      setSubmitState({ open: true, values: { ...rowData, ...calValues }, rowData: rowData });
+      setSubmitState({ open: true, values: inputField, rowData: rowData });
     }
   };
 

@@ -169,7 +169,7 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
                   size="small"
                   multiple={filter?.multiple}
                   fullWidth
-                  options={(filter?.key in filterOptions ? (filterOptions[filter?.key] || []) : (filter?.options || []))}
+                  options={(filter?.key in filterOptions ? (filterOptions[filter?.key]?.filter(o => !o?.optionNotSupportedInKpis?.includes(kpi)) || []) : (filter?.options || []))}
                   autoHighlight
                   value={values[filter?.key] ? values[filter?.key] : filter?.multiple ? [] : null}
                   getOptionLabel={(option: any) => option?.optionLabel}
