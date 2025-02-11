@@ -1,7 +1,7 @@
-import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import { Edit } from '@mui/icons-material';
 import queryString from 'query-string';
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -17,7 +17,8 @@ import { disassemblyOrder, sidebarResource } from '../../constants/helpers';
 import Step from '../DynamicForm/Step';
 import { ManageDiassemblyOrder } from "src/pages/DisassemblyOrder/ManageDiassemblyOrder";
 
-const DisassemblyOrderDetailsPage = () => {
+const DisassemblyOrderDetail = () => {
+
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const history = useHistory();
@@ -25,11 +26,10 @@ const DisassemblyOrderDetailsPage = () => {
   const { tab }: any = parsed;
 
   const {
-    state: { user, permissions, resources }
+    state: { permissions, resources }
   }: any = useData();
 
-  const [loadingDetails, setLoadingDetails] = useState(true);
-  const [orderData, setOrderData] = useState(null);
+  const [disassemblyOrderData, setDisassemblyOrderData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
@@ -39,10 +39,13 @@ const DisassemblyOrderDetailsPage = () => {
   const [fields, setFields] = useState(null);
 
   useEffect(() => {
+    fetchFields();
+    fetchPolicy();
+  }, [id]);
+
+  useEffect(() => {
     if (id) {
-      fetchFields();
       fetchData();
-      fetchPolicy();
     }
   }, [id]);
 
@@ -58,19 +61,13 @@ const DisassemblyOrderDetailsPage = () => {
   };
 
   const fetchData = async () => {
-    setLoadingDetails(true);
-    axiosInstance()
-      .get(`${disassemblyOrder.api}/${id}`)
-      .then(({ data: { data } }) => {
-        setLoadingDetails(false);
-        setAllowedToEdit(permissions?.disassemblyOrder?.isUpdate);
-        setAllowedToDelete(permissions?.disassemblyOrder?.isDelete);
-        setOrderData(data);
-      })
-      .catch((err) => {
-        setLoadingDetails(false);
-        toastConfig.setToastConfig(err);
-      });
+    axiosInstance().get(`${disassemblyOrder.api}/${id}`).then(({ data: { data } }) => {
+      setAllowedToEdit(permissions?.disassemblyOrder?.isUpdate);
+      setAllowedToDelete(permissions?.disassemblyOrder?.isDelete);
+      setDisassemblyOrderData(data);
+    }).catch((err) => {
+      toastConfig.setToastConfig(err);
+    });
   };
 
   const fetchPolicy = async () => {
@@ -106,7 +103,7 @@ const DisassemblyOrderDetailsPage = () => {
           <CustomBreadCrumbs
             routes={[
               { ...routes?.disassemblyOrder, title: resources?.disassemblyOrder?.titlePlural },
-              { title: `${orderData ? orderData?.disassemblyOrderNumber : ''}` }
+              { title: `${disassemblyOrderData ? disassemblyOrderData?.disassemblyOrderNumber : ''}` }
             ]}
           />
         </Box>
@@ -127,26 +124,37 @@ const DisassemblyOrderDetailsPage = () => {
           {resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 1} key={i}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
-          {!loadingDetails && orderData && fields ? (
-            <DetailsPage data={orderData} fields={fields} />
+          {disassemblyOrderData && fields ? (
+            <DetailsPage data={disassemblyOrderData} fields={fields} />
           ) : (
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           )}
         </TabPanel>
         {resourceData?.tabs?.map((tab, i) => (
           <TabPanel value={tabValue} index={i + 1} key={i}>
-            <Step tab={tab} resourcePolicyId={resourceData?._id} resourceId={id} resource={sidebarResource.disassemblyOrder} data={orderData} allowedToEdit={permissions?.disassemblyOrder?.isUpdate} />
+            <Step tab={tab} resourcePolicyId={resourceData?._id} resourceId={id} resource={sidebarResource.disassemblyOrder} data={disassemblyOrderData} allowedToEdit={permissions?.disassemblyOrder?.isUpdate} />
           </TabPanel>
         ))}
       </Box>
       {showConfirmBox && (
-        <ConfirmationDialog open={showConfirmBox} message={`Are you sure you want to delete this order?`} onClose={() => setShowConfirmBox(false)} onOk={handleDelete} />
+        <ConfirmationDialog
+          open={showConfirmBox}
+          message={`Are you sure you want to delete ${resources?.disassemblyOrder?.titleSingular?.toLowerCase()} : ${disassemblyOrderData?.disassemblyOrderNumber} ?`}
+          onClose={() => setShowConfirmBox(false)}
+          onOk={handleDelete} />
       )}
       {openUpdateDialog && (
-        <ManageDiassemblyOrder isClone={false} disassemblyOrderId={id} onClose={() => setOpenUpdateDialog(false)} onSuccess={fetchData} />
+        <ManageDiassemblyOrder
+          isClone={false}
+          disassemblyOrderId={id}
+          onClose={() => setOpenUpdateDialog(false)}
+          onSuccess={() => {
+            setOpenUpdateDialog(false)
+            fetchData()
+          }} />
       )}
     </Box>
   );
 };
 
-export default DisassemblyOrderDetailsPage;
+export default DisassemblyOrderDetail;

@@ -1,4 +1,3 @@
-
 import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -8,7 +7,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { sidebarResource, disassemblyOrder, GenerateResourceLineNumber, getObjKeysWithValues, DIASSEMBLY_ORDER_STATUS, getObjKeys, yupSchema, CustomDialogTransition } from 'src/constants/helpers';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { Box, Dialog, TextField } from '@mui/material';
+import { Box, Dialog } from '@mui/material';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -18,128 +17,96 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import InputField from 'src/components/Helpers/InputField';
 
-
-
 export const ManageDiassemblyOrder = ({ isClone = false, disassemblyOrderId = null, isRedirectToDetailPage = true, onClose, onSuccess }) => {
+
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, resources }
   }: any = useData();
-  const [initialData, setInitialData] = useState({ fields: [], values: {} });
+  const [initialData, setInitialData] = useState({ fields: [], values: null });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [loading, setLoading] = useState(false);
-  const [title, setTitle] = useState('');
-  const [value, setValue] = useState('');
-  const [textFields, setTextFields] = useState([]);
-  const createDiassemblyOrder = () => {
-    axiosInstance().get(`/field?resource=${sidebarResource.disassemblyOrder}`)
-      .then(({ data: { data } }) => {
-        const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-        const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-        if (disassemblyOrderId) {
-          axiosInstance()
-            .get(`${disassemblyOrder.api}/` + disassemblyOrderId)
-            .then(({ data: { data } }) => {
-              if (isClone) {
-                const { _id, createdBy, disassemblyOrderNumber, ...rest } = data;
-                rest['status'] = DIASSEMBLY_ORDER_STATUS.new;
-                setTitle(`Clone - ${data.disassemblyOrderNumber}`);
-                const tempInitialData = getObjKeysWithValues(rest, fieldsDataForCreate, true, user);
-
-                const primaryField = fieldsDataForCreate?.find((e) => e?.primaryField && e?.isSystemGenerate);
-                if (primaryField) {
-                  tempInitialData[primaryField?.fieldName] = GenerateResourceLineNumber(fieldsDataForCreate);
-                }
-                setInitialData({
-                  fields: fieldsDataForCreate,
-                  values: tempInitialData
-                });
-
-                setLoading(false)
-              }
-              else {
-                setTitle(`Edit - ${data.disassemblyOrderNumber}`);
-
-                const tempInitialData = getObjKeysWithValues(data, fieldsDataForUpdate);
-
-                const primaryField = fieldsDataForCreate?.find((e) => e?.primaryField && e?.isSystemGenerate);
-                if (primaryField) {
-                  tempInitialData[primaryField?.fieldName] = GenerateResourceLineNumber(fieldsDataForUpdate);
-                }
-                setInitialData({
-                  fields: fieldsDataForUpdate,
-                  values: tempInitialData
-                });
-              }
-
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
-            });
-
-        }
-        else {
-
-          setTitle(`Create ${resources?.disassemblyOrder?.titleSingular}`);
-          let initialData = getObjKeys('', fieldsDataForCreate);
-          initialData['disassemblyOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
-          setInitialData({
-            fields: fieldsDataForCreate,
-            values: initialData
-          });
-
-        }
-
-      })
-  }
+  const [cloneHeading, setCloneHeading] = useState('');
 
   useEffect(() => {
-    createDiassemblyOrder();
+    axiosInstance().get(`/field?resource=${sidebarResource.disassemblyOrder}`).then(({ data: { data } }) => {
+      const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+      if (disassemblyOrderId) {
+        axiosInstance()
+          .get(`${disassemblyOrder.api}/` + disassemblyOrderId)
+          .then(({ data: { data } }) => {
+            if (isClone) {
+              const { _id, createdBy, disassemblyOrderNumber, ...rest } = data;
+              rest['status'] = DIASSEMBLY_ORDER_STATUS.new;
+              setCloneHeading(disassemblyOrderNumber);
+              const tempInitialData = getObjKeysWithValues(rest, fieldsDataForCreate, true, user);
+              const primaryField = fieldsDataForCreate?.find((e) => e?.primaryField && e?.isSystemGenerate);
+              if (primaryField) {
+                tempInitialData[primaryField?.fieldName] = GenerateResourceLineNumber(fieldsDataForCreate);
+              }
+              setInitialData({
+                fields: fieldsDataForCreate,
+                values: tempInitialData
+              });
+            }
+            else {
+              setInitialData({
+                fields: fieldsDataForUpdate,
+                values: getObjKeysWithValues(data, fieldsDataForUpdate)
+              });
+            }
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
+      }
+      else {
+        let initialData = getObjKeys('', fieldsDataForCreate);
+        initialData['disassemblyOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
+        setInitialData({
+          fields: fieldsDataForCreate,
+          values: initialData
+        });
+      }
+    })
   }, []);
 
 
   const handleSubmit = (values) => {
     setIsSubmitting(true);
-
     if (disassemblyOrderId && isClone === false) {
       values._id = disassemblyOrderId;
-      axiosInstance()
-        .put(`${disassemblyOrder.api}`, values)
-        .then(({ data }) => {
-          setIsSubmitting(false);
-          onSuccess();
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-        })
-        .catch((error) => {
-          setIsSubmitting(false);
-          toastConfig.setToastConfig(error);
+      axiosInstance().put(`${disassemblyOrder.api}`, values).then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
         });
+        onSuccess();
+        setIsSubmitting(false);
+      }).catch((error) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
     } else {
-      axiosInstance()
-        .post(`${disassemblyOrder.api}/`, values)
-        .then(({ data: { data, message } }) => {
-          if (isRedirectToDetailPage) {
-            history.push(`${routes.disassemblyOrder.path}/${data._id}`);
-          }
-          setIsSubmitting(false);
-          onSuccess(data);
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: message
-          });
-        })
-        .catch((error) => {
-          setIsSubmitting(false);
-          toastConfig.setToastConfig(error);
+      axiosInstance().post(`${disassemblyOrder.api}/`, values).then(({ data: { data, message } }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: message
         });
+        if (isRedirectToDetailPage) {
+          history.push(`${routes.disassemblyOrderDetail.path}/${data._id}`);
+        }
+        onSuccess(data);
+        setIsSubmitting(false);
+      }).catch((error) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
     }
   };
 
@@ -154,6 +121,7 @@ export const ManageDiassemblyOrder = ({ isClone = false, disassemblyOrderId = nu
       });
     }
   };
+
   return (
     <Dialog
       maxWidth="md"
@@ -173,7 +141,11 @@ export const ManageDiassemblyOrder = ({ isClone = false, disassemblyOrderId = nu
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <>
               <CustomDialogHeader
-                title={title}
+                title={
+                  !disassemblyOrderId
+                    ? `Create ${resources?.demandOrder?.titleSingular}`
+                    : `${isClone ? `Clone - ${cloneHeading}` : `Update ${initialData?.values?.disassemblyOrderNumber}`}`
+                }
                 onClose={() => {
                   if (isEqual(values, initialData.values)) {
                     onClose();
@@ -200,7 +172,6 @@ export const ManageDiassemblyOrder = ({ isClone = false, disassemblyOrderId = nu
                     resource={sidebarResource.disassemblyOrder}
                     referenceId={disassemblyOrderId || null}
                   />
-
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
@@ -243,10 +214,8 @@ export const ManageDiassemblyOrder = ({ isClone = false, disassemblyOrderId = nu
                   }}
                 />
               )}
-
             </>
           )}
-
         </Formik>
       ) : (
         <Box p={2} height={500}>
