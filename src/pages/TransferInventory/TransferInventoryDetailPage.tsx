@@ -31,7 +31,6 @@ import LoadingTicket from './LoadingTicket';
 import ManageTransferInventory from './ManageTransferInventory';
 import Products from './Products';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
-import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Step from '../DynamicForm/Step';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import {
@@ -57,7 +56,6 @@ const TransferInventoryDetailPage = () => {
     state: { permissions, user, resources }
   }: any = useData();
   const [resourceData, setResourceData] = useState(null);
-  const { isOffline } = useContext(CustomOfflineContext);
   const [tabValue, setTabValue] = useState(parsedTab);
   const [loading, setLoading] = useState(true);
   const [isDeleting, setDeleting] = useState(false);
@@ -124,13 +122,11 @@ const TransferInventoryDetailPage = () => {
 
   const fetchPolicy = async () => {
     try {
-      if (!isOffline) {
-        const {
-          data: { data }
-        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.transferInventory}`);
-        if (data) {
-          setResourceData(data);
-        }
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.transferInventory}`);
+      if (data) {
+        setResourceData(data);
       }
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -175,8 +171,8 @@ const TransferInventoryDetailPage = () => {
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.transferInventory, data) && permissions?.transferInventory?.isUpdate);
         setAllowedToDelete(
           permissions?.transferInventory?.isDelete &&
-            checkIsAllowedToDelete(user, sidebarResource.transferInventory, data.owner.optionValue) &&
-            data?.canEdit
+          checkIsAllowedToDelete(user, sidebarResource.transferInventory, data.owner.optionValue) &&
+          data?.canEdit
         );
         setTransferInventoryData(data);
       })

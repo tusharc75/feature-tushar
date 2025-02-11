@@ -16,6 +16,8 @@ const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
 
+const localizer = dayjsLocalizer(dayjs);
+
 const MyCalendar = (props: Props) => {
   const { resource } = useParams();
   const history = useHistory();
@@ -53,7 +55,7 @@ const MyCalendar = (props: Props) => {
         }));
         setEvents(eventsData);
       })
-      .catch((err) => { });
+      .catch((err) => {});
   }, [resource, dateRange]);
 
   const onRangeChange = useCallback(
@@ -69,8 +71,6 @@ const MyCalendar = (props: Props) => {
     },
     [setView]
   );
-
-  const localizer = dayjsLocalizer(dayjs);
 
   return (
     <>

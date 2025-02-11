@@ -38,7 +38,6 @@ const Expenses = () => {
   const {
     state: { user, permissions, selectedEntity, resources }
   }: any = useData();
-
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -52,7 +51,6 @@ const Expenses = () => {
   useEffect(() => {
     fetchGridColumns();
   }, []);
-
   const fetchGridColumns = async () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.expenses}`);
@@ -132,7 +130,7 @@ const Expenses = () => {
             <IconButton
               size="small"
               aria-label="Delete"
-              disabled={row?.original?.canDelete && row?.original?.status !== EXPENSE_STATUS.unreported  ? true : false}
+              disabled={row?.original?.canDelete && row?.original?.status !== EXPENSE_STATUS.unreported ? true : false}
               onClick={() => {
                 setDeleteRecord(row.original);
                 setShowDeleteConfirmBox(true);
@@ -175,7 +173,6 @@ const Expenses = () => {
     }
     return deepFilter;
   };
-
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();

@@ -34,7 +34,6 @@ import RepairJobViews from './RoadMapViews/index';
 import SerializedAsset from './SerializedAsset';
 import Tickets from './Tickets';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
-import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Step from '../DynamicForm/Step';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 
@@ -51,7 +50,6 @@ const RepairJobDetails = () => {
     state: { user, permissions, resources }
   }: any = useData();
   const [resourceData, setResourceData] = useState(null);
-  const { isOffline } = useContext(CustomOfflineContext);
   const [repairJobData, setRepairJobData] = useState(null);
 
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -109,13 +107,11 @@ const RepairJobDetails = () => {
 
   const fetchPolicy = async () => {
     try {
-      if (!isOffline) {
-        const {
-          data: { data }
-        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.repairJob}`);
-        if (data) {
-          setResourceData(data);
-        }
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.repairJob}`);
+      if (data) {
+        setResourceData(data);
       }
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -146,7 +142,7 @@ const RepairJobDetails = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const fetchRepairJobData = () => {
@@ -194,7 +190,7 @@ const RepairJobDetails = () => {
   const updateJobStatus = (status) => {
     axiosInstance()
       .patch(`${repairJob.api}/${id}/status`, { status: status })
-      .then(({ data: { data } }) => {})
+      .then(({ data: { data } }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
