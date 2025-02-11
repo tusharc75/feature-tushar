@@ -18,7 +18,7 @@ import dayjs from 'dayjs';
 import { camelCase, groupBy } from 'lodash';
 import { forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { View, dayjsLocalizer } from 'react-big-calendar';
-import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss';
+import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -678,11 +678,13 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       }
 
       return {
-        backgroundColor,
-        color,
-        borderRadius: '4px',
-        border: 'none',
-        padding: '8px 16px'
+        style: {
+          backgroundColor,
+          color,
+          borderRadius: '4px',
+          border: 'none',
+          padding: '8px 16px'
+        }
       };
     },
     [themeMode]
@@ -785,12 +787,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 views={['month', 'week', 'day', 'agenda']}
                 onView={setView}
                 view={view}
-                eventPropGetter={(obj: any) => {
-                  const style = setEventStyle(obj);
-                  return {
-                    style
-                  };
-                }}
+                eventPropGetter={setEventStyle}
                 onNavigate={(date) => {
                   onNavigate(date);
                 }}
@@ -815,12 +812,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 views={['month', 'week', 'day', 'agenda']}
                 onView={setView}
                 view={view}
-                eventPropGetter={(obj: any) => {
-                  const style = setEventStyle(obj);
-                  return {
-                    style
-                  };
-                }}
+                eventPropGetter={setEventStyle}
                 onNavigate={(date) => {
                   onNavigate(date);
                 }}

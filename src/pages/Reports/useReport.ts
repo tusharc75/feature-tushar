@@ -253,9 +253,10 @@ const useReport = () => {
   useEffect(() => {
     (async () => {
       if (selectedReport?.route !== pathname) {
+        const pathNameP = selectedReport?.route ? selectedReport?.route : pathname;
         setColumns(null);
         setResourceColumns(null);
-        const currentRouteData = [...reportList, ...customReports].find((d) => d.route === pathname);
+        const currentRouteData = [...reportList, ...customReports].find((d) => d.route === pathNameP);
         if (currentRouteData) {
           const data = await handleGetRoute({ route: currentRouteData.route, title: currentRouteData.label });
           dispatch({ type: 'setSelectedReport', payload: data });
