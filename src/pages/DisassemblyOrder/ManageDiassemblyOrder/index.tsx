@@ -47,17 +47,31 @@ export const ManageDiassemblyOrder = ({ isClone = false, disassemblyOrderId = nu
                 const { _id, createdBy, disassemblyOrderNumber, ...rest } = data;
                 rest['status'] = DIASSEMBLY_ORDER_STATUS.new;
                 setTitle(`Clone - ${data.disassemblyOrderNumber}`);
+                const tempInitialData = getObjKeysWithValues(rest, fieldsDataForCreate, true, user);
+
+                const primaryField = fieldsDataForCreate?.find((e) => e?.primaryField && e?.isSystemGenerate);
+                if (primaryField) {
+                  tempInitialData[primaryField?.fieldName] = GenerateResourceLineNumber(fieldsDataForCreate);
+                }
                 setInitialData({
                   fields: fieldsDataForCreate,
-                  values: getObjKeysWithValues(rest, fieldsDataForCreate, true, user)
+                  values: tempInitialData
                 });
+
                 setLoading(false)
               }
               else {
                 setTitle(`Edit - ${data.disassemblyOrderNumber}`);
+
+                const tempInitialData = getObjKeysWithValues(data, fieldsDataForUpdate);
+
+                const primaryField = fieldsDataForCreate?.find((e) => e?.primaryField && e?.isSystemGenerate);
+                if (primaryField) {
+                  tempInitialData[primaryField?.fieldName] = GenerateResourceLineNumber(fieldsDataForUpdate);
+                }
                 setInitialData({
                   fields: fieldsDataForUpdate,
-                  values: { ...getObjKeysWithValues(data, fieldsDataForUpdate) }
+                  values: tempInitialData
                 });
               }
 
@@ -112,7 +126,7 @@ export const ManageDiassemblyOrder = ({ isClone = false, disassemblyOrderId = nu
         .post(`${disassemblyOrder.api}/`, values)
         .then(({ data: { data, message } }) => {
           if (isRedirectToDetailPage) {
-            history.push(`${routes.disassemblyOrder.path}`);
+            history.push(`${routes.disassemblyOrder.path}/${data._id}`);
           }
           setIsSubmitting(false);
           onSuccess(data);
