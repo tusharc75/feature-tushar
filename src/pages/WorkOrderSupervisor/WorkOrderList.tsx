@@ -201,7 +201,6 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
               }
             ]
             : []),
-
           {
             accessor: 'assignedWorkStations',
             Header: 'Work Stations',
