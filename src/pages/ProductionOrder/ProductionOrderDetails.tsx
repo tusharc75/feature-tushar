@@ -35,7 +35,6 @@ import ManageProductionOrder from './ManageProductionOrder';
 import Material from './Material';
 import WorkOrder from './WorkOrder';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
-import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Step from '../DynamicForm/Step';
 import { useTableReducer } from 'src/components/CustomReactTable';
 
@@ -66,7 +65,6 @@ const ProductionOrderDetails = () => {
   const [productionOrderProcessSteps, setProductionOrderProcessSteps] = useState(productionOrderSteps);
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [resourceData, setResourceData] = useState(null);
-  const { isOffline } = useContext(CustomOfflineContext);
   const productionOrderProcessStepsNames = React.useMemo(() => {
     return productionOrderProcessSteps.map((item) => item.name);
   }, [productionOrderProcessSteps]);
@@ -93,13 +91,11 @@ const ProductionOrderDetails = () => {
 
   const fetchPolicy = async () => {
     try {
-      if (!isOffline) {
-        const {
-          data: { data }
-        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.productionOrder}`);
-        if (data) {
-          setResourceData(data);
-        }
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.productionOrder}`);
+      if (data) {
+        setResourceData(data);
       }
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -146,8 +142,8 @@ const ProductionOrderDetails = () => {
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.productionOrder, data));
         setAllowedToDelete(
           permissions?.productionOrder?.isDelete &&
-            checkIsAllowedToDelete(user, sidebarResource.productionOrder, data.owner.optionValue) &&
-            data?.canDelete
+          checkIsAllowedToDelete(user, sidebarResource.productionOrder, data.owner.optionValue) &&
+          data?.canDelete
         );
         setProductionOrderData({ ...data });
       })
@@ -270,21 +266,21 @@ const ProductionOrderDetails = () => {
               handleNext={
                 productionOrderProcessStepsNames[currentStep] === 'Add'
                   ? () => {
-                      setNextStep(false);
-                      axiosInstance()
-                        .get(`/production-order/${productionOrderData?._id}/work-order/validate-work-order`)
-                        .then(({ data: { data } }) => {
-                          if (data) {
-                            setCurrentStep((prevStep) => {
-                              const newStep = prevStep + 1;
-                              return newStep;
-                            });
-                          }
-                        })
-                        .catch((err) => {
-                          toastConfig.setToastConfig(err);
-                        });
-                    }
+                    setNextStep(false);
+                    axiosInstance()
+                      .get(`/production-order/${productionOrderData?._id}/work-order/validate-work-order`)
+                      .then(({ data: { data } }) => {
+                        if (data) {
+                          setCurrentStep((prevStep) => {
+                            const newStep = prevStep + 1;
+                            return newStep;
+                          });
+                        }
+                      })
+                      .catch((err) => {
+                        toastConfig.setToastConfig(err);
+                      });
+                  }
                   : null
               }
               updateStatus={(step: number) => {

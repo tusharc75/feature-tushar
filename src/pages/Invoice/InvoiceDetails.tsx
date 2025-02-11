@@ -37,7 +37,6 @@ import ManageInvoiceDialog from './ManageInvoiceDialog';
 import Material from './Material';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
-import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Step from '../DynamicForm/Step';
 import { RiExchange2Line } from 'react-icons/ri';
 import { DownloadIcon } from 'src/assets/svg/svgIcons';
@@ -54,7 +53,6 @@ const InvoiceDetails = () => {
     state: { user, permissions, resources }
   }: any = useData();
   const [resourceData, setResourceData] = useState(null);
-  const { isOffline } = useContext(CustomOfflineContext);
   const [headingLabel, setHeadingLabel] = useState('');
   const [loading, setLoading] = useState(false);
   const [invoiceData, setInvoiceData] = useState(null);
@@ -96,13 +94,11 @@ const InvoiceDetails = () => {
 
   const fetchPolicy = async () => {
     try {
-      if (!isOffline) {
-        const {
-          data: { data }
-        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.invoice}`);
-        if (data) {
-          setResourceData(data);
-        }
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.invoice}`);
+      if (data) {
+        setResourceData(data);
       }
     } catch (error) {
       toastConfig.setToastConfig(error);
