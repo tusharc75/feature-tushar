@@ -1,4 +1,4 @@
-import { Box, CircularProgress, IconButton, MenuItem } from '@mui/material';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -19,8 +19,9 @@ import BulkAssetCreationQtyDialog from './BulkAssetCreationQtyDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import ThemeButton from 'src/components/Helpers/Buttons/ThemeButton';
+import SyncIcon from '@mui/icons-material/Sync';
 
-const Product = ({ bulkAssetCreationData, setNextStep, renderedFrom, fetchData, handleUpdateData, allowedToEdit }) => {
+const Product = ({ bulkAssetCreationData, setNextStep, renderedFrom, fetchData, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions, resources }
@@ -280,7 +281,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, renderedFrom, fetchData, 
       return {
         productId: d?.productId,
         _id: d?._id,
-        qty: d?.qty,   
+        qty: d?.qty,
       };
     });
     axiosInstance()
@@ -326,9 +327,9 @@ const Product = ({ bulkAssetCreationData, setNextStep, renderedFrom, fetchData, 
           }}
           disabled={selectedRecords.length === 0 || loadingButton || bulkAssetCreationData?.assetCreationInProgess}
           buttonType="theme"
-          endIcon={bulkAssetCreationData?.assetCreationInProgess ? <CircularProgress /> : null}
+          startIcon={bulkAssetCreationData?.assetCreationInProgess ? <SyncIcon className="rotate" /> : null}
         >
-          {bulkAssetCreationData?.assetCreationInProgess ?  `Creating ${resources?.serializedAsset?.titlePlural} ` : `Create ${resources?.serializedAsset?.titlePlural}`}
+          {bulkAssetCreationData?.assetCreationInProgess ? `Creating ${resources?.serializedAsset?.titlePlural} ` : `Create ${resources?.serializedAsset?.titlePlural}`}
         </ThemeButton>
       </>
     )

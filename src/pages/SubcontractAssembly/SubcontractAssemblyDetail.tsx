@@ -36,7 +36,6 @@ import queryString from 'query-string';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { addStepAddExistingProduct } from 'src/pages/SubcontractAssembly/walkmeSteps';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
-import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Step from '../DynamicForm/Step';
 
 const SubcontractAssemblyDetail = () => {
@@ -50,7 +49,6 @@ const SubcontractAssemblyDetail = () => {
     state: { permissions, user, resources }
   }: any = useData();
   const [resourceData, setResourceData] = useState(null);
-  const { isOffline } = useContext(CustomOfflineContext);
 
   const [subcontractAssemblyData, setSubcontractAssemblyData] = useState(null);
   const [fields, setFields] = useState(null);
@@ -75,13 +73,11 @@ const SubcontractAssemblyDetail = () => {
 
   const fetchPolicy = async () => {
     try {
-      if (!isOffline) {
-        const {
-          data: { data }
-        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.subcontractAssembly}`);
-        if (data) {
-          setResourceData(data);
-        }
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.subcontractAssembly}`);
+      if (data) {
+        setResourceData(data);
       }
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -109,8 +105,8 @@ const SubcontractAssemblyDetail = () => {
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.subcontractAssembly, data));
       setAllowedToDelete(
         permissions?.subcontractAssembly?.isDelete &&
-          checkIsAllowedToDelete(user, sidebarResource.subcontractAssembly, data.owner.optionValue) &&
-          data?.canDelete
+        checkIsAllowedToDelete(user, sidebarResource.subcontractAssembly, data.owner.optionValue) &&
+        data?.canDelete
       );
       setSubcontractAssemblyData(data);
       if (data?.status === SUBCONTRACT_ASSEMBLY_STATUS.closed) {

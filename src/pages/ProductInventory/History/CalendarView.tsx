@@ -9,6 +9,8 @@ const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
 
+const localizer = dayjsLocalizer(dayjs);
+
 const CalendarView = ({ product, warehouse, storageLocation }) => {
   const [activities, setActivities] = useState([]);
 
@@ -63,8 +65,6 @@ const CalendarView = ({ product, warehouse, storageLocation }) => {
 
     setActivities(newData);
   };
-
-  const localizer = dayjsLocalizer(dayjs);
 
   return (
     <div className="relative">
