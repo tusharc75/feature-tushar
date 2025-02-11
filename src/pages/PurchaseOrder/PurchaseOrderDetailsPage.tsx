@@ -38,11 +38,12 @@ import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-import { generateAddExistingProduct} from './walkmeSteps';
+import { generateAddExistingProduct } from './walkmeSteps';
+
+const renderedFrom = camelCase(sidebarResource.purchaseOrder);
 
 const PurchaseOrderDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
-  const renderedFrom = camelCase(sidebarResource.purchaseOrder);
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const history = useHistory();

@@ -26,6 +26,18 @@ export default defineConfig({
     viteTsconfigPaths(),
     splitVendorChunkPlugin()
   ],
+  css: {
+    preprocessorOptions: {
+      scss: {
+        // silenceDeprecations: ['legacy-js-api'],
+        api: 'modern-compiler',
+        quietDeps: true
+      },
+      sass: {
+        api: 'modern-compiler'
+      }
+    }
+  },
 
   build: {
     outDir: 'build'

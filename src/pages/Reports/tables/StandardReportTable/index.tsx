@@ -466,7 +466,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
           let finalObject: any = prepareDataForGrid(u);
           return finalObject;
         });
-        if ([`dailyVolumeReport`, 'volumeReport', 'rentalVolumeReport']?.includes(resourceCamelCase)) {
+        if ([`dailyVolumeReport`, 'volumeReport', 'monthlyRevenueReport', 'rentalVolumeReport']?.includes(resourceCamelCase)) {
           data = data.filter((d) => {
             if (d?.isFooter) {
               setFooterData(d);
@@ -616,7 +616,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
   }, [emailAttachments, htmlContent]);
 
   useEffect(() => {
-    if ([`dailyVolumeReport`, 'volumeReport', 'rentalVolumeReport']?.includes(resourceCamelCase) && footerData) {
+    if ([`dailyVolumeReport`, 'volumeReport', 'monthlyRevenueReport', 'rentalVolumeReport']?.includes(resourceCamelCase) && footerData) {
       const dataKeys = Object.keys(footerData);
       const newColumns = columns?.map((col: any, index) => {
         if (index === 0) {
@@ -683,7 +683,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
                   permissions={permissions?.report}
                   module={selectedReport.resource}
                   api={`/report/${selectedReport.resource}`}
-                  afterImportCompleted={() => { }}
+                  afterImportCompleted={() => {}}
                   isExportCount={true}
                   exportCount={0}
                   ids={[]}
@@ -741,8 +741,12 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
             refreshGrid={fetchResourceData}
             hideSelection={true}
             hideExportTable={true}
-            pagination={[`dailyVolumeReport`, 'volumeReport', 'rentalVolumeReport']?.includes(resourceCamelCase) ? false : true}
-            isClientSideGrid={[`dailyVolumeReport`, 'volumeReport', 'rentalVolumeReport']?.includes(resourceCamelCase) ? true : false}
+            pagination={
+              [`dailyVolumeReport`, 'volumeReport', 'monthlyRevenueReport', 'rentalVolumeReport']?.includes(resourceCamelCase) ? false : true
+            }
+            isClientSideGrid={
+              [`dailyVolumeReport`, 'volumeReport', 'monthlyRevenueReport', 'rentalVolumeReport']?.includes(resourceCamelCase) ? true : false
+            }
           />
         </>
       ) : (

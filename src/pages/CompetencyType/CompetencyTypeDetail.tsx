@@ -18,7 +18,6 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import Competencies from './Competencies';
 import ManageCompetencyType from './ManageCompetencyType';
 import Step from '../DynamicForm/Step';
-import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 
 const CompetencyMasterDetail = () => {
   const { id } = useParams();
@@ -30,7 +29,6 @@ const CompetencyMasterDetail = () => {
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [tabValue, setTabValue] = useState(0);
-  const { isOffline } = useContext(CustomOfflineContext);
   const [resourceData, setResourceData] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const {
@@ -96,13 +94,11 @@ const CompetencyMasterDetail = () => {
 
   const fetchPolicy = async () => {
     try {
-      if (!isOffline) {
-        const {
-          data: { data }
-        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.competencyType}`);
-        if (data) {
-          setResourceData(data);
-        }
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.competencyType}`);
+      if (data) {
+        setResourceData(data);
       }
     } catch (error) {
       toastConfig.setToastConfig(error);

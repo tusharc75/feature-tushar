@@ -1,7 +1,9 @@
-function NoDataCell() {
-    return <span style={{ color: 'grey' }}>
-        {`- - - - - - - `}
-    </span>
+import { memo } from 'react';
+
+function NoDataCellImpl() {
+  return <span style={{ color: 'grey' }}>{`- - - - - - - `}</span>;
 }
 
-export default NoDataCell
+const NoDataCell = memo(NoDataCellImpl);
+
+export default NoDataCell;

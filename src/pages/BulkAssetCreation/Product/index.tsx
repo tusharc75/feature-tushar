@@ -18,8 +18,10 @@ import { deleteDisable } from 'src/constants/messageHelpers';
 import BulkAssetCreationQtyDialog from './BulkAssetCreationQtyDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
+import ThemeButton from 'src/components/Helpers/Buttons/ThemeButton';
+import SyncIcon from '@mui/icons-material/Sync';
 
-const Product = ({ bulkAssetCreationData, setNextStep, renderedFrom, fetchData, handleUpdateData, allowedToEdit }) => {
+const Product = ({ bulkAssetCreationData, setNextStep, renderedFrom, fetchData, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions, resources }
@@ -206,8 +208,8 @@ const Product = ({ bulkAssetCreationData, setNextStep, renderedFrom, fetchData, 
                 fontSize="small"
                 color={
                   (row?.original?.actualReceived === undefined || row?.original?.actualReceived === 0) &&
-                  allowedToEdit &&
-                  permissions?.bulkAssetCreation?.isUpdate
+                    allowedToEdit &&
+                    permissions?.bulkAssetCreation?.isUpdate
                     ? 'error'
                     : 'disabled'
                 }
@@ -277,15 +279,13 @@ const Product = ({ bulkAssetCreationData, setNextStep, renderedFrom, fetchData, 
     setLoadingButton(true);
     let tempProducts = selectedRecords.map((d) => {
       return {
-        bulkAssetCreationId: bulkAssetCreationData?._id,
         productId: d?.productId,
         _id: d?._id,
         qty: d?.qty,
-        warehouse: bulkAssetCreationData?.warehouse?.optionValue
       };
     });
     axiosInstance()
-      .post(`${bulkAssetCreation.api}/create-assets`, { bulkAssetCreation: tempProducts })
+      .post(`${bulkAssetCreation.api}/create-assets`, { bulkAssetCreation: tempProducts, bulkAssetCreationId: bulkAssetCreationData?._id, warehouse: bulkAssetCreationData?.warehouse?.optionValue })
       .then(({ data }) => {
         setShowCreateConfirmBox(false);
         fetchBulkAssetCreationProduct();
@@ -317,12 +317,30 @@ const Product = ({ bulkAssetCreationData, setNextStep, renderedFrom, fetchData, 
     );
   };
 
+  const rightSideContents = () => {
+    return (
+      <>
+        <ThemeButton
+          style={{ minWidth: 'max-content' }}
+          onClick={() => {
+            setShowCreateConfirmBox(true);
+          }}
+          disabled={selectedRecords.length === 0 || loadingButton || bulkAssetCreationData?.assetCreationInProgess}
+          buttonType="theme"
+          startIcon={bulkAssetCreationData?.assetCreationInProgess ? <SyncIcon className="rotate" /> : null}
+        >
+          {bulkAssetCreationData?.assetCreationInProgess ? `Creating ${resources?.serializedAsset?.titlePlural} ` : `Create ${resources?.serializedAsset?.titlePlural}`}
+        </ThemeButton>
+      </>
+    )
+  };
+
   const actionButtonMenuItems = () => {
     return (
       <>
         <MenuItem
           color="primary"
-          disabled={selectedRecords.length === 0}
+          disabled={selectedRecords.length === 0 || bulkAssetCreationData?.assetCreationInProgess}
           onClick={() => {
             setIsBulkEdit(true);
             setShowProductDialog(true);
@@ -332,22 +350,13 @@ const Product = ({ bulkAssetCreationData, setNextStep, renderedFrom, fetchData, 
         </MenuItem>
         <MenuItem
           color="primary"
-          disabled={selectedRecords.length === 0 || loadingButton}
+          disabled={selectedRecords.length === 0 || loadingButton || bulkAssetCreationData?.assetCreationInProgess}
           onClick={() => {
             setShowDeleteConfirmBox(true);
             setDeleteBulkAssetCreationProduct(selectedRecords.map((d) => d._id));
           }}
         >
           Delete
-        </MenuItem>
-        <MenuItem
-          color="primary"
-          disabled={selectedRecords.length === 0 || loadingButton}
-          onClick={() => {
-            setShowCreateConfirmBox(true);
-          }}
-        >
-          {`Create ${resources?.serializedAsset?.titlePlural}`}
         </MenuItem>
       </>
     );
@@ -364,6 +373,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, renderedFrom, fetchData, 
             actionButtonMenuItems={actionButtonMenuItems()}
             actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
             hasXpadding
+            rightSideContents={rightSideContents()}
           />
         </>
       )}

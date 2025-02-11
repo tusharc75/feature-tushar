@@ -1,10 +1,8 @@
-import { Box, IconButton } from '@mui/material';
-import Grid from '@mui/material/Grid2';
+import { Box } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import ContentFullScreen from 'src/components/ContentFullScreen';
@@ -22,7 +20,6 @@ import {
   bulkAssetCreation,
   bulkAssetCreationSteps,
   checkIsAllowedToEdit,
-  getObjKeysWithValues,
   sidebarResource
 } from '../../constants/helpers';
 import ManageBulkAssetCreation from './ManageBulkAssetCreation';
@@ -30,7 +27,6 @@ import Product from './Product';
 import SerializedAsset from './SerializedAsset';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
-import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Step from '../DynamicForm/Step';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
@@ -44,7 +40,6 @@ const BulkAssetCreationDetailsPage = () => {
     state: { user, permissions, resources }
   }: any = useData();
   const [resourceData, setResourceData] = useState(null);
-  const { isOffline } = useContext(CustomOfflineContext);
 
   const [loadingBulkAssetCreation, setLoadingBulkAssetCreation] = useState(false);
   const [bulkAssetCreationData, setBulkAssetCreationData] = useState(null);
@@ -58,10 +53,6 @@ const BulkAssetCreationDetailsPage = () => {
   const [nextStep, setNextStep] = useState(true);
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
-  const bulkAssetCreationStepsNames = React.useMemo(() => {
-    return bulkAssetCreationSteps.map((item) => item.name);
-  }, [bulkAssetCreationSteps]);
-
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
     history.replace(`?tab=${newValue}`);
@@ -74,22 +65,23 @@ const BulkAssetCreationDetailsPage = () => {
   }, []);
 
   useEffect(() => {
+    fetchFields();
+    fetchPolicy();
+  }, []);
+
+  useEffect(() => {
     if (id) {
-      fetchFields();
       fetchData();
-      fetchPolicy();
     }
-  }, [id]);
+  }, [id, tabValue]);
 
   const fetchPolicy = async () => {
     try {
-      if (!isOffline) {
-        const {
-          data: { data }
-        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.bulkAssetCreation}`);
-        if (data) {
-          setResourceData(data);
-        }
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.bulkAssetCreation}`);
+      if (data) {
+        setResourceData(data);
       }
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -104,7 +96,12 @@ const BulkAssetCreationDetailsPage = () => {
       } = await axiosInstance().get(`${bulkAssetCreation.api}/${id}`);
 
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.bulkAssetCreation, data));
-      setCurrentStep(getIndex(data?.processStatus, bulkAssetCreationSteps));
+      if (data?.status === "Completed") {
+        setCurrentStep(bulkAssetCreationSteps?.length - 1);
+      }
+      else {
+        setCurrentStep(getIndex(data?.processStatus, bulkAssetCreationSteps));
+      }
       setBulkAssetCreationData(data);
       setLoadingBulkAssetCreation(false);
     } catch (error) {
@@ -138,29 +135,6 @@ const BulkAssetCreationDetailsPage = () => {
         toastConfig.setToastConfig(error);
         setShowDeleteConfirmBox(false);
       });
-  };
-
-  const handleUpdateData = (obj) => {
-    if (obj.status && bulkAssetCreationData?.status !== obj.status && bulkAssetCreationFields.length > 0) {
-      const fieldsDataForUpdate = bulkAssetCreationFields.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-      let values = getObjKeysWithValues(bulkAssetCreationData, fieldsDataForUpdate);
-      values['status'] = obj.status;
-      values['_id'] = id;
-      axiosInstance()
-        .put(`${bulkAssetCreation.api}`, values)
-        .then(({ data: { data } }) => {
-          fetchFields();
-          fetchData();
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: `Status changed to ${obj.status}`
-          });
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-    }
   };
 
   return (
@@ -235,7 +209,6 @@ const BulkAssetCreationDetailsPage = () => {
                     bulkAssetCreationData={bulkAssetCreationData}
                     setNextStep={setNextStep}
                     renderedFrom={`${renderedFrom}_grid-1`}
-                    handleUpdateData={handleUpdateData}
                     fetchData={fetchData}
                     allowedToEdit={allowedToEdit}
                   />

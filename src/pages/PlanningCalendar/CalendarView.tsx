@@ -34,6 +34,8 @@ const useStyles = makeStyles((theme: Theme) => ({
   }
 }));
 
+const localizer = dayjsLocalizer(dayjs);
+
 const CalendarView = (props: Props) => {
   const classes = useStyles();
   const {
@@ -65,7 +67,7 @@ const CalendarView = (props: Props) => {
           }));
         setEvents(eventsData);
       })
-      .catch((err) => { });
+      .catch((err) => {});
   }, []);
 
   const onRangeChange = useCallback(
@@ -82,7 +84,18 @@ const CalendarView = (props: Props) => {
     [setView]
   );
 
-  const localizer = dayjsLocalizer(dayjs);
+  const getEventStyle = useCallback((obj) => {
+    return {
+      style: {
+        backgroundColor:
+          obj.type === 'Rental Job' ? 'rgba(255, 232, 204, 1)' : obj.type === 'Sales Order' ? 'rgba(234, 239, 254, 1)' : 'rgba(253, 220, 228, 1)',
+        color: obj.type === 'Rental Job' ? 'rgba(236, 85, 0, 1)' : obj.type === 'Sales Order' ? 'rgba(4, 50, 161, 1)' : 'rgba(165, 4, 43, 1)',
+        borderRadius: '4px',
+        border: 'none',
+        padding: '8px 16px'
+      }
+    };
+  }, []);
 
   return (
     <>
@@ -122,24 +135,7 @@ const CalendarView = (props: Props) => {
               // }
             }}
             views={['month', 'week', 'day']}
-            eventPropGetter={(obj) => {
-              const newStyles = {
-                backgroundColor:
-                  obj.type === 'Rental Job'
-                    ? 'rgba(255, 232, 204, 1)'
-                    : obj.type === 'Sales Order'
-                      ? 'rgba(234, 239, 254, 1)'
-                      : 'rgba(253, 220, 228, 1)',
-                color: obj.type === 'Rental Job' ? 'rgba(236, 85, 0, 1)' : obj.type === 'Sales Order' ? 'rgba(4, 50, 161, 1)' : 'rgba(165, 4, 43, 1)',
-                borderRadius: '4px',
-                border: 'none',
-                padding: '8px 16px'
-              };
-
-              return {
-                style: newStyles
-              };
-            }}
+            eventPropGetter={getEventStyle}
             onSelectEvent={(event: any) => {
               setConvertPlanning({
                 open: true,
