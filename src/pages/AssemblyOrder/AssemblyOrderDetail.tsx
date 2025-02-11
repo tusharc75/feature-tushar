@@ -8,7 +8,6 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useParams, useHistory } from 'react-router-dom';
 import queryString from 'query-string';
 import { useData } from 'src/StateProvider/Provider';
-import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import {
   ACTIVITY_RESOURCE,
@@ -65,7 +64,6 @@ const AssemblyOrderDetail = () => {
   const [resourceData, setResourceData] = useState(null);
   const [openManagedPackageDialog, setOpenManagedPackageDialog] = useState(false);
 
-  const { isOffline } = useContext(CustomOfflineContext);
 
   const assemblyOrderProcessStepsNames = useMemo(() => {
     return assemblyOrderSteps.map((item) => item.name);
@@ -93,13 +91,11 @@ const AssemblyOrderDetail = () => {
 
   const fetchPolicy = async () => {
     try {
-      if (!isOffline) {
-        const {
-          data: { data }
-        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.assemblyOrder}`);
-        if (data) {
-          setResourceData(data);
-        }
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.assemblyOrder}`);
+      if (data) {
+        setResourceData(data);
       }
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -139,8 +135,8 @@ const AssemblyOrderDetail = () => {
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.assemblyOrder, data));
         setAllowedToDelete(
           permissions?.assemblyOrder?.isDelete &&
-            checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
-            data?.canDelete
+          checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
+          data?.canDelete
         );
         setAssemblyOrderData({ ...data });
       })
@@ -231,10 +227,10 @@ const AssemblyOrderDetail = () => {
               setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
               handleNext={
                 assemblyOrderProcessStepsNames[currentStep] === 'Work Order' &&
-                !assemblyOrderData?.material?.filter((m) => m?.type === MATERIAL_TYPE.package && !m?.parentId)?.every((m) => m?.managedPackage)
+                  !assemblyOrderData?.material?.filter((m) => m?.type === MATERIAL_TYPE.package && !m?.parentId)?.every((m) => m?.managedPackage)
                   ? () => {
-                      setOpenManagedPackageDialog(true);
-                    }
+                    setOpenManagedPackageDialog(true);
+                  }
                   : null
               }
               updateStatus={(step: number) => {

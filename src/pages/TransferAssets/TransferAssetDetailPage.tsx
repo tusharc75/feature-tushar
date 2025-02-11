@@ -34,7 +34,6 @@ import ReceivingTicketGrid from './ReceivingTicket';
 import TransferAssetViews from './RoadMapViews';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
-import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Step from '../DynamicForm/Step';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 
@@ -49,7 +48,6 @@ const TransferAssetDetailPage = () => {
     state: { user, permissions, resources }
   }: any = useData();
   const [resourceData, setResourceData] = useState(null);
-  const { isOffline } = useContext(CustomOfflineContext);
 
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [loading, setLoading] = useState(true);
@@ -103,13 +101,11 @@ const TransferAssetDetailPage = () => {
 
   const fetchPolicy = async () => {
     try {
-      if (!isOffline) {
-        const {
-          data: { data }
-        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.transferAsset}`);
-        if (data) {
-          setResourceData(data);
-        }
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.transferAsset}`);
+      if (data) {
+        setResourceData(data);
       }
     } catch (error) {
       toastConfig.setToastConfig(error);

@@ -167,9 +167,9 @@
   },
   "scripts": {
     "prebuild": "node -r dotenv/config src/prebuild/prebuild.js",
-    "start": "sass-migrator division **/*.scss && node --max_old_space_size=4096 ./node_modules/vite/bin/vite",
-    "dev": "yarn install && sass-migrator division **/*.scss && node --max_old_space_size=4096 ./node_modules/vite/bin/vite",
-    "pdev": "pnpm install && sass-migrator division **/*.scss && node --max_old_space_size=4096 ./node_modules/vite/bin/vite --host",
+    "start": "node --max_old_space_size=4096 ./node_modules/vite/bin/vite",
+    "dev": "yarn install && node --max_old_space_size=4096 ./node_modules/vite/bin/vite",
+    "pdev": "pnpm install && node --max_old_space_size=4096 ./node_modules/vite/bin/vite --host",
     "dev:prebuild": "yarn prebuild && yarn dev",
     "dev-https": "set \"HTTPS=true\" && yarn install && vite",
     "build": "node --max_old_space_size=8192 ./node_modules/vite/bin/vite build --mode production",
@@ -242,8 +242,8 @@
     "standard-version": "^9.3.1",
     "tailwind-merge": "^2.3.0",
     "tailwindcss": "^3.3.3",
-    "vite": "^4.3.9",
-    "vite-plugin-pwa": "^0.16.4",
+    "vite": "^6.1.0",
+    "vite-plugin-pwa": "^0.21.1",
     "vite-tsconfig-paths": "^4.2.0",
     "workbox-window": "^7.1.0"
   },

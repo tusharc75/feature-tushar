@@ -30,7 +30,6 @@ import ManagePurchaseOrder from '../PurchaseOrder/ManagePurchaseOrder';
 import ManagePurchaseRequisition from './ManagePurchaseRequisition';
 import Material from './Material';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
-import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Step from '../DynamicForm/Step';
 
 const PurchaseRequisitionDetail = () => {
@@ -58,7 +57,6 @@ const PurchaseRequisitionDetail = () => {
     state: { permissions, user, resources }
   }: any = useData();
   const [resourceData, setResourceData] = useState(null);
-  const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
     if (id) {
@@ -70,13 +68,11 @@ const PurchaseRequisitionDetail = () => {
 
   const fetchPolicy = async () => {
     try {
-      if (!isOffline) {
-        const {
-          data: { data }
-        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.purchaseRequisition}`);
-        if (data) {
-          setResourceData(data);
-        }
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.purchaseRequisition}`);
+      if (data) {
+        setResourceData(data);
       }
     } catch (error) {
       toastConfig.setToastConfig(error);
