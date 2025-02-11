@@ -21,7 +21,6 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import History from './History';
 import ManageEmployeeMaster from './ManageEmployeeMaster';
 import Step from '../DynamicForm/Step';
-import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 
 const EmployeeMasterDetail = () => {
   const { id } = useParams();
@@ -37,7 +36,6 @@ const EmployeeMasterDetail = () => {
   const { tab }: any = parsed;
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([]);
-  const { isOffline } = useContext(CustomOfflineContext);
   const [resourceData, setResourceData] = useState(null);
 
   const {
@@ -79,13 +77,11 @@ const EmployeeMasterDetail = () => {
 
   const fetchPolicy = async () => {
     try {
-      if (!isOffline) {
-        const {
-          data: { data }
-        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.employeeMaster}`);
-        if (data) {
-          setResourceData(data);
-        }
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.employeeMaster}`);
+      if (data) {
+        setResourceData(data);
       }
     } catch (error) {
       toastConfig.setToastConfig(error);

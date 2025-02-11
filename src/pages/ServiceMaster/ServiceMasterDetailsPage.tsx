@@ -20,7 +20,6 @@ import ManageServiceMaster from './ManageServiceMaster';
 import Product from './Product';
 import Steps from './Steps';
 import LeadTime from 'src/components/LeadTime';
-import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Step from '../DynamicForm/Step';
 import Grid from '@mui/material/Grid2';
 
@@ -33,7 +32,6 @@ const ServiceMasterDetailsPage = () => {
     state: { user, permissions, resources }
   }: any = useData();
   const [resourceData, setResourceData] = useState(null);
-  const { isOffline } = useContext(CustomOfflineContext);
 
   const [serviceMasterDetailData, setServiceMasterDetailData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -51,13 +49,11 @@ const ServiceMasterDetailsPage = () => {
 
   const fetchPolicy = async () => {
     try {
-      if (!isOffline) {
-        const {
-          data: { data }
-        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serviceMaster}`);
-        if (data) {
-          setResourceData(data);
-        }
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serviceMaster}`);
+      if (data) {
+        setResourceData(data);
       }
     } catch (error) {
       toastConfig.setToastConfig(error);

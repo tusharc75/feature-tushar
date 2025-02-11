@@ -16,7 +16,6 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageChartOfAccount from './ManageChartOfAccount';
-import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { useTableReducer } from 'src/components/CustomReactTable';
 
 const ChartOfAccountDetail = () => {
@@ -32,7 +31,6 @@ const ChartOfAccountDetail = () => {
   const [loading, setLoading] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const { isOffline } = useContext(CustomOfflineContext);
   const [resourceData, setResourceData] = useState(null);
   const {
     state: { permissions, resources }
@@ -109,13 +107,11 @@ const ChartOfAccountDetail = () => {
 
   const fetchPolicy = async () => {
     try {
-      if (!isOffline) {
-        const {
-          data: { data }
-        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.chartOfAccount}`);
-        if (data) {
-          setResourceData(data);
-        }
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.chartOfAccount}`);
+      if (data) {
+        setResourceData(data);
       }
     } catch (error) {
       toastConfig.setToastConfig(error);

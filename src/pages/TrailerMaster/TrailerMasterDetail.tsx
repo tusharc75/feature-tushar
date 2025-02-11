@@ -17,7 +17,6 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import History from './History';
 import ManageTrailerMaster from './ManageTrailerMaster';
 import Step from '../DynamicForm/Step';
-import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { ExpandMore } from '@mui/icons-material';
 import { RiExchange2Line } from 'react-icons/ri';
 
@@ -37,7 +36,6 @@ const TrailerMasterDetail = () => {
   const [tabValue, setTabValue] = useState(0);
   const [statusOptions, setStatusOptions] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
-  const { isOffline } = useContext(CustomOfflineContext);
   const [resourceData, setResourceData] = useState(null);
 
   useEffect(() => {
@@ -82,13 +80,11 @@ const TrailerMasterDetail = () => {
 
   const fetchPolicy = async () => {
     try {
-      if (!isOffline) {
-        const {
-          data: { data }
-        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.trailerMaster}`);
-        if (data) {
-          setResourceData(data);
-        }
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.trailerMaster}`);
+      if (data) {
+        setResourceData(data);
       }
     } catch (error) {
       toastConfig.setToastConfig(error);
