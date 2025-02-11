@@ -9,6 +9,7 @@ import { useData } from 'src/StateProvider/Provider';
 import CustomTableWithCard, { CardInterface, ColumnInterface, createBodyColumns } from 'src/components/CustomTableWithCard';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { toUpper } from 'lodash';
 
 const Requests = ({ referenceId, fetchDataMaster, isMobile = false }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -103,7 +104,7 @@ const Requests = ({ referenceId, fetchDataMaster, isMobile = false }) => {
       headerColumns: [
         {
           style: { marginRight: 'auto' },
-          render: (row) => row['status'],
+          render: (row) => toUpper(row['status']),
           component: (row) => (row['status'] === EXPENSE_STATUS.approved ? 'completedChip' : 'pendingChip')
         },
         {

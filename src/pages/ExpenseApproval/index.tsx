@@ -1,6 +1,6 @@
 import { Box, IconButton, MenuItem, Typography } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
-import { camelCase } from 'lodash';
+import { camelCase, toUpper } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import { ListingPageHeader } from 'src/components/PageHeaders';
@@ -212,7 +212,7 @@ const ExpenseApproval = () => {
                                   border: report?.status === EXPENSE_STATUS.approved ? '1px solid #80DEEA' : '1px solid #ffad33',
                                 }}
                               >
-                                {report?.status}
+                                {toUpper(report?.status)}
                               </Box>
                             </Typography>
                           </Box>
