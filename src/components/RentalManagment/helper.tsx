@@ -318,7 +318,7 @@ export const bulkUpdate = (values, selectedProducts, material, allFields, curren
 
     selectedProducts.forEach((element: any) => {
         let calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
-        if (childMatrialUpdate?.length && !childMatrialUpdate?.includes(element.type)) {
+        if (childMatrialUpdate?.length && !childMatrialUpdate?.includes(element.type) && element?.parentId) {
             calValues = resetObjectValueZero(allFields, calValues)
         }
         if (element?.parentId) {
