@@ -2672,6 +2672,16 @@ export const REPORT_LIST = [
     section: REPORT_SECTIONS.iot
   },
   {
+    title: 'Monthly Revenue Report',
+    permission: 'iotChart',
+    key: 'standardReport',
+    type: 'monthlyRevenueReport',
+    defaultColumn: true,
+    isExportPdf: true,
+    isSendMail: true,
+    section: REPORT_SECTIONS.iot
+  },
+  {
     title: 'Unit Downtime Report',
     permission: 'iotChart',
     key: 'standardReport',
@@ -2704,16 +2714,6 @@ export const REPORT_LIST = [
     key: 'standardReport',
     type: 'sytelineInvoiceIntegration',
     section: REPORT_SECTIONS.integration
-  },
-  {
-    title: 'Monthly Revenue Report',
-    permission: 'iotChart',
-    key: 'standardReport',
-    type: 'monthlyRevenueReport',
-    defaultColumn: true,
-    isExportPdf: true,
-    isSendMail: true,
-    section: REPORT_SECTIONS.iot
   }
 ];
 
