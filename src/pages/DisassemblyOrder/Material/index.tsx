@@ -15,7 +15,7 @@ import { useData } from 'src/StateProvider/Provider';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 
-const Material = ({ disassemblyOrderData, renderedFrom, stepFullScreen, allowedToEdit }) => {
+const Material = ({ disassemblyOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -136,7 +136,7 @@ const Material = ({ disassemblyOrderData, renderedFrom, stepFullScreen, allowedT
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
-    // setNextStep(false);
+    setNextStep(false);
     const {
       data: {
         data: { material }
@@ -152,6 +152,7 @@ const Material = ({ disassemblyOrderData, renderedFrom, stepFullScreen, allowedT
       packageId: m?.managedPackageDetail?.package?._id,
       canDelete: true
     }));
+    setNextStep(true);
 
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
