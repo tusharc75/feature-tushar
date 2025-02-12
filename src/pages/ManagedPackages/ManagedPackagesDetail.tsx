@@ -19,6 +19,7 @@ import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import Assign from './Assign';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import ManagedPackagesView from './View';
+import History from 'src/pages/ManagedPackages/History';
 
 const ManagedPackagedDetail = () => {
   const { id } = useParams();
@@ -130,7 +131,8 @@ const ManagedPackagedDetail = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0} label={'Details'} />
           <CustomTab value={1} label={'Products'} />
-          {!(isMobile && !isTablet) && <CustomTab value={2} label={'Views'} />}
+          <CustomTab value={2} label={'History'} />
+          {!(isMobile && !isTablet) && <CustomTab value={3} label={'Views'} />}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -147,6 +149,9 @@ const ManagedPackagedDetail = () => {
           <Assign managedPackagesData={managedPackagesData} />
         </TabPanel>
         <TabPanel value={tabValue} index={2}>
+          <History id={managedPackagesData?._id} />
+        </TabPanel>
+        <TabPanel value={tabValue} index={3}>
           {managedPackagesData && <ManagedPackagesView managedPackagesData={managedPackagesData} />}
         </TabPanel>
       </Box>
