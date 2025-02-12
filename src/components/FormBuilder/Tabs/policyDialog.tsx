@@ -206,7 +206,7 @@ const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource
       />
     );
   } else if (type === 'multiSelect') {
-    const options = fields
+    const options = data?.option && data?.option?.length ? data?.option : fields
       ?.filter((ele) => !ele.fieldData?.primaryField)
       ?.map((e) => {
         return {

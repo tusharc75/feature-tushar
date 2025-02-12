@@ -190,6 +190,8 @@ export const assemblyOrderSteps: stepInterface[] = [
   { name: 'Final Slip', title: 'Slip', icon: 'invoice' }
 ];
 
+export const disassemblyOrderSteps: stepInterface[] = [{ name: 'Add', title: 'Add', icon: 'add' }];
+
 //export const WORKORDER_TECHNICIAN_SERVICE_STATUS = ['Backlog', 'Pending', 'In-Progress', 'Completed', 'In-Progress By Other'];
 export const WORKORDER_TECHNICIAN_SERVICE_STATUS = ['Pending', 'In-Progress', 'Completed', 'In-Progress By Other'];
 
@@ -284,6 +286,7 @@ export const sidebarResource = {
   reminder: 'Reminder',
   calendar: 'Calendar',
   dashboard: 'Dashboard',
+  disassemblyOrder: 'Disassembly Order',
   budget: 'Budget',
   marketSegment: 'Market Segment',
   quotePdfTemplate: 'Quote Pdf Template',
@@ -515,6 +518,11 @@ export const repairJob = {
 export const expenses = {
   resource: 'expenses',
   api: '/expenses'
+};
+
+export const disassemblyOrder = {
+  resource: 'disassemblyOrder',
+  api: '/disassembly-order'
 };
 
 export const expenseReport = {
@@ -2665,6 +2673,16 @@ export const REPORT_LIST = [
     section: REPORT_SECTIONS.iot
   },
   {
+    title: 'Monthly Revenue Report',
+    permission: 'iotChart',
+    key: 'standardReport',
+    type: 'monthlyRevenueReport',
+    defaultColumn: true,
+    isExportPdf: true,
+    isSendMail: true,
+    section: REPORT_SECTIONS.iot
+  },
+  {
     title: 'Unit Downtime Report',
     permission: 'iotChart',
     key: 'standardReport',
@@ -2697,16 +2715,6 @@ export const REPORT_LIST = [
     key: 'standardReport',
     type: 'sytelineInvoiceIntegration',
     section: REPORT_SECTIONS.integration
-  },
-  {
-    title: 'Monthly Revenue Report',
-    permission: 'iotChart',
-    key: 'standardReport',
-    type: 'monthlyRevenueReport',
-    defaultColumn: true,
-    isExportPdf: true,
-    isSendMail: true,
-    section: REPORT_SECTIONS.iot
   }
 ];
 
@@ -3035,6 +3043,7 @@ export const MATERIAL_TYPE = {
   service: 'service',
   package: 'package',
   serializedAsset: 'serializedAsset',
+  serializedPackage: 'serializedPackage',
   manualEntry: 'manualEntry',
   other: 'other'
 };
@@ -3070,6 +3079,13 @@ export const SUBCONTRACT_ASSEMBLY_STATUS = {
   inProgress: 'In-Progress',
   closed: 'Closed'
 };
+
+
+export const DIASSEMBLY_ORDER_STATUS = {
+  new: 'New',
+  inProgress: 'In-Progress',
+  closed: 'Closed'
+}
 
 export const WORK_FLOW_STATUS = {
   open: 'Open',
@@ -3633,8 +3649,8 @@ function fallbackCopyTextToClipboard(text: string, callBack: (text: string) => v
   document.body.removeChild(textArea);
 }
 
-export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => {}) {
-  if (typeof callBack !== 'function') callBack = (text) => {};
+export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => { }) {
+  if (typeof callBack !== 'function') callBack = (text) => { };
 
   if (!navigator.clipboard) {
     fallbackCopyTextToClipboard(text, callBack);

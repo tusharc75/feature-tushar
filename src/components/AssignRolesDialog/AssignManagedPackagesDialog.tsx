@@ -13,7 +13,7 @@ import { ListingPageHeader } from '../PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 import { useData } from 'src/StateProvider/Provider';
 
-const AssignManagedPackagesDialog = ({ onSuccess, handleClose, ids = [], isSubmitting = false }) => {
+const AssignManagedPackagesDialog = ({ onSuccess, handleClose, ids = [], extraFilterById = [], isSubmitting = false }) => {
   const renderedFrom = `${camelCase(sidebarResource?.managedPackages)}`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -74,6 +74,12 @@ const AssignManagedPackagesDialog = ({ onSuccess, handleClose, ids = [], isSubmi
     let deepFilter = `?page=${page}&limit=${limit}&ignoreIds=${JSON.stringify(ignoreIds)}`;
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    if (extraFilterById?.length > 0) {
+      extraFilterById?.map((e) => {
+        filterByIds.push(e);
+      });
+    }
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
