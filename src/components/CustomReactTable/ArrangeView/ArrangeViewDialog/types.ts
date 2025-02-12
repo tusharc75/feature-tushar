@@ -2,7 +2,7 @@ import { GridViewSavedData } from 'src/components/CustomReactTable/ArrangeView/A
 import { Table } from '@tanstack/react-table';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
 import { FormikErrors, FormikTouched } from 'formik';
-import useArrangeView from 'src/components/CustomReactTable/ArrangeView/ArrangeViewDialog1/useArrangeView';
+import useArrangeView from 'src/components/CustomReactTable/ArrangeView/ArrangeViewDialog/useArrangeView';
 
 export type ArrangeViewDialogProps = {
   onClose: () => void;

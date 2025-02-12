@@ -5,7 +5,7 @@ import { FaStar } from 'react-icons/fa6';
 import { ImSpinner2 } from 'react-icons/im';
 import axiosInstance from 'src/axios/axiosInstance';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
-import ArrangeViewDialog from 'src/components/CustomReactTable/ArrangeView/ArrangeViewDialog1';
+import ArrangeViewDialog from 'src/components/CustomReactTable/ArrangeView/ArrangeViewDialog';
 import { getCurrentColumnSizes, useGridMetaData } from 'src/components/CustomReactTable/ArrangeView/utils';
 import { TActios, TInitialState } from 'src/components/CustomReactTable/hooks/useTableReducer';
 import { getStickyColumnNames } from 'src/components/CustomReactTable/utils';

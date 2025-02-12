@@ -1,6 +1,6 @@
 import { Checkbox, FormControlLabel, Radio, RadioGroup, TextField } from '@mui/material';
 import { memo } from 'react';
-import { HeadInputProps } from 'src/components/CustomReactTable/ArrangeView/ArrangeViewDialog1/types';
+import { HeadInputProps } from 'src/components/CustomReactTable/ArrangeView/ArrangeViewDialog/types';
 
 const HeadInputs = memo(({ state, setFieldValue, values, touched, errors }: HeadInputProps) => {
   return (

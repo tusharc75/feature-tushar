@@ -6,8 +6,8 @@ import { Close, DragIndicator } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
 import { startCase } from 'lodash';
 import { memo, useCallback, useMemo } from 'react';
-import { ToggleSidebar } from 'src/components/CustomReactTable/ArrangeView/ArrangeViewDialog1/Sidebar';
-import { ContentProps, RenderListItemProps } from 'src/components/CustomReactTable/ArrangeView/ArrangeViewDialog1/types';
+import { ToggleSidebar } from 'src/components/CustomReactTable/ArrangeView/ArrangeViewDialog/Sidebar';
+import { ContentProps, RenderListItemProps } from 'src/components/CustomReactTable/ArrangeView/ArrangeViewDialog/types';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { cn } from 'src/constants/helpers';
 import { useDndSensors } from 'src/hooks';
@@ -42,8 +42,10 @@ const Content = memo(({ state, values, setFieldValue }: ContentProps) => {
       )}
     >
       <div className="sticky top-0 z-10 flex items-center justify-between gap-2 bg-[--dark-primary,white] py-[16px]">
-        {isMobile && <ToggleSidebar toggleSidebar={toggleSidebar} />}
-        <h6 className="text-base font-medium leading-[19px]">Customize Columns</h6>
+        <div className="flex items-center">
+          {isMobile && <ToggleSidebar toggleSidebar={toggleSidebar} />}
+          <h6 className="text-base font-medium leading-[19px]">Customize Columns</h6>
+        </div>
         <p className="hidden text-sm leading-4 text-gray-300 dark:text-gray-600 md:block">(Drag to reorder)</p>
       </div>
       <DndContext onDragEnd={(e) => onDragEnd(e, setFieldValue)} modifiers={[restrictToVerticalAxis]} onDragStart={onDragStart} sensors={sensors}>

@@ -9,7 +9,7 @@ import {
   InitialState,
   SetFieldValue,
   UseArrangeViewProps
-} from 'src/components/CustomReactTable/ArrangeView/ArrangeViewDialog1/types';
+} from 'src/components/CustomReactTable/ArrangeView/ArrangeViewDialog/types';
 import { getCurrentColumnSizes } from 'src/components/CustomReactTable/ArrangeView/utils';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
 import { getStickyColumnNames } from 'src/components/CustomReactTable/utils';

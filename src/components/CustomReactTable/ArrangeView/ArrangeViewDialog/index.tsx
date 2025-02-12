@@ -3,14 +3,15 @@ import { Checkbox, Dialog, FormControlLabel, IconButton, Radio, RadioGroup, Text
 import { Formik } from 'formik';
 
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import Content from 'src/components/CustomReactTable/ArrangeView/ArrangeViewDialog1/Content';
-import Sidebar from 'src/components/CustomReactTable/ArrangeView/ArrangeViewDialog1/Sidebar';
-import useArrangeView from 'src/components/CustomReactTable/ArrangeView/ArrangeViewDialog1/useArrangeView';
+import Content from 'src/components/CustomReactTable/ArrangeView/ArrangeViewDialog/Content';
+import Sidebar from 'src/components/CustomReactTable/ArrangeView/ArrangeViewDialog/Sidebar';
+import useArrangeView from 'src/components/CustomReactTable/ArrangeView/ArrangeViewDialog/useArrangeView';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { cn, CustomDialogTransition } from 'src/constants/helpers';
 import { object, string } from 'yup';
 import { ArrangeViewDialogProps } from './types';
-import HeadInputs from 'src/components/CustomReactTable/ArrangeView/ArrangeViewDialog1/HeadInputs';
+import HeadInputs from 'src/components/CustomReactTable/ArrangeView/ArrangeViewDialog/HeadInputs';
+import { useCallback } from 'react';
 
 const formSchema = object().shape({
   name: string().min(2, 'Name too short').max(50, 'Name too long!').required('Name is required')
@@ -38,7 +39,12 @@ const ArrangeViewDialog1 = ({
     renderedFrom,
     table
   });
-  const { defaultValue, loading, resized, handleOnSubmit, handleReset, isMobile } = state;
+  const { defaultValue, loading, resized, handleOnSubmit, handleReset, isMobile, columnsWithoutSticky } = state;
+
+  const selectedColumnsLength = useCallback(
+    (hiddenColumns: string[]) => columnsWithoutSticky.length - hiddenColumns.length,
+    [columnsWithoutSticky.length]
+  );
 
   return (
     <Formik initialValues={defaultValue} validationSchema={formSchema} validateOnMount onSubmit={handleOnSubmit}>
@@ -71,13 +77,15 @@ const ArrangeViewDialog1 = ({
           <div className="flex items-center gap-3 px-[--px] py-[--py] ">
             <div className="flex-grow">
               <h6 className="mb-[5px] text-[20px] font-semibold leading-[22px]">Arrange View</h6>
-              <p className="text-[12px] font-normal leading-[14px] text-[#777575] dark:text-gray-400 max-sm:hidden">
-                See results in your view based on the filters you select here.
-              </p>
             </div>
-            <IconButton onClick={onClose} size="small">
-              <Close />
-            </IconButton>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium leading-4 text-gray-500 ">
+                {selectedColumnsLength(values.hide)} of {columnsWithoutSticky.length} Selected
+              </span>
+              <IconButton onClick={onClose} size="small">
+                <Close />
+              </IconButton>
+            </div>
           </div>
 
           <CustomDialogContent className="relative !px-[--px] !py-[--py] !pt-0 ">
