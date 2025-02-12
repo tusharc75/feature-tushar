@@ -190,7 +190,10 @@ export const assemblyOrderSteps: stepInterface[] = [
   { name: 'Final Slip', title: 'Slip', icon: 'invoice' }
 ];
 
-export const disassemblyOrderSteps: stepInterface[] = [{ name: 'Add', title: 'Add', icon: 'add' }];
+export const disassemblyOrderSteps: stepInterface[] = [
+  { name: 'Add', title: 'Add', icon: 'add' },
+  { name: 'Work Order', title: 'Work Order', icon: 'workOrder' }
+];
 
 //export const WORKORDER_TECHNICIAN_SERVICE_STATUS = ['Backlog', 'Pending', 'In-Progress', 'Completed', 'In-Progress By Other'];
 export const WORKORDER_TECHNICIAN_SERVICE_STATUS = ['Pending', 'In-Progress', 'Completed', 'In-Progress By Other'];
