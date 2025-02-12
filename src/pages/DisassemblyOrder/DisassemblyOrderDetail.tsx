@@ -21,6 +21,7 @@ import Steps, { getIndex } from 'src/components/Steps';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import Material from 'src/pages/DisassemblyOrder/Material';
 import { camelCase } from 'lodash';
+import WorkOrder from 'src/pages/DisassemblyOrder/WorkOrder';
 
 const DisassemblyOrderDetail = () => {
   const renderedFrom = camelCase(sidebarResource.disassemblyOrder);
@@ -169,7 +170,17 @@ const DisassemblyOrderDetail = () => {
             {disassemblyOrderProcessStepsNames[currentStep] === 'Add' && disassemblyOrderData && (
               <Material
                 disassemblyOrderData={disassemblyOrderData}
+                setNextStep={setNextStep}
                 renderedFrom={`${renderedFrom}_grid-1`}
+                stepFullScreen={stepFullScreen}
+                allowedToEdit={allowedToEdit}
+              />
+            )}
+            {disassemblyOrderProcessStepsNames[currentStep] === 'Work Order' && disassemblyOrderData && (
+              <WorkOrder
+                disassemblyOrderData={disassemblyOrderData}
+                setNextStep={setNextStep}
+                renderedFrom={`${renderedFrom}_grid-2`}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={allowedToEdit}
               />
