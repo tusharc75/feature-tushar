@@ -225,7 +225,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
     setIsColumnsLoading(false);
   }, [generateColumns, resourceCamelCase, resourceStartCase, setColumns, setIsColumnsLoading, setResourceColumns]);
 
-  const getQueryString = useCallback((isExport = false, deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
+  const getQueryString = (isExport = false, deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
 
     let filterQuery = `?page=${page}&limit=${limit}&`;
     let deepFilter = [];
@@ -327,52 +327,53 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
     }
 
     if (isExport) {
+      console.log(visibleColumns)
+      console.log(columnOrder)
       filterQuery = `${filterQuery}exportColumn=${JSON.stringify(getSortedVisibleColumns(columns, visibleColumns, columnOrder))}`;
     }
 
     return { query: `${filterQuery}`, deepFilter: newDeepFilter };
 
-  }, [deepFilters, filterByIds, filterTerm, filters, limit, page, resourceColumns, resourceStartCase, search, sorting]);
+  };
 
-  const fetchResourceData = useCallback(
-    (deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
-      setShowGrid(true);
+  const fetchResourceData = useCallback((deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
+    setShowGrid(true);
 
-      let { query, deepFilter } = getQueryString(false, deepFiltersP, filterByIdsP);
-      setDeepFilters(deepFilter);
+    let { query, deepFilter } = getQueryString(false, deepFiltersP, filterByIdsP);
+    setDeepFilters(deepFilter);
 
-      if (cancelTokenSource) {
-        cancelTokenSource.cancel();
-      }
-      cancelTokenSource = axios.CancelToken.source();
-      dispatch({ type: 'loading', loading: true });
+    if (cancelTokenSource) {
+      cancelTokenSource.cancel();
+    }
+    cancelTokenSource = axios.CancelToken.source();
+    dispatch({ type: 'loading', loading: true });
 
-      let api = `/report${routes[resourceCamelCase].path}${query}`;
-      if (resourceCamelCase === 'quotes') {
-        api = `/report/quote-builder${query}`;
-      } else {
-        api = `/report${routes[resourceCamelCase].path}${query}`;
-      }
+    let api = `/report${routes[resourceCamelCase].path}${query}`;
+    if (resourceCamelCase === 'quotes') {
+      api = `/report/quote-builder${query}`;
+    } else {
+      api = `/report${routes[resourceCamelCase].path}${query}`;
+    }
 
-      axiosInstance().get(api, { cancelToken: cancelTokenSource?.token }).then(({ data: { data, count } }) => {
-        data = data.map((u: any) => {
-          let finalObject = prepareDataForGrid(u);
-          return finalObject;
-        });
+    axiosInstance().get(api, { cancelToken: cancelTokenSource?.token }).then(({ data: { data, count } }) => {
+      data = data.map((u: any) => {
+        let finalObject = prepareDataForGrid(u);
+        return finalObject;
+      });
 
-        dispatch({ type: 'initialize', data: data, count: count });
+      dispatch({ type: 'initialize', data: data, count: count });
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+    }).catch((err) => {
+      if (!axios.isCancel(err)) {
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
-      }).catch((err) => {
-        if (!axios.isCancel(err)) {
-          setTimeout(() => {
-            dispatch({ type: 'loading', loading: false });
-          }, gridLoadingTimeout);
-          toastConfig.setToastConfig(err);
-        }
-      });
-    },
+        toastConfig.setToastConfig(err);
+      }
+    });
+  },
     [dispatch, getQueryString, resourceCamelCase, toastConfig]
   );
 
