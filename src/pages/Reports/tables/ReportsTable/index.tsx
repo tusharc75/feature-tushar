@@ -327,8 +327,6 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
     }
 
     if (isExport) {
-      console.log(visibleColumns)
-      console.log(columnOrder)
       filterQuery = `${filterQuery}exportColumn=${JSON.stringify(getSortedVisibleColumns(columns, visibleColumns, columnOrder))}`;
     }
 
