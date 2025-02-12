@@ -107,6 +107,9 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
               .catch((error) => {
                 toastConfig.setToastConfig(error);
               });
+              axiosInstance().patch(`${expenseReport.api}/expenses/status/${expenseReportId}`, {
+                status
+              });
           });
 
           setIsSubmitting(false);

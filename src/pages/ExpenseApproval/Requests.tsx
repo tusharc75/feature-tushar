@@ -1,61 +1,84 @@
-import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Typography } from '@mui/material';
-import { EXPENSE_STATUS, expenseReport, expenses, getUniqueCurrencies } from 'src/constants/helpers';
-import axiosInstance from 'src/axios/axiosInstance';
-import routes from 'src/components/Helpers/Routes';
-import { useData } from 'src/StateProvider/Provider';
-import CustomTableWithCard, { CardInterface, ColumnInterface, createBodyColumns } from 'src/components/CustomTableWithCard';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { Box } from '@mui/material';
+import { Edit } from '@mui/icons-material';
+import SendIcon from '@mui/icons-material/Send';
+import queryString from 'query-string';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
+import { useHistory, useParams } from 'react-router-dom';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { toUpper } from 'lodash';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import routes from '../../components/Helpers/Routes';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { EXPENSE_STATUS, expenseReport, expenses, sidebarResource } from '../../constants/helpers';
+import Step from '../DynamicForm/Step';
+import ManageExpenseReports from 'src/pages/ExpensesReport/ManageExpenseReports';
+import Expenses from 'src/pages/ExpensesReport/Expenses';
+import { CardInterface } from 'src/components/CustomTableWithCard';
 
 const Requests = ({ referenceId, fetchDataMaster, isMobile = false }) => {
   const toastConfig = useContext(CustomToastContext);
-
+  const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
-
+  const [loadingDetails, setLoadingDetails] = useState(true);
   const [rowsData, setRowsData] = useState(null);
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [accessor, setAccessor] = useState<CardInterface | null>(null);
+  const [resourceData, setResourceData] = useState(null);
 
   const {
     state: { user }
   }: any = useData();
 
   useEffect(() => {
-    fetchColumn();
-    fetchData();
+    console.log(referenceId);
+    if (referenceId) {
+      fetchData();
+      fetchFields();
+      fetchPolicy();
+    }
   }, [referenceId]);
 
   const fetchData = () => {
     setRowsData(null);
     axiosInstance()
-      .get(`${expenseReport.api}`)
+      .get(`${expenseReport.api}/${referenceId}`)
       .then(({ data: { data } }) => {
-        const mappedExpenses = data
-          ?.filter((e) => e?._id === referenceId)
-          .map((expense) => ({
-            reportTitle: expense.reportTitle,
-            status: expense.status,
-            _id: expense._id,
-            fromDate: expense.fromDate,
-            toDate: expense.toDate,
-            expenses: expense.expenses.map((exp) => ({
-              id: exp._id,
-              expenseNumber: exp.expenseNumber,
-              expenseDate: exp.expenseDate,
-              amount: exp.totalAmount || 'N/A',
-              status: exp.status,
-              currency: exp.currency
-            }))
-          }));
-        setRowsData(mappedExpenses);
+        setRowsData(data);
+        setLoadingDetails(false);
       })
       .catch((error) => {
+        setLoadingDetails(false);
         toastConfig.setToastConfig(error);
       });
+  };
+
+  const fetchFields = async () => {
+    axiosInstance()
+      .get(`/field?resource=${sidebarResource?.expenseReport}`)
+      .then(({ data }) => {
+        setFields(data.data?.filter((field) => field.isRead));
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.expenses}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
   };
 
   const handleStatusChange = async (status) => {
@@ -66,158 +89,80 @@ const Requests = ({ referenceId, fetchDataMaster, isMobile = false }) => {
         if (report.expenses && report.expenses.length > 0) {
           for (let expense of report.expenses) {
             await axiosInstance().patch(`${expenses.api}/status/${expense.id}`, { status });
-            await axiosInstance().patch(`${expenseReport.api}/expenses/status/${report._id}`, {
-              status
-            });
           }
         }
       }
-      fetchDataMaster();
+      fetchData();
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
   };
 
-  const fetchColumn = async () => {
-    setAccessor(null);
-
-    const columns: ColumnInterface[] = [
-      {
-        headerName: 'From :',
-        field: 'fromDate',
-        cellRenderer: 'dateRenderer'
-      },
-      {
-        headerName: 'To :',
-        field: 'toDate',
-        cellRenderer: 'dateRenderer'
-      }
-    ];
-
-    const accessor: CardInterface = {
-      name: (row) => (
-        <Typography component={'h6'} className="mt-0 line-clamp-2 !leading-[1.5] max-[768px]:!text-[13px]">
-          Report Title :{' '}
-          <a className="link" href={`${routes.expenseReportDetail.path}/${row?._id}`} title={row['reportTitle']} rel="noreferrer" target="_blank">
-            {row['reportTitle']}
-          </a>
-        </Typography>
-      ),
-
-      headerColumns: [
-        {
-          style: { marginRight: 'auto' },
-          render: (row) => toUpper(row['status']),
-          component: (row) => (row['status'] === EXPENSE_STATUS.approved ? 'completedChip' : 'pendingChip')
-        },
-        {
-          render: (row) => {
-            return (
-              <>
-                <Box display="flex">
-                  <Box display="flex" flexGrow={1}>
-                    {row['status'] === EXPENSE_STATUS.awaitingApproval && (
-                      <Fragment>
-                        <ThemeButton
-                          buttonType="themeBorder"
-                          style={{ boxShadow: 'unset' }}
-                          className="no-shadow"
-                          disabled={loading}
-                          onClick={() => {
-                            handleStatusChange(EXPENSE_STATUS.approved);
-                          }}
-                        >
-                          Approve
-                        </ThemeButton>
-                        <Box pl={1} />
-                        <ThemeButton
-                          buttonType="red"
-                          disabled={loading}
-                          onClick={() => {
-                            handleStatusChange(EXPENSE_STATUS.rejected);
-                          }}
-                        >
-                          Reject
-                        </ThemeButton>
-                        <Box pl={1} />
-                      </Fragment>
-                    )}
-                  </Box>
-                </Box>
-              </>
-            );
-          }
-        }
-      ],
-      bodyColumns: [...createBodyColumns({ columns: columns, exclude: [], xs: 6, sm: 4, md: 4, lg: 2 })]
-    };
-    setAccessor(accessor);
-  };
-
   return (
     <>
-      <Box display="flex" justifyContent={'space-between'}>
-        <Box pt={2}>
-          {rowsData && accessor ? (
-            <>
-              <Box zIndex={5} width={'100%'} paddingLeft={'7rem'} height={isMobile ? 'calc(100vh - 143px)' : 'calc(100vh - 290px)'}>
-                <CustomTableWithCard
-                  data={rowsData}
-                  accessor={accessor}
-                  uniqueKey={(data) => data._id}
-                  onSelect={setSelectedRecords}
-                  checkBox={false}
-                  showSelectAll={false}
-                  height={isMobile ? 'calc(100vh - 160px)' : 'calc(100vh - 290px)'}
-                />
-                <div className="mt-2">
-                  <TableContainer component={Paper}>
-                    <Table sx={{ minWidth: 700 }} aria-label="spanning table">
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Expenses</TableCell>
-                          <TableCell></TableCell>
-                          <TableCell></TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {rowsData.flatMap((row) =>
-                          row.expenses.map((expense) => (
-                            <TableRow key={expense.id}>
-                              <TableCell>{expense.expenseNumber}</TableCell>
-                              <TableCell
-                                sx={{
-                                  display: 'inline-block',
-                                  backgroundColor: expense?.status === EXPENSE_STATUS.approved ? '#E6FFFA' : '#FFF9E6',
-                                  color: expense?.status === EXPENSE_STATUS.approved ? '#0097A7' : '#FF9800',
-                                  fontWeight: 600,
-                                  padding: '4px 12px',
-                                  borderRadius: '16px',
-                                  fontSize: '0.875rem',
-                                  marginTop:'0.7rem',
-                                  border: expense?.status === EXPENSE_STATUS.approved ? '1px solid #80DEEA' : '1px solid #ffad33'
-                                }}
-                                align='center'
-                              >
-                                {toUpper(expense.status)}
-                              </TableCell>
-                              <TableCell align="right">
-                                {getUniqueCurrencies().find((d) => d.currencyCode === expense.currency)?.symbolNative} {expense.amount}
-                              </TableCell>
-                            </TableRow>
-                          ))
-                        )}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </div>
-              </Box>
-            </>
-          ) : (
-            <Box height={500}>
-              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+      <Box className="main-container-v1">
+        <Box className="headerbox-v1" display="flex" justifyContent="flex-end">
+          <Box className="controls-v1">
+            <Box className="control-buttons-v1 " >
+              <Fragment>
+                {rowsData?.status !== EXPENSE_STATUS.approved && (
+                  <>
+                    <ThemeButton
+                      buttonType="themeBorder"
+                      iconForMobile={<SendIcon />}
+                      onClick={() => {
+                        handleStatusChange(
+                          rowsData?.status === EXPENSE_STATUS.awaitingApproval ? EXPENSE_STATUS.recalled : EXPENSE_STATUS.awaitingApproval
+                        );
+                      }}
+                      mobileTooltip={rowsData?.status === EXPENSE_STATUS.awaitingApproval ? 'Recall' : 'Send For Approval'}
+                    >
+                     Approve
+                    </ThemeButton>
+                    <ThemeButton
+                      buttonType="red"
+                      iconForMobile={<SendIcon />}
+                      onClick={() => {
+                        handleStatusChange(
+                          rowsData?.status === EXPENSE_STATUS.awaitingApproval ? EXPENSE_STATUS.recalled : EXPENSE_STATUS.awaitingApproval
+                        );
+                      }}
+                      mobileTooltip={rowsData?.status === EXPENSE_STATUS.awaitingApproval ? 'Recall' : 'Send For Approval'}
+                    >
+                      Reject
+                    </ThemeButton>
+                  </>
+                )}
+              </Fragment>
             </Box>
-          )}
+          </Box>
+        </Box>
+        <Box className={`detail-container-v1`}>
+            <Box>
+              {!loadingDetails && rowsData && fields ? (
+                <DetailsPage data={rowsData} fields={fields} />
+              ) : (
+                <div className="p-2">
+                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                </div>
+              )}
+            </Box>
+            <Box>
+              {!loadingDetails && rowsData && fields ? (
+                <div className="mt-2">
+                  <Expenses
+                    selectedExpenseData={rowsData?.expenses}
+                    showAddButton={true}
+                    reportData={rowsData}
+                    removeRow={null}
+                  />
+                </div>
+              ) : (
+                <div className="p-2">
+                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                </div>
+              )}
+            </Box>
         </Box>
       </Box>
     </>

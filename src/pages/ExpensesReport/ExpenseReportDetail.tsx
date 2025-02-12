@@ -1,5 +1,6 @@
-import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import { Edit } from '@mui/icons-material';
+import SendIcon from '@mui/icons-material/Send';
 import queryString from 'query-string';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
@@ -13,24 +14,22 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { EXPENSE_STATUS, expenses, getUniqueCurrencies, sidebarResource } from '../../constants/helpers';
+import { EXPENSE_STATUS, expenseReport, expenses, sidebarResource } from '../../constants/helpers';
 import Step from '../DynamicForm/Step';
-import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
+import ManageExpenseReports from 'src/pages/ExpensesReport/ManageExpenseReports';
+import Expenses from 'src/pages/ExpensesReport/Expenses';
 
-const ExpenseDetailsPage = () => {
+const ExpenseReportDetail = () => {
   const toastConfig = useContext(CustomToastContext);
-
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const { tab }: any = parsed;
-
   const {
-    state: { user, permissions, resources }
+    state: { permissions, resources }
   }: any = useData();
   const [loadingDetails, setLoadingDetails] = useState(true);
-  const [expensesData, setExpensesData] = useState(null);
-  const [currencySymbol, setCurrencySymbol] = useState(null);
+  const [expenseReportData, setExpenseReportData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
@@ -73,7 +72,7 @@ const ExpenseDetailsPage = () => {
 
   const fetchFields = async () => {
     axiosInstance()
-      .get(`/field?resource=${sidebarResource?.expenses}`)
+      .get(`/field?resource=${sidebarResource?.expenseReport}`)
       .then(({ data }) => {
         setFields(data.data?.filter((field) => field.isRead));
       })
@@ -85,13 +84,12 @@ const ExpenseDetailsPage = () => {
   const fetchData = async () => {
     setLoadingDetails(true);
     axiosInstance()
-      .get(`${expenses.api}/${id}`)
+      .get(`${expenseReport.api}/${id}`)
       .then(({ data: { data } }) => {
-        setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data.currency)?.symbolNative);
         setLoadingDetails(false);
-        setAllowedToEdit(permissions?.expenses?.isUpdate);
-        setAllowedToDelete(permissions?.expenses?.isDelete && data.status === EXPENSE_STATUS.unreported);
-        setExpensesData(data);
+        setAllowedToEdit(permissions?.expenseReport?.isUpdate);
+        setAllowedToDelete(permissions?.expenseReport?.isDelete && data?.canDelete);
+        setExpenseReportData(data);
       })
       .catch((err) => {
         setLoadingDetails(false);
@@ -112,17 +110,68 @@ const ExpenseDetailsPage = () => {
     }
   };
 
-  const handleDelete = () => {
-    axiosInstance()
-      .put(`${expenses.api}/remove`, { ids: [expensesData._id] })
-      .then(() => {
-        setShowConfirmBox(false);
-        history.push(`${routes?.expenses?.path}`);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setShowConfirmBox(false);
-      });
+  const handleDelete = async () => {
+    try {
+      await axiosInstance().put(`${expenseReport.api}/remove`, { ids: [expenseReportData._id] });
+
+      if (expenseReportData?.expenses?.length > 0) {
+        for (let expense of expenseReportData.expenses) {
+          try {
+            await axiosInstance().patch(`${expenses.api}/status/${expense._id}`, {
+              status: EXPENSE_STATUS.unreported
+            });
+          } catch (error) {
+            toastConfig.setToastConfig(error);
+          }
+          await axiosInstance().patch(`${expenseReport.api}/expenses/status/${expenseReportData._id}`, {
+            status: EXPENSE_STATUS.unreported
+          });
+        }
+      }
+
+      setShowConfirmBox(false);
+
+      history.push(`${routes?.expenseReport?.path}`);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+      setShowConfirmBox(false);
+    }
+  };
+
+  const handleDeleteExpense = async (expenseIds: string[]) => {
+    try {
+      await axiosInstance().put(`${routes.expenseReport.path}/expenses/${expenseReportData._id}/remove`, { ids: expenseIds });
+
+      for (let expenseId of expenseIds) {
+        await axiosInstance().patch(`${expenses.api}/status/${expenseId}`, {
+          status: EXPENSE_STATUS.unreported
+        });
+        await axiosInstance().patch(`${expenseReport.api}/expenses/status/${expenseReportData._id}`, {
+          status: EXPENSE_STATUS.unreported
+        });
+      }
+
+      fetchData();
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const handleStatusChange = async (status) => {
+    await axiosInstance().patch(`${expenseReport.api}/status/${expenseReportData._id}`, {
+      status
+    });
+    if (expenseReportData?.expenses?.length > 0) {
+      for (let expense of expenseReportData.expenses) {
+        await axiosInstance().patch(`${expenses.api}/status/${expense._id}`, {
+          status
+        });
+        await axiosInstance().patch(`${expenseReport.api}/expenses/status/${expenseReportData._id}`, {
+          status
+        });
+      }
+    }
+    fetchData();
   };
 
   return (
@@ -131,24 +180,40 @@ const ExpenseDetailsPage = () => {
         <Box className="nav-v1">
           <CustomBreadCrumbs
             routes={[
-              { ...routes?.expenses, title: resources?.expenses?.titlePlural },
-              { title: `${expensesData ? expensesData?.expenseNumber : ''}` }
+              { ...routes?.expenseReport, title: resources?.expenseReport?.titlePlural },
+              { title: `${expenseReportData ? expenseReportData?.reportTitle : ''}` }
             ]}
           />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <Fragment>
-              {expensesData?.status !== EXPENSE_STATUS.approved && <ThemeButton
-                iconForMobile={<Edit />}
-                disabled={!allowedToEdit}
-                onClick={() => {
-                  setOpenUpdateDialog(true);
-                }}
-                mobileTooltip={'Edit'}
-              >
-                Edit
-              </ThemeButton>}
+              {expenseReportData?.status !== EXPENSE_STATUS.approved && (
+                <>
+                  <ThemeButton
+                    buttonType="theme"
+                    iconForMobile={<SendIcon />}
+                    onClick={() => {
+                      handleStatusChange(
+                        expenseReportData?.status === EXPENSE_STATUS.awaitingApproval ? EXPENSE_STATUS.recalled : EXPENSE_STATUS.awaitingApproval
+                      );
+                    }}
+                    mobileTooltip={expenseReportData?.status === EXPENSE_STATUS.awaitingApproval ? 'Recall' : 'Send For Approval'}
+                  >
+                    {expenseReportData?.status === EXPENSE_STATUS.awaitingApproval ? 'Recall' : 'Send For Approval'}
+                  </ThemeButton>
+                  {expenseReportData?.status !== EXPENSE_STATUS.awaitingApproval && <ThemeButton
+                    iconForMobile={<Edit />}
+                    disabled={!allowedToEdit}
+                    onClick={() => {
+                      setOpenUpdateDialog(true);
+                    }}
+                    mobileTooltip={'Edit'}
+                  >
+                    Edit
+                  </ThemeButton>}
+                </>
+              )}
             </Fragment>
             {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
           </Box>
@@ -157,53 +222,30 @@ const ExpenseDetailsPage = () => {
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
+          <CustomTab value={1}>Expenses</CustomTab>
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 1}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
-            {!loadingDetails && expensesData && fields ? (
-              <DetailsPage data={expensesData} fields={fields} />
+            {!loadingDetails && expenseReportData && fields ? (
+              <DetailsPage data={expenseReportData} fields={fields} />
             ) : (
               <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </div>
             )}
-            {!loadingDetails ? (
+          </Box>
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <Box>
+            {!loadingDetails && expenseReportData && fields ? (
               <div className="mt-2">
-                <TableContainer component={Paper}>
-                  <Table sx={{ minWidth: 700 }} aria-label="spanning table">
-                    {expensesData?.lineItems?.length > 0 && (
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Description</TableCell>
-                          <TableCell align="right">Amount</TableCell>
-                        </TableRow>
-                      </TableHead>
-                    )}
-                    <TableBody>
-                      {expensesData?.lineItems?.map((row) => (
-                        <TableRow key={row.id}>
-                          <TableCell>{row.description}</TableCell>
-                          <TableCell align="right">
-                            {currencySymbol} {row.amount}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                      <TableRow>
-                        <TableCell>
-                          <Typography variant='body1'>
-                            Total Amount
-                          </Typography>
-                        </TableCell>
-                        <TableCell align="right">
-                          <Typography variant='body1'>
-                            {currencySymbol} {expensesData?.totalAmount}
-                          </Typography>
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+                <Expenses
+                  selectedExpenseData={expenseReportData?.expenses}
+                  showAddButton={true}
+                  reportData={expenseReportData}
+                  removeRow={handleDeleteExpense}
+                />
               </div>
             ) : (
               <div className="p-2">
@@ -221,9 +263,9 @@ const ExpenseDetailsPage = () => {
                   tab={tab}
                   resourcePolicyId={resourceData?._id}
                   resourceId={id}
-                  resource={sidebarResource.expenses}
-                  data={expensesData}
-                  allowedToEdit={permissions?.expenses?.isUpdate}
+                  resource={sidebarResource.expenseReport}
+                  data={expenseReportData}
+                  allowedToEdit={permissions?.expenseReport?.isUpdate}
                 />
               </TabPanel>
             );
@@ -232,7 +274,7 @@ const ExpenseDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.expenses?.titleSingular?.toLowerCase()} : ${expensesData?.expenseNumber} ?`}
+          message={`Are you sure you want to delete ${resources?.expenseReport?.titleSingular?.toLowerCase()} : ${expenseReportData?.reportTitle} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
@@ -240,9 +282,9 @@ const ExpenseDetailsPage = () => {
         />
       )}
       {openUpdateDialog && (
-        <ManageExpenses
-          isClone={false}
-          expenseId={id}
+        <ManageExpenseReports
+          expenseReportId={id}
+          fetchReportData={fetchData}
           onClose={() => setOpenUpdateDialog(false)}
           onSuccess={() => {
             setOpenUpdateDialog(false);
@@ -254,4 +296,4 @@ const ExpenseDetailsPage = () => {
   );
 };
 
-export default ExpenseDetailsPage;
+export default ExpenseReportDetail;
