@@ -59,6 +59,7 @@ const useArrangeView = ({
     () => columns.filter((c) => !stickyColumns.includes(c.id || c.accessor)),
     [stickyColumns, columns]
   );
+
   const isMobile = useMediaQuery('(max-width:768px)');
 
   const initialState: InitialState = useMemo(
@@ -67,7 +68,7 @@ const useArrangeView = ({
       resized: false,
       search: '',
       sortedColumns: data?.order
-        ? columnsWithoutSticky.sort((a, b) => data?.order?.indexOf(a.id) - data?.order?.indexOf(b.id))
+        ? [...columnsWithoutSticky].sort((a, b) => data?.order?.indexOf(a.id) - data?.order?.indexOf(b.id))
         : columnsWithoutSticky,
       activeItem: null,
       isSidebarOpen: true
