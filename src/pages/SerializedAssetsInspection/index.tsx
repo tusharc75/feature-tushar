@@ -32,8 +32,6 @@ import {
 import axios, { CancelTokenSource } from 'axios';
 import ReasonDialog from '../SerializedAsset/ReasonDialog';
 import { ExpandMore } from '@mui/icons-material';
-import { isMobile } from 'react-device-detect';
-import { FaCircleChevronDown } from 'react-icons/fa6';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { RiExchange2Line } from 'react-icons/ri';
 
@@ -373,7 +371,6 @@ const SerializedAssetInspection = () => {
           ) {
             return null;
           }
-          //adding others 
           if (!Object.values(ASSET_STATUS).includes(status.optionLabel)) {
             otherStatuses.add(status.optionLabel);
           }
