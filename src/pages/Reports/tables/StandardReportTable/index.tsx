@@ -1,7 +1,7 @@
 import { Dialog, IconButton } from '@mui/material';
 import { History, Visibility } from '@mui/icons-material';
 import axios from 'axios';
-import { camelCase, isArray, isEmpty, isNumber, isObject, startCase } from 'lodash';
+import { camelCase, isArray, isNumber, startCase } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { isTablet } from 'react-device-detect';
 import { MdFilterList } from 'react-icons/md';
@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
 import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getSortedVisibleColumns, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import Filter, { getErrors } from 'src/components/Filter';
@@ -27,7 +27,7 @@ import {
   isObjectEmpty,
   prepareDataForGrid,
   REPORT_LIST,
-  sidebarResource
+  sidebarResource,
 } from 'src/constants/helpers';
 import { ReferenceRenderer } from 'src/pages/ProductInventory/History';
 import AverageCostHistory from 'src/pages/Reports/tables/AverageCostHistory';
@@ -74,7 +74,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
   const reportConfig = REPORT_LIST?.find((e) => e.type === resourceCamelCase);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { page, sorting, search, limit, filters, pageSizes, visibleColumns } = state;
+  const { page, sorting, search, limit, filters, pageSizes, visibleColumns, columnOrder } = state;
   const [showGrid, setShowGrid] = React.useState(false);
   const [deepFilters, setDeepFilters] = useState([]);
   const [filterByIds, setFilterByIds] = useState([]);
@@ -276,16 +276,22 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
   };
 
   const getQueryString = (isExport = false, deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
-    let filterQuery = ``;
+
     let deepFilter = [];
     let newDeepFilter = [...deepFiltersP];
 
-    if (!isExport) {
-      filterQuery = `page=${page}&limit=${limit}&`;
+    let filterQuery = `?page=${page}&limit=${limit}&`;
+    if (isExport) {
+      filterQuery = `?`;
     }
-    if (selectedReport.resource === 'iot-data-points') {
-      filterQuery += `column=true&timezone=${Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone}&`;
+
+    if (['iot-data-points', 'user-session']?.includes(selectedReport.resource)) {
+      filterQuery += `column=true&`;
+      if (['iot-data-points']?.includes(selectedReport.resource)) {
+        filterQuery += `timezone=${Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone}&`;
+      }
     }
+
     if (sorting.length > 0) {
       filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
     }
@@ -330,8 +336,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
     const dateFilter: any = [];
     const statusPeriodDateFilter: any = [];
 
-    const isStatusPeriod =
-      resourceStartCase === sidebarResource.serializedAsset && resourceColumns?.some((r) => r?.fieldData?.fieldName === 'status');
+    const isStatusPeriod = resourceStartCase === sidebarResource.serializedAsset && resourceColumns?.some((r) => r?.fieldData?.fieldName === 'status');
 
     if (deepFiltersP?.length > 0) {
       deepFilter = [
@@ -381,24 +386,11 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
       filterQuery = `${filterQuery}deepFilter=${encodeURIComponent(JSON.stringify(deepFilter))}&`;
     }
 
-    if (resourceCamelCase === 'userSession') {
-      return { query: `?column=true&${filterQuery}`, newDeepFilter };
-    }
-
     if (isExport) {
-      let newColumns = columns?.map((col) => col.accessor);
-      if (!isEmpty(visibleColumns) && isObject(visibleColumns)) {
-        newColumns = [];
-        for (const [key, value] of Object.entries(visibleColumns)) {
-          if (value) {
-            newColumns.push(key);
-          }
-        }
-      }
-      filterQuery = `${filterQuery}&exportColumn=${JSON.stringify(newColumns)}`;
+      filterQuery = `${filterQuery}&exportColumn=${JSON.stringify(getSortedVisibleColumns(columns, visibleColumns, columnOrder))}`;
     }
 
-    return { query: `?${filterQuery}`, newDeepFilter };
+    return { query: `${filterQuery}`, newDeepFilter };
   };
 
   const fetchResourceData = (deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
@@ -544,38 +536,36 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
       return;
     }
 
-    axiosInstance()
-      .get(`${api}${filterQuery}`, {
-        responseType: 'arraybuffer'
-      })
-      .then((res) => {
-        const fileName = res.headers['content-disposition'].split('filename=')[1];
-        if (processType === 'sendMail') {
-          const blobData = new Blob([res.data], { type: contentType });
-          generateBase64forFile(blobData, fileName, extension);
-        } else if (processType === 'pdf') {
-          const url = window.URL.createObjectURL(new Blob([res.data]));
-          const link = document.createElement('a');
-          link.href = url;
-          link.setAttribute('download', fileName + '.pdf');
-          document.body.appendChild(link);
-          link.click();
-          toastConfig.setToastConfig({
-            open: true,
-            message: 'Successfully Exported',
-            type: 'success'
-          });
-          setIsProcessing(null);
-        } else {
-          downloadExcel(res.data, fileName);
-          toastConfig.setToastConfig({
-            open: true,
-            message: 'Successfully Exported',
-            type: 'success'
-          });
-          setIsProcessing(null);
-        }
-      })
+    axiosInstance().get(`${api}${filterQuery}`, {
+      responseType: 'arraybuffer'
+    }).then((res) => {
+      const fileName = res.headers['content-disposition'].split('filename=')[1];
+      if (processType === 'sendMail') {
+        const blobData = new Blob([res.data], { type: contentType });
+        generateBase64forFile(blobData, fileName, extension);
+      } else if (processType === 'pdf') {
+        const url = window.URL.createObjectURL(new Blob([res.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', fileName + '.pdf');
+        document.body.appendChild(link);
+        link.click();
+        toastConfig.setToastConfig({
+          open: true,
+          message: 'Successfully Exported',
+          type: 'success'
+        });
+        setIsProcessing(null);
+      } else {
+        downloadExcel(res.data, fileName);
+        toastConfig.setToastConfig({
+          open: true,
+          message: 'Successfully Exported',
+          type: 'success'
+        });
+        setIsProcessing(null);
+      }
+    })
       .catch((err) => {
         setIsProcessing(null);
         toastConfig.setToastConfig(err);
@@ -683,7 +673,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
                   permissions={permissions?.report}
                   module={selectedReport.resource}
                   api={`/report/${selectedReport.resource}`}
-                  afterImportCompleted={() => {}}
+                  afterImportCompleted={() => { }}
                   isExportCount={true}
                   exportCount={0}
                   ids={[]}

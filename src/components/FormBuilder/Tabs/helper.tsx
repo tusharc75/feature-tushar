@@ -1,4 +1,4 @@
-import { sidebarResource } from 'src/constants/helpers';
+import { MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 
 export const resourcePolicy = [
   {
@@ -76,11 +76,16 @@ export const resourcePolicy = [
         defaultValue: false
       },
       {
-        fieldName: 'addPackageChild',
-        fieldLabel: 'Add Package Child',
-        type: 'checkBox',
-        defaultValue: false
-      },
+        fieldName: 'packageMaterialAdd',
+        fieldLabel: 'Package Material Add',
+        type: 'multiSelect',
+        option: [
+          { optionValue: MATERIAL_TYPE.package, optionLabel: 'Package', order: 0 },
+          { optionValue: MATERIAL_TYPE.product, optionLabel: 'Product', order: 1 },
+          { optionValue: MATERIAL_TYPE.service, optionLabel: 'Service', order: 2 }
+        ],
+        defaultValue: []
+      }
     ]
   },
   {
