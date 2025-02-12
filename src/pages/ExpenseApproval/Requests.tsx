@@ -21,7 +21,6 @@ const Requests = ({ referenceId, fetchDataMaster, isMobile = false }) => {
   }: any = useData();
 
   useEffect(() => {
-    console.log(referenceId);
     if (referenceId) {
       fetchData();
       fetchFields();
@@ -69,7 +68,6 @@ const Requests = ({ referenceId, fetchDataMaster, isMobile = false }) => {
 
   const handleStatusChange = async (status) => {
     if (!rowsData) return;
-    console.log(rowsData);
     try {
       await axiosInstance().patch(`${expenseReport.api}/status/${rowsData._id}`, { status });
       if (rowsData.expenses && rowsData.expenses.length > 0) {
