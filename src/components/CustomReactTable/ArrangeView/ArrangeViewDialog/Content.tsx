@@ -143,5 +143,6 @@ const RenderListItem = memo(
       </li>
     );
   },
-  (prev, next) => prev.column.id === next.column.id && prev.index === next.index && prev.hidden === next.hidden
+  (prev, next) =>
+    prev.column.id === next.column.id && prev.index === next.index && prev.hidden === next.hidden && prev.handleRemoveItem === next.handleRemoveItem
 );
