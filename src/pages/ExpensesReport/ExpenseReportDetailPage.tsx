@@ -123,6 +123,9 @@ const ExpenseReportDetailsPage = () => {
           } catch (error) {
             toastConfig.setToastConfig(error);
           }
+          await axiosInstance().patch(`${expenseReport.api}/expenses/status/${expenseReportData._id}`, {
+            status: EXPENSE_STATUS.unreported
+          });
         }
       }
 
@@ -143,6 +146,9 @@ const ExpenseReportDetailsPage = () => {
         await axiosInstance().patch(`${expenses.api}/status/${expenseId}`, {
           status: EXPENSE_STATUS.unreported
         });
+        await axiosInstance().patch(`${expenseReport.api}/expenses/status/${expenseReportData._id}`, {
+          status: EXPENSE_STATUS.unreported
+        });
       }
 
       fetchData();
@@ -158,6 +164,9 @@ const ExpenseReportDetailsPage = () => {
     if (expenseReportData?.expenses?.length > 0) {
       for (let expense of expenseReportData.expenses) {
         await axiosInstance().patch(`${expenses.api}/status/${expense._id}`, {
+          status
+        });
+        await axiosInstance().patch(`${expenseReport.api}/expenses/status/${expenseReportData._id}`, {
           status
         });
       }

@@ -66,14 +66,17 @@ const Requests = ({ referenceId, fetchDataMaster, isMobile = false }) => {
         if (report.expenses && report.expenses.length > 0) {
           for (let expense of report.expenses) {
             await axiosInstance().patch(`${expenses.api}/status/${expense.id}`, { status });
+            await axiosInstance().patch(`${expenseReport.api}/expenses/status/${report._id}`, {
+              status
+            });
           }
         }
       }
-      fetchData();
+      fetchDataMaster();
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
-  }
+  };
 
   const fetchColumn = async () => {
     setAccessor(null);
@@ -120,12 +123,20 @@ const Requests = ({ referenceId, fetchDataMaster, isMobile = false }) => {
                           style={{ boxShadow: 'unset' }}
                           className="no-shadow"
                           disabled={loading}
-                          onClick={() => {handleStatusChange(EXPENSE_STATUS.approved)}}
+                          onClick={() => {
+                            handleStatusChange(EXPENSE_STATUS.approved);
+                          }}
                         >
                           Approve
                         </ThemeButton>
                         <Box pl={1} />
-                        <ThemeButton buttonType="red" disabled={loading} onClick={() => {handleStatusChange(EXPENSE_STATUS.rejected)}}>
+                        <ThemeButton
+                          buttonType="red"
+                          disabled={loading}
+                          onClick={() => {
+                            handleStatusChange(EXPENSE_STATUS.rejected);
+                          }}
+                        >
                           Reject
                         </ThemeButton>
                         <Box pl={1} />
@@ -174,8 +185,25 @@ const Requests = ({ referenceId, fetchDataMaster, isMobile = false }) => {
                           row.expenses.map((expense) => (
                             <TableRow key={expense.id}>
                               <TableCell>{expense.expenseNumber}</TableCell>
-                              <TableCell></TableCell>
-                              <TableCell align='right'>{getUniqueCurrencies().find((d) => d.currencyCode === expense.currency)?.symbolNative} {expense.amount}</TableCell>
+                              <TableCell
+                                sx={{
+                                  display: 'inline-block',
+                                  backgroundColor: expense?.status === EXPENSE_STATUS.approved ? '#E6FFFA' : '#FFF9E6',
+                                  color: expense?.status === EXPENSE_STATUS.approved ? '#0097A7' : '#FF9800',
+                                  fontWeight: 600,
+                                  padding: '4px 12px',
+                                  borderRadius: '16px',
+                                  fontSize: '0.875rem',
+                                  marginTop:'0.7rem',
+                                  border: expense?.status === EXPENSE_STATUS.approved ? '1px solid #80DEEA' : '1px solid #ffad33'
+                                }}
+                                align='center'
+                              >
+                                {toUpper(expense.status)}
+                              </TableCell>
+                              <TableCell align="right">
+                                {getUniqueCurrencies().find((d) => d.currencyCode === expense.currency)?.symbolNative} {expense.amount}
+                              </TableCell>
                             </TableRow>
                           ))
                         )}

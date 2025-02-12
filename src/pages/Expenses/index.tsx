@@ -52,6 +52,7 @@ const Expenses = () => {
   useEffect(() => {
     fetchGridColumns();
   }, []);
+  
   const fetchGridColumns = async () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.expenses}`);
