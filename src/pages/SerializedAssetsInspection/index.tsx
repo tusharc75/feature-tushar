@@ -1,4 +1,4 @@
-import { Box, Chip, MenuItem, TextField } from '@mui/material';
+import { Box, Chip, Menu, MenuItem, TextField } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import WarningIcon from '@mui/icons-material/Warning';
@@ -31,6 +31,9 @@ import {
 } from '../../constants/helpers';
 import axios, { CancelTokenSource } from 'axios';
 import ReasonDialog from '../SerializedAsset/ReasonDialog';
+import { ExpandMore } from '@mui/icons-material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { RiExchange2Line } from 'react-icons/ri';
 
 const renderedFrom = camelCase(sidebarResource?.serializedAsset);
 
@@ -59,6 +62,7 @@ const SerializedAssetInspection = () => {
   const [statusOptions, setStatusOptions] = useState(null);
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
   const [showReasonDialog, setShowReasonDialog] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
   const [status, setStatus] = useState('');
 
   useEffect(() => {
@@ -345,6 +349,13 @@ const SerializedAssetInspection = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
   const ActionMenuItems = () => {
     if (!permissions?.serializedAsset?.isUpdate || !allowUpdateStatus || !selectedRecords?.length) {
       return null;
@@ -360,25 +371,23 @@ const SerializedAssetInspection = () => {
           ) {
             return null;
           }
-          //adding others 
           if (!Object.values(ASSET_STATUS).includes(status.optionLabel)) {
             otherStatuses.add(status.optionLabel);
           }
-          // if same 
           const isDisabled = selectedRecords.some(
             (record) => record.status === status?.optionLabel
           );
   
           return (
             <MenuItem key={key} onClick={() => handleStatusChange(status?.optionLabel)} disabled={isDisabled}>
-              {`Status Change - ${status?.optionLabel}`}
+              {status?.optionLabel}
             </MenuItem>
           );
         })}
         {/* other status */}
         {[...otherStatuses].map((status, index) => (
           <MenuItem key={`other-${index}`} onClick={() => handleStatusChange(status)}>
-            {`Status Change - ${status}`}
+            {status}
           </MenuItem>
         ))}
       </>
@@ -400,13 +409,25 @@ const SerializedAssetInspection = () => {
               setSelectedWarehouse,
               subleaseAsset,
               setSubleaseAsset,
-              resources
+              resources,
+              ActionMenuItems,
+              setAnchorEl,
+              anchorEl
             }} />}
+          rightSideContents={<RightSideContents
+            {...{
+              openActions,
+              anchorEl,
+              closeActions,
+              ActionMenuItems,
+              selectedRecords
+            }}
+          />}
           searchValue={search}
           onSearch={handleSearch}
-          isActionButtonVisible={true}
-          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
-          actionMenuItems={<ActionMenuItems />} isAddButtonVisible={false} />
+          isActionButtonVisible={false}
+          isAddButtonVisible={false}
+        />
 
         {columns ? (
           <CustomReactTable
@@ -489,6 +510,42 @@ const LeftSideContent = ({
           />
         )}
       </Fragment>
+    </>
+  );
+};
+
+const RightSideContents = ({
+  openActions,
+  anchorEl,
+  closeActions,
+  ActionMenuItems,
+  selectedRecords
+}) => {
+  return (
+    <>
+      <ThemeButton
+        onClick={openActions}
+        endIcon={<ExpandMore />}
+        buttonType="yellow"
+        disabled={selectedRecords?.length ? false : true}
+        mobileTooltip="Change Status"
+        iconForMobile={<RiExchange2Line size={24} style={{ color: 'var(--primary-text)' }} />}
+      >
+        {'Change Status'}
+      </ThemeButton>
+      <Menu
+        anchorEl={anchorEl}
+        id="action-menu"
+        keepMounted
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left'
+        }}
+        open={Boolean(anchorEl)}
+        onClose={closeActions}
+      >
+        <span onClick={() => closeActions()}>{ActionMenuItems && <ActionMenuItems />}</span>
+      </Menu>
     </>
   );
 };
