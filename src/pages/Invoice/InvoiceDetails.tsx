@@ -319,8 +319,7 @@ const InvoiceDetails = () => {
                   open={Boolean(anchorEl)}
                   onClose={closeActions}
                 >
-                  {statusOptions
-                    ?.filter((f) => f.optionValue !== INVOICE_STATUS.cancelled)
+                  {statusOptions?.filter((f) => f.optionValue !== INVOICE_STATUS.cancelled)
                     .map((o) => {
                       return (
                         <MenuItem

@@ -82,7 +82,7 @@ const Invoice = () => {
     data = response?.data?.data;
     data?.forEach((d) => {
       if (d?.fieldData?.fieldName === 'status') {
-        const statusOps = d?.fieldData?.option?.filter((e) => ![INVOICE_STATUS.cancelled, INVOICE_STATUS.new].includes(e.optionValue));
+        const statusOps = d?.fieldData?.option?.filter((e) => ![INVOICE_STATUS.new, INVOICE_STATUS.inProgress, INVOICE_STATUS.cancelled].includes(e.optionValue));
         setStatusOptions(statusOps);
       }
     });
@@ -297,11 +297,9 @@ const Invoice = () => {
   };
 
   const validateStatus = (status) => {
-    const currIdx = statusOptions.findIndex((status) => status.optionValue === selectedRecords[0].status);  
+    const currIdx = statusOptions.findIndex((status) => status.optionValue === selectedRecords[0].status);
     return statusOptions[currIdx + 1]?.optionValue !== status;
   };
-
-
 
   const ActionMenuItems = () => {
     return (
@@ -319,25 +317,24 @@ const Invoice = () => {
         >
           {`Delete (${selectedRecords?.length})`}
         </MenuItem>
-        {permissions?.invoice?.isUpdate && selectedRecords?.length && !selectedRecords?.some((s) => s.status === 'Closed') 
-        && selectedRecords.every(
-          (invoiceData) => invoiceData.status === selectedRecords[0].status
-        ) &&  (
-          <>
-            {statusOptions?.map((status) => {
-              return (
-                <MenuItem
-                  onClick={() => {
-                    handleStatusUpdate(status?.optionValue);
-                  }}
-                  disabled={validateStatus(status?.optionValue)}
-                >
-                  {`Status Change - ${status?.optionLabel}`}
-                </MenuItem>
-              );
-            })}
-          </>
-        )}
+        {permissions?.invoice?.isUpdate && selectedRecords?.length
+          && !selectedRecords?.some((s) => s.status === INVOICE_STATUS.closed)
+          && selectedRecords.every((e) => e.status === selectedRecords[0].status) && (
+            <>
+              {statusOptions?.map((status) => {
+                return (
+                  <MenuItem
+                    onClick={() => {
+                      handleStatusUpdate(status?.optionValue);
+                    }}
+                    disabled={validateStatus(status?.optionValue)}
+                  >
+                    {`Status Change - ${status?.optionLabel}`}
+                  </MenuItem>
+                );
+              })}
+            </>
+          )}
       </>
     );
   };
