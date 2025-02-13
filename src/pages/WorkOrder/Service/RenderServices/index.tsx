@@ -321,14 +321,15 @@ const RenderServices = ({
                           <IconButton
                             size="small"
                             color="inherit"
-                            style={{ color: 'red', marginTop: '3px' }}
                             aria-label="delete"
                             disabled={allowedToEdit && data?.status === WORKORDER_SERVICE_STATUS.pending && !completed ? false : true}
                             onClick={() => {
                               setShowConfirmBox(true);
                             }}
                           >
-                            <DeleteOutline style={{ fontSize: '18px' }} />
+                            <DeleteOutline
+                              color={allowedToEdit && data?.status === WORKORDER_SERVICE_STATUS.pending && !completed ? "error" : "disabled"}
+                              style={{ fontSize: '18px' }} />
                           </IconButton>
                         </HtmlTooltip>
                       )}
