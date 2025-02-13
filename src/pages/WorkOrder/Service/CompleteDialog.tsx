@@ -2,10 +2,10 @@ import { Dialog, Box, TextField, Typography } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import { CustomDialogTransition } from 'src/constants/helpers';
+import { CustomDialogTransition, WORK_ORDER_STATUS } from 'src/constants/helpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const CompleteDialog = ({ handleClose, serviceName, updateStatus, comment, setComment, type='complete' }) => {
+const CompleteDialog = ({ handleClose, serviceName, updateStatus, comment, setComment, status = WORK_ORDER_STATUS.completed }) => {
   return (
     <Dialog
       open
@@ -23,11 +23,11 @@ const CompleteDialog = ({ handleClose, serviceName, updateStatus, comment, setCo
         <Box>
           <Typography>
             {' '}
-            {`All steps are ${type==='complete' ? 'performed' : 'skipped'} for `}
+            {`All steps are ${status === WORK_ORDER_STATUS.completed ? 'performed' : 'skipped'} for `}
             <Box component="span" fontWeight="bold">
               {serviceName}
             </Box>
-            {`, do you want to mark it ${type==='complete' ? 'complete' : 'skip'}?`}
+            {`, do you want to mark it ${status === WORK_ORDER_STATUS.completed ? 'complete' : 'skip'}?`}
           </Typography>
           <Box mt={2}>
             <TextField
@@ -54,7 +54,7 @@ const CompleteDialog = ({ handleClose, serviceName, updateStatus, comment, setCo
           onClick={updateStatus}
           buttonType='theme'
         >
-          {type==='complete' ? 'Complete' : 'Skip'}
+          Submit
         </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
