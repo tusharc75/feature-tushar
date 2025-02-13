@@ -420,7 +420,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       data.material = data?.material
         ?.map((e) => {
           let materialData: any = { ...e };
-
           let pMethod = materialData?.pricingMethod?.split(',') || [];
           pMethod = pMethod.map((m) => m?.trim()).find((m) => !['Per Day', 'Per Week', 'Per Month', 'Per Barrel'].includes(m));
 
@@ -588,7 +587,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
     const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData?._id}/invoice/material-end-date-qty`);
     const invoicedProducts = invoiceResponse?.data?.data?.material;
-
 
     const assetList = records?.filter((r) => r?.pricingMethod === 'Per Barrel');
     let rentalUnitVolume;
