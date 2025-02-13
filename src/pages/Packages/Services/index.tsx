@@ -125,8 +125,8 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
       delete e.name;
     });
     axiosInstance()
-      .put(`${packages.api}/${packageId}/services/order`, {
-        packageType: packageData?.packageType,
+      .put(`${packages.api}/material/${packageId}/order`, {
+        packageType: 'Service',
         data: rows || []
       })
       .then(() => {
