@@ -37,7 +37,7 @@ import AddExpenses from 'src/pages/ExpensesReport/AddExpenses';
 import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
 import { isMobile, isTablet } from 'react-device-detect';
 
-const Expenses = ({ selectedExpenseData, showAddButton, reportData = null, removeRow }) => {
+const Expenses = ({ selectedExpenseData, showAddButton, reportData = null, removeRow}) => {
   const renderedFrom = camelCase(sidebarResource?.expenses);
   const toastConfig = useContext(CustomToastContext);
   const {
