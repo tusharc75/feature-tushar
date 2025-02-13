@@ -1,9 +1,25 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { cn } from 'src/constants/helpers';
 
 interface ImageZoomPanProps {
   src: string;
   alt?: string;
+}
+
+interface Dimensions {
+  width: number;
+  height: number;
+}
+function fitInsideContainer(width: number, height: number, containerWidth: number, containerHeight: number): Dimensions {
+  const aspectRatio = width / height;
+  let newWidth = containerWidth;
+  let newHeight = containerHeight;
+  if (containerWidth / containerHeight > aspectRatio) {
+    newWidth = containerHeight * aspectRatio;
+  } else {
+    newHeight = containerWidth / aspectRatio;
+  }
+  return { width: newWidth, height: newHeight };
 }
 
 const ImageZoomPan = ({ src, alt }: ImageZoomPanProps) => {
@@ -16,14 +32,28 @@ const ImageZoomPan = ({ src, alt }: ImageZoomPanProps) => {
   const [isError, setIsError] = useState(false);
   const [containerRef, setContainerRef] = useState<HTMLDivElement>(null);
 
+  const containerSize = useMemo(() => {
+    const parent = containerRef?.parentElement;
+    if (!parent) return { width: 0, height: 0 };
+    const { clientWidth, clientHeight } = parent || {};
+    return { width: clientWidth, height: clientHeight };
+  }, [containerRef]);
+
   useEffect(() => {
     const img = new Image();
     img.src = src;
     img.onload = () => {
       const canvas = canvasRef.current;
       if (canvas) {
-        canvas.width = img.width;
-        canvas.height = img.height;
+        const { width, height } = fitInsideContainer(img.width, img.height, containerSize.width, containerSize.height);
+        canvas.width = width;
+        canvas.height = height;
+        canvas.style.width = `${width}px`;
+        canvas.style.height = `${height}px`;
+        if (containerRef) {
+          containerRef.style.width = `${width}px`;
+          containerRef.style.height = `${height}px`;
+        }
         drawImage(img, { x: 0, y: 0 }, 1);
         setIsLoading(false);
       }
@@ -32,7 +62,7 @@ const ImageZoomPan = ({ src, alt }: ImageZoomPanProps) => {
       setIsError(true);
       setIsLoading(false);
     };
-  }, [src]);
+  }, [containerSize.height, containerSize.width, src, containerRef]);
 
   useEffect(() => {
     const img = new Image();
@@ -128,16 +158,16 @@ const ImageZoomPan = ({ src, alt }: ImageZoomPanProps) => {
     return () => canvas?.removeEventListener('wheel', handleWheel);
   }, [handleWheel]);
 
-  const getStyle = useCallback(() => {
-    const parent = containerRef?.parentElement;
-    if (!parent) return {};
-    const { clientWidth, clientHeight } = parent || { containerStyle: {}, canvasStyle: {} };
-    if (clientWidth > clientHeight) {
-      return { containerStyle: { height: clientHeight, width: 'auto' }, canvasStyle: { height: '100%', width: 'auto' } };
-    } else {
-      return { containerStyle: { width: clientWidth, height: 'auto' }, canvasStyle: { width: '100%', height: 'auto' } };
-    }
-  }, [containerRef]);
+  // const getStyle = useCallback(() => {
+  //   const parent = containerRef?.parentElement;
+  //   if (!parent) return { containerStyle: {}, canvasStyle: {} };
+  //   const { clientWidth, clientHeight } = parent || {};
+  //   if (clientWidth > clientHeight) {
+  //     return { containerStyle: { height: clientHeight, width: 'auto' }, canvasStyle: { height: '100%', width: 'auto' } };
+  //   } else {
+  //     return { containerStyle: { width: clientWidth, height: 'auto' }, canvasStyle: { width: '100%', height: 'auto' } };
+  //   }
+  // }, [containerRef]);
 
   return (
     <div
@@ -145,7 +175,7 @@ const ImageZoomPan = ({ src, alt }: ImageZoomPanProps) => {
         'relative max-h-full min-h-[300px] w-full overflow-hidden border',
         isLoading ? '' : isDragging ? 'cursor-grabbing' : 'cursor-grab'
       )}
-      style={getStyle().containerStyle}
+      // style={getStyle().containerStyle}
       ref={setContainerRef}
     >
       <img src={src} alt={alt} className="sr-only" />
@@ -162,7 +192,7 @@ const ImageZoomPan = ({ src, alt }: ImageZoomPanProps) => {
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           ref={canvasRef}
-          style={getStyle().canvasStyle}
+          // style={getStyle().canvasStyle}
           className="block max-h-full max-w-full overscroll-contain"
         />
       )}
