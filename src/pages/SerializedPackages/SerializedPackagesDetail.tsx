@@ -47,6 +47,11 @@ const SerializedPackagesDetail = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource?.serializedPackages}`)
       .then(({ data }) => {
+        data.data.forEach((element) => {
+          if (element?.fieldData?.fieldName === 'currentOwner') {
+            element.fieldData.type = 'singleLine';
+          }
+        });
         setFields(data.data?.filter((field) => field.isRead));
       })
       .catch((err) => {
@@ -60,7 +65,7 @@ const SerializedPackagesDetail = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`${routes.serializedPackages.path}/${id}`);
-      setSerializedPackagesData(data);
+      setSerializedPackagesData({ ...data, currentOwner: data?.currentOwner?.optionLabel });
       setCustomizedRoutes([
         { ...routes.serializedPackages, title: resources?.serializedPackages?.titlePlural },
         { title: data?.serializedPackageNumber }

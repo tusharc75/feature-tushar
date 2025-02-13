@@ -26,27 +26,35 @@ const History = ({ id }) => {
       disableFilters: true,
       disableSortBy: false,
       disabled: true,
-      Cell: ({ row }) => (
-        <div>
-          {row.original.reference ? (
-            row.original.type === sidebarResource?.disassemblyOrder ? (
-              <Link
-                className="link"
-                title={row.original.reference}
-                to={`${routes.disassemblyOrderDetail.path}/${row.original.referenceId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {row.original.reference}
-              </Link>
+      Cell: ({ row }) => {
+        const to =
+          row?.original?.type === sidebarResource?.assemblyOrder
+            ? routes.assemblyOrderDetail.path
+            : row?.original?.type === sidebarResource?.disassemblyOrder
+              ? routes?.disassemblyOrderDetail?.path
+              : null;
+        return (
+          <div>
+            {row.original.reference ? (
+              to ? (
+                <Link
+                  className="link"
+                  title={row.original.reference}
+                  to={`${to}/${row.original.referenceId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {row.original.reference}
+                </Link>
+              ) : (
+                <h5 className="text-truncate">{row.original.reference}</h5>
+              )
             ) : (
-              row.original.reference
-            )
-          ) : (
-            <NoDataCell />
-          )}
-        </div>
-      )
+              <NoDataCell />
+            )}
+          </div>
+        );
+      }
     },
     {
       accessor: 'type',
@@ -110,6 +118,16 @@ const History = ({ id }) => {
           )}
         </div>
       )
+    },
+    {
+      accessor: 'ownerType',
+      Header: 'Owner Type',
+      Cell: ({ row }) => (row.original?.ownerType ? <div>{row.original?.ownerType}</div> : <NoDataCell />)
+    },
+    {
+      accessor: 'owner',
+      Header: 'Owner',
+      Cell: ({ row }) => (row.original?.owner ? <div>{row.original?.owner}</div> : <NoDataCell />)
     }
   ];
 
