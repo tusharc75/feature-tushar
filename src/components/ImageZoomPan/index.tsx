@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useRef, useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { cn } from 'src/constants/helpers';
 
 interface ImageZoomPanProps {
@@ -21,7 +21,7 @@ function fitInsideContainer(width: number, height: number, containerWidth: numbe
   return { width: newWidth, height: newHeight };
 }
 
-const ImageZoomPan = ({ src, alt }: ImageZoomPanProps) => {
+const ImageZoomPan = memo(({ src, alt }: ImageZoomPanProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -188,6 +188,6 @@ const ImageZoomPan = ({ src, alt }: ImageZoomPanProps) => {
       )}
     </div>
   );
-};
+});
 
 export default ImageZoomPan;
