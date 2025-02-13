@@ -39,7 +39,7 @@ const ManageSerializedPackages = ({ onClose, onSuccess, isClone = false, id = nu
     try {
       let data;
       const response: any = await axiosInstance().get(`/field?resource=${sidebarResource?.serializedPackages}`);
-      data = response?.data?.data;
+      data = response?.data?.data?.filter((d) => !['currentOwnerType', 'currentOwner'].includes(d.fieldData.fieldName));
       let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
