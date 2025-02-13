@@ -36,7 +36,18 @@ const DisassemblyOrder = () => {
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
   const { generateColumns } = useColumns();
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.disassemblyOrder));
   const history = useHistory();
+  const types = [
+    {
+      key: `My ${resources?.disassemblyOrder?.titlePlural}`,
+      value: 1
+    },
+    {
+      key: `All ${resources?.disassemblyOrder?.titlePlural}`,
+      value: 2
+    }
+  ];
 
   useEffect(() => {
     fetchGridColumns();
@@ -46,7 +57,7 @@ const DisassemblyOrder = () => {
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
-  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, selectedType, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -103,9 +114,13 @@ const DisassemblyOrder = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
-    if (isExport) {
-      deepFilter = `?`;
+    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
+
+    if (selectedType === 1) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
+    if (selectedEntity) {
+      deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
@@ -184,7 +199,6 @@ const DisassemblyOrder = () => {
       setDeleteLoading(false);
     }
   };
-
   const ActionMenuItems = () => {
     return (
       <MenuItem
@@ -220,13 +234,18 @@ const DisassemblyOrder = () => {
             fetchData();
           }}
           additionalParams={getQueryString(true)}
+          asyncExport={true}
+          resource={sidebarResource.disassemblyOrder}
         />
       </div>
       <CustomContainer>
         <ListingPageHeader
           searchValue={search}
           onSearch={handleSearch}
+          toggleButtonList={types}
           isActionButtonVisible={true}
+          selectedType={selectedType}
+          setSelectedType={setSelectedType}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
           addButtonOnclick={() => {
