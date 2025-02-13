@@ -161,16 +161,6 @@ const ExpenseReportDetail = () => {
     await axiosInstance().patch(`${expenseReport.api}/status/${expenseReportData._id}`, {
       status
     });
-    if (expenseReportData?.expenses?.length > 0) {
-      for (let expense of expenseReportData.expenses) {
-        await axiosInstance().patch(`${expenses.api}/status/${expense._id}`, {
-          status
-        });
-        await axiosInstance().patch(`${expenseReport.api}/expenses/status/${expenseReportData._id}`, {
-          status
-        });
-      }
-    }
     fetchData();
   };
 
