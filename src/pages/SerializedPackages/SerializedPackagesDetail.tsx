@@ -125,7 +125,7 @@ const SerializedPackagesDetail = () => {
                   {'Edit'}
                 </ThemeButton>
               )}
-              {permissions?.serializedPackages?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+              {permissions?.serializedPackages?.isDelete && serializedPackagesData?.canDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               <ActivityButton
                 referenceId={serializedPackagesData?._id}
                 resource={ACTIVITY_RESOURCE.serializedPackages}
