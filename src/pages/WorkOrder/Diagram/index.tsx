@@ -3,7 +3,7 @@ import { Add, Delete } from '@mui/icons-material';
 import EditIcon from '@mui/icons-material/Edit';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import ShowPdf from './ShowPdf';
 
@@ -20,6 +20,9 @@ import { ACTIVITY_RESOURCE, ATTACHMENT_TYPE, CustomDialogTransition, WORK_ORDER_
 import PdfPreview from './ShowPdf/PdfPreview';
 import ViewImage from './ViewImage';
 import { getFileIcon, getFileNameWithExtension } from './utils';
+import ImageZoomPan from 'src/components/ImageZoomPan';
+
+const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
 
 const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVersions = false }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -113,7 +116,7 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
           <FileIcon size={150} className="text-center" />
           <p className=" line-clamp-1 text-[14px] font-normal">{getFileNameWithExtension(data)}</p>
           <ThemeButton
-            buttonType='theme'
+            buttonType="theme"
             onClick={() => {
               downloadExcel(data);
             }}
@@ -149,12 +152,13 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
               {rowData &&
                 rowData?.map((file, index) => {
                   return (
-                    <div key={file._id} className="shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
+                    <div key={file._id} className="rounded-md border shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${expended[file?._id]
-                          ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
-                          : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
-                          }`}
+                        className={`head flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${
+                          expended[file?._id]
+                            ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
+                            : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
+                        }`}
                         onClick={() => {
                           setExpended((prev) => ({
                             ...prev,
@@ -218,16 +222,17 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
                         )}
                       </div>
                       <Collapse in={expended[file?._id]}>
-                        <div className="border border-[var(--common-border-color)]">
+                        <div className="border-t ">
                           {file?.file?.map((f) => {
                             const Icon = getFileIcon(f.url);
+                            const extension = f.url?.split('.').pop();
                             return (
                               <Box
                                 key={f.url}
+                                className={'cursor-pointer [--px:18px] [--py:8px]'}
                                 onClick={() => {
                                   setSelectedAttachment({ ...f, attachmentId: file?._id });
                                 }}
-                                className="cursor-pointer px-[18px] py-[8px]"
                                 style={{
                                   border:
                                     selectedAttachment?.url === f?.url
@@ -237,14 +242,16 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
                                     selectedAttachment?.url === f?.url ? 'var(--dark-active-border-color,#0F9FA9 )' : 'var(--common-border-color)'
                                 }}
                               >
-                                <HtmlTooltip title={f.name}>
-                                  <div className="flex items-center gap-2">
-                                    <div className="w-[20px]">
-                                      <Icon size={20} />
-                                    </div>
-                                    <p className=" line-clamp-1 text-[14px] font-normal">{getFileNameWithExtension(f)}</p>
+                                <div className="flex max-w-fit cursor-pointer items-center gap-2 px-[--px] py-[--py]">
+                                  <div className="w-[20px]">
+                                    <Icon size={20} />
                                   </div>
-                                </HtmlTooltip>
+                                  <HtmlTooltip title={f.name} className="max-w-fit">
+                                    <p className=" line-clamp-1 text-[14px] font-normal">{getFileNameWithExtension(f)}</p>
+                                  </HtmlTooltip>
+                                </div>
+
+                                {imageExtensions.includes(extension) && <ImagePreview name={f.name} url={f.url} />}
                               </Box>
                             );
                           })}
@@ -359,3 +366,48 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
 };
 
 export default Diagram;
+// const extension = fileName?.split('.').pop()
+
+type ImagePreviewProps = {
+  name: string;
+  url: string;
+};
+const ImagePreview = ({ name, url }: ImagePreviewProps) => {
+  const toastConfig = useContext(CustomToastContext);
+  const [src, setSrc] = useState(null);
+  const [progress, setProgress] = useState(-1);
+
+  const viewFile = useCallback(async (): Promise<any> => {
+    try {
+      const { data } = await axiosInstance().get(`user/download?fileName=${encodeURIComponent(url)}`, {
+        responseType: 'blob',
+        onDownloadProgress: (progressEvent) => {
+          let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
+          setProgress(percentCompleted);
+          if (percentCompleted === 100) {
+            setTimeout(() => {
+              setProgress(-1);
+            }, 100);
+          }
+        }
+      });
+      setSrc(URL.createObjectURL(new Blob([data])));
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  }, [toastConfig, url]);
+
+  useEffect(() => {
+    viewFile();
+  }, [url]);
+
+  return (
+    <div className="mb-[--py] flex h-[200px] min-w-[400px] max-w-fit items-center justify-center overflow-hidden px-[--px]">
+      {src ? (
+        <img src={src} alt={name} className="mr-auto max-h-full max-w-full rounded-md border" />
+      ) : (
+        <p>Loading...{progress >= 0 ? progress : 0}%</p>
+      )}
+    </div>
+  );
+};
