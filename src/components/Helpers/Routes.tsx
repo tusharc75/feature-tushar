@@ -699,11 +699,11 @@ const routes = {
   subcontractAssemblyDetail: {
     path: '/subcontract-assembly/detail'
   },
-  managedPackages: {
-    path: '/managed-packages'
+  serializedPackages: {
+    path: '/serialized-packages'
   },
-  managedPackagesDetail: {
-    path: '/managed-packages/detail'
+  serializedPackagesDetail: {
+    path: '/serialized-packages/detail'
   },
   integration: {
     path: '/integration'
@@ -739,11 +739,11 @@ const routes = {
     path: '/schedule-and-dispatch'
   },
   disassemblyOrder: {
-    path: '/disassembly-order',
+    path: '/disassembly-order'
   },
   disassemblyOrderDetail: {
-    path: '/disassembly-order/detail',
-  },
+    path: '/disassembly-order/detail'
+  }
 };
 
 export default routes;

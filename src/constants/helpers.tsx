@@ -393,7 +393,7 @@ export const sidebarResource = {
   resourceDoaRequest: 'Resource Doa Request',
   workOrderPlanning: 'Work Order Planning',
   subcontractAssembly: 'Subcontract Assembly',
-  managedPackages: 'Managed Packages',
+  serializedPackages: 'Serialized Packages',
   trainAiModel: 'Train Ai Model',
   assemblyOrder: 'Assembly Order',
   packageInventory: 'Package Inventory',
@@ -671,13 +671,6 @@ export const eProduct = {
 export const serializedAsset = {
   api: '/serialized-asset',
   route: '/serialized-asset',
-  permission: 'serializedAsset',
-  resource: 'Serialized Asset'
-};
-
-export const serializedAssetInspection = {
-  api: '/serialized-asset/serialized-asset-inspection',
-  route: '/serialized-asset/serialized-asset-inspection',
   permission: 'serializedAsset',
   resource: 'Serialized Asset'
 };
@@ -2262,7 +2255,7 @@ export const ACTIVITY_RESOURCE = {
   irtTicket: 'irtTicket',
   subcontractAssembly: 'subcontractAssembly',
   assemblyOrder: 'assemblyOrder',
-  managedPackages: 'managedPackages'
+  serializedPackages: 'serializedPackages'
 };
 
 export const LOG_RESOURCE = {
@@ -3083,12 +3076,11 @@ export const SUBCONTRACT_ASSEMBLY_STATUS = {
   closed: 'Closed'
 };
 
-
 export const DIASSEMBLY_ORDER_STATUS = {
   new: 'New',
   inProgress: 'In-Progress',
   closed: 'Closed'
-}
+};
 
 export const WORK_FLOW_STATUS = {
   open: 'Open',
@@ -3166,6 +3158,13 @@ export const QUOTE_STATUS = {
   sentforDOA: 'Sent for DOA',
   acceptedbyDOA: 'Accepted by DOA',
   rejectedbyDOA: 'Rejected by DOA'
+};
+
+export const SERIALIZED_PACKAGES_STATUS = {
+  available: 'Available',
+  reserved: 'Reserved',
+  underReview: 'Under Review',
+  customerPossession: 'Customer Possession'
 };
 
 export const convertMsToTime = (milliseconds: any) => {

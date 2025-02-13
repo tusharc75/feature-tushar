@@ -47,12 +47,12 @@ const AssemblyOrderViews = (props) => {
       name: 'Package',
       ...COLOUR_MASTER.assets
     },
-    managedPackage: {
-      name: 'Managed Package',
+    serializedPackage: {
+      name: 'Serialized Package',
       ...COLOUR_MASTER.assets
     },
-    parentManagedpackage: {
-      name: 'Parent Managed package',
+    parentSerializedPackage: {
+      name: 'Parent Serialized package',
       ...COLOUR_MASTER.receivingTicket
     }
     // closed: {
@@ -83,22 +83,22 @@ const AssemblyOrderViews = (props) => {
           };
         });
 
-      const childManagedPackages = data
-        ?.filter((v) => v.parentId && v.managedPackage)
+      const childSerializedPackages = data
+        ?.filter((v) => v.parentId && v.serializedPackage)
         ?.map((f) => {
           return {
-            optionValue: f.managedPackageDetail._id,
-            optionLabel: f.managedPackageDetail.managedPackageName,
+            optionValue: f.serializedPackageDetail._id,
+            optionLabel: f.serializedPackageDetail.serializedPackageNumber,
             workOrder: f.workOrder._id
           };
         });
 
-      const parentManagedPackages = data
-        ?.filter((v) => !v.parentId && v.managedPackage)
+      const parentSerializedPackages = data
+        ?.filter((v) => !v.parentId && v.serializedPackage)
         ?.map((f) => {
           return {
-            optionValue: f.managedPackageDetail._id,
-            optionLabel: f.managedPackageDetail.managedPackageName,
+            optionValue: f.serializedPackageDetail._id,
+            optionLabel: f.serializedPackageDetail.serializedPackageNumber,
             id: f._id
           };
         });
@@ -229,21 +229,21 @@ const AssemblyOrderViews = (props) => {
           target: `${w.optionValue}`
         });
       });
-      if (childManagedPackages?.length) xPosition += 300;
-      childManagedPackages?.map((cmp, cmpIdx) => {
+      if (childSerializedPackages?.length) xPosition += 300;
+      childSerializedPackages?.map((cmp, cmpIdx) => {
         flow.push({
           id: `${cmp.optionValue}`,
           sourcePosition: 'right',
           targetPosition: 'left',
           type: 'default',
           data: {
-            ref_type: 'managedPackage',
+            ref_type: 'serializedPackage',
             ref_id: cmp.optionValue,
             label: (
-              <HtmlTooltip arrow placement="top" title={resources?.managedPackages?.titleSingular}>
+              <HtmlTooltip arrow placement="top" title={resources?.serializedPackage?.titleSingular}>
                 <div>
                   <Typography variant="body2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {resources?.managedPackages?.titleSingular}
+                    {resources?.serializedPackage?.titleSingular}
                   </Typography>
                   <Typography variant="subtitle2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {cmp.optionLabel}
@@ -256,31 +256,31 @@ const AssemblyOrderViews = (props) => {
             x: xPosition,
             y: cmpIdx * 80
           },
-          style: customNodeStyles.managedPackage
+          style: customNodeStyles.serializedPackage
         });
         flowEdge.push({
-          id: `workOrder-managedpackage-${cmp.optionValue}-${cmp.workOrder}`,
+          id: `workOrder-serializedpackage-${cmp.optionValue}-${cmp.workOrder}`,
           source: `${cmp.workOrder}`,
           arrowHeadType: 'arrow',
           target: `${cmp.optionValue}`
         });
       });
-      if (parentManagedPackages?.length) xPosition += 300;
+      if (parentSerializedPackages?.length) xPosition += 300;
 
-      parentManagedPackages?.map((pmp, pmpIdx) => {
+      parentSerializedPackages?.map((pmp, pmpIdx) => {
         flow.push({
           id: `${pmp.optionValue}`,
           sourcePosition: 'right',
           targetPosition: 'left',
           type: 'default',
           data: {
-            ref_type: 'managedPackage',
+            ref_type: 'serializedPackage',
             ref_id: pmp.optionValue,
             label: (
-              <HtmlTooltip arrow placement="top" title={`${resources?.managedPackages?.titleSingular}`}>
+              <HtmlTooltip arrow placement="top" title={`${resources?.serializedPackage?.titleSingular}`}>
                 <div>
                   <Typography variant="body2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {resources?.managedPackages?.titleSingular}
+                    {resources?.serializedPackage?.titleSingular}
                   </Typography>
                   <Typography variant="subtitle2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {pmp.optionLabel}
@@ -293,13 +293,13 @@ const AssemblyOrderViews = (props) => {
             x: xPosition,
             y: pmpIdx * 80
           },
-          style: customNodeStyles.parentManagedpackage
+          style: customNodeStyles.parentSerializedPackage
         });
         const childPacks = childProductPackages?.filter((d) => d.parentId === pmp.id);
         childPacks?.forEach((c) => {
           flowEdge.push({
-            id: `parentManagedPackage-child-${pmp.optionValue}-${c.type === MATERIAL_TYPE.product ? c.workOrder._id : c.managedPackageDetail._id}`,
-            source: c.type === MATERIAL_TYPE.product ? `${c.workOrder._id}` : `${c.managedPackageDetail._id}`,
+            id: `parentSerializedPackage-child-${pmp.optionValue}-${c.type === MATERIAL_TYPE.product ? c.workOrder._id : c.serializedPackageDetail._id}`,
+            source: c.type === MATERIAL_TYPE.product ? `${c.workOrder._id}` : `${c.serializedPackageDetail._id}`,
             arrowHeadType: 'arrow',
             target: `${pmp.optionValue}`
           });
@@ -329,8 +329,8 @@ const AssemblyOrderViews = (props) => {
       case 'workOrder':
         window.open(`${routes?.workOrderDetail?.path}/${element.data.ref_id}`);
         break;
-      case 'managedPackage':
-        window.open(`${routes.managedPackagesDetail.path}/${element.data.ref_id}`);
+      case 'serializedPackage':
+        window.open(`${routes.serializedPackagesDetail.path}/${element.data.ref_id}`);
         break;
     }
   };

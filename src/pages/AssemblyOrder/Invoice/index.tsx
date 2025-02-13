@@ -90,19 +90,19 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
         }
       },
       {
-        accessor: 'managedPackageName',
-        Header: 'Managed Package Name',
+        accessor: 'serializedPackageNumber',
+        Header: 'Serialized Package Number',
         width: 200,
         show: false,
         Cell: ({ row }) => {
-          return row.original?.managedPackageName ? (
+          return row.original?.serializedPackageNumber ? (
             <div className="flex items-center gap-2">
-              <h5 className="text-truncate">{row.original?.managedPackageName}</h5>{' '}
+              <h5 className="text-truncate">{row.original?.serializedPackageNumber}</h5>{' '}
               <Box>
                 <IconButton
                   size="small"
                   onClick={() => {
-                    window.open(`${routes.managedPackagesDetail.path}/${row.original.managedPackageId}`);
+                    window.open(`${routes.serializedPackagesDetail.path}/${row.original.serializedPackageId}`);
                   }}
                 >
                   <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
@@ -145,8 +145,8 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
       parent.detail = parent.packageDetail?.packageName || '';
       parent.description = parent?.packageDetail?.packageDescription || '';
       parent.qtyDisplay = parent.qty;
-      parent.managedPackageId = parent?.managedPackageDetail?._id;
-      parent.managedPackageName = parent?.managedPackageDetail?.managedPackageName;
+      parent.serializedPackageId = parent?.serializedPackageDetail?._id;
+      parent.serializedPackageNumber = parent?.serializedPackageDetail?.serializedPackageNumber;
       parent.subRows = generateNestedData(data, parent);
     });
 
@@ -175,7 +175,7 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
   return (
     <>
       <Box display="flex" justifyContent="space-between" m={1}>
-        <Box display="flex" alignItems="center" gap='8px'>
+        <Box display="flex" alignItems="center" gap="8px">
           <PreviewDownload
             fileName={`${resources?.assemblyOrder?.titlePlural}-${assemblyOrderData?.assemblyOrderNumber}`}
             resource={sidebarResource.assemblyOrder}
@@ -189,7 +189,7 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
         </Box>
       </Box>
       <Grid container spacing={2}>
-        <Grid size={{ xs:12, sm:12, md:12}}>
+        <Grid size={{ xs: 12, sm: 12, md: 12 }}>
           {columns ? (
             <>
               <Box zIndex={5} width={'100%'}>
