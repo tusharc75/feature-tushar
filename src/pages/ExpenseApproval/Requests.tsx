@@ -70,11 +70,6 @@ const Requests = ({ referenceId, fetchDataMaster, isMobile = false }) => {
     if (!rowsData) return;
     try {
       await axiosInstance().patch(`${expenseReport.api}/status/${rowsData._id}`, { status });
-      if (rowsData.expenses && rowsData.expenses.length > 0) {
-        for (let expense of rowsData.expenses) {
-          await axiosInstance().patch(`${expenses.api}/status/${expense.id}`, { status });
-        }
-      }
       fetchDataMaster();
     } catch (error) {
       toastConfig.setToastConfig(error);
