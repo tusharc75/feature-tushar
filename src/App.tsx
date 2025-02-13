@@ -9,8 +9,6 @@ import LoginMFA from 'src/pages/Auth/LoginMFA';
 import EquiptAi from 'src/pages/EquiptAi';
 import TrainAiModel from 'src/pages/EquiptAi/TrainAiModel';
 import Integration from 'src/pages/Integration';
-import ManagedPackages from 'src/pages/ManagedPackages';
-import ManagedPackagedDetail from 'src/pages/ManagedPackages/ManagedPackagesDetail';
 import SubcontractAssembly from 'src/pages/SubcontractAssembly';
 import SubcontractAssemblyDetail from 'src/pages/SubcontractAssembly/SubcontractAssemblyDetail';
 import WorkFlow from 'src/pages/WorkFlow';
@@ -282,7 +280,8 @@ import ExpenseApproval from 'src/pages/ExpenseApproval';
 import SerializedAssetInspection from './pages/SerializedAssetsInspection';
 import DisassemblyOrder from 'src/pages/DisassemblyOrder';
 import DisassemblyOrderDetail from 'src/pages/DisassemblyOrder/DisassemblyOrderDetail';
-
+import SerializedPackages from 'src/pages/SerializedPackages';
+import SerializedPackagesDetail from 'src/pages/SerializedPackages/SerializedPackagesDetail';
 
 var notificationInterval: any = null;
 
@@ -338,7 +337,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
     return () => {
       clearInterval(notificationInterval);
     };
@@ -1184,11 +1183,11 @@ function App() {
             <PrivateRoute exact path={`${routes.subcontractAssemblyDetail.path}/:id`}>
               <SubcontractAssemblyDetail />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.managedPackages.path}>
-              <ManagedPackages />
+            <PrivateRoute exact path={routes.serializedPackages.path}>
+              <SerializedPackages />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.managedPackagesDetail.path}/:id`}>
-              <ManagedPackagedDetail />
+            <PrivateRoute exact path={`${routes.serializedPackagesDetail.path}/:id`}>
+              <SerializedPackagesDetail />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.integration.path}`}>
               <Integration />

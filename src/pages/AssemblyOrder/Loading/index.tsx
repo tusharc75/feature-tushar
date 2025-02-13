@@ -37,17 +37,17 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
     let newColumns = generateColumns(renderedFrom, data, null, false, assemblyOrderData?.currency || 'USD');
 
     const {
-      data: { data: managedPackageFieldData }
+      data: { data: serializedPackageFieldData }
     } = await axiosInstance().put(`/field/find-field-labels`, {
       fields: [
         {
-          resource: sidebarResource.managedPackages,
-          fieldNames: ['managedPackageName']
+          resource: sidebarResource.serializedPackages,
+          fieldNames: ['serializedPackageNumber']
         }
       ]
     });
 
-    const managedPackageField = managedPackageFieldData?.find((d) => d.resource === sidebarResource.managedPackages)?.fieldNames || [];
+    const serializedPackageField = serializedPackageFieldData?.find((d) => d.resource === sidebarResource.serializedPackages)?.fieldNames || [];
 
     let coloum: any = [
       {
@@ -107,19 +107,19 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
         }
       },
       {
-        accessor: 'managedPackageName',
-        Header: managedPackageField[0]?.fieldLabel || 'Managed Package Name',
+        accessor: 'serializedPackageNumber',
+        Header: serializedPackageField[0]?.fieldLabel || 'Serialized Package Number',
         width: 200,
         show: false,
         Cell: ({ row }) => {
-          return row.original?.managedPackageName ? (
+          return row.original?.serializedPackageNumber ? (
             <div className="flex items-center gap-2">
-              <h5 className="text-truncate">{row.original?.managedPackageName}</h5>{' '}
+              <h5 className="text-truncate">{row.original?.serializedPackageNumber}</h5>{' '}
               <Box>
                 <IconButton
                   size="small"
                   onClick={() => {
-                    window.open(`${routes.managedPackagesDetail.path}/${row.original.managedPackageId}`);
+                    window.open(`${routes.serializedPackagesDetail.path}/${row.original.serializedPackageId}`);
                   }}
                 >
                   <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
@@ -176,12 +176,12 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
       parent.detail = parent.packageDetail?.packageName || '';
       parent.description = parent?.packageDetail?.packageDescription || '';
       parent.qtyDisplay = parent.qty;
-      parent.managedPackageId = parent?.managedPackageDetail?._id;
-      parent.managedPackageName = parent?.managedPackageDetail?.managedPackageName;
+      parent.serializedPackageId = parent?.serializedPackageDetail?._id;
+      parent.serializedPackageNumber = parent?.serializedPackageDetail?.serializedPackageNumber;
       parent.subRows = generateNestedData(data, parent);
     });
 
-    if (rows?.every((r) => r?.isValid && r?.managedPackageId)) {
+    if (rows?.every((r) => r?.isValid && r?.serializedPackageId)) {
       setNextStep(true);
     }
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
@@ -207,22 +207,22 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
             ? _subRow?.packageDetail?.packageDescription
             : '';
       if (_subRow.type === MATERIAL_TYPE.package) {
-        _subRow.managedPackageId = _subRow?.managedPackageDetail?._id;
-        _subRow.managedPackageName = _subRow?.managedPackageDetail?.managedPackageName;
+        _subRow.serializedPackageId = _subRow?.serializedPackageDetail?._id;
+        _subRow.serializedPackageNumber = _subRow?.serializedPackageDetail?.serializedPackageNumber;
       }
       _subRow.qty = _subRow.qty || 1;
       _subRow.qtyDisplay = _subRow.qty || 1;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     const subPackages = subRows?.filter((s) => s.type === MATERIAL_TYPE.package);
-    parent.isValid = subPackages?.length > 0 ? subPackages?.every((s) => s?.managedPackageId) : true;
+    parent.isValid = subPackages?.length > 0 ? subPackages?.every((s) => s?.serializedPackageId) : true;
     return subRows;
   };
 
   const handleSendToCustomer = () => {
     axiosInstance()
-      .put(`${routes.managedPackages.path}/send-to-customer`, {
-        ids: selectedRecords?.filter((r) => r?.managedPackageId)?.map((r) => r?.managedPackageId)
+      .put(`${routes.serializedPackages.path}/send-to-customer`, {
+        ids: selectedRecords?.filter((r) => r?.serializedPackageId)?.map((r) => r?.serializedPackageId)
       })
       .then(() => {
         toastConfig.setToastConfig({
@@ -240,7 +240,7 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
     return (
       <>
         <MenuItem
-          disabled={selectedRecords?.filter((r) => r?.managedPackageId)?.length > 0 ? false : true}
+          disabled={selectedRecords?.filter((r) => r?.serializedPackageId)?.length > 0 ? false : true}
           onClick={() => {
             setExistingRentalJobDialog(true);
           }}
@@ -248,7 +248,7 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
           Add In Rental Job
         </MenuItem>
         <MenuItem
-          disabled={selectedRecords?.filter((r) => r?.managedPackageId)?.length > 0 ? false : true}
+          disabled={selectedRecords?.filter((r) => r?.serializedPackageId)?.length > 0 ? false : true}
           onClick={() => {
             handleSendToCustomer();
           }}
@@ -301,7 +301,7 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
             setExistingRentalJobDialog(false);
           }}
           referenceData={assemblyOrderData}
-          managedPackageIds={selectedRecords?.filter((r) => r?.managedPackageId)?.map((m) => m?.managedPackageId)}
+          serializedPackageIds={selectedRecords?.filter((r) => r?.serializedPackageId)?.map((m) => m?.serializedPackageId)}
           inventory={selectedRecords
             ?.filter((r) => r?.type === MATERIAL_TYPE.serializedAsset)
             ?.map((a) => ({

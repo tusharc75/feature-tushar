@@ -320,7 +320,7 @@ const Invoice = () => {
                   onClick={() => {
                     handleStatusUpdate(status?.optionValue);
                   }}
-                  disabled={false}
+                  disabled={selectedRecords.some((record) => record.status === status?.optionLabel)}
                 >
                   {`Status Change - ${status?.optionLabel}`}
                 </MenuItem>

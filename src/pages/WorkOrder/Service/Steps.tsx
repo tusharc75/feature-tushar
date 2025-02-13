@@ -199,7 +199,7 @@ const Steps = ({
   const [stepState, setStepState] = useState(null);
   const [arrangeView, setArrangeView] = useState(false);
   const [comment, setComment] = useState('');
-  const [openCompleteDialog, setOpenCompleteDialog] = useState(false);
+  const [openCompleteDialog, setOpenCompleteDialog] = useState({ open: false, status: null });
   const [commentsDialog, setCommentsDialog] = useState(false);
   const [userAssignDialog, setUserAssignDialog] = useState(false);
   const [workStationAssignDialog, setWorkStationAssignDialog] = useState(false);
@@ -333,7 +333,11 @@ const Steps = ({
         [WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.pending].includes(selectedService.status) &&
         addNewStep.open === false
       ) {
-        setOpenCompleteDialog(true);
+        if (completedSteps?.every((c) => c.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.skipped)) {
+          setOpenCompleteDialog({ open: true, status: WORKORDER_SERVICE_STATUS.skipped });
+        } else {
+          setOpenCompleteDialog({ open: true, status: WORKORDER_SERVICE_STATUS.completed });
+        }
       }
     }
   };
@@ -344,7 +348,7 @@ const Steps = ({
       .then(({ data: { data } }) => {
         fetchService();
         if (openCompleteDialog) {
-          setOpenCompleteDialog(false);
+          setOpenCompleteDialog({ open: false, status: null });
         }
         setComment('');
         if (handelClose) {
@@ -354,7 +358,7 @@ const Steps = ({
       .catch((err) => {
         toastConfig.setToastConfig(err);
         if (openCompleteDialog) {
-          setOpenCompleteDialog(false);
+          setOpenCompleteDialog({ open: false, status: null });
         }
       });
   };
@@ -1177,7 +1181,6 @@ const Steps = ({
                                   <IconButton
                                     size="small"
                                     color="inherit"
-                                    style={{ color: 'red' }}
                                     aria-label="delete"
                                     disabled={
                                       !allowedToEdit ||
@@ -1190,7 +1193,12 @@ const Steps = ({
                                     }
                                     onClick={() => setShowDeleteConfirmBox((prev) => ({ ...prev, open: true, steps: [step] }))}
                                   >
-                                    <DeleteOutline style={{ fontSize: '20px' }} />
+                                    <DeleteOutline color={allowedToEdit && ![
+                                      WORKORDER_SERVICE_STEP_STATUS.passed,
+                                      WORKORDER_SERVICE_STEP_STATUS.failed,
+                                      WORKORDER_SERVICE_STEP_STATUS.completed,
+                                      WORKORDER_SERVICE_STEP_STATUS.skipped
+                                    ].includes(stepData?.passFailStatus) ? "error" : "disabled"} style={{ fontSize: '20px' }} />
                                   </IconButton>
                                 </HtmlTooltip>
                               </div>
@@ -1417,7 +1425,6 @@ const Steps = ({
                             <IconButton
                               size="small"
                               color="inherit"
-                              style={{ color: 'red' }}
                               aria-label="delete"
                               disabled={
                                 !allowedToEdit ||
@@ -1430,7 +1437,12 @@ const Steps = ({
                               }
                               onClick={() => setShowDeleteConfirmBox((prev) => ({ ...prev, open: true, steps: [step] }))}
                             >
-                              <DeleteOutline style={{ fontSize: '20px' }} />
+                              <DeleteOutline color={allowedToEdit && ![
+                                WORKORDER_SERVICE_STEP_STATUS.passed,
+                                WORKORDER_SERVICE_STEP_STATUS.failed,
+                                WORKORDER_SERVICE_STEP_STATUS.completed,
+                                WORKORDER_SERVICE_STEP_STATUS.skipped
+                              ].includes(stepData?.passFailStatus) ? "error" : "disabled"} style={{ fontSize: '20px' }} />
                             </IconButton>
                           </HtmlTooltip>
                         </div>
@@ -1552,16 +1564,19 @@ const Steps = ({
                       buttonType="theme"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setOpenCompleteDialog(true);
+                        setOpenCompleteDialog({
+                          open: true, status:
+                            stepSubmitedData?.filter((e) => e.uniqueId === selectedService?._id)?.every((e) => e?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.skipped) ?
+                              WORKORDER_SERVICE_STATUS.skipped : WORKORDER_SERVICE_STATUS.completed
+                        });
                       }}
                     >
-                      Complete
+                      {stepSubmitedData?.filter((e) => e.uniqueId === selectedService?._id)?.every((e) => e?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.skipped) ? "Skip" : "Complete"}
                     </ThemeButton>
                   </Grid>
                 </Box>
               )}
             </div>
-
             {fieldDialog && (
               <StepFieldsDialog
                 workOrderId={workOrderId}
@@ -1596,17 +1611,18 @@ const Steps = ({
                 }}
               />
             )}
-            {openCompleteDialog && (
+            {openCompleteDialog.open && (
               <CompleteDialog
                 serviceName={selectedService?.serviceName}
                 comment={comment}
                 setComment={setComment}
                 updateStatus={() => {
-                  updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.completed, handelClose);
+                  updateServiceStatus(selectedService?.uniqueId, openCompleteDialog.status, handelClose);
                 }}
+                status={openCompleteDialog?.status}
                 handleClose={() => {
                   setComment('');
-                  setOpenCompleteDialog(false);
+                  setOpenCompleteDialog({ open: false, status: null });
                 }}
               />
             )}

@@ -13,8 +13,8 @@ import { ListingPageHeader } from '../PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 import { useData } from 'src/StateProvider/Provider';
 
-const AssignManagedPackagesDialog = ({ onSuccess, handleClose, ids = [], extraDeepFilter = [], extraFilterById = [], isSubmitting = false }) => {
-  const renderedFrom = `${camelCase(sidebarResource?.managedPackages)}`;
+const AssignSerializedPackagesDialog = ({ onSuccess, handleClose, ids = [], extraDeepFilter = [], extraFilterById = [], isSubmitting = false }) => {
+  const renderedFrom = `${camelCase(sidebarResource?.serializedPackages)}`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -39,9 +39,9 @@ const AssignManagedPackagesDialog = ({ onSuccess, handleClose, ids = [], extraDe
 
   const fetchGridColumns = () => {
     axiosInstance()
-      .get(`/field?resource=${sidebarResource.managedPackages}&view=true`)
+      .get(`/field?resource=${sidebarResource.serializedPackages}&view=true`)
       .then(({ data: { data } }) => {
-        let newColumns = generateColumns(renderedFrom, data, routes.managedPackagesDetail.path);
+        let newColumns = generateColumns(renderedFrom, data, routes.serializedPackagesDetail.path);
         setColumns([...newColumns, ...getStaticFields()]);
       });
   };
@@ -50,7 +50,7 @@ const AssignManagedPackagesDialog = ({ onSuccess, handleClose, ids = [], extraDe
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${routes.managedPackages.path}${queryString}`, { cancelToken: cancelTokenSource?.token })
+      .get(`${routes.serializedPackages.path}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
         let rows = data.data.map((u) => {
           let finalObject = prepareDataForGrid(u);
@@ -125,7 +125,7 @@ const AssignManagedPackagesDialog = ({ onSuccess, handleClose, ids = [], extraDe
       aria-labelledby="assign-roles-dialog"
     >
       <CustomDialogHeader
-        title={`Add ${resources?.managedPackages?.titlePlural}`}
+        title={`Add ${resources?.serializedPackages?.titlePlural}`}
         showManimizeMaximize={false}
         showRequiredLabel={false}
         onClose={handleClose}
@@ -160,7 +160,7 @@ const AssignManagedPackagesDialog = ({ onSuccess, handleClose, ids = [], extraDe
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
-            resource={sidebarResource.managedPackages}
+            resource={sidebarResource.serializedPackages}
           />
         ) : (
           <Box p={2} height={500}>
@@ -172,4 +172,4 @@ const AssignManagedPackagesDialog = ({ onSuccess, handleClose, ids = [], extraDe
   );
 };
 
-export default AssignManagedPackagesDialog;
+export default AssignSerializedPackagesDialog;

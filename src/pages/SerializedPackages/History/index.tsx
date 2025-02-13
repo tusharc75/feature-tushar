@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect } from 'react';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { displayDateTime, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { Link } from 'react-router-dom';
@@ -13,7 +13,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 
 const History = ({ id }) => {
   const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = `${camelCase(sidebarResource?.managedPackages)}_History`;
+  const renderedFrom = `${camelCase(sidebarResource?.serializedPackages)}_History`;
 
   const {
     state: { permissions, resources }
@@ -139,13 +139,12 @@ const History = ({ id }) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`/history/managed-package/${id}${queryString}`)
+      .get(`/history/serialized-package/${id}${queryString}`)
       .then(({ data: { data, count } }) => {
         const rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
           return finalObject;
         });
-        console.log('rows', rows);
         dispatch({ type: 'initialize', data: rows, count: count });
         dispatch({ type: 'loading', loading: false });
       })

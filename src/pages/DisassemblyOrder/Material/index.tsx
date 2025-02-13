@@ -2,18 +2,18 @@ import { Box, IconButton, MenuItem } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
 import axiosInstance from 'src/axios/axiosInstance';
-import AssignManagedPackagesDialog from 'src/components/AssignRolesDialog/AssignManagedPackagesDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { MANAGED_PACKAGES_STATUS, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
+import { MATERIAL_TYPE, SERIALIZED_PACKAGES_STATUS, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import AssignSerializedPackagesDialog from 'src/components/AssignRolesDialog/AssignSerializedPackagesDialog';
 
 const Material = ({ disassemblyOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -40,25 +40,25 @@ const Material = ({ disassemblyOrderData, setNextStep, renderedFrom, stepFullScr
   const fetchFields = async () => {
     const {
       data: { data }
-    } = await axiosInstance().get(`/field?resource=${sidebarResource.managedPackages}`);
+    } = await axiosInstance().get(`/field?resource=${sidebarResource.serializedPackages}`);
     const newColumns = generateColumns(
       renderedFrom,
-      data?.filter((d) => d?.fieldData?.fieldName === 'managedPackageName'),
-      routes.managedPackagesDetail.path,
+      data?.filter((d) => d?.fieldData?.fieldName === 'serializedPackageNumber'),
+      routes.serializedPackagesDetail.path,
       true
     );
 
     newColumns?.forEach((c) => {
-      if (c?.accessor === 'managedPackageName') {
+      if (c?.accessor === 'serializedPackageNumber') {
         c.cell = ({ row }) =>
-          row.original?.managedPackageName && row.original.managedPackageId ? (
+          row.original?.serializedPackageNumber && row.original.serializedPackageId ? (
             <div className="flex items-center gap-2">
-              <h5 className="text-truncate">{row.original?.managedPackageName}</h5>
+              <h5 className="text-truncate">{row.original?.serializedPackageNumber}</h5>
               <Box>
                 <IconButton
                   size="small"
                   onClick={() => {
-                    window.open(`${routes.managedPackagesDetail.path}/${row.original.managedPackageId}`);
+                    window.open(`${routes.serializedPackagesDetail.path}/${row.original.serializedPackageId}`);
                   }}
                 >
                   <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
@@ -146,10 +146,10 @@ const Material = ({ disassemblyOrderData, setNextStep, renderedFrom, stepFullScr
     const rows = material?.map((m, i) => ({
       index: i + 1,
       _id: m?._id,
-      managedPackageName: m?.managedPackageDetail?.managedPackageName,
-      managedPackageId: m?.managedPackageDetail?._id,
-      package: m?.managedPackageDetail?.package?.packageName,
-      packageId: m?.managedPackageDetail?.package?._id,
+      serializedPackageNumber: m?.serializedPackageDetail?.serializedPackageNumber,
+      serializedPackageId: m?.serializedPackageDetail?._id,
+      package: m?.serializedPackageDetail?.package?.packageName,
+      packageId: m?.serializedPackageDetail?.package?._id,
       canDelete: true
     }));
     setNextStep(true);
@@ -211,7 +211,7 @@ const Material = ({ disassemblyOrderData, setNextStep, renderedFrom, stepFullScr
             setOpen(true);
           }}
         >
-          Add Existing {resources?.managedPackages?.titlePlural}
+          Add Existing {resources?.serializedPackages?.titlePlural}
         </MenuItem>
       </>
     );
@@ -269,17 +269,15 @@ const Material = ({ disassemblyOrderData, setNextStep, renderedFrom, stepFullScr
         </Box>
       )}
       {open && (
-        <AssignManagedPackagesDialog
+        <AssignSerializedPackagesDialog
           onSuccess={handleAdd}
           handleClose={() => {
             setOpen(false);
           }}
           extraFilterById={[{ field: 'warehouse', term: { $in: [disassemblyOrderData?.warehouse?.optionValue] } }]}
-          extraDeepFilter={[
-            { field: 'status', term: [MANAGED_PACKAGES_STATUS.new, MANAGED_PACKAGES_STATUS.available, MANAGED_PACKAGES_STATUS.underReview] }
-          ]}
+          extraDeepFilter={[{ field: 'status', term: [SERIALIZED_PACKAGES_STATUS.available, SERIALIZED_PACKAGES_STATUS.underReview] }]}
           isSubmitting={isSubmitting}
-          ids={dataRows?.map((d) => d?.managedPackageId)}
+          ids={dataRows?.map((d) => d?.serializedPackageId)}
         />
       )}
       {deleteData && (

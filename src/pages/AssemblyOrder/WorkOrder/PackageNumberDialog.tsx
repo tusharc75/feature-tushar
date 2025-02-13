@@ -13,11 +13,11 @@ import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderIds = null }) => {
+const SerializedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderIds = null }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [initialValues, setInitialValues] = useState({ managedPackages: [] });
+  const [initialValues, setInitialValues] = useState({ serializedPackages: [] });
   const [packageOptions, setPackageOptions] = useState([]);
-  const [managedPackagedLabel, setManagedPackagedLabel] = useState(null);
+  const [serializedPackagedLabel, setSerializedPackagedLabel] = useState(null);
 
   useEffect(() => {
     fetchFieldLabel();
@@ -28,7 +28,7 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderId
       .get(`${routes.assemblyOrder.path}/material/${assemblyOrderId}`)
       .then(({ data: { data } }) => {
         let material = [];
-        material = data?.material?.filter((m) => m?.type === MATERIAL_TYPE.package && !m?.managedPackage);
+        material = data?.material?.filter((m) => m?.type === MATERIAL_TYPE.package && !m?.serializedPackage);
         if (workOrderIds?.length) {
           material = material?.filter((m) => m.parentId && [...workOrderIds].includes(m?.workOrder?.optionValue));
         } else {
@@ -36,15 +36,15 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderId
         }
         setPackageOptions(material?.map((m) => ({ optionValue: m?.materialId, optionLabel: m?.packageDetail?.packageName })));
         setInitialValues({
-          managedPackages: material?.map((m) => ({
+          serializedPackages: material?.map((m) => ({
             package: m?.materialId,
-            managedPackageName: '',
+            serializedPackageNumber: '',
             uniqueId: m?._id,
             isSubPackage: m?.parentId ? true : false
           }))
         });
       })
-      .catch((error) => { });
+      .catch((error) => {});
   }, [assemblyOrderId]);
 
   const fetchFieldLabel = async () => {
@@ -53,30 +53,30 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderId
     } = await axiosInstance().put(`/field/find-field-labels`, {
       fields: [
         {
-          resource: sidebarResource.managedPackages,
-          fieldNames: ['managedPackageName']
+          resource: sidebarResource.serializedPackages,
+          fieldNames: ['serializedPackageNumber']
         }
       ]
     });
-    const managedPackageField = data?.find((d) => d.resource === sidebarResource.managedPackages)?.fieldNames || [];
-    setManagedPackagedLabel(managedPackageField[0]?.fieldLabel);
+    const serializedPackageField = data?.find((d) => d.resource === sidebarResource.serializedPackages)?.fieldNames || [];
+    setSerializedPackagedLabel(serializedPackageField[0]?.fieldLabel);
   };
 
   const validate = (values) => {
     const errors: any = {};
-    if (values?.managedPackages?.length > 0) {
-      values?.managedPackages?.forEach((d, i) => {
-        if (!d.managedPackageName) {
-          if (!errors?.managedPackageName) {
-            errors['managedPackages'] = [];
+    if (values?.serializedPackages?.length > 0) {
+      values?.serializedPackages?.forEach((d, i) => {
+        if (!d.serializedPackageNumber) {
+          if (!errors?.serializedPackageNumber) {
+            errors['serializedPackages'] = [];
           }
-          errors.managedPackages[i] = { managedPackageName: 'Managed Package Name is required' };
+          errors.serializedPackages[i] = { serializedPackageNumber: 'Serialized Package Number is required' };
         }
         if (!d.package) {
           if (!errors?.package) {
             errors['package'] = [];
           }
-          errors.managedPackages[i] = { package: 'Package Name is required' };
+          errors.serializedPackages[i] = { package: 'Package Name is required' };
         }
       });
     }
@@ -85,11 +85,11 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderId
 
   const handleSubmit = (values) => {
     axiosInstance()
-      .post(`${routes.assemblyOrder.path}/work-order/${assemblyOrderId}/managed-package`, { managedPackages: values?.managedPackages })
+      .post(`${routes.assemblyOrder.path}/work-order/${assemblyOrderId}/serialized-package`, { serializedPackages: values?.serializedPackages })
       .then((res) => {
         onSuccess();
       })
-      .catch((error) => { });
+      .catch((error) => {});
   };
 
   return (
@@ -105,7 +105,7 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderId
         }
       }}
     >
-      {initialValues?.managedPackages?.length > 0 ? (
+      {initialValues?.serializedPackages?.length > 0 ? (
         <Formik initialValues={initialValues} validate={validate} onSubmit={handleSubmit}>
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <>
@@ -122,41 +122,41 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderId
               <CustomDialogContent>
                 <Form>
                   <FieldArray
-                    name="managedPackages"
+                    name="serializedPackages"
                     render={(arrayHelpers) => (
                       <>
-                        {values?.managedPackages?.map((data, index) => (
+                        {values?.serializedPackages?.map((data, index) => (
                           <Box mb={2} border={1} p={1} borderColor="var(--common-border-color)">
                             <Grid container spacing={2}>
                               <Grid size={{ xs: 12, sm: 6, md: 6, lg: 6 }}>
                                 <TextField
                                   fullWidth
-                                  label={managedPackagedLabel || 'Managed Package Name'}
+                                  label={serializedPackagedLabel || 'Serialized Package Number'}
                                   variant="outlined"
                                   type="text"
                                   size="small"
-                                  name="managedPackageName"
-                                  placeholder={managedPackagedLabel || 'Managed Package Name'}
+                                  name="serializedPackageNumber"
+                                  placeholder={serializedPackagedLabel || 'Serialized Package Number'}
                                   margin="dense"
                                   value={data.message}
                                   required
                                   onChange={(e) => {
                                     arrayHelpers.replace(index, {
-                                      ...values?.managedPackages[index],
-                                      ['managedPackageName']: e.target.value
+                                      ...values?.serializedPackages[index],
+                                      ['serializedPackageNumber']: e.target.value
                                     });
                                   }}
                                   error={
-                                    touched?.managedPackages &&
-                                    touched?.managedPackages[index]?.managedPackageName &&
-                                    errors?.managedPackages &&
-                                    Boolean(errors?.managedPackages[index]?.managedPackageName)
+                                    touched?.serializedPackages &&
+                                    touched?.serializedPackages[index]?.serializedPackageNumber &&
+                                    errors?.serializedPackages &&
+                                    Boolean(errors?.serializedPackages[index]?.serializedPackageNumber)
                                   }
                                   helperText={
-                                    touched?.managedPackages &&
-                                    touched?.managedPackages[index]?.managedPackageName &&
-                                    errors?.managedPackages &&
-                                    errors?.managedPackages[index]?.managedPackageName
+                                    touched?.serializedPackages &&
+                                    touched?.serializedPackages[index]?.serializedPackageNumber &&
+                                    errors?.serializedPackages &&
+                                    errors?.serializedPackages[index]?.serializedPackageNumber
                                   }
                                 />
                               </Grid>
@@ -174,7 +174,7 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderId
                                   }
                                   onChange={(e, val) => {
                                     arrayHelpers.replace(index, {
-                                      ...values?.managedPackages[index],
+                                      ...values?.serializedPackages[index],
                                       ['package']: val && val?.optionValue ? val?.optionValue : ''
                                     });
                                   }}
@@ -190,16 +190,16 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderId
                                       disabled
                                       required
                                       error={
-                                        touched?.managedPackages &&
-                                        touched?.managedPackages[index]?.package &&
-                                        errors?.managedPackages &&
-                                        Boolean(errors?.managedPackages[index]?.package)
+                                        touched?.serializedPackages &&
+                                        touched?.serializedPackages[index]?.package &&
+                                        errors?.serializedPackages &&
+                                        Boolean(errors?.serializedPackages[index]?.package)
                                       }
                                       helperText={
-                                        touched?.managedPackages &&
-                                        touched?.managedPackages[index]?.package &&
-                                        errors?.managedPackages &&
-                                        errors?.managedPackages[index]?.package
+                                        touched?.serializedPackages &&
+                                        touched?.serializedPackages[index]?.package &&
+                                        errors?.serializedPackages &&
+                                        errors?.serializedPackages[index]?.package
                                       }
                                     />
                                   )}
@@ -214,16 +214,10 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderId
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <ThemeButton
-                  buttonType='transparent'
-                  onClick={submitForm}
-                >
+                <ThemeButton buttonType="transparent" onClick={submitForm}>
                   Cancel
                 </ThemeButton>
-                <ThemeButton
-                  buttonType='theme'
-                  onClick={submitForm}
-                >
+                <ThemeButton buttonType="theme" onClick={submitForm}>
                   Save
                 </ThemeButton>
               </CustomDialogFooter>
@@ -239,4 +233,4 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderId
   );
 };
 
-export default ManagedPackageDialog;
+export default SerializedPackageDialog;
