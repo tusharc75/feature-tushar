@@ -12,12 +12,17 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { useData } from 'src/StateProvider/Provider';
 
 const SerializedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderIds = null }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialValues, setInitialValues] = useState({ serializedPackages: [] });
   const [packageOptions, setPackageOptions] = useState([]);
   const [serializedPackagedLabel, setSerializedPackagedLabel] = useState(null);
+
+  const {
+    state: { resources }
+  }: any = useData();
 
   useEffect(() => {
     fetchFieldLabel();
@@ -44,7 +49,7 @@ const SerializedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrde
           }))
         });
       })
-      .catch((error) => {});
+      .catch((error) => { });
   }, [assemblyOrderId]);
 
   const fetchFieldLabel = async () => {
@@ -89,7 +94,7 @@ const SerializedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrde
       .then((res) => {
         onSuccess();
       })
-      .catch((error) => {});
+      .catch((error) => { });
   };
 
   return (
@@ -111,7 +116,7 @@ const SerializedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrde
             <>
               <CustomDialogHeader
                 onClose={onClose}
-                title={'Packages Number'}
+                title={`${resources?.serializedPackages?.titlePlural} Number`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -214,7 +219,7 @@ const SerializedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrde
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <ThemeButton buttonType="transparent" onClick={submitForm}>
+                <ThemeButton buttonType="transparent" onClick={onClose}>
                   Cancel
                 </ThemeButton>
                 <ThemeButton buttonType="theme" onClick={submitForm}>
