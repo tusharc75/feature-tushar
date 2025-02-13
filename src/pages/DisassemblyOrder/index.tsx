@@ -1,6 +1,6 @@
 import { camelCase } from 'lodash';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import { checkIsAllowedToDelete, disassemblyOrder, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { checkIsAllowedToDelete, disassemblyOrder, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
@@ -18,7 +18,6 @@ import { ListingPageHeader } from 'src/components/PageHeaders';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { ManageDiassemblyOrder } from 'src/pages/DisassemblyOrder/ManageDiassemblyOrder';
-import { useHistory } from 'react-router-dom';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 const DisassemblyOrder = () => {
@@ -37,7 +36,6 @@ const DisassemblyOrder = () => {
   const [columns, setColumns] = useState(null);
   const { generateColumns } = useColumns();
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.disassemblyOrder));
-  const history = useHistory();
   const types = [
     {
       key: `My ${resources?.disassemblyOrder?.titlePlural}`,
@@ -274,12 +272,11 @@ const DisassemblyOrder = () => {
         {showDeleteConfirmBox ? (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${
-              deleteRecord
-                ? `${resources?.disassemblyOrder.titleSingular?.toLowerCase()} :
+            message={`Are you sure you want to delete ${deleteRecord
+              ? `${resources?.disassemblyOrder.titleSingular?.toLowerCase()} :
                       ${deleteRecord?.disassemblyOrderNumber}`
-                : `selected ${resources?.disassemblyOrder?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.disassemblyOrder?.titlePlural?.toLowerCase()}`
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
@@ -294,7 +291,7 @@ const DisassemblyOrder = () => {
           isClone={showManageDiassemblyOrder.isClone}
           disassemblyOrderId={showManageDiassemblyOrder.idToClone}
           onClose={() => setShowManageDiassemblyOrder({ open: false, isClone: false, idToClone: null })}
-          onSuccess={() => {}}
+          onSuccess={() => { }}
           isRedirectToDetailPage={true}
         />
       )}
