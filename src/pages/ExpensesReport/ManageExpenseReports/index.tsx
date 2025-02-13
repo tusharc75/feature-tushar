@@ -49,6 +49,7 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
   const [showAddExistingExpenseModal, setShowAddExistingExpenseModal] = useState(false);
   const [showManageExpensesDialog, setShowManageExpensesDialog] = useState({ open: false, idToClone: null });
   const [isAllowedToEdit, setIsAllowedToEdit] = useState(true);
+  const [editing, setEditing] = useState(false);
 
   useEffect(() => {
     axiosInstance()
@@ -63,6 +64,7 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
               setTitle(`Edit - ${data.reportTitle}`);
               setSelectedExpense(data.expenses);
               setIsAllowedToEdit(false);
+              setEditing(true);
               setInitialData({
                 fields: fieldsDataForUpdate,
                 values: { ...getObjKeysWithValues(data, fieldsDataForUpdate) }
@@ -99,14 +101,11 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
       axiosInstance()
         .put(`${expenseReport.api}`, data)
         .then(({ data }) => {
-          selectedExpense.forEach((expense) => {
             axiosInstance()
-              .patch(`${expenses.api}/status/${expense._id}`, { status })
+              .patch(`${expenseReport.api}/status/${expenseReportId}`, { status })
               .catch((error) => {
                 toastConfig.setToastConfig(error);
               });
-          });
-
           setIsSubmitting(false);
           onSuccess();
           toastConfig.setToastConfig({
@@ -123,14 +122,11 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
       axiosInstance()
         .post(`${expenseReport.api}`, data)
         .then(({ data: { data, message } }) => {
-          selectedExpense.forEach((expense) => {
-            axiosInstance()
-              .patch(`${expenses.api}/status/${expense._id}`, { status })
-              .catch((error) => {
-                toastConfig.setToastConfig(error);
-              });
+          axiosInstance()
+          .patch(`${expenseReport.api}/status/${data._id}`, { status })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
           });
-
           history.push(`${routes?.expenseReportDetail?.path}/${data._id}`);
           setIsSubmitting(false);
           onSuccess(data);
@@ -195,7 +191,7 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
     <Dialog
       maxWidth="md"
       fullWidth
-      fullScreen
+      fullScreen={editing ? (fullScreen || isMobile || isTablet) : true}
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
       onClose={(e, reason) => {
@@ -323,7 +319,7 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
         </Formik>
       ) : (
         <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          <CommonSkeleton lenArray={[...(editing ? Array(6) : Array(10)).keys()]} />
         </Box>
       )}
     </Dialog>

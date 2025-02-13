@@ -19,7 +19,7 @@ import Step from '../DynamicForm/Step';
 import ManageExpenseReports from 'src/pages/ExpensesReport/ManageExpenseReports';
 import Expenses from 'src/pages/ExpensesReport/Expenses';
 
-const ExpenseReportDetailsPage = () => {
+const ExpenseReportDetail = () => {
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const history = useHistory();
@@ -123,6 +123,9 @@ const ExpenseReportDetailsPage = () => {
           } catch (error) {
             toastConfig.setToastConfig(error);
           }
+          await axiosInstance().patch(`${expenseReport.api}/expenses/status/${expenseReportData._id}`, {
+            status: EXPENSE_STATUS.unreported
+          });
         }
       }
 
@@ -137,13 +140,13 @@ const ExpenseReportDetailsPage = () => {
 
   const handleDeleteExpense = async (expenseIds: string[]) => {
     try {
-      await axiosInstance().put(
-        `${routes.expenseReport.path}/expenses/${expenseReportData._id}/remove`,
-        { ids: expenseIds }
-      );
+      await axiosInstance().put(`${routes.expenseReport.path}/expenses/${expenseReportData._id}/remove`, { ids: expenseIds });
 
       for (let expenseId of expenseIds) {
         await axiosInstance().patch(`${expenses.api}/status/${expenseId}`, {
+          status: EXPENSE_STATUS.unreported
+        });
+        await axiosInstance().patch(`${expenseReport.api}/expenses/status/${expenseReportData._id}`, {
           status: EXPENSE_STATUS.unreported
         });
       }
@@ -158,13 +161,6 @@ const ExpenseReportDetailsPage = () => {
     await axiosInstance().patch(`${expenseReport.api}/status/${expenseReportData._id}`, {
       status
     });
-    if (expenseReportData?.expenses?.length > 0) {
-      for (let expense of expenseReportData.expenses) {
-          await axiosInstance().patch(`${expenses.api}/status/${expense._id}`, {
-            status
-          });
-      }
-    }
     fetchData();
   };
 
@@ -182,31 +178,31 @@ const ExpenseReportDetailsPage = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <Fragment>
-            {expenseReportData?.status !== EXPENSE_STATUS.approved && (
-              <>
-              <ThemeButton
-                iconForMobile={<Edit />}
-                disabled={!allowedToEdit}
-                onClick={() => {
-                  setOpenUpdateDialog(true);
-                }}
-                mobileTooltip={'Edit'}
-              >
-                Edit
-              </ThemeButton>
-               <ThemeButton
-                buttonType="theme"
-                iconForMobile={<SendIcon />}
-                onClick={() => {
-                  handleStatusChange(
-                    expenseReportData?.status === EXPENSE_STATUS.awaitingApproval ? EXPENSE_STATUS.recalled : EXPENSE_STATUS.awaitingApproval
-                  );
-                }}
-                mobileTooltip={expenseReportData?.status === EXPENSE_STATUS.awaitingApproval ? 'Recall' : 'Send For Approval'}
-              >
-                {expenseReportData?.status === EXPENSE_STATUS.awaitingApproval ? 'Recall' : 'Send For Approval'}
-              </ThemeButton>
-              </>
+              {expenseReportData?.status !== EXPENSE_STATUS.approved && (
+                <>
+                  <ThemeButton
+                    buttonType="theme"
+                    iconForMobile={<SendIcon />}
+                    onClick={() => {
+                      handleStatusChange(
+                        expenseReportData?.status === EXPENSE_STATUS.awaitingApproval ? EXPENSE_STATUS.recalled : EXPENSE_STATUS.awaitingApproval
+                      );
+                    }}
+                    mobileTooltip={expenseReportData?.status === EXPENSE_STATUS.awaitingApproval ? 'Recall' : 'Send For Approval'}
+                  >
+                    {expenseReportData?.status === EXPENSE_STATUS.awaitingApproval ? 'Recall' : 'Send For Approval'}
+                  </ThemeButton>
+                  {expenseReportData?.status !== EXPENSE_STATUS.awaitingApproval && <ThemeButton
+                    iconForMobile={<Edit />}
+                    disabled={!allowedToEdit}
+                    onClick={() => {
+                      setOpenUpdateDialog(true);
+                    }}
+                    mobileTooltip={'Edit'}
+                  >
+                    Edit
+                  </ThemeButton>}
+                </>
               )}
             </Fragment>
             {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
@@ -234,7 +230,12 @@ const ExpenseReportDetailsPage = () => {
           <Box>
             {!loadingDetails && expenseReportData && fields ? (
               <div className="mt-2">
-                <Expenses selectedExpenseData={expenseReportData?.expenses} showAddButton={true} reportData={expenseReportData} removeRow={handleDeleteExpense} />
+                <Expenses
+                  selectedExpenseData={expenseReportData?.expenses}
+                  showAddButton={true}
+                  reportData={expenseReportData}
+                  removeRow={handleDeleteExpense}
+                />
               </div>
             ) : (
               <div className="p-2">
@@ -285,4 +286,4 @@ const ExpenseReportDetailsPage = () => {
   );
 };
 
-export default ExpenseReportDetailsPage;
+export default ExpenseReportDetail;

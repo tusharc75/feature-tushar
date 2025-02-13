@@ -31,7 +31,7 @@ const MaterialUpdateActions = ({ resource, values, referenceData, allFields, mat
       else {
         let childMatrialUpdate = []
         if (rentalPackagePriceMaterialWise) {
-          childMatrialUpdate = [...user?.user?.brandPolicy?.rentalPackagePriceMaterialWise, MATERIAL_TYPE.package]
+          childMatrialUpdate = [...user?.user?.brandPolicy?.rentalPackagePriceMaterialWise]
         }
         const rows = bulkUpdate(values, selectedRecords, material, allFields, referenceData?.currency, false, childMatrialUpdate);
         handleUpdateData(rows);

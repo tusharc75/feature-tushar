@@ -90,6 +90,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null,isRedirectToDetailPa
                 const { _id, brand, createdBy, history, expenseNumber, updatedBy, ...rest } = data;
                 setTitle(`Clone - ${expenseNumber}`);
                 rest.expenseNumber = GenerateResourceLineNumber(fieldsDataForCreate);
+                rest.status = EXPENSE_STATUS.unreported;
                 setInitialData({
                   fields: fieldsDataForCreate,
                   values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }

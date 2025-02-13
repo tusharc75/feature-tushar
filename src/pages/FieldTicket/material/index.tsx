@@ -369,8 +369,8 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageName : '';
-      _subRow.description = _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageDescription || '' : '';
+      _subRow.detail = _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageName : _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceName : '';
+      _subRow.description = _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageDescription || '' : _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceDescription  : '';
       _subRow.competencyType = _subRow?.serviceDetail?.competencyType;
       _subRow.competencies = _subRow?.serviceDetail?.competencies;
       _subRow.qty = _subRow.qty * parent.qty;

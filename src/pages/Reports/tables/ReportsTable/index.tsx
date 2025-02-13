@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { MdFilterList } from 'react-icons/md';
 import axiosInstance from 'src/axios/axiosInstance';
 import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getSortedVisibleColumns, getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import Filter from 'src/components/Filter';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -38,7 +38,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
   const resourceStartCase = startCase(selectedReport.resource);
   const renderedFrom = `${selectedReport.resource}_report_new`;
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { page, sorting, search, limit, filters, pageSizes, visibleColumns } = state;
+  const { page, sorting, search, limit, filters, pageSizes, visibleColumns, columnOrder } = state;
   const [showGrid, setShowGrid] = React.useState(false);
   const [deepFilters, setDeepFilters] = useState([]);
   const [filterByIds, setFilterByIds] = useState([]);
@@ -225,176 +225,162 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
     setIsColumnsLoading(false);
   }, [generateColumns, resourceCamelCase, resourceStartCase, setColumns, setIsColumnsLoading, setResourceColumns]);
 
-  const getFilter = useCallback(
-    (isExport = false, deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
-      let filterQuery = `page=${page}&`;
-      let deepFilter = [];
-      let newDeepFilter = [...deepFiltersP];
+  const getQueryString = (isExport = false, deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
 
-      if (!isExport) {
-        filterQuery = `${filterQuery}limit=${limit}&`;
-      }
-      if (sorting.length > 0) {
-        filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
-      }
-      if (search) {
-        filterQuery = `${filterQuery}search=${encodeURIComponent(search)}&`;
-      }
-      if (!isObjectEmpty(filters)) {
-        for (let i = 0; i < deepFiltersP.length; i++) {
-          const tempFilter = deepFiltersP[i];
-          if (filters[tempFilter.field]) {
-            newDeepFilter = newDeepFilter.filter((d) => d.field !== tempFilter.field);
-            deepFiltersP = newDeepFilter;
-          }
+    let filterQuery = `?page=${page}&limit=${limit}&`;
+    let deepFilter = [];
+    let newDeepFilter = [...deepFiltersP];
+
+    if (isExport) {
+      filterQuery = `?`;
+    }
+
+    if (sorting.length > 0) {
+      filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
+    }
+    if (search) {
+      filterQuery = `${filterQuery}search=${encodeURIComponent(search)}&`;
+    }
+    if (!isObjectEmpty(filters)) {
+      for (let i = 0; i < deepFiltersP.length; i++) {
+        const tempFilter = deepFiltersP[i];
+        if (filters[tempFilter.field]) {
+          newDeepFilter = newDeepFilter.filter((d) => d.field !== tempFilter.field);
+          deepFiltersP = newDeepFilter;
         }
-        Object.keys(filters).forEach((field) => {
-          deepFilter.push({
-            field: field,
-            term: filters[field].filter
-          });
+      }
+      Object.keys(filters).forEach((field) => {
+        deepFilter.push({
+          field: field,
+          term: filters[field].filter
         });
+      });
+    }
+
+    if (filterByIdsP?.length > 0) {
+      const filterById = filterByIdsP
+        ?.filter((f) => f?.term?.length > 0)
+        ?.map((f) => {
+          const term = filterTerm[f?.field] === '$nin' ? '$nin' : '$in';
+          return {
+            field: f?.field,
+            term: {
+              [term]: f?.term?.map?.((d: any) => d.optionValue)
+            }
+          };
+        });
+      if (filterById?.length > 0) {
+        filterQuery = `${filterQuery}filterById=${JSON.stringify(filterById)}&`;
       }
+    }
 
-      if (filterByIdsP?.length > 0) {
-        const filterById = filterByIdsP
-          ?.filter((f) => f?.term?.length > 0)
-          ?.map((f) => {
-            const term = filterTerm[f?.field] === '$nin' ? '$nin' : '$in';
-            return {
-              field: f?.field,
-              term: {
-                [term]: f?.term?.map?.((d: any) => d.optionValue)
+    const dateFilter: any = [];
+    const statusPeriodDateFilter: any = [];
+
+    const isStatusPeriod = resourceStartCase === sidebarResource.serializedAsset && resourceColumns?.some((r) => r?.fieldData?.fieldName === 'status');
+
+    if (deepFiltersP?.length > 0) {
+      deepFilter = [
+        ...deepFilter,
+        ...deepFiltersP
+          ?.filter((d) => {
+            if (d?.type === 'date') {
+              if (isStatusPeriod && 'statusPeriod' === d?.field) {
+                statusPeriodDateFilter.push({ field: `from_${d?.field}`, term: d?.term?.from });
+                statusPeriodDateFilter.push({ field: `to_${d?.field}`, term: d?.term?.to });
+              } else {
+                dateFilter.push({ field: `from_${d?.field}`, term: d?.term?.from });
+                dateFilter.push({ field: `to_${d?.field}`, term: d?.term?.to });
               }
-            };
-          });
-        if (filterById?.length > 0) {
-          filterQuery = `${filterQuery}filterById=${JSON.stringify(filterById)}&`;
-        }
-      }
-
-      const dateFilter: any = [];
-      const statusPeriodDateFilter: any = [];
-
-      const isStatusPeriod =
-        resourceStartCase === sidebarResource.serializedAsset && resourceColumns?.some((r) => r?.fieldData?.fieldName === 'status');
-
-      if (deepFiltersP?.length > 0) {
-        deepFilter = [
-          ...deepFilter,
-          ...deepFiltersP
-            ?.filter((d) => {
-              if (d?.type === 'date') {
-                if (isStatusPeriod && 'statusPeriod' === d?.field) {
-                  statusPeriodDateFilter.push({ field: `from_${d?.field}`, term: d?.term?.from });
-                  statusPeriodDateFilter.push({ field: `to_${d?.field}`, term: d?.term?.to });
-                } else {
-                  dateFilter.push({ field: `from_${d?.field}`, term: d?.term?.from });
-                  dateFilter.push({ field: `to_${d?.field}`, term: d?.term?.to });
-                }
-                return false;
-              }
-              return d?.term?.length ? true : false;
-            })
-            ?.map((d) => {
-              if (filterTerm[d?.field] === '$nin' && Array.isArray(d?.term)) {
-                return {
-                  field: d?.field,
-                  term: { $nin: d?.term }
-                };
-              }
+              return false;
+            }
+            return d?.term?.length ? true : false;
+          })
+          ?.map((d) => {
+            if (filterTerm[d?.field] === '$nin' && Array.isArray(d?.term)) {
               return {
                 field: d?.field,
-                term: d?.term
+                term: { $nin: d?.term }
               };
-            })
-        ];
+            }
+            return {
+              field: d?.field,
+              term: d?.term
+            };
+          })
+      ];
+    }
+    if (dateFilter?.length > 0) {
+      deepFilter = [...deepFilter, ...dateFilter?.filter((d) => dayjs(d?.term).isValid())?.map((d) => ({ ...d, term: dateFormatToSend(d?.term) }))];
+    }
+
+    if (statusPeriodDateFilter?.length > 0) {
+      statusPeriodDateFilter?.forEach((d) => {
+        if (d?.term) {
+          filterQuery = `${filterQuery}${d?.field}=${d?.term}&`;
+        }
+      });
+    }
+
+    if (deepFilter && deepFilter.length > 0) {
+      filterQuery = `${filterQuery}deepFilter=${encodeURIComponent(JSON.stringify(deepFilter))}&`;
+    }
+
+    if (isExport) {
+      filterQuery = `${filterQuery}exportColumn=${JSON.stringify(getSortedVisibleColumns(columns, visibleColumns, columnOrder))}`;
+    }
+
+    return { query: `${filterQuery}`, deepFilter: newDeepFilter };
+
+  };
+
+  const fetchResourceData = useCallback((deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
+    setShowGrid(true);
+
+    let { query, deepFilter } = getQueryString(false, deepFiltersP, filterByIdsP);
+    setDeepFilters(deepFilter);
+
+    if (cancelTokenSource) {
+      cancelTokenSource.cancel();
+    }
+    cancelTokenSource = axios.CancelToken.source();
+    dispatch({ type: 'loading', loading: true });
+
+    let api = `/report${routes[resourceCamelCase].path}${query}`;
+    if (resourceCamelCase === 'quotes') {
+      api = `/report/quote-builder${query}`;
+    } else {
+      api = `/report${routes[resourceCamelCase].path}${query}`;
+    }
+
+    axiosInstance().get(api, { cancelToken: cancelTokenSource?.token }).then(({ data: { data, count } }) => {
+      data = data.map((u: any) => {
+        let finalObject = prepareDataForGrid(u);
+        return finalObject;
+      });
+
+      dispatch({ type: 'initialize', data: data, count: count });
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+    }).catch((err) => {
+      if (!axios.isCancel(err)) {
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+        toastConfig.setToastConfig(err);
       }
-      if (dateFilter?.length > 0) {
-        deepFilter = [...deepFilter, ...dateFilter?.filter((d) => dayjs(d?.term).isValid())?.map((d) => ({ ...d, term: dateFormatToSend(d?.term) }))];
-      }
-
-      if (statusPeriodDateFilter?.length > 0) {
-        statusPeriodDateFilter?.forEach((d) => {
-          if (d?.term) {
-            filterQuery = `${filterQuery}${d?.field}=${d?.term}&`;
-          }
-        });
-      }
-
-      if (deepFilter && deepFilter.length > 0) {
-        filterQuery = `${filterQuery}deepFilter=${encodeURIComponent(JSON.stringify(deepFilter))}&`;
-      }
-
-      return { query: `?${filterQuery}`, deepFilter: newDeepFilter };
-    },
-    [deepFilters, filterByIds, filterTerm, filters, limit, page, resourceColumns, resourceStartCase, search, sorting]
-  );
-
-  const fetchResourceData = useCallback(
-    (deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
-      setShowGrid(true);
-
-      let { query, deepFilter } = getFilter(false, deepFiltersP, filterByIdsP);
-      setDeepFilters(deepFilter);
-
-      if (cancelTokenSource) {
-        cancelTokenSource.cancel();
-      }
-      cancelTokenSource = axios.CancelToken.source();
-      dispatch({ type: 'loading', loading: true });
-
-      let api = `/report${routes[resourceCamelCase].path}${query}`;
-      if (resourceCamelCase === 'quotes') {
-        api = `/report/quote-builder/${query}`;
-      } else {
-        api = `/report${routes[resourceCamelCase].path}${query}`;
-      }
-
-      axiosInstance()
-        .get(api, {
-          cancelToken: cancelTokenSource?.token
-        })
-        .then(({ data: { data, count } }) => {
-          data = data.map((u: any) => {
-            let finalObject = prepareDataForGrid(u);
-            return finalObject;
-          });
-
-          dispatch({ type: 'initialize', data: data, count: count });
-          setTimeout(() => {
-            dispatch({ type: 'loading', loading: false });
-          }, gridLoadingTimeout);
-        })
-        .catch((err) => {
-          if (!axios.isCancel(err)) {
-            setTimeout(() => {
-              dispatch({ type: 'loading', loading: false });
-            }, gridLoadingTimeout);
-            toastConfig.setToastConfig(err);
-          }
-        });
-    },
-    [dispatch, getFilter, resourceCamelCase, toastConfig]
+    });
+  },
+    [dispatch, getQueryString, resourceCamelCase, toastConfig]
   );
 
   const getApi = () => {
-    if (!columns) return;
-    let newColumns = columns?.map((col) => col.accessor);
-    if (!isEmpty(visibleColumns) && isObject(visibleColumns)) {
-      newColumns = [];
-      for (const [key, value] of Object.entries(visibleColumns)) {
-        if (value) {
-          newColumns.push(key);
-        }
-      }
-    }
-    let { query: filterQuery } = getFilter(true);
     let api = null;
     if (resourceCamelCase === 'quotes') {
-      api = `/report/quote-builder/export?exportColumn=${JSON.stringify(newColumns)}&${filterQuery}`;
+      api = `/report/quote-builder`;
     } else {
-      api = `/report${routes[resourceCamelCase].path}/export?exportColumn=${JSON.stringify(newColumns)}&${filterQuery}`;
+      api = `/report${routes[resourceCamelCase].path}`;
     }
     return api;
   };
@@ -460,8 +446,9 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
               permissions={permissions[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
               module={''}
               api={getApi()}
-              afterImportCompleted={() => {}}
+              afterImportCompleted={() => { }}
               onlyExport={true}
+              additionalParams={getQueryString(true).query}
             />
           </>
         )}

@@ -17,7 +17,7 @@ import { EXPENSE_STATUS, expenses, getUniqueCurrencies, sidebarResource } from '
 import Step from '../DynamicForm/Step';
 import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
 
-const ExpenseDetailsPage = () => {
+const ExpenseDetail = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const { id } = useParams();
@@ -254,4 +254,4 @@ const ExpenseDetailsPage = () => {
   );
 };
 
-export default ExpenseDetailsPage;
+export default ExpenseDetail;

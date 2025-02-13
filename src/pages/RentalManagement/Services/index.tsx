@@ -24,7 +24,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { calculateRowsField, fetch_rental_product_fields, getNestedSubRows } from '../../../components/RentalManagment/helper';
+import { fetch_rental_product_fields, getNestedSubRows } from '../../../components/RentalManagment/helper';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import {
   DELIVERY_TICKET_REFERENCE_TYPE,
@@ -676,8 +676,7 @@ const Services = ({
         return;
       }
     }
-    const calValues = autoCalculateSpecificFields(inputField, rowData, allFields)
-    setSubmitState({ open: true, values: { ...rowData, ...calValues }, rowData: rowData })
+    setSubmitState({ open: true, values: inputField, rowData: rowData })
   };
 
   const addButtonMenuItems = () => {

@@ -20,6 +20,7 @@ import {
   expenses,
   sidebarResource,
   EXPENSE_STATUS,
+  getUniqueCurrencies,
 } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
@@ -51,6 +52,7 @@ const Expenses = () => {
   useEffect(() => {
     fetchGridColumns();
   }, []);
+  
   const fetchGridColumns = async () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.expenses}`);
@@ -73,7 +75,7 @@ const Expenses = () => {
         Cell: ({ row }) => {
           return row?.original?.totalAmount ? (
             <div>
-              <p className="text-truncate">{row?.original?.totalAmount}</p>
+              <p className="text-truncate">{getUniqueCurrencies().find((d) => d.currencyCode === row?.original?.currency)?.symbolNative} {row?.original?.totalAmount}</p>
             </div>
           ) : (
             <NoDataCell />

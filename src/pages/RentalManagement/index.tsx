@@ -62,6 +62,7 @@ const RentalManagement = () => {
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+
   const { generateColumns, checkStaticField } = useColumns();
 
   const [renderCount, setRenderCount] = useState(0);
@@ -530,11 +531,12 @@ const RentalManagement = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord
-              ? `${resources?.rentalManagement?.titleSingular?.toLowerCase()} :
+            message={`Are you sure you want to delete ${
+              deleteRecord
+                ? `${resources?.rentalManagement?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.rentalJobName}`
-              : `selected ${resources?.rentalManagement?.titlePlural?.toLowerCase()}`
-              } ?`}
+                : `selected ${resources?.rentalManagement?.titlePlural?.toLowerCase()}`
+            } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

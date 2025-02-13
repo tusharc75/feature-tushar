@@ -1,7 +1,7 @@
 import { Avatar, Box } from '@mui/material';
 import { Image } from '@mui/icons-material';
 import InfoIcon from '@mui/icons-material/Info';
-import { isArray, isObject } from 'lodash';
+import { isArray, isEmpty, isObject } from 'lodash';
 import camelCase from 'lodash/camelCase';
 import { memo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
@@ -24,7 +24,8 @@ import {
   formatAmountWithCurrency,
   formatTotalforTableFooter,
   getUniqueCurrencies,
-  sidebarResourceObjectFromValues
+  sidebarResourceObjectFromValues,
+  sortByAnotherArray
 } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import CopyToClipboard from '../../Helpers/CopyToClipboard';
@@ -530,3 +531,19 @@ const DropDownMultiSelect = memo(({ row, field }: any) => {
     </div>
   );
 });
+
+export const getSortedVisibleColumns = (columns, visibleColumns, columnOrder) => {
+  let newColumns = columns?.map((col) => col.accessor);
+  if (!isEmpty(visibleColumns) && isObject(visibleColumns)) {
+    newColumns = [];
+    for (const [key, value] of Object.entries(visibleColumns)) {
+      if (value) {
+        newColumns.push(key);
+      }
+    }
+  }
+  if (isArray(columnOrder) && columnOrder?.length) {
+    newColumns = sortByAnotherArray(newColumns, columnOrder)
+  }
+  return newColumns;
+}
