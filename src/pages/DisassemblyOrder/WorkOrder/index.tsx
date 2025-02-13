@@ -48,7 +48,6 @@ const WorkOrder = ({ disassemblyOrderData, setNextStep, renderedFrom, stepFullSc
     const response = await axiosInstance().get(
       `${routes.disassemblyOrder.path}/work-order/${disassemblyOrderData?._id}/check-all-work-order-complete`
     );
-    console.log('response', response);
     if (!!response?.data?.data?.isCompletedAll) {
       setNextStep(true);
     }
@@ -150,7 +149,6 @@ const WorkOrder = ({ disassemblyOrderData, setNextStep, renderedFrom, stepFullSc
       data: { data }
     } = await axiosInstance().get(`${routes.disassemblyOrder.path}/work-order/${disassemblyOrderData?._id}`);
 
-    console.log('dddddd', data);
     const rows = data?.map((d, i) => ({
       index: i + 1,
       _id: d?._id,

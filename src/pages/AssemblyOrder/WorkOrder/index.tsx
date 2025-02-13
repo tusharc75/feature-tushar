@@ -55,7 +55,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, ids: [], data: null });
   const [arrangeView, setArrangeView] = useState(false);
   const [attachmentsDialog, setAttachmentsDialog] = useState({ open: false, workOrderId: null, uniqueServiceId: null, serviceName: null });
-  const [openManagedPackageDialog, setOpenManagedPackageDialog] = useState({ open: false, ids: [] });
+  const [openSerializedPackageDialog, setOpenSerializedPackageDialog] = useState({ open: false, ids: [] });
 
   const { generateColumns } = useColumns();
 
@@ -734,23 +734,23 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
               });
             }
 
-            isPackage ? setOpenManagedPackageDialog({ open: true, ids: ids }) : handleAutoComplete(ids);
+            isPackage ? setOpenSerializedPackageDialog({ open: true, ids: ids }) : handleAutoComplete(ids);
           }}
         />
       )}
 
-      {openManagedPackageDialog.open && (
+      {openSerializedPackageDialog.open && (
         <PackageNumberDialog
           onClose={() => {
-            setOpenManagedPackageDialog({ open: false, ids: [] });
+            setOpenSerializedPackageDialog({ open: false, ids: [] });
             setCompleteConfirmBox(false);
           }}
           assemblyOrderId={assemblyOrderData._id}
-          workOrderIds={openManagedPackageDialog.ids}
+          workOrderIds={openSerializedPackageDialog.ids}
           onSuccess={() => {
             setCompleteConfirmBox(false);
-            handleAutoComplete(openManagedPackageDialog.ids);
-            setOpenManagedPackageDialog({ open: false, ids: [] });
+            handleAutoComplete(openSerializedPackageDialog.ids);
+            setOpenSerializedPackageDialog({ open: false, ids: [] });
           }}
         />
       )}
