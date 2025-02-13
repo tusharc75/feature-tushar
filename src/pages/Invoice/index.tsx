@@ -296,13 +296,12 @@ const Invoice = () => {
     dispatch({ type: 'pageChange', page: 0 });
   };
 
-  const validateStatusForRecords = (status) => {
-    return selectedRecords.every((invoiceData) => {
-      const currIdx = statusOptions.findIndex((option) => option.optionValue === invoiceData.status);
-      return statusOptions[currIdx + 1]?.optionValue !== status;
-    });
+  const validateStatus = (status) => {
+    const currIdx = statusOptions.findIndex((status) => status.optionValue === selectedRecords[0].status);  
+    return statusOptions[currIdx + 1]?.optionValue !== status;
   };
-  
+
+
 
   const ActionMenuItems = () => {
     return (
@@ -320,7 +319,10 @@ const Invoice = () => {
         >
           {`Delete (${selectedRecords?.length})`}
         </MenuItem>
-        {permissions?.invoice?.isUpdate && selectedRecords?.length && !selectedRecords?.some((s) => s.status === 'Closed') && (
+        {permissions?.invoice?.isUpdate && selectedRecords?.length && !selectedRecords?.some((s) => s.status === 'Closed') 
+        && selectedRecords.every(
+          (invoiceData) => invoiceData.status === selectedRecords[0].status
+        ) &&  (
           <>
             {statusOptions?.map((status) => {
               return (
@@ -328,7 +330,7 @@ const Invoice = () => {
                   onClick={() => {
                     handleStatusUpdate(status?.optionValue);
                   }}
-                  disabled={validateStatusForRecords(status?.optionValue)}
+                  disabled={validateStatus(status?.optionValue)}
                 >
                   {`Status Change - ${status?.optionLabel}`}
                 </MenuItem>
