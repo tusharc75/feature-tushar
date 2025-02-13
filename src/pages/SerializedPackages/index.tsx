@@ -18,6 +18,7 @@ import routes from './../../components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 import ManageSerializedPackages from 'src/pages/SerializedPackages/ManageSerializedPackages';
+import { deleteDisable } from 'src/constants/messageHelpers';
 
 const renderedFrom = camelCase(sidebarResource?.serializedPackages);
 
@@ -87,20 +88,23 @@ const SerializedPackages = () => {
             </IconButton>
           </HtmlTooltip>
         )}
-        {permissions?.serializedPackages?.isDelete && (
-          <HtmlTooltip title="Delete">
+         <HtmlTooltip
+          title={row?.original?.canDelete ? 'Delete' : deleteDisable}
+        >
+          <span>
             <IconButton
               size="small"
               aria-label="Delete"
+              disabled={row?.original?.canDelete ? false : true}
               onClick={() => {
                 setDeleteRecord(row.original);
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" fontSize="small" />
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
             </IconButton>
-          </HtmlTooltip>
-        )}
+          </span>
+        </HtmlTooltip>
       </>
     )
   };
@@ -144,7 +148,7 @@ const SerializedPackages = () => {
           let finalObject = prepareDataForGrid(u, user);
           finalObject['isChecked'] = false;
           finalObject['allowedToEdit'] = permissions?.serializedPackages?.isUpdate;
-          finalObject['canDelete'] = permissions?.serializedPackages?.isDelete;
+          finalObject['canDelete'] = permissions?.serializedPackages?.isDelete && u?.canDelete;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
