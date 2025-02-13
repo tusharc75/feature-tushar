@@ -1,14 +1,17 @@
+import { Restore, Undo } from '@mui/icons-material';
+import { IconButton } from '@mui/material';
 import React, { useRef, useState, useEffect, useCallback, useMemo, memo } from 'react';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { cn } from 'src/constants/helpers';
 
-interface ImageZoomPanProps {
+type ImageZoomPanProps = {
   src: string;
   alt?: string;
-}
-interface Dimensions {
+};
+type Dimensions = {
   width: number;
   height: number;
-}
+};
 function fitInsideContainer(width: number, height: number, containerWidth: number, containerHeight: number): Dimensions {
   const aspectRatio = width / height;
   let newWidth = containerWidth;
@@ -20,6 +23,7 @@ function fitInsideContainer(width: number, height: number, containerWidth: numbe
   }
   return { width: newWidth, height: newHeight };
 }
+const maxRetry = 5;
 
 const ImageZoomPan = memo(({ src, alt }: ImageZoomPanProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -30,6 +34,9 @@ const ImageZoomPan = memo(({ src, alt }: ImageZoomPanProps) => {
   const [lastTouchDistance, setLastTouchDistance] = useState<number | null>(null);
   const [isError, setIsError] = useState(false);
   const [containerRef, setContainerRef] = useState<HTMLDivElement>(null);
+  const [size, setSize] = useState<Dimensions>({ width: 0, height: 0 });
+  const [dirty, setDirty] = useState(false);
+  const retries = useRef(0);
 
   const containerSize = useMemo(() => {
     const parent = containerRef?.parentElement;
@@ -39,31 +46,35 @@ const ImageZoomPan = memo(({ src, alt }: ImageZoomPanProps) => {
   }, [containerRef]);
 
   useEffect(() => {
-    const img = new Image();
-    img.src = src;
-    img.onload = () => {
-      const canvas = canvasRef.current;
-      if (canvas) {
-        const { width, height } = fitInsideContainer(img.width, img.height, containerSize.width, containerSize.height);
-        canvas.width = width;
-        canvas.height = height;
-        canvas.style.width = `${width}px`;
-        canvas.style.height = `${height}px`;
-        if (containerRef) {
-          containerRef.style.width = `${width}px`;
-          containerRef.style.height = `${height}px`;
+    if (retries.current < maxRetry && (size.width === 0 || size.height === 0)) {
+      retries.current++;
+      const img = new Image();
+      img.src = src;
+      img.onload = () => {
+        const canvas = canvasRef.current;
+        if (canvas) {
+          const { width, height } = fitInsideContainer(img.width, img.height, containerSize.width, containerSize.height);
+          setSize({ width, height });
+          canvas.width = width;
+          canvas.height = height;
+          canvas.style.width = `${width}px`;
+          canvas.style.height = `${height}px`;
+          if (containerRef) {
+            containerRef.style.width = `${width}px`;
+            containerRef.style.height = `${height}px`;
+          }
+          requestAnimationFrame(() => {
+            drawImage(img, { x: 0, y: 0 }, 1);
+          });
+          setIsLoading(false);
         }
-        requestAnimationFrame(() => {
-          drawImage(img, { x: 0, y: 0 }, 1);
-        });
+      };
+      img.onerror = () => {
+        setIsError(true);
         setIsLoading(false);
-      }
-    };
-    img.onerror = () => {
-      setIsError(true);
-      setIsLoading(false);
-    };
-  }, [containerSize.height, containerSize.width, src, containerRef]);
+      };
+    }
+  }, [containerSize.height, containerSize.width, src, containerRef, size]);
 
   useEffect(() => {
     const img = new Image();
@@ -113,6 +124,7 @@ const ImageZoomPan = memo(({ src, alt }: ImageZoomPanProps) => {
         x: position.x + e.movementX,
         y: position.y + e.movementY
       });
+      setDirty(true);
     }
   };
 
@@ -132,6 +144,7 @@ const ImageZoomPan = memo(({ src, alt }: ImageZoomPanProps) => {
       const distance = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
       const zoomFactor = distance / lastTouchDistance;
       setZoom((prevZoom) => Math.max(1, prevZoom * zoomFactor));
+      setDirty(true);
       setLastTouchDistance(distance);
     }
   };
@@ -146,6 +159,7 @@ const ImageZoomPan = memo(({ src, alt }: ImageZoomPanProps) => {
         const offsetY = e.clientY - rect.top;
         const newZoom = Math.max(0.5, zoom + e.deltaY * -0.001);
         const zoomFactor = newZoom / zoom;
+        setDirty(true);
         setPosition({
           x: position.x - offsetX * (zoomFactor - 1),
           y: position.y - offsetY * (zoomFactor - 1)
@@ -161,6 +175,12 @@ const ImageZoomPan = memo(({ src, alt }: ImageZoomPanProps) => {
     return () => canvas?.removeEventListener('wheel', handleWheel);
   }, [handleWheel]);
 
+  const handleReset = useCallback(() => {
+    setPosition({ x: 0, y: 0 });
+    setZoom(1);
+    setDirty(false);
+  }, []);
+
   return (
     <div
       className={cn(
@@ -169,6 +189,7 @@ const ImageZoomPan = memo(({ src, alt }: ImageZoomPanProps) => {
       )}
       ref={setContainerRef}
     >
+      <ResetButton dirty={dirty} handleReset={handleReset} />
       <img src={src} alt={alt} className="sr-only" />
       {isLoading && !isError && (
         <div className="bg-muted absolute inset-0 flex animate-pulse select-none items-center justify-center">Loading...</div>
@@ -176,18 +197,36 @@ const ImageZoomPan = memo(({ src, alt }: ImageZoomPanProps) => {
       {isError ? (
         <div className="bg-muted absolute inset-0 flex select-none items-center justify-center">Failed to load preview</div>
       ) : (
-        <canvas
-          onMouseDown={handleMouseDown}
-          onMouseUp={handleMouseUp}
-          onMouseMove={handleMouseMove}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          ref={canvasRef}
-          className="block max-h-full max-w-full overscroll-contain"
-        />
+        <>
+          <canvas
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            onMouseMove={handleMouseMove}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            ref={canvasRef}
+            className="block max-h-full max-w-full overscroll-contain"
+          />
+        </>
       )}
     </div>
   );
 });
 
 export default ImageZoomPan;
+
+const ResetButton = memo(({ dirty, handleReset }: { dirty: boolean; handleReset: () => void }) => {
+  if (!dirty) return null;
+  return (
+    <HtmlTooltip className="absolute right-2 top-2" title={'Restore'}>
+      <IconButton
+        onClick={handleReset}
+        className=" bg-white"
+        sx={{ borderRadius: '5px', border: '1px solid var(--common-border-color)' }}
+        size="small"
+      >
+        <Restore />
+      </IconButton>
+    </HtmlTooltip>
+  );
+});
