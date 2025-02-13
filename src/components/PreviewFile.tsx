@@ -121,11 +121,6 @@ export const PreviewFile: React.FC<PreviewFileProps> = (props) => {
   };
 
   const viewFile = async (): Promise<any> => {
-    toastConfig.setToastConfig({
-      open: true,
-      type: 'info',
-      message: `File Preview is in-progress, Please wait...`
-    });
     setImageDialogData((prev) => ({ ...prev, viewProgress: 0 }));
     setIsViewing(true);
     try {
@@ -139,7 +134,7 @@ export const PreviewFile: React.FC<PreviewFileProps> = (props) => {
           setImageDialogData((prev) => ({ ...prev, viewProgress: percentCompleted }));
           if (percentCompleted === 100) {
             toastConfig.setToastConfig({
-              message: 'File Previewed Successfully',
+              message: 'File Loaded Successfully',
               open: true,
               type: 'success'
             });
