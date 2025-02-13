@@ -9,13 +9,13 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
+import { MANAGED_PACKAGES_STATUS, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 
-const Material = ({ disassemblyOrderData, renderedFrom, stepFullScreen, allowedToEdit }) => {
+const Material = ({ disassemblyOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -136,7 +136,7 @@ const Material = ({ disassemblyOrderData, renderedFrom, stepFullScreen, allowedT
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
-    // setNextStep(false);
+    setNextStep(false);
     const {
       data: {
         data: { material }
@@ -152,6 +152,7 @@ const Material = ({ disassemblyOrderData, renderedFrom, stepFullScreen, allowedT
       packageId: m?.managedPackageDetail?.package?._id,
       canDelete: true
     }));
+    setNextStep(true);
 
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
@@ -274,6 +275,9 @@ const Material = ({ disassemblyOrderData, renderedFrom, stepFullScreen, allowedT
             setOpen(false);
           }}
           extraFilterById={[{ field: 'warehouse', term: { $in: [disassemblyOrderData?.warehouse?.optionValue] } }]}
+          extraDeepFilter={[
+            { field: 'status', term: [MANAGED_PACKAGES_STATUS.new, MANAGED_PACKAGES_STATUS.available, MANAGED_PACKAGES_STATUS.underReview] }
+          ]}
           isSubmitting={isSubmitting}
           ids={dataRows?.map((d) => d?.managedPackageId)}
         />

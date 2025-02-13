@@ -101,14 +101,11 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
       axiosInstance()
         .put(`${expenseReport.api}`, data)
         .then(({ data }) => {
-          selectedExpense.forEach((expense) => {
             axiosInstance()
-              .patch(`${expenses.api}/status/${expense._id}`, { status })
+              .patch(`${expenseReport.api}/status/${expenseReportId}`, { status })
               .catch((error) => {
                 toastConfig.setToastConfig(error);
               });
-          });
-
           setIsSubmitting(false);
           onSuccess();
           toastConfig.setToastConfig({
@@ -125,14 +122,11 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
       axiosInstance()
         .post(`${expenseReport.api}`, data)
         .then(({ data: { data, message } }) => {
-          selectedExpense.forEach((expense) => {
-            axiosInstance()
-              .patch(`${expenses.api}/status/${expense._id}`, { status })
-              .catch((error) => {
-                toastConfig.setToastConfig(error);
-              });
+          axiosInstance()
+          .patch(`${expenseReport.api}/status/${data._id}`, { status })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
           });
-
           history.push(`${routes?.expenseReportDetail?.path}/${data._id}`);
           setIsSubmitting(false);
           onSuccess(data);

@@ -4,7 +4,7 @@ import { TransitionProps } from '@mui/material/transitions';
 import { GoogleMapProps } from '@react-google-maps/api';
 import clsx, { ClassValue } from 'clsx';
 import dayjs, { Dayjs } from 'dayjs';
-import { camelCase, cloneDeep, isArray, isString, lowerFirst, orderBy, uniqBy } from 'lodash';
+import { camelCase, cloneDeep, indexOf, isArray, isString, lowerFirst, orderBy, sortBy, uniqBy } from 'lodash';
 import mimeDb from 'mime-db';
 import React from 'react';
 import { PiCaretCircleDoubleRight } from 'react-icons/pi';
@@ -190,7 +190,10 @@ export const assemblyOrderSteps: stepInterface[] = [
   { name: 'Final Slip', title: 'Slip', icon: 'invoice' }
 ];
 
-export const disassemblyOrderSteps: stepInterface[] = [{ name: 'Add', title: 'Add', icon: 'add' }];
+export const disassemblyOrderSteps: stepInterface[] = [
+  { name: 'Add', title: 'Add', icon: 'add' },
+  { name: 'Work Order', title: 'Work Order', icon: 'workOrder' }
+];
 
 //export const WORKORDER_TECHNICIAN_SERVICE_STATUS = ['Backlog', 'Pending', 'In-Progress', 'Completed', 'In-Progress By Other'];
 export const WORKORDER_TECHNICIAN_SERVICE_STATUS = ['Pending', 'In-Progress', 'Completed', 'In-Progress By Other'];
@@ -3080,12 +3083,11 @@ export const SUBCONTRACT_ASSEMBLY_STATUS = {
   closed: 'Closed'
 };
 
-
 export const DIASSEMBLY_ORDER_STATUS = {
   new: 'New',
   inProgress: 'In-Progress',
   closed: 'Closed'
-}
+};
 
 export const WORK_FLOW_STATUS = {
   open: 'Open',
@@ -3163,6 +3165,14 @@ export const QUOTE_STATUS = {
   sentforDOA: 'Sent for DOA',
   acceptedbyDOA: 'Accepted by DOA',
   rejectedbyDOA: 'Rejected by DOA'
+};
+
+export const MANAGED_PACKAGES_STATUS = {
+  new: 'New',
+  available: 'Available',
+  reserved: 'Reserved',
+  underReview: 'Under Review',
+  customerPossession: 'Customer Possession'
 };
 
 export const convertMsToTime = (milliseconds: any) => {
@@ -3837,6 +3847,7 @@ export function getSubdomain(url = window.location.origin) {
   }
   return null;
 }
+
 export function filterDataByDateIntersection<D>(
   datesList: string[],
   data: D[],
@@ -3909,3 +3920,10 @@ export const workOrderIconMap = {
     <PiCaretCircleDoubleRight size={20} className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.skipped].indicatorColor}`} />
   )
 };
+
+export function sortByAnotherArray(targetArray, orderArray) {
+  return sortBy(targetArray, (item) => {
+    const index = indexOf(orderArray, item);
+    return index === -1 ? Infinity : index;
+  });
+}
