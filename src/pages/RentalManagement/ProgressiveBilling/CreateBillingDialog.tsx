@@ -40,6 +40,7 @@ import CustomDatePicker from 'src/components/CustomDatePicker';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import dayjs from 'dayjs';
 import { getNestedQty } from 'src/pages/RentalManagement/rentalOfflineHelper';
+import { ConsoleLogger } from 'aws-amplify/utils';
 
 const calculateServiceDays = (serviceLog: any[], startDate: any, endDate: any) => {
   const uniqueDates = new Set<string>();
@@ -449,8 +450,10 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
           const row: any = invoiceData[0]?.material.find((m) => m._id === e._id);
           if (row) {
-            const actualEndDate = new Date(product?.endDate)?.setDate(new Date(product?.endDate)?.getDate() + 1);
-            setEndDate(actualEndDate);
+            const actualEndDate = new Date(product?.endDate);
+            actualEndDate.setDate(actualEndDate.getDate() + 1);
+            const formattedEndDate = actualEndDate.toISOString();
+            setEndDate(formattedEndDate);
           }
           return materialData;
         })
@@ -554,7 +557,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
   const handleApplyDate = async () => {
     const records = [...selectedRecords];
-
     setIsApplingDate(true);
     dispatch({ type: 'loading', loading: true });
     const childRows: any = [];
@@ -587,6 +589,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
     const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData?._id}/invoice/material-end-date-qty`);
     const invoicedProducts = invoiceResponse?.data?.data?.material;
+
 
     const assetList = records?.filter((r) => r?.pricingMethod === 'Per Barrel');
     let rentalUnitVolume;
