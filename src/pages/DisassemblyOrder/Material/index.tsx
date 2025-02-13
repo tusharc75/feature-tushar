@@ -9,7 +9,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
+import { MANAGED_PACKAGES_STATUS, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -275,6 +275,9 @@ const Material = ({ disassemblyOrderData, setNextStep, renderedFrom, stepFullScr
             setOpen(false);
           }}
           extraFilterById={[{ field: 'warehouse', term: { $in: [disassemblyOrderData?.warehouse?.optionValue] } }]}
+          extraDeepFilter={[
+            { field: 'status', term: [MANAGED_PACKAGES_STATUS.new, MANAGED_PACKAGES_STATUS.available, MANAGED_PACKAGES_STATUS.underReview] }
+          ]}
           isSubmitting={isSubmitting}
           ids={dataRows?.map((d) => d?.managedPackageId)}
         />
