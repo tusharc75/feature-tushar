@@ -62,8 +62,7 @@ const AssemblyOrderDetail = () => {
   const [currentStep, setCurrentStep] = useState(null);
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [resourceData, setResourceData] = useState(null);
-  const [openManagedPackageDialog, setOpenManagedPackageDialog] = useState(false);
-
+  const [openSerializedPackageDialog, setOpenSerializedPackageDialog] = useState(false);
 
   const assemblyOrderProcessStepsNames = useMemo(() => {
     return assemblyOrderSteps.map((item) => item.name);
@@ -124,19 +123,19 @@ const AssemblyOrderDetail = () => {
       });
   };
 
-  const fetchData = (isManagedPackageCreated = false) => {
+  const fetchData = (isSerializedPackageCreated = false) => {
     axiosInstance()
       .get(`${routes.assemblyOrder.path}/${id}`)
       .then(({ data: { data } }) => {
-        if (!isManagedPackageCreated) {
+        if (!isSerializedPackageCreated) {
           setCurrentStep(getIndex(data?.processStatus, assemblyOrderSteps));
         }
 
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.assemblyOrder, data));
         setAllowedToDelete(
           permissions?.assemblyOrder?.isDelete &&
-          checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
-          data?.canDelete
+            checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
+            data?.canDelete
         );
         setAssemblyOrderData({ ...data });
       })
@@ -227,10 +226,10 @@ const AssemblyOrderDetail = () => {
               setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
               handleNext={
                 assemblyOrderProcessStepsNames[currentStep] === 'Work Order' &&
-                  !assemblyOrderData?.material?.filter((m) => m?.type === MATERIAL_TYPE.package && !m?.parentId)?.every((m) => m?.managedPackage)
+                !assemblyOrderData?.material?.filter((m) => m?.type === MATERIAL_TYPE.package && !m?.parentId)?.every((m) => m?.serializedPackage)
                   ? () => {
-                    setOpenManagedPackageDialog(true);
-                  }
+                      setOpenSerializedPackageDialog(true);
+                    }
                   : null
               }
               updateStatus={(step: number) => {
@@ -314,15 +313,15 @@ const AssemblyOrderDetail = () => {
           }}
         />
       )}
-      {openManagedPackageDialog && (
+      {openSerializedPackageDialog && (
         <PackageNumberDialog
           onClose={() => {
-            setOpenManagedPackageDialog(false);
+            setOpenSerializedPackageDialog(false);
           }}
           assemblyOrderId={id}
           onSuccess={() => {
             fetchData(true);
-            setOpenManagedPackageDialog(false);
+            setOpenSerializedPackageDialog(false);
             setCurrentStep((prevStep) => {
               const newStep = prevStep + 1;
               return newStep;

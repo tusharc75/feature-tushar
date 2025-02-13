@@ -145,8 +145,8 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
       }
     }
 
-    if (reference === 'managedPackages') {
-      deepFilter = `${deepFilter}&managedPackages=1`;
+    if (reference === 'serializedPackages') {
+      deepFilter = `${deepFilter}&serializedPackages=1`;
       if (referenceData?.warehouse) {
         deepFilter = `${deepFilter}&plant=${referenceData?.warehouse}`;
       }
@@ -209,7 +209,7 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
         while (qty) {
           const result = selectedRecords?.filter((f) => f.productId === ele.product && !f.isCounted);
           if (result.length) {
-            if (reference === 'managedPackages') {
+            if (reference === 'serializedPackages') {
               if (qty - ele?.packages?.length <= 0) {
                 data.push({ product: ele.product, package: ele?.packages[0], asset: result[0]._id });
                 ele.packages.shift();
@@ -236,31 +236,32 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
         <Box style={{ display: 'inline' }}>
           {products.length > 0
             ? products?.map((d) => (
-              <Box
-                m={0.5}
-                p={1}
-                border={1}
-                className={`cursor-pointer rounded-sm ${selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
+                <Box
+                  m={0.5}
+                  p={1}
+                  border={1}
+                  className={`cursor-pointer rounded-sm ${
+                    selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
                   }`}
-                borderColor="var(--common-border-color)"
-                onClick={() => {
-                  if (selectedProduct === d.id) {
-                    setSelectedProduct(null);
-                  } else {
-                    setSelectedProduct(d.id);
-                  }
-                }}
-                style={{ display: 'inline-block' }}
-              >
-                {d?.qty < 0 ? (
-                  <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                ) : d?.qty === 0 ? (
-                  <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                ) : (
-                  <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                )}
-              </Box>
-            ))
+                  borderColor="var(--common-border-color)"
+                  onClick={() => {
+                    if (selectedProduct === d.id) {
+                      setSelectedProduct(null);
+                    } else {
+                      setSelectedProduct(d.id);
+                    }
+                  }}
+                  style={{ display: 'inline-block' }}
+                >
+                  {d?.qty < 0 ? (
+                    <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                  ) : d?.qty === 0 ? (
+                    <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                  ) : (
+                    <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                  )}
+                </Box>
+              ))
             : null}
         </Box>
       </>

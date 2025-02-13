@@ -109,7 +109,7 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
   const [workOrderCostFields, setWorkOrderCostFields] = useState(null);
   const [assetPolicyData, setAssetPolicyData] = useState(null);
   const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, _ids: null });
-  const [openManagedPackageDialog, setOpenManagedPackageDialog] = useState(false);
+  const [openSerializedPackageDialog, setOpenSerializedPackageDialog] = useState(false);
 
   const columns = [
     { accessor: 'index', Header: 'Index' },
@@ -448,7 +448,7 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
             updateStatus(WORK_ORDER_STATUS.completed);
           }
         } else if (workOrderData?.type === WORK_ORDER_TYPE.assemblyOrder && workOrderData?.package) {
-          setOpenManagedPackageDialog(true);
+          setOpenSerializedPackageDialog(true);
         } else {
           updateStatus(WORK_ORDER_STATUS.completed);
         }
@@ -830,15 +830,15 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
         />
       )}
 
-      {openManagedPackageDialog && (
+      {openSerializedPackageDialog && (
         <PackageNumberDialog
           onClose={() => {
-            setOpenManagedPackageDialog(false);
+            setOpenSerializedPackageDialog(false);
           }}
           assemblyOrderId={workOrderData?.assemblyOrder?.optionValue}
           workOrderIds={[id]}
           onSuccess={() => {
-            setOpenManagedPackageDialog(false);
+            setOpenSerializedPackageDialog(false);
             updateStatus(WORK_ORDER_STATUS.completed);
           }}
         />

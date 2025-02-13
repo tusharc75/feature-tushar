@@ -17,8 +17,8 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Delete } from '@mui/icons-material';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
-const Assign = ({ managedPackagesData }) => {
-  const renderedFrom = `${camelCase(sidebarResource?.managedPackages)}_${managedPackagesData?.package?.optionLabel}`;
+const Assign = ({ serializedPackagesData }) => {
+  const renderedFrom = `${camelCase(sidebarResource?.serializedPackages)}_${serializedPackagesData?.package?.optionLabel}`;
   const { setToastConfig } = useContext(CustomToastContext);
 
   const {
@@ -175,7 +175,7 @@ const Assign = ({ managedPackagesData }) => {
         canDrag: false,
         Cell: ({ row }) => (
           <>
-            {permissions?.managedPackages?.isUpdate && row?.original?.type === MATERIAL_TYPE.serializedAsset && (
+            {permissions?.serializedPackages?.isUpdate && row?.original?.type === MATERIAL_TYPE.serializedAsset && (
               <HtmlTooltip title="Delete">
                 <IconButton
                   size="small"
@@ -199,11 +199,11 @@ const Assign = ({ managedPackagesData }) => {
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
-    const allAssetsResponse: any = await axiosInstance().get(`/managed-packages/${managedPackagesData?._id}/assets`);
+    const allAssetsResponse: any = await axiosInstance().get(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/assets`);
     const assets = allAssetsResponse?.data?.data || [];
 
     axiosInstance()
-      .get(`/managed-packages/${managedPackagesData?.package?.optionValue}/package-material`)
+      .get(`${routes.serializedPackages.path}/${serializedPackagesData?.package?.optionValue}/package-material`)
       .then(({ data: { data } }) => {
         let rows = data?.material.filter((e) => !e.parentId);
         rows.forEach((parent, i) => {
@@ -282,7 +282,7 @@ const Assign = ({ managedPackagesData }) => {
       ids = selectedRecords?.filter((r) => r?.type === MATERIAL_TYPE.serializedAsset)?.map((d) => d._id);
     }
     axiosInstance()
-      .put(`/managed-packages/${managedPackagesData?._id}/assets`, { ids: ids })
+      .put(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/assets`, { ids: ids })
       .then(() => {
         dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
@@ -299,7 +299,7 @@ const Assign = ({ managedPackagesData }) => {
   const handleAssignAssets = (data) => {
     setIsAssetAdding(true);
     axiosInstance()
-      .post(`managed-packages/${managedPackagesData?._id}/assets`, { assets: data })
+      .post(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/assets`, { assets: data })
       .then(() => {
         setAssignAssetDialog({ open: false, products: [] });
         setIsAssetAdding(false);
@@ -320,7 +320,7 @@ const Assign = ({ managedPackagesData }) => {
   const actionButtonMenuItems = () => {
     return (
       <>
-        {permissions?.managedPackages?.isUpdate && (
+        {permissions?.serializedPackages?.isUpdate && (
           <MenuItem
             disabled={disableAssignSerializedAssets()}
             onClick={() => {
@@ -354,7 +354,7 @@ const Assign = ({ managedPackagesData }) => {
             {`Assign ${resources?.serializedAsset?.titlePlural}`}
           </MenuItem>
         )}
-        {permissions?.managedPackages?.isUpdate && (
+        {permissions?.serializedPackages?.isUpdate && (
           <MenuItem
             disabled={!selectedRecords?.some((e) => e.type === MATERIAL_TYPE.serializedAsset)}
             onClick={() => {
@@ -395,13 +395,13 @@ const Assign = ({ managedPackagesData }) => {
       )}
       {assignAssetDialog.open && (
         <AssignSerializedAssetDialog
-          reference={'managedPackages'}
+          reference={'serializedPackages'}
           ids={[]}
           handleClose={() => setAssignAssetDialog({ open: false, products: [] })}
           handleSucess={handleAssignAssets}
           isAssigning={isAssetAdding}
           selectedProducts={assignAssetDialog.products}
-          referenceData={{ warehouse: managedPackagesData?.warehouse?.optionValue }}
+          referenceData={{ warehouse: serializedPackagesData?.warehouse?.optionValue }}
         />
       )}
       {showDeleteConfirmBox && (
