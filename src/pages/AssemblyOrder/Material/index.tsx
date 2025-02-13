@@ -191,6 +191,8 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     setNextStep(false);
     const {
       data: { data, count }
