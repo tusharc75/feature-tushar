@@ -40,7 +40,6 @@ import CustomDatePicker from 'src/components/CustomDatePicker';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import dayjs from 'dayjs';
 import { getNestedQty } from 'src/pages/RentalManagement/rentalOfflineHelper';
-import { ConsoleLogger } from 'aws-amplify/utils';
 
 const calculateServiceDays = (serviceLog: any[], startDate: any, endDate: any) => {
   const uniqueDates = new Set<string>();
