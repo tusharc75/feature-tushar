@@ -54,10 +54,10 @@ import {
   nextButtonStep
 } from 'src/pages/RentalManagement/walkmeSteps';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
-import AssignManagedPackagesDialog from 'src/components/AssignRolesDialog/AssignManagedPackagesDialog';
 import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
 import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
 import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
+import AssignSerializedPackagesDialog from 'src/components/AssignRolesDialog/AssignSerializedPackagesDialog';
 
 const Productpackage = ({
   rentalManagementData,
@@ -101,7 +101,7 @@ const Productpackage = ({
 
   const { generateColumns } = useColumns();
   const [addExistingAssets, setAddExistingAssets] = useState(false);
-  const [addExistingManagedPackages, setAddExistingManagedPackages] = useState(false);
+  const [addExistingSerializedPackages, setAddExistingSerializedPackages] = useState(false);
 
   const { isOffline } = useContext(CustomOfflineContext);
   const [submitState, setSubmitState] = useState({ open: false, values: null, rowData: null });
@@ -640,15 +640,15 @@ const Productpackage = ({
     AddMaterial(material, priceData);
   };
 
-  const handleAddManagedPackages = async (rows) => {
+  const handleAddSerializedPackages = async (rows) => {
     setIsSubmitting(true);
     const packageIds = rows?.map((item) => item._id);
     axiosInstance()
-      .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}/managedPackages`, {
+      .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}/serializedPackages`, {
         ids: packageIds
       })
       .then(() => {
-        setAddExistingManagedPackages(false);
+        setAddExistingSerializedPackages(false);
         setIsSubmitting(false);
         fetchData();
       })
@@ -910,14 +910,14 @@ const Productpackage = ({
         >
           Add Existing Packages
         </MenuItem>
-        {permissions?.managedPackages?.isRead && (
+        {permissions?.serializedPackages?.isRead && (
           <MenuItem
-            id={'add-existing-managed-package-menu-item'}
+            id={'add-existing-serialized-package-menu-item'}
             onClick={() => {
-              setAddExistingManagedPackages(true);
+              setAddExistingSerializedPackages(true);
             }}
           >
-            Add Existing {resources?.managedPackages?.titlePlural}
+            Add Existing {resources?.serializedPackages?.titlePlural}
           </MenuItem>
         )}
         <MenuItem
@@ -948,7 +948,7 @@ const Productpackage = ({
         )}
       </>
     );
-  }, [costFields, permissions?.managedPackages?.isRead, resources?.managedPackages?.titlePlural, resources?.serializedAsset?.titlePlural]);
+  }, [costFields, permissions?.serializedPackages?.isRead, resources?.serializedPackages?.titlePlural, resources?.serializedAsset?.titlePlural]);
 
   const rightSideContents = () => {
     return (
@@ -1128,11 +1128,11 @@ const Productpackage = ({
           isSubmitting={isSubmitting}
         />
       )}
-      {addExistingManagedPackages && (
-        <AssignManagedPackagesDialog
-          onSuccess={handleAddManagedPackages}
+      {addExistingSerializedPackages && (
+        <AssignSerializedPackagesDialog
+          onSuccess={handleAddSerializedPackages}
           handleClose={() => {
-            setAddExistingManagedPackages(false);
+            setAddExistingSerializedPackages(false);
           }}
           extraFilterById={[{ field: 'warehouse', term: { $in: [rentalManagementData?.warehouse?.optionValue] } }]}
           isSubmitting={isSubmitting}

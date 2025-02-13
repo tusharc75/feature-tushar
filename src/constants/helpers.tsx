@@ -393,7 +393,7 @@ export const sidebarResource = {
   resourceDoaRequest: 'Resource Doa Request',
   workOrderPlanning: 'Work Order Planning',
   subcontractAssembly: 'Subcontract Assembly',
-  managedPackages: 'Managed Packages',
+  serializedPackages: 'Serialized Packages',
   trainAiModel: 'Train Ai Model',
   assemblyOrder: 'Assembly Order',
   packageInventory: 'Package Inventory',
@@ -2255,7 +2255,7 @@ export const ACTIVITY_RESOURCE = {
   irtTicket: 'irtTicket',
   subcontractAssembly: 'subcontractAssembly',
   assemblyOrder: 'assemblyOrder',
-  managedPackages: 'managedPackages'
+  serializedPackages: 'serializedPackages'
 };
 
 export const LOG_RESOURCE = {
@@ -3160,8 +3160,7 @@ export const QUOTE_STATUS = {
   rejectedbyDOA: 'Rejected by DOA'
 };
 
-export const MANAGED_PACKAGES_STATUS = {
-  new: 'New',
+export const SERIALIZED_PACKAGES_STATUS = {
   available: 'Available',
   reserved: 'Reserved',
   underReview: 'Under Review',

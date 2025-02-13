@@ -14,6 +14,9 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { isMobile } from 'react-device-detect';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { GrDrag } from 'react-icons/gr';
+import ArrangeView from 'src/components/Helpers/ArrangeView';
 
 const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = false }) => {
   const renderedFrom = `${camelCase(sidebarResource?.packages)}_packages'}`;
@@ -31,7 +34,8 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
   const { generateColumns } = useColumns();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
-
+  const [arrangeView, setArrangeView] = useState(false);
+  const [isArranging, setIsArranging] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -166,22 +170,52 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
 
   const rightSideContents = () => {
     return (
-      allowedToEdit && (
-        <>
-          <ImportExportMenu
-            permissions={permissions?.packages}
-            module="packages"
-            api={`${packages.api}/${packageId}/package`}
-            afterImportCompleted={() => {
-              fetchData();
-            }}
-            isExportAllOrSomeFeature={true}
-            ids={[]}
-            additionalParams={`refrenceId=${packageId}`}
-          />
-        </>
-      )
+      <>
+        {allowedToEdit && (
+          <>
+            <ImportExportMenu
+              permissions={permissions?.packages}
+              module="packages"
+              api={`${packages.api}/${packageId}/package`}
+              afterImportCompleted={() => {
+                fetchData();
+              }}
+              isExportAllOrSomeFeature={true}
+              ids={[]}
+              additionalParams={`refrenceId=${packageId}`}
+            />
+          </>
+        )}
+        <ThemeButton
+          startIcon={<GrDrag fontSize="small" />}
+          onClick={() => setArrangeView(true)}>
+          Arrange
+        </ThemeButton>
+      </>
     );
+  };
+
+  const handleArrangeUpdate = (rows: any) => {
+    setIsArranging(true);
+    rows?.forEach((e: any) => {
+      delete e.preWork;
+      delete e.name;
+    });
+    axiosInstance()
+      .put(`${packages.api}/material/${packageId}/order`, {
+        packageType: 'Package',
+        data: rows || []
+      })
+      .then(() => {
+        fetchData();
+        setIsArranging(false);
+        setArrangeView(false);
+      })
+      .catch((err) => {
+        setIsArranging(false);
+        setArrangeView(false);
+        setToastConfig(err);
+      });
   };
 
   return (
@@ -244,6 +278,19 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
           }}
           okBtnLoading={isRemovingProducts}
           onOk={removeProducts}
+        />
+      )}
+      {arrangeView && (
+        <ArrangeView
+          data={
+            dataRows?.map((d) => {
+              return { _id: d?._id, name: d?.packageName, order: d?.order };
+            }) || []
+          }
+          title={'Arrange'}
+          handleClose={() => setArrangeView(false)}
+          handleSubmit={handleArrangeUpdate}
+          loading={isArranging}
         />
       )}
     </>

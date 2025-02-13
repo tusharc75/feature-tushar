@@ -15,13 +15,13 @@ import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import ManageManagedPackages from './ManageManagedPackages';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
+import ManageSerializedPackages from 'src/pages/SerializedPackages/ManageSerializedPackages';
 
-const renderedFrom = camelCase(sidebarResource?.managedPackages);
+const renderedFrom = camelCase(sidebarResource?.serializedPackages);
 
-const ManagedPackages = () => {
+const SerializedPackages = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -33,7 +33,7 @@ const ManagedPackages = () => {
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
+  const [showSerializedPackageDialog, setShowSerializedPackageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
 
@@ -51,9 +51,9 @@ const ManagedPackages = () => {
 
   const fetchGridColumns = async () => {
     let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.managedPackages}`);
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource.serializedPackages}`);
     data = response?.data?.data;
-    let newColumns = generateColumns(renderedFrom, data, routes.managedPackagesDetail.path, true);
+    let newColumns = generateColumns(renderedFrom, data, routes.serializedPackagesDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
@@ -68,13 +68,13 @@ const ManagedPackages = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        {permissions?.managedPackages?.isCreate ? (
+        {permissions?.serializedPackages?.isCreate ? (
           <HtmlTooltip title="Clone">
             <IconButton
               size="small"
               aria-label="Clone"
               onClick={() => {
-                setShowManageDialog({ open: true, isClone: true, idToClone: row.original._id });
+                setShowSerializedPackageDialog({ open: true, isClone: true, idToClone: row.original._id });
               }}
             >
               <FileCopyIcon fontSize="small" color="primary" />
@@ -87,7 +87,7 @@ const ManagedPackages = () => {
             </IconButton>
           </HtmlTooltip>
         )}
-        {permissions?.managedPackages?.isDelete && (
+        {permissions?.serializedPackages?.isDelete && (
           <HtmlTooltip title="Delete">
             <IconButton
               size="small"
@@ -97,7 +97,7 @@ const ManagedPackages = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" fontSize='small' />
+              <DeleteIcon color="error" fontSize="small" />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -137,14 +137,14 @@ const ManagedPackages = () => {
     const queryString = getQueryString();
 
     axiosInstance()
-      .get(`${routes.managedPackages.path}${queryString}`, { cancelToken: cancelTokenSource?.token })
+      .get(`${routes.serializedPackages.path}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
         let count = data?.count;
         let rows = data?.data?.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
           finalObject['isChecked'] = false;
-          finalObject['allowedToEdit'] = permissions?.managedPackages?.isUpdate;
-          finalObject['canDelete'] = permissions?.managedPackages?.isDelete;
+          finalObject['allowedToEdit'] = permissions?.serializedPackages?.isUpdate;
+          finalObject['canDelete'] = permissions?.serializedPackages?.isDelete;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -172,7 +172,7 @@ const ManagedPackages = () => {
       ids = selectedRecords?.map((d) => d._id);
     }
     axiosInstance()
-      .put(`${routes.managedPackages.path}/remove`, { ids: ids })
+      .put(`${routes.serializedPackages.path}/remove`, { ids: ids })
       .then(() => {
         dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
@@ -211,11 +211,11 @@ const ManagedPackages = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ ...routes.managedPackages, title: resources?.managedPackages?.titlePlural }]} />
+        <CustomBreadCrumbs routes={[{ ...routes.serializedPackages, title: resources?.serializedPackages?.titlePlural }]} />
         <ImportExportLinks
-          permissions={permissions?.managedPackages}
-          module={resources?.managedPackages?.titlePlural}
-          api={routes.managedPackages.path}
+          permissions={permissions?.serializedPackages}
+          module={resources?.serializedPackages?.titlePlural}
+          api={routes.serializedPackages.path}
           afterImportCompleted={() => {
             fetchData();
           }}
@@ -238,7 +238,7 @@ const ManagedPackages = () => {
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
           addButtonOnclick={() => {
-            setShowManageDialog({ open: true, isClone: false, idToClone: null });
+            setShowSerializedPackageDialog({ open: true, isClone: false, idToClone: null });
           }}
         />
         {columns ? (
@@ -251,7 +251,7 @@ const ManagedPackages = () => {
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
-            resource={sidebarResource.managedPackages}
+            resource={sidebarResource.serializedPackages}
           />
         ) : (
           <Box p={2} height={500}>
@@ -262,7 +262,7 @@ const ManagedPackages = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.managedPackages?.titleSingular?.toLowerCase()} : ${deleteRecord?.managedPackageName || ''}` : `selected ${resources?.managedPackages?.titlePlural?.toLowerCase()}`} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.serializedPackages?.titleSingular?.toLowerCase()} : ${deleteRecord?.serializedPackageNumber || ''}` : `selected ${resources?.serializedPackages?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -271,14 +271,14 @@ const ManagedPackages = () => {
           onOk={handleDelete}
         />
       )}
-      {showManageDialog.open && (
-        <ManageManagedPackages
-          isClone={showManageDialog.isClone}
-          id={showManageDialog.idToClone}
-          onClose={() => setShowManageDialog({ open: false, isClone: false, idToClone: null })}
+      {showSerializedPackageDialog.open && (
+        <ManageSerializedPackages
+          isClone={showSerializedPackageDialog.isClone}
+          id={showSerializedPackageDialog.idToClone}
+          onClose={() => setShowSerializedPackageDialog({ open: false, isClone: false, idToClone: null })}
           onSuccess={() => {
             fetchData();
-            setShowManageDialog({ open: false, isClone: false, idToClone: null });
+            setShowSerializedPackageDialog({ open: false, isClone: false, idToClone: null });
           }}
         />
       )}
@@ -286,4 +286,4 @@ const ManagedPackages = () => {
   );
 };
 
-export default ManagedPackages;
+export default SerializedPackages;
