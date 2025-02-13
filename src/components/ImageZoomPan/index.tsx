@@ -5,7 +5,6 @@ interface ImageZoomPanProps {
   src: string;
   alt?: string;
 }
-
 interface Dimensions {
   width: number;
   height: number;
@@ -54,7 +53,9 @@ const ImageZoomPan = ({ src, alt }: ImageZoomPanProps) => {
           containerRef.style.width = `${width}px`;
           containerRef.style.height = `${height}px`;
         }
-        drawImage(img, { x: 0, y: 0 }, 1);
+        requestAnimationFrame(() => {
+          drawImage(img, { x: 0, y: 0 }, 1);
+        });
         setIsLoading(false);
       }
     };
@@ -70,7 +71,9 @@ const ImageZoomPan = ({ src, alt }: ImageZoomPanProps) => {
     img.onload = () => {
       const canvas = canvasRef.current;
       if (canvas) {
-        drawImage(img, position, zoom);
+        requestAnimationFrame(() => {
+          drawImage(img, position, zoom);
+        });
         setIsLoading(false);
       }
     };
@@ -158,24 +161,12 @@ const ImageZoomPan = ({ src, alt }: ImageZoomPanProps) => {
     return () => canvas?.removeEventListener('wheel', handleWheel);
   }, [handleWheel]);
 
-  // const getStyle = useCallback(() => {
-  //   const parent = containerRef?.parentElement;
-  //   if (!parent) return { containerStyle: {}, canvasStyle: {} };
-  //   const { clientWidth, clientHeight } = parent || {};
-  //   if (clientWidth > clientHeight) {
-  //     return { containerStyle: { height: clientHeight, width: 'auto' }, canvasStyle: { height: '100%', width: 'auto' } };
-  //   } else {
-  //     return { containerStyle: { width: clientWidth, height: 'auto' }, canvasStyle: { width: '100%', height: 'auto' } };
-  //   }
-  // }, [containerRef]);
-
   return (
     <div
       className={cn(
         'relative max-h-full min-h-[300px] w-full overflow-hidden border',
         isLoading ? '' : isDragging ? 'cursor-grabbing' : 'cursor-grab'
       )}
-      // style={getStyle().containerStyle}
       ref={setContainerRef}
     >
       <img src={src} alt={alt} className="sr-only" />
@@ -192,7 +183,6 @@ const ImageZoomPan = ({ src, alt }: ImageZoomPanProps) => {
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           ref={canvasRef}
-          // style={getStyle().canvasStyle}
           className="block max-h-full max-w-full overscroll-contain"
         />
       )}
