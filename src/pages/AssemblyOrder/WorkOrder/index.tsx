@@ -27,6 +27,8 @@ import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductD
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import AttachmentDialog from 'src/pages/WorkOrder/Service/AttachmentDialog';
 import PackageNumberDialog from 'src/pages/AssemblyOrder/WorkOrder/PackageNumberDialog';
+import DescriptionIcon from '@mui/icons-material/Description';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -56,6 +58,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
   const [arrangeView, setArrangeView] = useState(false);
   const [attachmentsDialog, setAttachmentsDialog] = useState({ open: false, workOrderId: null, uniqueServiceId: null, serviceName: null });
   const [openSerializedPackageDialog, setOpenSerializedPackageDialog] = useState({ open: false, ids: [] });
+  const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, workOrder: null });
 
   const { generateColumns } = useColumns();
 
@@ -268,25 +271,37 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
         return (
           <>
             {checkParentProduct([row?.original], row?.original?.parentId, table.getRowModel().rows) && (
-              <HtmlTooltip title="Auto Complete Work Order">
-                <IconButton
-                  size="small"
-                  aria-label="Details"
-                  onClick={() => {
-                    setAutoCompleteData([row.original]);
-                    setCompleteConfirmBox(true);
-                  }}
-                  disabled={row?.original?.canAutoCompleteWorkOrder ? false : true}
-                >
-                  {row.original['workOrderStatus'] === WORK_ORDER_STATUS.completed ? (
-                    <CheckCircle className="text-[var(--chip-color-completed)] [font-size:19px_!important] dark:text-green-400" />
-                  ) : (
-                    <AutoCompleteIcon size={18} />
-                  )}
-                </IconButton>
-              </HtmlTooltip>
+              <>
+                <HtmlTooltip title="Auto Complete Work Order">
+                  <IconButton
+                    size="small"
+                    aria-label="Details"
+                    onClick={() => {
+                      setAutoCompleteData([row.original]);
+                      setCompleteConfirmBox(true);
+                    }}
+                    disabled={row?.original?.canAutoCompleteWorkOrder ? false : true}
+                  >
+                    {row.original['workOrderStatus'] === WORK_ORDER_STATUS.completed ? (
+                      <CheckCircle className="text-[var(--chip-color-completed)] [font-size:19px_!important] dark:text-green-400" />
+                    ) : (
+                      <AutoCompleteIcon size={18} />
+                    )}
+                  </IconButton>
+                </HtmlTooltip>
+                <HtmlTooltip title="Drawings">
+                  <IconButton
+                    size="small"
+                    aria-label="Details"
+                    onClick={() => {
+                      setShowDrawingDialog({ open: true, workOrder: row.original?.workOrder?._id });
+                    }}
+                  >
+                    <DescriptionIcon fontSize="small" color={'primary'} />
+                  </IconButton>
+                </HtmlTooltip>
+              </>
             )}
-
             {row?.original?.parentId && (
               <HtmlTooltip title="Delete">
                 <span>
@@ -312,8 +327,10 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
   };
 
   const fetchData = async () => {
-    dispatch({ type: 'loading', loading: true });
     setNextStep(false);
+
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
 
     const {
       data: { data }
@@ -524,7 +541,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
     } else if (parentId && rows?.length === 0) {
       return selectedRecords[0]?.type === MATERIAL_TYPE.product && !material?.find((m) => m?._id === parentId)?.parentId;
     }
-    return selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !material?.find((m) => m?._id === e?.parentId)?.parentId)?.length
+    return selectedRecords?.filter((e) => !material?.find((m) => m?._id === e?.parentId)?.parentId)?.length
       ? true
       : false;
   };
@@ -825,7 +842,6 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
           }}
         />
       )}
-
       {consumablesDialog.open && (
         <AssignProductDialog
           handleCloseDialog={() => setConsumablesDialog({ open: false, ids: [], data: null })}
@@ -837,7 +853,6 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
           isSubmitting={isSubmitting}
         />
       )}
-
       {arrangeView && (
         <ArrangeView
           data={
@@ -853,7 +868,6 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
           loading={false}
         />
       )}
-
       {attachmentsDialog.open && (
         <AttachmentDialog
           workOrderId={attachmentsDialog.workOrderId}
@@ -877,6 +891,14 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
               uniqueServiceId: null,
               serviceName: null
             });
+          }}
+        />
+      )}
+      {showDrawingDialog.open && (
+        <DiagramDialog
+          referenceId={showDrawingDialog.workOrder}
+          handleClose={() => {
+            setShowDrawingDialog({ open: false, workOrder: null });
           }}
         />
       )}
