@@ -296,6 +296,14 @@ const Invoice = () => {
     dispatch({ type: 'pageChange', page: 0 });
   };
 
+  const validateStatusForRecords = (status) => {
+    return selectedRecords.every((invoiceData) => {
+      const currIdx = statusOptions.findIndex((option) => option.optionValue === invoiceData.status);
+      return statusOptions[currIdx + 1]?.optionValue !== status;
+    });
+  };
+  
+
   const ActionMenuItems = () => {
     return (
       <>
@@ -320,7 +328,7 @@ const Invoice = () => {
                   onClick={() => {
                     handleStatusUpdate(status?.optionValue);
                   }}
-                  disabled={selectedRecords.some((record) => record.status === status?.optionLabel)}
+                  disabled={validateStatusForRecords(status?.optionValue)}
                 >
                   {`Status Change - ${status?.optionLabel}`}
                 </MenuItem>
