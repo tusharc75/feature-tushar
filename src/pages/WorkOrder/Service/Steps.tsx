@@ -199,7 +199,7 @@ const Steps = ({
   const [stepState, setStepState] = useState(null);
   const [arrangeView, setArrangeView] = useState(false);
   const [comment, setComment] = useState('');
-  const [openCompleteDialog, setOpenCompleteDialog] = useState(false);
+  const [openCompleteDialog, setOpenCompleteDialog] = useState({open: false, type: null});
   const [commentsDialog, setCommentsDialog] = useState(false);
   const [userAssignDialog, setUserAssignDialog] = useState(false);
   const [workStationAssignDialog, setWorkStationAssignDialog] = useState(false);
@@ -334,9 +334,9 @@ const Steps = ({
         addNewStep.open === false
       ) {
         if(completedSteps?.every((c)=>c.passFailStatus===WORKORDER_SERVICE_STEP_STATUS.skipped)){
-          updateServiceStatus(selectedService.uniqueId, WORKORDER_SERVICE_STATUS.skipped)
+          setOpenCompleteDialog({open: true, type: 'skipped'});
         }else{
-          setOpenCompleteDialog(true);
+          setOpenCompleteDialog({open: true, type: 'complete'});
         }
       }
     }
@@ -348,7 +348,7 @@ const Steps = ({
       .then(({ data: { data } }) => {
         fetchService();
         if (openCompleteDialog) {
-          setOpenCompleteDialog(false);
+          setOpenCompleteDialog({open: false, type: null});
         }
         setComment('');
         if (handelClose) {
@@ -358,7 +358,7 @@ const Steps = ({
       .catch((err) => {
         toastConfig.setToastConfig(err);
         if (openCompleteDialog) {
-          setOpenCompleteDialog(false);
+          setOpenCompleteDialog({open: false, type: null});
         }
       });
   };
@@ -1556,7 +1556,7 @@ const Steps = ({
                       buttonType="theme"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setOpenCompleteDialog(true);
+                        setOpenCompleteDialog({open: true, type: 'complete'});
                       }}
                     >
                       Complete
@@ -1600,17 +1600,22 @@ const Steps = ({
                 }}
               />
             )}
-            {openCompleteDialog && (
+            {openCompleteDialog.open && (
               <CompleteDialog
                 serviceName={selectedService?.serviceName}
                 comment={comment}
                 setComment={setComment}
                 updateStatus={() => {
-                  updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.completed, handelClose);
+                  if(openCompleteDialog?.type==='skipped'){
+                    updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.skipped, handelClose);
+                  }else {
+                    updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.completed, handelClose);
+                  }
                 }}
+                type={openCompleteDialog?.type}
                 handleClose={() => {
                   setComment('');
-                  setOpenCompleteDialog(false);
+                  setOpenCompleteDialog({open: false, type: null});
                 }}
               />
             )}
