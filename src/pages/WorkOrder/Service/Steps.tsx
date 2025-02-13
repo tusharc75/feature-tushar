@@ -333,7 +333,11 @@ const Steps = ({
         [WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.pending].includes(selectedService.status) &&
         addNewStep.open === false
       ) {
-        setOpenCompleteDialog(true);
+        if(completedSteps?.every((c)=>c.passFailStatus===WORKORDER_SERVICE_STEP_STATUS.skipped)){
+          updateServiceStatus(selectedService.uniqueId, WORKORDER_SERVICE_STATUS.skipped)
+        }else{
+          setOpenCompleteDialog(true);
+        }
       }
     }
   };
