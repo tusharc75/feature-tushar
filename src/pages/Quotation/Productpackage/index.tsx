@@ -681,13 +681,15 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
   const addButtonMenuItems = () => {
     return (
       <>
-        <MenuItem
-          onClick={() => {
-            setAddDialog({ open: true, type: MATERIAL_TYPE.product, parentId: null });
-          }}
-        >
-          Add Existing Products
-        </MenuItem>
+        {quotationData?.type === QUOTATION_TYPE.assemblyOrder ? null :
+          <MenuItem
+            onClick={() => {
+              setAddDialog({ open: true, type: MATERIAL_TYPE.product, parentId: null });
+            }}
+          >
+            Add Existing Products
+          </MenuItem>
+        }
         {quotationData?.type !== QUOTATION_TYPE.fieldJob && (
           <MenuItem
             onClick={() => {
@@ -697,7 +699,8 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
             Add Existing Packages
           </MenuItem>
         )}
-        {quotationData?.type === QUOTATION_TYPE.rentalJob && !user?.user?.brandPolicy?.rentalService ? null : (
+        {(quotationData?.type === QUOTATION_TYPE.rentalJob && !user?.user?.brandPolicy?.rentalService) ||
+          quotationData?.type === QUOTATION_TYPE.assemblyOrder ? null : (
           <MenuItem
             onClick={() => {
               setAddDialog({ open: true, type: MATERIAL_TYPE.service, parentId: null });
