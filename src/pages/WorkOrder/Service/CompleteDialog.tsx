@@ -5,7 +5,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const CompleteDialog = ({ handleClose, serviceName, updateStatus, comment, setComment }) => {
+const CompleteDialog = ({ handleClose, serviceName, updateStatus, comment, setComment, type='complete' }) => {
   return (
     <Dialog
       open
@@ -23,11 +23,11 @@ const CompleteDialog = ({ handleClose, serviceName, updateStatus, comment, setCo
         <Box>
           <Typography>
             {' '}
-            All steps are performed for{' '}
+            {`All steps are ${type==='complete' ? 'performed' : 'skipped'} for `}
             <Box component="span" fontWeight="bold">
               {serviceName}
             </Box>
-            , do you want to mark it complete?
+            {`, do you want to mark it ${type==='complete' ? 'complete' : 'skip'}?`}
           </Typography>
           <Box mt={2}>
             <TextField
@@ -54,7 +54,7 @@ const CompleteDialog = ({ handleClose, serviceName, updateStatus, comment, setCo
           onClick={updateStatus}
           buttonType='theme'
         >
-          Complete
+          {type==='complete' ? 'Complete' : 'Skip'}
         </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
