@@ -221,7 +221,7 @@ const ResetButton = memo(({ dirty, handleReset }: { dirty: boolean; handleReset:
     <HtmlTooltip className="absolute right-2 top-2" title={'Restore'}>
       <IconButton
         onClick={handleReset}
-        className=" bg-white"
+        className=" !bg-[--dark-primary,white]"
         sx={{ borderRadius: '5px', border: '1px solid var(--common-border-color)' }}
         size="small"
       >
