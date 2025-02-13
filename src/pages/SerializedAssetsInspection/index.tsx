@@ -1,12 +1,11 @@
-import { Box, Chip, Menu, MenuItem, TextField } from '@mui/material';
+import { Box, Menu, MenuItem, TextField } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import WarningIcon from '@mui/icons-material/Warning';
-import queryString from 'query-string';
 import Autocomplete from '@mui/material/Autocomplete';
-import { camelCase, isArray, isObject } from 'lodash';
-import { Fragment, useContext, useEffect, useMemo, useState } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { camelCase } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import CustomContainer from 'src/components/CustomContainer';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -26,7 +25,6 @@ import {
   gridLoadingTimeout,
   prepareDataForGrid,
   serializedAsset,
-  serializedAssetInspection,
   sidebarResource
 } from '../../constants/helpers';
 import axios, { CancelTokenSource } from 'axios';
@@ -35,20 +33,15 @@ import { ExpandMore } from '@mui/icons-material';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { RiExchange2Line } from 'react-icons/ri';
 
-const renderedFrom = camelCase(sidebarResource?.serializedAsset);
 
 const SerializedAssetInspection = () => {
+
+  const renderedFrom = camelCase(sidebarResource?.serializedAssetInspection);
+
   const toastConfig = useContext(CustomToastContext);
 
-  const history = useHistory();
-  let {
-    assetStatus,
-    warehouse,
-    currentLocation,
-    jobCount
-  }: any = queryString.parse(history.location.search);
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
   const {
@@ -60,56 +53,13 @@ const SerializedAssetInspection = () => {
   const [selectedWarehouse, setSelectedWarehouse] = useState(null);
   const [subleaseAsset, setSubleaseAsset] = useState(false);
   const [statusOptions, setStatusOptions] = useState(null);
-  const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
   const [showReasonDialog, setShowReasonDialog] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [status, setStatus] = useState('');
 
   useEffect(() => {
-    const fetch = async () => {
-      await fetchGridColumns();
-    };
-    fetch();
-  }, [permissions, selectedEntity]);
-
-  useEffect(() => {
-    if (columns) {
-      if (assetStatus || warehouse || currentLocation || jobCount) {
-        const filterVal = {};
-        if (assetStatus) {
-          filterVal['status'] = { filter: [assetStatus] };
-        }
-        if (warehouse) {
-          const warehouseFilter = JSON.parse(warehouse);
-          if (isArray(warehouseFilter)) {
-            filterVal['warehouse'] = {
-              operator: 'OR',
-              condition1: {
-                filter: warehouseFilter
-              }
-            };
-          }
-        }
-        if (currentLocation) {
-          const currentLocationFilter = JSON.parse(currentLocation);
-          if (isArray(currentLocationFilter)) {
-            filterVal['currentLocation'] = {
-              operator: 'OR',
-              condition1: {
-                filter: currentLocationFilter
-              }
-            };
-          }
-        }
-        if (jobCount) {
-          if (isObject(JSON.parse(jobCount))) {
-            filterVal['jobCount'] = { filter: ((JSON.parse(jobCount))?.optionValue)?.toString() };
-          }
-        }
-        dispatch({ type: 'filter', filters: filterVal });
-      }
-    }
-  }, [columns]);
+    fetchGridColumns()
+  }, []);
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
@@ -141,7 +91,6 @@ const SerializedAssetInspection = () => {
   const fetchGridColumns = async () => {
     const resourceDataResponce = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
     const resourceData = resourceDataResponce?.data?.data;
-
     const statusColors = {};
     if (resourceData?.policy?.statusColor) {
       for (const item of resourceData?.policy?.statusColor) {
@@ -155,16 +104,13 @@ const SerializedAssetInspection = () => {
       }
     }
 
-    axiosInstance()
-      .get(`/field?resource=${serializedAssetInspection.resource}`)
+    axiosInstance().get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
-        data?.some((o) => {
-          if (o?.fieldData?.fieldName === 'status') {
-            setStatusOptions([...o.fieldData.option]);
-            setAllowUpdateStatus(o?.isUpdate);
-            return true;
-          }
-        });
+
+        let statusFieldOption = data?.find((e) => e?.fieldData?.fieldName === 'status')?.fieldData?.option || []
+        statusFieldOption = statusFieldOption?.filter((e) => !SYSTEM_ASSET_STATUS?.includes(e.optionLabel) || [ASSET_STATUS.inRepair]?.includes(e.optionLabel))
+        setStatusOptions(statusFieldOption);
+
         let newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path, true);
         newColumns?.forEach((o) => {
           if (o?.accessor === 'assetNumber') {
@@ -197,18 +143,10 @@ const SerializedAssetInspection = () => {
                       </HtmlTooltip>
                     </Box>
                   ))}
-                {row?.original?.currentLocationNotMatchWithGps && (
-                  <Box ml={1}>
-                    <HtmlTooltip title="Asset location needs to be update in Equipt">
-                      <WarningIcon style={{ fontSize: '14px' }} fontSize="small" color="error" />
-                    </HtmlTooltip>
-                  </Box>
-                )}
               </div>
             );
           }
         });
-
         newColumns.push({
           accessor: 'ownerType',
           Header: 'Actual Owner Type',
@@ -226,7 +164,6 @@ const SerializedAssetInspection = () => {
             </>
           )
         });
-
         newColumns.push({
           accessor: 'owner',
           Header: 'Actual Owner',
@@ -244,7 +181,6 @@ const SerializedAssetInspection = () => {
             </>
           )
         });
-
         setColumns([...newColumns, ...getStaticFields()]);
       });
   };
@@ -254,8 +190,7 @@ const SerializedAssetInspection = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
-    axiosInstance()
-      .get(`${serializedAssetInspection.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
+    axiosInstance().get(`${serializedAsset.api}/serialized-asset-inspection${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
@@ -274,14 +209,11 @@ const SerializedAssetInspection = () => {
       });
   };
 
-  const getQueryString = (isExport = false) => {
-    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
+  const getQueryString = () => {
+    let deepFilter = `?page=${page}&limit=${limit}`;
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    if (selectedWarehouse && selectedWarehouse !== '') {
-      filterByIds.push({ field: 'warehouse', term: selectedWarehouse });
-    }
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
@@ -298,6 +230,10 @@ const SerializedAssetInspection = () => {
     }
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
+    }
+
+    if (selectedWarehouse && selectedWarehouse !== '') {
+      deepFilter = `${deepFilter}&warehouse=${selectedWarehouse}`;
     }
     if (subleaseAsset) {
       deepFilter = `${deepFilter}&subleaseAsset=1`;
@@ -357,43 +293,20 @@ const SerializedAssetInspection = () => {
   };
 
   const ActionMenuItems = () => {
-    if (!permissions?.serializedAsset?.isUpdate || !allowUpdateStatus || !selectedRecords?.length) {
-      return null;
-    }
-    const otherStatuses = new Set<string>();
-    return (
+    return (statusOptions ?
       <>
         {Object.entries(statusOptions).map(([key, status]: any) => {
-          if (
-            SYSTEM_ASSET_STATUS.includes(status?.optionLabel) &&
-            status?.optionLabel !== statusOptions.repair &&
-            status?.optionLabel !== ASSET_STATUS.inRepair
-          ) {
-            return null;
-          }
-          if (!Object.values(ASSET_STATUS).includes(status.optionLabel)) {
-            otherStatuses.add(status.optionLabel);
-          }
-          const isDisabled = selectedRecords.some(
-            (record) => record.status === status?.optionLabel
-          );
-  
+          const isDisabled = selectedRecords.some((record) => record.status === status?.optionLabel);
           return (
             <MenuItem key={key} onClick={() => handleStatusChange(status?.optionLabel)} disabled={isDisabled}>
               {status?.optionLabel}
             </MenuItem>
           );
         })}
-        {/* other status */}
-        {[...otherStatuses].map((status, index) => (
-          <MenuItem key={`other-${index}`} onClick={() => handleStatusChange(status)}>
-            {status}
-          </MenuItem>
-        ))}
-      </>
+      </> : null
     );
   };
-  
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -428,7 +341,6 @@ const SerializedAssetInspection = () => {
           isActionButtonVisible={false}
           isAddButtonVisible={false}
         />
-
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
@@ -447,7 +359,6 @@ const SerializedAssetInspection = () => {
           </Box>
         )}
       </CustomContainer>
-
       {showReasonDialog && (
         <ReasonDialog
           onClose={() => setShowReasonDialog(false)}
@@ -490,7 +401,7 @@ const LeftSideContent = ({
             setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
           }}
           renderInput={(params) => (
-            <TextField {...params} margin="none" size="small" name="plant" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
+            <TextField {...params} margin="none" size="small" name="warehouse" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
           )}
         />
         {permissions?.sublease && (
@@ -529,7 +440,7 @@ const RightSideContents = ({
         buttonType="yellow"
         disabled={selectedRecords?.length ? false : true}
         mobileTooltip="Change Status"
-        iconForMobile={<RiExchange2Line size={24} style={{ color: 'var(--primary-text)' }} />}
+        iconForMobile={<RiExchange2Line size={24} />}
       >
         {'Change Status'}
       </ThemeButton>
