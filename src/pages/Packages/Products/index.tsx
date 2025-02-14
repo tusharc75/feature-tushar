@@ -2,11 +2,14 @@ import { Box, MenuItem } from '@mui/material';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
+import { GrDrag } from 'react-icons/gr';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import ArrangeView from 'src/components/Helpers/ArrangeView';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
@@ -28,7 +31,8 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
   const [showProductConfirmBox, setShowProductConfirmBox] = useState({ open: false, data: null });
   const [showProductAssignDialog, setShowProductAssignDialog] = useState(false);
   const [isRemovingProducts, setRemovingProducts] = useState(false);
-
+  const [arrangeView, setArrangeView] = useState(false);
+  const [isArranging, setIsArranging] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
@@ -173,6 +177,29 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
     );
   };
 
+  const handleArrangeUpdate = (rows: any) => {
+    setIsArranging(true);
+    rows?.forEach((e: any) => {
+      delete e.preWork;
+      delete e.name;
+    });
+    axiosInstance()
+      .put(`${packages.api}/material/${packageId}/order`, {
+        packageType: 'Product',
+        data: rows || []
+      })
+      .then(() => {
+        fetchData();
+        setIsArranging(false);
+        setArrangeView(false);
+      })
+      .catch((err) => {
+        setIsArranging(false);
+        setArrangeView(false);
+        setToastConfig(err);
+      });
+  };
+
   const rightSideContents = () => {
     return (
       <>
@@ -189,6 +216,11 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
             additionalParams={`refrenceId=${packageId}`}
           />
         )}
+        <ThemeButton
+          startIcon={<GrDrag fontSize="small" />}
+          onClick={() => setArrangeView(true)}>
+          Arrange
+        </ThemeButton>
       </>
     );
   };
@@ -243,6 +275,19 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
           }}
           okBtnLoading={isRemovingProducts}
           onOk={removeProducts}
+        />
+      )}
+      {arrangeView && (
+        <ArrangeView
+          data={
+            dataRows?.map((d) => {
+              return { _id: d?._id, name: d?.productName, order: d?.order };
+            }) || []
+          }
+          title={'Arrange'}
+          handleClose={() => setArrangeView(false)}
+          handleSubmit={handleArrangeUpdate}
+          loading={isArranging}
         />
       )}
     </>

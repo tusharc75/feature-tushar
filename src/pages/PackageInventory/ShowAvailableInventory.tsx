@@ -21,9 +21,9 @@ const ShowAvailableInventory = ({ onClose, renderedFrom, plantId, packageId }) =
 
   const fetchColumns = async () => {
     let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.managedPackages}&view=true`);
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource.serializedPackages}&view=true`);
     data = response?.data?.data;
-    let newColumns = generateColumns(renderedFrom, data, routes.managedPackagesDetail.path);
+    let newColumns = generateColumns(renderedFrom, data, routes.serializedPackagesDetail.path);
     setColumns([...newColumns, ...getStaticFields()]);
   };
 
@@ -77,7 +77,7 @@ const ShowAvailableInventory = ({ onClose, renderedFrom, plantId, packageId }) =
     const queryString = getQueryString();
 
     axiosInstance()
-      .get(`${routes.managedPackages.path}${queryString}`)
+      .get(`${routes.serializedPackages.path}${queryString}`)
       .then(({ data: { data } }) => {
         let count = data?.count;
         let rows = data?.data?.map((u) => {

@@ -18,7 +18,7 @@ import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/hel
 import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const ManageManagedPackages = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, isRedirectToDetailPage = true }) => {
+const ManageSerializedPackages = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, isRedirectToDetailPage = true }) => {
   const history = useHistory();
   const {
     state: { user, resources }
@@ -38,21 +38,21 @@ const ManageManagedPackages = ({ onClose, onSuccess, isClone = false, id = null,
   const fetchFields = async () => {
     try {
       let data;
-      const response: any = await axiosInstance().get(`/field?resource=${sidebarResource?.managedPackages}`);
-      data = response?.data?.data;
+      const response: any = await axiosInstance().get(`/field?resource=${sidebarResource?.serializedPackages}`);
+      data = response?.data?.data?.filter((d) => !['currentOwnerType', 'currentOwner'].includes(d.fieldData.fieldName));
       let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
       if (id) {
         axiosInstance()
-          .get(`${routes?.managedPackages?.path}/${id}`)
+          .get(`${routes?.serializedPackages?.path}/${id}`)
           .then(({ data: { data } }: any) => {
             let fields = fieldsDataForUpdate;
             let tempData = data;
             if (isClone) {
               fields = fieldsDataForCreate;
               const { ...rest } = data;
-              setCloneHeading(rest.managedPackageName);
+              setCloneHeading(rest.serializedPackageNumber);
               tempData = rest;
             }
             setInitialData({
@@ -92,7 +92,7 @@ const ManageManagedPackages = ({ onClose, onSuccess, isClone = false, id = null,
     if (id && !isClone) {
       values._id = id;
       axiosInstance()
-        .put(`${routes.managedPackages?.path}`, values)
+        .put(`${routes.serializedPackages?.path}`, values)
         .then(({ data }: any) => {
           setSubmitting(false);
           onSuccess();
@@ -108,11 +108,11 @@ const ManageManagedPackages = ({ onClose, onSuccess, isClone = false, id = null,
         });
     } else {
       axiosInstance()
-        .post(`${routes.managedPackages?.path}`, values)
+        .post(`${routes.serializedPackages?.path}`, values)
         .then(({ data: { data, message } }: any) => {
           setLoading(false);
           if (isRedirectToDetailPage) {
-            history.push(`${routes.managedPackagesDetail.path}/${data._id}`);
+            history.push(`${routes.serializedPackagesDetail.path}/${data._id}`);
           }
           onSuccess(data);
           setSubmitting(true);
@@ -157,8 +157,8 @@ const ManageManagedPackages = ({ onClose, onSuccess, isClone = false, id = null,
                   id
                     ? isClone
                       ? `Clone - ${cloneHeading}`
-                      : `Update - ${initialData.values?.managedPackageName ? `${initialData.values?.managedPackageName}` : ''}`
-                    : `Create ${resources?.managedPackages?.titleSingular}`
+                      : `Update - ${initialData.values?.serializedPackageNumber ? `${initialData.values?.serializedPackageNumber}` : ''}`
+                    : `Create ${resources?.serializedPackages?.titleSingular}`
                 }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
@@ -178,7 +178,7 @@ const ManageManagedPackages = ({ onClose, onSuccess, isClone = false, id = null,
                     fieldsData={initialData.fields}
                     size="small"
                     fullWidth
-                    resource={sidebarResource.managedPackages}
+                    resource={sidebarResource.serializedPackages}
                     referenceId={id || null}
                   />
                 </Form>
@@ -189,16 +189,11 @@ const ManageManagedPackages = ({ onClose, onSuccess, isClone = false, id = null,
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
-                  buttonType='transparent'
+                  buttonType="transparent"
                 >
                   Cancel
                 </ThemeButton>
-                <ThemeButton
-                  onClick={submitForm}
-                  disabled={loading || submitting}
-                  isLoading={submitting}
-                  buttonType='theme'
-                >
+                <ThemeButton onClick={submitForm} disabled={loading || submitting} isLoading={submitting} buttonType="theme">
                   Save
                 </ThemeButton>
               </CustomDialogFooter>
@@ -227,4 +222,4 @@ const ManageManagedPackages = ({ onClose, onSuccess, isClone = false, id = null,
   );
 };
 
-export default ManageManagedPackages;
+export default ManageSerializedPackages;
