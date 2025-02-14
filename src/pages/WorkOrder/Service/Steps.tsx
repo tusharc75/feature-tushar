@@ -1566,12 +1566,12 @@ const Steps = ({
                         e.stopPropagation();
                         setOpenCompleteDialog({
                           open: true, status:
-                            stepSubmitedData?.filter((e) => e.uniqueId === selectedService?._id)?.every((e) => e?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.skipped) ?
+                            stepSubmitedData?.filter((e) => e?.uniqueId === selectedService?.uniqueId)?.every((e) => e?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.skipped) ?
                               WORKORDER_SERVICE_STATUS.skipped : WORKORDER_SERVICE_STATUS.completed
                         });
                       }}
                     >
-                      {stepSubmitedData?.filter((e) => e.uniqueId === selectedService?._id)?.every((e) => e?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.skipped) ? "Skip" : "Complete"}
+                      {stepSubmitedData?.filter((e) => e?.uniqueId === selectedService?.uniqueId)?.every((e) => e?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.skipped) ? "Skip" : "Complete"}
                     </ThemeButton>
                   </Grid>
                 </Box>

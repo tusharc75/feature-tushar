@@ -87,9 +87,13 @@ const ExpenseReportDetail = () => {
       .get(`${expenseReport.api}/${id}`)
       .then(({ data: { data } }) => {
         setLoadingDetails(false);
-        setAllowedToEdit(permissions?.expenseReport?.isUpdate);
         setAllowedToDelete(permissions?.expenseReport?.isDelete && data?.canDelete);
         setExpenseReportData(data);
+        if (data.status === EXPENSE_STATUS.awaitingApproval || data.status === EXPENSE_STATUS.approved) {
+          setAllowedToEdit(false);
+        } else {
+          setAllowedToEdit(permissions?.expenseReport?.isUpdate);
+        }
       })
       .catch((err) => {
         setLoadingDetails(false);
@@ -114,20 +118,7 @@ const ExpenseReportDetail = () => {
     try {
       await axiosInstance().put(`${expenseReport.api}/remove`, { ids: [expenseReportData._id] });
 
-      if (expenseReportData?.expenses?.length > 0) {
-        for (let expense of expenseReportData.expenses) {
-          try {
-            await axiosInstance().patch(`${expenses.api}/status/${expense._id}`, {
-              status: EXPENSE_STATUS.unreported
-            });
-          } catch (error) {
-            toastConfig.setToastConfig(error);
-          }
-          await axiosInstance().patch(`${expenseReport.api}/expenses/status/${expenseReportData._id}`, {
-            status: EXPENSE_STATUS.unreported
-          });
-        }
-      }
+      await axiosInstance().patch(`${expenseReport.api}/status/${expenseReportData._id}`, { status: EXPENSE_STATUS.unreported });
 
       setShowConfirmBox(false);
 
@@ -140,16 +131,7 @@ const ExpenseReportDetail = () => {
 
   const handleDeleteExpense = async (expenseIds: string[]) => {
     try {
-      await axiosInstance().put(`${routes.expenseReport.path}/expenses/${expenseReportData._id}/remove`, { ids: expenseIds });
-
-      for (let expenseId of expenseIds) {
-        await axiosInstance().patch(`${expenses.api}/status/${expenseId}`, {
-          status: EXPENSE_STATUS.unreported
-        });
-        await axiosInstance().patch(`${expenseReport.api}/expenses/status/${expenseReportData._id}`, {
-          status: EXPENSE_STATUS.unreported
-        });
-      }
+      await axiosInstance().put(`${routes.expenseReport.path}/${expenseReportData._id}/expenses/remove`, { expenseIds });
 
       fetchData();
     } catch (error) {
@@ -157,8 +139,8 @@ const ExpenseReportDetail = () => {
     }
   };
 
-  const handleStatusChange = async (status) => {
-    await axiosInstance().patch(`${expenseReport.api}/status/${expenseReportData._id}`, {
+  const handleStatusChange = (status) => {
+    axiosInstance().patch(`${expenseReport.api}/status/${expenseReportData._id}`, {
       status
     });
     fetchData();
@@ -192,16 +174,18 @@ const ExpenseReportDetail = () => {
                   >
                     {expenseReportData?.status === EXPENSE_STATUS.awaitingApproval ? 'Recall' : 'Send For Approval'}
                   </ThemeButton>
-                  {expenseReportData?.status !== EXPENSE_STATUS.awaitingApproval && <ThemeButton
-                    iconForMobile={<Edit />}
-                    disabled={!allowedToEdit}
-                    onClick={() => {
-                      setOpenUpdateDialog(true);
-                    }}
-                    mobileTooltip={'Edit'}
-                  >
-                    Edit
-                  </ThemeButton>}
+                  {expenseReportData?.status !== EXPENSE_STATUS.awaitingApproval && (
+                    <ThemeButton
+                      iconForMobile={<Edit />}
+                      disabled={!allowedToEdit}
+                      onClick={() => {
+                        setOpenUpdateDialog(true);
+                      }}
+                      mobileTooltip={'Edit'}
+                    >
+                      Edit
+                    </ThemeButton>
+                  )}
                 </>
               )}
             </Fragment>
@@ -231,10 +215,12 @@ const ExpenseReportDetail = () => {
             {!loadingDetails && expenseReportData && fields ? (
               <div className="mt-2">
                 <Expenses
-                  selectedExpenseData={expenseReportData?.expenses}
+                  expenseIds={expenseReportData?.expenses?.map((expense) => expense._id)}
                   showAddButton={true}
                   reportData={expenseReportData}
                   removeRow={handleDeleteExpense}
+                  allowedToEdit={allowedToEdit}
+                  fetchDataMaster={fetchData}
                 />
               </div>
             ) : (

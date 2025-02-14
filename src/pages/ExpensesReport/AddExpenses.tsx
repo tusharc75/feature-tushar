@@ -11,28 +11,18 @@ import { CustomDialogTransition, EXPENSE_STATUS, sidebarResource } from 'src/con
 import { camelCase } from 'lodash';
 import axios, { CancelTokenSource } from 'axios';
 import { useData } from '../../StateProvider/Provider';
-import {
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  expenses,
-} from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, expenses } from '../../constants/helpers';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 
-function AddExpenses({
-  open,
-  onClose,
-  fullScreen,
-  setFullScreen,
-  isSubmitting=null,
-  onSave,
-  fetchReportData
-}) {
+function AddExpenses({ open, onClose, fullScreen, setFullScreen, isSubmitting = null, onSave, fetchReportData }) {
   const renderedFrom = camelCase(sidebarResource?.expenses);
   const [columns, setColumns] = useState(null);
   const { generateColumns, checkStaticField } = useColumns();
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { page, limit, filters,search, sorting, showFilteredRecordsOnly } = state;
-  const { state: { user, permissions } } = useData();
+  const { page, limit, filters, search, sorting, showFilteredRecordsOnly } = state;
+  const {
+    state: { user, permissions }
+  } = useData();
   const [selectedRows, setSelectedRows] = useState([]);
   const { selectedRecords } = state;
 
@@ -44,7 +34,7 @@ function AddExpenses({
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
-  }, [page, limit, filters,search, sorting, showFilteredRecordsOnly]);
+  }, [page, limit, filters, search, sorting, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -62,41 +52,42 @@ function AddExpenses({
     dispatch({ type: 'search', search: e.target.value });
   };
 
-    const getQueryString = (isExport = false) => {
-      let deepFilter = `?page=${page}&limit=${limit}`;
-      if (isExport) {
-        deepFilter = `?`;
-      }
-      const { filterByIds, deepFilters } = gridFilterParser(filters);
-  
-      if (filterByIds?.length) {
-        deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
-      }
-      if (deepFilters?.length) {
-        deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
-      }
-  
-      if (filterByIds?.length || deepFilters?.length) {
-        deepFilter = `${deepFilter}&filterType=and`;
-      }
-  
-      if (sorting.length > 0) {
-        deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
-      }
-      if (search) {
-        deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
-      }
-      if (showFilteredRecordsOnly) {
-        deepFilter = `${deepFilter}&getById=${JSON.stringify(selectedRecords.map((m) => m._id))}`;
-      }
-      return deepFilter;
-    };
+  const getQueryString = (isExport = false) => {
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    if (isExport) {
+      deepFilter = `?`;
+    }
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    }
+
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+    if (search) {
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
+    }
+    if (showFilteredRecordsOnly) {
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(selectedRecords.map((m) => m._id))}`;
+    }
+    return deepFilter;
+  };
 
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     try {
-      let data: any = [], count;
+      let data: any = [],
+        count;
       const response: any = await axiosInstance().get(`${expenses.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
       data = response?.data?.data;
       count = response?.data?.count;
@@ -118,12 +109,12 @@ function AddExpenses({
 
   const handleSave = (selectedRecords) => {
     setSelectedRows(selectedRecords);
-    onSave(selectedRows); 
+    onSave(selectedRows);
     onClose();
   };
 
   const handleRowSelection = (selectedRows) => {
-    setSelectedRows(selectedRows); 
+    setSelectedRows(selectedRows);
   };
 
   return (
@@ -149,24 +140,25 @@ function AddExpenses({
         }}
       />
       <CustomDialogContent>
-      <ListingPageHeader
-            showSearchInMobile={true}
-            searchValue={search}
-            onSearch={handleSearch}
-            isActionButtonVisible={false}
-            addButtonProps={{
-              disabled: !selectedRecords?.length || isSubmitting,
-              loading: isSubmitting,
-              iconsEnabled: false,
-              text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : '',
-              textAddShow: true
-            }}
-            addButtonOnclick={()=>{handleSave(selectedRecords);
-              fetchReportData();
-            }}
-            isAddButtonVisible={true}
-            setQueryString={false}
-          />
+        <ListingPageHeader
+          showSearchInMobile={true}
+          searchValue={search}
+          onSearch={handleSearch}
+          isActionButtonVisible={false}
+          addButtonProps={{
+            disabled: !selectedRecords?.length || isSubmitting,
+            loading: isSubmitting,
+            iconsEnabled: false,
+            text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : '',
+            textAddShow: true
+          }}
+          addButtonOnclick={() => {
+            handleSave(selectedRecords);
+            fetchReportData();
+          }}
+          isAddButtonVisible={true}
+          setQueryString={false}
+        />
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
@@ -175,7 +167,7 @@ function AddExpenses({
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             resource={sidebarResource?.expenses}
-            onSelect={handleRowSelection} 
+            onSelect={handleRowSelection}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             refreshGrid={fetchData}
