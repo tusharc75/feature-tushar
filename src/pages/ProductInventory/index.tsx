@@ -8,7 +8,7 @@ import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, Link } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -27,6 +27,7 @@ import SerialNumberDialog from './SerialNumber/SerialNumberDialog';
 import SettingsDialog from './SettingsDialog';
 import SoftHoldDialog from './SoftHold';
 import axios, { CancelTokenSource } from 'axios';
+import WarningIcon  from '@mui/icons-material/Warning';
 
 const InventoryProduct = () => {
   const renderedFrom = camelCase(sidebarResource?.productInventory);
@@ -112,9 +113,32 @@ const InventoryProduct = () => {
 
     let newColumns = generateColumns(renderedFrom, productFields?.data?.data, routes.productDetail.path);
     columns = [...columns, ...newColumns];
+    columns?.forEach((col)=>{
+      if(col?.primaryField){
+        col.cell = ({ row }) => (
+          <div>
+            <p
+              className="link text-truncate"
+              title={row?.original?.productName}
+              onClick={()=> {window.open(`${routes.productDetail.path}/${row?.original?._id}`)}}
+            >
+              {row?.original?.productName}
+            </p>
+            {(row?.original?.minInventory > 0 && row?.original?.inventory < row?.original?.minInventory  && (
+                <Box ml={1}>
+                  <HtmlTooltip title="Low Inventory Alert">
+                    <WarningIcon style={{ fontSize: '14px' }} fontSize="small" color="error" />
+                  </HtmlTooltip>
+                </Box>
+              ))}
+              </div>
+          )
+      }
+    })
     if (!user?.user?.brandPolicy?.hideInventoryCount) {
       let newColumns = generateColumns(renderedFrom, productInventoryFields?.data?.data, routes.productInventory.path);
       newColumns?.forEach((o) => {
+
         if (!['plant', 'product'].includes(o?.accessor)) {
           if (
             ['minInventory', 'maxInventory'].includes(o.accessor) &&

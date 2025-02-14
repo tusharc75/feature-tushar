@@ -1,18 +1,16 @@
 import { CircularProgress, CircularProgressProps, Dialog, IconButton, MenuItem, Box, Typography } from '@mui/material';
 import { GetApp } from '@mui/icons-material';
 import PreviewIcon from '@mui/icons-material/Visibility';
-import { useContext, useState } from 'react';
+import { useCallback, useContext, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { CustomDialogTransition } from 'src/constants/helpers';
+import ImageZoomPan from 'src/components/ImageZoomPan';
 
-
-function CircularProgressWithLabel(
-  props: CircularProgressProps & { value: number },
-) {
+function CircularProgressWithLabel(props: CircularProgressProps & { value: number }) {
   return (
     <Box sx={{ position: 'relative', display: 'inline-flex' }}>
       <CircularProgress variant="determinate" {...props} />
@@ -25,14 +23,10 @@ function CircularProgressWithLabel(
           position: 'absolute',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
+          justifyContent: 'center'
         }}
       >
-        <Typography
-          variant="caption"
-          component="div"
-          sx={{ color: 'text.secondary' }}
-        >{`${Math.round(props.value)}%`}</Typography>
+        <Typography variant="caption" component="div" sx={{ color: 'text.secondary' }}>{`${Math.round(props.value)}%`}</Typography>
       </Box>
     </Box>
   );
@@ -41,26 +35,47 @@ function CircularProgressWithLabel(
 const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
 const pdfExtensions = ['pdf'];
 
-export type PreviewFileProps = {
+export type PreviewFileProps = PreviewFileInternal | PreviewFileEnternal;
+
+type PreviewFileInternalCommon = {
   fileName: string;
   component?: 'IconButton' | 'MenuItem' | keyof HTMLElementTagNameMap;
 };
+type PreviewFileInternal = {
+  externalImageViewer?: false;
+} & PreviewFileInternalCommon;
+type PreviewFileEnternal = {
+  externalImageViewer?: true;
+  setImageDialogData: React.Dispatch<React.SetStateAction<ImageDialogData>>;
+  imageDialogData: ImageDialogData;
+} & PreviewFileInternalCommon;
+export type ImageDialogData = {
+  open: boolean;
+  url: string;
+  fileName: string;
+  viewProgress: number;
+};
 
-function getFileNameFromUrl(url: string) {
-  const filename = decodeURIComponent(new URL(url).pathname.split('/').pop());
-  if (!filename) return ''; // Provide a default filename if necessary
-  return filename;
-}
+export const defaultImageDialogData = { fileName: '', open: false, url: '', viewProgress: -1 };
 
-export const PreviewFile = ({ fileName, component = 'IconButton' }: PreviewFileProps) => {
+const useGetter = (props: PreviewFileProps): [ImageDialogData, React.Dispatch<React.SetStateAction<ImageDialogData>>] => {
+  const [imageDialogData, setImageDialogData] = useState<ImageDialogData>({ open: false, url: '', fileName: props.fileName, viewProgress: -1 });
+  if (props.externalImageViewer) {
+    const setImageDialogData = props.setImageDialogData;
+    const imageDialogData = props.imageDialogData;
+    return [imageDialogData, setImageDialogData];
+  } else {
+    return [imageDialogData, setImageDialogData];
+  }
+};
+
+export const PreviewFile: React.FC<PreviewFileProps> = (props) => {
+  const { fileName, component = 'IconButton', externalImageViewer = false } = props;
   const toastConfig = useContext(CustomToastContext);
   const [downloading, setDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(-1);
-
   const [isViewing, setIsViewing] = useState(false);
-  const [viewProgress, setViewProgress] = useState(-1);
-
-  const [imageDialogData, setImageDialogData] = useState({ open: false, url: '', fileName });
+  const [imageDialogData, setImageDialogData] = useGetter({ ...props });
 
   const validExtensions = [...pdfExtensions, ...imageExtensions];
   const extension = fileName?.split('.').pop();
@@ -106,27 +121,25 @@ export const PreviewFile = ({ fileName, component = 'IconButton' }: PreviewFileP
   };
 
   const viewFile = async (): Promise<any> => {
-    toastConfig.setToastConfig({
-      open: true,
-      type: 'info',
-      message: `File Preview is in-progress, Please wait...`
-    });
-    setViewProgress(0);
+    setImageDialogData((prev) => ({ ...prev, viewProgress: 0 }));
     setIsViewing(true);
     try {
+      if (!pdfExtensions.includes(extension)) {
+        setImageDialogData((prev) => ({ ...prev, fileName, open: true }));
+      }
       const { data } = await axiosInstance().get(`user/download?fileName=${encodeURIComponent(fileName)}`, {
         responseType: 'blob',
         onDownloadProgress: (progressEvent) => {
           let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
-          setViewProgress(percentCompleted);
+          setImageDialogData((prev) => ({ ...prev, viewProgress: percentCompleted }));
           if (percentCompleted === 100) {
             toastConfig.setToastConfig({
-              message: 'File Previewed Successfully',
+              message: 'File Loaded Successfully',
               open: true,
               type: 'success'
             });
             setTimeout(() => {
-              setViewProgress(-1);
+              setImageDialogData((prev) => ({ ...prev, viewProgress: -1 }));
               setIsViewing(false);
             }, 100);
           }
@@ -141,7 +154,7 @@ export const PreviewFile = ({ fileName, component = 'IconButton' }: PreviewFileP
         pdfWindow.location.href = fileURL;
         pdfWindow.focus();
       } else {
-        setImageDialogData({ open: true, url: URL.createObjectURL(new Blob([data])), fileName });
+        setImageDialogData((prev) => ({ ...prev, open: true, url: URL.createObjectURL(new Blob([data])), fileName }));
       }
     } catch (error) {
       setIsViewing(false);
@@ -153,64 +166,57 @@ export const PreviewFile = ({ fileName, component = 'IconButton' }: PreviewFileP
 
   return (
     <div>
-      {component === 'IconButton' ?
+      {component === 'IconButton' ? (
         <>
-          {validExtensions.includes(extension) &&
-            <HtmlTooltip title={'Preview'} >
-              <IconButton
-                onClick={viewFile}
-                size="small"
-                disabled={isViewing}
-              >
-                {isViewing ?
-                  <CircularProgressWithLabel size={'small'} value={viewProgress} />
-                  : <PreviewIcon fontSize="small" color="primary" />}
+          {validExtensions.includes(extension) && (
+            <HtmlTooltip title={'Preview'}>
+              <IconButton onClick={viewFile} size="small" disabled={isViewing}>
+                {isViewing ? (
+                  <CircularProgressWithLabel size={'small'} value={imageDialogData.viewProgress} />
+                ) : (
+                  <PreviewIcon fontSize="small" color="primary" />
+                )}
               </IconButton>
             </HtmlTooltip>
-          }
-          <HtmlTooltip title={'Download'} >
-            <IconButton
-              onClick={downloadFile}
-              size="small"
-              disabled={downloading}
-            >
-              {downloading ?
-                <CircularProgressWithLabel size={'small'} value={downloadProgress} />
-                : <GetApp fontSize="small" color='primary' />}
+          )}
+          <HtmlTooltip title={'Download'}>
+            <IconButton onClick={downloadFile} size="small" disabled={downloading}>
+              {downloading ? <CircularProgressWithLabel size={'small'} value={downloadProgress} /> : <GetApp fontSize="small" color="primary" />}
             </IconButton>
           </HtmlTooltip>
         </>
-        : <>
-          {validExtensions.includes(extension) &&
-            <MenuItem
-              onClick={viewFile}
-              disabled={isViewing}
-            >
+      ) : (
+        <>
+          {validExtensions.includes(extension) && (
+            <MenuItem onClick={viewFile} disabled={isViewing}>
               Preview
             </MenuItem>
-          }
-        </>}
-      {imageDialogData.open && (
-        <ViewImage
-          downloadProgress={downloadProgress}
-          imageDialogData={imageDialogData}
-          close={() => setImageDialogData({ open: false, url: '', fileName })}
-        />
+          )}
+        </>
       )}
-    </div >
+      {!externalImageViewer && <ViewImage imageDialogData={imageDialogData} setImageDialogData={setImageDialogData} />}
+    </div>
   );
 };
 
-const ViewImage = ({ imageDialogData, close, downloadProgress }) => {
+type ViewImageProps = {
+  imageDialogData: ImageDialogData;
+  setImageDialogData: React.Dispatch<React.SetStateAction<ImageDialogData>>;
+};
+
+export const ViewImage = ({ imageDialogData, setImageDialogData }: ViewImageProps) => {
+  const handleClose = useCallback(() => {
+    setImageDialogData({ open: false, url: '', fileName: '', viewProgress: -1 });
+  }, [setImageDialogData]);
   return (
-    <Dialog TransitionComponent={CustomDialogTransition} maxWidth="md" fullWidth fullScreen open={true} onClose={close}>
-      <CustomDialogHeader title={imageDialogData.fileName} onClose={close} showRequiredLabel={false} />
-      <CustomDialogContent>
-        <div className="flex min-h-[calc(100vh-128px)] items-center justify-center">
-          {downloadProgress === -1 ? (
-            <img src={imageDialogData.url} loading="lazy" alt={imageDialogData.fileName} />
+    <Dialog slots={{ transition: CustomDialogTransition }} maxWidth="md" fullWidth fullScreen open={imageDialogData.open} onClose={handleClose}>
+      <CustomDialogHeader title={imageDialogData.fileName} onClose={handleClose} showRequiredLabel={false} />
+      <CustomDialogContent className="flex p-3">
+        <div className="flex flex-grow items-center justify-center overflow-hidden">
+          {imageDialogData.viewProgress === -1 ? (
+            <ImageZoomPan src={imageDialogData.url} alt={imageDialogData.fileName} />
           ) : (
-            <p>Downloading {downloadProgress}%</p>
+            <p>Downloading {imageDialogData.viewProgress}%</p>
           )}
         </div>
       </CustomDialogContent>

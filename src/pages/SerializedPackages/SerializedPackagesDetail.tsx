@@ -12,21 +12,21 @@ import { ACTIVITY_RESOURCE, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import ManagedPackages from './ManageManagedPackages';
 import { isMobile, isTablet } from 'react-device-detect';
 import EditIcon from '@mui/icons-material/Edit';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import Assign from './Assign';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import ManagedPackagesView from './View';
-import History from 'src/pages/ManagedPackages/History';
+import History from 'src/pages/SerializedPackages/History';
+import ManageSerializedPackages from 'src/pages/SerializedPackages/ManageSerializedPackages';
+import SerializedPackagesView from 'src/pages/SerializedPackages/View';
 
-const ManagedPackagedDetail = () => {
+const SerializedPackagesDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.managedPackages]);
-  const [managedPackagesData, setManagedPackagesData] = useState(null);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.serializedPackages]);
+  const [serializedPackagesData, setSerializedPackagesData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -45,8 +45,13 @@ const ManagedPackagedDetail = () => {
 
   const fetchFields = async () => {
     axiosInstance()
-      .get(`/field?resource=${sidebarResource?.managedPackages}`)
+      .get(`/field?resource=${sidebarResource?.serializedPackages}`)
       .then(({ data }) => {
+        data.data.forEach((element) => {
+          if (element?.fieldData?.fieldName === 'currentOwner') {
+            element.fieldData.type = 'singleLine';
+          }
+        });
         setFields(data.data?.filter((field) => field.isRead));
       })
       .catch((err) => {
@@ -59,9 +64,12 @@ const ManagedPackagedDetail = () => {
     try {
       const {
         data: { data }
-      } = await axiosInstance().get(`${routes.managedPackages.path}/${id}`);
-      setManagedPackagesData(data);
-      setCustomizedRoutes([{ ...routes.managedPackages, title: resources?.managedPackages?.titlePlural }, { title: data?.managedPackageName }]);
+      } = await axiosInstance().get(`${routes.serializedPackages.path}/${id}`);
+      setSerializedPackagesData({ ...data, currentOwner: data?.currentOwner?.optionLabel });
+      setCustomizedRoutes([
+        { ...routes.serializedPackages, title: resources?.serializedPackages?.titlePlural },
+        { title: data?.serializedPackageNumber }
+      ]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -70,9 +78,9 @@ const ManagedPackagedDetail = () => {
 
   const handleDelete = () => {
     if (id) {
-      if (permissions?.managedPackages?.isDelete) {
+      if (permissions?.serializedPackages?.isDelete) {
         axiosInstance()
-          .put(`${routes.managedPackages.path}/remove`, { ids: [id] })
+          .put(`${routes.serializedPackages.path}/remove`, { ids: [id] })
           .then(({ data }) => {
             setShowConfirmBox(false);
             toastConfig.setToastConfig({
@@ -80,7 +88,7 @@ const ManagedPackagedDetail = () => {
               type: 'success',
               message: data?.message
             });
-            history.push(`${routes.managedPackages.path}`);
+            history.push(`${routes.serializedPackages.path}`);
           })
           .catch((err) => {
             setShowConfirmBox(false);
@@ -112,16 +120,16 @@ const ManagedPackagedDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <>
-              {permissions?.managedPackages?.isUpdate && (
+              {permissions?.serializedPackages?.isUpdate && (
                 <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                   {'Edit'}
                 </ThemeButton>
               )}
-              {permissions?.managedPackages?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+              {permissions?.serializedPackages?.isDelete && serializedPackagesData?.canDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               <ActivityButton
-                referenceId={managedPackagesData?._id}
-                resource={ACTIVITY_RESOURCE.managedPackages}
-                resourceLabel={managedPackagesData?.managedPackageName}
+                referenceId={serializedPackagesData?._id}
+                resource={ACTIVITY_RESOURCE.serializedPackages}
+                resourceLabel={serializedPackagesData?.serializedPackageNumber}
               />
             </>
           </Box>
@@ -141,24 +149,24 @@ const ManagedPackagedDetail = () => {
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </div>
             ) : (
-              <DetailsPage data={managedPackagesData} fields={fields} />
+              <DetailsPage data={serializedPackagesData} fields={fields} />
             )}
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          <Assign managedPackagesData={managedPackagesData} />
+          <Assign serializedPackagesData={serializedPackagesData} />
         </TabPanel>
         <TabPanel value={tabValue} index={2}>
-          <History id={managedPackagesData?._id} />
+          <History id={serializedPackagesData?._id} />
         </TabPanel>
         <TabPanel value={tabValue} index={3}>
-          {managedPackagesData && <ManagedPackagesView managedPackagesData={managedPackagesData} />}
+          {serializedPackagesData && <SerializedPackagesView serializedPackagesData={serializedPackagesData} />}
         </TabPanel>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.managedPackages?.titleSingular?.toLowerCase()} : ${managedPackagesData?.managedPackageName} ?`}
+          message={`Are you sure you want to delete ${resources?.serializedPackages?.titleSingular?.toLowerCase()} : ${serializedPackagesData?.serializedPackageNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
@@ -166,7 +174,7 @@ const ManagedPackagedDetail = () => {
         />
       )}
       {openUpdateDialog && (
-        <ManagedPackages
+        <ManageSerializedPackages
           id={id}
           isClone={false}
           onClose={closeUpdateDialog}
@@ -180,4 +188,4 @@ const ManagedPackagedDetail = () => {
   );
 };
 
-export default ManagedPackagedDetail;
+export default SerializedPackagesDetail;

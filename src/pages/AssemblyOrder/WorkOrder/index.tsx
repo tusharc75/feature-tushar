@@ -27,6 +27,8 @@ import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductD
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import AttachmentDialog from 'src/pages/WorkOrder/Service/AttachmentDialog';
 import PackageNumberDialog from 'src/pages/AssemblyOrder/WorkOrder/PackageNumberDialog';
+import DescriptionIcon from '@mui/icons-material/Description';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -55,7 +57,8 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, ids: [], data: null });
   const [arrangeView, setArrangeView] = useState(false);
   const [attachmentsDialog, setAttachmentsDialog] = useState({ open: false, workOrderId: null, uniqueServiceId: null, serviceName: null });
-  const [openManagedPackageDialog, setOpenManagedPackageDialog] = useState({ open: false, ids: [] });
+  const [openSerializedPackageDialog, setOpenSerializedPackageDialog] = useState({ open: false, ids: [] });
+  const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, workOrder: null });
 
   const { generateColumns } = useColumns();
 
@@ -268,25 +271,37 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
         return (
           <>
             {checkParentProduct([row?.original], row?.original?.parentId, table.getRowModel().rows) && (
-              <HtmlTooltip title="Auto Complete Work Order">
-                <IconButton
-                  size="small"
-                  aria-label="Details"
-                  onClick={() => {
-                    setAutoCompleteData([row.original]);
-                    setCompleteConfirmBox(true);
-                  }}
-                  disabled={row?.original?.canAutoCompleteWorkOrder ? false : true}
-                >
-                  {row.original['workOrderStatus'] === WORK_ORDER_STATUS.completed ? (
-                    <CheckCircle className="text-[var(--chip-color-completed)] [font-size:19px_!important] dark:text-green-400" />
-                  ) : (
-                    <AutoCompleteIcon size={18} />
-                  )}
-                </IconButton>
-              </HtmlTooltip>
+              <>
+                <HtmlTooltip title="Auto Complete Work Order">
+                  <IconButton
+                    size="small"
+                    aria-label="Details"
+                    onClick={() => {
+                      setAutoCompleteData([row.original]);
+                      setCompleteConfirmBox(true);
+                    }}
+                    disabled={row?.original?.canAutoCompleteWorkOrder ? false : true}
+                  >
+                    {row.original['workOrderStatus'] === WORK_ORDER_STATUS.completed ? (
+                      <CheckCircle className="text-[var(--chip-color-completed)] [font-size:19px_!important] dark:text-green-400" />
+                    ) : (
+                      <AutoCompleteIcon size={18} />
+                    )}
+                  </IconButton>
+                </HtmlTooltip>
+                <HtmlTooltip title="Drawings">
+                  <IconButton
+                    size="small"
+                    aria-label="Details"
+                    onClick={() => {
+                      setShowDrawingDialog({ open: true, workOrder: row.original?.workOrder?._id });
+                    }}
+                  >
+                    <DescriptionIcon fontSize="small" color={'primary'} />
+                  </IconButton>
+                </HtmlTooltip>
+              </>
             )}
-
             {row?.original?.parentId && (
               <HtmlTooltip title="Delete">
                 <span>
@@ -312,8 +327,10 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
   };
 
   const fetchData = async () => {
-    dispatch({ type: 'loading', loading: true });
     setNextStep(false);
+
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
 
     const {
       data: { data }
@@ -428,13 +445,9 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
 
   const handleDelete = async () => {
     setDeleting(true);
-    if (
-      deleteData?.some(
-        (e) =>
-          [MATERIAL_TYPE.service, MATERIAL_TYPE.package]?.includes(e.type) ||
-          (MATERIAL_TYPE.product === e.type && e.parentId && material?.find((r) => r?._id === e?.parentId)?.parentId)
-      )
-    ) {
+    if (deleteData?.some((e) => [MATERIAL_TYPE.service]?.includes(e.type)
+      || (MATERIAL_TYPE.product === e.type && e.parentId && material?.find((r) => r?._id === e?.parentId)?.parentId)
+    )) {
       const records: any = [];
       deleteData?.forEach((data) => {
         const index = records?.findIndex((d) => d?.workOrder === data?.workOrderId);
@@ -528,7 +541,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
     } else if (parentId && rows?.length === 0) {
       return selectedRecords[0]?.type === MATERIAL_TYPE.product && !material?.find((m) => m?._id === parentId)?.parentId;
     }
-    return selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !material?.find((m) => m?._id === e?.parentId)?.parentId)?.length
+    return selectedRecords?.filter((e) => !material?.find((m) => m?._id === e?.parentId)?.parentId)?.length
       ? true
       : false;
   };
@@ -734,23 +747,23 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
               });
             }
 
-            isPackage ? setOpenManagedPackageDialog({ open: true, ids: ids }) : handleAutoComplete(ids);
+            isPackage ? setOpenSerializedPackageDialog({ open: true, ids: ids }) : handleAutoComplete(ids);
           }}
         />
       )}
 
-      {openManagedPackageDialog.open && (
+      {openSerializedPackageDialog.open && (
         <PackageNumberDialog
           onClose={() => {
-            setOpenManagedPackageDialog({ open: false, ids: [] });
+            setOpenSerializedPackageDialog({ open: false, ids: [] });
             setCompleteConfirmBox(false);
           }}
           assemblyOrderId={assemblyOrderData._id}
-          workOrderIds={openManagedPackageDialog.ids}
+          workOrderIds={openSerializedPackageDialog.ids}
           onSuccess={() => {
             setCompleteConfirmBox(false);
-            handleAutoComplete(openManagedPackageDialog.ids);
-            setOpenManagedPackageDialog({ open: false, ids: [] });
+            handleAutoComplete(openSerializedPackageDialog.ids);
+            setOpenSerializedPackageDialog({ open: false, ids: [] });
           }}
         />
       )}
@@ -829,7 +842,6 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
           }}
         />
       )}
-
       {consumablesDialog.open && (
         <AssignProductDialog
           handleCloseDialog={() => setConsumablesDialog({ open: false, ids: [], data: null })}
@@ -841,7 +853,6 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
           isSubmitting={isSubmitting}
         />
       )}
-
       {arrangeView && (
         <ArrangeView
           data={
@@ -857,7 +868,6 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
           loading={false}
         />
       )}
-
       {attachmentsDialog.open && (
         <AttachmentDialog
           workOrderId={attachmentsDialog.workOrderId}
@@ -881,6 +891,14 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
               uniqueServiceId: null,
               serviceName: null
             });
+          }}
+        />
+      )}
+      {showDrawingDialog.open && (
+        <DiagramDialog
+          referenceId={showDrawingDialog.workOrder}
+          handleClose={() => {
+            setShowDrawingDialog({ open: false, workOrder: null });
           }}
         />
       )}
