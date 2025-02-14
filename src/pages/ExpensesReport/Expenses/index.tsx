@@ -27,7 +27,7 @@ import AddExpenses from 'src/pages/ExpensesReport/AddExpenses';
 import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
 import { isMobile, isTablet } from 'react-device-detect';
 
-const Expenses = ({ selectedExpenseData, showAddButton, reportData = null, removeRow, allowedToEdit = false }) => {
+const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, allowedToEdit, fetchDataMaster = null }) => {
   const renderedFrom = camelCase(sidebarResource?.expenses);
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -53,7 +53,7 @@ const Expenses = ({ selectedExpenseData, showAddButton, reportData = null, remov
 
   useEffect(() => {
     fetchData();
-  }, [selectedEntity, selectedExpenseData, selectedExpense, reportData]);
+  }, [selectedEntity, expenseIds, selectedExpense, reportData]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -96,45 +96,27 @@ const Expenses = ({ selectedExpenseData, showAddButton, reportData = null, remov
     return () => cancelTokenSource.cancel();
   }, [selectedEntity]);
 
-  const getQueryString = (expense) => {
-    let queryString = `?`;
-
-    if (selectedEntity) {
-      queryString = `${queryString}&entity=${selectedEntity}`;
-    }
-    if (expense?._id) {
-      const filterById = [{ field: '_id', term: expense._id }];
-      queryString = `${queryString}&filterById=${encodeURIComponent(JSON.stringify(filterById))}&filterType=and`;
-    }
-
-    return queryString;
-  };
-
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     try {
-      const expensesList = [...(selectedExpenseData || []), ...(selectedExpense || [])];
-      const mergedExpenses = Array.from(new Map(expensesList.map((expense) => [expense._id, expense])).values());
-
-      const promises = mergedExpenses.map((expense) => {
-        const queryString = getQueryString(expense);
-        return axiosInstance().get(`${expenses.api}${queryString}`, {
+      const expensesIds = expenseIds || [];
+      const promises = expensesIds.map((expenseId) =>
+        axiosInstance().get(`${expenses.api}/${expenseId}`, {
           cancelToken: cancelTokenSource?.token
-        });
-      });
+        })
+      );
 
       const results = await Promise.all(promises);
 
       let fetchedRows = [];
       results.forEach((response) => {
-        const data = response?.data?.data || [];
-        const rows = data.map((u) => {
-          const finalObject = prepareDataForGrid(u, user);
+        const expense = response?.data?.data;
+        if (expense) {
+          const finalObject = prepareDataForGrid(expense, user);
           finalObject['isChecked'] = false;
           finalObject['canDelete'] = permissions?.expenses?.isDelete;
-          return finalObject;
-        });
-        fetchedRows = [...fetchedRows, ...rows];
+          fetchedRows.push(finalObject);
+        }
       });
 
       const deduplicatedFetchedRows = Array.from(new Map(fetchedRows.map((item) => [item._id, item])).values());
@@ -181,7 +163,7 @@ const Expenses = ({ selectedExpenseData, showAddButton, reportData = null, remov
     try {
       const response = await axiosInstance().put(`${expenseReport.api}`, payload);
       await updateExpensesStatus(updatedExpenses);
-      fetchData();
+      fetchDataMaster();
       toastConfig.setToastConfig({
         open: true,
         type: 'success',

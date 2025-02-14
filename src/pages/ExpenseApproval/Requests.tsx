@@ -116,7 +116,13 @@ const Requests = ({ referenceId, fetchDataMaster }) => {
           <Box>
             {!loadingDetails && rowsData && fields ? (
               <div className="mt-2">
-                <Expenses selectedExpenseData={rowsData?.expenses} showAddButton={true} reportData={rowsData} removeRow={null} />
+                <Expenses
+                  expenseIds={rowsData?.expenses?.map((expense) => expense._id)}
+                  showAddButton={true}
+                  reportData={rowsData}
+                  removeRow={null}
+                  allowedToEdit={false}
+                />
               </div>
             ) : (
               <div className="p-2">

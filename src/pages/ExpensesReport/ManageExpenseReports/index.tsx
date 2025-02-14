@@ -242,7 +242,7 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
                   {selectedExpense.length > 0 && isAllowedToEdit && (
                     <div className="mt-2">
                       <Expenses
-                        selectedExpenseData={selectedExpense}
+                        expenseIds={selectedExpense?.map((expense) => expense._id)}
                         showAddButton={false}
                         removeRow={handleDeleteRows}
                         allowedToEdit={isAllowedToEdit}

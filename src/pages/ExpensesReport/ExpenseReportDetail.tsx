@@ -133,8 +133,6 @@ const ExpenseReportDetail = () => {
     try {
       await axiosInstance().put(`${routes.expenseReport.path}/${expenseReportData._id}/expenses/remove`, { expenseIds });
 
-      await axiosInstance().patch(`${expenseReport.api}/status/${expenseReportData._id}`, { status: EXPENSE_STATUS.unreported });
-
       fetchData();
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -217,11 +215,12 @@ const ExpenseReportDetail = () => {
             {!loadingDetails && expenseReportData && fields ? (
               <div className="mt-2">
                 <Expenses
-                  selectedExpenseData={expenseReportData?.expenses}
+                  expenseIds={expenseReportData?.expenses?.map((expense) => expense._id)}
                   showAddButton={true}
                   reportData={expenseReportData}
                   removeRow={handleDeleteExpense}
                   allowedToEdit={allowedToEdit}
+                  fetchDataMaster={fetchData}
                 />
               </div>
             ) : (
