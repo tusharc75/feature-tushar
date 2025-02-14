@@ -1030,7 +1030,7 @@ export default function StepDialog({
                                   disabled={notEditable}
                                   size="small"
                                   value={
-                                    values?.returnToStepOnFail!=='' ? stepOption?.find((data) => data?.optionValue === values?.returnToStepOnFail) : ''
+                                    values?.returnToStepOnFail && values?.returnToStepOnFail!=='' ? stepOption?.find((data) => data?.optionValue === values?.returnToStepOnFail) : ''
                                   }
                                   getOptionLabel={(option) => option.optionLabel || ''}
                                   isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
