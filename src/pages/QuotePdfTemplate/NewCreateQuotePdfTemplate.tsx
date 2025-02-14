@@ -23,7 +23,7 @@ import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import { quotation } from '../../constants/helpers';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
-import { camelCase, startCase } from 'lodash';
+import { camelCase, isEqual, startCase } from 'lodash';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const defaultProductColumns = 7;
@@ -164,146 +164,145 @@ export default function NewCreateQuotePdfTemplate() {
   }
 
   useEffect(() => {
-    if (id && id !== '0') {
-      (async () => {
-        let tempPdfTemplate = null;
-        let tempQuoteData = null;
-        if (queryParams.quote && queryParams.version) {
-          history.replace(`?quote=${queryParams.quote}&version=${queryParams.version}`);
-          try {
-            const res = await axiosInstance().get(`${qbApi}/${queryParams?.quote}?entity=${selectedEntity}`);
-            const {
-              data: { data }
-            } = res;
-            setQuoteData(data);
-            setVersion(queryParams.version);
-            if (data?._id) {
-              setHasPermissionToUpdate(true);
-            }
-            tempPdfTemplate = data?.versions[Number(queryParams?.version)]?.pdfTemplate;
-            tempQuoteData = data;
-          } catch (e) {
-            toastConfig.setToastConfig(e);
-          }
-        } else if (queryParams.quotation && queryParams.version) {
-          history.replace(`?quotation=${queryParams.quotation}&version=${queryParams.version}`);
-          try {
-            const res = await axiosInstance().get(`${quotation.api}/${queryParams?.quotation}?entity=${selectedEntity}`);
-            const {
-              data: { data }
-            } = res;
-            setQuoteData(data);
-            setVersion(queryParams.version);
-            if (data?._id) {
-              setHasPermissionToUpdate(true);
-            }
-            tempPdfTemplate = data?.versions[Number(queryParams?.version)]?.pdfTemplate;
-            tempQuoteData = data;
-          } catch (e) {
-            toastConfig.setToastConfig(e);
-          }
-        }
-        if (tempPdfTemplate) {
-          setIsLandscapChecked(tempPdfTemplate.landscape);
-          setInitialValues({
-            landscape: tempPdfTemplate.landscape,
-            productColumns: tempPdfTemplate.productColumns,
-            name: tempPdfTemplate.name,
-            pageNumberInFooter: tempPdfTemplate.pageNumberInFooter,
-            header: tempPdfTemplate.header,
-            footer: tempPdfTemplate.footer,
-            aboveTable: tempPdfTemplate.aboveTable,
-            belowTable: tempPdfTemplate.belowTable,
-            tabelSummaryLeftSide: tempPdfTemplate?.tabelSummaryLeftSide,
-            entity: tempPdfTemplate.entity ? tempPdfTemplate.entity : [],
-            type: tempPdfTemplate.type,
-            owner: tempPdfTemplate.owner && tempPdfTemplate.owner !== undefined ? tempPdfTemplate.owner : user.user._id,
-            collaborator: tempPdfTemplate.collaborator ? tempPdfTemplate.collaborator : []
-          });
-          setDetails({
-            header: tempPdfTemplate.header,
-            footer: tempPdfTemplate.footer,
-            aboveTable: tempPdfTemplate.aboveTable,
-            belowTable: tempPdfTemplate.belowTable,
-            tabelSummaryLeftSide: tempPdfTemplate?.tabelSummaryLeftSide
-          });
-        } else {
-          try {
-            const res = await axiosInstance().get(`/quote-pdf-template/${id}`);
-            const {
-              data: { data }
-            } = res;
-            setIsLandscapChecked(data?.landscape);
-            setInitialValues({
-              landscape: data?.landscape,
-              productColumns: data?.productColumns,
-              name: !isClone ? data?.name : '',
-              pageNumberInFooter: data?.pageNumberInFooter,
-              header: data?.header,
-              footer: data?.footer,
-              aboveTable: data?.aboveTable,
-              belowTable: data?.belowTable,
-              tabelSummaryLeftSide: data?.tabelSummaryLeftSide,
-              entity: data?.entity ? data?.entity : [],
-              type: data?.type,
-              owner: data?.owner && data.owner !== undefined ? data?.owner : user.user._id,
-              collaborator: data?.collaborator ? data?.collaborator : []
-            });
-            setDetails({
-              header: data?.header,
-              footer: data?.footer,
-              aboveTable: data?.aboveTable,
-              belowTable: data?.belowTable,
-              tabelSummaryLeftSide: data?.tabelSummaryLeftSide
-            });
-            if (tempQuoteData?._id) {
-              setHasPermissionToUpdate(true);
-            } else if (
-              data?.owner &&
-              data?.owner !== undefined &&
-              user.user._id !== data?.owner &&
-              !data?.collaborator?.some((d) => d === user.user._id) &&
-              !checkSuperAdminAccess(user, sidebarResource.quotePdfTemplate)
-            ) {
-              setHasPermissionToUpdate(false);
-            }
-            if (data?.tables && data?.tables?.length) {
-              const tableData = data?.tables?.map(async (d) => {
-                const fetchedFieldData = await fetchFieldData(d?.resourceName);
-                return {
-                  ...d,
-                  fieldOptions: fetchedFieldData ?? []
-                };
-              });
-              const allTableData = await Promise.all(tableData);
-              if (allTableData.length) {
-                setTable(allTableData);
-              }
-            }
-          } catch (e) {
-            toastConfig.setToastConfig(e);
-          }
-        }
-      })();
-    } else {
-      setInitialValues({
-        landscape: false,
-        productColumns: defaultProductColumns,
-        name: '',
-        pageNumberInFooter: false,
-        header: '',
-        footer: '',
-        aboveTable: '',
-        belowTable: '',
-        tabelSummaryLeftSide: '',
-        entity: selectedEntity ? [selectedEntity] : [],
-        type: '',
-        owner: user.user._id,
-        collaborator: []
-      });
-    }
+    fetchData();
     fetchUser();
   }, [id]);
+
+  const fetchData = async () => {
+    const initialValues = {
+      landscape: false,
+      productColumns: defaultProductColumns,
+      name: '',
+      pageNumberInFooter: false,
+      header: '',
+      footer: '',
+      aboveTable: '',
+      belowTable: '',
+      tabelSummaryLeftSide: '',
+      entity: selectedEntity ? [selectedEntity] : [],
+      type: '',
+      owner: user.user._id,
+      collaborator: []
+    };
+    if (id && id !== '0') {
+      let tempPdfTemplate = null;
+      let tempQuoteData = null;
+      if (queryParams.quote && queryParams.version) {
+        history.replace(`?quote=${queryParams.quote}&version=${queryParams.version}`);
+        try {
+          const res = await axiosInstance().get(`${qbApi}/${queryParams?.quote}?entity=${selectedEntity}`);
+          const {
+            data: { data }
+          } = res;
+          setQuoteData(data);
+          setVersion(queryParams.version);
+          if (data?._id) {
+            setHasPermissionToUpdate(true);
+          }
+          tempPdfTemplate = data?.versions[Number(queryParams?.version)]?.pdfTemplate;
+          tempQuoteData = data;
+        } catch (e) {
+          toastConfig.setToastConfig(e);
+        }
+      } else if (queryParams.quotation && queryParams.version) {
+        history.replace(`?quotation=${queryParams.quotation}&version=${queryParams.version}`);
+        try {
+          const res = await axiosInstance().get(`${quotation.api}/${queryParams?.quotation}?entity=${selectedEntity}`);
+          const {
+            data: { data }
+          } = res;
+          setQuoteData(data);
+          setVersion(queryParams.version);
+          if (data?._id) {
+            setHasPermissionToUpdate(true);
+          }
+          tempPdfTemplate = data?.versions[Number(queryParams?.version)]?.pdfTemplate;
+          tempQuoteData = data;
+        } catch (e) {
+          toastConfig.setToastConfig(e);
+        }
+      }
+      if (tempPdfTemplate) {
+        setIsLandscapChecked(tempPdfTemplate.landscape);
+        initialValues.landscape = tempPdfTemplate.landscape;
+        initialValues.productColumns = tempPdfTemplate.productColumns;
+        initialValues.name = tempPdfTemplate.name;
+        initialValues.pageNumberInFooter = tempPdfTemplate.pageNumberInFooter;
+        initialValues.header = tempPdfTemplate.header;
+        initialValues.footer = tempPdfTemplate.footer;
+        initialValues.aboveTable = tempPdfTemplate.aboveTable;
+        initialValues.belowTable = tempPdfTemplate.belowTable;
+        initialValues.tabelSummaryLeftSide = tempPdfTemplate.tabelSummaryLeftSide;
+        initialValues.entity = tempPdfTemplate.entity ? tempPdfTemplate.entity : [];
+        initialValues.type = tempPdfTemplate.type;
+        initialValues.owner = tempPdfTemplate.owner && tempPdfTemplate.owner !== undefined ? tempPdfTemplate.owner : user.user._id;
+        initialValues.collaborator = tempPdfTemplate.collaborator ? tempPdfTemplate.collaborator : [];
+
+        setDetails({
+          header: tempPdfTemplate.header,
+          footer: tempPdfTemplate.footer,
+          aboveTable: tempPdfTemplate.aboveTable,
+          belowTable: tempPdfTemplate.belowTable,
+          tabelSummaryLeftSide: tempPdfTemplate?.tabelSummaryLeftSide
+        });
+      } else {
+        try {
+          const res = await axiosInstance().get(`/quote-pdf-template/${id}`);
+          const {
+            data: { data }
+          } = res;
+          setIsLandscapChecked(data?.landscape);
+          initialValues.landscape = data?.landscape;
+          initialValues.productColumns = data?.productColumns;
+          initialValues.name = !isClone ? data?.name : '';
+          initialValues.pageNumberInFooter = data?.pageNumberInFooter;
+          initialValues.header = data?.header;
+          initialValues.footer = data?.footer;
+          initialValues.aboveTable = data?.aboveTable;
+          initialValues.belowTable = data?.belowTable;
+          initialValues.tabelSummaryLeftSide = data?.tabelSummaryLeftSide;
+          initialValues.entity = data?.entity ? data?.entity : [];
+          initialValues.type = data?.type;
+          initialValues.owner = data?.owner && data.owner !== undefined ? data?.owner : user.user._id;
+          initialValues.collaborator = data?.collaborator ? data?.collaborator : [];
+          setDetails({
+            header: data?.header,
+            footer: data?.footer,
+            aboveTable: data?.aboveTable,
+            belowTable: data?.belowTable,
+            tabelSummaryLeftSide: data?.tabelSummaryLeftSide
+          });
+          if (tempQuoteData?._id) {
+            setHasPermissionToUpdate(true);
+          } else if (
+            data?.owner &&
+            data?.owner !== undefined &&
+            user.user._id !== data?.owner &&
+            !data?.collaborator?.some((d) => d === user.user._id) &&
+            !checkSuperAdminAccess(user, sidebarResource.quotePdfTemplate)
+          ) {
+            setHasPermissionToUpdate(false);
+          }
+          if (data?.tables && data?.tables?.length) {
+            const tableData = data?.tables?.map(async (d) => {
+              const fetchedFieldData = await fetchFieldData(d?.resourceName);
+              return {
+                ...d,
+                fieldOptions: fetchedFieldData ?? []
+              };
+            });
+            const allTableData = await Promise.all(tableData);
+            if (allTableData.length) {
+              setTable(allTableData);
+            }
+          }
+        } catch (e) {
+          toastConfig.setToastConfig(e);
+        }
+      }
+    }
+    setInitialValues({ ...initialValues });
+  };
 
   const fetchUser = () => {
     axiosInstance()
@@ -383,6 +382,8 @@ export default function NewCreateQuotePdfTemplate() {
           } else {
             if (isBreakCrumbPath) {
               history.push({ pathname: isBreakCrumbPath });
+            } else {
+              history.push(`${routes.quotePdfTemplateDetail.path}/${data._id}`);
             }
             setIsUpdating(false);
             toastConfig.setToastConfig({
@@ -424,32 +425,23 @@ export default function NewCreateQuotePdfTemplate() {
           if (isPreview === true) {
             previewPdfTemplate(data._id);
             setIsUpdatingAndPreview(false);
-            if (quoteData?._id) {
-              history.push(`${queryParams.quotation ? routes.quotationDetail.path : '/quotes/detail'}/${quoteData?._id}`, {
-                versionNumber: `${version}`,
-                tabValue: 1
-              });
-            } else {
-              history.push(`${routes.quotePdfTemplateDetail.path}/${data._id}`);
-            }
-          } else {
-            if (quoteData?._id) {
-              history.push(`${queryParams.quotation ? routes.quotationDetail.path : '/quotes/detail'}/${quoteData?._id}`, {
-                versionNumber: `${version}`,
-                tabValue: 1
-              });
-            } else {
-              if (isBreakCrumbPath) {
-                history.push({ pathname: isBreakCrumbPath });
-              }
-            }
-            toastConfig.setToastConfig({
-              open: true,
-              type: 'success',
-              message: message
-            });
-            setIsUpdating(false);
           }
+          if (quoteData?._id) {
+            history.push(`${queryParams.quotation ? routes.quotationDetail.path : '/quotes/detail'}/${quoteData?._id}`, {
+              versionNumber: `${version}`,
+              tabValue: 1
+            });
+          } else if (isBreakCrumbPath) {
+            history.push({ pathname: isBreakCrumbPath });
+          } else {
+            fetchData();
+          }
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: message
+          });
+          setIsUpdating(false);
         })
         .catch((error) => {
           setIsUpdating(false);
@@ -502,7 +494,11 @@ export default function NewCreateQuotePdfTemplate() {
                     onBreadCrumbClick={(path) => {
                       setIsBreakCrumbPath(path);
                       if (hasPermissionToUpdate) {
-                        setShowConfirmDialog(true);
+                        if (!isEqual({ ...values, ...details }, initialValues)) {
+                          setShowConfirmDialog(true);
+                        } else {
+                          handleClose();
+                        }
                       }
                     }}
                   />
@@ -511,7 +507,7 @@ export default function NewCreateQuotePdfTemplate() {
                   <ThemeButton
                     disabled={isUpdating || (!isClone && !hasPermissionToUpdate)}
                     onClick={submitForm}
-                    buttonType='theme'
+                    buttonType="theme"
                     isLoading={isUpdating}
                   >
                     Save
@@ -524,7 +520,7 @@ export default function NewCreateQuotePdfTemplate() {
                         setIsPreview(true);
                         submitForm();
                       }}
-                      buttonType='theme'
+                      buttonType="theme"
                       isLoading={isUpdatingAndPreview}
                     >
                       Save & Preview
@@ -533,9 +529,13 @@ export default function NewCreateQuotePdfTemplate() {
 
                   <ThemeButton
                     onClick={() => {
-                      handleClose();
+                      if (hasPermissionToUpdate && !isEqual({ ...values, ...details }, initialValues)) {
+                        setShowConfirmDialog(true);
+                      } else {
+                        handleClose();
+                      }
                     }}
-                    buttonType='transparent'
+                    buttonType="transparent"
                   >
                     Close
                   </ThemeButton>
@@ -579,8 +579,8 @@ export default function NewCreateQuotePdfTemplate() {
                             setFieldValue('entity', val && val?.map((d) => d._id));
                             val && val.length !== 0
                               ? setOwnerCollaboratorData(
-                                ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
-                              )
+                                  ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
+                                )
                               : setOwnerCollaboratorData(ownerCollaboratorDataConst);
                           }}
                           renderInput={(params) => (
@@ -612,10 +612,10 @@ export default function NewCreateQuotePdfTemplate() {
                           onOpen={() =>
                             values['entity'] && values['entity'].length !== 0
                               ? setOwnerCollaboratorData(
-                                ownerCollaboratorDataConst.filter((data) =>
-                                  values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
+                                  ownerCollaboratorDataConst.filter((data) =>
+                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
+                                  )
                                 )
-                              )
                               : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                           }
                           renderInput={(params) => (
@@ -649,10 +649,10 @@ export default function NewCreateQuotePdfTemplate() {
                           onOpen={() =>
                             values['entity'] && values['entity'].length !== 0
                               ? setOwnerCollaboratorData(
-                                ownerCollaboratorDataConst.filter((data) =>
-                                  values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
+                                  ownerCollaboratorDataConst.filter((data) =>
+                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
+                                  )
                                 )
-                              )
                               : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                           }
                           renderInput={(params) => (

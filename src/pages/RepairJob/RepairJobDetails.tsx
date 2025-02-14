@@ -67,7 +67,7 @@ const RepairJobDetails = () => {
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
 
-  const [alloweOperation, setAlloweOperation] = useState(true);
+  const [allowedOperation, setAllowedOperation] = useState(true);
 
   const repairJobProcessStepsNames = React.useMemo(() => {
     return repairJobProcessSteps.map((item) => item.name);
@@ -151,9 +151,9 @@ const RepairJobDetails = () => {
       .then(({ data: { data } }) => {
         setCurrentStep(getIndex(data?.processStatus, repairJobProcessSteps));
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.repairJob, data));
-        setAlloweOperation(data?.workOrder ? false : true);
+        setAllowedOperation(data?.workOrder ? false : true);
         setAllowedToDelete(
-          permissions?.repairJob?.isDelete && checkIsAllowedToDelete(user, sidebarResource.repairJob, data.owner.optionValue) && data?.canDelete
+          permissions?.repairJob?.isDelete && checkIsAllowedToDelete(user, sidebarResource.repairJob, data?.owner?.optionValue) && data?.canDelete
         );
         setRepairJobData({ ...data });
       })
@@ -271,7 +271,7 @@ const RepairJobDetails = () => {
                 renderedFrom={`${renderedFrom}_grid-1`}
                 allowedToEdit={allowedToEdit}
                 stepFullScreen={stepFullScreen}
-                alloweOperation={alloweOperation}
+                allowedOperation={allowedOperation}
                 fetchRepairJobData={fetchRepairJobData}
               />
             )}
@@ -284,7 +284,7 @@ const RepairJobDetails = () => {
                 allowedToEdit={allowedToEdit}
                 allowUpdateStatus={allowUpdateStatus}
                 stepFullScreen={stepFullScreen}
-                alloweOperation={alloweOperation}
+                allowedOperation={allowedOperation}
               />
             )}
           </TabPanel>

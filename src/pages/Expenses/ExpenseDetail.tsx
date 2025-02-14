@@ -139,16 +139,18 @@ const ExpenseDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <Fragment>
-              {expensesData?.status !== EXPENSE_STATUS.approved && <ThemeButton
-                iconForMobile={<Edit />}
-                disabled={!allowedToEdit}
-                onClick={() => {
-                  setOpenUpdateDialog(true);
-                }}
-                mobileTooltip={'Edit'}
-              >
-                Edit
-              </ThemeButton>}
+              {expensesData?.status !== EXPENSE_STATUS.approved && (
+                <ThemeButton
+                  iconForMobile={<Edit />}
+                  disabled={!allowedToEdit}
+                  onClick={() => {
+                    setOpenUpdateDialog(true);
+                  }}
+                  mobileTooltip={'Edit'}
+                >
+                  Edit
+                </ThemeButton>
+              )}
             </Fragment>
             {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
           </Box>
@@ -191,12 +193,10 @@ const ExpenseDetail = () => {
                       ))}
                       <TableRow>
                         <TableCell>
-                          <Typography variant='body1'>
-                            Total Amount
-                          </Typography>
+                          <Typography variant="body1">Total Amount</Typography>
                         </TableCell>
                         <TableCell align="right">
-                          <Typography variant='body1'>
+                          <Typography variant="body1">
                             {currencySymbol} {expensesData?.totalAmount}
                           </Typography>
                         </TableCell>

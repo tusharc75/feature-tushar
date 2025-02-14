@@ -1,14 +1,4 @@
-import {
-  Box,
-  IconButton,
-  MenuItem,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableRow
-} from '@mui/material';
+import { Box, IconButton, MenuItem, Paper, Table, TableBody, TableCell, TableContainer, TableRow } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
@@ -37,7 +27,7 @@ import AddExpenses from 'src/pages/ExpensesReport/AddExpenses';
 import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
 import { isMobile, isTablet } from 'react-device-detect';
 
-const Expenses = ({ selectedExpenseData, showAddButton, reportData = null, removeRow}) => {
+const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, allowedToEdit, fetchDataMaster = null }) => {
   const renderedFrom = camelCase(sidebarResource?.expenses);
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -63,7 +53,7 @@ const Expenses = ({ selectedExpenseData, showAddButton, reportData = null, remov
 
   useEffect(() => {
     fetchData();
-  }, [selectedEntity, selectedExpenseData, selectedExpense, reportData]);
+  }, [selectedEntity, expenseIds, selectedExpense, reportData]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -87,7 +77,9 @@ const Expenses = ({ selectedExpenseData, showAddButton, reportData = null, remov
         Cell: ({ row }) => {
           return row?.original?.totalAmount ? (
             <div>
-              <p className="text-truncate">{getUniqueCurrencies().find((d) => d.currencyCode === row?.original?.currency)?.symbolNative} {row?.original?.totalAmount}</p>
+              <p className="text-truncate">
+                {getUniqueCurrencies().find((d) => d.currencyCode === row?.original?.currency)?.symbolNative} {row?.original?.totalAmount}
+              </p>
             </div>
           ) : (
             <NoDataCell />
@@ -95,7 +87,7 @@ const Expenses = ({ selectedExpenseData, showAddButton, reportData = null, remov
         }
       }
     ];
-    setColumns([...extracolumns, ActionsRenderer]);
+    setColumns([...extracolumns, ...(allowedToEdit ? [ActionsRenderer] : [])]);
   };
 
   useEffect(() => {
@@ -104,65 +96,38 @@ const Expenses = ({ selectedExpenseData, showAddButton, reportData = null, remov
     return () => cancelTokenSource.cancel();
   }, [selectedEntity]);
 
-  const getQueryString = (expense) => {
-    let queryString = `?`;
-
-    if (selectedEntity) {
-      queryString = `${queryString}&entity=${selectedEntity}`;
-    }
-    if (expense?._id) {
-      const filterById = [{ field: '_id', term: expense._id }];
-      queryString = `${queryString}&filterById=${encodeURIComponent(JSON.stringify(filterById))}&filterType=and`;
-    }
-
-    return queryString;
-  };
-
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     try {
-      const expensesList = [
-        ...(selectedExpenseData || []),
-        ...(selectedExpense || [])
-      ];
-      const mergedExpenses = Array.from(
-        new Map(expensesList.map((expense) => [expense._id, expense])).values()
-      );
-  
-      const promises = mergedExpenses.map((expense) => {
-        const queryString = getQueryString(expense);
-        return axiosInstance().get(`${expenses.api}${queryString}`, {
+      const expensesIds = expenseIds || [];
+      const promises = expensesIds.map((expenseId) =>
+        axiosInstance().get(`${expenses.api}/${expenseId}`, {
           cancelToken: cancelTokenSource?.token
-        });
-      });
-  
+        })
+      );
+
       const results = await Promise.all(promises);
-  
+
       let fetchedRows = [];
       results.forEach((response) => {
-        const data = response?.data?.data || [];
-        const rows = data.map((u) => {
-          const finalObject = prepareDataForGrid(u, user);
+        const expense = response?.data?.data;
+        if (expense) {
+          const finalObject = prepareDataForGrid(expense, user);
           finalObject['isChecked'] = false;
           finalObject['canDelete'] = permissions?.expenses?.isDelete;
-          return finalObject;
-        });
-        fetchedRows = [...fetchedRows, ...rows];
+          fetchedRows.push(finalObject);
+        }
       });
-  
-      const deduplicatedFetchedRows = Array.from(
-        new Map(fetchedRows.map((item) => [item._id, item])).values()
-      );
-      const filteredRows = deduplicatedFetchedRows.filter(
-        (row) => !deletedIdsRef.current.has(row._id)
-      );
-  
+
+      const deduplicatedFetchedRows = Array.from(new Map(fetchedRows.map((item) => [item._id, item])).values());
+      const filteredRows = deduplicatedFetchedRows.filter((row) => !deletedIdsRef.current.has(row._id));
+
       const sum = filteredRows.reduce((acc, row) => acc + (Number(row.totalAmount) || 0), 0).toFixed(2);
       setSubtotal(sum);
-  
+
       currentDataRef.current = filteredRows;
       dispatch({ type: 'initialize', data: filteredRows, count: filteredRows.length });
-  
+
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
@@ -174,9 +139,7 @@ const Expenses = ({ selectedExpenseData, showAddButton, reportData = null, remov
 
   const updateExpensesStatus = async (expenseList) => {
     await Promise.all(
-      expenseList.map((expense) =>
-        axiosInstance().patch(`${expenses.api}/status/${expense._id}`, { status: EXPENSE_STATUS.unSubmitted })
-      )
+      expenseList.map((expense) => axiosInstance().patch(`${expenses.api}/status/${expense._id}`, { status: EXPENSE_STATUS.unSubmitted }))
     );
     fetchData();
   };
@@ -194,17 +157,17 @@ const Expenses = ({ selectedExpenseData, showAddButton, reportData = null, remov
       _id: reportData._id,
       reportTitle: reportData.reportTitle,
       status: reportData.status,
-      expenses: expense,
+      expenses: expense
     };
 
     try {
       const response = await axiosInstance().put(`${expenseReport.api}`, payload);
       await updateExpensesStatus(updatedExpenses);
-      fetchData();
+      fetchDataMaster();
       toastConfig.setToastConfig({
         open: true,
         type: 'success',
-        message: response.data.message,
+        message: response.data.message
       });
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -224,15 +187,15 @@ const Expenses = ({ selectedExpenseData, showAddButton, reportData = null, remov
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={row?.original?.canDelete && row?.original?.status !== EXPENSE_STATUS.awaitingApproval && row?.original?.status !== EXPENSE_STATUS.approved ? 'Delete' : 'Expense is Awaiting Approval'}>
+        <HtmlTooltip title={row?.original?.canDelete && allowedToEdit ? 'Delete' : 'Expense is Awaiting Approval'}>
           <span>
             <IconButton
               size="small"
               aria-label="Delete"
-              disabled={row?.original?.canDelete && reportData?.status !== EXPENSE_STATUS.awaitingApproval && reportData?.status !== EXPENSE_STATUS.approved ? true : false}
+              disabled={row?.original?.canDelete && allowedToEdit ? false : true}
               onClick={() => setDeleteData([row?.original?._id])}
             >
-              <DeleteIcon fontSize="small" color={row?.original?.canDelete && row?.original?.status !== EXPENSE_STATUS.awaitingApproval && row?.original?.status !== EXPENSE_STATUS.approved ? 'error' : 'disabled'} />
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete && allowedToEdit ? 'error' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -281,14 +244,16 @@ const Expenses = ({ selectedExpenseData, showAddButton, reportData = null, remov
   return (
     <div className="main-container-v1">
       <>
-        {reportData?.status !== EXPENSE_STATUS.awaitingApproval && reportData?.status !== EXPENSE_STATUS.approved && <DetailsPageHeader
-          isAddButtonVisible={showAddButton}
-          isActionButtonVisible={true}
-          actionButtonMenuItems={actionButtonMenuItems()}
-          addButtonMenuItems={addButtonMenuItems()}
-          actionButtonProps={{ disabled: selectedRecords.length === 0 }}
-          hasXpadding
-        />}
+        {allowedToEdit && (
+          <DetailsPageHeader
+            isAddButtonVisible={showAddButton}
+            isActionButtonVisible={true}
+            actionButtonMenuItems={actionButtonMenuItems()}
+            addButtonMenuItems={addButtonMenuItems()}
+            actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+            hasXpadding
+          />
+        )}
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 450px)'}
@@ -299,6 +264,7 @@ const Expenses = ({ selectedExpenseData, showAddButton, reportData = null, remov
             resource={sidebarResource.expenses}
             pagination={false}
             refreshGrid={fetchData}
+            hideSelection={!allowedToEdit}
           />
         ) : (
           <Box p={2} height={500}>
@@ -312,7 +278,9 @@ const Expenses = ({ selectedExpenseData, showAddButton, reportData = null, remov
                 <TableBody>
                   <TableRow>
                     <TableCell rowSpan={3} />
-                    <TableCell colSpan={2} sx={{ fontWeight: 'bold', fontSize: '1.1rem' }}><strong>Total :</strong></TableCell>
+                    <TableCell colSpan={2} sx={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
+                      <strong>Total :</strong>
+                    </TableCell>
                     <TableCell align="right" sx={{ fontSize: '1rem' }}>{`${subtotal}`}</TableCell>
                   </TableRow>
                 </TableBody>
@@ -325,7 +293,7 @@ const Expenses = ({ selectedExpenseData, showAddButton, reportData = null, remov
             open={true}
             message={`Are you sure you want to delete the record(s)?`}
             onClose={() => setDeleteData(null)}
-            onOk={() => removeRow(deleteData) }
+            onOk={() => removeRow(deleteData)}
           />
         )}
         {showAddExistingExpenseModal && (
@@ -345,7 +313,7 @@ const Expenses = ({ selectedExpenseData, showAddButton, reportData = null, remov
             onClose={() => setShowManageExpensesDialog({ open: false, idToClone: null })}
             onSuccess={async (data) => {
               setShowManageExpensesDialog({ open: false, idToClone: null });
-              await handleSaveAndSubmit(data);
+              handleSaveAndSubmit(data);
               fetchData();
             }}
             isRedirectToDetailPage={false}
