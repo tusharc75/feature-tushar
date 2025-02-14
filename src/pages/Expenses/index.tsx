@@ -45,7 +45,7 @@ const Expenses = () => {
   useEffect(() => {
     fetchGridColumns();
   }, []);
-  
+
   const fetchGridColumns = async () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.expenses}`);
@@ -179,7 +179,8 @@ const Expenses = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     try {
-      let data: any = [], count;
+      let data: any = [],
+        count;
       const response: any = await axiosInstance().get(`${expenses.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
       data = response?.data?.data;
       count = response?.data?.count;

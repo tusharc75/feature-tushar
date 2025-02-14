@@ -119,13 +119,13 @@ const ExpenseApproval = () => {
       </Box>
       <div className=" flex items-center justify-between ">
         <Box width={'19rem'}>
-        <ListingPageHeader
-          searchValue={search}
-          onSearch={handleSearch}
-          isActionButtonVisible={false}
-          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
-          isAddButtonVisible={false}
-        />
+          <ListingPageHeader
+            searchValue={search}
+            onSearch={handleSearch}
+            isActionButtonVisible={false}
+            actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+            isAddButtonVisible={false}
+          />
         </Box>
         <div className="flex">
           <HtmlTooltip title="Refresh">
@@ -200,7 +200,7 @@ const ExpenseApproval = () => {
                 </Box>
               </Grid>
               <Grid size={{ xs: 12, md: 8, lg: 9 }}>
-                {selectedExpenseReport && <Requests referenceId={selectedExpenseReport?._id} fetchDataMaster={fetchData}/>}
+                {selectedExpenseReport && <Requests referenceId={selectedExpenseReport?._id} fetchDataMaster={fetchData} />}
               </Grid>
             </Grid>
           ) : (

@@ -88,10 +88,10 @@ const ExpenseReportDetail = () => {
       .then(({ data: { data } }) => {
         setLoadingDetails(false);
         setAllowedToDelete(permissions?.expenseReport?.isDelete && data?.canDelete);
-        setExpenseReportData(data); 
-        if(data.status === EXPENSE_STATUS.awaitingApproval || data.status === EXPENSE_STATUS.approved){
+        setExpenseReportData(data);
+        if (data.status === EXPENSE_STATUS.awaitingApproval || data.status === EXPENSE_STATUS.approved) {
           setAllowedToEdit(false);
-        }else{
+        } else {
           setAllowedToEdit(permissions?.expenseReport?.isUpdate);
         }
       })
