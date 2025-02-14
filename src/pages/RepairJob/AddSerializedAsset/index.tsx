@@ -33,7 +33,7 @@ const SerializedAsset = ({
   renderedFrom,
   allowedToEdit,
   stepFullScreen,
-  alloweOperation,
+  allowedOperation,
   fetchRepairJobData
 }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -437,7 +437,7 @@ const SerializedAsset = ({
       {allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
         <>
           <DetailsPageHeader
-            isAddButtonVisible={alloweOperation}
+            isAddButtonVisible={allowedOperation}
             addButtonMenuItems={addButtonMenuItems()}
             isActionButtonVisible={true}
             actionButtonMenuItems={actionButtonMenuitems()}
