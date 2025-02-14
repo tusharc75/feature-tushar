@@ -131,26 +131,28 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
   }, [id]);
 
   useEffect(() => {
-    if (scheduleData && filterColumns?.length > 0 && resourceColumns?.length > 0) {
+    if (scheduleData && resourceColumns?.length > 0) {
       const filterById: any = [];
       const deepFilter: any = [];
 
       const column: any = [];
-      scheduleData?.filters?.forEach((_f) => {
-        const col = filterColumns?.find((c) => c?.fieldData?.fieldName === _f?.term)?.fieldData;
-        if (col?.lookup) {
-          filterById.push({
-            field: _f?.term,
-            term: _f?.value
-          });
-        } else {
-          deepFilter.push({
-            ..._f,
-            field: _f?.term,
-            term: _f?.value
-          });
-        }
-      });
+      if(filterColumns?.length){
+        scheduleData?.filters?.forEach((_f) => {
+          const col = filterColumns?.find((c) => c?.fieldData?.fieldName === _f?.term)?.fieldData;
+          if (col?.lookup) {
+            filterById.push({
+              field: _f?.term,
+              term: _f?.value
+            });
+          } else {
+            deepFilter.push({
+              ..._f,
+              field: _f?.term,
+              term: _f?.value
+            });
+          }
+        });
+      }
 
       if (scheduleData?.column?.length > 0) {
         scheduleData?.column?.map((c) => {
@@ -516,7 +518,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                         />
                       </div>
                     ) : (
-                      <div className="m-2">Loading ..</div>
+                      null
                     )
                   ) : null}
                   <Box my={2}>

@@ -30,7 +30,7 @@ import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ItemizeExpenses from 'src/pages/Expenses/ItemizeExpenses';
 
-const ManageExpenses = ({ isClone = false, expenseId = null,isRedirectToDetailPage = true, onClose, onSuccess }) => {
+const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailPage = true, onClose, onSuccess }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -98,7 +98,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null,isRedirectToDetailPa
               } else {
                 setValue(data.totalAmount);
                 setTextFields(data.lineItems);
-                if(data.status !== EXPENSE_STATUS.unreported){
+                if (data.status !== EXPENSE_STATUS.unreported) {
                   setIsDisabled(true);
                 }
                 setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data.currency)?.symbolNative);
@@ -156,8 +156,9 @@ const ManageExpenses = ({ isClone = false, expenseId = null,isRedirectToDetailPa
       axiosInstance()
         .post(`${expenses.api}`, values)
         .then(({ data: { data, message } }) => {
-          if(isRedirectToDetailPage){
-          history.push(`${routes.expensesDetail.path}/${data._id}`);}
+          if (isRedirectToDetailPage) {
+            history.push(`${routes.expensesDetail.path}/${data._id}`);
+          }
           setIsSubmitting(false);
           onSuccess(data);
           toastConfig.setToastConfig({
@@ -232,7 +233,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null,isRedirectToDetailPa
                     resource={sidebarResource.expenses}
                     referenceId={expenseId || null}
                   />
-                  <Grid container spacing={2} sx={{ display: 'flex', flexDirection:'column' }}>
+                  <Grid container spacing={2} sx={{ display: 'flex', flexDirection: 'column' }}>
                     <Grid size={{ xs: 6, sm: 6, md: 6, lg: 6 }}>
                       <TextField
                         id="outlined-required"
@@ -251,7 +252,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null,isRedirectToDetailPa
                         }}
                       />
                     </Grid>
-                    <Grid size={{ xs: 6, sm: 6, md: 6, lg: 6 }} sx={{display:'flex',justifyContent:'flex-end'}}>
+                    <Grid size={{ xs: 6, sm: 6, md: 6, lg: 6 }} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                       <ThemeButton buttonType="transparent" disabled={isDisabled} onClick={() => setShowItemizeDialog(true)}>
                         Itemize
                       </ThemeButton>

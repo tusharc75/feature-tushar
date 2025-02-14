@@ -9,7 +9,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { EXPENSE_STATUS, expenseReport, expenses, sidebarResource } from '../../constants/helpers';
 import Expenses from 'src/pages/ExpensesReport/Expenses';
 
-const Requests = ({ referenceId, fetchDataMaster, isMobile = false }) => {
+const Requests = ({ referenceId, fetchDataMaster }) => {
   const toastConfig = useContext(CustomToastContext);
   const [fields, setFields] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(true);
@@ -66,10 +66,10 @@ const Requests = ({ referenceId, fetchDataMaster, isMobile = false }) => {
     }
   };
 
-  const handleStatusChange = async (status) => {
+  const handleStatusChange = (status) => {
     if (!rowsData) return;
     try {
-      await axiosInstance().patch(`${expenseReport.api}/status/${rowsData._id}`, { status });
+      axiosInstance().patch(`${expenseReport.api}/status/${rowsData._id}`, { status });
       fetchDataMaster();
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -89,7 +89,7 @@ const Requests = ({ referenceId, fetchDataMaster, isMobile = false }) => {
                     handleStatusChange(EXPENSE_STATUS.approved);
                   }}
                 >
-                  Approve
+                  APPROVE
                 </ThemeButton>
                 <ThemeButton
                   buttonType="red"
@@ -97,7 +97,7 @@ const Requests = ({ referenceId, fetchDataMaster, isMobile = false }) => {
                     handleStatusChange(EXPENSE_STATUS.rejected);
                   }}
                 >
-                  Reject
+                  REJECT
                 </ThemeButton>
               </>
             )}
@@ -116,7 +116,13 @@ const Requests = ({ referenceId, fetchDataMaster, isMobile = false }) => {
           <Box>
             {!loadingDetails && rowsData && fields ? (
               <div className="mt-2">
-                <Expenses selectedExpenseData={rowsData?.expenses} showAddButton={true} reportData={rowsData} removeRow={null} />
+                <Expenses
+                  expenseIds={rowsData?.expenses?.map((expense) => expense._id)}
+                  showAddButton={true}
+                  reportData={rowsData}
+                  removeRow={null}
+                  allowedToEdit={false}
+                />
               </div>
             ) : (
               <div className="p-2">
