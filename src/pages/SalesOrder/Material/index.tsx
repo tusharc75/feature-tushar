@@ -20,13 +20,11 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
-import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import {
   CHILD_RESOURCE,
   MATERIAL_TYPE,
   PRICING_SETUP_TYPE,
   SALES_ORDER_STATUS,
-  pricingCondition,
   salesOrder,
   sidebarResource
 } from '../../../constants/helpers';
@@ -37,7 +35,7 @@ import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import ManageLeadTime from 'src/components/LeadTime/ManageLeadTime';
 import { ownerAndColaborator } from 'src/constants/messageHelpers';
-import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
+import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
 
 const renderedFrom = `${camelCase(sidebarResource.salesOrder)}_Material`;
 
@@ -267,15 +265,14 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
     rows = [...rows, ...additionalCost];
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.service
-            ? parent.serviceDetail?.serviceName
-            : parent.type === MATERIAL_TYPE.package
-              ? parent.packageDetail?.packageName
-              : parent.detail || ''
-      }`;
+      parent.detail = `${parent.type === MATERIAL_TYPE.product
+        ? parent.productDetail?.productName
+        : parent.type === MATERIAL_TYPE.service
+          ? parent.serviceDetail?.serviceName
+          : parent.type === MATERIAL_TYPE.package
+            ? parent.packageDetail?.packageName
+            : parent.detail || ''
+        }`;
       parent.description =
         parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription || ''
@@ -304,13 +301,12 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = `${
-        _subRow.type === MATERIAL_TYPE.product
-          ? _subRow.productDetail?.productName
-          : _subRow.type === MATERIAL_TYPE.service
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
-      }`;
+      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.product
+        ? _subRow.productDetail?.productName
+        : _subRow.type === MATERIAL_TYPE.service
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription
@@ -333,6 +329,11 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
 
   const handleAdd = async (rows) => {
     setSubmitting(true);
+    var taxCodeData: any = null;
+    const taxCodeOptions = await getTaxList(salesOrderData, addDialog.type);
+    if (taxCodeOptions?.length) {
+      taxCodeData = taxCodeOptions[0];
+    }
     const material: any = [];
     rows.forEach((d) => {
       const element: any = {};
@@ -341,9 +342,12 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
       element.unit = d?.unit && d?.unitMain?.length ? d?.unitMain[0] : '';
       element.qty = d.qty ? parseFloat(d.qty) : 1;
       element.parentId = addDialog.parentId;
+      if (taxCodeData && allFields?.find((e) => e.fieldName === 'taxCode')) {
+        element.taxCode = taxCodeData?.optionValue;
+        element.taxPercentage = taxCodeData?.taxRate || 0;
+      }
       material.push(element);
     });
-
     let priceData: any = await getPricingConditions(salesOrderData, material, PRICING_SETUP_TYPE.price);
     if (priceData) {
       material.forEach((element) => {
@@ -351,22 +355,18 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
         Object.assign(element, calValues);
       });
     }
-
-    axiosInstance()
-      .post(`${salesOrder.api}/material/${salesOrderData._id}`, { material })
-      .then(() => {
-        setAddDialog({ open: false, type: '', parentId: null });
-        fetchData();
-        fetchSalesOrderData();
-        setSubmitting(false);
-        if (salesOrderData?.status === SALES_ORDER_STATUS.new) {
-          updateJobStatus(SALES_ORDER_STATUS.inProgress);
-        }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setSubmitting(false);
-      });
+    axiosInstance().post(`${salesOrder.api}/material/${salesOrderData._id}`, { material }).then(() => {
+      setAddDialog({ open: false, type: '', parentId: null });
+      fetchData();
+      fetchSalesOrderData();
+      setSubmitting(false);
+      if (salesOrderData?.status === SALES_ORDER_STATUS.new) {
+        updateJobStatus(SALES_ORDER_STATUS.inProgress);
+      }
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+      setSubmitting(false);
+    });
   };
 
   const handleAddCost = (rows) => {
