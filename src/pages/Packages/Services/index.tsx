@@ -51,9 +51,9 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
     dispatch({ type: 'selection', selectedRecords: [] });
     let api = `${packages.api}/${packageId}/services`;
     if (tabValue === 1) {
-      api += `?type=Assembly`;
+      api += `?type=${sidebarResource.assemblyOrder}`;
     } else if (tabValue === 2) {
-      api += `?type=Disassembly`;
+      api += `?type=${sidebarResource.disassemblyOrder}`;
     }
     axiosInstance()
       .get(api).then(({ data: { data } }) => {
@@ -105,7 +105,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
       .put(`${packages.api}/${packageId}/services`, {
         ids: [row?._id],
         qty: Number(data?.qty),
-        type: tabValue === 1 ? 'Assembly' : tabValue === 2 ? 'Disassembly' : ''
+        type: tabValue === 1 ? sidebarResource.assemblyOrder : tabValue === 2 ? sidebarResource.disassemblyOrder : ''
       })
       .then(() => {
         fetchData();
@@ -117,7 +117,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
     setRemovingServices(true);
     const Ids = selectedRecords.map((d) => d._id);
     axiosInstance()
-      .put(`${packages.api}/${packageId}/services/remove`, { ids: Ids, type: tabValue === 1 ? 'Assembly' : tabValue === 2 ? 'Disassembly' : '' })
+      .put(`${packages.api}/${packageId}/services/remove`, { ids: Ids, type: tabValue === 1 ? sidebarResource.assemblyOrder : tabValue === 2 ? sidebarResource.disassemblyOrder : '' })
       .then(() => {
         setRemovingServices(false);
         setShowServiceConfirmBox(false);
@@ -140,7 +140,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
       .put(`${packages.api}/material/${packageId}/order`, {
         packageType: 'Service',
         data: rows || [],
-        type: tabValue === 1 ? 'Assembly' : tabValue === 2 ? 'Disassembly' : ''
+        type: tabValue === 1 ? sidebarResource.assemblyOrder : tabValue === 2 ? sidebarResource.disassemblyOrder : ''
       })
       .then(() => {
         fetchData();
@@ -160,7 +160,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
       .post(`${packages.api}/material`, {
         ids: [packageId],
         services: rows.map((d: any) => ({ service: d.id, qty: Number(d.qty) })),
-        type: tabValue === 1 ? 'Assembly' : tabValue === 2 ? 'Disassembly' : ''
+        type: tabValue === 1 ? sidebarResource.assemblyOrder : tabValue === 2 ? sidebarResource.disassemblyOrder : ''
       })
       .then(({ data }) => {
         setShowServiceAssignDialog(false);
@@ -215,7 +215,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
             }}
             isExportAllOrSomeFeature={true}
             ids={[]}
-            additionalParams={`refrenceId=${packageId}${tabValue === 1 ? '&type=Assembly' : tabValue === 2 ? '&type=Disassembly' : ''}`}
+            additionalParams={`refrenceId=${packageId}${tabValue === 1 ? `&type=${sidebarResource.assemblyOrder}` : tabValue === 2 ? `&type=${sidebarResource.disassemblyOrder}` : ''}`}
           />
           {dataRows?.length > 0 ? (
             <ThemeButton

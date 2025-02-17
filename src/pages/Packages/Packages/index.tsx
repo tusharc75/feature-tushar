@@ -53,7 +53,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
     dispatch({ type: 'selection', selectedRecords: [] });
     let api = `${packages.api}/${packageId}/package`;
     if (tabValue === 1) {
-      api += `?type=Assembly`;
+      api += `?type=${sidebarResource.assemblyOrder}`;
     }
     axiosInstance()
       .get(api).then(({ data: { data } }) => {
@@ -105,7 +105,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
         .put(`${packages.api}/${packageId}/package`, {
           ids: [row?._id],
           qty: Number(data?.qty),
-          type: tabValue === 1 ? 'Assembly' : ''
+          type: tabValue === 1 ? sidebarResource.assemblyOrder : ''
         })
         .then(() => {
           fetchData();
@@ -120,7 +120,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
     setRemovingProducts(true);
     const Ids = selectedRecords.map((d) => d._id);
     axiosInstance()
-      .put(`${packages.api}/${packageId}/package/remove`, { ids: Ids, type: tabValue === 1 ? 'Assembly' : '' })
+      .put(`${packages.api}/${packageId}/package/remove`, { ids: Ids, type: tabValue === 1 ? sidebarResource.assemblyOrder : '' })
       .then(() => {
         setRemovingProducts(false);
         setShowProductConfirmBox(false);
@@ -139,7 +139,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
       .post(`${packages.api}/${packageId}/package`, {
         ids: [packageId],
         packages: rows?.map((d: any) => ({ packageId: d?._id, qty: d?.qty ? Number(d?.qty) : Number(1) })),
-        type: tabValue === 1 ? 'Assembly' : ''
+        type: tabValue === 1 ? sidebarResource.assemblyOrder : ''
       })
       .then(() => {
         setShowProductAssignDialog(false);
@@ -191,7 +191,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
             }}
             isExportAllOrSomeFeature={true}
             ids={[]}
-            additionalParams={`refrenceId=${packageId}${tabValue === 1 ? '&type=Assembly' : ''}`}
+            additionalParams={`refrenceId=${packageId}${tabValue === 1 ? `&type=${sidebarResource.assemblyOrder}` : ''}`}
           />
           {dataRows?.length > 0 ? (
             <ThemeButton
@@ -215,7 +215,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
       .put(`${packages.api}/material/${packageId}/order`, {
         packageType: 'Package',
         data: rows || [],
-        type: tabValue === 1 ? 'Assembly' : ''
+        type: tabValue === 1 ? sidebarResource.assemblyOrder : ''
       })
       .then(() => {
         fetchData();

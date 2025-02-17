@@ -53,9 +53,9 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
     dispatch({ type: 'selection', selectedRecords: [] });
     let api = `${packages.api}/${packageId}/products`;
     if (tabValue === 1) {
-      api += `?type=Assembly`;
+      api += `?type=${sidebarResource.assemblyOrder}`;
     } else if (tabValue === 2) {
-      api += `?type=Disassembly`;
+      api += `?type=${sidebarResource.disassemblyOrder}`;
     }
     axiosInstance()
       .get(api).then(({ data: { data } }) => {
@@ -107,7 +107,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
       .put(`${packages.api}/${packageId}/products`, {
         ids: [row._id],
         qty: Number(data.qty),
-        type: tabValue === 1 ? 'Assembly' : tabValue === 2 ? 'Disassembly' : ''
+        type: tabValue === 1 ? sidebarResource.assemblyOrder : tabValue === 2 ? sidebarResource.disassemblyOrder : ''
       })
       .then(({ data }) => {
         setToastConfig({
@@ -124,7 +124,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
     setRemovingProducts(true);
     const productIds = showProductConfirmBox?.data?.map((d) => d._id) || [];
     axiosInstance()
-      .put(`${packages.api}/${packageId}/products/remove`, { ids: productIds, type: tabValue === 1 ? 'Assembly' : tabValue === 2 ? 'Disassembly' : '' })
+      .put(`${packages.api}/${packageId}/products/remove`, { ids: productIds, type: tabValue === 1 ? sidebarResource.assemblyOrder : tabValue === 2 ? sidebarResource.disassemblyOrder : '' })
       .then(({ data }) => {
         setRemovingProducts(false);
         setShowProductConfirmBox({ open: false, data: null });
@@ -148,7 +148,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
       .post(`${packages.api}/material`, {
         ids: [packageId],
         products: rows.map((d: any) => ({ product: d.id, qty: Number(d.qty) })),
-        type: tabValue === 1 ? 'Assembly' : tabValue === 2 ? 'Disassembly' : ''
+        type: tabValue === 1 ? sidebarResource.assemblyOrder : tabValue === 2 ? sidebarResource.disassemblyOrder : ''
       })
       .then(({ data }) => {
         fetchData();
@@ -199,7 +199,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
       .put(`${packages.api}/material/${packageId}/order`, {
         packageType: 'Product',
         data: rows || [],
-        type: tabValue === 1 ? 'Assembly' : tabValue === 2 ? 'Disassembly' : ''
+        type: tabValue === 1 ? sidebarResource.assemblyOrder : tabValue === 2 ? sidebarResource.disassemblyOrder : ''
       })
       .then(() => {
         fetchData();
@@ -226,7 +226,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
             }}
             isExportAllOrSomeFeature={true}
             ids={[]}
-            additionalParams={`refrenceId=${packageId}${tabValue === 1 ? '&type=Assembly' : tabValue === 2 ? '&type=Disassembly' : ''}`}
+            additionalParams={`refrenceId=${packageId}${tabValue === 1 ? `&type=${sidebarResource.assemblyOrder}` : tabValue === 2 ? `&type=${sidebarResource.disassemblyOrder}` : ''}`}
           />
           {dataRows?.length > 0 ? (
             <ThemeButton
