@@ -11,7 +11,6 @@ import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, EXPENSE_STATUS
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import Grid from '@mui/material/Grid2';
-import { isMobile } from 'react-device-detect';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import Requests from 'src/pages/ExpenseApproval/Requests';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -25,8 +24,6 @@ const ExpenseApproval = () => {
   const {
     state: { user, permissions, selectedEntity, resources }
   }: any = useData();
-  const [deleteRecord, setDeleteRecord] = useState(null);
-  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [reportData, setReportData] = useState(null);
@@ -89,7 +86,7 @@ const ExpenseApproval = () => {
       data = response?.data?.data;
       count = response?.data?.count;
       data = data.filter((item) => item.status === EXPENSE_STATUS.awaitingApproval || item.status === EXPENSE_STATUS.approved);
-      if (data?.length && !isMobile) {
+      if (data?.length) {
         setSelectedExpenseReport(data[0]);
       }
       setReportData(data);
@@ -113,24 +110,6 @@ const ExpenseApproval = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const ActionMenuItems = () => {
-    return (
-      <MenuItem
-        disabled={selectedRecords.every((e) => e?.canDelete) ? false : true}
-        onClick={() => {
-          if (selectedRecords?.length === 1) {
-            setDeleteRecord(selectedRecords[0]);
-          } else {
-            setDeleteRecord(null);
-          }
-          setShowDeleteConfirmBox(true);
-        }}
-      >
-        {`Delete (${selectedRecords?.length})`}
-      </MenuItem>
-    );
-  };
-
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -138,35 +117,33 @@ const ExpenseApproval = () => {
           <CustomBreadCrumbs routes={[{ ...routes.expenseApproval, title: resources?.expenseApproval?.titlePlural }]} />
         </Box>
       </Box>
-      <div className="mb-4 flex items-center justify-end">
-        <ListingPageHeader
-          searchValue={search}
-          onSearch={handleSearch}
-          isActionButtonVisible={false}
-          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
-          actionMenuItems={<ActionMenuItems />}
-          isAddButtonVisible={false}
-        />
-        <div className="flex gap-2">
-          <HtmlTooltip title="Refresh">
-            <IconButton size="small" onClick={() => fetchData()}>
-              <RefreshIcon />
-            </IconButton>
-          </HtmlTooltip>
-        </div>
-      </div>
       <Box className={`detail-container-v1`}>
         {reportData ? (
           reportData?.length > 0 ? (
             <Grid container spacing={2}>
               <Grid size={{ xs: 12, md: 4, lg: 3 }}>
                 <Box className="container-with-border" p={2}>
-                  <Box style={{ maxHeight: isMobile ? 'calc(100vh - 100px)' : 'calc(100vh - 220px)', overflow: 'auto' }}>
+                  <div className=" flex items-center justify-between ">
+                    <Box width={'15rem'}>
+                      <ListingPageHeader
+                        searchValue={search}
+                        onSearch={handleSearch}
+                        isActionButtonVisible={false}
+                        actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+                        isAddButtonVisible={false}
+                      />
+                    </Box>
+                    <div className="flex">
+                      <HtmlTooltip title="Refresh">
+                        <IconButton size="small" onClick={() => fetchData()}>
+                          <RefreshIcon />
+                        </IconButton>
+                      </HtmlTooltip>
+                    </div>
+                  </div>
+                  <Box style={{ maxHeight: 'calc(100vh - 220px)', overflow: 'auto' }}>
                     {reportData?.map((report) => {
-                        const reportTotal = report.expenses?.reduce(
-                          (acc, expense) => acc + (Number(expense.totalAmount) || 0),
-                          0
-                        ) || 0;
+                      const reportTotal = report.expenses?.reduce((acc, expense) => acc + (Number(expense.totalAmount) || 0), 0) || 0;
                       return (
                         <Box
                           mb={2}
@@ -209,7 +186,7 @@ const ExpenseApproval = () => {
                                   padding: '4px 12px',
                                   borderRadius: '16px',
                                   fontSize: '0.875rem',
-                                  border: report?.status === EXPENSE_STATUS.approved ? '1px solid #80DEEA' : '1px solid #ffad33',
+                                  border: report?.status === EXPENSE_STATUS.approved ? '1px solid #80DEEA' : '1px solid #ffad33'
                                 }}
                               >
                                 {toUpper(report?.status)}
@@ -224,23 +201,15 @@ const ExpenseApproval = () => {
               </Grid>
               <Grid size={{ xs: 12, md: 8, lg: 9 }}>
                 {selectedExpenseReport && (
-                  <>
-                    {isMobile ? (
-                      <>
-                        <Requests referenceId={selectedExpenseReport?._id} fetchDataMaster={fetchData} isMobile={isMobile} />
-                      </>
-                    ) : (
-                      <Box className="container-with-border " p={3}>
-                        <Requests referenceId={selectedExpenseReport?._id} fetchDataMaster={fetchData} />
-                      </Box>
-                    )}
-                  </>
+                  <Box className="container-with-border" p={3}>
+                    <Requests referenceId={selectedExpenseReport?._id} fetchDataMaster={fetchData} />
+                  </Box>
                 )}
               </Grid>
             </Grid>
           ) : (
             <Box style={{ minHeight: 'calc(100vh - 349px)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              <Typography>No Request Pending !</Typography>
+              <Typography>No Request !</Typography>
             </Box>
           )
         ) : (

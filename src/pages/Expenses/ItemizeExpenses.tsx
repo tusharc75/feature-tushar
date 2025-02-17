@@ -102,13 +102,15 @@ const ItemizeExpenses = ({
           ))}
           <Grid container spacing={2} sx={{ alignItems: 'center', marginTop: 2 }}>
             <Grid size={{ xs: 8 }} sx={{ display: 'flex', alignItems: 'center' }}>
-              <ThemeButton onClick={addTextField} buttonType='themeBorder' sx={{marginRight: 0.5 }} aria-label="add">
+              <ThemeButton onClick={addTextField} buttonType="themeBorder" sx={{ marginRight: 0.5 }} aria-label="add">
                 <AddIcon fontSize="small" />
                 Add
               </ThemeButton>
             </Grid>
             <Grid size={{ xs: 4 }} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <Typography variant="h6">Total Amount: {currencySymbol} {value}</Typography>
+              <Typography variant="h6">
+                Total Amount: {currencySymbol} {value}
+              </Typography>
             </Grid>
           </Grid>
         </div>
