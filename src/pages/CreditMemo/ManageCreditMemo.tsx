@@ -94,9 +94,7 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = 
           if (referenceData) {
             if (referenceData?.taxCode) {
               const taxRate = await fetchTaxRate(referenceData?.taxCode);
-              if (taxRate) {
-                referenceData.taxPercentage = taxRate;
-              }
+              referenceData.taxPercentage = taxRate;
             }
             for (const key in referenceData) {
               if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
