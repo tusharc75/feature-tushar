@@ -407,7 +407,8 @@ export const sidebarResource = {
   workSpace: 'Work Space',
   workflow: 'Workflow',
   workflowReport: 'Workflow Report',
-  equiptAi: 'Equipt Ai'
+  equiptAi: 'Equipt Ai',
+  productTypes: 'Product Types'
 };
 
 export const primaryFields = {
@@ -826,6 +827,11 @@ export const workOrder = {
   resource: 'Work Order',
   api: '/work-order'
 };
+
+export const productTypes = {
+  resource: 'Product Types',
+  api: '/product-types'
+}
 
 export const profileMenuItems = {
   profile: 1,
