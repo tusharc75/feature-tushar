@@ -5,7 +5,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE, salesOrder, PRICING_SETUP_TYPE } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE, PRICING_SETUP_TYPE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -18,8 +18,7 @@ import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { bulkUpdate, calculateRowsField } from 'src/components/RentalManagment/helper';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import dayjs from 'dayjs';
-import { getPricingConditions } from 'src/components/PricingCondition';
+import { getPricingConditions, getTaxList } from 'src/components/PricingCondition';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -137,12 +136,18 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
     EvaluteproductFields(data);
   };
 
-  const EvaluteproductFields = (fields) => {
+  const EvaluteproductFields = async (fields) => {
     const sections = uniq(map(fields, 'sectionName'));
     const customData = sections.map((name) => {
       let sectionFields = fields.filter((field) => field.sectionName === name);
       sectionFields = orderBy(sectionFields, 'order', 'asc');
       return { name, sectionFields };
+    });
+    const taxCodeOptions = await getTaxList(salesOrderData, isBulkedit ? rowData[0]?.type : rowData?.type);
+    fields?.forEach((e: any) => {
+      if (e?.fieldName === 'taxCode') {
+        e.option = taxCodeOptions;
+      }
     });
     setFields(customData);
   };
@@ -176,7 +181,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
 
   async function getAllPricingCondition(values: any, pricingMethodOptions: any) {
     if (rowData) {
-      let priceData: any = await getPricingConditions(salesOrderData,[
+      let priceData: any = await getPricingConditions(salesOrderData, [
         {
           materialId: rowData.materialId,
           type: rowData.type,
@@ -225,21 +230,6 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
     return { tempPriceCondition, tempPricingMethod };
   };
 
-  function validate(values) {
-    const errors = {};
-    let startDate = dayjs(values?.estimateStartDate);
-    let endDate = dayjs(values?.estimateEndDate);
-    if (endDate.diff(startDate, 'day') < 0) {
-      errors['endDate'] = 'Please enter valid end date';
-    }
-    if (rowData && rowData.hideSelection) {
-      if (values.qty < rowData.assetQty) {
-        errors['qty'] = 'The quantity is less than what was assigned.';
-      }
-    }
-    return errors;
-  }
-
   return (
     <Dialog
       maxWidth="md"
@@ -256,7 +246,6 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
           initialValues={initialData.values}
           validationSchema={yupSchema(initialData.fields)}
           validateOnMount
-          validate={validate}
           onSubmit={handleSubmit}
         >
           {({ values, errors, touched, setFieldValue, submitForm }) => (
@@ -312,6 +301,45 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
                                     tooltipMessage={field.tooltipMessage}
                                     size="small"
                                   />
+                                ) : field.fieldName === 'taxCode' ? (
+                                  <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
+                                    <Box display="flex">
+                                      <Box flexGrow={1}>
+                                        <FormTypes
+                                          {...field}
+                                          fields={initialData.fields}
+                                          fieldData={field}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={(name, value) => {
+                                            setFieldValue(name, value);
+                                            const taxCode = field.option?.find((d) => d.optionValue === value);
+                                            setFieldValue('taxPercentage', taxCode?.taxRate || 0);
+                                            const result = autoCalculateSpecificFields(
+                                              { ['taxPercentage']: taxCode?.taxRate || 0 },
+                                              values,
+                                              initialData.fields
+                                            );
+                                            if (Object.keys(result).length >= 1) {
+                                              for (var x in result) {
+                                                setFieldValue(x, result[x]);
+                                              }
+                                            }
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field.isTooltip}
+                                          tooltipMessage={field.tooltipMessage}
+                                          size="small"
+                                        />
+                                      </Box>
+                                    </Box>
+                                  </Grid>
                                 ) : rateChangeFields.includes(field.fieldName) && !isBulkedit ? (
                                   <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                     <Box display="flex">
