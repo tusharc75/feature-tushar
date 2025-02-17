@@ -133,7 +133,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom,stepFullScreen, 
     let columns: any = [];
     const productResult = await axiosInstance().get('/field?resource=Product&view=true');
     const productFields = productResult?.data?.data?.filter((e) =>
-      ['productCategory', 'productNumber', 'serializedProduct', 'chartOfAccount'].includes(e?.fieldData?.fieldName)
+      ['productCategory', 'productNumber', 'serializedProduct', 'chartOfAccount','revenueCode','costCode'].includes(e?.fieldData?.fieldName)
     );
     columns.push({
       accessor: 'index',
@@ -210,7 +210,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom,stepFullScreen, 
         return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
       }
     });
-
+       
     const productFieldsColumns = generateColumns(renderedFrom, productFields);
     productFieldsColumns?.forEach((e) => {
       columns.push(e);
@@ -363,6 +363,8 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom,stepFullScreen, 
       res.serializedProduct = item.productDetail?.serializedProduct;
       res.productCategory = item.productDetail?.productCategory;
       res.chartOfAccount = item.productDetail?.chartOfAccount;
+      res.revenueCode = item.productDetail?.revenueCode;
+      res.costCode = item.productDetail?.costCode;
       res.parentId = null;
       res.qty = item?.qty;
       res.productDetail = item?.productDetail;
