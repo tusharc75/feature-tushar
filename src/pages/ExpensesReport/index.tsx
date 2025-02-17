@@ -84,18 +84,18 @@ const ExpenseReport = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
+        <HtmlTooltip title={row?.original?.canDelete || row?.original?.expenses?.length === 0 ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
               size="small"
               aria-label="Delete"
-              disabled={row?.original?.canDelete ? false : true}
+              disabled={row?.original?.canDelete || row?.original?.expenses?.length === 0 ? false : true}
               onClick={() => {
                 setDeleteRecord(row.original);
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete || row?.original?.expenses?.length === 0 ? 'error' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
