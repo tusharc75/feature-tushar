@@ -35,6 +35,15 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = 
     fetchFields();
   }, []);
 
+  const fetchTaxRate = async (taxCodeId: string) => {
+    try {
+      const response = await axiosInstance().get(`${routes?.taxMaster.path}/${taxCodeId}`);
+      return response?.data?.data?.cityTaxRate || response?.data?.data?.countyTaxRate || response?.data?.data?.stateTaxRate || 0;
+    } catch (e) {
+      toastConfig.setToastConfig(e);
+    }
+  };
+
   const fetchFields = async () => {
     try {
       let data;
@@ -83,6 +92,12 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = 
           );
           referenceData.invoice = invoiceData?._id;
           if (referenceData) {
+            if (referenceData?.taxCode) {
+              const taxRate = await fetchTaxRate(referenceData?.taxCode);
+              if (taxRate) {
+                referenceData.taxPercentage = taxRate;
+              }
+            }
             for (const key in referenceData) {
               if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
                 tempInitialData[key] = referenceData[key];
