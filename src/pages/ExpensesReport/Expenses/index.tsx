@@ -49,11 +49,11 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
 
   useEffect(() => {
     fetchGridColumns();
-  }, []);
+  }, [allowedToEdit]);
 
   useEffect(() => {
     fetchData();
-  }, [selectedEntity, expenseIds, selectedExpense, reportData]);
+  }, [selectedEntity, expenseIds]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -99,24 +99,15 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     try {
-      const expensesIds = expenseIds || [];
-      const promises = expensesIds.map((expenseId) =>
-        axiosInstance().get(`${expenses.api}/${expenseId}`, {
-          cancelToken: cancelTokenSource?.token
-        })
-      );
-
-      const results = await Promise.all(promises);
+      const response: any = await axiosInstance().get(`${expenses.api}`, { cancelToken: cancelTokenSource?.token });
+      const filteredExpenses = response?.data?.data.filter((expense) => expenseIds?.includes(expense._id));
 
       let fetchedRows = [];
-      results.forEach((response) => {
-        const expense = response?.data?.data;
-        if (expense) {
-          const finalObject = prepareDataForGrid(expense, user);
-          finalObject['isChecked'] = false;
-          finalObject['canDelete'] = permissions?.expenses?.isDelete;
-          fetchedRows.push(finalObject);
-        }
+      filteredExpenses.map((expense) => {
+        const finalObject = prepareDataForGrid(expense, user);
+        finalObject['isChecked'] = false;
+        finalObject['canDelete'] = permissions?.expenses?.isDelete;
+        fetchedRows.push(finalObject);
       });
 
       const deduplicatedFetchedRows = Array.from(new Map(fetchedRows.map((item) => [item._id, item])).values());
@@ -137,11 +128,8 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
     }
   };
 
-  const updateExpensesStatus = async (expenseList) => {
-    await Promise.all(
-      expenseList.map((expense) => axiosInstance().patch(`${expenses.api}/status/${expense._id}`, { status: EXPENSE_STATUS.unSubmitted }))
-    );
-    fetchData();
+  const updateExpensesStatus = () => {
+    axiosInstance().patch(`${expenseReport.api}/status/${reportData._id}`, { status: EXPENSE_STATUS.unSubmitted });
   };
 
   const handleSaveAndSubmit = async (newExpenses) => {
@@ -162,7 +150,7 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
 
     try {
       const response = await axiosInstance().put(`${expenseReport.api}`, payload);
-      await updateExpensesStatus(updatedExpenses);
+      await updateExpensesStatus();
       fetchDataMaster();
       toastConfig.setToastConfig({
         open: true,
