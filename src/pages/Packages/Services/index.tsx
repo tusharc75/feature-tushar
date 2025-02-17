@@ -7,6 +7,7 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -22,7 +23,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
 
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { permissions, user }
+    state: { permissions, user, resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -34,19 +35,29 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
   const [arrangeView, setArrangeView] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
   const { dataRows, selectedRecords } = state;
+  const [tabValue, setTabValue] = useState(0);
 
   useEffect(() => {
     fetchGridColumns();
-    fetchData();
   }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [tabValue]);
+
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
+    let api = `${packages.api}/${packageId}/services`;
+    if (tabValue === 1) {
+      api += `?type=${sidebarResource.assemblyOrder}`;
+    } else if (tabValue === 2) {
+      api += `?type=${sidebarResource.disassemblyOrder}`;
+    }
     axiosInstance()
-      .get(`${packages.api}/${packageId}/services`)
-      .then(({ data: { data } }) => {
-        let rows = data.map((u) => {
+      .get(api).then(({ data: { data } }) => {
+        let rows = data?.map((u) => {
           let res = {
             ...prepareDataForGrid(u, user)
           };
@@ -93,7 +104,8 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
     axiosInstance()
       .put(`${packages.api}/${packageId}/services`, {
         ids: [row?._id],
-        qty: Number(data?.qty)
+        qty: Number(data?.qty),
+        type: tabValue === 1 ? sidebarResource.assemblyOrder : tabValue === 2 ? sidebarResource.disassemblyOrder : ''
       })
       .then(() => {
         fetchData();
@@ -101,11 +113,11 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
       .catch((err) => toastConfig.setToastConfig(err));
   };
 
-  const removeProducts = () => {
+  const removeServices = () => {
     setRemovingServices(true);
     const Ids = selectedRecords.map((d) => d._id);
     axiosInstance()
-      .put(`${packages.api}/${packageId}/services/remove`, { ids: Ids })
+      .put(`${packages.api}/${packageId}/services/remove`, { ids: Ids, type: tabValue === 1 ? sidebarResource.assemblyOrder : tabValue === 2 ? sidebarResource.disassemblyOrder : '' })
       .then(() => {
         setRemovingServices(false);
         setShowServiceConfirmBox(false);
@@ -127,7 +139,8 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
     axiosInstance()
       .put(`${packages.api}/material/${packageId}/order`, {
         packageType: 'Service',
-        data: rows || []
+        data: rows || [],
+        type: tabValue === 1 ? sidebarResource.assemblyOrder : tabValue === 2 ? sidebarResource.disassemblyOrder : ''
       })
       .then(() => {
         fetchData();
@@ -146,7 +159,8 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
     axiosInstance()
       .post(`${packages.api}/material`, {
         ids: [packageId],
-        services: rows.map((d: any) => ({ service: d.id, qty: Number(d.qty) }))
+        services: rows.map((d: any) => ({ service: d.id, qty: Number(d.qty) })),
+        type: tabValue === 1 ? sidebarResource.assemblyOrder : tabValue === 2 ? sidebarResource.disassemblyOrder : ''
       })
       .then(({ data }) => {
         setShowServiceAssignDialog(false);
@@ -201,20 +215,35 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
             }}
             isExportAllOrSomeFeature={true}
             ids={[]}
-            additionalParams={`refrenceId=${packageId}`}
+            additionalParams={`refrenceId=${packageId}${tabValue === 1 ? `&type=${sidebarResource.assemblyOrder}` : tabValue === 2 ? `&type=${sidebarResource.disassemblyOrder}` : ''}`}
           />
-          <ThemeButton
-            startIcon={<GrDrag fontSize="small" />}
-            onClick={() => setArrangeView(true)}>
-            Arrange
-          </ThemeButton>
+          {dataRows?.length > 0 ? (
+            <ThemeButton
+              startIcon={<GrDrag fontSize="small" />}
+              onClick={() => setArrangeView(true)}>
+              Arrange
+            </ThemeButton>
+          ) : null}
         </>
       )
     );
   };
 
+  const handleMainTabChange = (event: any, newValue: number) => {
+    setTabValue(newValue);
+  };
+
   return (
     <Box>
+      {(permissions?.assemblyOrder?.isRead || permissions?.disassemblyOrder?.isRead) && (
+        <>
+          <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
+            <CustomTab value={0} label={`Individual`} />
+            {permissions?.assemblyOrder?.isRead && <CustomTab value={1} label={`${resources?.assemblyOrder?.titleSingular}`} />}
+            {permissions?.disassemblyOrder?.isRead && <CustomTab value={2} label={`${resources?.disassemblyOrder?.titleSingular}`} />}
+          </CustomTabs>
+        </>
+      )}
       <DetailsPageHeader
         isAddButtonVisible={allowedToEdit}
         addButtonMenuItems={addButtonMenuItems()}
@@ -260,7 +289,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
             setShowServiceConfirmBox(false);
           }}
           okBtnLoading={isRemovingServices}
-          onOk={removeProducts}
+          onOk={removeServices}
         />
       )}
       {arrangeView && (
