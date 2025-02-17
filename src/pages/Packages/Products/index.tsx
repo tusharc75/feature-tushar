@@ -8,6 +8,7 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -24,7 +25,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
   const { setToastConfig } = useContext(CustomToastContext);
 
   const {
-    state: { permissions, user }
+    state: { permissions, user, resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -37,19 +38,28 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
+  const [tabValue, setTabValue] = useState(0);
 
   useEffect(() => {
     fetchColumns();
-    fetchData();
   }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [tabValue]);
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
+    let api = `${packages.api}/${packageId}/products`;
+    if (tabValue === 1) {
+      api += `?type=Assembly`;
+    } else if (tabValue === 2) {
+      api += `?type=Disassembly`;
+    }
     axiosInstance()
-      .get(`${packages.api}/${packageId}/products`)
-      .then(({ data: { data } }) => {
-        let rows = data.map((u, index) => {
+      .get(api).then(({ data: { data } }) => {
+        let rows = data?.map((u, index) => {
           let res: any = {
             ...prepareDataForGrid(u, user)
           };
@@ -96,7 +106,8 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
     axiosInstance()
       .put(`${packages.api}/${packageId}/products`, {
         ids: [row._id],
-        qty: Number(data.qty)
+        qty: Number(data.qty),
+        type: tabValue === 1 ? 'Assembly' : tabValue === 2 ? 'Disassembly' : ''
       })
       .then(({ data }) => {
         setToastConfig({
@@ -113,7 +124,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
     setRemovingProducts(true);
     const productIds = showProductConfirmBox?.data?.map((d) => d._id) || [];
     axiosInstance()
-      .put(`${packages.api}/${packageId}/products/remove`, { ids: productIds })
+      .put(`${packages.api}/${packageId}/products/remove`, { ids: productIds, type: tabValue === 1 ? 'Assembly' : tabValue === 2 ? 'Disassembly' : '' })
       .then(({ data }) => {
         setRemovingProducts(false);
         setShowProductConfirmBox({ open: false, data: null });
@@ -136,7 +147,8 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
     axiosInstance()
       .post(`${packages.api}/material`, {
         ids: [packageId],
-        products: rows.map((d: any) => ({ product: d.id, qty: Number(d.qty) }))
+        products: rows.map((d: any) => ({ product: d.id, qty: Number(d.qty) })),
+        type: tabValue === 1 ? 'Assembly' : tabValue === 2 ? 'Disassembly' : ''
       })
       .then(({ data }) => {
         fetchData();
@@ -186,7 +198,8 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
     axiosInstance()
       .put(`${packages.api}/material/${packageId}/order`, {
         packageType: 'Product',
-        data: rows || []
+        data: rows || [],
+        type: tabValue === 1 ? 'Assembly' : tabValue === 2 ? 'Disassembly' : ''
       })
       .then(() => {
         fetchData();
@@ -202,8 +215,8 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
 
   const rightSideContents = () => {
     return (
-      <>
-        {allowedToEdit && (
+      allowedToEdit && (
+        <>
           <ImportExportMenu
             permissions={permissions?.packages}
             module="products"
@@ -213,20 +226,35 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
             }}
             isExportAllOrSomeFeature={true}
             ids={[]}
-            additionalParams={`refrenceId=${packageId}`}
+            additionalParams={`refrenceId=${packageId}${tabValue === 1 ? '&type=Assembly' : tabValue === 2 ? '&type=Disassembly' : ''}`}
           />
-        )}
-        <ThemeButton
-          startIcon={<GrDrag fontSize="small" />}
-          onClick={() => setArrangeView(true)}>
-          Arrange
-        </ThemeButton>
-      </>
+          {dataRows?.length > 0 ? (
+            <ThemeButton
+              startIcon={<GrDrag fontSize="small" />}
+              onClick={() => setArrangeView(true)}>
+              Arrange
+            </ThemeButton>
+          ) : null}
+        </>
+      )
     );
+  };
+
+  const handleMainTabChange = (event: any, newValue: number) => {
+    setTabValue(newValue);
   };
 
   return (
     <>
+      {(permissions?.assemblyOrder?.isRead || permissions?.disassemblyOrder?.isRead) && (
+        <>
+          <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
+            <CustomTab value={0} label={`Individual`} />
+            {permissions?.assemblyOrder?.isRead && <CustomTab value={1} label={`${resources?.assemblyOrder?.titleSingular}`} />}
+            {permissions?.disassemblyOrder?.isRead && <CustomTab value={2} label={`${resources?.disassemblyOrder?.titleSingular}`} />}
+          </CustomTabs>
+        </>
+      )}
       <DetailsPageHeader
         isAddButtonVisible={allowedToEdit}
         addButtonMenuItems={addButtonMenuItems()}
