@@ -743,6 +743,12 @@ const routes = {
   },
   disassemblyOrderDetail: {
     path: '/disassembly-order/detail'
+  },
+  productTypes: {
+    path: '/product-types'
+  },
+  productTypesDetail: {
+    path: '/product-types/detail'
   }
 };
 

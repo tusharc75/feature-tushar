@@ -282,6 +282,8 @@ import DisassemblyOrder from 'src/pages/DisassemblyOrder';
 import DisassemblyOrderDetail from 'src/pages/DisassemblyOrder/DisassemblyOrderDetail';
 import SerializedPackages from 'src/pages/SerializedPackages';
 import SerializedPackagesDetail from 'src/pages/SerializedPackages/SerializedPackagesDetail';
+import ProductTypes from 'src/pages/ProductTypes';
+import ProductTypesDetail from 'src/pages/ProductTypes/ProductTypesDetail';
 
 var notificationInterval: any = null;
 
@@ -337,7 +339,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
     return () => {
       clearInterval(notificationInterval);
     };
@@ -1224,6 +1226,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.scheduleAndDispatch.path}`}>
               <ScheduleAndDispatch />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.productTypes.path}`}>
+              <ProductTypes />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.productTypesDetail.path}/:id`}>
+              <ProductTypesDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

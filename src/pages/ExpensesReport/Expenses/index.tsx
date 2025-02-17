@@ -46,6 +46,7 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
   const [showManageExpensesDialog, setShowManageExpensesDialog] = useState({ open: false, idToClone: null });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deleteconfirmBox, setDeleteConfirmBox] = useState(false);
 
   useEffect(() => {
     fetchGridColumns();
@@ -181,7 +182,10 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
               size="small"
               aria-label="Delete"
               disabled={row?.original?.canDelete && allowedToEdit ? false : true}
-              onClick={() => setDeleteData([row?.original?._id])}
+              onClick={() => {
+                setDeleteConfirmBox(true);
+                setDeleteData([row?.original?._id]);
+              }}
             >
               <DeleteIcon fontSize="small" color={row?.original?.canDelete && allowedToEdit ? 'error' : 'disabled'} />
             </IconButton>
@@ -219,6 +223,7 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
           color="primary"
           disabled={selectedRecords.length === 0}
           onClick={() => {
+            setDeleteConfirmBox(true);
             const dataToDelete = selectedRecords.map((record) => record._id);
             setDeleteData(dataToDelete);
           }}
@@ -276,12 +281,15 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
             </TableContainer>
           </Grid>
         </Grid>
-        {deleteData && (
+        {deleteData && deleteconfirmBox && (
           <ConfirmationDialog
             open={true}
             message={`Are you sure you want to delete the record(s)?`}
             onClose={() => setDeleteData(null)}
-            onOk={() => removeRow(deleteData)}
+            onOk={() => {
+              removeRow(deleteData);
+              setDeleteConfirmBox(false);
+            }}
           />
         )}
         {showAddExistingExpenseModal && (
