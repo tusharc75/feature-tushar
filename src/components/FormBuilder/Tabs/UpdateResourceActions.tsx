@@ -364,16 +364,10 @@ const DynamicFormField = ({ fieldName, value, field, setFieldValue, formikField,
   return (
     <FormTypes
       {...field}
-      values={{
-        [fieldName]: value
-      }}
-      errors={{
-        [fieldName]: error
-      }}
-      touched={{
-        [fieldName]: touched
-      }}
-      fieldData={field}
+      values={{ [fieldName]: value }}
+      errors={{ [fieldName]: error }}
+      touched={{ [fieldName]: touched }}
+      fieldData={{ ...field, required: false, isUneditable: false, disableOnEdit: false }}
       label={label}
       name={field.fieldName}
       type={field.type}
