@@ -35,7 +35,7 @@ jobs:
           IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$TIMESTAMP
           echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
           echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_ENV
-          echo "${{ secrets.UAT_ENV }}" >> .env
+          echo "${{ vars.ENV }}" >> .env
           # Build the Docker image
           docker build -t $IMAGE_URI .
           # Push the Docker image to ECR
