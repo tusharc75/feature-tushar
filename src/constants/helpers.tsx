@@ -2515,6 +2515,13 @@ export const REPORT_LIST = [
     section: REPORT_SECTIONS.asset
   },
   {
+    title: 'Sublease',
+    permission: 'sublease',
+    key: 'standardReport',
+    type: 'sublease',
+    section: REPORT_SECTIONS.rental
+  },
+  {
     title: 'Lost Assets',
     permission: 'serializedAsset',
     key: 'standardReport',
