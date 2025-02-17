@@ -86,7 +86,7 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
 
     const productResult = await axiosInstance().get('/field?resource=Product&view=true');
     const productFields = productResult?.data?.data?.filter((e) =>
-      ['productCategory', 'productNumber', 'serializedProduct', 'chartOfAccount'].includes(e?.fieldData?.fieldName)
+      ['productCategory', 'productNumber', 'serializedProduct', 'chartOfAccount','revenueCode','costCode'].includes(e?.fieldData?.fieldName)
     );
     column.push({
       accessor: 'index',
@@ -311,7 +311,9 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
           productNumber: item?.productDetail?.productNumber,
           serializedProduct: item?.productDetail?.serializedProduct,
           productCategory: item.productDetail?.productCategory,
-          chartOfAccount: item.productDetail?.chartOfAccount
+          chartOfAccount: item.productDetail?.chartOfAccount,
+          revenueCode :  item.productDetail?.revenueCode,
+          costCode : item.productDetail?.costCode
         };
         const subRows = [];
         serializedAsset
