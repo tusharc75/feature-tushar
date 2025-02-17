@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - uat
+
 permissions:
   id-token: write
   contents: read
@@ -11,6 +12,7 @@ permissions:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment: uat
     steps:
       - name: 'Checkout GitHub repository'
         uses: actions/checkout@v3
@@ -35,7 +37,7 @@ jobs:
           IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$TIMESTAMP
           echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
           echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_ENV
-          echo "${{ vars.ENV }}" >> .env
+          echo "${{ vars.ENV_VAR }}" >> .env
           # Build the Docker image
           docker build -t $IMAGE_URI .
           # Push the Docker image to ECR
