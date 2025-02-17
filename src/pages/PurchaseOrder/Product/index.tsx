@@ -211,6 +211,26 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom,stepFullScreen, 
       }
     });
 
+    columns.push({
+      accessor: 'revenue',
+      Header: 'Revenue',
+      width: 200,
+      Cell: ({ row }) => {
+        return row.original['revenueCode'] ? <p className="text-truncate">{row.original.revenueCode}</p> : <NoDataCell />;
+      }
+    });
+
+    columns.push({
+      accessor: 'costCode',
+      Header: 'Cost Code',
+      width: 200,
+      Cell: ({ row }) => {
+        return row.original['costCode'] ? <p className="text-truncate">{row.original.costCode}</p> : <NoDataCell />;
+      }
+    });
+  
+  
+   
     const productFieldsColumns = generateColumns(renderedFrom, productFields);
     productFieldsColumns?.forEach((e) => {
       columns.push(e);
@@ -363,6 +383,8 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom,stepFullScreen, 
       res.serializedProduct = item.productDetail?.serializedProduct;
       res.productCategory = item.productDetail?.productCategory;
       res.chartOfAccount = item.productDetail?.chartOfAccount;
+      res.revenueCode = item.productDetail?.revenueCode;
+      res.costCode = item.productDetail?.costCode;
       res.parentId = null;
       res.qty = item?.qty;
       res.productDetail = item?.productDetail;
