@@ -71,6 +71,14 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
             });
             setLoading(false);
           } else {
+            if (data?.rentalJob?.optionValue) {
+              fieldsDataForCreate?.forEach((f) => {
+                if (['parentAccount','customerAccount', 'warehouse'].includes(f.fieldName)) {
+                  f.disableOnEdit = true;
+                  f.isUneditable = true;
+                }
+              })
+            }
             setInvoiceNumber(data?.invoiceNumber);
             setInitialData({
               fields: fieldsDataForUpdate,
