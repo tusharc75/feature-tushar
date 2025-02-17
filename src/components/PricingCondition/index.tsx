@@ -65,7 +65,7 @@ export const getPricingValue = (row: any, priceData: any, currency: any, fields:
 };
 
 
-export const getTaxList = async (referenceData: any, materialType: any) => {
+export const getTaxList = async (referenceData: any, materialType: any, taxCodeId:any = null) => {
   const zipCode = referenceData?.billingAddress?.zipCode;
   const state = referenceData?.billingAddress?.state;
   const county = referenceData?.billingAddress?.county;
@@ -73,6 +73,7 @@ export const getTaxList = async (referenceData: any, materialType: any) => {
   if (referenceData?.taxCode?.optionValue) {
     taxCode = referenceData?.taxCode?.optionValue;
   }
+  if(taxCodeId) taxCode = taxCodeId;
   let data = []
   if (taxCode || zipCode || state) {
     let api = `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&county=${county}&materialType=${materialType}`
