@@ -17,6 +17,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { getTaxList } from 'src/components/PricingCondition';
 
 const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = null, invoiceData = null, isRedirectToDetailPage = true }) => {
   const history = useHistory();
@@ -34,15 +35,6 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = 
   useEffect(() => {
     fetchFields();
   }, []);
-
-  const fetchTaxRate = async (taxCodeId: string) => {
-    try {
-      const response = await axiosInstance().get(`${routes?.taxMaster.path}/${taxCodeId}`);
-      return response?.data?.data?.cityTaxRate || response?.data?.data?.countyTaxRate || response?.data?.data?.stateTaxRate || 0;
-    } catch (e) {
-      toastConfig.setToastConfig(e);
-    }
-  };
 
   const fetchFields = async () => {
     try {
@@ -93,8 +85,10 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = 
           referenceData.invoice = invoiceData?._id;
           if (referenceData) {
             if (referenceData?.taxCode) {
-              const taxRate = await fetchTaxRate(referenceData?.taxCode);
-              referenceData.taxPercentage = taxRate;
+              const taxRate = await getTaxList(null, null, referenceData?.taxCode);
+              if (taxRate?.length) {
+                referenceData.taxPercentage = taxRate[0].taxRate;
+              }
             }
             for (const key in referenceData) {
               if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
