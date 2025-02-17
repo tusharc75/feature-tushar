@@ -123,7 +123,7 @@ const ExpenseApproval = () => {
             <Grid container spacing={2}>
               <Grid size={{ xs: 12, md: 4, lg: 3 }}>
                 <Box className="container-with-border" p={2}>
-                  <div className=" flex items-center justify-between ">
+                  <div className=" flex items-center justify-between mb-2">
                     <Box width={'15rem'}>
                       <ListingPageHeader
                         searchValue={search}

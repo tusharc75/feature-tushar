@@ -70,7 +70,7 @@ const ExpenseReportDetail = () => {
     }
   }, [id]);
 
-  const fetchFields = async () => {
+  const fetchFields = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource?.expenseReport}`)
       .then(({ data }) => {
@@ -118,8 +118,9 @@ const ExpenseReportDetail = () => {
     try {
       await axiosInstance().put(`${expenseReport.api}/remove`, { ids: [expenseReportData._id] });
 
-      await axiosInstance().patch(`${expenseReport.api}/status/${expenseReportData._id}`, { status: EXPENSE_STATUS.unreported });
-
+      if (expenseReportData?.expenses?.length > 0) {
+        await axiosInstance().patch(`${expenseReport.api}/status/${expenseReportData._id}`, { status: EXPENSE_STATUS.unreported });
+      }
       setShowConfirmBox(false);
 
       history.push(`${routes?.expenseReport?.path}`);
@@ -169,6 +170,7 @@ const ExpenseReportDetail = () => {
                       handleStatusChange(
                         expenseReportData?.status === EXPENSE_STATUS.awaitingApproval ? EXPENSE_STATUS.recalled : EXPENSE_STATUS.awaitingApproval
                       );
+                      fetchData();
                     }}
                     mobileTooltip={expenseReportData?.status === EXPENSE_STATUS.awaitingApproval ? 'Recall' : 'Send For Approval'}
                   >
