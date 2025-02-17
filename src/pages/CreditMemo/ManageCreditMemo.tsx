@@ -17,6 +17,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { getTaxList } from 'src/components/PricingCondition';
 
 const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = null, invoiceData = null, isRedirectToDetailPage = true }) => {
   const history = useHistory();
@@ -83,6 +84,12 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = 
           );
           referenceData.invoice = invoiceData?._id;
           if (referenceData) {
+            if (referenceData?.taxCode) {
+              const taxRate = await getTaxList(null, null, referenceData?.taxCode);
+              if (taxRate?.length) {
+                referenceData.taxPercentage = taxRate[0].taxRate;
+              }
+            }
             for (const key in referenceData) {
               if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
                 tempInitialData[key] = referenceData[key];
