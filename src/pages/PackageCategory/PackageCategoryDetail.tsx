@@ -141,7 +141,7 @@ const PackageCategoryDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.packageCategory?.titleSingular?.toLowerCase()} : ${packageCategoryData?.productType} ?`}
+          message={`Are you sure you want to delete ${resources?.packageCategory?.titleSingular?.toLowerCase()} : ${packageCategoryData?.packageCategory} ?`}
           onClose={() => setShowConfirmBox(false)}
           onOk={handleDelete} />
       )}
