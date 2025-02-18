@@ -16,10 +16,11 @@ import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { useLocation, useHistory } from 'react-router-dom';
 
 const ManageEmployeeMaster = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const {
-    state: { user }
+    state: { user, resources, permissions }
   }: any = useData();
   const ref = useRef(null);
   const toastConfig = useContext(CustomToastContext);
@@ -30,6 +31,8 @@ const ManageEmployeeMaster = ({ onClose, onSuccess, isClone = false, id = null }
   const [cloneHeading, setCloneHeading] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
+  const location = useLocation();
+  const history = useHistory();
 
   useEffect(() => {
     fetchFields();
@@ -98,6 +101,13 @@ const ManageEmployeeMaster = ({ onClose, onSuccess, isClone = false, id = null }
       axiosInstance()
         .post(`${routes?.employeeMaster?.path}`, values)
         .then(({ data }) => {
+          const newId = data.data[0]._id;
+          const userId = data.data[0].userId;
+          history.push({
+            pathname: `${routes.employeeMasterDetail.path}/${newId}`,
+            search: permissions?.employeeMaster?.isUpdate && !userId ? '?portalAccess=true' : '',
+            state: { location: location }
+          });
           setLoading(false);
           onSuccess(data.data);
           setSubmitting(true);
@@ -145,7 +155,7 @@ const ManageEmployeeMaster = ({ onClose, onSuccess, isClone = false, id = null }
                   ? isClone
                     ? `Clone - ${cloneHeading}`
                     : `Update ${initialData.values?.employeeNumber ? `(${initialData.values?.employeeNumber})` : ''}`
-                  : `Create Employee Master`
+                  : `Create ${resources?.employeeMaster?.titleSingular}`
                   }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {

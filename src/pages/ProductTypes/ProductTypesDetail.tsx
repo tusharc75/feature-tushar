@@ -61,10 +61,8 @@ const ProductTypesDetail = () => {
   };
 
 
-  console.log('product api called', productTypes.api)
   const fetchData = async () => {
     axiosInstance().get(`${productTypes.api}/${id}`).then(({ data: { data } }) => {
-      console.log(data)
       setAllowedToEdit(permissions?.productTypes?.isUpdate);
       setAllowedToDelete(permissions?.productTypes?.isDelete);
       setproductTypeData(data);
@@ -99,7 +97,6 @@ const ProductTypesDetail = () => {
       });
   };
 
-  console.log(productTypeData)
 
   return (
     <Box className="main-container-v1">
