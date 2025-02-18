@@ -73,7 +73,7 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
           } else {
             if (!data?.canDelete) {
               fieldsDataForUpdate?.forEach((f) => {
-                if (['parentAccount', 'customerAccount', 'warehouse', 'currency'].includes(f.fieldName)) {
+                if (['parentAccount', 'customerAccount', 'warehouse', 'currency', 'rentalJob', 'fieldTicket'].includes(f.fieldName)) {
                   f.disableOnEdit = true;
                   f.isUneditable = true;
                 }

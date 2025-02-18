@@ -50,7 +50,7 @@ const ServiceMaster = (props: Props) => {
   const [orignalData, setOrignalData] = useState([]);
   const [frequencyDialog, setFrequencyDialog] = useState({ open: false, data: null });
   const [tabValue, setTabValue] = useState(0);
-  const [workOrderDialog, setWorkOrderDialog] = useState({ open: false, data: null, type: null });
+  const [workOrderUpdateDialog, setWorkOrderUpdateDialog] = useState({ open: false, data: null, type: null });
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
@@ -437,7 +437,7 @@ const ServiceMaster = (props: Props) => {
       .then(({ data }) => {
         setAssignProductDialog({ open: false, products: null, service: null, uniqueId: null, steps: null });
         setAssignStepsToConsumablesDialog({ open: false, consumables: null, service: null, steps: null });
-        setWorkOrderDialog({ open: false, data: null, type: null });
+        setWorkOrderUpdateDialog({ open: false, data: null, type: null });
         setIsAssigning(false);
         fetchData();
         toastConfig.setToastConfig({
@@ -449,7 +449,7 @@ const ServiceMaster = (props: Props) => {
       .catch((error) => {
         setAssignProductDialog({ open: false, products: null, service: null, uniqueId: null, steps: null });
         setAssignStepsToConsumablesDialog({ open: false, consumables: null, service: null, steps: null });
-        setWorkOrderDialog({ open: false, data: null, type: null });
+        setWorkOrderUpdateDialog({ open: false, data: null, type: null });
         setIsAssigning(false);
         toastConfig.setToastConfig(error);
       });
@@ -461,7 +461,7 @@ const ServiceMaster = (props: Props) => {
       .put(`${routes.product.path}/${id}/service-master/consumables`, data)
       .then(({ data }) => {
         setIsAssigning(false);
-        setWorkOrderDialog({ open: false, data: null, type: null });
+        setWorkOrderUpdateDialog({ open: false, data: null, type: null });
         fetchData();
         toastConfig.setToastConfig({
           open: true,
@@ -471,7 +471,7 @@ const ServiceMaster = (props: Props) => {
       })
       .catch((error) => {
         setIsAssigning(false);
-        setWorkOrderDialog({ open: false, data: null, type: null });
+        setWorkOrderUpdateDialog({ open: false, data: null, type: null });
         toastConfig.setToastConfig(error);
       });
   };
@@ -486,7 +486,7 @@ const ServiceMaster = (props: Props) => {
     } else if (updatedData.type === 'Product') {
       const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
       if (rowData && parseInt(inputField['qty'])) {
-        setWorkOrderDialog({ open: true, data: { _id: rowData._id, qty: parseInt(inputField['qty']) }, type: 'edit' });
+        setWorkOrderUpdateDialog({ open: true, data: { _id: rowData._id, qty: parseInt(inputField['qty']) }, type: 'edit' });
       }
     }
   };
@@ -667,7 +667,7 @@ const ServiceMaster = (props: Props) => {
                 uniqueId: assignProductDialog.uniqueId
               };
             });
-            setWorkOrderDialog({ open: true, data: data, type: 'add' });
+            setWorkOrderUpdateDialog({ open: true, data: data, type: 'add' });
           }}
         />
       )}
@@ -684,22 +684,25 @@ const ServiceMaster = (props: Props) => {
           }}
         />
       )}
-      {workOrderDialog.open && (
+      {workOrderUpdateDialog.open && (
         <ConfirmationDialog
-          open={workOrderDialog.open}
-          message={`Do you wish to add/edit Product(s)/Consumable(s) in existing open ${resources?.workOrder?.titlePlural}?`}
+          open={workOrderUpdateDialog.open}
+          message={workOrderUpdateDialog.type === 'add' ?
+            `Do you want to add selected Product(s) in existing open ${resources?.workOrder?.titlePlural}?` :
+            `Do you want to update qty in existing open ${resources?.workOrder?.titlePlural}?
+            Note: If qty is less then consumbed qty work order will not be updated  `}
           onClose={() => {
-            if (workOrderDialog.type === 'edit') {
-              handleSaveData(workOrderDialog.data);
+            if (workOrderUpdateDialog.type === 'edit') {
+              handleSaveData(workOrderUpdateDialog.data);
             } else {
-              handleAssignConsumable(workOrderDialog.data);
+              handleAssignConsumable(workOrderUpdateDialog.data);
             }
           }}
           onOk={() => {
-            if (workOrderDialog.type === 'edit') {
-              handleSaveData({...workOrderDialog.data, updateInWorkOrder: true});
+            if (workOrderUpdateDialog.type === 'edit') {
+              handleSaveData({ ...workOrderUpdateDialog.data, updateInWorkOrder: true });
             } else {
-              const data = workOrderDialog.data.map((d) => {
+              const data = workOrderUpdateDialog.data.map((d) => {
                 return { ...d, addInWorkOrder: true };
               });
               handleAssignConsumable(data);
