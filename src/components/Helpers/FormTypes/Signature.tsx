@@ -10,10 +10,11 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import Webcam from 'react-webcam';
-import { cn, CustomDialogTransition } from 'src/constants/helpers';
+import { cn, convertBase64ToBlob, CustomDialogTransition } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ErrorType, useDropZone } from 'src/hooks';
+import axiosInstance from 'src/axios/axiosInstance';
 
 const UseCamera = ({ handleToggleMode, usePad, setPicture, picture, isFullScreen }) => {
   const [cameraCount, setCameraCount] = useState(0);
@@ -135,6 +136,7 @@ const SignatureDialog = ({ onSave, open, close }) => {
   const [fullScreen, setFullScreen] = useState(isMobile && !isTablet ? true : false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
+  const [uploading, setUploading] = useState<boolean>(false);
 
   const handleShowDropDownError = (error: ErrorType) => {
     const fileNames = Object.keys(error);
@@ -258,18 +260,20 @@ const SignatureDialog = ({ onSave, open, close }) => {
         <ThemeButton buttonType="theme" onClick={handleToggleMode} startIcon={usePad ? <CameraAlt /> : <FaSignature />}>
           {usePad ? 'Use Camera' : 'Use Sign Pad'}
         </ThemeButton>
-        <ThemeButton buttonType="theme" onClick={close}>
+        <ThemeButton buttonType="theme" onClick={close} disabled={uploading}>
           Close
         </ThemeButton>
         <ThemeButton
+          disabled={uploading}
           buttonType="theme"
           onClick={() => {
             if (picture !== '') {
-              onSave(picture);
+              onSave(picture, setUploading);
             } else {
               setToastConfig({ open: true, type: 'warning', message: 'Signature cannot be empty' });
             }
           }}
+          isLoading={uploading}
         >
           Save
         </ThemeButton>
@@ -280,10 +284,28 @@ const SignatureDialog = ({ onSave, open, close }) => {
 
 const Signature = ({ label, values, name, touched, errors, isTooltip, tooltipMessage, setFieldValue, required, disable = false }) => {
   const [openDialog, setOpenDialog] = React.useState(false);
+  const { setToastConfig } = React.useContext(CustomToastContext);
 
-  const handleSaveImage = (dataURL: string) => {
-    setFieldValue(name, dataURL);
-    setOpenDialog(false);
+  const handleSaveImage = (dataURL: string, setIsLoading: React.Dispatch<React.SetStateAction<boolean>>) => {
+    setIsLoading(true);
+    const blob = convertBase64ToBlob(dataURL);
+    const file = new File([blob], 'signature.png', { type: 'image/png' });
+    let formData = new FormData();
+    formData.append('file', file);
+    axiosInstance()
+      .post('/user/upload-public', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      .then(({ data }) => {
+        setFieldValue(name, data.fileUrl);
+        setIsLoading(false);
+        setOpenDialog(false);
+      })
+      .catch((err) => {
+        setToastConfig(err);
+        setIsLoading(false);
+        setOpenDialog(false);
+      });
   };
 
   return (
