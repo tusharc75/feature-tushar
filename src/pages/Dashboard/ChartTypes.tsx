@@ -107,7 +107,6 @@ const ChartTypes = ({
   }, [filterValues]);
 
   const getParams = () => {
-    console.log('chart.kpi.kpi', chart.kpi.kpi);
     let url = '';
     let params = {
       ...filterValues,
@@ -117,9 +116,6 @@ const ChartTypes = ({
         to: dateFormatToSend(globalFilters.between.to)
       })
     };
-    if (chart.kpi.kpi.endsWith('yearly')) {
-      delete params?.between;
-    }
     const keys = Object.keys(params);
     keys.forEach((key) => {
       if (Array.isArray(params[key]) && params[key].length > 0) {
