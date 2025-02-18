@@ -1,6 +1,6 @@
 import { camelCase } from 'lodash';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import { checkIsAllowedToDelete, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource, productTypes } from 'src/constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, productTypes } from 'src/constants/helpers';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
@@ -9,7 +9,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import { deleteDisable, cloneDisable } from 'src/constants/messageHelpers';
 import { Box, IconButton, MenuItem } from '@mui/material';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import axios, { CancelTokenSource } from 'axios';
@@ -35,17 +35,7 @@ const ProductTypes = () => {
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
   const { generateColumns } = useColumns();
-  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.productTypes));
-  const types = [
-    {
-      key: `My ${resources?.productTypes?.titlePlural}`,
-      value: 1
-    },
-    {
-      key: `All ${resources?.productTypes?.titlePlural}`,
-      value: 2
-    }
-  ];
+
 
   useEffect(() => {
     fetchGridColumns();
@@ -55,7 +45,7 @@ const ProductTypes = () => {
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
-  }, [page, limit, filters, sorting, selectedType, selectedEntity, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -64,8 +54,6 @@ const ProductTypes = () => {
     const newColumns = generateColumns(renderedFrom, data, routes?.productTypesDetail?.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
-
-
 
   const ActionsRenderer = {
     accessor: 'action',
@@ -78,7 +66,6 @@ const ProductTypes = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        {console.log(row?.original?.canDelete)}
         <HtmlTooltip title={permissions?.productTypes?.isCreate ? 'Clone' : cloneDisable}>
           <span>
             <IconButton
@@ -93,22 +80,18 @@ const ProductTypes = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip
-          title={row?.original?.canDelete}
-        >
-          <span>
-            <IconButton
-              size="small"
-              aria-label="Delete"
-              disabled={row?.original?.canDelete ? false : true}
-              onClick={() => {
-                setDeleteRecord(row.original);
-                setShowDeleteConfirmBox(true);
-              }}
-            >
-              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
-            </IconButton>
-          </span>
+        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}     >
+          <IconButton
+            size="small"
+            aria-label="Delete"
+            disabled={row?.original?.canDelete ? false : true}
+            onClick={() => {
+              setDeleteRecord(row.original);
+              setShowDeleteConfirmBox(true);
+            }}
+          >
+            <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+          </IconButton>
         </HtmlTooltip>
       </>
     )
@@ -116,10 +99,6 @@ const ProductTypes = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
-
-    if (selectedType === 1) {
-      deepFilter = deepFilter + `&myRecords=1`;
-    }
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
@@ -159,13 +138,9 @@ const ProductTypes = () => {
       count = response?.data?.count;
       let rows = data.map((u) => {
         let finalObject: any = prepareDataForGrid(u, user);
-        finalObject['isChecked'] = false;
-        finalObject['canDelete'] =
-          permissions?.productTypes?.isDelete &&
-          checkIsAllowedToDelete(user, sidebarResource.productTypes, finalObject?.ownerId);
+        finalObject['canDelete'] = permissions?.productTypes?.isDelete;
         return finalObject;
       });
-
       dispatch({ type: 'initialize', data: rows, count });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
@@ -200,6 +175,7 @@ const ProductTypes = () => {
       setDeleteLoading(false);
     }
   };
+
   const ActionMenuItems = () => {
     return (
       <MenuItem
@@ -243,10 +219,7 @@ const ProductTypes = () => {
         <ListingPageHeader
           searchValue={search}
           onSearch={handleSearch}
-          toggleButtonList={types}
           isActionButtonVisible={true}
-          selectedType={selectedType}
-          setSelectedType={setSelectedType}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
           addButtonOnclick={() => {
@@ -271,7 +244,6 @@ const ProductTypes = () => {
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-
         {showDeleteConfirmBox ? (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
