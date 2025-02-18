@@ -31,12 +31,12 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
   const { dataRows, selectedRecords } = state;
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [isUpdating, setUpdating] = useState(false);
   const [material, setMaterial] = useState([]);
-  const [addDialog, setAddDialog] = useState({ open: false, type: '', parentId: null });
+  const [addDialog, setAddDialog] = useState({ open: false, parentId: null });
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
   const [materialEdit, setMaterialEdit] = useState({ open: false, data: null });
@@ -103,10 +103,10 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
                 </Box>
                 <Box>
                   {!row?.original?.parentId && (
-                    <HtmlTooltip title="Add Existing Products">
+                    <HtmlTooltip title={`Add Existing ${resources?.packages?.titlePlural}`}>
                       <IconButton
                         onClick={() => {
-                          setAddDialog({ open: true, type: MATERIAL_TYPE.product, parentId: row.original?._id });
+                          setAddDialog({ open: true, parentId: row.original?._id });
                         }}
                         size="small"
                       >
@@ -121,13 +121,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
               <IconButton
                 size="small"
                 onClick={() => {
-                  if (row.original.type === MATERIAL_TYPE.product) {
-                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === MATERIAL_TYPE.package) {
-                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                  } else {
-                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                  }
+                  window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
                 }}
               >
                 <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
@@ -256,9 +250,12 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
     rows.forEach((d) => {
       const element: any = {};
       element.materialId = d._id;
-      element.type = d?.type || addDialog.type;
+      element.type = d?.type || MATERIAL_TYPE.package;
       element.qty = d.qty ? parseFloat(d.qty) : 1;
       element.parentId = addDialog.parentId;
+      if (allFields?.some((f) => f?.fieldName === 'warehouse')) {
+        element.warehouse = assemblyOrderData?.warehouse?.optionValue;
+      }
       material.push(element);
     });
 
@@ -266,7 +263,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
       .post(`${routes.assemblyOrder.path}/material/${assemblyOrderData._id}`, { material })
       .then(({ data }) => {
         dispatch({ type: 'selection', selectedRecords: [] });
-        setAddDialog({ open: false, type: '', parentId: null });
+        setAddDialog({ open: false, parentId: null });
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -314,7 +311,13 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
     setUpdating(true);
     const data = [];
     rows?.forEach((element) => {
-      data.push({ _id: element._id, qty: element.qty });
+      data.push({
+        _id: element._id,
+        qty: element.qty,
+        ...(allFields?.some((f) => f?.fieldName === 'warehouse')
+          ? { warehouse: element?.warehouse ? element?.warehouse : assemblyOrderData?.warehouse?.optionValue }
+          : {})
+      });
     });
     axiosInstance()
       .put(`${routes.assemblyOrder.path}/material/${assemblyOrderData._id}`, { material: data })
@@ -340,7 +343,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
       <>
         <MenuItem
           onClick={() => {
-            setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
+            setAddDialog({ open: true, parentId: null });
           }}
         >
           Add Existing Packages
@@ -412,24 +415,14 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
         />
       )}
 
-      {addDialog.open && addDialog.type === MATERIAL_TYPE.package && (
+      {addDialog.open && (
         <AssignPackageDialog
-          handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
+          handleClose={() => setAddDialog({ open: false, parentId: null })}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
           isSubmitting={isSubmitting}
           packageType={'product'}
-        />
-      )}
-
-      {addDialog.open && addDialog.type === MATERIAL_TYPE.product && (
-        <AssignProductDialog
-          handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
-          onSuccess={(d) => {
-            handleAdd(d);
-          }}
-          isSubmitting={isSubmitting}
         />
       )}
 
