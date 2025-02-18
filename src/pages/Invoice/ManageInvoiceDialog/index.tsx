@@ -71,6 +71,14 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
             });
             setLoading(false);
           } else {
+            if (!data?.canDelete) {
+              fieldsDataForUpdate?.forEach((f) => {
+                if (['parentAccount', 'customerAccount', 'warehouse', 'currency'].includes(f.fieldName)) {
+                  f.disableOnEdit = true;
+                  f.isUneditable = true;
+                }
+              })
+            }
             setInvoiceNumber(data?.invoiceNumber);
             setInitialData({
               fields: fieldsDataForUpdate,
