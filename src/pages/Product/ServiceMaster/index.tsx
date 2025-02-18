@@ -50,6 +50,7 @@ const ServiceMaster = (props: Props) => {
   const [orignalData, setOrignalData] = useState([]);
   const [frequencyDialog, setFrequencyDialog] = useState({ open: false, data: null });
   const [tabValue, setTabValue] = useState(0);
+  const [workOrderDialog, setWorkOrderDialog] = useState({ open: false, data: null, type: null });
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
@@ -64,7 +65,7 @@ const ServiceMaster = (props: Props) => {
   });
 
   const {
-    state: { permissions, selectedEntity }
+    state: { permissions, selectedEntity, resources }
   }: any = useData();
 
   useEffect(() => {
@@ -156,14 +157,14 @@ const ServiceMaster = (props: Props) => {
       },
       ...(serviceColumns && serviceColumns?.some((column) => column?.fieldData?.fieldName === 'frequency')
         ? [
-            {
-              accessor: 'frequency',
-              Header: 'Frequency',
-              width: 150,
-              minWidth: 150,
-              Cell: ({ row }) => (row.original?.frequency ? <p>{row.original?.frequency}</p> : <NoDataCell />)
-            }
-          ]
+          {
+            accessor: 'frequency',
+            Header: 'Frequency',
+            width: 150,
+            minWidth: 150,
+            Cell: ({ row }) => (row.original?.frequency ? <p>{row.original?.frequency}</p> : <NoDataCell />)
+          }
+        ]
         : []),
       {
         accessor: 'stepName',
@@ -430,11 +431,14 @@ const ServiceMaster = (props: Props) => {
   };
 
   const handleAssignConsumable = (data: any) => {
+    setIsAssigning(true);
     axiosInstance()
       .post(`${routes.product.path}/${id}/service-master/consumables`, data)
       .then(({ data }) => {
         setAssignProductDialog({ open: false, products: null, service: null, uniqueId: null, steps: null });
         setAssignStepsToConsumablesDialog({ open: false, consumables: null, service: null, steps: null });
+        setWorkOrderDialog({ open: false, data: null, type: null });
+        setIsAssigning(false);
         fetchData();
         toastConfig.setToastConfig({
           open: true,
@@ -445,14 +449,19 @@ const ServiceMaster = (props: Props) => {
       .catch((error) => {
         setAssignProductDialog({ open: false, products: null, service: null, uniqueId: null, steps: null });
         setAssignStepsToConsumablesDialog({ open: false, consumables: null, service: null, steps: null });
+        setWorkOrderDialog({ open: false, data: null, type: null });
+        setIsAssigning(false);
         toastConfig.setToastConfig(error);
       });
   };
 
   const handleSaveData = (data: any) => {
+    setIsAssigning(true);
     axiosInstance()
       .put(`${routes.product.path}/${id}/service-master/consumables`, data)
       .then(({ data }) => {
+        setIsAssigning(false);
+        setWorkOrderDialog({ open: false, data: null, type: null });
         fetchData();
         toastConfig.setToastConfig({
           open: true,
@@ -461,6 +470,8 @@ const ServiceMaster = (props: Props) => {
         });
       })
       .catch((error) => {
+        setIsAssigning(false);
+        setWorkOrderDialog({ open: false, data: null, type: null });
         toastConfig.setToastConfig(error);
       });
   };
@@ -475,7 +486,7 @@ const ServiceMaster = (props: Props) => {
     } else if (updatedData.type === 'Product') {
       const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
       if (rowData && parseInt(inputField['qty'])) {
-        handleSaveData({ _id: rowData._id, qty: parseInt(inputField['qty']) });
+        setWorkOrderDialog({ open: true, data: { _id: rowData._id, qty: parseInt(inputField['qty']) }, type: 'edit' });
       }
     }
   };
@@ -656,7 +667,7 @@ const ServiceMaster = (props: Props) => {
                 uniqueId: assignProductDialog.uniqueId
               };
             });
-            handleAssignConsumable(data);
+            setWorkOrderDialog({ open: true, data: data, type: 'add' });
           }}
         />
       )}
@@ -671,6 +682,32 @@ const ServiceMaster = (props: Props) => {
             fetchData();
             setFrequencyDialog({ open: false, data: null });
           }}
+        />
+      )}
+      {workOrderDialog.open && (
+        <ConfirmationDialog
+          open={workOrderDialog.open}
+          message={`Do you wish to add/edit Product(s)/Consumable(s) in existing open ${resources?.workOrder?.titlePlural}?`}
+          onClose={() => {
+            if (workOrderDialog.type === 'edit') {
+              handleSaveData(workOrderDialog.data);
+            } else {
+              handleAssignConsumable(workOrderDialog.data);
+            }
+          }}
+          onOk={() => {
+            if (workOrderDialog.type === 'edit') {
+              handleSaveData({...workOrderDialog.data, updateInWorkOrder: true});
+            } else {
+              const data = workOrderDialog.data.map((d) => {
+                return { ...d, addInWorkOrder: true };
+              });
+              handleAssignConsumable(data);
+            }
+          }}
+          okBtnLoading={isAssigning}
+          cancelText='No'
+          forwardText='Yes'
         />
       )}
     </Fragment>
