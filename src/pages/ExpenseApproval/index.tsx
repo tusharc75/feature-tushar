@@ -1,9 +1,8 @@
-import { Box, IconButton, MenuItem, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
-import { camelCase, toUpper } from 'lodash';
+import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
-import { ListingPageHeader } from 'src/components/PageHeaders';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -13,8 +12,6 @@ import routes from './../../components/Helpers/Routes';
 import Grid from '@mui/material/Grid2';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import Requests from 'src/pages/ExpenseApproval/Requests';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import RefreshIcon from '@mui/icons-material/Refresh';
 
 let expenseApprovalTimeout;
 
@@ -28,6 +25,29 @@ const ExpenseApproval = () => {
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [reportData, setReportData] = useState(null);
   const [selectedExpenseReport, setSelectedExpenseReport] = useState(null);
+  const [columns, setColumns] = useState(null);
+
+  const { generateColumns, checkStaticField } = useColumns();
+
+  useEffect(() => {
+    fetchGridColumns();
+  }, []);
+
+  const fetchGridColumns = async () => {
+    let data;
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource.expenseReport}`);
+    data = response?.data?.data;
+    const newColumns = generateColumns(renderedFrom, data, routes?.expenseReportDetail?.path, true);
+    let staticFields = getStaticFields();
+    staticFields.forEach((field) => {
+      newColumns.push(checkStaticField(renderedFrom, field));
+    });
+    setColumns(newColumns);
+  };
+
+  useEffect(() => {
+    dispatch({ type: 'filter', filters: { status: { filter: [EXPENSE_STATUS.awaitingApproval] } } });
+  }, []);
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -66,12 +86,7 @@ const ExpenseApproval = () => {
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
-    if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
-    }
-    if (showFilteredRecordsOnly) {
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(selectedRecords.map((m) => m._id))}`;
-    }
+
     return deepFilter;
   };
 
@@ -106,8 +121,10 @@ const ExpenseApproval = () => {
     }
   };
 
-  const handleSearch = (e) => {
-    dispatch({ type: 'search', search: e.target.value });
+  const onRowClick = (row) => {
+    if (!selectedExpenseReport || row._id !== selectedExpenseReport._id) {
+      setSelectedExpenseReport(row);
+    }
   };
 
   return (
@@ -121,91 +138,36 @@ const ExpenseApproval = () => {
         {reportData ? (
           reportData?.length > 0 ? (
             <Grid container spacing={2}>
-              <Grid size={{ xs: 12, md: 4, lg: 3 }}>
-                <Box className="container-with-border" p={2}>
-                  <div className=" flex items-center justify-between mb-2">
-                    <Box width={'15rem'}>
-                      <ListingPageHeader
-                        searchValue={search}
-                        onSearch={handleSearch}
-                        isActionButtonVisible={false}
-                        actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
-                        isAddButtonVisible={false}
-                      />
+              <div className="grid grid-cols-1 gap-8 md:grid-cols-[400px_1fr]">
+                <div className="container-with-border p-[20px] md:min-h-[calc(100vh-200px)]">
+                  <CustomReactTable
+                    showOnlyMobileView={true}
+                    height={'calc(100vh - 200px)'}
+                    columns={columns}
+                    state={state}
+                    dispatch={dispatch}
+                    renderedFrom={renderedFrom}
+                    refreshGrid={fetchData}
+                    resource={sidebarResource.expenseReport}
+                    showOnlyShowFilteredRecordSwitch={false}
+                    hideSelection={true}
+                    setWholeRowsCellColor={(row) =>
+                      row._id === selectedExpenseReport?._id
+                        ? ' [box-shadow:inset_0px_0px_0px_3px_var(--new-theme-color)_!important]  transition-bg duration-300'
+                        : ' transition-bg duration-300'
+                    }
+                    onRowClick={onRowClick}
+                    showFilters={true}
+                  />
+                </div>
+                <div className="container-with-border p-[20px]">
+                  {selectedExpenseReport && (
+                    <Box p={3}>
+                      <Requests referenceId={selectedExpenseReport?._id} fetchDataMaster={fetchData} />
                     </Box>
-                    <div className="flex">
-                      <HtmlTooltip title="Refresh">
-                        <IconButton size="small" onClick={() => fetchData()}>
-                          <RefreshIcon />
-                        </IconButton>
-                      </HtmlTooltip>
-                    </div>
-                  </div>
-                  <Box style={{ maxHeight: 'calc(100vh - 220px)', overflow: 'auto' }}>
-                    {reportData?.map((report) => {
-                      const reportTotal = report.expenses?.reduce((acc, expense) => acc + (Number(expense.totalAmount) || 0), 0) || 0;
-                      return (
-                        <Box
-                          mb={2}
-                          key={report._id}
-                          onClick={() => {
-                            setSelectedExpenseReport(report);
-                          }}
-                          style={
-                            {
-                              cursor: 'pointer',
-                              backgroundColor: 'var(--dark-secondary, white)',
-                              '--card-color-primary': 'var(--dark-primary-text, #2A3042)',
-                              '--card-color-secondary': 'var(--dark-secondary-text, #5B5B5B)',
-                              border:
-                                selectedExpenseReport === report ? '2.5px solid var(--new_theme_color)' : '1px solid var(--common-border-color)',
-                              borderRadius: '8px'
-                            } as React.CSSProperties
-                          }
-                        >
-                          <Box p={2}>
-                            <Box display="flex">
-                              <Typography
-                                variant="subtitle2"
-                                style={{ color: 'var(--card-color-primary)', fontSize: 15, marginBottom: 8, fontWeight: 600 }}
-                              >
-                                Report Title : <span style={{ color: 'var(--card-color-secondary)' }}>{report.reportTitle}</span>
-                              </Typography>
-                            </Box>
-                            <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 600 }}>
-                              Total Amount : <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{reportTotal || 'N/A'}</span>
-                            </Typography>
-                            <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 600 }}>
-                              <Box
-                                component="span"
-                                sx={{
-                                  display: 'inline-block',
-                                  backgroundColor: report?.status === EXPENSE_STATUS.approved ? '#E6FFFA' : '#FFF9E6',
-                                  color: report?.status === EXPENSE_STATUS.approved ? '#0097A7' : '#FF9800',
-                                  fontWeight: 600,
-                                  padding: '4px 12px',
-                                  borderRadius: '16px',
-                                  fontSize: '0.875rem',
-                                  border: report?.status === EXPENSE_STATUS.approved ? '1px solid #80DEEA' : '1px solid #ffad33'
-                                }}
-                              >
-                                {toUpper(report?.status)}
-                              </Box>
-                            </Typography>
-                          </Box>
-                        </Box>
-                      );
-                    })}
-                  </Box>
-                </Box>
-              </Grid>
-              <Grid size={{ xs: 12, md: 8, lg: 9 }}>
-                {selectedExpenseReport && (
-                  <Box className="container-with-border" p={3}>
-                    <Requests referenceId={selectedExpenseReport?._id} fetchDataMaster={fetchData} />
-                  </Box>
-                )}
-              </Grid>
+                  )}
+                </div>
+              </div>
             </Grid>
           ) : (
             <Box style={{ minHeight: 'calc(100vh - 349px)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
