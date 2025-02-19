@@ -17,7 +17,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { getTaxList } from 'src/components/PricingCondition';
+import { getTaxById } from 'src/components/PricingCondition';
 
 const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = null, invoiceData = null, isRedirectToDetailPage = true }) => {
   const history = useHistory();
@@ -85,7 +85,7 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = 
           referenceData.invoice = invoiceData?._id;
           if (referenceData) {
             if (referenceData?.taxCode) {
-              const taxRate = await getTaxList(null, null, referenceData?.taxCode);
+              const taxRate = await getTaxById(referenceData?.taxCode);
               if (taxRate?.length) {
                 referenceData.taxPercentage = taxRate[0].taxRate;
               }
@@ -179,10 +179,10 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = 
                   else setShowConfirmDialog(true);
                 }}
                 title={`${creditMemoId
-                    ? isClone
-                      ? `Clone - ${cloneHeading}`
-                      : `Update - ${initialData.values?.creditMemoNumber ? `${initialData.values?.creditMemoNumber}` : ''}`
-                    : `Create ${resources?.creditMemo?.titleSingular}`
+                  ? isClone
+                    ? `Clone - ${cloneHeading}`
+                    : `Update - ${initialData.values?.creditMemoNumber ? `${initialData.values?.creditMemoNumber}` : ''}`
+                  : `Create ${resources?.creditMemo?.titleSingular}`
                   }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
