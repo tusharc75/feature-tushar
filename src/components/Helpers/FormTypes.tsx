@@ -2759,7 +2759,16 @@ const FormTypes = (props) => {
         fieldData={fieldData}
       />
     ) : type === 'counter' ? (
-      <Counter label={label} values={values} name={name} setFieldValue={setFieldValue} fieldData={fieldData} touched={touched} errors={errors} />
+      <Counter
+        {...rest}
+        label={label}
+        values={values}
+        name={name}
+        setFieldValue={setFieldValue}
+        fieldData={fieldData}
+        touched={touched}
+        errors={errors}
+      />
     ) : type === 'description' ? (
       <Description fieldData={fieldData} />
     ) : null
