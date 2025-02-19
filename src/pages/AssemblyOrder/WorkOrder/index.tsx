@@ -343,9 +343,34 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
       parent.index = i + 1;
       parent.detail = parent.packageDetail?.packageName || '';
       parent.description = parent?.packageDetail?.packageDescription || '';
-      parent.qtyDisplay = parent.qty;
+      parent.qty = parent.qty;
+      if (parent?.workOrder) {
+        parent.workOrderId = parent?.workOrder?._id;
+        parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
+        parent.status = parent?.workOrder?.status || '';
+        if (parent?.workOrder?.status === WORK_ORDER_STATUS.new) {
+          parent.canAutoCompleteWorkOrder = true;
+        }
+        if (parent?.workOrder?.status === WORK_ORDER_STATUS.completed) {
+          parent.hideSelection = true;
+          parent.workOrderStatus = WORK_ORDER_STATUS.completed;
+        }
+      }
+      if (data?.find((e) => e.parentId === parent._id && e.type === MATERIAL_TYPE.package)) {
+        parent.subRows = generatedNestedProduct(data, parent);
+      }
+      else {
+        parent.subRows = generateNestedData(data, parent);
+      }
       parent.canDelete = false;
-      parent.subRows = generatedNestedProduct(data, parent);
+      if (parent?.workOrder) {
+        if (parent?.workOrder?.status !== WORK_ORDER_STATUS.completed) {
+          parent.canDelete = parent.subRows.length === 0 ? true : false;
+          if (parent.subRows?.length && parent.subRows?.find((e) => !e?.canDelete)) {
+            parent.canDelete = false;
+          }
+        }
+      }
     });
 
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
@@ -356,18 +381,19 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail =
-        _subRow.type === MATERIAL_TYPE.product
-          ? _subRow.productDetail?.productName
-          : _subRow.type === MATERIAL_TYPE.package
-            ? _subRow.packageDetail?.packageName
-            : '';
+      _subRow.detail = _subRow.type === MATERIAL_TYPE.product
+        ? _subRow.productDetail?.productName
+        : _subRow.type === MATERIAL_TYPE.package
+          ? _subRow.packageDetail?.packageName
+          : _subRow.type === MATERIAL_TYPE.service
+            ? _subRow.serviceDetail?.serviceName : '';
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === MATERIAL_TYPE.package
             ? _subRow.packageDetail?.packageDescription
-            : '';
+            : _subRow.type === MATERIAL_TYPE.service
+              ? _subRow.serviceDetail?.serviceDescription : '';
       _subRow.qty = _subRow.qty;
       _subRow.workOrderId = _subRow?.workOrder?._id;
       _subRow.workOrderNumber = _subRow?.workOrder?.workOrderNumber;
@@ -380,7 +406,6 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
         _subRow.workOrderStatus = WORK_ORDER_STATUS.completed;
       }
       _subRow.subRows = generateNestedData(material, _subRow);
-
       _subRow.canDelete = false;
       if (_subRow?.workOrder?.status !== WORK_ORDER_STATUS.completed) {
         _subRow.canDelete = _subRow.subRows.length === 0 ? true : false;
@@ -389,7 +414,6 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
         }
       }
     });
-
     return subRows;
   };
 
@@ -504,26 +528,23 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
   const handleAutoComplete = (ids) => {
     setCompleting(true);
     if (ids.length) {
-      axiosInstance()
-        .put(`${routes.assemblyOrder.path}/work-order/${assemblyOrderData._id}/auto-complete`, {
-          workOrders: ids
-        })
-        .then(({ data }) => {
-          setCompleting(false);
-          setCompleteConfirmBox(false);
-          fetchData();
-          checkAllWorkOrderComplete();
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data?.message
-          });
-        })
-        .catch((err) => {
-          setCompleteConfirmBox(false);
-          setCompleting(false);
-          toastConfig.setToastConfig(err);
+      axiosInstance().put(`${routes.assemblyOrder.path}/work-order/${assemblyOrderData._id}/auto-complete`, {
+        workOrders: ids
+      }).then(({ data }) => {
+        setCompleting(false);
+        setCompleteConfirmBox(false);
+        fetchData();
+        checkAllWorkOrderComplete();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
         });
+      }).catch((err) => {
+        setCompleteConfirmBox(false);
+        setCompleting(false);
+        toastConfig.setToastConfig(err);
+      });
     } else {
       setCompleting(false);
       setCompleteConfirmBox(false);
@@ -737,17 +758,21 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
           }}
           onOk={() => {
             let ids = [];
-            let isPackage = false;
             if (autoCompleteData && autoCompleteData.length > 0) {
               autoCompleteData.forEach((d) => {
-                if (d?.canAutoCompleteWorkOrder && d?.workOrderId) {
-                  if (d?.type === MATERIAL_TYPE.package) isPackage = true;
-                  if (!ids?.includes(d?.workOrderId)) ids.push(d?.workOrderId);
+                if (d?.workOrderId) {
+                  if (!ids?.includes(d?.workOrderId)) {
+                    ids.push(d?.workOrderId);
+                  }
                 }
               });
             }
-
-            isPackage ? setOpenSerializedPackageDialog({ open: true, ids: ids }) : handleAutoComplete(ids);
+            if (autoCompleteData?.every((e) => e.type === MATERIAL_TYPE.package)) {
+              setOpenSerializedPackageDialog({ open: true, ids: ids })
+            }
+            else {
+              handleAutoComplete(ids);
+            }
           }}
         />
       )}
@@ -1023,7 +1048,7 @@ const ActionButtonMenuItems = ({
       </MenuItem>
       <MenuItem
         onClick={() => {
-          setAutoCompleteData(selectedRecords);
+          setAutoCompleteData(selectedRecords?.filter((e) => e?.canAutoCompleteWorkOrder));
           setCompleteConfirmBox(true);
         }}
         disabled={selectedRecords.some((e) => e?.canAutoCompleteWorkOrder) ? false : true}

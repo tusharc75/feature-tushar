@@ -98,9 +98,11 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
             )}
             {allowedToEdit && row.original.type === MATERIAL_TYPE.package && !row.original.parentId && (
               <>
-                <Box>
-                  <span>({row.original?.subRows?.length})</span>
-                </Box>
+                {row.original?.subRows?.length > 0 &&
+                  <Box>
+                    <span>({row.original?.subRows?.length})</span>
+                  </Box>
+                }
                 <Box>
                   {!row?.original?.parentId && (
                     <HtmlTooltip title={`Add Existing ${resources?.packages?.titlePlural}`}>
