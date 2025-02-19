@@ -42,7 +42,7 @@ const Counter = ({ label, values, name, setFieldValue, fieldData, touched, error
         setCount(value);
         timeout = setTimeout(() => {
           handleAddRemoveMulti(+value);
-        }, 300);
+        }, 500);
       }
     },
     [handleAddRemoveMulti]
