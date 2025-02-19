@@ -1,7 +1,9 @@
 import { Box, Grid, IconButton, Typography } from '@mui/material';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { getObjKeys, gridSize, setFieldsInAscendingOrder } from 'src/constants/helpers';
 import FormTypes from '../../FormTypes';
+
+let timeout: NodeJS.Timeout;
 
 const Counter = ({ label, values, name, setFieldValue, fieldData, touched, errors, defaultValue, ...rest }) => {
   const [error, setError] = useState({});
@@ -9,41 +11,28 @@ const Counter = ({ label, values, name, setFieldValue, fieldData, touched, error
   const [formsData, setFormsData] = useState([]);
   const [count, setCount] = useState(() => (isNaN(+defaultValue) || !defaultValue ? '0' : defaultValue));
 
-  const handleAddRemove = useCallback(
-    (type, data = []) => {
-      if (type === 'add') {
-        if (fieldData?.subFields?.length > 0) {
-          data.splice(values[name]?.length, 0, getObjKeys('', fieldData?.subFields || []));
-        }
-      } else {
-        data.splice(values[name]?.length - 1, 1);
-      }
-      return data;
-    },
-    [fieldData?.subFields, name, values]
-  );
-
   const handleAddRemoveMulti = useCallback(
     (count: number) => {
-      let data = values[name] || [];
+      let newData: any[] = values[name] ? [...values[name]] : [];
       const length = values[name]?.length || 0;
-      if (length < count) {
+      if (length < count && fieldData?.subFields?.length > 0) {
+        const tempData = [];
         for (let i = 0; i < count - length; i++) {
-          data = handleAddRemove('add', data);
+          tempData.push(getObjKeys('', fieldData?.subFields || []));
         }
+        newData = [...newData, ...tempData];
       }
       if (length > count) {
-        for (let i = 0; i < length - count; i++) {
-          data = handleAddRemove('remove', data);
-        }
+        newData = [...newData].splice(0, count);
       }
-      setFieldValue(name, data);
+      setFieldValue(name, newData);
     },
-    [handleAddRemove, name, setFieldValue, values]
+    [fieldData?.subFields, name, setFieldValue, values]
   );
 
   const handleInput = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
+      clearTimeout(timeout);
       const value = e.target.value.trim();
       if (value === '') {
         setCount('');
@@ -51,7 +40,9 @@ const Counter = ({ label, values, name, setFieldValue, fieldData, touched, error
       }
       if (!isNaN(+value) && +value >= 0) {
         setCount(value);
-        handleAddRemoveMulti(+value);
+        timeout = setTimeout(() => {
+          handleAddRemoveMulti(+value);
+        }, 500);
       }
     },
     [handleAddRemoveMulti]
