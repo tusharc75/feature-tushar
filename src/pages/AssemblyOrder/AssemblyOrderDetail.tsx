@@ -134,8 +134,8 @@ const AssemblyOrderDetail = () => {
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.assemblyOrder, data));
         setAllowedToDelete(
           permissions?.assemblyOrder?.isDelete &&
-            checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
-            data?.canDelete
+          checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
+          data?.canDelete
         );
         setAssemblyOrderData({ ...data });
       })
@@ -226,10 +226,11 @@ const AssemblyOrderDetail = () => {
               setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
               handleNext={
                 assemblyOrderProcessStepsNames[currentStep] === 'Work Order' &&
-                !assemblyOrderData?.material?.filter((m) => m?.type === MATERIAL_TYPE.package && !m?.parentId)?.every((m) => m?.serializedPackage)
+                  assemblyOrderData?.material?.find((m) => m?.type === MATERIAL_TYPE.package
+                    && !m?.parentId && !m?.serializedPackage)
                   ? () => {
-                      setOpenSerializedPackageDialog(true);
-                    }
+                    setOpenSerializedPackageDialog(true);
+                  }
                   : null
               }
               updateStatus={(step: number) => {
