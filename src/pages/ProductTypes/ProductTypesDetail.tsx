@@ -16,6 +16,8 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { productTypes, sidebarResource } from '../../constants/helpers';
 import Step from '../DynamicForm/Step';
 import { ManageProductTypes } from 'src/pages/ProductTypes/ManageProductTypes';
+import Products from 'src/pages/ProductTypes/Products';
+import Services from 'src/pages/ProductTypes/Services';
 
 const ProductTypesDetail = () => {
 
@@ -37,6 +39,7 @@ const ProductTypesDetail = () => {
   const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [resourceData, setResourceData] = useState(null);
   const [fields, setFields] = useState(null);
+  const WORK_ORDER_RESOURCE_TABS = [sidebarResource.repairOrder, sidebarResource.productionOrder, sidebarResource.assemblyOrder, sidebarResource.disassemblyOrder];
 
   useEffect(() => {
     fetchFields();
@@ -61,10 +64,8 @@ const ProductTypesDetail = () => {
   };
 
 
-  console.log('product api called', productTypes.api)
   const fetchData = async () => {
     axiosInstance().get(`${productTypes.api}/${id}`).then(({ data: { data } }) => {
-      console.log(data)
       setAllowedToEdit(permissions?.productTypes?.isUpdate);
       setAllowedToDelete(permissions?.productTypes?.isDelete);
       setproductTypeData(data);
@@ -99,7 +100,6 @@ const ProductTypesDetail = () => {
       });
   };
 
-  console.log(productTypeData)
 
   return (
     <Box className="main-container-v1">
@@ -126,6 +126,8 @@ const ProductTypesDetail = () => {
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={(e, newValue) => setTabValue(Number(newValue))}>
           <CustomTab value={0}>Header</CustomTab>
+          <CustomTab value={1}>Products</CustomTab>
+          <CustomTab value={2}>Services</CustomTab>
           {resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 1} key={i}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
@@ -134,6 +136,12 @@ const ProductTypesDetail = () => {
           ) : (
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           )}
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <Products resource={sidebarResource.productTypes} referenceId={productTypeData?._id} workOrderResourceTabs={WORK_ORDER_RESOURCE_TABS} allowedToEdit={allowedToEdit} />
+        </TabPanel>
+        <TabPanel value={tabValue} index={2}>
+          <Services resource={sidebarResource.productTypes} referenceId={productTypeData?._id} workOrderResourceTabs={WORK_ORDER_RESOURCE_TABS} allowedToEdit={allowedToEdit} />
         </TabPanel>
         {resourceData?.tabs?.map((tab, i) => (
           <TabPanel value={tabValue} index={i + 1} key={i}>
