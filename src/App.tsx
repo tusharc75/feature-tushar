@@ -284,6 +284,8 @@ import SerializedPackages from 'src/pages/SerializedPackages';
 import SerializedPackagesDetail from 'src/pages/SerializedPackages/SerializedPackagesDetail';
 import ProductTypes from 'src/pages/ProductTypes';
 import ProductTypesDetail from 'src/pages/ProductTypes/ProductTypesDetail';
+import PackageCategory from 'src/pages/PackageCategory';
+import PackageCategoryDetail from 'src/pages/PackageCategory/PackageCategoryDetail';
 
 var notificationInterval: any = null;
 
@@ -1232,6 +1234,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.productTypesDetail.path}/:id`}>
               <ProductTypesDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.packageCategory.path}`}>
+              <PackageCategory />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.packageCategoryDetail.path}/:id`}>
+              <PackageCategoryDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
