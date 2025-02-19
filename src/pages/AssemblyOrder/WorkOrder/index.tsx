@@ -344,6 +344,10 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
       parent.detail = parent.packageDetail?.packageName || '';
       parent.description = parent?.packageDetail?.packageDescription || '';
       parent.qtyDisplay = parent.qty;
+      parent.workOrder = parent?.workOrder;
+      parent.workOrderId = parent?.workOrder?._id;
+      parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
+      parent.status = parent?.workOrder?.status;
       parent.canDelete = false;
       parent.subRows = generatedNestedProduct(data, parent);
     });
@@ -361,17 +365,26 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
           ? _subRow.productDetail?.productName
           : _subRow.type === MATERIAL_TYPE.package
             ? _subRow.packageDetail?.packageName
-            : '';
+            : _subRow.type === MATERIAL_TYPE.service
+              ? _subRow.serviceDetail?.serviceName
+              : '';
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === MATERIAL_TYPE.package
             ? _subRow.packageDetail?.packageDescription
-            : '';
+            : _subRow.type === MATERIAL_TYPE.service
+              ? _subRow.serviceDetail?.serviceDescription
+              : '';
       _subRow.qty = _subRow.qty;
-      _subRow.workOrderId = _subRow?.workOrder?._id;
-      _subRow.workOrderNumber = _subRow?.workOrder?.workOrderNumber;
-      _subRow.status = _subRow?.workOrder?.status || '';
+      _subRow.workOrder = [MATERIAL_TYPE.product, MATERIAL_TYPE.service]?.includes(_subRow?.type) ? parent?.workOrder : _subRow?.workOrder;
+      _subRow.workOrderId = [MATERIAL_TYPE.product, MATERIAL_TYPE.service]?.includes(_subRow?.type)
+        ? parent?.workOrder?._id
+        : _subRow?.workOrder?._id;
+      _subRow.workOrderNumber = [MATERIAL_TYPE.product, MATERIAL_TYPE.service]?.includes(_subRow?.type)
+        ? parent?.workOrder?.workOrderNumber
+        : _subRow?.workOrder?.workOrderNumber;
+      _subRow.status = MATERIAL_TYPE.service ? _subRow?.status : MATERIAL_TYPE.product ? '' : _subRow?.workOrder?.status || '';
       if (_subRow?.workOrder?.status === WORK_ORDER_STATUS.new) {
         _subRow.canAutoCompleteWorkOrder = true;
       }
@@ -445,9 +458,13 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
 
   const handleDelete = async () => {
     setDeleting(true);
-    if (deleteData?.some((e) => [MATERIAL_TYPE.service]?.includes(e.type)
-      || (MATERIAL_TYPE.product === e.type && e.parentId && material?.find((r) => r?._id === e?.parentId)?.parentId)
-    )) {
+    if (
+      deleteData?.some(
+        (e) =>
+          [MATERIAL_TYPE.service]?.includes(e.type) ||
+          (MATERIAL_TYPE.product === e.type && e.parentId && material?.find((r) => r?._id === e?.parentId)?.parentId)
+      )
+    ) {
       const records: any = [];
       deleteData?.forEach((data) => {
         const index = records?.findIndex((d) => d?.workOrder === data?.workOrderId);
@@ -541,9 +558,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
     } else if (parentId && rows?.length === 0) {
       return selectedRecords[0]?.type === MATERIAL_TYPE.product && !material?.find((m) => m?._id === parentId)?.parentId;
     }
-    return selectedRecords?.filter((e) => !material?.find((m) => m?._id === e?.parentId)?.parentId)?.length
-      ? true
-      : false;
+    return selectedRecords?.filter((e) => !material?.find((m) => m?._id === e?.parentId)?.parentId)?.length ? true : false;
   };
 
   const checkUniqWorkOrder = () => {
