@@ -3,6 +3,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { getObjKeys, gridSize, setFieldsInAscendingOrder } from 'src/constants/helpers';
 import FormTypes from '../../FormTypes';
 
+let timeout: NodeJS.Timeout;
+
 const Counter = ({ label, values, name, setFieldValue, fieldData, touched, errors, defaultValue, ...rest }) => {
   const [error, setError] = useState({});
   const [touch, setTouch] = useState({});
@@ -30,6 +32,7 @@ const Counter = ({ label, values, name, setFieldValue, fieldData, touched, error
 
   const handleInput = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
+      clearTimeout(timeout);
       const value = e.target.value.trim();
       if (value === '') {
         setCount('');
@@ -37,7 +40,9 @@ const Counter = ({ label, values, name, setFieldValue, fieldData, touched, error
       }
       if (!isNaN(+value) && +value >= 0) {
         setCount(value);
-        handleAddRemoveMulti(+value);
+        timeout = setTimeout(() => {
+          handleAddRemoveMulti(+value);
+        }, 300);
       }
     },
     [handleAddRemoveMulti]
