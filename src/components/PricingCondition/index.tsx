@@ -39,7 +39,6 @@ export const getPricingConditions = (referenceData: any, material: any[], condit
   }
 };
 
-
 export const getPricingValue = (row: any, priceData: any, currency: any, fields: any[]) => {
   let rateList = [];
   let changeUnit = false;
@@ -64,18 +63,16 @@ export const getPricingValue = (row: any, priceData: any, currency: any, fields:
   return row;
 };
 
-
-export const getTaxList = async (referenceData: any, materialType: any, taxCodeId:any = null) => {
-  const zipCode = referenceData?.billingAddress?.zipCode;
-  const state = referenceData?.billingAddress?.state;
-  const county = referenceData?.billingAddress?.county;
-  let taxCode = null;
-  if (referenceData?.taxCode?.optionValue) {
-    taxCode = referenceData?.taxCode?.optionValue;
-  }
-  if(taxCodeId) taxCode = taxCodeId;
+export const getTaxList = async (referenceData: any, materialType: any) => {
   let data = []
-  if (taxCode || zipCode || state) {
+  if (referenceData?.customerAccount?.taxApplicable) {
+    const zipCode = referenceData?.billingAddress?.zipCode;
+    const state = referenceData?.billingAddress?.state;
+    const county = referenceData?.billingAddress?.county;
+    let taxCode = null;
+    if (referenceData?.taxCode?.optionValue) {
+      taxCode = referenceData?.taxCode?.optionValue;
+    }
     let api = `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&county=${county}&materialType=${materialType}`
     if (taxCode) {
       api += `&taxCode=${taxCode}`
@@ -85,4 +82,12 @@ export const getTaxList = async (referenceData: any, materialType: any, taxCodeI
   }
   return data;
 };
+
+export const getTaxById = async (taxCode: any) => {
+  let data = []
+  const response = await axiosInstance().get(`${routes?.taxMaster.path}/by-zipcode?taxCode=${taxCode}`);
+  data = response?.data?.data || [];
+  return data;
+}
+
 
