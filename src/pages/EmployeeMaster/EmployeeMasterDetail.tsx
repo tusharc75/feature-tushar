@@ -4,7 +4,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { useHistory, useParams } from 'react-router-dom';
+import { useHistory, useParams, useLocation } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -37,6 +37,8 @@ const EmployeeMasterDetail = () => {
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([]);
   const [resourceData, setResourceData] = useState(null);
+  const queryParameter = useLocation().search;
+  const givePortalAccessDialog = new URLSearchParams(queryParameter).get('portalAccess');
 
   const {
     state: { permissions, user, resources }
@@ -48,6 +50,10 @@ const EmployeeMasterDetail = () => {
       fetchData();
       fetchLoggedInUserRole();
       fetchPolicy();
+
+      if (givePortalAccessDialog === 'true') {
+        setShowAssignEntityDialog(true);
+      }
     }
   }, [id]);
 
