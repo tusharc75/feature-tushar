@@ -365,7 +365,7 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
                   />
                 </Box>
                 {!values['linkWithResource'] && (
-                  <Box className="mt-2">
+                  <div className="flex items-center gap-1 mt-2">
                     <ThemeButton
                       buttonType="theme"
                       onClick={() => {
@@ -375,18 +375,16 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
                       Add Fields
                     </ThemeButton>
                     {!values['linkWithMaterial'] && (
-                      <>
-                        <ThemeButton
-                          buttonType="theme"
-                          onClick={() => {
-                            setOpenStepActions(true);
-                          }}
-                        >
-                          Create Actions
-                        </ThemeButton>
-                      </>
+                      <ThemeButton
+                        buttonType="theme"
+                        onClick={() => {
+                          setOpenStepActions(true);
+                        }}
+                      >
+                        Create Actions
+                      </ThemeButton>
                     )}
-                  </Box>
+                  </div>
                 )}
               </Form>
             </CustomDialogContent>
@@ -412,7 +410,6 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
 
             {showConfirmDialog ? (
               <ConfirmationCancelDialog
-                close={() => setShowConfirmDialog(false)}
                 open={showConfirmDialog}
                 onSave={() => {
                   setShowConfirmDialog(false);

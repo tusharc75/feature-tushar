@@ -168,9 +168,9 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
             <div>
               {row.original.reference ? (
                 row.original.type === 'Loading Ticket' ||
-                row.original.type === 'Receiving Ticket' ||
-                row.original.type === 'Return Ticket' ||
-                row.original.type === 'Delivery Ticket' ? (
+                  row.original.type === 'Receiving Ticket' ||
+                  row.original.type === 'Return Ticket' ||
+                  row.original.type === 'Delivery Ticket' ? (
                   <Link
                     className="link"
                     title={row.original.reference}
@@ -455,16 +455,16 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
               {reservedStatusField?.length &&
                 row?.original?.referenceData?.rentalJob &&
                 row?.original?.referenceData?.status !== DELIVERY_TICKET_STATUS.cancelled &&
-                row?.original?.status === ASSET_STATUS.inUse && (
-                  <HtmlTooltip title="Rental Asset Data History">
-                    <IconButton
-                      size="small"
-                      onClick={() => setRentalAssetHistory({ open: true, rentalJob: row?.original?.referenceData?.rentalJob })}
-                    >
-                      <Visibility color="primary" fontSize="small" />
-                    </IconButton>
-                  </HtmlTooltip>
-                )}
+                row?.original?.status === ASSET_STATUS.inUse ? (
+                <HtmlTooltip title="Rental Asset Data History">
+                  <IconButton
+                    size="small"
+                    onClick={() => setRentalAssetHistory({ open: true, rentalJob: row?.original?.referenceData?.rentalJob })}
+                  >
+                    <Visibility color="primary" fontSize="small" />
+                  </IconButton>
+                </HtmlTooltip>
+              ) : null}
             </div>
           )
         }
@@ -581,8 +581,8 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
           permissions={permissions?.history}
           module={'Asset History'}
           api={`/history/inventory/${id}`}
-          afterImportCompleted={() => {}}
-          onExportToExcelSuccess={() => {}}
+          afterImportCompleted={() => { }}
+          onExportToExcelSuccess={() => { }}
           additionalParams={getQueryString()}
           onlyExport={true}
         />

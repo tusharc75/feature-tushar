@@ -35,7 +35,7 @@ const SerializedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrde
         let material = [];
         material = data?.material?.filter((m) => m?.type === MATERIAL_TYPE.package && !m?.serializedPackage);
         if (workOrderIds?.length) {
-          material = material?.filter((m) => m.parentId && [...workOrderIds].includes(m?.workOrder?.optionValue));
+          material = material?.filter((m) => [...workOrderIds].includes(m?.workOrder?.optionValue));
         } else {
           material = material?.filter((m) => !m.parentId);
         }

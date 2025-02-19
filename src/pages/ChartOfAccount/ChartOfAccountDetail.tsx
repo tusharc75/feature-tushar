@@ -26,7 +26,6 @@ const ChartOfAccountDetail = () => {
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.chartOfAccount]);
   const [chartOfAccountData, setChartOfAccountData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const { selectedRecords } = state;
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [tabValue, setTabValue] = useState(0);
