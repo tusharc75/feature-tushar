@@ -87,7 +87,7 @@ const InputField = (props) => {
                             sm: field?.columnSize ? field?.columnSize : gridSize(field.type),
                             md: field?.columnSize ? field?.columnSize : gridSize(field.type),
                             lg: field?.columnSize ? field?.columnSize : gridSize(field.type),
-                            xl: field?.columnSize ? field?.columnSize : gridSize(field.type),
+                            xl: field?.columnSize ? field?.columnSize : gridSize(field.type)
                           }}
                         >
                           <FormTypes
@@ -108,23 +108,23 @@ const InputField = (props) => {
                             onChange={
                               field.fieldName === 'currency'
                                 ? (e, val) => {
-                                  if (val && val.currencyCode) {
-                                    setFieldValue(field.fieldName, val.currencyCode);
-                                    setCurrencySymbol(val.symbolNative);
-                                  } else {
-                                    setFieldValue(field.fieldName, '');
-                                    setCurrencySymbol(null);
+                                    if (val && val.currencyCode) {
+                                      setFieldValue(field.fieldName, val.currencyCode);
+                                      setCurrencySymbol(val.symbolNative);
+                                    } else {
+                                      setFieldValue(field.fieldName, '');
+                                      setCurrencySymbol(null);
+                                    }
                                   }
-                                }
                                 : null
                             }
                             imageOrFileUploadCompletePercentage={
                               ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                 ? (completePercentage) => {
-                                  if (onImageUploadCompletePercentage) {
-                                    onImageUploadCompletePercentage(completePercentage);
+                                    if (onImageUploadCompletePercentage) {
+                                      onImageUploadCompletePercentage(completePercentage);
+                                    }
                                   }
-                                }
                                 : null
                             }
                             fields={fieldsData}

@@ -408,7 +408,8 @@ export const sidebarResource = {
   workflow: 'Workflow',
   workflowReport: 'Workflow Report',
   equiptAi: 'Equipt Ai',
-  productTypes: 'Product Types'
+  productTypes: 'Product Types',
+  packageCategory: 'Package Category'
 };
 
 export const primaryFields = {
@@ -831,8 +832,13 @@ export const workOrder = {
 export const productTypes = {
   resource: 'Product Types',
   api: '/product-types'
-}
+};
 
+
+export const packageCategory = {
+  resource: 'Package Category',
+  api: '/package-category'
+};
 export const profileMenuItems = {
   profile: 1,
   notification: 2,
@@ -2521,10 +2527,10 @@ export const REPORT_LIST = [
     section: REPORT_SECTIONS.asset
   },
   {
-    title: 'Sublease',
+    title: sidebarResource.sublease,
     permission: 'sublease',
-    key: 'standardReport',
-    type: 'sublease',
+    key: 'sublease',
+    type: 'dynamic',
     section: REPORT_SECTIONS.rental
   },
   {
@@ -3319,6 +3325,19 @@ export const convertBlobToBase64 = async (blobUrl) => {
     img.onerror = () => reject('Error in converting blob to base64');
     img.src = blobUrl;
   });
+};
+
+export const convertBase64ToBlob = (base64: string): Blob => {
+  const byteString = atob(base64.split(',')[1]);
+  const mimeString = base64.split(',')[0].split(':')[1].split(';')[0];
+  const arrayBuffer = new ArrayBuffer(byteString.length);
+  const uint8Array = new Uint8Array(arrayBuffer);
+
+  for (let i = 0; i < byteString.length; i++) {
+    uint8Array[i] = byteString.charCodeAt(i);
+  }
+
+  return new Blob([uint8Array], { type: mimeString });
 };
 
 export const IMPORT_EXPORT_STATUS = {
