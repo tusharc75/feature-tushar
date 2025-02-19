@@ -346,6 +346,7 @@ const ScheduledMaintenance = ({ onClose }) => {
             serialized={true}
             isSubmitting={false}
             ids={dataRows?.map((d) => d?.productId)}
+            hideQty={true}
           />
         )}
 
