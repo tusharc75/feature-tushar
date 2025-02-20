@@ -552,7 +552,11 @@ const InventoryProduct = () => {
           isActionButtonVisible
           actionButtonProps={{
             disabled: selectedRecords?.length && plantId !== 'All' ? false : true,
-            tooltip: selectedRecords?.length === 0 && permissions?.productInventory?.isCreate ? 'Select Plant' : TOOLTIP_MESSAGE.edit
+            tooltip: !permissions?.productInventory?.isUpdate
+              ? TOOLTIP_MESSAGE.edit
+              : selectedRecords?.length === 0
+                ? `Select ${resources?.warehouse?.titleSingular}`
+                : ''
           }}
           actionMenuItems={
             <ActionMenuItems {...{ permissions, setInventory, selectedRecords, plantId, checkReport, handleRemap, handleRemapPurchaseOrder }} />
