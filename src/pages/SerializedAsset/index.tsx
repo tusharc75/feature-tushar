@@ -725,7 +725,8 @@ const SerializedAsset = () => {
                 setSubleaseAsset,
                 showScrapAsset,
                 setShowScrapAsset,
-                resources
+                resources,
+                columns
               }}
             />
           }
@@ -833,12 +834,13 @@ const LeftSideContent = ({
   setSubleaseAsset,
   showScrapAsset,
   setShowScrapAsset,
-  resources
+  resources,
+  columns
 }) => {
   return (
     <>
       <Fragment>
-        {permissions?.productCategory?.isRead && (
+        {permissions?.productCategory?.isRead && columns?.find(c => c?.accessor === 'productCategory') && (
           <Autocomplete
             className={`w-full lg:w-[230px]`}
             options={productCategoryList}
