@@ -96,7 +96,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
             ) : (
               <h5 className="text-truncate">{row.original?.detail}</h5>
             )}
-            {allowedToEdit && row.original.type === MATERIAL_TYPE.package && !row.original.parentId && (
+            {allowedToEdit && row.original.type === MATERIAL_TYPE.package && (
               <>
                 {row.original?.subRows?.length > 0 &&
                   <Box>
@@ -104,18 +104,16 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
                   </Box>
                 }
                 <Box>
-                  {!row?.original?.parentId && (
-                    <HtmlTooltip title={`Add Existing ${resources?.packages?.titlePlural}`}>
-                      <IconButton
-                        onClick={() => {
-                          setAddDialog({ open: true, parentId: row.original?._id });
-                        }}
-                        size="small"
-                      >
-                        <Add fontSize="small" color="primary" />
-                      </IconButton>
-                    </HtmlTooltip>
-                  )}
+                  <HtmlTooltip title={`Add Existing ${resources?.packages?.titlePlural}`}>
+                    <IconButton
+                      onClick={() => {
+                        setAddDialog({ open: true, parentId: row.original?._id });
+                      }}
+                      size="small"
+                    >
+                      <Add fontSize="small" color="primary" />
+                    </IconButton>
+                  </HtmlTooltip>
                 </Box>
               </>
             )}
