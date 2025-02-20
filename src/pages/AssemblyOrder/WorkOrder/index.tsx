@@ -361,6 +361,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
       } else {
         parent.subRows = generateNestedData(data, parent);
       }
+
       parent.canDelete = false;
       if (parent?.workOrder) {
         if (parent?.workOrder?.status !== WORK_ORDER_STATUS.completed) {
@@ -386,7 +387,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
           : _subRow.type === MATERIAL_TYPE.package
             ? _subRow.packageDetail?.packageName
             : _subRow.type === MATERIAL_TYPE.service
-              ? _subRow.serviceDetail?.serviceName
+              ? _subRow?.serviceDetail?.serviceName
               : '';
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.product
@@ -394,18 +395,20 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
           : _subRow.type === MATERIAL_TYPE.package
             ? _subRow.packageDetail?.packageDescription
             : _subRow.type === MATERIAL_TYPE.service
-              ? _subRow.serviceDetail?.serviceDescription
+              ? _subRow?.serviceDetail?.serviceDescription
               : '';
       _subRow.qty = _subRow.qty;
-      _subRow.workOrder = [MATERIAL_TYPE.product, MATERIAL_TYPE.service]?.includes(_subRow?.type) ? parent?.workOrder : _subRow?.workOrder;
-      _subRow.workOrderId = [MATERIAL_TYPE.product, MATERIAL_TYPE.service]?.includes(_subRow?.type)
-        ? parent?.workOrder?._id
-        : _subRow?.workOrder?._id;
-      _subRow.workOrderNumber = [MATERIAL_TYPE.product, MATERIAL_TYPE.service]?.includes(_subRow?.type)
-        ? parent?.workOrder?.workOrderNumber
-        : _subRow?.workOrder?.workOrderNumber;
-      _subRow.status = MATERIAL_TYPE.service ? _subRow?.status : MATERIAL_TYPE.product ? '' : _subRow?.workOrder?.status || '';
-      if (_subRow?.workOrder?.status === WORK_ORDER_STATUS.new) {
+      _subRow.workOrder = _subRow?.workOrder;
+      _subRow.workOrderId = _subRow?.workOrder?._id;
+      _subRow.workOrderNumber = _subRow?.workOrder?.workOrderNumber;
+      _subRow.status =
+        _subRow?.type === MATERIAL_TYPE.product ? '' : _subRow?.type === MATERIAL_TYPE.service ? _subRow?.status : _subRow?.workOrder?.status || '';
+      if ([MATERIAL_TYPE.product, MATERIAL_TYPE.service]?.includes(_subRow?.type) && parent?.workOrder) {
+        _subRow.workOrder = parent?.workOrder;
+        _subRow.workOrderId = parent?.workOrderId;
+        _subRow.workOrderNumber = parent?.workOrderNumber;
+      }
+      if (_subRow?.workOrder?.status === WORK_ORDER_STATUS.new && _subRow?.type === MATERIAL_TYPE.package) {
         _subRow.canAutoCompleteWorkOrder = true;
       }
       if (_subRow?.workOrder?.status === WORK_ORDER_STATUS.completed) {
@@ -415,7 +418,15 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
       _subRow.subRows = generateNestedData(material, _subRow);
       _subRow.canDelete = false;
       if (_subRow?.workOrder?.status !== WORK_ORDER_STATUS.completed) {
-        _subRow.canDelete = _subRow.subRows.length === 0 ? true : false;
+        if (_subRow.type === MATERIAL_TYPE.product) {
+          _subRow.canDelete = _subRow?.consumedQty || _subRow?.requestedQty ? false : true;
+        }
+        if (_subRow.type === MATERIAL_TYPE.service) {
+          _subRow.canDelete = _subRow?.status === WORKORDER_SERVICE_STATUS.pending ? true : false;
+        }
+        if (_subRow.type === MATERIAL_TYPE.package) {
+          _subRow.canDelete = _subRow.subRows.length === 0 ? true : false;
+        }
         if (_subRow.subRows?.length && _subRow.subRows?.find((e) => !e?.canDelete)) {
           _subRow.canDelete = false;
         }
