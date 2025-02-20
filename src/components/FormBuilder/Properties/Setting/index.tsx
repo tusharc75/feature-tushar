@@ -694,6 +694,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
               setFieldValue('columnSize', Number(e?.target?.value));
             }}
           >
+            <FormControlLabel value={3} control={<Radio size="small" />} label="Col 3" />
             <FormControlLabel value={6} control={<Radio size="small" />} label="Col 6" />
             <FormControlLabel value={12} control={<Radio size="small" />} label="Col 12" />
           </RadioGroup>
