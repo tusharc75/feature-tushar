@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _, { isEmpty } from 'lodash';
 import { useContext, useState, useEffect, Fragment } from 'react';
 import ReactFlow, { Controls, ControlButton, ReactFlowProvider } from 'react-flow-renderer';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -69,9 +69,6 @@ const AssemblyOrderViews = (props) => {
         data: { data }
       } = await axiosInstance().get(`${routes.assemblyOrder.path}/work-order/${id}`);
 
-      const position: any = {
-        xPosition: 0
-      };
       var xPosition = 0;
       const flow: any[] = [
         {
@@ -96,7 +93,8 @@ const AssemblyOrderViews = (props) => {
         }
       ];
       const flowEdge: any[] = [];
-      position.xPosition += 300;
+      xPosition += 300;
+      const childPosition: any = {};
 
       const rows = data?.filter((item) => !item?.parentId);
       rows?.forEach((parent: any, pIdx) => {
@@ -118,7 +116,7 @@ const AssemblyOrderViews = (props) => {
             )
           },
           position: {
-            x: position.xPosition,
+            x: xPosition,
             y: pIdx * 95
           },
           style: parent?.type === 'package' ? customNodeStyles.package : customNodeStyles.product
@@ -129,7 +127,7 @@ const AssemblyOrderViews = (props) => {
           arrowHeadType: 'arrow',
           target: `${parent?._id}`
         });
-        generateChild(parent, data, flow, flowEdge, position);
+        generateChild(parent, data, flow, flowEdge, xPosition, childPosition);
       });
 
       const workOrders = data
@@ -152,7 +150,8 @@ const AssemblyOrderViews = (props) => {
           };
         });
 
-      if (workOrders?.length) position.xPosition += 300;
+      const xPositions: any = Object.values(childPosition)?.map((d) => d);
+      if (workOrders?.length) xPosition = Math.max(...xPositions) + 300;
       workOrders?.map((w: any, wIdx) => {
         flow.push({
           id: `${w.optionValue}`,
@@ -174,7 +173,7 @@ const AssemblyOrderViews = (props) => {
             )
           },
           position: {
-            x: position.xPosition,
+            x: xPosition,
             y: wIdx * 80
           },
           style: customNodeStyles.workOrder
@@ -187,7 +186,7 @@ const AssemblyOrderViews = (props) => {
         });
       });
 
-      if (childSerializedPackages?.length) position.xPosition += 300;
+      if (childSerializedPackages?.length) xPosition += 300;
       childSerializedPackages?.map((cmp, cmpIdx) => {
         flow.push({
           id: `${cmp.optionValue}`,
@@ -211,7 +210,7 @@ const AssemblyOrderViews = (props) => {
             )
           },
           position: {
-            x: position.xPosition,
+            x: xPosition,
             y: cmpIdx * 80
           },
           style: customNodeStyles.serializedPackage
@@ -232,10 +231,14 @@ const AssemblyOrderViews = (props) => {
     }
   };
 
-  const generateChild = (parent, material, flow, flowEdge, position) => {
+  const generateChild = (parent, material, flow, flowEdge, xPosition, childPosition) => {
     const child = material?.filter((m) => m?.parentId === parent?._id && m?.type === MATERIAL_TYPE.package);
-    if (child?.length) position.xPosition += 300;
+    if (child?.length) {
+      childPosition[parent?._id] = childPosition[parent?._id] ? childPosition[parent?._id] + 300 : xPosition + 300;
+    }
+
     child?.forEach((item: any, cIdx) => {
+      childPosition[item?._id] = childPosition[item?.parentId];
       flow.push({
         id: `${item?._id}`,
         sourcePosition: 'right',
@@ -256,7 +259,7 @@ const AssemblyOrderViews = (props) => {
           )
         },
         position: {
-          x: position.xPosition,
+          x: childPosition[item?._id],
           y: cIdx * 80
         },
         style: item.type === 'package' ? customNodeStyles.package : customNodeStyles.product
@@ -267,7 +270,7 @@ const AssemblyOrderViews = (props) => {
         arrowHeadType: 'arrow',
         target: `${item._id}`
       });
-      generateChild(item, material, flow, flowEdge, position);
+      generateChild(item, material, flow, flowEdge, xPosition, childPosition);
     });
   };
 
