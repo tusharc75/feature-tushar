@@ -27,7 +27,7 @@ import SerialNumberDialog from './SerialNumber/SerialNumberDialog';
 import SettingsDialog from './SettingsDialog';
 import SoftHoldDialog from './SoftHold';
 import axios, { CancelTokenSource } from 'axios';
-import WarningIcon  from '@mui/icons-material/Warning';
+import WarningIcon from '@mui/icons-material/Warning';
 
 const InventoryProduct = () => {
   const renderedFrom = camelCase(sidebarResource?.productInventory);
@@ -113,32 +113,33 @@ const InventoryProduct = () => {
 
     let newColumns = generateColumns(renderedFrom, productFields?.data?.data, routes.productDetail.path);
     columns = [...columns, ...newColumns];
-    columns?.forEach((col)=>{
-      if(col?.primaryField){
+    columns?.forEach((col) => {
+      if (col?.primaryField) {
         col.cell = ({ row }) => (
           <div>
             <p
               className="link text-truncate"
               title={row?.original?.productName}
-              onClick={()=> {window.open(`${routes.productDetail.path}/${row?.original?._id}`)}}
+              onClick={() => {
+                window.open(`${routes.productDetail.path}/${row?.original?._id}`);
+              }}
             >
               {row?.original?.productName}
             </p>
-            {(row?.original?.minInventory > 0 && row?.original?.inventory < row?.original?.minInventory  && (
-                <Box ml={1}>
-                  <HtmlTooltip title="Low Inventory Alert">
-                    <WarningIcon style={{ fontSize: '14px' }} fontSize="small" color="error" />
-                  </HtmlTooltip>
-                </Box>
-              ))}
-              </div>
-          )
+            {row?.original?.minInventory > 0 && row?.original?.inventory < row?.original?.minInventory && (
+              <Box ml={1}>
+                <HtmlTooltip title="Low Inventory Alert">
+                  <WarningIcon style={{ fontSize: '14px' }} fontSize="small" color="error" />
+                </HtmlTooltip>
+              </Box>
+            )}
+          </div>
+        );
       }
-    })
+    });
     if (!user?.user?.brandPolicy?.hideInventoryCount) {
       let newColumns = generateColumns(renderedFrom, productInventoryFields?.data?.data, routes.productInventory.path);
       newColumns?.forEach((o) => {
-
         if (!['plant', 'product'].includes(o?.accessor)) {
           if (
             ['minInventory', 'maxInventory'].includes(o.accessor) &&
@@ -165,38 +166,38 @@ const InventoryProduct = () => {
     const defaultColumns = [
       ...(!user?.user?.brandPolicy?.hideInventoryCount
         ? [
-          {
-            accessor: 'availableInventory',
-            Header: 'Available Inventory',
-            disableFilters: true,
-            disableSortBy: true,
-            Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.availableInventory || 0}</h5>
-          },
-          {
-            accessor: 'softHold',
-            Header: 'Soft Hold',
-            disableFilters: true,
-            disableSortBy: true,
-            Cell: ({ row }) =>
-              row?.original?.softHold ? (
-                <div className="flex items-center gap-2">
-                  <h5 className="text-truncate">{row?.original?.softHold}</h5>
-                  <HtmlTooltip title={`Soft Hold History`}>
-                    <InfoIcon className="ml-1 cursor-pointer" fontSize="small" color="primary" onClick={() => infoHandler(row?.original)} />
-                  </HtmlTooltip>
-                </div>
-              ) : (
-                <h5 className="text-truncate">0</h5>
-              )
-          },
-          {
-            accessor: 'purchaseOrderQty',
-            Header: 'On PO',
-            disableFilters: true,
-            disableSortBy: true,
-            Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.purchaseOrderQty || 0}</h5>
-          }
-        ]
+            {
+              accessor: 'availableInventory',
+              Header: 'Available Inventory',
+              disableFilters: true,
+              disableSortBy: true,
+              Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.availableInventory || 0}</h5>
+            },
+            {
+              accessor: 'softHold',
+              Header: 'Soft Hold',
+              disableFilters: true,
+              disableSortBy: true,
+              Cell: ({ row }) =>
+                row?.original?.softHold ? (
+                  <div className="flex items-center gap-2">
+                    <h5 className="text-truncate">{row?.original?.softHold}</h5>
+                    <HtmlTooltip title={`Soft Hold History`}>
+                      <InfoIcon className="ml-1 cursor-pointer" fontSize="small" color="primary" onClick={() => infoHandler(row?.original)} />
+                    </HtmlTooltip>
+                  </div>
+                ) : (
+                  <h5 className="text-truncate">0</h5>
+                )
+            },
+            {
+              accessor: 'purchaseOrderQty',
+              Header: 'On PO',
+              disableFilters: true,
+              disableSortBy: true,
+              Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.purchaseOrderQty || 0}</h5>
+            }
+          ]
         : [])
     ];
     setColumns([...columns, ...defaultColumns, ActionsRenderer]);
@@ -355,9 +356,9 @@ const InventoryProduct = () => {
     let tempPlantId =
       plantId === 'All'
         ? plantOptions
-          .filter((d) => d.optionValue !== 'All')
-          .map((d) => d.optionValue)
-          .toString()
+            .filter((d) => d.optionValue !== 'All')
+            .map((d) => d.optionValue)
+            .toString()
         : plantId;
 
     let deepFilter = `?warehouse=${tempPlantId}&page=${page}&limit=${limit}`;
@@ -435,7 +436,7 @@ const InventoryProduct = () => {
     }
     axiosInstance()
       .get(api)
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -549,7 +550,10 @@ const InventoryProduct = () => {
           onSearch={handleSearch}
           rightSideContents={<RightSideContents />}
           isActionButtonVisible
-          actionButtonProps={{ disabled: selectedRecords?.length && plantId !== 'All' ? false : true }}
+          actionButtonProps={{
+            disabled: selectedRecords?.length && plantId !== 'All' ? false : true,
+            tooltip: selectedRecords?.length === 0 && permissions?.productInventory?.isCreate ? 'Select Plant' : TOOLTIP_MESSAGE.edit
+          }}
           actionMenuItems={
             <ActionMenuItems {...{ permissions, setInventory, selectedRecords, plantId, checkReport, handleRemap, handleRemapPurchaseOrder }} />
           }
@@ -582,9 +586,9 @@ const InventoryProduct = () => {
           warehouse={
             plantId === 'All'
               ? plantOptions
-                .filter((d) => d.optionValue !== 'All')
-                .map((d) => d.optionValue)
-                .toString()
+                  .filter((d) => d.optionValue !== 'All')
+                  .map((d) => d.optionValue)
+                  .toString()
               : plantId
           }
         />
@@ -600,9 +604,9 @@ const InventoryProduct = () => {
           warehouse={
             plantId === 'All'
               ? plantOptions
-                .filter((d) => d.optionValue !== 'All')
-                .map((d) => d.optionValue)
-                .toString()
+                  .filter((d) => d.optionValue !== 'All')
+                  .map((d) => d.optionValue)
+                  .toString()
               : plantId
           }
           storageLocation={storageLocationId}
@@ -618,9 +622,9 @@ const InventoryProduct = () => {
           warehouse={
             plantId === 'All'
               ? plantOptions
-                .filter((d) => d.optionValue !== 'All')
-                .map((d) => d.optionValue)
-                .toString()
+                  .filter((d) => d.optionValue !== 'All')
+                  .map((d) => d.optionValue)
+                  .toString()
               : plantId
           }
         />
