@@ -239,8 +239,8 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
         <>
           <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
             <CustomTab value={0} label={`Individual`} />
-            {permissions?.assemblyOrder?.isRead && <CustomTab value={1} label={`${resources?.assemblyOrder?.titleSingular}`} />}
-            {permissions?.disassemblyOrder?.isRead && <CustomTab value={2} label={`${resources?.disassemblyOrder?.titleSingular}`} />}
+            {permissions?.assemblyOrder?.isRead && <CustomTab value={1} label={`Assembly`} />}
+            {permissions?.disassemblyOrder?.isRead && <CustomTab value={2} label={`Disassembly`} />}
           </CustomTabs>
         </>
       )}

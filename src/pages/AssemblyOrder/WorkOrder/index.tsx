@@ -12,7 +12,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { CHILD_RESOURCE, MATERIAL_SUB_TYPE, MATERIAL_TYPE, WORK_ORDER_STATUS, workOrder, WORKORDER_SERVICE_STATUS } from 'src/constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_SUB_TYPE, MATERIAL_TYPE, sidebarResource, WORK_ORDER_STATUS, workOrder, WORKORDER_SERVICE_STATUS } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import SyncIcon from '@mui/icons-material/Sync';
@@ -29,6 +29,7 @@ import AttachmentDialog from 'src/pages/WorkOrder/Service/AttachmentDialog';
 import PackageNumberDialog from 'src/pages/AssemblyOrder/WorkOrder/PackageNumberDialog';
 import DescriptionIcon from '@mui/icons-material/Description';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
+import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -97,6 +98,19 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
   const fetchFields = async () => {
     const response = await fetch_child_resource_fields(CHILD_RESOURCE.assemblyOrderMaterial, assemblyOrderData?.currency || 'USD', false);
     var data = response?.filter((e) => !['detail', 'description']?.includes(e?.fieldName));
+
+    const {
+      data: { data: serializedPackageFieldData }
+    } = await axiosInstance().put(`/field/find-field-labels`, {
+      fields: [
+        {
+          resource: sidebarResource.serializedPackages,
+          fieldNames: ['serializedPackageNumber']
+        }
+      ]
+    });
+    const serializedPackageField = serializedPackageFieldData?.find((d) => d.resource === sidebarResource.serializedPackages)?.fieldNames || [];
+
     const newColumns = generateColumns(renderedFrom, data, null, false, assemblyOrderData?.currency || 'USD');
     let coloum: any = [
       {
@@ -186,40 +200,43 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
     ];
     coloum = [...coloum, ...newColumns];
     coloum.push({
+      accessor: 'serializedPackageNumber',
+      Header: serializedPackageField[0]?.fieldLabel || 'Serialized Package Number',
+      width: 200,
+      show: false,
+      Cell: ({ row }) => {
+        return row.original?.serializedPackageNumber ? (
+          <div className="flex items-center gap-2">
+            <h5 className="text-truncate">{row.original?.serializedPackageNumber}</h5>{' '}
+            <Box>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.serializedPackagesDetail.path}/${row.original.serializedPackageId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            </Box>
+          </div>
+        ) : (
+          <NoDataCell />
+        );
+      }
+    });
+    coloum.push({
       accessor: 'assignedUsers',
       Header: 'Assigned Technician',
       width: 200,
-      Cell: ({ row }) => (
-        <div>
-          {row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
-            row?.original['assignedUsers']?.map((e, i) => {
-              return i === row?.original['assignedUsers'].length - 1 ? (
-                <a
-                  className="link text-truncate [flex-grow:0_!important]"
-                  target="_blank"
-                  href={`${routes.userDetail.path}/${e.optionValue}`}
-                  rel="noreferrer"
-                >
-                  {e?.optionLabel}
-                </a>
-              ) : (
-                <>
-                  <a
-                    className="link text-truncate [flex-grow:0_!important]"
-                    target="_blank"
-                    href={`${routes.userDetail.path}/${e.optionValue}`}
-                    rel="noreferrer"
-                  >
-                    {e?.optionLabel},
-                  </a>
-                  &nbsp;
-                </>
-              );
-            })
-          ) : (
-            <NoDataCell />
-          )}
-        </div>
+      Cell: ({ row }) => (<DropdownCell
+        permissions={permissions}
+        permissionForLinks={{}}
+        field={{
+          fieldName: 'assignedUsers',
+          lookupResource: sidebarResource.user
+        }}
+        original={row?.original}
+      />
       )
     });
     if (permissions?.workStations) {
@@ -228,36 +245,15 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
         Header: 'Assigned Work Station',
         width: 200,
         Cell: ({ row }) => (
-          <div>
-            {row?.original['assignedWorkStations'] && row?.original['assignedWorkStations']?.length ? (
-              row?.original['assignedWorkStations']?.map((e, i) => {
-                return i === row?.original['assignedWorkStations'].length - 1 ? (
-                  <a
-                    className="link text-truncate [flex-grow:0_!important]"
-                    target="_blank"
-                    href={`${routes.workStationsDetail.path}/${e.optionValue}`}
-                    rel="noreferrer"
-                  >
-                    {e?.optionLabel}
-                  </a>
-                ) : (
-                  <>
-                    <a
-                      className="link text-truncate [flex-grow:0_!important]"
-                      target="_blank"
-                      href={`${routes.workStationsDetail.path}/${e.optionValue}`}
-                      rel="noreferrer"
-                    >
-                      {e?.optionLabel},
-                    </a>
-                    &nbsp;
-                  </>
-                );
-              })
-            ) : (
-              <NoDataCell />
-            )}
-          </div>
+          <DropdownCell
+            permissions={permissions}
+            permissionForLinks={{}}
+            field={{
+              fieldName: 'assignedWorkStations',
+              lookupResource: sidebarResource.workStations
+            }}
+            original={row?.original}
+          />
         )
       });
     }
@@ -267,10 +263,10 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
       minWidth: 100,
       width: 100,
       sticky: 'right',
-      Cell: ({ row, table }) => {
+      Cell: ({ row }) => {
         return (
           <>
-            {checkParentProduct([row?.original], row?.original?.parentId, table.getRowModel().rows) && (
+            {row.original.type === MATERIAL_TYPE.package && row.original?.workOrderId && (
               <>
                 <HtmlTooltip title="Auto Complete Work Order">
                   <IconButton
@@ -302,23 +298,21 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
                 </HtmlTooltip>
               </>
             )}
-            {row?.original?.parentId && (
-              <HtmlTooltip title="Delete">
-                <span>
-                  <IconButton
-                    disabled={row?.original?.canDelete ? false : true}
-                    size="small"
-                    aria-label="Delete"
-                    onClick={() => {
-                      setDeleteData([row.original]);
-                      setShowDeleteConfirmBox(true);
-                    }}
-                  >
-                    <Delete fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
-                  </IconButton>
-                </span>
-              </HtmlTooltip>
-            )}
+            <HtmlTooltip title="Delete">
+              <span>
+                <IconButton
+                  disabled={row?.original?.canDelete ? false : true}
+                  size="small"
+                  aria-label="Delete"
+                  onClick={() => {
+                    setDeleteData([row.original]);
+                    setShowDeleteConfirmBox(true);
+                  }}
+                >
+                  <Delete fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
           </>
         );
       }
@@ -337,8 +331,8 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
     } = await axiosInstance().get(`${routes.assemblyOrder.path}/work-order/${assemblyOrderData._id}`);
 
     setMaterial(JSON.parse(JSON.stringify(data)));
-    let rows = data?.filter((e) => e.parentId === null);
 
+    let rows = data?.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = parent.packageDetail?.packageName || '';
@@ -354,14 +348,13 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
         if (parent?.workOrder?.status === WORK_ORDER_STATUS.completed) {
           parent.hideSelection = true;
           parent.workOrderStatus = WORK_ORDER_STATUS.completed;
+          if (parent?.serializedPackage) {
+            parent.serializedPackageId = parent?.serializedPackage?.optionValue;
+            parent.serializedPackageNumber = parent?.serializedPackage?.optionLabel;
+          }
         }
       }
-      if (data?.find((e) => e.parentId === parent._id && e.type === MATERIAL_TYPE.package)) {
-        parent.subRows = generatedNestedProduct(data, parent);
-      } else {
-        parent.subRows = generateNestedData(data, parent);
-      }
-
+      parent.subRows = generateNestedData(data, parent);
       parent.canDelete = false;
       if (parent?.workOrder) {
         if (parent?.workOrder?.status !== WORK_ORDER_STATUS.completed) {
@@ -377,85 +370,56 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
     dispatch({ type: 'loading', loading: false });
   };
 
-  const generatedNestedProduct = (material, parent) => {
-    const subRows: any = material.filter((e) => e.parentId === parent._id);
-    subRows.forEach((_subRow, index) => {
-      _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail =
-        _subRow.type === MATERIAL_TYPE.product
-          ? _subRow.productDetail?.productName
-          : _subRow.type === MATERIAL_TYPE.package
-            ? _subRow.packageDetail?.packageName
-            : _subRow.type === MATERIAL_TYPE.service
-              ? _subRow?.serviceDetail?.serviceName
-              : '';
-      _subRow.description =
-        _subRow.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productDescription
-          : _subRow.type === MATERIAL_TYPE.package
-            ? _subRow.packageDetail?.packageDescription
-            : _subRow.type === MATERIAL_TYPE.service
-              ? _subRow?.serviceDetail?.serviceDescription
-              : '';
-      _subRow.qty = _subRow.qty;
-      _subRow.workOrder = _subRow?.workOrder;
-      _subRow.workOrderId = _subRow?.workOrder?._id;
-      _subRow.workOrderNumber = _subRow?.workOrder?.workOrderNumber;
-      _subRow.status =
-        _subRow?.type === MATERIAL_TYPE.product ? '' : _subRow?.type === MATERIAL_TYPE.service ? _subRow?.status : _subRow?.workOrder?.status || '';
-      if ([MATERIAL_TYPE.product, MATERIAL_TYPE.service]?.includes(_subRow?.type) && parent?.workOrder) {
-        _subRow.workOrder = parent?.workOrder;
-        _subRow.workOrderId = parent?.workOrderId;
-        _subRow.workOrderNumber = parent?.workOrderNumber;
-      }
-      if (_subRow?.workOrder?.status === WORK_ORDER_STATUS.new && _subRow?.type === MATERIAL_TYPE.package) {
-        _subRow.canAutoCompleteWorkOrder = true;
-      }
-      if (_subRow?.workOrder?.status === WORK_ORDER_STATUS.completed) {
-        _subRow.hideSelection = true;
-        _subRow.workOrderStatus = WORK_ORDER_STATUS.completed;
-      }
-      _subRow.subRows = generateNestedData(material, _subRow);
-      _subRow.canDelete = false;
-      if (_subRow?.workOrder?.status !== WORK_ORDER_STATUS.completed) {
-        if (_subRow.type === MATERIAL_TYPE.product) {
-          _subRow.canDelete = _subRow?.consumedQty || _subRow?.requestedQty ? false : true;
+  const generateNestedData = (material, parent) => {
+
+    var subPackage: any = material.filter((e) => e?.parentId === parent?._id && e?.type === MATERIAL_TYPE.package);
+    subPackage.forEach((_subPackage, index) => {
+      _subPackage.index = parent.index + '.' + `${index + 1}`;
+      _subPackage.detail = _subPackage.packageDetail?.packageName || '';
+      _subPackage.description = _subPackage?.packageDetail?.packageDescription || '';
+      _subPackage.qty = _subPackage.qty;
+      if (_subPackage?.workOrder) {
+        _subPackage.workOrderId = _subPackage?.workOrder?._id;
+        _subPackage.workOrderNumber = _subPackage?.workOrder?.workOrderNumber;
+        _subPackage.status = _subPackage?.workOrder?.status || '';
+        if (_subPackage?.workOrder?.status === WORK_ORDER_STATUS.new) {
+          _subPackage.canAutoCompleteWorkOrder = true;
         }
-        if (_subRow.type === MATERIAL_TYPE.service) {
-          _subRow.canDelete = _subRow?.status === WORKORDER_SERVICE_STATUS.pending ? true : false;
+        if (_subPackage?.workOrder?.status === WORK_ORDER_STATUS.completed) {
+          _subPackage.hideSelection = true;
+          _subPackage.workOrderStatus = WORK_ORDER_STATUS.completed;
+          if (_subPackage?.serializedPackage) {
+            _subPackage.serializedPackageId = _subPackage?.serializedPackage?.optionValue;
+            _subPackage.serializedPackageNumber = _subPackage?.serializedPackage?.optionLabel;
+          }
         }
-        if (_subRow.type === MATERIAL_TYPE.package) {
-          _subRow.canDelete = _subRow.subRows.length === 0 ? true : false;
-        }
-        if (_subRow.subRows?.length && _subRow.subRows?.find((e) => !e?.canDelete)) {
-          _subRow.canDelete = false;
+      }
+      _subPackage.subRows = generateNestedData(material, _subPackage);
+      _subPackage.canDelete = false;
+      if (_subPackage?.workOrder) {
+        if (_subPackage?.workOrder?.status !== WORK_ORDER_STATUS.completed) {
+          _subPackage.canDelete = _subPackage.subRows.length === 0 ? true : false;
+          if (_subPackage.subRows?.length && _subPackage.subRows?.find((e) => !e?.canDelete)) {
+            _subPackage.canDelete = false;
+          }
         }
       }
     });
-    return subRows;
-  };
 
-  const generateNestedData = (material, parent) => {
-    var subRows: any = material.filter((e) => e?.parentId === parent?._id);
+    var subRows: any = material.filter((e) => e?.parentId === parent?._id && [MATERIAL_TYPE.product, MATERIAL_TYPE.service]?.includes(e?.type));
     subRows = orderBy(subRows, ['type'], ['desc']);
     let productIndex = 0;
     let serviceIndex = 0;
-    subRows.forEach((_subRow, index) => {
+    subRows.forEach((_subRow) => {
       _subRow.index = parent.index + '.' + `${_subRow.type === MATERIAL_TYPE.service ? alphabet[serviceIndex] : productIndex + 1}`;
-      _subRow.detail = _subRow.detail
-        ? _subRow.detail
-        : _subRow.type === MATERIAL_TYPE.service
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow.productDetail?.productName
-            : _subRow.packageDetail?.packageName;
-      _subRow.description = _subRow.description
-        ? _subRow.description
-        : _subRow.type === MATERIAL_TYPE.service
-          ? _subRow?.serviceDetail?.serviceDescription
-          : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow?.productDetail?.productDescription
-            : _subRow?.packageDetail?.packageDescription;
+      _subRow.detail = _subRow.detail ? _subRow.detail
+        : _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceName
+          : _subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName
+            : '';
+      _subRow.description = _subRow.description ? _subRow.description
+        : _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceDescription
+          : _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription
+            : '';
       _subRow.qty = _subRow.qty;
       _subRow.workOrder = parent?.workOrder;
       _subRow.workOrderId = parent?.workOrderId;
@@ -474,15 +438,12 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
         if (_subRow.type === MATERIAL_TYPE.service) {
           _subRow.canDelete = _subRow?.status === WORKORDER_SERVICE_STATUS.pending ? true : false;
         }
-        if (_subRow.type === MATERIAL_TYPE.package) {
-          _subRow.canDelete = _subRow.subRows.length === 0 ? true : false;
-        }
         if (_subRow.subRows?.length && _subRow.subRows?.find((e) => !e?.canDelete)) {
           _subRow.canDelete = false;
         }
       }
     });
-    return subRows;
+    return [...subRows, ...subPackage];
   };
 
   const handleDelete = async () => {
@@ -1060,8 +1021,8 @@ const ActionButtonMenuItems = ({
         }}
         disabled={
           selectedRecords?.length &&
-          selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || checkParentProduct([d], d?.parentId)) &&
-          selectedRecords?.every((d) => d.workOrderId === selectedRecords[0]?.workOrderId)
+            selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || checkParentProduct([d], d?.parentId)) &&
+            selectedRecords?.every((d) => d.workOrderId === selectedRecords[0]?.workOrderId)
             ? false
             : true
         }
@@ -1080,8 +1041,8 @@ const ActionButtonMenuItems = ({
       <MenuItem
         disabled={
           checkUniqWorkOrder() &&
-          (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
-            selectedRecords?.filter((e) => checkParentProduct([e], e?.parentId))?.length === 1)
+            (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
+              selectedRecords?.filter((e) => checkParentProduct([e], e?.parentId))?.length === 1)
             ? false
             : true
         }
