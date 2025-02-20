@@ -1,5 +1,4 @@
 import { Box } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
@@ -9,14 +8,7 @@ import { useParams, useHistory } from 'react-router-dom';
 import queryString from 'query-string';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import {
-  ACTIVITY_RESOURCE,
-  assemblyOrderSteps,
-  checkIsAllowedToDelete,
-  checkIsAllowedToEdit,
-  MATERIAL_TYPE,
-  sidebarResource
-} from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, assemblyOrderSteps, checkIsAllowedToDelete, checkIsAllowedToEdit, sidebarResource } from 'src/constants/helpers';
 import Steps, { getIndex } from 'src/components/Steps';
 import { isMobile, isTablet } from 'react-device-detect';
 import EditIcon from '@mui/icons-material/Edit';
@@ -33,7 +25,6 @@ import ContentFullScreen from 'src/components/ContentFullScreen';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import Material from 'src/pages/AssemblyOrder/Material';
 import WorkOrder from 'src/pages/AssemblyOrder/WorkOrder';
-import PackageNumberDialog from 'src/pages/AssemblyOrder/WorkOrder/PackageNumberDialog';
 import Loading from 'src/pages/AssemblyOrder/Loading';
 import Invoice from 'src/pages/AssemblyOrder/Invoice';
 import RoadmapViews from './RoadMapViews';
@@ -62,7 +53,6 @@ const AssemblyOrderDetail = () => {
   const [currentStep, setCurrentStep] = useState(null);
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [resourceData, setResourceData] = useState(null);
-  const [openSerializedPackageDialog, setOpenSerializedPackageDialog] = useState(false);
 
   const assemblyOrderProcessStepsNames = useMemo(() => {
     return assemblyOrderSteps.map((item) => item.name);
@@ -224,14 +214,6 @@ const AssemblyOrderDetail = () => {
               isStepEnded={false}
               stepFullScreen={stepFullScreen}
               setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
-              handleNext={
-                assemblyOrderProcessStepsNames[currentStep] === 'Work Order' &&
-                !assemblyOrderData?.material?.filter((m) => m?.type === MATERIAL_TYPE.package && !m?.parentId)?.every((m) => m?.serializedPackage)
-                  ? () => {
-                      setOpenSerializedPackageDialog(true);
-                    }
-                  : null
-              }
               updateStatus={(step: number) => {
                 dynamicFormUpdateProcessStatus(sidebarResource.assemblyOrder, assemblyOrderProcessStepsNames[step], id);
               }}
@@ -310,22 +292,6 @@ const AssemblyOrderDetail = () => {
           onSuccess={() => {
             fetchData();
             setOpenUpdateDialog(false);
-          }}
-        />
-      )}
-      {openSerializedPackageDialog && (
-        <PackageNumberDialog
-          onClose={() => {
-            setOpenSerializedPackageDialog(false);
-          }}
-          assemblyOrderId={id}
-          onSuccess={() => {
-            fetchData(true);
-            setOpenSerializedPackageDialog(false);
-            setCurrentStep((prevStep) => {
-              const newStep = prevStep + 1;
-              return newStep;
-            });
           }}
         />
       )}

@@ -1,24 +1,68 @@
-import { useEffect, useState } from 'react';
 import { Box, Grid, IconButton, Typography } from '@mui/material';
+import { useCallback, useEffect, useState } from 'react';
 import { getObjKeys, gridSize, setFieldsInAscendingOrder } from 'src/constants/helpers';
 import FormTypes from '../../FormTypes';
 
-const Counter = ({ label, values, name, setFieldValue, fieldData, touched, errors }) => {
+let timeout: NodeJS.Timeout;
+
+const Counter = ({ label, values, name, setFieldValue, fieldData, touched, errors, defaultValue, ...rest }) => {
   const [error, setError] = useState({});
   const [touch, setTouch] = useState({});
   const [formsData, setFormsData] = useState([]);
+  const [count, setCount] = useState(() => (isNaN(+defaultValue) || !defaultValue ? '0' : defaultValue));
 
-  const handleAddRemove = (type = 'add') => {
-    let data = values[name] || [];
-    if (type === 'add') {
-      if (fieldData?.subFields?.length > 0) {
-        data.splice(values[name]?.length, 0, getObjKeys('', fieldData?.subFields || []));
+  const handleAddRemoveMulti = useCallback(
+    (count: number) => {
+      let newData: any[] = values[name] ? [...values[name]] : [];
+      const length = values[name]?.length || 0;
+      if (length < count && fieldData?.subFields?.length > 0) {
+        const tempData = [];
+        for (let i = 0; i < count - length; i++) {
+          tempData.push(getObjKeys('', fieldData?.subFields || []));
+        }
+        newData = [...newData, ...tempData];
       }
-    } else {
-      data.splice(values[name]?.length - 1, 1);
+      if (length > count) {
+        newData = [...newData].splice(0, count);
+      }
+      setFieldValue(name, newData);
+    },
+    [fieldData?.subFields, name, setFieldValue, values]
+  );
+
+  const handleInput = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      clearTimeout(timeout);
+      const value = e.target.value.trim();
+      if (value === '') {
+        setCount('');
+        return;
+      }
+      if (!isNaN(+value) && +value >= 0) {
+        setCount(value);
+        timeout = setTimeout(() => {
+          handleAddRemoveMulti(+value);
+        }, 500);
+      }
+    },
+    [handleAddRemoveMulti]
+  );
+
+  const handleButton = useCallback(
+    (count: number) => {
+      if (count >= 0) {
+        handleAddRemoveMulti(count);
+        setCount(`${count}`);
+      }
+    },
+    [handleAddRemoveMulti]
+  );
+
+  useEffect(() => {
+    if (defaultValue && !isNaN(+defaultValue)) {
+      handleAddRemoveMulti(+defaultValue);
     }
-    setFieldValue(name, data);
-  };
+  }, [defaultValue]);
 
   useEffect(() => {
     setFormsData(setFieldsInAscendingOrder(fieldData?.subFields));
@@ -60,25 +104,27 @@ const Counter = ({ label, values, name, setFieldValue, fieldData, touched, error
           >
             {label}
           </Typography>
-          <div className="flex w-[130px] flex-shrink-0 items-center gap-2 overflow-hidden">
+          <div className="flex w-[130px] flex-shrink-0 items-center overflow-hidden">
             <IconButton
               color="secondary"
               className="!rounded-r-none !bg-[var(--new-theme-color)] hover:!opacity-80"
               style={{ maxHeight: 30, color: 'white' }}
               onClick={() => {
-                handleAddRemove('remove');
+                handleButton(values[name]?.length - 1);
               }}
             >
               -
             </IconButton>
-            <Box p={1}>
-              <span>{values[name]?.length}</span>
-            </Box>
+            <input
+              className="focus: h-[30px] min-w-0 flex-grow rounded-none border p-1 text-center outline-transparent focus:outline-[--new-theme-color] focus:ring-[--new-theme-color]"
+              value={count}
+              onChange={handleInput}
+            />
             <IconButton
               className=" !rounded-l-none !bg-[var(--new-theme-color)] hover:!opacity-80"
               style={{ maxHeight: 30, color: 'white' }}
               onClick={() => {
-                handleAddRemove();
+                handleButton(values[name]?.length + 1);
               }}
             >
               +

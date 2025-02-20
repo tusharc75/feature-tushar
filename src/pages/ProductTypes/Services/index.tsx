@@ -16,10 +16,10 @@ import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { packages, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { MATERIAL_TYPE, packages, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 
-const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = false }) => {
-  const renderedFrom = `${camelCase(sidebarResource?.packages)}_service'}`;
+const ServiceTable = ({ resource, referenceId, workOrderResourceTabs, allowedToEdit, fullHeight = false }) => {
+  const renderedFrom = `${camelCase(resource)}_service'}`;
 
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -45,18 +45,14 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
     fetchData();
   }, [tabValue]);
 
-
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
-    let api = `${packages.api}/${packageId}/services`;
-    if (tabValue === 1) {
-      api += `?type=${sidebarResource.assemblyOrder}`;
-    } else if (tabValue === 2) {
-      api += `?type=${sidebarResource.disassemblyOrder}`;
-    }
+    let api = `/work-order-material-master-data`;
+    api += `?resource=${resource}&referenceId=${referenceId}&workOrderType=${workOrderResourceTabs[tabValue]}&materialType=${MATERIAL_TYPE.service}`;
     axiosInstance()
-      .get(api).then(({ data: { data } }) => {
+      .get(api)
+      .then(({ data: { data } }) => {
         let rows = data?.map((u) => {
           let res = {
             ...prepareDataForGrid(u, user)
@@ -102,10 +98,9 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
 
   const onSaveInlineEdit = (data, row) => {
     axiosInstance()
-      .put(`${packages.api}/${packageId}/services`, {
-        ids: [row?._id],
-        qty: Number(data?.qty),
-        type: tabValue === 1 ? sidebarResource.assemblyOrder : tabValue === 2 ? sidebarResource.disassemblyOrder : ''
+      .put(`/work-order-material-master-data`, {
+        _id: row?._id,
+        qty: Number(data?.qty)
       })
       .then(() => {
         fetchData();
@@ -117,7 +112,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
     setRemovingServices(true);
     const Ids = selectedRecords.map((d) => d._id);
     axiosInstance()
-      .put(`${packages.api}/${packageId}/services/remove`, { ids: Ids, type: tabValue === 1 ? sidebarResource.assemblyOrder : tabValue === 2 ? sidebarResource.disassemblyOrder : '' })
+      .put(`/work-order-material-master-data/remove`, { ids: Ids })
       .then(() => {
         setRemovingServices(false);
         setShowServiceConfirmBox(false);
@@ -137,10 +132,8 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
       delete e.name;
     });
     axiosInstance()
-      .put(`${packages.api}/material/${packageId}/order`, {
-        packageType: 'Service',
+      .put(`/work-order-material-master-data/order`, {
         data: rows || [],
-        type: tabValue === 1 ? sidebarResource.assemblyOrder : tabValue === 2 ? sidebarResource.disassemblyOrder : ''
       })
       .then(() => {
         fetchData();
@@ -157,10 +150,12 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
   const handleAdd = async (rows) => {
     setIsAssigning(true);
     axiosInstance()
-      .post(`${packages.api}/material`, {
-        ids: [packageId],
-        services: rows.map((d: any) => ({ service: d.id, qty: Number(d.qty) })),
-        type: tabValue === 1 ? sidebarResource.assemblyOrder : tabValue === 2 ? sidebarResource.disassemblyOrder : ''
+      .post(`/work-order-material-master-data`, {
+        material: rows.map((d: any) => ({ materialId: d.id, qty: Number(d.qty) })),
+        workOrderType: workOrderResourceTabs[tabValue],
+        materialType: MATERIAL_TYPE.service,
+        resource: resource,
+        referenceId: referenceId
       })
       .then(({ data }) => {
         setShowServiceAssignDialog(false);
@@ -206,16 +201,17 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
     return (
       allowedToEdit && (
         <>
-          <ImportExportMenu
-            permissions={permissions?.packages}
+           <ImportExportMenu
+            permissions={permissions?.[camelCase(resource)]}
             module="services"
-            api={`${packages.api}/${packageId}/services`}
+            api={`/work-order-material-master-data`}
             afterImportCompleted={() => {
               fetchData();
             }}
             isExportAllOrSomeFeature={true}
-            ids={[]}
-            additionalParams={`refrenceId=${packageId}${tabValue === 1 ? `&type=${sidebarResource.assemblyOrder}` : tabValue === 2 ? `&type=${sidebarResource.disassemblyOrder}` : ''}`}
+            ids={selectedRecords?.map((s)=> s._id) || []}
+            recordsToExport={selectedRecords?.length}
+            additionalParams={`resource=${resource}&referenceId=${referenceId}&workOrderType=${workOrderResourceTabs[tabValue]}&materialType=${MATERIAL_TYPE.service}&workOrderResources=${JSON.stringify(workOrderResourceTabs)}`}
           />
           {dataRows?.length > 0 ? (
             <ThemeButton
@@ -223,7 +219,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
               onClick={() => setArrangeView(true)}>
               Arrange
             </ThemeButton>
-          ) : null}
+          ) : null} 
         </>
       )
     );
@@ -235,15 +231,13 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
 
   return (
     <Box>
-      {(permissions?.assemblyOrder?.isRead || permissions?.disassemblyOrder?.isRead) && (
-        <>
-          <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
-            <CustomTab value={0} label={`Individual`} />
-            {permissions?.assemblyOrder?.isRead && <CustomTab value={1} label={`Assembly`} />}
-            {permissions?.disassemblyOrder?.isRead && <CustomTab value={2} label={`Disassembly`} />}
-          </CustomTabs>
-        </>
-      )}
+      {workOrderResourceTabs?.length ? (
+        <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
+          {workOrderResourceTabs?.map((res, index) =>
+            permissions?.[camelCase(res)]?.isRead ? <CustomTab key={res} value={index} label={resources?.[camelCase(res)]?.titleSingular} /> : null
+          )}
+        </CustomTabs>
+      ) : null}
       <DetailsPageHeader
         isAddButtonVisible={allowedToEdit}
         addButtonMenuItems={addButtonMenuItems()}
