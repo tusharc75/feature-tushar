@@ -228,15 +228,15 @@ const LoadingTicket = ({ salesOrderData, setNextStep, stepFullScreen }) => {
   const handleDeliveryTicketDialog = () => {
     if (selectedRecords.length) {
       const data = {};
-      data['ticketName'] = salesOrderData.salesOrderNo;
-      data['referenceId'] = salesOrderData._id;
+      data['ticketName'] = salesOrderData?.salesOrderNo;
+      data['referenceId'] = salesOrderData?._id;
 
       data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
       data['pickupFrom'] = salesOrderData?.warehouse?.optionValue;
 
       data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.customer;
       data['deliveryTo'] = salesOrderData?.customerAccount?.optionValue;
-      data['deliveryToAddress'] = salesOrderData.shippingAddress?.optionValue;
+      data['deliveryToAddress'] = salesOrderData?.shippingAddress?.optionValue;
 
       data['isPickupFromDisable'] = true;
       data['isDeliveryToDisable'] = true;
