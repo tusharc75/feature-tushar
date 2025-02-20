@@ -91,7 +91,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
       });
       const unitOptions: any = arrayToDropwdownOption(unit);
       const pricingMethodOptions: any = arrayToDropwdownOption(pricingMethod);
-      data.forEach((element) => {
+      data?.forEach((element) => {
         if (element.fieldName === 'unit') {
           element.option = unitOptions;
         }
@@ -143,7 +143,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
       sectionFields = orderBy(sectionFields, 'order', 'asc');
       return { name, sectionFields };
     });
-    const taxCodeOptions = await getTaxList(salesOrderData, isBulkedit ? rowData[0]?.type : rowData?.type);
+    const taxCodeOptions = await getTaxList(salesOrderData, isBulkedit ? selectedProducts[0]?.type : rowData?.type);
     fields?.forEach((e: any) => {
       if (e?.fieldName === 'taxCode') {
         e.option = taxCodeOptions;
