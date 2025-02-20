@@ -18,6 +18,7 @@ import {
   QUOTATION_STATUS,
   WORKORDER_SERVICE_STATUS,
   WORKORDER_SERVICE_STEP_STATUS,
+  WORK_ORDER_STATUS,
   cn,
   sidebarResource,
   workOrder
@@ -206,17 +207,16 @@ const Service = ({
         }
       }
       setServiceSteps(services);
-      if (
-        (workOrderData?.canComplete &&
-          !services
-            .filter((e) => e.type === MATERIAL_TYPE.service)
+      if (![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.deleted, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)) {
+        if ((workOrderData?.canComplete &&
+          !services.filter((e) => e.type === MATERIAL_TYPE.service)
             ?.every((e) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(e.status))) ||
-        (!workOrderData?.canComplete &&
-          services
-            .filter((e) => e.type === MATERIAL_TYPE.service)
-            ?.every((e) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(e.status)))
-      ) {
-        fetchWorkOrderData();
+          (!workOrderData?.canComplete &&
+            services.filter((e) => e.type === MATERIAL_TYPE.service)
+              ?.every((e) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(e.status)))
+        ) {
+          fetchWorkOrderData();
+        }
       }
     } else {
       setServiceSteps([]);

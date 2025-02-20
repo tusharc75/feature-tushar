@@ -75,7 +75,7 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
         minWidth: 200,
         width: 200,
         sticky: isMobile || isTablet ? 'none' : 'left',
-        Cell: ({ row, table }) => (
+        Cell: ({ row }) => (
           <div className="flex items-center gap-2">
             <h5 className="text-truncate">{row.original?.detail}</h5>{' '}
             <Box>

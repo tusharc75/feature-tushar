@@ -191,7 +191,6 @@ const Products = ({ resource, referenceId, workOrderResourceTabs, allowedToEdit,
 
   const handleArrangeUpdate = (rows: any) => {
     setIsArranging(true);
-    console.log(rows)
     rows?.forEach((e: any) => {
       delete e.preWork;
       delete e.name;
@@ -216,7 +215,7 @@ const Products = ({ resource, referenceId, workOrderResourceTabs, allowedToEdit,
     return (
       allowedToEdit && (
         <>
-           <ImportExportMenu
+          <ImportExportMenu
             permissions={permissions?.[camelCase(resource)]}
             module="products"
             api={`/work-order-material-master-data`}
@@ -224,7 +223,7 @@ const Products = ({ resource, referenceId, workOrderResourceTabs, allowedToEdit,
               fetchData();
             }}
             isExportAllOrSomeFeature={true}
-            ids={selectedRecords?.map((s)=> s._id) || []}
+            ids={selectedRecords?.map((s) => s._id) || []}
             recordsToExport={selectedRecords?.length}
             additionalParams={`resource=${resource}&referenceId=${referenceId}&workOrderType=${workOrderResourceTabs[tabValue]}&materialType=${MATERIAL_TYPE.product}&workOrderResources=${JSON.stringify(workOrderResourceTabs)}`}
           />
