@@ -409,7 +409,8 @@ export const sidebarResource = {
   workflowReport: 'Workflow Report',
   equiptAi: 'Equipt Ai',
   productTypes: 'Product Types',
-  packageCategory: 'Package Category'
+  packageCategory: 'Package Category',
+  scheduleMaintenance: 'Schedule Maintenance'
 };
 
 export const primaryFields = {

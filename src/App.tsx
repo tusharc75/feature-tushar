@@ -286,6 +286,7 @@ import ProductTypes from 'src/pages/ProductTypes';
 import ProductTypesDetail from 'src/pages/ProductTypes/ProductTypesDetail';
 import PackageCategory from 'src/pages/PackageCategory';
 import PackageCategoryDetail from 'src/pages/PackageCategory/PackageCategoryDetail';
+import ScheduleMaintenance from 'src/pages/ScheduleMaintenance';
 
 var notificationInterval: any = null;
 
@@ -341,7 +342,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
     return () => {
       clearInterval(notificationInterval);
     };
@@ -1240,6 +1241,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.packageCategoryDetail.path}/:id`}>
               <PackageCategoryDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.scheduleMaintenance.path}`}>
+              <ScheduleMaintenance />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
