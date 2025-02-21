@@ -23,11 +23,10 @@ const DateDialog = ({ title, type, status, onClose, handleSubmit, loading, asset
     const {
       data: { data }
     } = await axiosInstance().put(`/rental-management/assets-last-date`, { assets, last });
-    var lastDate: any = new Date();
+    var lastDate: any = dayjs.tz().startOf("day").toDate();
     if (data?.date) {
-      lastDate = new Date(data?.date);
+      lastDate = dayjs(data?.date).tz().startOf("day").toDate();
     }
-    lastDate.setHours(0, 0, 0);
     setMinDate(lastDate);
   };
 
