@@ -83,6 +83,10 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   const [okBtnLoading, setOkBtnLoading] = useState(false);
 
   useEffect(() => {
+    fetchFields();
+  }, []);
+
+  useEffect(() => {
     if (transferAssetId) {
       fetchAssetsData();
     }
@@ -221,7 +225,6 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   const fetchAssetsData = async (checkAutoComplete = false) => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
-    await fetchFields();
     try {
       const result = await axiosInstance().get(`${routes.transferAsset.path}/get-asset/${transferAssetData?._id}`);
       let assetData = result?.data?.data?.assets;
@@ -528,8 +531,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           Replace Assets
         </MenuItem>
         {permissions?.transferAsset?.isUpdate &&
-        selectedRecords.length &&
-        selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
+          selectedRecords.length &&
+          selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
           selectedRecords?.length ? (
           <MenuItem
             onClick={() => {

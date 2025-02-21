@@ -755,6 +755,9 @@ const routes = {
   },
   packageCategoryDetail: {
     path: '/package-category/detail'
+  },
+  scheduleMaintenance: {
+    path: '/scheduling-maintenance'
   }
 };
 
