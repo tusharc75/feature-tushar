@@ -5,7 +5,7 @@ import { cn, dateFormat, dateTimeFormat } from 'src/constants/helpers';
 
 type HandleGetUpdateDataProps = {
   date: string;
-  user: {
+  user?: {
     concatedName?: string;
     firstName?: string;
     lastName?: string;
@@ -14,11 +14,11 @@ type HandleGetUpdateDataProps = {
 };
 type HandleGetUpdateDataR = { name: string; user: string; date: string; id: string };
 const handleGetUpdateData = (data: HandleGetUpdateDataProps, name: string) => {
-  const newData: HandleGetUpdateDataR = { name: name, user: '', date: data.date, id: data.user._id };
-  if (data.user.concatedName) {
-    newData['user'] = data.user.concatedName;
+  const newData: HandleGetUpdateDataR = { name: name, user: '', date: data.date, id: data.user?._id };
+  if (data.user?.concatedName) {
+    newData['user'] = data.user?.concatedName;
   } else {
-    newData['user'] = `${data.user.firstName} ${data.user.lastName}`;
+    newData['user'] = `${data.user?.firstName} ${data.user?.lastName}`;
   }
   return newData;
 };
@@ -26,13 +26,13 @@ const handleGetUpdateData = (data: HandleGetUpdateDataProps, name: string) => {
 const ShowModificationData = ({ data, containerPadding }: { data: Record<string, any>; containerPadding: string | number }) => {
   const modificationData = useMemo(() => {
     const newData: HandleGetUpdateDataR[] = [];
-    if (data?.createdBy) {
+    if (data?.createdBy?.user) {
       newData.push(handleGetUpdateData(data.createdBy, 'Created by'));
     }
-    if (data?.updatedBy) {
+    if (data?.updatedBy?.user) {
       newData.push(handleGetUpdateData(data.updatedBy, 'Updated by'));
     }
-    if (data?.completedBy) {
+    if (data?.completedBy?.user) {
       newData.push(handleGetUpdateData(data.completedBy, 'Completed by'));
     }
     return newData;
