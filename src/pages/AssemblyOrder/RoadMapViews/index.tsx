@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _, { isEmpty } from 'lodash';
 import { useContext, useState, useEffect, Fragment } from 'react';
 import ReactFlow, { Controls, ControlButton, ReactFlowProvider } from 'react-flow-renderer';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -68,43 +68,9 @@ const AssemblyOrderViews = (props) => {
       const {
         data: { data }
       } = await axiosInstance().get(`${routes.assemblyOrder.path}/work-order/${id}`);
-      let parent = data?.filter((item) => item?.parentId === null);
-
-      const parentIds = parent?.map((item) => item._id);
-      const childProductPackages = data?.filter((item) => [...parentIds].includes(item?.parentId));
-
-      const workOrders = data
-        ?.filter((v) => v.workOrder && v?.workOrder?._id)
-        ?.map((f) => {
-          return {
-            optionValue: f.workOrder._id,
-            optionLabel: f.workOrder.workOrderNumber,
-            parent: f._id
-          };
-        });
-
-      const childSerializedPackages = data
-        ?.filter((v) => v.parentId && v.serializedPackage)
-        ?.map((f) => {
-          return {
-            optionValue: f.serializedPackageDetail._id,
-            optionLabel: f.serializedPackageDetail.serializedPackageNumber,
-            workOrder: f.workOrder._id
-          };
-        });
-
-      const parentSerializedPackages = data
-        ?.filter((v) => !v.parentId && v.serializedPackage)
-        ?.map((f) => {
-          return {
-            optionValue: f.serializedPackageDetail._id,
-            optionLabel: f.serializedPackageDetail.serializedPackageNumber,
-            id: f._id
-          };
-        });
 
       var xPosition = 0;
-      var flow: any[] = [
+      const flow: any[] = [
         {
           id: `${id}`,
           type: 'input',
@@ -126,22 +92,25 @@ const AssemblyOrderViews = (props) => {
           style: customNodeStyles.assemblyOrder
         }
       ];
-      var flowEdge: any[] = [];
+      const flowEdge: any[] = [];
       xPosition += 300;
-      parent?.map((item: any, pIdx) => {
+      const childPosition: any = {};
+
+      const rows = data?.filter((item) => !item?.parentId);
+      rows?.forEach((parent: any, pIdx) => {
         flow.push({
-          id: `${item._id}`,
+          id: `${parent?._id}`,
           sourcePosition: 'right',
           targetPosition: 'left',
           type: 'default',
           data: {
-            ref_type: item.type,
-            ref_id: item.materialId,
+            ref_type: parent?.type,
+            ref_id: parent?.materialId,
             label: (
-              <HtmlTooltip arrow placement="top" title={_.startCase(_.camelCase(item.type))}>
+              <HtmlTooltip arrow placement="top" title={_.startCase(_.camelCase(parent?.type))}>
                 <div>
-                  <Typography variant="body2">{_.startCase(_.camelCase(item.type))}</Typography>
-                  <Typography variant="subtitle2">{item.packageDetail?.packageName || item?.detail}</Typography>
+                  <Typography variant="body2">{_.startCase(_.camelCase(parent?.type))}</Typography>
+                  <Typography variant="subtitle2">{parent?.packageDetail?.packageName || parent?.detail}</Typography>
                 </div>
               </HtmlTooltip>
             )
@@ -150,52 +119,39 @@ const AssemblyOrderViews = (props) => {
             x: xPosition,
             y: pIdx * 95
           },
-          style: item.type === 'package' ? customNodeStyles.package : customNodeStyles.product
+          style: parent?.type === 'package' ? customNodeStyles.package : customNodeStyles.product
         });
         flowEdge.push({
-          id: `assemblyOrder-parent-${item._id}`,
+          id: `assemblyOrder-parent-${parent?._id}`,
           source: `${id}`,
           arrowHeadType: 'arrow',
-          target: `${item._id}`
+          target: `${parent?._id}`
         });
+        generateChild(parent, data, flow, flowEdge, xPosition, childPosition);
       });
 
-      if (childProductPackages?.length) xPosition += 300;
-      let maxXPosition = xPosition;
-      childProductPackages?.map((item: any, cIdx) => {
-        flow.push({
-          id: `${item._id}`,
-          sourcePosition: 'right',
-          targetPosition: 'left',
-          type: 'default',
-          data: {
-            ref_type: item.type,
-            ref_id: item.materialId,
-            label: (
-              <HtmlTooltip arrow placement="top" title={_.startCase(_.camelCase(item.type))}>
-                <div>
-                  <Typography variant="body2">{_.startCase(_.camelCase(item.type))}</Typography>
-                  <Typography variant="subtitle2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {item.productDetail?.productName || item.packageDetail?.packageName}
-                  </Typography>
-                </div>
-              </HtmlTooltip>
-            )
-          },
-          position: {
-            x: maxXPosition,
-            y: cIdx * 80
-          },
-          style: item.type === 'package' ? customNodeStyles.package : customNodeStyles.product
+      const workOrders = data
+        ?.filter((v) => v.workOrder && v?.workOrder?._id)
+        ?.map((f) => {
+          return {
+            optionValue: f.workOrder._id,
+            optionLabel: f.workOrder.workOrderNumber,
+            parent: f._id
+          };
         });
-        flowEdge.push({
-          id: `parent-child-${item._id}-${item.parentId}`,
-          source: `${item.parentId}`,
-          arrowHeadType: 'arrow',
-          target: `${item._id}`
+
+      const childSerializedPackages = data
+        ?.filter((v) => v.parentId && v.serializedPackage)
+        ?.map((f) => {
+          return {
+            optionValue: f.serializedPackage.optionValue,
+            optionLabel: f.serializedPackage.optionLabel,
+            workOrder: f.workOrder._id
+          };
         });
-      });
-      if (workOrders?.length) xPosition += 300;
+
+      const xPositions: any = Object.values(childPosition)?.map((d) => d);
+      if (workOrders?.length) xPosition = Math.max(...xPositions) + 300;
       workOrders?.map((w: any, wIdx) => {
         flow.push({
           id: `${w.optionValue}`,
@@ -223,12 +179,13 @@ const AssemblyOrderViews = (props) => {
           style: customNodeStyles.workOrder
         });
         flowEdge.push({
-          id: `parent-child-${w.optionValue}-${w.parentId}`,
+          id: `parent-child-${w.optionValue}-${w.parent}`,
           source: `${w.parent}`,
           arrowHeadType: 'arrow',
           target: `${w.optionValue}`
         });
       });
+
       if (childSerializedPackages?.length) xPosition += 300;
       childSerializedPackages?.map((cmp, cmpIdx) => {
         flow.push({
@@ -243,7 +200,7 @@ const AssemblyOrderViews = (props) => {
               <HtmlTooltip arrow placement="top" title={resources?.serializedPackage?.titleSingular}>
                 <div>
                   <Typography variant="body2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {resources?.serializedPackage?.titleSingular}
+                    {resources?.serializedPackages?.titleSingular}
                   </Typography>
                   <Typography variant="subtitle2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {cmp.optionLabel}
@@ -265,46 +222,6 @@ const AssemblyOrderViews = (props) => {
           target: `${cmp.optionValue}`
         });
       });
-      if (parentSerializedPackages?.length) xPosition += 300;
-
-      parentSerializedPackages?.map((pmp, pmpIdx) => {
-        flow.push({
-          id: `${pmp.optionValue}`,
-          sourcePosition: 'right',
-          targetPosition: 'left',
-          type: 'default',
-          data: {
-            ref_type: 'serializedPackage',
-            ref_id: pmp.optionValue,
-            label: (
-              <HtmlTooltip arrow placement="top" title={`${resources?.serializedPackage?.titleSingular}`}>
-                <div>
-                  <Typography variant="body2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {resources?.serializedPackage?.titleSingular}
-                  </Typography>
-                  <Typography variant="subtitle2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {pmp.optionLabel}
-                  </Typography>
-                </div>
-              </HtmlTooltip>
-            )
-          },
-          position: {
-            x: xPosition,
-            y: pmpIdx * 80
-          },
-          style: customNodeStyles.parentSerializedPackage
-        });
-        const childPacks = childProductPackages?.filter((d) => d.parentId === pmp.id);
-        childPacks?.forEach((c) => {
-          flowEdge.push({
-            id: `parentSerializedPackage-child-${pmp.optionValue}-${c.type === MATERIAL_TYPE.product ? c.workOrder._id : c.serializedPackageDetail._id}`,
-            source: c.type === MATERIAL_TYPE.product ? `${c.workOrder._id}` : `${c.serializedPackageDetail._id}`,
-            arrowHeadType: 'arrow',
-            target: `${pmp.optionValue}`
-          });
-        });
-      });
 
       setFlowData([...flow, ...flowEdge]);
       setLoading(false);
@@ -312,6 +229,49 @@ const AssemblyOrderViews = (props) => {
       setLoading(false);
       toastConfig.setToastConfig(error);
     }
+  };
+
+  const generateChild = (parent, material, flow, flowEdge, xPosition, childPosition) => {
+    const child = material?.filter((m) => m?.parentId === parent?._id && m?.type === MATERIAL_TYPE.package);
+    if (child?.length) {
+      childPosition[parent?._id] = childPosition[parent?._id] ? childPosition[parent?._id] + 300 : xPosition + 300;
+    }
+
+    child?.forEach((item: any, cIdx) => {
+      childPosition[item?._id] = childPosition[item?.parentId];
+      flow.push({
+        id: `${item?._id}`,
+        sourcePosition: 'right',
+        targetPosition: 'left',
+        type: 'default',
+        data: {
+          ref_type: item?.type,
+          ref_id: item?.materialId,
+          label: (
+            <HtmlTooltip arrow placement="top" title={_.startCase(_.camelCase(item?.type))}>
+              <div>
+                <Typography variant="body2">{_.startCase(_.camelCase(item?.type))}</Typography>
+                <Typography variant="subtitle2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {item?.productDetail?.productName || item?.packageDetail?.packageName}
+                </Typography>
+              </div>
+            </HtmlTooltip>
+          )
+        },
+        position: {
+          x: childPosition[item?._id],
+          y: cIdx * 80
+        },
+        style: item.type === 'package' ? customNodeStyles.package : customNodeStyles.product
+      });
+      flowEdge.push({
+        id: `parent-child-${item._id}-${item.parentId}`,
+        source: `${item.parentId}`,
+        arrowHeadType: 'arrow',
+        target: `${item._id}`
+      });
+      generateChild(item, material, flow, flowEdge, xPosition, childPosition);
+    });
   };
 
   const onLoad = (reactFlowInstance) => {
