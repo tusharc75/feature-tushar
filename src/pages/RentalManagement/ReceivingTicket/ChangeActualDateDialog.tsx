@@ -40,8 +40,7 @@ const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, isBulkUp
       .put(`${routes?.serializedAsset?.path}/asset-last-history-date-before-adding`, { referenceId: rentalId, assets: assets })
       .then(({ data: { data } }) => {
         if (data?.date) {
-          const date = new Date(data?.date);
-          date.setHours(0, 0, 0);
+          const date = dayjs(data?.date).tz().startOf("day").toDate();
           setMinStartDate(date);
         }
         setLoadingData(false);
