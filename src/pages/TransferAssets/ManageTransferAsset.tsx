@@ -225,10 +225,9 @@ const ManageTransferAsset: FC<Props> = (props) => {
     const {
       data: { data }
     } = await axiosInstance().put(`/rental-management/assets-last-date`, { assets: assets, last: 1 });
-    var lastDate: any = new Date();
+    var lastDate: any = dayjs.tz().startOf("day").toDate();
     if (data?.date) {
-      lastDate = new Date(data?.date);
-      lastDate.setHours(0, 0, 0);
+      lastDate = dayjs(data?.date).tz().startOf("day").toDate();;
     }
     setCreateDateMin(lastDate);
   };

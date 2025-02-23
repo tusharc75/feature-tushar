@@ -749,6 +749,15 @@ const routes = {
   },
   productTypesDetail: {
     path: '/product-types/detail'
+  },
+  packageCategory: {
+    path: '/package-category'
+  },
+  packageCategoryDetail: {
+    path: '/package-category/detail'
+  },
+  scheduleMaintenance: {
+    path: '/scheduling-maintenance'
   }
 };
 

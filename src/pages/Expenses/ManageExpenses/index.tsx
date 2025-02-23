@@ -119,6 +119,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
           if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
             initialData['currency'] = user.user?.brandCurrency;
           }
+          initialData['users'] = [user?.user?._id];
           setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === initialData['currency'])?.symbolNative);
           setInitialData({
             fields: fieldsDataForCreate,

@@ -411,7 +411,7 @@ export function useColumns() {
           column.push({
             ...commonFieldData,
             editable: Boolean(field?.isColumnEditable),
-            cell: ({ row }) => (row.original[field.fieldName] ? <p>{row.original[field.fieldName]}</p> : <NoDataCell />),
+            cell: ({ row }) => (row.original[field.fieldName] || row.original[field?.fieldName] === 0 ? <p>{row.original[field.fieldName]}</p> : <NoDataCell />),
             Footer: (info) => {
               let rows = info.table.getExpandedRowModel().rows;
               const total = rows

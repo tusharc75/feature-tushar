@@ -13,13 +13,11 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { productTypes, sidebarResource } from '../../constants/helpers';
+import { packageCategory, sidebarResource } from '../../constants/helpers';
 import Step from '../DynamicForm/Step';
-import { ManageProductTypes } from 'src/pages/ProductTypes/ManageProductTypes';
-import Products from 'src/pages/ProductTypes/Products';
-import Services from 'src/pages/ProductTypes/Services';
+import { ManagePackageCategory } from 'src/pages/PackageCategory/ManagePackageCategory';
 
-const ProductTypesDetail = () => {
+const PackageCategoryDetail = () => {
 
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
@@ -31,7 +29,7 @@ const ProductTypesDetail = () => {
     state: { permissions, resources }
   }: any = useData();
 
-  const [productTypeData, setproductTypeData] = useState(null);
+  const [packageCategoryData, setPackageCategoryData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
@@ -39,7 +37,6 @@ const ProductTypesDetail = () => {
   const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [resourceData, setResourceData] = useState(null);
   const [fields, setFields] = useState(null);
-  const WORK_ORDER_RESOURCE_TABS = [sidebarResource.repairOrder, sidebarResource.productionOrder, sidebarResource.assemblyOrder, sidebarResource.disassemblyOrder];
 
   useEffect(() => {
     fetchFields();
@@ -54,7 +51,7 @@ const ProductTypesDetail = () => {
 
   const fetchFields = async () => {
     axiosInstance()
-      .get(`/field?resource=${sidebarResource?.productTypes}`)
+      .get(`/field?resource=${sidebarResource?.packageCategory}`)
       .then(({ data }) => {
         setFields(data.data?.filter((field) => field.isRead));
       })
@@ -65,10 +62,10 @@ const ProductTypesDetail = () => {
 
 
   const fetchData = async () => {
-    axiosInstance().get(`${productTypes.api}/${id}`).then(({ data: { data } }) => {
-      setAllowedToEdit(permissions?.productTypes?.isUpdate);
-      setAllowedToDelete(permissions?.productTypes?.isDelete);
-      setproductTypeData(data);
+    axiosInstance().get(`${packageCategory.api}/${id}`).then(({ data: { data } }) => {
+      setAllowedToEdit(permissions?.packageCategory?.isUpdate);
+      setAllowedToDelete(permissions?.packageCategory?.isDelete);
+      setPackageCategoryData(data);
     }).catch((err) => {
       toastConfig.setToastConfig(err);
     });
@@ -78,7 +75,7 @@ const ProductTypesDetail = () => {
     try {
       const {
         data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.productTypes}`);
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.packageCategory}`);
       if (data) {
         setResourceData(data);
       }
@@ -89,10 +86,10 @@ const ProductTypesDetail = () => {
 
   const handleDelete = () => {
     axiosInstance()
-      .put(`${productTypes.api}/remove`, { ids: [id] })
+      .put(`${packageCategory.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.push(`${routes?.productTypes?.path}`);
+        history.push(`${routes?.packageCategory?.path}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -107,8 +104,8 @@ const ProductTypesDetail = () => {
         <Box className="nav-v1">
           <CustomBreadCrumbs
             routes={[
-              { ...routes?.productTypes, title: resources?.productTypes?.titlePlural },
-              { title: `${productTypeData ? productTypeData?.productType : ''}` }
+              { ...routes?.packageCategory, title: resources?.packageCategory?.titlePlural },
+              { title: `${packageCategoryData ? packageCategoryData?.packageCategory : ''}` }
             ]}
           />
         </Box>
@@ -126,40 +123,32 @@ const ProductTypesDetail = () => {
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={(e, newValue) => setTabValue(Number(newValue))}>
           <CustomTab value={0}>Header</CustomTab>
-          <CustomTab value={1}>Products</CustomTab>
-          <CustomTab value={2}>Services</CustomTab>
           {resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 1} key={i}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
-          {productTypeData && fields ? (
-            <DetailsPage data={productTypeData} fields={fields} />
+          {packageCategoryData && fields ? (
+            <DetailsPage data={packageCategoryData} fields={fields} />
           ) : (
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           )}
         </TabPanel>
-        <TabPanel value={tabValue} index={1}>
-          <Products resource={sidebarResource.productTypes} referenceId={productTypeData?._id} workOrderResourceTabs={WORK_ORDER_RESOURCE_TABS} allowedToEdit={allowedToEdit} />
-        </TabPanel>
-        <TabPanel value={tabValue} index={2}>
-          <Services resource={sidebarResource.productTypes} referenceId={productTypeData?._id} workOrderResourceTabs={WORK_ORDER_RESOURCE_TABS} allowedToEdit={allowedToEdit} />
-        </TabPanel>
         {resourceData?.tabs?.map((tab, i) => (
           <TabPanel value={tabValue} index={i + 1} key={i}>
-            <Step tab={tab} resourcePolicyId={resourceData?._id} resourceId={id} resource={sidebarResource.productTypes} data={productTypeData} allowedToEdit={permissions?.productTypes?.isUpdate} />
+            <Step tab={tab} resourcePolicyId={resourceData?._id} resourceId={id} resource={sidebarResource.packageCategory} data={packageCategoryData} allowedToEdit={permissions?.packageCategory?.isUpdate} />
           </TabPanel>
         ))}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.productTypes?.titleSingular?.toLowerCase()} : ${productTypeData?.productType} ?`}
+          message={`Are you sure you want to delete ${resources?.packageCategory?.titleSingular?.toLowerCase()} : ${packageCategoryData?.packageCategory} ?`}
           onClose={() => setShowConfirmBox(false)}
           onOk={handleDelete} />
       )}
       {openUpdateDialog && (
-        <ManageProductTypes
+        <ManagePackageCategory
           isClone={false}
-          productTypesId={id}
+          packageCategoryId={id}
           onClose={() => setOpenUpdateDialog(false)}
           onSuccess={() => {
             setOpenUpdateDialog(false)
@@ -170,4 +159,4 @@ const ProductTypesDetail = () => {
   );
 };
 
-export default ProductTypesDetail;
+export default PackageCategoryDetail;

@@ -184,31 +184,33 @@ const View = ({
       })
       .then(({ data: { data } }) => {
         const rows = data?.filter((e) => e?.parentId === null || !e?.parentId);
-        let _rows = rows?.map((u, i) => {
-          let finalObject = prepareDataForGrid(u);
-          finalObject['index'] = i + 1;
-          finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-          finalObject['detail'] =
-            u?.type === MATERIAL_TYPE.product
-              ? u?.productDetail?.productName
-              : u?.type === MATERIAL_TYPE.service
-                ? u?.serviceDetail?.serviceName
-                : u?.type === MATERIAL_TYPE.package
-                  ? u?.packageDetail?.packageName
-                  : '';
-          finalObject['description'] =
-            u?.type === MATERIAL_TYPE.product
-              ? u?.productDetail?.productDescription
-              : u?.type === MATERIAL_TYPE.service
-                ? u?.serviceDetail?.serviceDescription
-                : u?.type === MATERIAL_TYPE.package
-                  ? u?.packageDetail?.packageDescription
-                  : '';
+        const newData = []
+        rows?.forEach((ele, index) => {
+          let finalObject = prepareDataForGrid(ele);
+          finalObject['index'] = index + 1;
+          finalObject['isChecked'] = selectedRecords?.some((s) => s._id === ele._id);
+          if (step?.linkWithMaterial) {
+            finalObject['detail'] =
+              ele?.type === MATERIAL_TYPE.product
+                ? ele?.productDetail?.productName
+                : ele?.type === MATERIAL_TYPE.service
+                  ? ele?.serviceDetail?.serviceName
+                  : ele?.type === MATERIAL_TYPE.package
+                    ? ele?.packageDetail?.packageName
+                    : '';
+            finalObject['description'] =
+              ele?.type === MATERIAL_TYPE.product
+                ? ele?.productDetail?.productDescription
+                : ele?.type === MATERIAL_TYPE.service
+                  ? ele?.serviceDetail?.serviceDescription
+                  : ele?.type === MATERIAL_TYPE.package
+                    ? ele?.packageDetail?.packageDescription
+                    : '';
+          }
           finalObject['subRows'] = generateNestedData(data, finalObject);
-          return finalObject;
-        });
-
-        dispatch({ type: 'initialize', data: _rows, count: data?.length });
+          newData.push(finalObject)
+        })
+        dispatch({ type: 'initialize', data: newData, count: newData?.length });
         if (setNextStep) {
           if (data?.length > 0) {
             setNextStep(true);
@@ -231,7 +233,6 @@ const View = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow['isChecked'] = selectedRecords?.some((s) => s._id === _subRow._id);
       _subRow.detail =
         _subRow?.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productName
@@ -249,7 +250,6 @@ const View = ({
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';
     });
-
     return subRows;
   };
 

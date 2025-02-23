@@ -1,6 +1,6 @@
 import { camelCase } from 'lodash';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, productTypes } from 'src/constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, packageCategory } from 'src/constants/helpers';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
@@ -17,11 +17,11 @@ import CustomContainer from 'src/components/CustomContainer';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { ManageProductTypes } from 'src/pages/ProductTypes/ManageProductTypes';
+import { ManagePackageCategory } from 'src/pages/PackageCategory/ManagePackageCategory';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-const ProductTypes = () => {
-  const renderedFrom = camelCase(sidebarResource?.productTypes);
+const PackageCategory = () => {
+  const renderedFrom = camelCase(sidebarResource?.packageCategory);
   const {
     state: { user, permissions, selectedEntity, resources }
   }: any = useData();
@@ -30,7 +30,7 @@ const ProductTypes = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [showManageProductTypes, setshowManageProductTypes] = useState({ open: false, isClone: false, idToClone: null });
+  const [showManagePackageCategory, setshowManagePackageCategory] = useState({ open: false, isClone: false, idToClone: null });
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
@@ -49,9 +49,9 @@ const ProductTypes = () => {
 
   const fetchGridColumns = async () => {
     let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.productTypes}`);
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource.packageCategory}`);
     data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes?.productTypesDetail?.path, true);
+    const newColumns = generateColumns(renderedFrom, data, routes?.packageCategoryDetail?.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
@@ -66,17 +66,17 @@ const ProductTypes = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={permissions?.productTypes?.isCreate ? 'Clone' : cloneDisable}>
+        <HtmlTooltip title={permissions?.packageCategory?.isCreate ? 'Clone' : cloneDisable}>
           <span>
             <IconButton
               size="small"
               aria-label="Clone"
-              disabled={permissions?.productTypes?.isCreate ? false : true}
+              disabled={permissions?.packageCategory?.isCreate ? false : true}
               onClick={() => {
-                setshowManageProductTypes({ open: true, isClone: true, idToClone: row.original._id });
+                setshowManagePackageCategory({ open: true, isClone: true, idToClone: row.original._id });
               }}
             >
-              <FileCopyIcon fontSize="small" color={permissions?.productTypes?.isCreate ? 'primary' : 'disabled'} />
+              <FileCopyIcon fontSize="small" color={permissions?.packageCategory?.isCreate ? 'primary' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -133,12 +133,12 @@ const ProductTypes = () => {
     try {
       let data: any = [],
         count;
-      const response: any = await axiosInstance().get(`${productTypes.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
+      const response: any = await axiosInstance().get(`${packageCategory.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
       data = response?.data?.data;
       count = response?.data?.count;
       let rows = data.map((u) => {
         let finalObject: any = prepareDataForGrid(u, user);
-        finalObject['canDelete'] = permissions?.productTypes?.isDelete;
+        finalObject['canDelete'] = permissions?.packageCategory?.isDelete;
         return finalObject;
       });
       dispatch({ type: 'initialize', data: rows, count });
@@ -155,11 +155,11 @@ const ProductTypes = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const handleDeleteProductTypes = async () => {
+  const handleDeletePackageCategory = async () => {
     let recordsToDelete = deleteRecord?._id ? [deleteRecord._id] : selectedRecords.map((u) => u._id);
     setDeleteLoading(true);
     try {
-      const response = await axiosInstance().put(`${productTypes.api}/remove`, { ids: recordsToDelete });
+      const response = await axiosInstance().put(`${packageCategory.api}/remove`, { ids: recordsToDelete });
       toastConfig.setToastConfig({
         open: true,
         type: 'success',
@@ -197,11 +197,11 @@ const ProductTypes = () => {
   return (
     <div className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ ...routes.productTypes, title: resources?.productTypes?.titlePlural }]} />
+        <CustomBreadCrumbs routes={[{ ...routes.packageCategory, title: resources?.packageCategory?.titlePlural }]} />
         <ImportExportLinks
-          permissions={permissions.productTypes}
-          module={resources?.productTypes?.titlePlural}
-          api={productTypes.api}
+          permissions={permissions.packageCategory}
+          module={resources?.packageCategory?.titlePlural}
+          api={packageCategory.api}
           afterImportCompleted={() => fetchData()}
           isExportAllOrSomeFeature={true}
           total={rowCount}
@@ -212,7 +212,7 @@ const ProductTypes = () => {
           }}
           additionalParams={getQueryString(true)}
           asyncExport={true}
-          resource={sidebarResource.productTypes}
+          resource={sidebarResource.packageCategory}
         />
       </div>
       <CustomContainer>
@@ -223,9 +223,9 @@ const ProductTypes = () => {
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
           addButtonOnclick={() => {
-            setshowManageProductTypes({ open: true, isClone: false, idToClone: null });
+            setshowManagePackageCategory({ open: true, isClone: false, idToClone: null });
           }}
-          isAddButtonVisible={permissions?.productTypes?.isCreate}
+          isAddButtonVisible={permissions?.packageCategory?.isCreate}
         />
         {columns ? (
           <CustomReactTable
@@ -236,7 +236,7 @@ const ProductTypes = () => {
             renderedFrom={renderedFrom}
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
-            resource={sidebarResource.productTypes}
+            resource={sidebarResource.packageCategory}
             showFilters={true}
           />
         ) : (
@@ -248,24 +248,24 @@ const ProductTypes = () => {
           <ConfirmationDialog
             open={showDeleteConfirmBox}
             message={`Are you sure you want to delete ${deleteRecord
-              ? `${resources?.productTypes.titleSingular?.toLowerCase()} :
-                      ${deleteRecord?.productType}`
-              : `selected ${resources?.productTypes?.titlePlural?.toLowerCase()}`
+              ? `${resources?.packageCategory.titleSingular?.toLowerCase()} :
+                      ${deleteRecord?.packageCategory}`
+              : `selected ${resources?.packageCategory?.titlePlural?.toLowerCase()}`
               } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
             }}
-            onOk={handleDeleteProductTypes}
+            onOk={handleDeletePackageCategory}
             okBtnLoading={deleteLoading}
           />
         ) : null}
       </CustomContainer>
-      {showManageProductTypes.open && (
-        <ManageProductTypes
-          isClone={showManageProductTypes.isClone}
-          productTypesId={showManageProductTypes.idToClone}
-          onClose={() => setshowManageProductTypes({ open: false, isClone: false, idToClone: null })}
+      {showManagePackageCategory.open && (
+        <ManagePackageCategory
+          isClone={showManagePackageCategory.isClone}
+          packageCategoryId={showManagePackageCategory.idToClone}
+          onClose={() => setshowManagePackageCategory({ open: false, isClone: false, idToClone: null })}
           onSuccess={() => { }}
           isRedirectToDetailPage={true}
         />
@@ -274,4 +274,4 @@ const ProductTypes = () => {
   );
 };
 
-export default ProductTypes;
+export default PackageCategory;

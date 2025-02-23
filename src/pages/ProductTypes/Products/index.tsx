@@ -17,10 +17,10 @@ import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { packages, sidebarResource, prepareDataForGrid } from 'src/constants/helpers';
+import { packages, sidebarResource, prepareDataForGrid, MATERIAL_TYPE } from 'src/constants/helpers';
 
-const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false }) => {
-  const renderedFrom = `${camelCase(sidebarResource?.packages)}_product`;
+const Products = ({ resource, referenceId, workOrderResourceTabs, allowedToEdit, fullHeight = false }) => {
+  const renderedFrom = `${camelCase(resource)}_product`;
 
   const { setToastConfig } = useContext(CustomToastContext);
 
@@ -51,14 +51,11 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
-    let api = `${packages.api}/${packageId}/products`;
-    if (tabValue === 1) {
-      api += `?type=${sidebarResource.assemblyOrder}`;
-    } else if (tabValue === 2) {
-      api += `?type=${sidebarResource.disassemblyOrder}`;
-    }
+    let api = `/work-order-material-master-data`;
+    api += `?resource=${resource}&referenceId=${referenceId}&workOrderType=${workOrderResourceTabs[tabValue]}&materialType=${MATERIAL_TYPE.product}`;
     axiosInstance()
-      .get(api).then(({ data: { data } }) => {
+      .get(api)
+      .then(({ data: { data } }) => {
         let rows = data?.map((u, index) => {
           let res: any = {
             ...prepareDataForGrid(u, user)
@@ -104,10 +101,9 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
 
   const onSaveInlineEdit = (data, row) => {
     axiosInstance()
-      .put(`${packages.api}/${packageId}/products`, {
-        ids: [row._id],
+      .put(`/work-order-material-master-data`, {
+        _id: row._id,
         qty: Number(data.qty),
-        type: tabValue === 1 ? sidebarResource.assemblyOrder : tabValue === 2 ? sidebarResource.disassemblyOrder : ''
       })
       .then(({ data }) => {
         setToastConfig({
@@ -124,7 +120,9 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
     setRemovingProducts(true);
     const productIds = showProductConfirmBox?.data?.map((d) => d._id) || [];
     axiosInstance()
-      .put(`${packages.api}/${packageId}/products/remove`, { ids: productIds, type: tabValue === 1 ? sidebarResource.assemblyOrder : tabValue === 2 ? sidebarResource.disassemblyOrder : '' })
+      .put(`/work-order-material-master-data/remove`, {
+        ids: productIds,
+      })
       .then(({ data }) => {
         setRemovingProducts(false);
         setShowProductConfirmBox({ open: false, data: null });
@@ -145,10 +143,12 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
   const handleAdd = async (rows) => {
     setSubmitting(true);
     axiosInstance()
-      .post(`${packages.api}/material`, {
-        ids: [packageId],
-        products: rows.map((d: any) => ({ product: d.id, qty: Number(d.qty) })),
-        type: tabValue === 1 ? sidebarResource.assemblyOrder : tabValue === 2 ? sidebarResource.disassemblyOrder : ''
+      .post(`/work-order-material-master-data`, {
+        material: rows.map((d: any) => ({ materialId: d.id, qty: Number(d.qty) })),
+        workOrderType: workOrderResourceTabs[tabValue],
+        materialType: MATERIAL_TYPE.product,
+        resource: resource,
+        referenceId: referenceId
       })
       .then(({ data }) => {
         fetchData();
@@ -196,10 +196,8 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
       delete e.name;
     });
     axiosInstance()
-      .put(`${packages.api}/material/${packageId}/order`, {
-        packageType: 'Product',
+      .put(`/work-order-material-master-data/order`, {
         data: rows || [],
-        type: tabValue === 1 ? sidebarResource.assemblyOrder : tabValue === 2 ? sidebarResource.disassemblyOrder : ''
       })
       .then(() => {
         fetchData();
@@ -218,20 +216,19 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
       allowedToEdit && (
         <>
           <ImportExportMenu
-            permissions={permissions?.packages}
+            permissions={permissions?.[camelCase(resource)]}
             module="products"
-            api={`${packages.api}/${packageId}/products`}
+            api={`/work-order-material-master-data`}
             afterImportCompleted={() => {
               fetchData();
             }}
             isExportAllOrSomeFeature={true}
-            ids={[]}
-            additionalParams={`refrenceId=${packageId}${tabValue === 1 ? `&type=${sidebarResource.assemblyOrder}` : tabValue === 2 ? `&type=${sidebarResource.disassemblyOrder}` : ''}`}
+            ids={selectedRecords?.map((s) => s._id) || []}
+            recordsToExport={selectedRecords?.length}
+            additionalParams={`resource=${resource}&referenceId=${referenceId}&workOrderType=${workOrderResourceTabs[tabValue]}&materialType=${MATERIAL_TYPE.product}&workOrderResources=${JSON.stringify(workOrderResourceTabs)}`}
           />
           {dataRows?.length > 0 ? (
-            <ThemeButton
-              startIcon={<GrDrag fontSize="small" />}
-              onClick={() => setArrangeView(true)}>
+            <ThemeButton startIcon={<GrDrag fontSize="small" />} onClick={() => setArrangeView(true)}>
               Arrange
             </ThemeButton>
           ) : null}
@@ -246,15 +243,13 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
 
   return (
     <>
-      {(permissions?.assemblyOrder?.isRead || permissions?.disassemblyOrder?.isRead) && (
-        <>
-          <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
-            <CustomTab value={0} label={`Individual`} />
-            {permissions?.assemblyOrder?.isRead && <CustomTab value={1} label={`Assembly`} />}
-            {permissions?.disassemblyOrder?.isRead && <CustomTab value={2} label={`Disassembly`} />}
-          </CustomTabs>
-        </>
-      )}
+      {workOrderResourceTabs?.length ? (
+        <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
+          {workOrderResourceTabs?.map((res, index) =>
+            permissions?.[camelCase(res)]?.isRead ? <CustomTab key={res} value={index} label={resources?.[camelCase(res)]?.titleSingular} /> : null
+          )}
+        </CustomTabs>
+      ) : null}
       <DetailsPageHeader
         isAddButtonVisible={allowedToEdit}
         addButtonMenuItems={addButtonMenuItems()}
@@ -285,7 +280,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
       )}
       {showProductAssignDialog && (
         <AssignProductDialog
-          serialized={packageData?.packageType === 'Service' ? false : null}
+          serialized={null}
           handleCloseDialog={() => setShowProductAssignDialog(false)}
           ids={[...dataRows?.map((e) => e._id)]}
           onSuccess={(rows) => {

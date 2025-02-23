@@ -71,9 +71,9 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
             });
             setLoading(false);
           } else {
-            if (data?.rentalJob?.optionValue) {
-              fieldsDataForCreate?.forEach((f) => {
-                if (['parentAccount','customerAccount', 'warehouse'].includes(f.fieldName)) {
+            if (!data?.canDelete) {
+              fieldsDataForUpdate?.forEach((f) => {
+                if (['parentAccount', 'customerAccount', 'warehouse', 'currency', 'rentalJob', 'fieldTicket'].includes(f.fieldName)) {
                   f.disableOnEdit = true;
                   f.isUneditable = true;
                 }
