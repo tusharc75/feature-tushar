@@ -14,10 +14,11 @@ import { ListingPageHeader } from '../PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
 const AssignDynamicDialog = ({ onSuccess, handleClose, resource, isSubmitting, ids = [], extraDeepFilter = [], extraFilterById = [] }) => {
-  const renderedFrom = camelCase(`${routes[resource]?.title || resource}`);
+
+  const renderedFrom = camelCase(`${resource}`);
 
   const {
-    state: { selectedEntity }
+    state: { selectedEntity, resources }
   }: any = useData();
 
   const toastConfig = useContext(CustomToastContext);
@@ -216,7 +217,7 @@ const AssignDynamicDialog = ({ onSuccess, handleClose, resource, isSubmitting, i
       aria-labelledby="assign-roles-dialog"
     >
       <CustomDialogHeader
-        title={`Add ${routes[camelCase(resource)]?.title || resource}`}
+        title={`Add ${resources?.[camelCase(resource)]?.titlePlural || resource}`}
         showManimizeMaximize={false}
         showRequiredLabel={false}
         onClose={handleClose}
