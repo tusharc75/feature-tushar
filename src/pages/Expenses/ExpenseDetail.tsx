@@ -1,4 +1,4 @@
-import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { Edit } from '@mui/icons-material';
 import queryString from 'query-string';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
@@ -13,7 +13,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { EXPENSE_STATUS, expenses, getUniqueCurrencies, sidebarResource } from '../../constants/helpers';
+import { EXPENSE_STATUS, expenses, formatAmountWithCurrency, sidebarResource } from '../../constants/helpers';
 import Step from '../DynamicForm/Step';
 import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
 
@@ -26,11 +26,9 @@ const ExpenseDetail = () => {
   const { tab }: any = parsed;
 
   const {
-    state: { user, permissions, resources }
+    state: { permissions, resources }
   }: any = useData();
-  const [loadingDetails, setLoadingDetails] = useState(true);
   const [expensesData, setExpensesData] = useState(null);
-  const [currencySymbol, setCurrencySymbol] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
@@ -83,18 +81,13 @@ const ExpenseDetail = () => {
   };
 
   const fetchData = async () => {
-    setLoadingDetails(true);
-    axiosInstance()
-      .get(`${expenses.api}/${id}`)
+    axiosInstance().get(`${expenses.api}/${id}`)
       .then(({ data: { data } }) => {
-        setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data.currency)?.symbolNative);
-        setLoadingDetails(false);
         setAllowedToEdit(permissions?.expenses?.isUpdate);
         setAllowedToDelete(permissions?.expenses?.isDelete && data.status === EXPENSE_STATUS.unreported);
         setExpensesData(data);
       })
       .catch((err) => {
-        setLoadingDetails(false);
         toastConfig.setToastConfig(err);
       });
   };
@@ -163,17 +156,17 @@ const ExpenseDetail = () => {
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
-            {!loadingDetails && expensesData && fields ? (
+            {expensesData && fields ? (
               <DetailsPage data={expensesData} fields={fields} />
             ) : (
               <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </div>
             )}
-            {!loadingDetails ? (
-              <div className="mt-2">
-                <TableContainer component={Paper}>
-                  <Table sx={{ minWidth: 700 }} aria-label="spanning table">
+            {expensesData ? (
+              <div className="pt-3">
+                <TableContainer className='border'>
+                  <Table sx={{ minWidth: 700 }} size="medium" aria-label="spanning table">
                     {expensesData?.lineItems?.length > 0 && (
                       <TableHead>
                         <TableRow>
@@ -187,17 +180,17 @@ const ExpenseDetail = () => {
                         <TableRow key={row.id}>
                           <TableCell>{row.description}</TableCell>
                           <TableCell align="right">
-                            {currencySymbol} {row.amount}
+                            {formatAmountWithCurrency(expensesData?.currency, row?.amount)?.fullFormatAmountWithoutSpace}
                           </TableCell>
                         </TableRow>
                       ))}
                       <TableRow>
                         <TableCell>
-                          <Typography variant="body1">Total Amount</Typography>
+                          <Typography variant="subtitle2">Total Amount</Typography>
                         </TableCell>
                         <TableCell align="right">
-                          <Typography variant="body1">
-                            {currencySymbol} {expensesData?.totalAmount}
+                          <Typography variant="subtitle2">
+                            {formatAmountWithCurrency(expensesData?.currency, expensesData?.totalAmount)?.fullFormatAmountWithoutSpace}
                           </Typography>
                         </TableCell>
                       </TableRow>
