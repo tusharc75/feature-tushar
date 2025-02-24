@@ -3,7 +3,6 @@ import MuiAccordion, { accordionClasses, AccordionProps } from '@mui/material/Ac
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import MuiAccordionSummary, { accordionSummaryClasses, AccordionSummaryProps } from '@mui/material/AccordionSummary';
 import { styled } from '@mui/styles';
-import { cn } from 'src/constants/helpers';
 
 const Accordion = styled((props: AccordionProps) => <MuiAccordion disableGutters elevation={0} {...props} />)(({ theme }) => ({
   borderRadius: '6px !important',

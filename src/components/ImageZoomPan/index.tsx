@@ -7,6 +7,7 @@ import { cn } from 'src/constants/helpers';
 type ImageZoomPanProps = {
   src: string;
   alt?: string;
+  noBorder?: boolean;
 };
 type Dimensions = {
   width: number;
@@ -25,7 +26,7 @@ function fitInsideContainer(width: number, height: number, containerWidth: numbe
 }
 const maxRetry = 5;
 
-const ImageZoomPan = memo(({ src, alt }: ImageZoomPanProps) => {
+const ImageZoomPan = memo(({ src, alt, noBorder = false }: ImageZoomPanProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -184,7 +185,8 @@ const ImageZoomPan = memo(({ src, alt }: ImageZoomPanProps) => {
   return (
     <div
       className={cn(
-        'relative max-h-full min-h-[300px] w-full overflow-hidden border',
+        'relative max-h-full min-h-[300px] w-full overflow-hidden',
+        noBorder ? '' : 'border',
         isLoading ? '' : isDragging ? 'cursor-grabbing' : 'cursor-grab'
       )}
       ref={setContainerRef}
