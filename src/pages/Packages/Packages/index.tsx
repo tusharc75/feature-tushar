@@ -4,7 +4,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { prepareDataForGrid, packages, sidebarResource } from 'src/constants/helpers';
+import { prepareDataForGrid, packages, sidebarResource, WORK_ORDER_TYPE_LABEL, WORK_ORDER_TYPE } from 'src/constants/helpers';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -39,6 +39,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
   const [isArranging, setIsArranging] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
   const [tabValue, setTabValue] = useState(0);
+  const [selectedResource, setSelectedResource] = useState('');
 
   useEffect(() => {
     fetchGridColumns();
@@ -46,14 +47,14 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
 
   useEffect(() => {
     fetchData();
-  }, [tabValue]);
+  }, [selectedResource]);
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
     let api = `${packages.api}/${packageId}/package`;
-    if (tabValue === 1) {
-      api += `?type=${sidebarResource.assemblyOrder}`;
+    if (selectedResource) {
+      api += `?type=${selectedResource}`;
     }
     axiosInstance()
       .get(api).then(({ data: { data } }) => {
@@ -105,7 +106,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
         .put(`${packages.api}/${packageId}/package`, {
           ids: [row?._id],
           qty: Number(data?.qty),
-          type: tabValue === 1 ? sidebarResource.assemblyOrder : ''
+          type: selectedResource
         })
         .then(() => {
           fetchData();
@@ -120,7 +121,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
     setRemovingProducts(true);
     const Ids = selectedRecords.map((d) => d._id);
     axiosInstance()
-      .put(`${packages.api}/${packageId}/package/remove`, { ids: Ids, type: tabValue === 1 ? sidebarResource.assemblyOrder : '' })
+      .put(`${packages.api}/${packageId}/package/remove`, { ids: Ids, type: selectedResource })
       .then(() => {
         setRemovingProducts(false);
         setShowProductConfirmBox(false);
@@ -139,7 +140,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
       .post(`${packages.api}/${packageId}/package`, {
         ids: [packageId],
         packages: rows?.map((d: any) => ({ packageId: d?._id, qty: d?.qty ? Number(d?.qty) : Number(1) })),
-        type: tabValue === 1 ? sidebarResource.assemblyOrder : ''
+        type: selectedResource
       })
       .then(() => {
         setShowProductAssignDialog(false);
@@ -191,7 +192,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
             }}
             isExportAllOrSomeFeature={true}
             ids={[]}
-            additionalParams={`refrenceId=${packageId}${tabValue === 1 ? `&type=${sidebarResource.assemblyOrder}` : ''}`}
+            additionalParams={`refrenceId=${packageId}${selectedResource ? `&type=${selectedResource}` : ''}`}
           />
           {dataRows?.length > 0 ? (
             <ThemeButton
@@ -215,7 +216,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
       .put(`${packages.api}/material/${packageId}/order`, {
         packageType: 'Package',
         data: rows || [],
-        type: tabValue === 1 ? sidebarResource.assemblyOrder : ''
+        type: selectedResource
       })
       .then(() => {
         fetchData();
@@ -230,6 +231,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
   };
 
   const handleMainTabChange = (event: any, newValue: number) => {
+    setSelectedResource(newValue === 1 ? WORK_ORDER_TYPE.assemblyOrder : '')
     setTabValue(newValue);
   };
 
@@ -239,7 +241,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
         <>
           <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
             <CustomTab value={0} label={`Individual`} />
-            {permissions?.assemblyOrder?.isRead && <CustomTab value={1} label={`Assembly`} />}
+            <CustomTab value={1} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.assemblyOrder]} />
           </CustomTabs>
         </>
       )}
