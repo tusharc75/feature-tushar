@@ -15,7 +15,7 @@ import { useData } from 'src/StateProvider/Provider';
 
 const renderedFrom = 'assemblyOrder_rental_management_existing';
 
-const ExistingRentalJob = ({ onClose, referenceData, managedPackageIds, inventory = [], assetPolicyData = null }) => {
+const ExistingRentalJob = ({ onClose, referenceData, serializedPackageIds, inventory = [], assetPolicyData = null }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, selectedEntity, resources }
@@ -79,16 +79,16 @@ const ExistingRentalJob = ({ onClose, referenceData, managedPackageIds, inventor
           setOpenAssetDataDialog({ open: true, statusPolicy: statusPolicy, _ids: inventory?.map((a) => a?._id), rentalId: rentalId });
         }
       } else {
-        handleAddManagedPAckage(rentalId);
+        handleAddSerializedPackage(rentalId);
       }
     }
   };
 
-  const handleAddManagedPAckage = (rentalId, reserveAssetsData = null) => {
+  const handleAddSerializedPackage = (rentalId, reserveAssetsData = null) => {
     setIsSubmitting(true);
     axiosInstance()
-      .post(`${rentalManagement.api}/productpackage/${rentalId}/managedPackages`, {
-        ids: managedPackageIds,
+      .post(`${rentalManagement.api}/productpackage/${rentalId}/serializedPackages`, {
+        ids: serializedPackageIds,
         reserveAssetsData: reserveAssetsData
       })
       .then(() => {
@@ -107,12 +107,12 @@ const ExistingRentalJob = ({ onClose, referenceData, managedPackageIds, inventor
       <CustomDialogHeader title={`Select ${resources?.rentalManagement?.titleSingular}`} onClose={onClose}></CustomDialogHeader>
       <div className="listing-grid p-3">
         <Box mb={2}>
-          <Grid size={{ xs:12, sm:12, md:12}} container justifyContent="flex-end">
+          <Grid size={{ xs: 12, sm: 12, md: 12 }} container justifyContent="flex-end">
             <ThemeButton
               onClick={() => {
                 setShowRentalDialog(true);
               }}
-              buttonType='theme'
+              buttonType="theme"
             >
               {`Create ${resources?.rentalManagement?.titleSingular}`}
             </ThemeButton>
@@ -123,7 +123,7 @@ const ExistingRentalJob = ({ onClose, referenceData, managedPackageIds, inventor
               }}
               disabled={isSubmitting || selectedRecords.length > 1 || selectedRecords.length === 0}
               isLoading={isSubmitting}
-              buttonType='theme'
+              buttonType="theme"
             >
               Add
             </ThemeButton>
@@ -169,7 +169,7 @@ const ExistingRentalJob = ({ onClose, referenceData, managedPackageIds, inventor
           setAssetsData={() => {}}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, rentalId: null })}
           onSuccess={(_assetData) => {
-            handleAddManagedPAckage(openAssetDataDialog.rentalId, _assetData);
+            handleAddSerializedPackage(openAssetDataDialog.rentalId, _assetData);
           }}
         />
       )}

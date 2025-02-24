@@ -39,7 +39,6 @@ import ManageWorkOrder from './ManageWorkOrder';
 import Service from './Service';
 import Versions from './Versions';
 import View from './View';
-import { FaCircleChevronDown } from 'react-icons/fa6';
 import ManageRepairJob from '../RepairJob/ManageRepairJob';
 import Step from '../DynamicForm/Step';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -109,7 +108,7 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
   const [workOrderCostFields, setWorkOrderCostFields] = useState(null);
   const [assetPolicyData, setAssetPolicyData] = useState(null);
   const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, _ids: null });
-  const [openManagedPackageDialog, setOpenManagedPackageDialog] = useState(false);
+  const [openSerializedPackageDialog, setOpenSerializedPackageDialog] = useState(false);
 
   const columns = [
     { accessor: 'index', Header: 'Index' },
@@ -383,10 +382,10 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
       type: 'menuItem',
       isVisible:
         permissions?.repairJob?.isCreate &&
-        allowedToEdit &&
-        workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
-        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-        !workOrderData?.currentRepairJob
+          allowedToEdit &&
+          workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
+          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+          !workOrderData?.currentRepairJob
           ? true
           : false,
       children: `Create ${resources?.repairJob?.titleSingular}`,
@@ -441,14 +440,14 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
         if (workOrderData?.type === WORK_ORDER_TYPE.productionOrder && workOrderCostFields?.length) {
           setOpenTotalCostDialog(true);
         } else if (workOrderData?.type === WORK_ORDER_TYPE.repairOrder) {
-          const statusPolicy = checkAssetPolicy(ASSET_STATUS.available);
+          const statusPolicy = checkAssetPolicy(workOrderData?.inUseAsset ? ASSET_STATUS.reserved : ASSET_STATUS.available);
           if (statusPolicy) {
             setOpenAssetDataDialog({ open: true, statusPolicy: statusPolicy?.statusPolicy, _ids: statusPolicy?.assetIds });
           } else {
             updateStatus(WORK_ORDER_STATUS.completed);
           }
         } else if (workOrderData?.type === WORK_ORDER_TYPE.assemblyOrder && workOrderData?.package) {
-          setOpenManagedPackageDialog(true);
+          setOpenSerializedPackageDialog(true);
         } else {
           updateStatus(WORK_ORDER_STATUS.completed);
         }
@@ -478,9 +477,9 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
       children: 'Create Version Without Existing Data',
       isVisible: Boolean(
         allowedToEdit &&
-          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-          !workOrderData?.currentRepairJob &&
-          workOrderData?.canCreateWorkOrderVersion
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+        !workOrderData?.currentRepairJob &&
+        workOrderData?.canCreateWorkOrderVersion
       )
     },
     {
@@ -493,9 +492,9 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
       },
       isVisible: Boolean(
         allowedToEdit &&
-          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-          !workOrderData?.currentRepairJob &&
-          workOrderData?.canCreateWorkOrderVersion
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+        !workOrderData?.currentRepairJob &&
+        workOrderData?.canCreateWorkOrderVersion
       ),
       disabled: false
     },
@@ -830,15 +829,15 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
         />
       )}
 
-      {openManagedPackageDialog && (
+      {openSerializedPackageDialog && (
         <PackageNumberDialog
           onClose={() => {
-            setOpenManagedPackageDialog(false);
+            setOpenSerializedPackageDialog(false);
           }}
           assemblyOrderId={workOrderData?.assemblyOrder?.optionValue}
           workOrderIds={[id]}
           onSuccess={() => {
-            setOpenManagedPackageDialog(false);
+            setOpenSerializedPackageDialog(false);
             updateStatus(WORK_ORDER_STATUS.completed);
           }}
         />

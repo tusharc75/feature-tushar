@@ -27,9 +27,12 @@ import Setting from 'src/components/FormBuilder/Tabs/Setting';
 import Actions from 'src/components/FormBuilder/Tabs/Actions';
 import Notifications from 'src/components/FormBuilder/Tabs/Notifications';
 import PolicyDialog from 'src/components/FormBuilder/Tabs/policyDialog';
-import { AddOutlined, ExpandLess, ExpandMore, Sync } from '@mui/icons-material';
+import { AddOutlined, ExpandLess, ExpandMore } from '@mui/icons-material';
+import UpdateIcon from '@mui/icons-material/Update';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import routes from 'src/components/Helpers/Routes';
 import UpdateResourceActions from 'src/components/FormBuilder/Tabs/UpdateResourceActions';
+import { sidebarResource } from 'src/constants/helpers';
 
 const DynamicTabs = ({ workflowId = null, resource }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -143,21 +146,21 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
         >
           Add Tab
         </ThemeButton>
-        <Box>
-          {resourcePolicy.find((e) => e.resource === resource) && !workflowId && (
-            <HtmlTooltip title={'Policy'}>
-              <IconButton
-                aria-label="Policy"
-                onClick={() => {
-                  setOpenPolicy(true);
-                }}
-              >
-                <PolicyIcon fontSize="small" color={'primary'} />
-              </IconButton>
-            </HtmlTooltip>
-          )}
-          {!workflowId && (
-            <HtmlTooltip title={'Setting'}>
+        {!workflowId &&
+          <Box>
+            {resourcePolicy.find((e) => e.resource === resource) && (
+              <HtmlTooltip title={'Resource Policy'}>
+                <IconButton
+                  aria-label="Policy"
+                  onClick={() => {
+                    setOpenPolicy(true);
+                  }}
+                >
+                  <PolicyIcon fontSize="small" color={'primary'} />
+                </IconButton>
+              </HtmlTooltip>
+            )}
+            <HtmlTooltip title={'Resource Setting'}>
               <IconButton
                 aria-label="Setting"
                 onClick={() => {
@@ -167,32 +170,28 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
                 <SettingIcon fontSize="small" color={'primary'} />
               </IconButton>
             </HtmlTooltip>
-          )}
-          {!workflowId && (
-            <HtmlTooltip title={'Actions'}>
+            <HtmlTooltip title={'Create Resource Actions'}>
               <IconButton
                 aria-label="Actions"
                 onClick={() => {
                   setOpenAction(true);
                 }}
               >
-                <BuildIcon fontSize="small" color={'primary'} />
+                <AddCircleOutlineIcon fontSize="small" color={'primary'} />
               </IconButton>
             </HtmlTooltip>
-          )}
-          {!workflowId && (
-            <HtmlTooltip title={'Update Resource Actions'}>
-              <IconButton
-                aria-label="Actions"
-                onClick={() => {
-                  setOpenUpdateResourceActions(true);
-                }}
-              >
-                <Sync fontSize="small" color={'primary'} />
-              </IconButton>
-            </HtmlTooltip>
-          )}
-          {!workflowId && (
+            {[sidebarResource.serializedAsset]?.includes(resource) &&
+              <HtmlTooltip title={'Update Resource Actions'}>
+                <IconButton
+                  aria-label="Actions"
+                  onClick={() => {
+                    setOpenUpdateResourceActions(true);
+                  }}
+                >
+                  <UpdateIcon fontSize="small" color={'primary'} />
+                </IconButton>
+              </HtmlTooltip>
+            }
             <HtmlTooltip title={'Notifications'}>
               <IconButton
                 aria-label="Notifications"
@@ -203,10 +202,9 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
                 <AddAlertIcon fontSize="small" color={'primary'} />
               </IconButton>
             </HtmlTooltip>
-          )}
-        </Box>
+          </Box>
+        }
       </Box>
-
       <Box pt={2}>
         <DndContext onDragEnd={handleOnDragEnd} onDragStart={onDragStart} sensors={sensors} modifiers={[restrictToVerticalAxis]}>
           <RenderTabItems {...{ tabs, loading, setOpen, resourceData, setDeleteData, fetchData, workflowId }} />

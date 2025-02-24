@@ -84,18 +84,18 @@ const ExpenseReport = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
+        <HtmlTooltip title={row?.original?.canDelete || row?.original?.expenses?.length === 0 ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
               size="small"
               aria-label="Delete"
-              disabled={row?.original?.canDelete ? false : true}
+              disabled={row?.original?.canDelete || row?.original?.expenses?.length === 0 ? false : true}
               onClick={() => {
                 setDeleteRecord(row.original);
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete || row?.original?.expenses?.length === 0 ? 'error' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -184,15 +184,6 @@ const ExpenseReport = () => {
           message: data.message
         });
 
-        if (deleteRecord?.selectedExpenses?.length > 0) {
-          await handleStatusChange(deleteRecord.selectedExpenses);
-        } else {
-          const allSelectedExpenses = selectedRecords.flatMap((record) => record.selectedExpenses || []);
-          if (allSelectedExpenses.length > 0) {
-            await handleStatusChange(allSelectedExpenses);
-          }
-        }
-
         dispatch({ type: 'selection', selectedRecords: [] });
         setShowDeleteConfirmBox(false);
         setDeleteLoading(false);
@@ -203,18 +194,6 @@ const ExpenseReport = () => {
         toastConfig.setToastConfig(error);
         setShowDeleteConfirmBox(false);
         setDeleteLoading(false);
-      }
-    }
-  };
-
-  const handleStatusChange = async (expenseInfo) => {
-    for (let expense of expenseInfo) {
-      try {
-        await axiosInstance().patch(`${expenses.api}/status/${expense._id}`, {
-          status: EXPENSE_STATUS.unreported
-        });
-      } catch (error) {
-        toastConfig.setToastConfig(error);
       }
     }
   };

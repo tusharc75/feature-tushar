@@ -18,6 +18,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 const ReceiveDialog = ({ handleClose, selectedRecords, handleSuccess, transferAssetId, type }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -40,11 +41,10 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSuccess, transferAs
       } else {
         response = await axiosInstance().put(`/rental-management/assets-last-date`, { assets: assets, last: 1 });
       }
-      var lastDate: any = new Date();
+      var lastDate: any = dayjs.tz().startOf("day").toDate();
       let date = response?.data?.data?.date;
       if (date) {
-        lastDate = new Date(date);
-        lastDate.setHours(0, 0, 0);
+        lastDate = dayjs(date).tz().startOf("day").toDate();;
       }
       setMinDate(lastDate);
     } catch (error) {

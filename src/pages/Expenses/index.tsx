@@ -14,14 +14,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import {
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  expenses,
-  sidebarResource,
-  EXPENSE_STATUS,
-  getUniqueCurrencies,
-} from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, expenses, sidebarResource, EXPENSE_STATUS, getUniqueCurrencies } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
@@ -52,6 +45,7 @@ const Expenses = () => {
   useEffect(() => {
     fetchGridColumns();
   }, []);
+
   const fetchGridColumns = async () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.expenses}`);
@@ -74,7 +68,9 @@ const Expenses = () => {
         Cell: ({ row }) => {
           return row?.original?.totalAmount ? (
             <div>
-              <p className="text-truncate">{getUniqueCurrencies().find((d) => d.currencyCode === row?.original?.currency)?.symbolNative} {row?.original?.totalAmount}</p>
+              <p className="text-truncate">
+                {getUniqueCurrencies().find((d) => d.currencyCode === row?.original?.currency)?.symbolNative} {row?.original?.totalAmount}
+              </p>
             </div>
           ) : (
             <NoDataCell />
@@ -126,7 +122,9 @@ const Expenses = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title={row?.original?.canDelete && row?.original?.status === EXPENSE_STATUS.unreported ? 'Delete' : 'You can not delete it is reported'}>
+        <HtmlTooltip
+          title={row?.original?.canDelete && row?.original?.status === EXPENSE_STATUS.unreported ? 'Delete' : 'You can not delete it is reported'}
+        >
           <span>
             <IconButton
               size="small"
@@ -137,7 +135,10 @@ const Expenses = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon fontSize="small" color={row?.original?.canDelete && row?.original?.status !== EXPENSE_STATUS.unreported ? 'disabled' : 'error'} />
+              <DeleteIcon
+                fontSize="small"
+                color={row?.original?.canDelete && row?.original?.status !== EXPENSE_STATUS.unreported ? 'disabled' : 'error'}
+              />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -178,7 +179,8 @@ const Expenses = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     try {
-      let data: any = [], count;
+      let data: any = [],
+        count;
       const response: any = await axiosInstance().get(`${expenses.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
       data = response?.data?.data;
       count = response?.data?.count;
@@ -306,11 +308,12 @@ const Expenses = () => {
         {showDeleteConfirmBox ? (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord
-              ? `${resources?.expenses?.titleSingular?.toLowerCase()} :
+            message={`Are you sure you want to delete ${
+              deleteRecord
+                ? `${resources?.expenses?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.expenseNumber}`
-              : `selected ${resources?.expenses?.titlePlural?.toLowerCase()}`
-              } ?`}
+                : `selected ${resources?.expenses?.titlePlural?.toLowerCase()}`
+            } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

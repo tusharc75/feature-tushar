@@ -420,7 +420,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       data.material = data?.material
         ?.map((e) => {
           let materialData: any = { ...e };
-
           let pMethod = materialData?.pricingMethod?.split(',') || [];
           pMethod = pMethod.map((m) => m?.trim()).find((m) => !['Per Day', 'Per Week', 'Per Month', 'Per Barrel'].includes(m));
 
@@ -449,8 +448,10 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
           const row: any = invoiceData[0]?.material.find((m) => m._id === e._id);
           if (row) {
-            const actualEndDate = new Date(product?.endDate)?.setDate(new Date(product?.endDate)?.getDate() + 1);
-            setEndDate(actualEndDate);
+            const actualEndDate = new Date(product?.endDate);
+            actualEndDate.setDate(actualEndDate.getDate() + 1);
+            const formattedEndDate = actualEndDate.toISOString();
+            setEndDate(formattedEndDate);
           }
           return materialData;
         })
@@ -554,7 +555,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
   const handleApplyDate = async () => {
     const records = [...selectedRecords];
-
     setIsApplingDate(true);
     dispatch({ type: 'loading', loading: true });
     const childRows: any = [];

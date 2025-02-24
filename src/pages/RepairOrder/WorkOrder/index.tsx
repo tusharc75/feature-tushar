@@ -956,16 +956,6 @@ const WorkOrder = ({
       });
   };
 
-  const checkUniqWorkOrder = () => {
-    if (selectedRecords.length === 0) {
-      return false;
-    } else if (uniq(map(selectedRecords, 'workOrder._id')).length === 1) {
-      return true;
-    } else {
-      return false;
-    }
-  };
-
   const handleServiceSelect = (newValue) => {
     setSelectedServiceOption(newValue);
     if (newValue) {
@@ -1225,11 +1215,10 @@ const WorkOrder = ({
                 setAutoCompleteData(selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset));
                 setCompleteConfirmBox(true);
               }}
-              disabled={
-                selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length &&
-                  selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.every((e) => e?.canAutoCompleteWorkOrder)
-                  ? false
-                  : true
+              disabled={selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length &&
+                selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.every((e) => e?.canAutoCompleteWorkOrder)
+                ? false
+                : true
               }
               id="auto-complete-work-order"
             >
@@ -1486,7 +1475,7 @@ const WorkOrder = ({
                 setCompleteConfirmBox(false);
               }}
               onOk={() => {
-                const statusPolicy = checkAssetPolicy(ASSET_STATUS.available);
+                const statusPolicy = checkAssetPolicy(autoCompleteData?.find((e) => e?.inUseAsset) ? ASSET_STATUS.reserved : ASSET_STATUS.available);
                 if (statusPolicy) {
                   setOpenAssetDataDialog({ open: true, statusPolicy: statusPolicy?.statusPolicy, _ids: statusPolicy?.assetIds });
                 } else {

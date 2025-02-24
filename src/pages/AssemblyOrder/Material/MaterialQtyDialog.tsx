@@ -48,6 +48,14 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, assem
         values: { ...getObjKeys('', data) }
       });
     } else {
+      if (rowData?.workOrder) {
+        data?.forEach((e) => {
+          if (e.fieldName === 'warehouse') {
+            e.disableOnEdit = true;
+            e.isUneditable = true;
+          }
+        });
+      }
       setInitialData({
         fields: data,
         values: getObjKeysWithValues(rowData, data)

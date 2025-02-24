@@ -82,7 +82,7 @@ export default function UpdateResourceActions({ onClose, onSuccess, resource, re
       } = await axiosInstance().get(`/field?resource=${resource}`);
       data = data?.filter((obj) => obj?.isCreate).map((d: any) => d.fieldData);
       setFields(data);
-    } catch (e) {}
+    } catch (e) { }
   };
 
   function validate(values) {
@@ -132,7 +132,7 @@ export default function UpdateResourceActions({ onClose, onSuccess, resource, re
             <Fragment>
               <CustomDialogHeader
                 onClose={onClose}
-                title={'Actions'}
+                title={'Update Resource Actions'}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -145,10 +145,9 @@ export default function UpdateResourceActions({ onClose, onSuccess, resource, re
                   <FieldArray name="updateResourceActions">
                     {({ push, remove }) => (
                       <>
-                        <div className="sticky top-0 z-10 flex items-center justify-between gap-2 border-b bg-[var(--dark-primary,white)] py-3 pb-3">
-                          <h6 className="text-sm font-semibold">Update Resource Actions</h6>
+                        <div className="sticky top-0 z-10 flex items-center justify-between gap-2 bg-[var(--dark-primary,white)] py-3 pb-3">
                           <ThemeButton
-                            buttonType="theme"
+                            buttonType='theme'
                             onClick={() => push({ checkFields: [{ fieldName: '', value: '', operator: '' }], updateField: '', updateValue: '' })}
                           >
                             Add
@@ -234,7 +233,7 @@ const Card = ({ values, index, parentRemove, setFieldValue, errors, touched, fie
                           renderInput={(params) => (
                             <TextField
                               {...params}
-                              label="FieldName"
+                              label="Field Name"
                               margin="none"
                               size="small"
                               error={
@@ -293,8 +292,13 @@ const Card = ({ values, index, parentRemove, setFieldValue, errors, touched, fie
                         ) : null}
                         <div className="mt-1 flex">
                           <HtmlTooltip title={'Remove'}>
-                            <IconButton size="small" aria-label="close" onClick={() => remove(i)} disabled={arr.length === 1}>
-                              <RemoveCircleOutline fontSize="small" color={'error'} />
+                            <IconButton
+                              size="small"
+                              aria-label="close"
+                              onClick={() => remove(i)}
+                              disabled={arr.length === 1}
+                            >
+                              <RemoveCircleOutline fontSize="small" color={arr.length === 1 ? 'disabled' : 'error'} />
                             </IconButton>
                           </HtmlTooltip>
                           <HtmlTooltip title={'Add'}>
@@ -360,16 +364,10 @@ const DynamicFormField = ({ fieldName, value, field, setFieldValue, formikField,
   return (
     <FormTypes
       {...field}
-      values={{
-        [fieldName]: value
-      }}
-      errors={{
-        [fieldName]: error
-      }}
-      touched={{
-        [fieldName]: touched
-      }}
-      fieldData={field}
+      values={{ [fieldName]: value }}
+      errors={{ [fieldName]: error }}
+      touched={{ [fieldName]: touched }}
+      fieldData={{ ...field, required: false, isUneditable: false, disableOnEdit: false }}
       label={label}
       name={field.fieldName}
       type={field.type}

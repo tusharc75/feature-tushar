@@ -1,31 +1,33 @@
 import { Delete, Edit } from '@mui/icons-material';
-import { Box, Dialog, IconButton, MenuItem } from '@mui/material';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
+import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
-import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomContainer from 'src/components/CustomContainer';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { CustomDialogTransition, displayDate, prepareDataForGrid, product, sidebarResource } from 'src/constants/helpers';
-import CustomDataDialog from 'src/pages/Product/ScheduledMaintenance/CustomDataDialog';
+import { DetailsPageHeader, ListingPageHeader } from 'src/components/PageHeaders';
+import { displayDate, prepareDataForGrid, product, sidebarResource } from 'src/constants/helpers';
+import ManageScheduleMaintenance from 'src/pages/ScheduleMaintenance/ManageScheduleMaintenance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 
-const ScheduledMaintenance = ({ onClose }) => {
-  const renderedFrom = `productScheduledMaintenance`;
+const ScheduleMaintenance = () => {
+  const renderedFrom = camelCase(sidebarResource.scheduleMaintenance);
   const { setToastConfig } = useContext(CustomToastContext);
 
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -195,6 +197,10 @@ const ScheduledMaintenance = ({ onClose }) => {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
 
+    if (search) {
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
+    }
+
     if (showFilteredRecordsOnly) {
       deepFilter = `${deepFilter}&getById=${JSON.stringify(selectedRecords.map((m) => m._id))}`;
     }
@@ -275,7 +281,7 @@ const ScheduledMaintenance = ({ onClose }) => {
       <>
         <ImportExportMenu
           permissions={permissions?.product}
-          module="productScheduledMaintenance"
+          module="scheduledMaintenance"
           api={`${product.api}/scheduledMaintenance`}
           afterImportCompleted={() => {
             fetchData();
@@ -286,7 +292,7 @@ const ScheduledMaintenance = ({ onClose }) => {
     );
   };
 
-  const actionButtonMenuItems = () => {
+  const ActionMenuItems = () => {
     return (
       <>
         <MenuItem disabled={selectedRecords.length === 0} onClick={() => setShowConfirmBox({ open: true, data: selectedRecords })}>
@@ -296,46 +302,70 @@ const ScheduledMaintenance = ({ onClose }) => {
     );
   };
 
-  return (
-    <Dialog
-      TransitionComponent={CustomDialogTransition}
-      fullWidth
-      maxWidth="md"
-      fullScreen={true}
-      open={true}
-      onClose={onClose}
-      aria-labelledby="assign-roles-dialog"
-    >
-      <CustomDialogHeader title={`Setup Schedule Maintenance`} showManimizeMaximize={false} showRequiredLabel={false} onClose={onClose} />
-      <CustomDialogContent isFooterPresent={false}>
-        <>
-          <DetailsPageHeader
-            isAddButtonVisible={true}
-            addButtonMenuItems={addButtonMenuItems()}
-            isActionButtonVisible={true}
-            actionButtonMenuItems={actionButtonMenuItems()}
-            actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
-            rightSideContents={rightSideContents()}
-            hasXpadding={false}
-          />
+  const handleSearch = (e) => {
+    dispatch({ type: 'search', search: e.target.value });
+  };
 
-          {columns ? (
-            <CustomReactTable
-              height={'calc(100vh - 250px)'}
-              columns={columns}
-              state={state}
-              dispatch={dispatch}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchData}
-              showOnlyShowFilteredRecordSwitch={true}
-              showFilters={false}
-            />
-          ) : (
-            <Box p={2} height={500}>
-              <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>
-          )}
-        </>
+  return (
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[{ title: 'Schedule Maintenances' }]} />
+        <ImportExportLinks
+          permissions={permissions.product}
+          module={sidebarResource.scheduleMaintenance}
+          api={`${product.api}/scheduledMaintenance`}
+          afterImportCompleted={() => {
+            fetchData();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={selectedRecords?.length}
+          ids={selectedRecords?.map((obj) => obj._id)}
+          resource={sidebarResource.scheduleMaintenance}
+          onExportToExcelSuccess={() => {
+            fetchData();
+          }}
+          additionalParams={getQueryString(true)}
+        />
+      </div>
+      <CustomContainer>
+        <ListingPageHeader
+          searchValue={search}
+          onSearch={handleSearch}
+          isActionButtonVisible={true}
+          actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
+          actionMenuItems={<ActionMenuItems />}
+          isAddButtonVisible={true}
+          addButtonOnclick={() => {
+            setOpenAssignProductDialog(true);
+          }}
+          addButtonProps={{ textAddShow: true, text: `Existing ${resources?.product?.titlePlural}` }}
+        />
+        {/* <DetailsPageHeader
+          isAddButtonVisible={true}
+          addButtonMenuItems={addButtonMenuItems()}
+          isActionButtonVisible={true}
+          actionButtonMenuItems={actionButtonMenuItems()}
+          actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
+          rightSideContents={rightSideContents()}
+          hasXpadding={false}
+        /> */}
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 250px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            refreshGrid={fetchData}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={false}
+          />
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
         {openAssignProductDialog && (
           <AssignProductDialog
             handleCloseDialog={() => setOpenAssignProductDialog(false)}
@@ -346,11 +376,12 @@ const ScheduledMaintenance = ({ onClose }) => {
             serialized={true}
             isSubmitting={false}
             ids={dataRows?.map((d) => d?.productId)}
+            hideQty={true}
           />
         )}
 
         {openCustomDataDialog.open && (
-          <CustomDataDialog
+          <ManageScheduleMaintenance
             data={openCustomDataDialog?.data}
             handleClose={() => {
               setOpenCustomDataDialog({ open: false, data: null });
@@ -373,9 +404,9 @@ const ScheduledMaintenance = ({ onClose }) => {
             onOk={handleRemove}
           />
         )}
-      </CustomDialogContent>
-    </Dialog>
+      </CustomContainer>
+    </section>
   );
 };
 
-export default ScheduledMaintenance;
+export default ScheduleMaintenance;

@@ -77,6 +77,7 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
           setTitle(`Create ${resources?.expenseReport?.titleSingular}`);
           let initialData = getObjKeys('', fieldsDataForCreate);
           initialData['status'] = EXPENSE_STATUS.draft;
+          initialData['users'] = user?.user?._id;
           setInitialData({
             fields: fieldsDataForCreate,
             values: initialData
@@ -101,14 +102,11 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
       axiosInstance()
         .put(`${expenseReport.api}`, data)
         .then(({ data }) => {
-          selectedExpense.forEach((expense) => {
-            axiosInstance()
-              .patch(`${expenses.api}/status/${expense._id}`, { status })
-              .catch((error) => {
-                toastConfig.setToastConfig(error);
-              });
-          });
-
+          axiosInstance()
+            .patch(`${expenseReport.api}/status/${expenseReportId}`, { status })
+            .catch((error) => {
+              toastConfig.setToastConfig(error);
+            });
           setIsSubmitting(false);
           onSuccess();
           toastConfig.setToastConfig({
@@ -125,14 +123,11 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
       axiosInstance()
         .post(`${expenseReport.api}`, data)
         .then(({ data: { data, message } }) => {
-          selectedExpense.forEach((expense) => {
-            axiosInstance()
-              .patch(`${expenses.api}/status/${expense._id}`, { status })
-              .catch((error) => {
-                toastConfig.setToastConfig(error);
-              });
-          });
-
+          axiosInstance()
+            .patch(`${expenseReport.api}/status/${data._id}`, { status })
+            .catch((error) => {
+              toastConfig.setToastConfig(error);
+            });
           history.push(`${routes?.expenseReportDetail?.path}/${data._id}`);
           setIsSubmitting(false);
           onSuccess(data);
@@ -167,9 +162,7 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
   };
 
   const handleDeleteRows = (rowIds) => {
-    setSelectedExpense((prevExpenses) =>
-      prevExpenses.filter((expense) => !rowIds.includes(expense._id))
-    );
+    setSelectedExpense((prevExpenses) => prevExpenses.filter((expense) => !rowIds.includes(expense._id)));
   };
 
   const addButtonMenuItems = () => {
@@ -197,7 +190,7 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
     <Dialog
       maxWidth="md"
       fullWidth
-      fullScreen={editing ? (fullScreen || isMobile || isTablet) : true}
+      fullScreen={editing ? fullScreen || isMobile || isTablet : true}
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
       onClose={(e, reason) => {
@@ -249,7 +242,12 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
                   )}
                   {selectedExpense.length > 0 && isAllowedToEdit && (
                     <div className="mt-2">
-                      <Expenses selectedExpenseData={selectedExpense} showAddButton={false} removeRow={handleDeleteRows} />
+                      <Expenses
+                        expenseIds={selectedExpense?.map((expense) => expense._id)}
+                        showAddButton={false}
+                        removeRow={handleDeleteRows}
+                        allowedToEdit={isAllowedToEdit}
+                      />
                     </div>
                   )}
                 </Form>
@@ -272,7 +270,7 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
                   isLoading={isSubmitting}
                   buttonType="theme"
                   id="dialog-save-button"
-                  disabled={isSubmitting || selectedExpense.length===0}
+                  disabled={isSubmitting || selectedExpense.length === 0}
                   onClick={(e) => {
                     submitForm();
                   }}

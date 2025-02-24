@@ -14,7 +14,7 @@ import { useAppTheme } from 'src/constants/AppConfig';
 import { useData } from 'src/StateProvider/Provider';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const ManagedPackagesView = ({ managedPackagesData }) => {
+const SerializedPackagesView = ({ serializedPackagesData }) => {
   const { setToastConfig } = useContext(CustomToastContext);
   const [themeColor] = useAppTheme();
   const [fullScreenOpen, setFullScreenOpen] = useState(false);
@@ -27,8 +27,8 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
   }: any = useData();
 
   const customNodeStyles = {
-    managedPackage: {
-      name: 'Managed Package',
+    serializedPackage: {
+      name: 'Serialized Package',
       ...COLOUR_MASTER.purchaseOrder
     },
     product: {
@@ -47,43 +47,43 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
 
   useEffect(() => {
     fetchData();
-  }, [managedPackagesData]);
+  }, [serializedPackagesData]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const allAssetsResponse = await axiosInstance().get(`/managed-packages/${managedPackagesData?._id}/assets`);
+      const allAssetsResponse = await axiosInstance().get(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/assets`);
       const assets = allAssetsResponse?.data?.data || [];
 
       const {
         data: {
           data: { material }
         }
-      } = await axiosInstance().get(`/managed-packages/${managedPackagesData?.package?.optionValue}/package-material`);
+      } = await axiosInstance().get(`${routes.serializedPackages.path}/${serializedPackagesData?.package?.optionValue}/package-material`);
 
       let xPosition = 0;
       let flow = [
         {
-          id: managedPackagesData?._id,
+          id: serializedPackagesData?._id,
           type: 'input',
           className: 'dark-node',
           sourcePosition: 'right',
           data: {
-            ref_type: 'managedPackages',
-            ref_id: managedPackagesData?._id,
+            ref_type: 'serializedPackages',
+            ref_id: serializedPackagesData?._id,
             label: (
-              <HtmlTooltip arrow placement="top" title={resources?.managedPackages?.titleSingular}>
+              <HtmlTooltip arrow placement="top" title={resources?.serializedPackages?.titleSingular}>
                 <div>
-                  <Typography variant="body2">{resources?.managedPackages?.titleSingular}</Typography>
+                  <Typography variant="body2">{resources?.serializedPackages?.titleSingular}</Typography>
                   <Typography variant="subtitle2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {managedPackagesData?.managedPackageName}
+                    {serializedPackagesData?.serializedPackageNumber}
                   </Typography>
                 </div>
               </HtmlTooltip>
             )
           },
           position: { x: xPosition, y: 60 },
-          style: customNodeStyles.managedPackage
+          style: customNodeStyles.serializedPackage
         }
       ];
       let flowEdge = [];
@@ -98,7 +98,7 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
           parent.type === MATERIAL_TYPE.product ? parent?.productName : parent.type === MATERIAL_TYPE.package ? parent?.packageName : '';
         parent.subRows = generateNestedData(material, assets, parent);
       });
-      generateFlowData(rows, xPosition, flow, flowEdge, managedPackagesData._id, yPrev);
+      generateFlowData(rows, xPosition, flow, flowEdge, serializedPackagesData._id, yPrev);
       setFlowData([...flow, ...flowEdge]);
       setLoading(false);
     } catch (err) {
@@ -186,8 +186,8 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
   };
 
   const onElementClick = (event, element) => {
-    if (element?.data?.ref_type === 'managedPackages') {
-      window.open(`${routes.managedPackagesDetail.path}/${element?.data?.ref_id}`);
+    if (element?.data?.ref_type === 'serializedPackages') {
+      window.open(`${routes.serializedPackagesDetail.path}/${element?.data?.ref_id}`);
     }
     if (element?.data?.ref_type === MATERIAL_TYPE.product) {
       window.open(`${routes.productDetail.path}/${element?.data?.ref_id}`);
@@ -274,4 +274,4 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
   );
 };
 
-export default ManagedPackagesView;
+export default SerializedPackagesView;

@@ -190,7 +190,10 @@ export const assemblyOrderSteps: stepInterface[] = [
   { name: 'Final Slip', title: 'Slip', icon: 'invoice' }
 ];
 
-export const disassemblyOrderSteps: stepInterface[] = [{ name: 'Add', title: 'Add', icon: 'add' }];
+export const disassemblyOrderSteps: stepInterface[] = [
+  { name: 'Add', title: 'Add', icon: 'add' },
+  { name: 'Work Order', title: 'Work Order', icon: 'workOrder' }
+];
 
 //export const WORKORDER_TECHNICIAN_SERVICE_STATUS = ['Backlog', 'Pending', 'In-Progress', 'Completed', 'In-Progress By Other'];
 export const WORKORDER_TECHNICIAN_SERVICE_STATUS = ['Pending', 'In-Progress', 'Completed', 'In-Progress By Other'];
@@ -390,7 +393,7 @@ export const sidebarResource = {
   resourceDoaRequest: 'Resource Doa Request',
   workOrderPlanning: 'Work Order Planning',
   subcontractAssembly: 'Subcontract Assembly',
-  managedPackages: 'Managed Packages',
+  serializedPackages: 'Serialized Packages',
   trainAiModel: 'Train Ai Model',
   assemblyOrder: 'Assembly Order',
   packageInventory: 'Package Inventory',
@@ -404,7 +407,10 @@ export const sidebarResource = {
   workSpace: 'Work Space',
   workflow: 'Workflow',
   workflowReport: 'Workflow Report',
-  equiptAi: 'Equipt Ai'
+  equiptAi: 'Equipt Ai',
+  productTypes: 'Product Types',
+  packageCategory: 'Package Category',
+  scheduleMaintenance: 'Schedule Maintenance'
 };
 
 export const primaryFields = {
@@ -672,13 +678,6 @@ export const serializedAsset = {
   resource: 'Serialized Asset'
 };
 
-export const serializedAssetInspection = {
-  api: '/serialized-asset/serialized-asset-inspection',
-  route: '/serialized-asset/serialized-asset-inspection',
-  permission: 'serializedAsset',
-  resource: 'Serialized Asset'
-};
-
 export const serializedAssetsCertification = {
   api: '/serialized-assets-certification',
   route: '/serialized-assets-certification',
@@ -831,6 +830,16 @@ export const workOrder = {
   api: '/work-order'
 };
 
+export const productTypes = {
+  resource: 'Product Types',
+  api: '/product-types'
+};
+
+
+export const packageCategory = {
+  resource: 'Package Category',
+  api: '/package-category'
+};
 export const profileMenuItems = {
   profile: 1,
   notification: 2,
@@ -2259,7 +2268,7 @@ export const ACTIVITY_RESOURCE = {
   irtTicket: 'irtTicket',
   subcontractAssembly: 'subcontractAssembly',
   assemblyOrder: 'assemblyOrder',
-  managedPackages: 'managedPackages'
+  serializedPackages: 'serializedPackages'
 };
 
 export const LOG_RESOURCE = {
@@ -2517,6 +2526,13 @@ export const REPORT_LIST = [
     key: 'serializedAsset',
     type: 'dynamic',
     section: REPORT_SECTIONS.asset
+  },
+  {
+    title: sidebarResource.sublease,
+    permission: 'sublease',
+    key: 'sublease',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.rental
   },
   {
     title: 'Lost Assets',
@@ -3080,12 +3096,11 @@ export const SUBCONTRACT_ASSEMBLY_STATUS = {
   closed: 'Closed'
 };
 
-
 export const DIASSEMBLY_ORDER_STATUS = {
   new: 'New',
   inProgress: 'In-Progress',
   closed: 'Closed'
-}
+};
 
 export const WORK_FLOW_STATUS = {
   open: 'Open',
@@ -3163,6 +3178,13 @@ export const QUOTE_STATUS = {
   sentforDOA: 'Sent for DOA',
   acceptedbyDOA: 'Accepted by DOA',
   rejectedbyDOA: 'Rejected by DOA'
+};
+
+export const SERIALIZED_PACKAGES_STATUS = {
+  available: 'Available',
+  reserved: 'Reserved',
+  underReview: 'Under Review',
+  customerPossession: 'Customer Possession'
 };
 
 export const convertMsToTime = (milliseconds: any) => {
@@ -3304,6 +3326,19 @@ export const convertBlobToBase64 = async (blobUrl) => {
     img.onerror = () => reject('Error in converting blob to base64');
     img.src = blobUrl;
   });
+};
+
+export const convertBase64ToBlob = (base64: string): Blob => {
+  const byteString = atob(base64.split(',')[1]);
+  const mimeString = base64.split(',')[0].split(':')[1].split(';')[0];
+  const arrayBuffer = new ArrayBuffer(byteString.length);
+  const uint8Array = new Uint8Array(arrayBuffer);
+
+  for (let i = 0; i < byteString.length; i++) {
+    uint8Array[i] = byteString.charCodeAt(i);
+  }
+
+  return new Blob([uint8Array], { type: mimeString });
 };
 
 export const IMPORT_EXPORT_STATUS = {

@@ -9,8 +9,6 @@ import LoginMFA from 'src/pages/Auth/LoginMFA';
 import EquiptAi from 'src/pages/EquiptAi';
 import TrainAiModel from 'src/pages/EquiptAi/TrainAiModel';
 import Integration from 'src/pages/Integration';
-import ManagedPackages from 'src/pages/ManagedPackages';
-import ManagedPackagedDetail from 'src/pages/ManagedPackages/ManagedPackagesDetail';
 import SubcontractAssembly from 'src/pages/SubcontractAssembly';
 import SubcontractAssemblyDetail from 'src/pages/SubcontractAssembly/SubcontractAssemblyDetail';
 import WorkFlow from 'src/pages/WorkFlow';
@@ -275,14 +273,20 @@ import UserManual from './pages/UserManual';
 import ScheduleAndDispatch from 'src/pages/ScheduleAndDispatch';
 import ReportsCenter from 'src/pages/Reports';
 import Expenses from 'src/pages/Expenses';
-import ExpenseDetailsPage from 'src/pages/Expenses/ExpenseDetailsPage';
+import ExpenseDetailsPage from 'src/pages/Expenses/ExpenseDetail';
 import ExpenseReport from 'src/pages/ExpensesReport';
-import ExpenseReportDetailsPage from 'src/pages/ExpensesReport/ExpenseReportDetailPage';
+import ExpenseReportDetailsPage from 'src/pages/ExpensesReport/ExpenseReportDetail';
 import ExpenseApproval from 'src/pages/ExpenseApproval';
 import SerializedAssetInspection from './pages/SerializedAssetsInspection';
 import DisassemblyOrder from 'src/pages/DisassemblyOrder';
 import DisassemblyOrderDetail from 'src/pages/DisassemblyOrder/DisassemblyOrderDetail';
-
+import SerializedPackages from 'src/pages/SerializedPackages';
+import SerializedPackagesDetail from 'src/pages/SerializedPackages/SerializedPackagesDetail';
+import ProductTypes from 'src/pages/ProductTypes';
+import ProductTypesDetail from 'src/pages/ProductTypes/ProductTypesDetail';
+import PackageCategory from 'src/pages/PackageCategory';
+import PackageCategoryDetail from 'src/pages/PackageCategory/PackageCategoryDetail';
+import ScheduleMaintenance from 'src/pages/ScheduleMaintenance';
 
 var notificationInterval: any = null;
 
@@ -338,7 +342,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
     return () => {
       clearInterval(notificationInterval);
     };
@@ -1184,11 +1188,11 @@ function App() {
             <PrivateRoute exact path={`${routes.subcontractAssemblyDetail.path}/:id`}>
               <SubcontractAssemblyDetail />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.managedPackages.path}>
-              <ManagedPackages />
+            <PrivateRoute exact path={routes.serializedPackages.path}>
+              <SerializedPackages />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.managedPackagesDetail.path}/:id`}>
-              <ManagedPackagedDetail />
+            <PrivateRoute exact path={`${routes.serializedPackagesDetail.path}/:id`}>
+              <SerializedPackagesDetail />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.integration.path}`}>
               <Integration />
@@ -1225,6 +1229,21 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.scheduleAndDispatch.path}`}>
               <ScheduleAndDispatch />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.productTypes.path}`}>
+              <ProductTypes />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.productTypesDetail.path}/:id`}>
+              <ProductTypesDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.packageCategory.path}`}>
+              <PackageCategory />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.packageCategoryDetail.path}/:id`}>
+              <PackageCategoryDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.scheduleMaintenance.path}`}>
+              <ScheduleMaintenance />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

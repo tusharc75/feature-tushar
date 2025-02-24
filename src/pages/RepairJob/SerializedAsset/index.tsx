@@ -47,7 +47,7 @@ const SerializedAsset = ({
   allowedToEdit,
   allowUpdateStatus,
   stepFullScreen,
-  alloweOperation
+  allowedOperation
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const [showRemoveAssetFromReceivingTicketDialog, setShowRemoveAssetFromReceivingTicketDialog] = useState(false);
@@ -217,7 +217,7 @@ const SerializedAsset = ({
               <HtmlTooltip title="Repaired">
                 <CheckCircleIcon color="primary" fontSize="small" />
               </HtmlTooltip>
-            ) : alloweOperation &&
+            ) : allowedOperation &&
               allowedToEdit &&
               repairJobData?.status !== REPAIR_JOB_STATUS.completed &&
               ![ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair].includes(row?.original?.status) &&
@@ -400,7 +400,7 @@ const SerializedAsset = ({
   const rightSideContents = () => {
     return (
       <>
-        {allowedToEdit && alloweOperation && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
+        {allowedToEdit && allowedOperation && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
           <Fragment>
             <ThemeButton
               disabled={selectedRecords.length === 0 || !allowUpdateStatus}
@@ -530,7 +530,7 @@ const SerializedAsset = ({
     <>
       <DetailsPageHeader
         isAddButtonVisible={false}
-        isActionButtonVisible={allowedToEdit && alloweOperation && repairJobData?.status !== REPAIR_JOB_STATUS.completed}
+        isActionButtonVisible={allowedToEdit && allowedOperation && repairJobData?.status !== REPAIR_JOB_STATUS.completed}
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{
           disabled: selectedRecords.length === 0 || selectedRecords.some((s) => s.repaired === true) || checkUniqSupplier() || checkUniqWarehouse()

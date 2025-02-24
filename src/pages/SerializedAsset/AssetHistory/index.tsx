@@ -6,7 +6,14 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { Link } from 'react-router-dom';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { ASSET_STATUS, dateFormatToSend, DELIVERY_TICKET_STATUS, displayDateTime, INVENTORY_HISTORY_TYPE, sidebarResource } from 'src/constants/helpers';
+import {
+  ASSET_STATUS,
+  dateFormatToSend,
+  DELIVERY_TICKET_STATUS,
+  displayDateTime,
+  INVENTORY_HISTORY_TYPE,
+  sidebarResource
+} from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import DurationFilter from 'src/components/DurationFilter';
 import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -148,8 +155,7 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
 
   useEffect(() => {
     if (fields) {
-
-      const reservedStatusField = resourceData?.policy?.statusChangeFields?.find((e) => e.status === ASSET_STATUS.reserved)?.fields || []
+      const reservedStatusField = resourceData?.policy?.statusChangeFields?.find((e) => e.status === ASSET_STATUS.reserved)?.fields || [];
 
       const columns = [
         {
@@ -314,6 +320,16 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
                   >
                     {row.original.reference}
                   </Link>
+                ) : row?.original?.type === sidebarResource.serializedPackages ? (
+                  <Link
+                    className="link"
+                    title={row.original.reference}
+                    to={`${routes.serializedPackagesDetail.path}/${row.original.referenceId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {row.original.reference}
+                  </Link>
                 ) : (
                   row.original.reference
                 )
@@ -436,17 +452,19 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
           canDrag: false,
           Cell: ({ row }) => (
             <div>
-              {reservedStatusField?.length && row?.original?.referenceData?.rentalJob &&
-                row?.original?.referenceData?.status !== DELIVERY_TICKET_STATUS.cancelled
-                && row?.original?.status === ASSET_STATUS.inUse && (
-                  <HtmlTooltip title='Rental Asset Data History'>
-                    <IconButton
-                      size="small"
-                      onClick={() => setRentalAssetHistory({ open: true, rentalJob: row?.original?.referenceData?.rentalJob })}>
-                      <Visibility color="primary" fontSize='small' />
-                    </IconButton>
-                  </HtmlTooltip>
-                )}
+              {reservedStatusField?.length &&
+                row?.original?.referenceData?.rentalJob &&
+                row?.original?.referenceData?.status !== DELIVERY_TICKET_STATUS.cancelled &&
+                row?.original?.status === ASSET_STATUS.inUse ? (
+                <HtmlTooltip title="Rental Asset Data History">
+                  <IconButton
+                    size="small"
+                    onClick={() => setRentalAssetHistory({ open: true, rentalJob: row?.original?.referenceData?.rentalJob })}
+                  >
+                    <Visibility color="primary" fontSize="small" />
+                  </IconButton>
+                </HtmlTooltip>
+              ) : null}
             </div>
           )
         }
@@ -458,13 +476,15 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
 
       let extraColumns = generateColumns(
         renderedFrom,
-        statusChangeField?.map((field) => {
-          const f = cloneDeep(field);
-          const fieldData = f.fieldData;
-          fieldData.fieldName = `assetData.${fieldData.fieldName}`;
-          f.fieldData = fieldData;
-          return f;
-        })?.filter((_field) => !columns?.map((c) => c?.accessor).includes(_field?.fieldData?.fieldName)),
+        statusChangeField
+          ?.map((field) => {
+            const f = cloneDeep(field);
+            const fieldData = f.fieldData;
+            fieldData.fieldName = `assetData.${fieldData.fieldName}`;
+            f.fieldData = fieldData;
+            return f;
+          })
+          ?.filter((_field) => !columns?.map((c) => c?.accessor).includes(_field?.fieldData?.fieldName)),
         routes.serializedAssetDetail.path,
         true
       );

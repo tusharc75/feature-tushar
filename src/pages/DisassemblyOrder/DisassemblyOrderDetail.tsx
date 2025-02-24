@@ -13,7 +13,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { disassemblyOrder, disassemblyOrderSteps, sidebarResource } from '../../constants/helpers';
+import { checkIsAllowedToDelete, checkIsAllowedToEdit, disassemblyOrder, disassemblyOrderSteps, sidebarResource } from '../../constants/helpers';
 import Step from '../DynamicForm/Step';
 import { ManageDiassemblyOrder } from 'src/pages/DisassemblyOrder/ManageDiassemblyOrder';
 import ContentFullScreen from 'src/components/ContentFullScreen';
@@ -21,6 +21,7 @@ import Steps, { getIndex } from 'src/components/Steps';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import Material from 'src/pages/DisassemblyOrder/Material';
 import { camelCase } from 'lodash';
+import WorkOrder from 'src/pages/DisassemblyOrder/WorkOrder';
 
 const DisassemblyOrderDetail = () => {
   const renderedFrom = camelCase(sidebarResource.disassemblyOrder);
@@ -31,7 +32,7 @@ const DisassemblyOrderDetail = () => {
   const { tab }: any = parsed;
 
   const {
-    state: { permissions, resources }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [disassemblyOrderData, setDisassemblyOrderData] = useState(null);
@@ -77,8 +78,12 @@ const DisassemblyOrderDetail = () => {
       .get(`${disassemblyOrder.api}/${id}`)
       .then(({ data: { data } }) => {
         setCurrentStep(getIndex(data?.processStatus, disassemblyOrderSteps));
-        setAllowedToEdit(permissions?.disassemblyOrder?.isUpdate);
-        setAllowedToDelete(permissions?.disassemblyOrder?.isDelete);
+        setAllowedToEdit(permissions?.disassemblyOrder?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.disassemblyOrder, data));
+        setAllowedToDelete(
+          permissions?.disassemblyOrder?.isDelete &&
+            checkIsAllowedToDelete(user, sidebarResource.disassemblyOrder, data.owner.optionValue) &&
+            data?.canDelete
+        );
         setDisassemblyOrderData(data);
       })
       .catch((err) => {
@@ -169,7 +174,17 @@ const DisassemblyOrderDetail = () => {
             {disassemblyOrderProcessStepsNames[currentStep] === 'Add' && disassemblyOrderData && (
               <Material
                 disassemblyOrderData={disassemblyOrderData}
+                setNextStep={setNextStep}
                 renderedFrom={`${renderedFrom}_grid-1`}
+                stepFullScreen={stepFullScreen}
+                allowedToEdit={allowedToEdit}
+              />
+            )}
+            {disassemblyOrderProcessStepsNames[currentStep] === 'Work Order' && disassemblyOrderData && (
+              <WorkOrder
+                disassemblyOrderData={disassemblyOrderData}
+                setNextStep={setNextStep}
+                renderedFrom={`${renderedFrom}_grid-2`}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={allowedToEdit}
               />

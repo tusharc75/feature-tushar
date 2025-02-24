@@ -12,7 +12,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { CHILD_RESOURCE, MATERIAL_SUB_TYPE, MATERIAL_TYPE, WORK_ORDER_STATUS, workOrder, WORKORDER_SERVICE_STATUS } from 'src/constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_SUB_TYPE, MATERIAL_TYPE, sidebarResource, WORK_ORDER_STATUS, workOrder, WORKORDER_SERVICE_STATUS } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import SyncIcon from '@mui/icons-material/Sync';
@@ -27,6 +27,9 @@ import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductD
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import AttachmentDialog from 'src/pages/WorkOrder/Service/AttachmentDialog';
 import PackageNumberDialog from 'src/pages/AssemblyOrder/WorkOrder/PackageNumberDialog';
+import DescriptionIcon from '@mui/icons-material/Description';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
+import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -55,7 +58,8 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, ids: [], data: null });
   const [arrangeView, setArrangeView] = useState(false);
   const [attachmentsDialog, setAttachmentsDialog] = useState({ open: false, workOrderId: null, uniqueServiceId: null, serviceName: null });
-  const [openManagedPackageDialog, setOpenManagedPackageDialog] = useState({ open: false, ids: [] });
+  const [openSerializedPackageDialog, setOpenSerializedPackageDialog] = useState({ open: false, ids: [] });
+  const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, workOrder: null });
 
   const { generateColumns } = useColumns();
 
@@ -94,6 +98,19 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
   const fetchFields = async () => {
     const response = await fetch_child_resource_fields(CHILD_RESOURCE.assemblyOrderMaterial, assemblyOrderData?.currency || 'USD', false);
     var data = response?.filter((e) => !['detail', 'description']?.includes(e?.fieldName));
+
+    const {
+      data: { data: serializedPackageFieldData }
+    } = await axiosInstance().put(`/field/find-field-labels`, {
+      fields: [
+        {
+          resource: sidebarResource.serializedPackages,
+          fieldNames: ['serializedPackageNumber']
+        }
+      ]
+    });
+    const serializedPackageField = serializedPackageFieldData?.find((d) => d.resource === sidebarResource.serializedPackages)?.fieldNames || [];
+
     const newColumns = generateColumns(renderedFrom, data, null, false, assemblyOrderData?.currency || 'USD');
     let coloum: any = [
       {
@@ -183,40 +200,43 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
     ];
     coloum = [...coloum, ...newColumns];
     coloum.push({
+      accessor: 'serializedPackageNumber',
+      Header: serializedPackageField[0]?.fieldLabel || 'Serialized Package Number',
+      width: 200,
+      show: false,
+      Cell: ({ row }) => {
+        return row.original?.serializedPackageNumber ? (
+          <div className="flex items-center gap-2">
+            <h5 className="text-truncate">{row.original?.serializedPackageNumber}</h5>{' '}
+            <Box>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.serializedPackagesDetail.path}/${row.original.serializedPackageId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            </Box>
+          </div>
+        ) : (
+          <NoDataCell />
+        );
+      }
+    });
+    coloum.push({
       accessor: 'assignedUsers',
       Header: 'Assigned Technician',
       width: 200,
-      Cell: ({ row }) => (
-        <div>
-          {row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
-            row?.original['assignedUsers']?.map((e, i) => {
-              return i === row?.original['assignedUsers'].length - 1 ? (
-                <a
-                  className="link text-truncate [flex-grow:0_!important]"
-                  target="_blank"
-                  href={`${routes.userDetail.path}/${e.optionValue}`}
-                  rel="noreferrer"
-                >
-                  {e?.optionLabel}
-                </a>
-              ) : (
-                <>
-                  <a
-                    className="link text-truncate [flex-grow:0_!important]"
-                    target="_blank"
-                    href={`${routes.userDetail.path}/${e.optionValue}`}
-                    rel="noreferrer"
-                  >
-                    {e?.optionLabel},
-                  </a>
-                  &nbsp;
-                </>
-              );
-            })
-          ) : (
-            <NoDataCell />
-          )}
-        </div>
+      Cell: ({ row }) => (<DropdownCell
+        permissions={permissions}
+        permissionForLinks={{}}
+        field={{
+          fieldName: 'assignedUsers',
+          lookupResource: sidebarResource.user
+        }}
+        original={row?.original}
+      />
       )
     });
     if (permissions?.workStations) {
@@ -225,36 +245,15 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
         Header: 'Assigned Work Station',
         width: 200,
         Cell: ({ row }) => (
-          <div>
-            {row?.original['assignedWorkStations'] && row?.original['assignedWorkStations']?.length ? (
-              row?.original['assignedWorkStations']?.map((e, i) => {
-                return i === row?.original['assignedWorkStations'].length - 1 ? (
-                  <a
-                    className="link text-truncate [flex-grow:0_!important]"
-                    target="_blank"
-                    href={`${routes.workStationsDetail.path}/${e.optionValue}`}
-                    rel="noreferrer"
-                  >
-                    {e?.optionLabel}
-                  </a>
-                ) : (
-                  <>
-                    <a
-                      className="link text-truncate [flex-grow:0_!important]"
-                      target="_blank"
-                      href={`${routes.workStationsDetail.path}/${e.optionValue}`}
-                      rel="noreferrer"
-                    >
-                      {e?.optionLabel},
-                    </a>
-                    &nbsp;
-                  </>
-                );
-              })
-            ) : (
-              <NoDataCell />
-            )}
-          </div>
+          <DropdownCell
+            permissions={permissions}
+            permissionForLinks={{}}
+            field={{
+              fieldName: 'assignedWorkStations',
+              lookupResource: sidebarResource.workStations
+            }}
+            original={row?.original}
+          />
         )
       });
     }
@@ -264,46 +263,56 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
       minWidth: 100,
       width: 100,
       sticky: 'right',
-      Cell: ({ row, table }) => {
+      Cell: ({ row }) => {
         return (
           <>
-            {checkParentProduct([row?.original], row?.original?.parentId, table.getRowModel().rows) && (
-              <HtmlTooltip title="Auto Complete Work Order">
-                <IconButton
-                  size="small"
-                  aria-label="Details"
-                  onClick={() => {
-                    setAutoCompleteData([row.original]);
-                    setCompleteConfirmBox(true);
-                  }}
-                  disabled={row?.original?.canAutoCompleteWorkOrder ? false : true}
-                >
-                  {row.original['workOrderStatus'] === WORK_ORDER_STATUS.completed ? (
-                    <CheckCircle className="text-[var(--chip-color-completed)] [font-size:19px_!important] dark:text-green-400" />
-                  ) : (
-                    <AutoCompleteIcon size={18} />
-                  )}
-                </IconButton>
-              </HtmlTooltip>
-            )}
-
-            {row?.original?.parentId && (
-              <HtmlTooltip title="Delete">
-                <span>
+            {row.original.type === MATERIAL_TYPE.package && row.original?.workOrderId && (
+              <>
+                <HtmlTooltip title="Auto Complete Work Order">
                   <IconButton
-                    disabled={row?.original?.canDelete ? false : true}
                     size="small"
-                    aria-label="Delete"
+                    aria-label="Details"
                     onClick={() => {
-                      setDeleteData([row.original]);
-                      setShowDeleteConfirmBox(true);
+                      setAutoCompleteData([row.original]);
+                      setCompleteConfirmBox(true);
+                    }}
+                    disabled={row?.original?.canAutoCompleteWorkOrder ? false : true}
+                  >
+                    {row.original['workOrderStatus'] === WORK_ORDER_STATUS.completed ? (
+                      <CheckCircle className="text-[var(--chip-color-completed)] [font-size:19px_!important] dark:text-green-400" />
+                    ) : (
+                      <AutoCompleteIcon size={18} />
+                    )}
+                  </IconButton>
+                </HtmlTooltip>
+                <HtmlTooltip title="Drawings">
+                  <IconButton
+                    size="small"
+                    aria-label="Details"
+                    onClick={() => {
+                      setShowDrawingDialog({ open: true, workOrder: row.original?.workOrder?._id });
                     }}
                   >
-                    <Delete fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+                    <DescriptionIcon fontSize="small" color={'primary'} />
                   </IconButton>
-                </span>
-              </HtmlTooltip>
+                </HtmlTooltip>
+              </>
             )}
+            <HtmlTooltip title="Delete">
+              <span>
+                <IconButton
+                  disabled={row?.original?.canDelete ? false : true}
+                  size="small"
+                  aria-label="Delete"
+                  onClick={() => {
+                    setDeleteData([row.original]);
+                    setShowDeleteConfirmBox(true);
+                  }}
+                >
+                  <Delete fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
           </>
         );
       }
@@ -312,91 +321,105 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
   };
 
   const fetchData = async () => {
-    dispatch({ type: 'loading', loading: true });
     setNextStep(false);
+
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
 
     const {
       data: { data }
     } = await axiosInstance().get(`${routes.assemblyOrder.path}/work-order/${assemblyOrderData._id}`);
 
     setMaterial(JSON.parse(JSON.stringify(data)));
-    let rows = data?.filter((e) => e.parentId === null);
 
+    let rows = data?.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = parent.packageDetail?.packageName || '';
       parent.description = parent?.packageDetail?.packageDescription || '';
-      parent.qtyDisplay = parent.qty;
+      parent.qty = parent.qty;
+      if (parent?.workOrder) {
+        parent.workOrderId = parent?.workOrder?._id;
+        parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
+        parent.status = parent?.workOrder?.status || '';
+        if (parent?.workOrder?.status === WORK_ORDER_STATUS.new) {
+          parent.canAutoCompleteWorkOrder = true;
+        }
+        if (parent?.workOrder?.status === WORK_ORDER_STATUS.completed) {
+          parent.hideSelection = true;
+          parent.workOrderStatus = WORK_ORDER_STATUS.completed;
+          if (parent?.serializedPackage) {
+            parent.serializedPackageId = parent?.serializedPackage?.optionValue;
+            parent.serializedPackageNumber = parent?.serializedPackage?.optionLabel;
+          }
+        }
+      }
+      parent.subRows = generateNestedData(data, parent);
       parent.canDelete = false;
-      parent.subRows = generatedNestedProduct(data, parent);
+      if (parent?.workOrder) {
+        if (parent?.workOrder?.status !== WORK_ORDER_STATUS.completed) {
+          parent.canDelete = parent.subRows.length === 0 ? true : false;
+          if (parent.subRows?.length && parent.subRows?.find((e) => !e?.canDelete)) {
+            parent.canDelete = false;
+          }
+        }
+      }
     });
 
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
 
-  const generatedNestedProduct = (material, parent) => {
-    const subRows: any = material.filter((e) => e.parentId === parent._id);
-    subRows.forEach((_subRow, index) => {
-      _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail =
-        _subRow.type === MATERIAL_TYPE.product
-          ? _subRow.productDetail?.productName
-          : _subRow.type === MATERIAL_TYPE.package
-            ? _subRow.packageDetail?.packageName
-            : '';
-      _subRow.description =
-        _subRow.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productDescription
-          : _subRow.type === MATERIAL_TYPE.package
-            ? _subRow.packageDetail?.packageDescription
-            : '';
-      _subRow.qty = _subRow.qty;
-      _subRow.workOrderId = _subRow?.workOrder?._id;
-      _subRow.workOrderNumber = _subRow?.workOrder?.workOrderNumber;
-      _subRow.status = _subRow?.workOrder?.status || '';
-      if (_subRow?.workOrder?.status === WORK_ORDER_STATUS.new) {
-        _subRow.canAutoCompleteWorkOrder = true;
-      }
-      if (_subRow?.workOrder?.status === WORK_ORDER_STATUS.completed) {
-        _subRow.hideSelection = true;
-        _subRow.workOrderStatus = WORK_ORDER_STATUS.completed;
-      }
-      _subRow.subRows = generateNestedData(material, _subRow);
+  const generateNestedData = (material, parent) => {
 
-      _subRow.canDelete = false;
-      if (_subRow?.workOrder?.status !== WORK_ORDER_STATUS.completed) {
-        _subRow.canDelete = _subRow.subRows.length === 0 ? true : false;
-        if (_subRow.subRows?.length && _subRow.subRows?.find((e) => !e?.canDelete)) {
-          _subRow.canDelete = false;
+    var subPackage: any = material.filter((e) => e?.parentId === parent?._id && e?.type === MATERIAL_TYPE.package);
+    subPackage.forEach((_subPackage, index) => {
+      _subPackage.index = parent.index + '.' + `${index + 1}`;
+      _subPackage.detail = _subPackage.packageDetail?.packageName || '';
+      _subPackage.description = _subPackage?.packageDetail?.packageDescription || '';
+      _subPackage.qty = _subPackage.qty;
+      if (_subPackage?.workOrder) {
+        _subPackage.workOrderId = _subPackage?.workOrder?._id;
+        _subPackage.workOrderNumber = _subPackage?.workOrder?.workOrderNumber;
+        _subPackage.status = _subPackage?.workOrder?.status || '';
+        if (_subPackage?.workOrder?.status === WORK_ORDER_STATUS.new) {
+          _subPackage.canAutoCompleteWorkOrder = true;
+        }
+        if (_subPackage?.workOrder?.status === WORK_ORDER_STATUS.completed) {
+          _subPackage.hideSelection = true;
+          _subPackage.workOrderStatus = WORK_ORDER_STATUS.completed;
+          if (_subPackage?.serializedPackage) {
+            _subPackage.serializedPackageId = _subPackage?.serializedPackage?.optionValue;
+            _subPackage.serializedPackageNumber = _subPackage?.serializedPackage?.optionLabel;
+          }
+        }
+      }
+      _subPackage.subRows = generateNestedData(material, _subPackage);
+      _subPackage.canDelete = false;
+      if (_subPackage?.workOrder) {
+        if (_subPackage?.workOrder?.status !== WORK_ORDER_STATUS.completed) {
+          _subPackage.canDelete = _subPackage.subRows.length === 0 ? true : false;
+          if (_subPackage.subRows?.length && _subPackage.subRows?.find((e) => !e?.canDelete)) {
+            _subPackage.canDelete = false;
+          }
         }
       }
     });
 
-    return subRows;
-  };
-
-  const generateNestedData = (material, parent) => {
-    var subRows: any = material.filter((e) => e?.parentId === parent?._id);
+    var subRows: any = material.filter((e) => e?.parentId === parent?._id && [MATERIAL_TYPE.product, MATERIAL_TYPE.service]?.includes(e?.type));
     subRows = orderBy(subRows, ['type'], ['desc']);
     let productIndex = 0;
     let serviceIndex = 0;
-    subRows.forEach((_subRow, index) => {
+    subRows.forEach((_subRow) => {
       _subRow.index = parent.index + '.' + `${_subRow.type === MATERIAL_TYPE.service ? alphabet[serviceIndex] : productIndex + 1}`;
-      _subRow.detail = _subRow.detail
-        ? _subRow.detail
-        : _subRow.type === MATERIAL_TYPE.service
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow.productDetail?.productName
-            : _subRow.packageDetail?.packageName;
-      _subRow.description = _subRow.description
-        ? _subRow.description
-        : _subRow.type === MATERIAL_TYPE.service
-          ? _subRow?.serviceDetail?.serviceDescription
-          : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow?.productDetail?.productDescription
-            : _subRow?.packageDetail?.packageDescription;
+      _subRow.detail = _subRow.detail ? _subRow.detail
+        : _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceName
+          : _subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName
+            : '';
+      _subRow.description = _subRow.description ? _subRow.description
+        : _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceDescription
+          : _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription
+            : '';
       _subRow.qty = _subRow.qty;
       _subRow.workOrder = parent?.workOrder;
       _subRow.workOrderId = parent?.workOrderId;
@@ -415,15 +438,12 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
         if (_subRow.type === MATERIAL_TYPE.service) {
           _subRow.canDelete = _subRow?.status === WORKORDER_SERVICE_STATUS.pending ? true : false;
         }
-        if (_subRow.type === MATERIAL_TYPE.package) {
-          _subRow.canDelete = _subRow.subRows.length === 0 ? true : false;
-        }
         if (_subRow.subRows?.length && _subRow.subRows?.find((e) => !e?.canDelete)) {
           _subRow.canDelete = false;
         }
       }
     });
-    return subRows;
+    return [...subRows, ...subPackage];
   };
 
   const handleDelete = async () => {
@@ -431,7 +451,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
     if (
       deleteData?.some(
         (e) =>
-          [MATERIAL_TYPE.service, MATERIAL_TYPE.package]?.includes(e.type) ||
+          [MATERIAL_TYPE.service]?.includes(e.type) ||
           (MATERIAL_TYPE.product === e.type && e.parentId && material?.find((r) => r?._id === e?.parentId)?.parentId)
       )
     ) {
@@ -528,9 +548,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
     } else if (parentId && rows?.length === 0) {
       return selectedRecords[0]?.type === MATERIAL_TYPE.product && !material?.find((m) => m?._id === parentId)?.parentId;
     }
-    return selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !material?.find((m) => m?._id === e?.parentId)?.parentId)?.length
-      ? true
-      : false;
+    return selectedRecords?.filter((e) => !material?.find((m) => m?._id === e?.parentId)?.parentId)?.length ? true : false;
   };
 
   const checkUniqWorkOrder = () => {
@@ -724,33 +742,36 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
           }}
           onOk={() => {
             let ids = [];
-            let isPackage = false;
             if (autoCompleteData && autoCompleteData.length > 0) {
               autoCompleteData.forEach((d) => {
-                if (d?.canAutoCompleteWorkOrder && d?.workOrderId) {
-                  if (d?.type === MATERIAL_TYPE.package) isPackage = true;
-                  if (!ids?.includes(d?.workOrderId)) ids.push(d?.workOrderId);
+                if (d?.workOrderId) {
+                  if (!ids?.includes(d?.workOrderId)) {
+                    ids.push(d?.workOrderId);
+                  }
                 }
               });
             }
-
-            isPackage ? setOpenManagedPackageDialog({ open: true, ids: ids }) : handleAutoComplete(ids);
+            if (autoCompleteData?.every((e) => e.type === MATERIAL_TYPE.package)) {
+              setOpenSerializedPackageDialog({ open: true, ids: ids });
+            } else {
+              handleAutoComplete(ids);
+            }
           }}
         />
       )}
 
-      {openManagedPackageDialog.open && (
+      {openSerializedPackageDialog.open && (
         <PackageNumberDialog
           onClose={() => {
-            setOpenManagedPackageDialog({ open: false, ids: [] });
+            setOpenSerializedPackageDialog({ open: false, ids: [] });
             setCompleteConfirmBox(false);
           }}
           assemblyOrderId={assemblyOrderData._id}
-          workOrderIds={openManagedPackageDialog.ids}
+          workOrderIds={openSerializedPackageDialog.ids}
           onSuccess={() => {
             setCompleteConfirmBox(false);
-            handleAutoComplete(openManagedPackageDialog.ids);
-            setOpenManagedPackageDialog({ open: false, ids: [] });
+            handleAutoComplete(openSerializedPackageDialog.ids);
+            setOpenSerializedPackageDialog({ open: false, ids: [] });
           }}
         />
       )}
@@ -829,7 +850,6 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
           }}
         />
       )}
-
       {consumablesDialog.open && (
         <AssignProductDialog
           handleCloseDialog={() => setConsumablesDialog({ open: false, ids: [], data: null })}
@@ -841,7 +861,6 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
           isSubmitting={isSubmitting}
         />
       )}
-
       {arrangeView && (
         <ArrangeView
           data={
@@ -857,7 +876,6 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
           loading={false}
         />
       )}
-
       {attachmentsDialog.open && (
         <AttachmentDialog
           workOrderId={attachmentsDialog.workOrderId}
@@ -881,6 +899,14 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
               uniqueServiceId: null,
               serviceName: null
             });
+          }}
+        />
+      )}
+      {showDrawingDialog.open && (
+        <DiagramDialog
+          referenceId={showDrawingDialog.workOrder}
+          handleClose={() => {
+            setShowDrawingDialog({ open: false, workOrder: null });
           }}
         />
       )}
@@ -1005,7 +1031,7 @@ const ActionButtonMenuItems = ({
       </MenuItem>
       <MenuItem
         onClick={() => {
-          setAutoCompleteData(selectedRecords);
+          setAutoCompleteData(selectedRecords?.filter((e) => e?.canAutoCompleteWorkOrder));
           setCompleteConfirmBox(true);
         }}
         disabled={selectedRecords.some((e) => e?.canAutoCompleteWorkOrder) ? false : true}

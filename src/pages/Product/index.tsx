@@ -27,8 +27,6 @@ import { gridLoadingTimeout, prepareDataForGrid, product, sidebarResource } from
 import axios, { CancelTokenSource } from 'axios';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createResourceFlow } from 'src/components/CustomIntro/walkmeSteps';
-import ScheduledMaintenance from 'src/pages/Product/ScheduledMaintenance';
-import HandymanIcon from '@mui/icons-material/Handyman';
 
 const ignoreField = ['qty', 'priceTemplate'];
 
@@ -59,7 +57,6 @@ const Product = () => {
   const [productTypeList, setProductTypeList] = useState([]);
   const [isProductType, setIsProductType] = useState(false);
   const [productColumns, setProductColumns] = useState(null);
-  const [openScheduledMaintenance, setOpenScheduledMaintenance] = useState(false);
   const {
     state: { user, permissions, selectedEntity, resources }
   }: any = useData();
@@ -420,13 +417,6 @@ const Product = () => {
               }
             ]}
           />
-          {permissions?.product.isUpdate && user?.user?.brandPolicy?.serializedProductScheduledMaintenance && (
-            <HtmlTooltip title={'Schedule Maintenance'}>
-              <IconButton size="small" aria-label="Schedule Maintenance" onClick={() => setOpenScheduledMaintenance(true)}>
-                <HandymanIcon fontSize="small" color={'primary'} />
-              </IconButton>
-            </HtmlTooltip>
-          )}
         </div>
       </div>
       <CustomContainer>
@@ -512,14 +502,6 @@ const Product = () => {
             setShowDeleteConfirmBox(false);
           }}
           onOk={handleDelete}
-        />
-      )}
-
-      {openScheduledMaintenance && (
-        <ScheduledMaintenance
-          onClose={() => {
-            setOpenScheduledMaintenance(false);
-          }}
         />
       )}
     </section>

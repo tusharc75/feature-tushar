@@ -38,7 +38,7 @@ import {
   generateDeleteStep
 } from '../walkmeSteps';
 
-const Product = ({ purchaseOrderData, setNextStep, renderedFrom,stepFullScreen, allowedToEdit: hasPermission, checkReceivedProduct }) => {
+const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit: hasPermission, checkReceivedProduct }) => {
   const toastConfig = useContext(CustomToastContext);
   const { setWalkmeData } = useSetWalkmeData();
   const walkmeInstance = useGetWalkmeInstance();
@@ -133,7 +133,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom,stepFullScreen, 
     let columns: any = [];
     const productResult = await axiosInstance().get('/field?resource=Product&view=true');
     const productFields = productResult?.data?.data?.filter((e) =>
-      ['productCategory', 'productNumber', 'serializedProduct', 'chartOfAccount'].includes(e?.fieldData?.fieldName)
+      ['productCategory', 'productNumber', 'serializedProduct', 'chartOfAccount', 'revenueCode', 'costCode'].includes(e?.fieldData?.fieldName)
     );
     columns.push({
       accessor: 'index',
@@ -363,6 +363,8 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom,stepFullScreen, 
       res.serializedProduct = item.productDetail?.serializedProduct;
       res.productCategory = item.productDetail?.productCategory;
       res.chartOfAccount = item.productDetail?.chartOfAccount;
+      res.revenueCode = item.productDetail?.revenueCode;
+      res.costCode = item.productDetail?.costCode;
       res.parentId = null;
       res.qty = item?.qty;
       res.productDetail = item?.productDetail;
@@ -411,7 +413,6 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom,stepFullScreen, 
       qty: d.qty ? parseInt(d.qty) : 1,
       expectedDelivery: purchaseOrderData?.deliveryDate,
       unit: d?.unitMain?.length ? d?.unitMain[0] : '',
-      costCode: d?.costCode ? d?.costCode : '',
       ...tax
     }));
 
@@ -661,12 +662,12 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom,stepFullScreen, 
         <MenuItem
           disabled={
             selectedRecords?.filter((e) => !e.hideSelection).length > 0 &&
-            uniq(
-              map(
-                selectedRecords?.filter((e) => !e.hideSelection),
-                'type'
-              )
-            )?.length === 1
+              uniq(
+                map(
+                  selectedRecords?.filter((e) => !e.hideSelection),
+                  'type'
+                )
+              )?.length === 1
               ? false
               : true
           }
@@ -768,21 +769,21 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom,stepFullScreen, 
           extraDeepFilter={
             purchaseOrderData?.expenseItem === true || purchaseOrderData?.expenseItem === false
               ? [
-                  {
-                    field: 'expenseItem',
-                    term: purchaseOrderData?.expenseItem ? 'Yes' : 'No'
-                  }
-                ]
+                {
+                  field: 'expenseItem',
+                  term: purchaseOrderData?.expenseItem ? 'Yes' : 'No'
+                }
+              ]
               : []
           }
           extraFilterById={
             purchaseOrderData?.chartOfAccount && !isEmpty(purchaseOrderData?.chartOfAccount)
               ? [
-                  {
-                    field: 'chartOfAccount',
-                    term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
-                  }
-                ]
+                {
+                  field: 'chartOfAccount',
+                  term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
+                }
+              ]
               : []
           }
           isSubmitting={isAddingProducts}
@@ -843,11 +844,11 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom,stepFullScreen, 
           extraFilterById={
             purchaseOrderData?.chartOfAccount && !isEmpty(purchaseOrderData?.chartOfAccount)
               ? [
-                  {
-                    field: 'chartOfAccount',
-                    term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
-                  }
-                ]
+                {
+                  field: 'chartOfAccount',
+                  term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
+                }
+              ]
               : []
           }
         />

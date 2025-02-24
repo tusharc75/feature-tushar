@@ -1,28 +1,26 @@
-import { camelCase } from "lodash"
-import CustomBreadCrumbs from "src/components/CustomBreadCrumbs";
-import { disassemblyOrder, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from "src/constants/helpers"
-import routes from "src/components/Helpers/Routes";
-import { useData } from "src/StateProvider/Provider";
-import ImportExportLinks from "src/components/Helpers/ImportExportLinks";
-import { useContext, useEffect, useState } from "react";
-import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from "src/components/CustomReactTable";
-import axiosInstance from "src/axios/axiosInstance";
-import HtmlTooltip from "src/components/CustomTooltipTitle";
-import { cloneDisable, deleteDisable } from "src/constants/messageHelpers";
-import { Box, IconButton, MenuItem } from "@mui/material";
+import { camelCase } from 'lodash';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import { checkIsAllowedToDelete, disassemblyOrder, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import routes from 'src/components/Helpers/Routes';
+import { useData } from 'src/StateProvider/Provider';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import { useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import axiosInstance from 'src/axios/axiosInstance';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
-import axios, { CancelTokenSource } from "axios";
-import CustomContainer from "src/components/CustomContainer";
-import { ListingPageHeader } from "src/components/PageHeaders";
-import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
+import axios, { CancelTokenSource } from 'axios';
+import CustomContainer from 'src/components/CustomContainer';
+import { ListingPageHeader } from 'src/components/PageHeaders';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { ManageDiassemblyOrder } from "src/pages/DisassemblyOrder/ManageDiassemblyOrder";
-import { useHistory } from 'react-router-dom';
+import { ManageDiassemblyOrder } from 'src/pages/DisassemblyOrder/ManageDiassemblyOrder';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 const DisassemblyOrder = () => {
-
   const renderedFrom = camelCase(sidebarResource?.disassemblyOrder);
   const {
     state: { user, permissions, selectedEntity, resources }
@@ -37,7 +35,17 @@ const DisassemblyOrder = () => {
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
   const { generateColumns } = useColumns();
-  const history = useHistory();
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.disassemblyOrder));
+  const types = [
+    {
+      key: `My ${resources?.disassemblyOrder?.titlePlural}`,
+      value: 1
+    },
+    {
+      key: `All ${resources?.disassemblyOrder?.titlePlural}`,
+      value: 2
+    }
+  ];
 
   useEffect(() => {
     fetchGridColumns();
@@ -47,7 +55,7 @@ const DisassemblyOrder = () => {
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
-  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, selectedType, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -55,7 +63,7 @@ const DisassemblyOrder = () => {
     data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, routes?.disassemblyOrderDetail?.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
-  }
+  };
 
   const ActionsRenderer = {
     accessor: 'action',
@@ -82,7 +90,9 @@ const DisassemblyOrder = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
+        <HtmlTooltip
+          title={row?.original?.canDelete ? 'Delete' : row?.original?.status === 'New' ? deleteDisable : 'You can not delete because its in progress'}
+        >
           <span>
             <IconButton
               size="small"
@@ -102,9 +112,13 @@ const DisassemblyOrder = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
-    if (isExport) {
-      deepFilter = `?`;
+    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
+
+    if (selectedType === 1) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
+    if (selectedEntity) {
+      deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
@@ -129,22 +143,25 @@ const DisassemblyOrder = () => {
       deepFilter = `${deepFilter}&getById=${JSON.stringify(selectedRecords.map((m) => m._id))}`;
     }
     return deepFilter;
-
-  }
+  };
 
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     try {
-      let data: any = [], count;
+      let data: any = [],
+        count;
       const response: any = await axiosInstance().get(`${disassemblyOrder.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
       data = response?.data?.data;
       count = response?.data?.count;
       let rows = data.map((u) => {
         let finalObject: any = prepareDataForGrid(u, user);
         finalObject['isChecked'] = false;
-        finalObject['canDelete'] = permissions?.disassemblyOrder?.isDelete;
-        return finalObject
+        finalObject['canDelete'] =
+          permissions?.disassemblyOrder?.isDelete &&
+          checkIsAllowedToDelete(user, sidebarResource.disassemblyOrder, finalObject?.ownerId) &&
+          u?.canDelete;
+        return finalObject;
       });
       dispatch({ type: 'initialize', data: rows, count });
       setTimeout(() => {
@@ -154,11 +171,11 @@ const DisassemblyOrder = () => {
       dispatch({ type: 'loading', loading: false });
       toastConfig.setToastConfig(error);
     }
-  }
+  };
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
-  }
+  };
 
   const handleDeleteDisassemblyOrder = async () => {
     let recordsToDelete = deleteRecord?._id ? [deleteRecord._id] : selectedRecords.map((u) => u._id);
@@ -167,10 +184,10 @@ const DisassemblyOrder = () => {
       const response = await axiosInstance().put(`${disassemblyOrder.api}/remove`, { ids: recordsToDelete });
       toastConfig.setToastConfig({
         open: true,
-        type: "success",
-        message: response.data.message,
+        type: 'success',
+        message: response.data.message
       });
-      dispatch({ type: "selection", selectedRecords: [] });
+      dispatch({ type: 'selection', selectedRecords: [] });
       setShowDeleteConfirmBox(false);
       setDeleteLoading(false);
       fetchData();
@@ -180,7 +197,6 @@ const DisassemblyOrder = () => {
       setDeleteLoading(false);
     }
   };
-
   const ActionMenuItems = () => {
     return (
       <MenuItem
@@ -196,8 +212,8 @@ const DisassemblyOrder = () => {
       >
         {`Delete (${selectedRecords?.length})`}
       </MenuItem>
-    )
-  }
+    );
+  };
 
   return (
     <div className="main-container-v1">
@@ -207,24 +223,27 @@ const DisassemblyOrder = () => {
           permissions={permissions.disassemblyOrder}
           module={resources?.disassemblyOrder?.titlePlural}
           api={disassemblyOrder.api}
-          afterImportCompleted={
-            () => fetchData()
-          }
+          afterImportCompleted={() => fetchData()}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
           ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
-            fetchData()
+            fetchData();
           }}
           additionalParams={getQueryString(true)}
+          asyncExport={true}
+          resource={sidebarResource.disassemblyOrder}
         />
       </div>
       <CustomContainer>
         <ListingPageHeader
           searchValue={search}
           onSearch={handleSearch}
+          toggleButtonList={types}
           isActionButtonVisible={true}
+          selectedType={selectedType}
+          setSelectedType={setSelectedType}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
           addButtonOnclick={() => {
@@ -277,7 +296,7 @@ const DisassemblyOrder = () => {
         />
       )}
     </div>
-  )
-}
+  );
+};
 
 export default DisassemblyOrder;

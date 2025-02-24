@@ -113,10 +113,9 @@ const ManageDeliveryTicket = ({
         assets: assets?.map((e) => e._id),
         referenceId: initialData?.values?.transferAsset
       });
-      var lastDate: any = new Date();
+      var lastDate: any = dayjs.tz().startOf("day").toDate();
       if (data?.date) {
-        lastDate = new Date(data?.date);
-        lastDate.setHours(0, 0, 0);
+        lastDate = dayjs(data?.date).tz().startOf("day").toDate();
       }
       setCreateDateMin(lastDate);
     } else {
@@ -130,10 +129,9 @@ const ManageDeliveryTicket = ({
       const {
         data: { data }
       } = await axiosInstance().put(`/rental-management/assets-last-date`, { assets: assets?.map((e) => e._id), last: last });
-      var lastDate: any = new Date();
+      var lastDate: any = dayjs.tz().startOf("day").toDate();
       if (data?.date) {
-        lastDate = new Date(data?.date);
-        lastDate.setHours(0, 0, 0);
+        lastDate = dayjs(data?.date).tz().startOf("day").toDate();
       }
       setCreateDateMin(lastDate);
     }

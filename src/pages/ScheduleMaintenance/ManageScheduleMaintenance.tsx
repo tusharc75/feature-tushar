@@ -17,7 +17,7 @@ const Schema = object().shape({
 
 const DURATION = ['Monthly', 'Quarterly', 'Yearly'];
 
-const CustomDataDialog = ({ data = null, handleClose, handleSave, loading }) => {
+const ManageScheduleMaintenance = ({ data = null, handleClose, handleSave, loading }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialData, setInitialData] = useState({ effectiveDate: '', duration: '' });
 
@@ -65,7 +65,6 @@ const CustomDataDialog = ({ data = null, handleClose, handleSave, loading }) => 
                     label={'Effective Date'}
                     value={values['effectiveDate']}
                     required
-                    disablePast
                     margin="dense"
                     onChange={(value: any) => {
                       setFieldValue('effectiveDate', value);
@@ -115,4 +114,4 @@ const CustomDataDialog = ({ data = null, handleClose, handleSave, loading }) => 
   );
 };
 
-export default CustomDataDialog;
+export default ManageScheduleMaintenance;
