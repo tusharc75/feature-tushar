@@ -1,5 +1,5 @@
 import { ExpandMore } from '@mui/icons-material';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { cn } from 'src/constants/helpers';
 import { Accordion, AccordionSummary, AccordionDetails } from 'src/pages/UserManual/components/Accordion';
 import { ComponentCommonProps } from 'src/pages/UserManual/type';
@@ -7,7 +7,7 @@ import { getSectionFromUrl } from 'src/pages/UserManual/utils';
 
 const ManualSidebar = ({ state }: ComponentCommonProps) => {
   const { manualData, navigate, currentRoute, isMobile, isSidebarOpen } = state;
-  const sections = getSectionFromUrl(currentRoute);
+  const sections = useMemo(() => getSectionFromUrl(currentRoute), [currentRoute]);
 
   return (
     <aside
@@ -26,33 +26,44 @@ const ManualSidebar = ({ state }: ComponentCommonProps) => {
           <nav className=" flex-grow overflow-auto p-2">
             <ul className="flex flex-col gap-1">
               {manualData.map((section) => (
-                <Accordion
-                  component={'li'}
-                  className="list-none dark:bg-[#1b1b1d]"
-                  key={section.sectionName}
-                  defaultExpanded={sections[0] === section.sectionName}
-                >
-                  <AccordionSummary className="hover:bg-gray-100 dark:hover:bg-[#272729]" expandIcon={<ExpandMore />}>
-                    <span className="px-1 py-2 text-[16px] font-normal leading-[1.25] text-gray-500 dark:text-gray-100">{section.sectionName}</span>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <ul className="ml-4 grid list-none gap-1 p-1">
-                      {section.resource.map((resource) => (
-                        <li
-                          key={resource._id}
-                          className={cn(
-                            'cursor-pointer rounded-md px-3 py-2 hover:bg-gray-100 dark:hover:bg-[#272729]',
-                            sections[0] === section.sectionName && sections[1] === resource.resourceLabel && 'bg-gray-100 dark:bg-[#272729]'
-                          )}
-                          onClick={() => {const encodedLabel = encodeURIComponent(resource.resourceLabel);
-                            navigate(`/${section.sectionName}/${encodedLabel}`);}}
-                        >
-                          <span className="text-[16px] font-normal leading-[1.25] text-gray-500 dark:text-gray-100">{resource.resourceLabel}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </AccordionDetails>
-                </Accordion>
+                <li key={section.sectionName}>
+                  <Accordion className="list-none dark:bg-[#1b1b1d]" key={section.sectionName} defaultExpanded={sections[0] === section.sectionName}>
+                    <AccordionSummary
+                      className={cn(
+                        'hover:bg-gray-100 dark:hover:bg-[#272729]',
+                        section.sectionName === sections[0] ? '!bg-gray-100 dark:!bg-[#272729]' : ''
+                      )}
+                      expandIcon={<ExpandMore />}
+                      dataActive={section.sectionName === sections[0]}
+                    >
+                      <span className="px-1 py-2 text-[16px] font-normal leading-[1.25] text-gray-500 dark:text-gray-100">{section.sectionName}</span>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <ul className="ml-4 grid list-none gap-1 p-1">
+                        {section.resource.map((resource) => {
+                          const encodedLabel = encodeURIComponent(resource.resourceLabel);
+                          const link = `/${section.sectionName}/${encodedLabel}`;
+                          return (
+                            <li
+                              key={resource._id}
+                              className={cn(
+                                'cursor-pointer rounded-md px-3 py-2 hover:bg-gray-100 dark:hover:bg-[#272729]',
+                                sections[0] === section.sectionName && sections[1] === encodedLabel && 'bg-gray-100 dark:bg-[#272729]'
+                              )}
+                              onClick={() => {
+                                navigate(link);
+                              }}
+                            >
+                              <span className="text-[14px] font-normal leading-[1.25] text-gray-500 dark:text-gray-100">
+                                {resource.resourceLabel}
+                              </span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </AccordionDetails>
+                  </Accordion>
+                </li>
               ))}
             </ul>
           </nav>

@@ -55,7 +55,7 @@ const useManual = () => {
     axiosInstance()
       .get('/user/user-manual')
       .then(({ data: { data } }) => {
-        const sectionNames = uniq(data?.resources?.map((e) => e?.sectionName));
+        const sectionNames = uniq(data?.resources?.map((e) => e?.sectionName)).filter((d) => !!d);
         const result = [];
         sectionNames?.forEach((ele) => {
           const obj: any = {};
@@ -73,20 +73,11 @@ const useManual = () => {
       });
   }, [toastConfig]);
 
-  const navigate = useCallback((url, scrollKey = null) => {
+  const navigate = useCallback((url) => {
     if (url) {
       const parsedUrl = createURl(url);
       setState({ type: 'setCurrentRoute', payload: parsedUrl });
       window.history.pushState(null, '', parsedUrl);
-
-      if (scrollKey) {
-        setTimeout(() => {
-          const element = document.querySelector(scrollKey);
-          if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
-        }, 0);
-      }
     }
   }, []);
 
@@ -106,7 +97,7 @@ const useManual = () => {
     } else {
       document.title = pageTitle;
     }
-  }, [manualData]);
+  }, [manualData, navigate]);
 
   useEffect(() => {
     fetchData();

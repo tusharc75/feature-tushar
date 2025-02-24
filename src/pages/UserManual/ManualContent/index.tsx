@@ -1,11 +1,72 @@
-import { Accordion, AccordionDetails, AccordionSummary, CircularProgress } from '@mui/material';
-import { ExpandMore } from '@mui/icons-material';
+import { Close, ExpandMore } from '@mui/icons-material';
+import { Accordion, AccordionDetails, AccordionSummary, CircularProgress, IconButton } from '@mui/material';
 import { kebabCase } from 'lodash';
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import ImageZoomPan from 'src/components/ImageZoomPan';
+import { cn } from 'src/constants/helpers';
 import { ComponentCommonProps, Section } from 'src/pages/UserManual/type';
 
 const ManualContent = ({ state }: ComponentCommonProps) => {
   const { pageData, loading, isMobile } = state;
+  const imagesLoaded = useRef(0);
+  const totalImages = useRef(0);
+  const mainContainerRef = useRef<HTMLElement>(null);
+  const [isImageLoading, setIsImageloading] = useState(false);
+
+  const scrollToHash = useCallback(() => {
+    if (window.location.hash) {
+      const targetElement = document.querySelector(window.location.hash);
+      if (targetElement) {
+        targetElement.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, []);
+
+  const handleImageLoad = useCallback(() => {
+    imagesLoaded.current++;
+    if (imagesLoaded.current === totalImages.current) {
+      scrollToHash();
+      setIsImageloading(false);
+    }
+  }, [scrollToHash]);
+
+  useEffect(() => {
+    let allImagesTillSection: HTMLImageElement[];
+    if (!loading && window.location.hash !== '') {
+      setIsImageloading(true);
+      setTimeout(() => {
+        const allSections = document.querySelectorAll('[id*="-section-id"]');
+        const sectionIndex = [...allSections].findIndex((d) => d.id === window.location.hash.split('#')[1]);
+        const sections = sectionIndex > -1 ? [...allSections].splice(0, sectionIndex) : [...allSections];
+        allImagesTillSection = sections.map((s) => [...s.querySelectorAll('img')]).flat();
+
+        totalImages.current = allImagesTillSection.length;
+
+        // add listeners till images till the sections
+        // if images are loaded then scroll to the section
+        allImagesTillSection?.forEach((img) => {
+          if (img.complete) {
+            imagesLoaded.current++;
+          } else {
+            img.addEventListener('load', handleImageLoad);
+            img.addEventListener('error', handleImageLoad);
+          }
+        });
+
+        if (imagesLoaded.current === totalImages.current) {
+          scrollToHash();
+          setIsImageloading(false);
+        }
+      }, 0);
+    }
+    return () => {
+      allImagesTillSection?.forEach((img) => {
+        img.removeEventListener('load', handleImageLoad);
+        img.removeEventListener('error', handleImageLoad);
+      });
+    };
+  }, [handleImageLoad, loading, scrollToHash]);
+
   const [zoomedImage, setZoomedImage] = useState(null);
   const handleClick = (e) => {
     if (e.target.tagName === 'IMG') {
@@ -13,14 +74,28 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
     }
   };
 
+  useEffect(() => {
+    if (zoomedImage) {
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [zoomedImage]);
+
+  useEffect(() => {
+    mainContainerRef.current?.scrollIntoView({ block: 'start', behavior: 'instant' });
+  }, [pageData]);
+
   return (
-    <main className="relative flex min-h-screen flex-grow bg-[white] dark:bg-[#1b1b1d]">
+    <main ref={mainContainerRef} className="relative flex min-h-screen flex-grow scroll-m-24 bg-[white] dark:bg-[#1b1b1d]">
       {loading ? (
         <div className="absolute inset-0 left-1/2 top-1/2 z-10 h-fit w-fit [transform:translate(-50%,-50%)]">
           <CircularProgress className="!text-gray-400" />
         </div>
       ) : (
         <div className="mx-auto flex w-full flex-grow flex-wrap p-2">
+          {isImageLoading && <CircularProgress className="fixed" size={16} />}
           <div className="basis-full px-4 max-lg:order-2 lg:basis-3/4">
             {pageData?.map((e, i) => (
               <>
@@ -65,8 +140,18 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
             )}
           </div>
           {zoomedImage && (
-            <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/80 backdrop-blur-sm" onClick={() => setZoomedImage(null)}>
-              <img src={zoomedImage?.src} alt={zoomedImage?.alt} className="rounded-lg object-contain shadow-lg" />
+            <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm">
+              <div className="flex min-h-[50px] w-full items-center justify-between gap-2 border-b bg-[--dark-primary,var(--primary)] px-4 py-3 text-white">
+                <h2>Preview</h2>
+                <IconButton onClick={() => setZoomedImage(null)} size="small" className="text-white">
+                  <Close color="inherit" />
+                </IconButton>
+              </div>
+              <div className="flex w-full flex-grow flex-col items-center justify-center bg-[--dark-secondary,white] p-4">
+                <div className="mx-auto flex w-full flex-grow items-center justify-center">
+                  <ImageZoomPan src={zoomedImage?.src} alt={zoomedImage?.alt} />
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -78,30 +163,38 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
 export default ManualContent;
 
 const OnThisPageImpl = ({ pageData }: { pageData: Section[] }) => {
+  const hash = window.location.hash.split('#')[1];
   return (
     <ul className="sticky top-[--manual-head-height] list-none pb-2 pl-2 pr-0 pt-2 lg:[border-left:1px_solid_var(--common-border-color)] ">
-      {pageData?.map((e) => (
-        <li className="m-2 list-none text-[16px] font-normal leading-[1.25] text-gray-500 dark:text-gray-100">
-          <a key={e._id} href={`#${kebabCase(e.sectionName)}-section-id`} className="text-[12px] hover:text-[var(--link)]">
-            {e.sectionName}
-          </a>
-          {e?.subSections?.length ? <SubOnThisPageImpl pageData={e?.subSections} /> : null}
-        </li>
-      ))}
+      {pageData?.map((e) => {
+        const link = `${kebabCase(e.sectionName)}-section-id`;
+        return (
+          <li className="m-2 list-none text-[16px] font-normal leading-[1.25] text-gray-500 dark:text-gray-100">
+            <a key={e._id} href={`#${link}`} className={cn('text-[12px] hover:text-[var(--link)]', hash === link && 'font-bold')}>
+              {e.sectionName}
+            </a>
+            {e?.subSections?.length ? <SubOnThisPageImpl pageData={e?.subSections} /> : null}
+          </li>
+        );
+      })}
     </ul>
   );
 };
 
 const SubOnThisPageImpl = ({ pageData }: { pageData: Section[] }) => {
+  const hash = window.location.hash.split('#')[1];
   return (
     <ul className="sticky top-[--manual-head-height] list-none pl-2 pr-0">
-      {pageData?.map((e) => (
-        <li className="m-1.5 list-none text-[16px] font-normal leading-[1.25] text-gray-500 dark:text-gray-100">
-          <a key={e._id} href={`#${kebabCase(e.sectionName)}-section-id`} className="text-[12px] hover:text-[var(--link)]">
-            {e.sectionName}
-          </a>
-        </li>
-      ))}
+      {pageData?.map((e) => {
+        const link = `${kebabCase(e.sectionName)}-section-id`;
+        return (
+          <li className="m-1.5 list-none text-[16px] font-normal leading-[1.25] text-gray-500 dark:text-gray-100">
+            <a key={e._id} href={`#${link}`} className={cn('text-[12px] hover:text-[var(--link)]', hash === link && 'font-bold')}>
+              {e.sectionName}
+            </a>
+          </li>
+        );
+      })}
     </ul>
   );
 };
