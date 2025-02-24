@@ -12,7 +12,16 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { CHILD_RESOURCE, MATERIAL_SUB_TYPE, MATERIAL_TYPE, sidebarResource, WORK_ORDER_STATUS, workOrder, WORKORDER_SERVICE_STATUS } from 'src/constants/helpers';
+import {
+  CHILD_RESOURCE,
+  MATERIAL_SUB_TYPE,
+  MATERIAL_TYPE,
+  sidebarResource,
+  WORK_ORDER_STATUS,
+  WORK_ORDER_TYPE,
+  workOrder,
+  WORKORDER_SERVICE_STATUS
+} from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import SyncIcon from '@mui/icons-material/Sync';
@@ -228,15 +237,16 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
       accessor: 'assignedUsers',
       Header: 'Assigned Technician',
       width: 200,
-      Cell: ({ row }) => (<DropdownCell
-        permissions={permissions}
-        permissionForLinks={{}}
-        field={{
-          fieldName: 'assignedUsers',
-          lookupResource: sidebarResource.user
-        }}
-        original={row?.original}
-      />
+      Cell: ({ row }) => (
+        <DropdownCell
+          permissions={permissions}
+          permissionForLinks={{}}
+          field={{
+            fieldName: 'assignedUsers',
+            lookupResource: sidebarResource.user
+          }}
+          original={row?.original}
+        />
       )
     });
     if (permissions?.workStations) {
@@ -371,7 +381,6 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
   };
 
   const generateNestedData = (material, parent) => {
-
     var subPackage: any = material.filter((e) => e?.parentId === parent?._id && e?.type === MATERIAL_TYPE.package);
     subPackage.forEach((_subPackage, index) => {
       _subPackage.index = parent.index + '.' + `${index + 1}`;
@@ -412,13 +421,19 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
     let serviceIndex = 0;
     subRows.forEach((_subRow) => {
       _subRow.index = parent.index + '.' + `${_subRow.type === MATERIAL_TYPE.service ? alphabet[serviceIndex] : productIndex + 1}`;
-      _subRow.detail = _subRow.detail ? _subRow.detail
-        : _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceName
-          : _subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName
+      _subRow.detail = _subRow.detail
+        ? _subRow.detail
+        : _subRow.type === MATERIAL_TYPE.service
+          ? _subRow?.serviceDetail?.serviceName
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow.productDetail?.productName
             : '';
-      _subRow.description = _subRow.description ? _subRow.description
-        : _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceDescription
-          : _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription
+      _subRow.description = _subRow.description
+        ? _subRow.description
+        : _subRow.type === MATERIAL_TYPE.service
+          ? _subRow?.serviceDetail?.serviceDescription
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow?.productDetail?.productDescription
             : '';
       _subRow.qty = _subRow.qty;
       _subRow.workOrder = parent?.workOrder;
@@ -751,7 +766,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
                 }
               });
             }
-            if (autoCompleteData?.every((e) => e.type === MATERIAL_TYPE.package)) {
+            if (autoCompleteData?.every((e) => e.type === MATERIAL_TYPE.package && e?.workOrderType === WORK_ORDER_TYPE.assemblyOrder)) {
               setOpenSerializedPackageDialog({ open: true, ids: ids });
             } else {
               handleAutoComplete(ids);

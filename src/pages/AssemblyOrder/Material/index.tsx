@@ -19,7 +19,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { CHILD_RESOURCE, MATERIAL_TYPE } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, WORK_ORDER_TYPE } from '../../../constants/helpers';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import MaterialQtyDialog from 'src/pages/AssemblyOrder/Material/MaterialQtyDialog';
@@ -98,11 +98,11 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
             )}
             {allowedToEdit && row.original.type === MATERIAL_TYPE.package && (
               <>
-                {row.original?.subRows?.length > 0 &&
+                {row.original?.subRows?.length > 0 && (
                   <Box>
                     <span>({row.original?.subRows?.length})</span>
                   </Box>
-                }
+                )}
                 <Box>
                   <HtmlTooltip title={`Add Existing ${resources?.packages?.titlePlural}`}>
                     <IconButton
@@ -256,6 +256,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
       if (allFields?.some((f) => f?.fieldName === 'warehouse')) {
         element.warehouse = assemblyOrderData?.warehouse?.optionValue;
       }
+      element.workOrderType = WORK_ORDER_TYPE.assemblyOrder;
       material.push(element);
     });
 
@@ -312,8 +313,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
     const data = [];
     rows?.forEach((element) => {
       data.push({
-        _id: element._id,
-        qty: element.qty,
+        ...element,
         ...(allFields?.some((f) => f?.fieldName === 'warehouse')
           ? { warehouse: element?.warehouse ? element?.warehouse : assemblyOrderData?.warehouse?.optionValue }
           : {})
