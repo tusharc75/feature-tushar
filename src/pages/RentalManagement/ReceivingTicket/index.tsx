@@ -375,11 +375,14 @@ const ReceivingTicket = ({
         ) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.inTransitDeliveredLoadingTicket });
         } else if (e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered || e?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) {
-          const receivingStatus = user?.user?.brandPolicy?.rentalReceivingStatus ? user?.user?.brandPolicy?.rentalReceivingStatus : ASSET_STATUS.underReview;
+          const validCancelStatus = [ASSET_STATUS.underReview, ASSET_STATUS.available]
+          if (user?.user?.brandPolicy?.rentalReceivingStatus && !validCancelStatus?.includes(user?.user?.brandPolicy?.rentalReceivingStatus)) {
+            validCancelStatus.push(user?.user?.brandPolicy?.rentalReceivingStatus)
+          }
           if (e?.isReplaced && e?.type === 'Asset') {
             errorMessages.push({ index: e.index, message: rentalManagementMessage.ticketCanNotCancelledForReplaceedAssets });
-          } else if (![receivingStatus]?.includes(e?.status) && e?.type === 'Asset') {
-            errorMessages.push({ index: e.index, message: rentalManagementMessage.statusURForCancelReceiving });
+          } else if (!validCancelStatus?.includes(e?.status) && e?.type === 'Asset') {
+            errorMessages.push({ index: e.index, message: `${rentalManagementMessage.statusForCancelReceiving} ${validCancelStatus?.toString()}` });
           } else if (![RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return, 'Returned']?.includes(e?.rentalAssetStatus)) {
             errorMessages.push({ index: e.index, message: rentalManagementMessage.rentalStatusCompleteCancelReceiving });
           }
