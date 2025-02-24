@@ -1036,8 +1036,8 @@ const ActionButtonMenuItems = ({
         }}
         disabled={
           selectedRecords?.length &&
-            selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || checkParentProduct([d], d?.parentId)) &&
-            selectedRecords?.every((d) => d.workOrderId === selectedRecords[0]?.workOrderId)
+          selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || checkParentProduct([d], d?.parentId)) &&
+          selectedRecords?.every((d) => d.workOrderId === selectedRecords[0]?.workOrderId)
             ? false
             : true
         }
@@ -1049,15 +1049,20 @@ const ActionButtonMenuItems = ({
           setAutoCompleteData(selectedRecords?.filter((e) => e?.canAutoCompleteWorkOrder));
           setCompleteConfirmBox(true);
         }}
-        disabled={selectedRecords.some((e) => e?.canAutoCompleteWorkOrder) ? false : true}
+        disabled={
+          selectedRecords?.every((s) => s?.workOrderType === selectedRecords[0]?.workOrderType) &&
+          selectedRecords.some((e) => e?.canAutoCompleteWorkOrder)
+            ? false
+            : true
+        }
       >
         Auto Complete Work Order(s)
       </MenuItem>
       <MenuItem
         disabled={
           checkUniqWorkOrder() &&
-            (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
-              selectedRecords?.filter((e) => checkParentProduct([e], e?.parentId))?.length === 1)
+          (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
+            selectedRecords?.filter((e) => checkParentProduct([e], e?.parentId))?.length === 1)
             ? false
             : true
         }
