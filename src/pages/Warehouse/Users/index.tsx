@@ -198,7 +198,7 @@ const Users = ({ warehouse }) => {
               mobileTooltip="Assign Users"
               iconForMobile={false}
             >
-              Assign Users
+              Add Users
             </ThemeButton>
           </Grid>
           <Grid size={{ xs: 9, md: 9, sm: 9 }}>
