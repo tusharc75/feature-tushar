@@ -16,7 +16,7 @@ import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { packages, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { packages, prepareDataForGrid, sidebarResource, WORK_ORDER_TYPE, WORK_ORDER_TYPE_LABEL } from 'src/constants/helpers';
 
 const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = false }) => {
   const renderedFrom = `${camelCase(sidebarResource?.packages)}_service'}`;
@@ -36,6 +36,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
   const [isAssigning, setIsAssigning] = useState(false);
   const { dataRows, selectedRecords } = state;
   const [tabValue, setTabValue] = useState(0);
+  const [selectedResource, setSelectedResource] = useState('');
 
   useEffect(() => {
     fetchGridColumns();
@@ -43,17 +44,15 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
 
   useEffect(() => {
     fetchData();
-  }, [tabValue]);
+  }, [selectedResource]);
 
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
     let api = `${packages.api}/${packageId}/services`;
-    if (tabValue === 1) {
-      api += `?type=${sidebarResource.assemblyOrder}`;
-    } else if (tabValue === 2) {
-      api += `?type=${sidebarResource.disassemblyOrder}`;
+    if (selectedResource) {
+      api += `?type=${selectedResource}`;
     }
     axiosInstance()
       .get(api).then(({ data: { data } }) => {
@@ -105,7 +104,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
       .put(`${packages.api}/${packageId}/services`, {
         ids: [row?._id],
         qty: Number(data?.qty),
-        type: tabValue === 1 ? sidebarResource.assemblyOrder : tabValue === 2 ? sidebarResource.disassemblyOrder : ''
+        type: selectedResource
       })
       .then(() => {
         fetchData();
@@ -117,7 +116,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
     setRemovingServices(true);
     const Ids = selectedRecords.map((d) => d._id);
     axiosInstance()
-      .put(`${packages.api}/${packageId}/services/remove`, { ids: Ids, type: tabValue === 1 ? sidebarResource.assemblyOrder : tabValue === 2 ? sidebarResource.disassemblyOrder : '' })
+      .put(`${packages.api}/${packageId}/services/remove`, { ids: Ids, type: selectedResource })
       .then(() => {
         setRemovingServices(false);
         setShowServiceConfirmBox(false);
@@ -140,7 +139,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
       .put(`${packages.api}/material/${packageId}/order`, {
         packageType: 'Service',
         data: rows || [],
-        type: tabValue === 1 ? sidebarResource.assemblyOrder : tabValue === 2 ? sidebarResource.disassemblyOrder : ''
+        type: selectedResource
       })
       .then(() => {
         fetchData();
@@ -160,7 +159,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
       .post(`${packages.api}/material`, {
         ids: [packageId],
         services: rows.map((d: any) => ({ service: d.id, qty: Number(d.qty) })),
-        type: tabValue === 1 ? sidebarResource.assemblyOrder : tabValue === 2 ? sidebarResource.disassemblyOrder : ''
+        type: selectedResource
       })
       .then(({ data }) => {
         setShowServiceAssignDialog(false);
@@ -215,7 +214,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
             }}
             isExportAllOrSomeFeature={true}
             ids={[]}
-            additionalParams={`refrenceId=${packageId}${tabValue === 1 ? `&type=${sidebarResource.assemblyOrder}` : tabValue === 2 ? `&type=${sidebarResource.disassemblyOrder}` : ''}`}
+            additionalParams={`refrenceId=${packageId}${selectedResource ? `&type=${selectedResource}` : ''}`}
           />
           {dataRows?.length > 0 ? (
             <ThemeButton
@@ -230,17 +229,25 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
   };
 
   const handleMainTabChange = (event: any, newValue: number) => {
+    setSelectedResource(newValue === 1 ? WORK_ORDER_TYPE.assemblyOrder :
+      newValue === 2 ? WORK_ORDER_TYPE.preInspectionOrder :
+        newValue === 3 ? WORK_ORDER_TYPE.postInspectionOrder :
+          newValue === 4 ? WORK_ORDER_TYPE.disassemblyOrder :
+            ''
+    )
     setTabValue(newValue);
   };
 
   return (
     <Box>
-      {(permissions?.assemblyOrder?.isRead || permissions?.disassemblyOrder?.isRead) && (
+      {(permissions?.assemblyOrder?.isRead) && (
         <>
           <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
             <CustomTab value={0} label={`Individual`} />
-            {permissions?.assemblyOrder?.isRead && <CustomTab value={1} label={`Assembly`} />}
-            {permissions?.disassemblyOrder?.isRead && <CustomTab value={2} label={`Disassembly`} />}
+            <CustomTab value={1} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.assemblyOrder]} />
+            <CustomTab value={2} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.preInspectionOrder]} />
+            <CustomTab value={3} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.postInspectionOrder]} />
+            <CustomTab value={4} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.disassemblyOrder]} />
           </CustomTabs>
         </>
       )}
