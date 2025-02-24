@@ -179,7 +179,7 @@ const VirtualTableImpl = forwardRef(function (
                               style={{
                                 ...style,
                                 ...(style.position === 'sticky' ? { ...style } : { ...style, position: 'absolute', left: vc.start }),
-                                zIndex: columnDef.sticky === 'left' || columnDef.sticky === 'right' ? 12 : 'unset',
+                                zIndex: columnDef.sticky === 'left' || columnDef.sticky === 'right' ? 12 : '-1',
                                 minWidth: colSize,
                                 maxWidth: colSize,
                                 display: 'flex',
