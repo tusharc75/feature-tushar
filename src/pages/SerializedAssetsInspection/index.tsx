@@ -243,7 +243,7 @@ const SerializedAssetInspection = () => {
     if (showFilteredRecordsOnly) {
       deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
-    return `${deepFilter}&filterType=and`;
+    return `${deepFilter}`;
   };
 
   const handleStatusChange = (status) => {
