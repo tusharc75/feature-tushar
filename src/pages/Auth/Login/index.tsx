@@ -19,6 +19,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import AuthSlider from '../AuthSlider';
 import styles from '../index.module.scss';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { backendApi } from 'src/config';
 
 export type BrandData = {
   companyName: string;
@@ -26,7 +27,7 @@ export type BrandData = {
   subDomain: string;
 };
 
-const MAIN_SUB_DOMAIN = ['portal', 'am-portal', 'master.portal', 'uat.portal', 'staging.portal'];
+const MAIN_SUB_DOMAIN = ['portal', 'am-portal', 'master.portal', 'uat.portal', 'staging.portal', 'uat'];
 
 const Login = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -208,14 +209,7 @@ const Login = () => {
                       </MuiLink>
                     </Box>
                     <Box>
-                      <ThemeButton
-                        fullWidth
-                        buttonType="theme"
-                        type="submit"
-                        disabled={isSubmitting}
-                        isLoading={isSubmitting}
-                        sx={{ height: 40 }}
-                      >
+                      <ThemeButton fullWidth buttonType="theme" type="submit" disabled={isSubmitting} isLoading={isSubmitting} sx={{ height: 40 }}>
                         Sign In
                       </ThemeButton>
                       <AuthenticatedTemplate>
