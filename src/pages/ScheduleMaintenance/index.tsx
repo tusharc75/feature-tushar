@@ -1,8 +1,9 @@
-import { Delete, Edit } from '@mui/icons-material';
-import { Box, IconButton, MenuItem } from '@mui/material';
+import { Add, Delete, Edit, ExpandMore } from '@mui/icons-material';
+import { Box, IconButton, Menu, MenuItem } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
+import { isMobile } from 'react-device-detect';
 import { FiExternalLink } from 'react-icons/fi';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
@@ -10,13 +11,13 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { DetailsPageHeader, ListingPageHeader } from 'src/components/PageHeaders';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 import { displayDate, prepareDataForGrid, product, sidebarResource } from 'src/constants/helpers';
 import ManageScheduleMaintenance from 'src/pages/ScheduleMaintenance/ManageScheduleMaintenance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -268,26 +269,49 @@ const ScheduleMaintenance = () => {
       });
   };
 
-  const addButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem onClick={() => setOpenAssignProductDialog(true)}>Add Existing Products</MenuItem>
-      </>
-    );
-  };
+  const LeftSideContent = () => {
+    const [anchorEl, setAnchorEl] = useState(null);
+    const handleClick = (event) => {
+      setAnchorEl(event.currentTarget);
+    };
 
-  const rightSideContents = () => {
+    const handleClose = () => {
+      setAnchorEl(null);
+    };
     return (
       <>
-        <ImportExportMenu
-          permissions={permissions?.product}
-          module="scheduledMaintenance"
-          api={`${product.api}/scheduledMaintenance`}
-          afterImportCompleted={() => {
-            fetchData();
+        <ThemeButton
+          id={'add-menu-button'}
+          mobileTooltip="Add"
+          startIcon={isMobile ? null : <Add />}
+          onClick={handleClick}
+          aria-controls="add-menu"
+          mode="light"
+          iconForMobile={<Add />}
+          endIcon={isMobile ? null : <ExpandMore fontSize="small" />}
+        >
+          Add
+        </ThemeButton>
+        <Menu
+          anchorEl={anchorEl}
+          keepMounted
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'left'
           }}
-          isExportAllOrSomeFeature={true}
-        />
+          id="add-menu"
+          open={Boolean(anchorEl)}
+          onClose={handleClose}
+        >
+          <MenuItem
+            onClick={() => {
+              setOpenAssignProductDialog(true);
+              handleClose();
+            }}
+          >
+            {`Add Existing ${resources?.product?.titlePlural}`}
+          </MenuItem>
+        </Menu>
       </>
     );
   };
@@ -330,26 +354,14 @@ const ScheduleMaintenance = () => {
       </div>
       <CustomContainer>
         <ListingPageHeader
+          leftSideContents={<LeftSideContent />}
           searchValue={search}
           onSearch={handleSearch}
           isActionButtonVisible={true}
           actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
-          isAddButtonVisible={true}
-          addButtonOnclick={() => {
-            setOpenAssignProductDialog(true);
-          }}
-          addButtonProps={{ textAddShow: true, text: `Existing ${resources?.product?.titlePlural}` }}
+          isAddButtonVisible={false}
         />
-        {/* <DetailsPageHeader
-          isAddButtonVisible={true}
-          addButtonMenuItems={addButtonMenuItems()}
-          isActionButtonVisible={true}
-          actionButtonMenuItems={actionButtonMenuItems()}
-          actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
-          rightSideContents={rightSideContents()}
-          hasXpadding={false}
-        /> */}
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 250px)'}
