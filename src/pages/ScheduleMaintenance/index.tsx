@@ -7,6 +7,7 @@ import { isMobile } from 'react-device-detect';
 import { FiExternalLink } from 'react-icons/fi';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -18,7 +19,7 @@ import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { displayDate, prepareDataForGrid, product, sidebarResource } from 'src/constants/helpers';
+import { displayDate, MATERIAL_TYPE, prepareDataForGrid, product, sidebarResource } from 'src/constants/helpers';
 import ManageScheduleMaintenance from 'src/pages/ScheduleMaintenance/ManageScheduleMaintenance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -31,13 +32,26 @@ const ScheduleMaintenance = () => {
     state: { permissions, resources }
   }: any = useData();
 
+  const types = [
+    {
+      key: `Products`,
+      value: 1
+    },
+    {
+      key: `Serialized Assets`,
+      value: 2
+    }
+  ];
+
   const [columns, setColumns] = useState(null);
   const [openAssignProductDialog, setOpenAssignProductDialog] = useState(false);
+  const [openAssignSerializedAssetDialog, setOpenAssignSerializedAssetDialog] = useState(false);
   const [openCustomDataDialog, setOpenCustomDataDialog] = useState({ open: false, data: null });
   const [rowsToAdd, setRowsToAdd] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, data: null });
   const [isDeleting, setIsDeleting] = useState(false);
+  const [selectedType, setSelectedType] = useState(1);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, dataRows, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -46,42 +60,89 @@ const ScheduleMaintenance = () => {
 
   useEffect(() => {
     fetchGridColumns();
-  }, []);
+  }, [selectedType]);
 
   const fetchGridColumns = async () => {
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.product}&view=true`);
+    let response;
+    if(selectedType===1){
+      response = await axiosInstance().get(`/field?resource=${sidebarResource.product}&view=true`);
+    }
+    else{
+      response = await axiosInstance().get(`/field?resource=${sidebarResource.serializedAsset}&view=true`);
+    }
     const fields = response?.data?.data?.map((e) => e?.fieldData);
 
     let coloum: any = [];
 
-    fields
-      ?.filter((e) => ['productName']?.includes(e.fieldName))
-      ?.forEach((ele) => {
-        if (ele?.fieldName === 'productName') {
-          coloum.push({
-            accessor: 'productName',
-            Header: ele?.fieldLabel,
-            width: 200,
-            Cell: ({ row }) => (
-              <div className="flex items-center gap-2">
-                <p className="text-truncate">{row.original.productName}</p>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes.productDetail.path}/${row?.original?.productId}`);
-                  }}
-                >
-                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                </IconButton>
-              </div>
-            )
-          });
-        }
-      });
-    const newColumns = generateColumns(
-      renderedFrom,
-      fields?.filter((e) => ['productDescription', 'productNumber']?.includes(e?.fieldName))
-    );
+    let newColumns;
+    if(selectedType===1){
+      fields
+        ?.filter((e) => ['productName']?.includes(e.fieldName))
+        ?.forEach((ele) => {
+          if (ele?.fieldName === 'productName') {
+            coloum.push({
+              accessor: 'productName',
+              Header: ele?.fieldLabel,
+              width: 200,
+              Cell: ({ row }) => (
+                <div className="flex items-center gap-2">
+                  <p className="text-truncate">{row.original.productName}</p>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.productDetail.path}/${row?.original?.productId}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                </div>
+              )
+            });
+          }
+        });
+        newColumns = generateColumns(
+          renderedFrom,
+          fields?.filter((e) => ['productDescription', 'productNumber']?.includes(e?.fieldName))
+        );
+    }
+    else{
+      fields
+        ?.filter((e) => ['assetNumber']?.includes(e.fieldName))
+        ?.forEach((ele) => {
+          if (ele?.fieldName === 'assetNumber') {
+            coloum.push({
+              accessor: 'assetNumber',
+              Header: ele?.fieldLabel,
+              width: 200,
+              Cell: ({ row }) => (
+                <div className="flex items-center gap-2">
+                  <p className="text-truncate">{row.original.assetNumber}</p>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.serializedAssetDetail.path}/${row?.original?.assetId}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                </div>
+              )
+            });
+          }
+        });
+        newColumns = generateColumns(
+          renderedFrom,
+          fields?.filter((e) => ['productDescription','productCategory']?.includes(e?.fieldName))
+        );
+        newColumns.push({
+          accessor: 'productNumber',
+          Header: 'Product Number',
+          width: 200,
+          disableFilters: true,
+          disableSortBy: true,
+          Cell: ({ row }) => (row.original?.product?.productNumber ? <p>{displayDate(row.original?.product?.productNumber)}</p> : <NoDataCell />)
+        })
+    }
 
     coloum = [
       ...coloum,
@@ -146,7 +207,7 @@ const ScheduleMaintenance = () => {
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
-  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, selectedType]);
 
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
@@ -167,6 +228,11 @@ const ScheduleMaintenance = () => {
             res.productId = u?.productDetail?.optionValue || '';
             res.productDescription = u?.productDetail?.productDescription || '';
             res.productNumber = u?.productDetail?.productNumber || '';
+
+            res.assetNumber = u?.serializedAssetDetail?.assetNumber || '';
+            res.assetId = u?.serializedAssetDetail?._id || '';
+            res.productDescription = u?.serializedAssetDetail?.product?.productDescription || '';
+            res.productCategory = u?.serializedAssetDetail?.productCategory.optionLabel || '';
             return res;
           });
           dispatch({ type: 'initialize', data: rows, count: count });
@@ -181,6 +247,13 @@ const ScheduleMaintenance = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
+
+    if (selectedType === 1) {
+      deepFilter = deepFilter + `&type=product`;
+    }
+    else{
+      deepFilter = deepFilter + `&type=serializedAsset`;
+    }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
@@ -214,7 +287,8 @@ const ScheduleMaintenance = () => {
       setIsSubmitting(true);
       axiosInstance()
         .post(`${product.api}/scheduledMaintenance`, {
-          products: rowsToAdd?.map((r) => r?._id),
+          materials: rowsToAdd?.map((r) => r?._id),
+          type: selectedType === 1? MATERIAL_TYPE.product : MATERIAL_TYPE.serializedAsset,
           effectiveDate: _data?.effectiveDate,
           duration: _data?.duration
         })
@@ -223,6 +297,7 @@ const ScheduleMaintenance = () => {
           setIsSubmitting(false);
           setOpenCustomDataDialog({ open: false, data: null });
           setOpenAssignProductDialog(false);
+          setOpenAssignSerializedAssetDialog(false);
           setRowsToAdd([]);
         })
         .catch((error) => {
@@ -242,6 +317,7 @@ const ScheduleMaintenance = () => {
           setIsSubmitting(false);
           setOpenCustomDataDialog({ open: false, data: null });
           setOpenAssignProductDialog(false);
+          setOpenAssignSerializedAssetDialog(false);
         })
         .catch((error) => {
           setIsSubmitting(false);
@@ -311,6 +387,14 @@ const ScheduleMaintenance = () => {
           >
             {`Add Existing ${resources?.product?.titlePlural}`}
           </MenuItem>
+          <MenuItem
+            onClick={() => {
+              setOpenAssignSerializedAssetDialog(true);
+              handleClose();
+            }}
+          >
+            {`Add Existing ${resources?.serializedAsset?.titlePlural}`}
+          </MenuItem>
         </Menu>
       </>
     );
@@ -354,6 +438,9 @@ const ScheduleMaintenance = () => {
       </div>
       <CustomContainer>
         <ListingPageHeader
+          toggleButtonList={types}
+          selectedType={selectedType}
+          setSelectedType={setSelectedType}
           leftSideContents={<LeftSideContent />}
           searchValue={search}
           onSearch={handleSearch}
@@ -387,11 +474,22 @@ const ScheduleMaintenance = () => {
             }}
             serialized={true}
             isSubmitting={false}
-            ids={dataRows?.map((d) => d?.productId)}
+            ids={dataRows?.map((d) => d?.materialId)}
             hideQty={true}
           />
         )}
-
+        {openAssignSerializedAssetDialog && (
+          <AssignSerializedAssetDialog
+            handleClose={() => setOpenAssignSerializedAssetDialog(false)}
+            handleSucess={(rows) => {
+              setRowsToAdd(rows);
+              setOpenCustomDataDialog({ open: true, data: null });
+            }}
+            isAssigning={false}
+            ids={dataRows?.map((d) => d?.materialId)}
+            reference={null}
+          />
+        )}
         {openCustomDataDialog.open && (
           <ManageScheduleMaintenance
             data={openCustomDataDialog?.data}
