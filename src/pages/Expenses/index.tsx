@@ -14,10 +14,10 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { gridLoadingTimeout, prepareDataForGrid, expenses, sidebarResource, EXPENSE_STATUS, getUniqueCurrencies } from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, expenses, sidebarResource, EXPENSE_STATUS, formatAmountWithCurrency } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import { cloneDisable } from 'src/constants/messageHelpers';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -40,7 +40,7 @@ const Expenses = () => {
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
 
-  const { generateColumns, checkStaticField } = useColumns();
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchGridColumns();
@@ -51,10 +51,6 @@ const Expenses = () => {
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.expenses}`);
     data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, routes?.expensesDetail?.path, true);
-    let staticFields = getStaticFields();
-    staticFields.forEach((field) => {
-      newColumns.push(checkStaticField(renderedFrom, field));
-    });
     const extracolumns: any = [
       ...newColumns,
       {
@@ -69,14 +65,15 @@ const Expenses = () => {
           return row?.original?.totalAmount ? (
             <div>
               <p className="text-truncate">
-                {getUniqueCurrencies().find((d) => d.currencyCode === row?.original?.currency)?.symbolNative} {row?.original?.totalAmount}
+                {formatAmountWithCurrency(row?.original?.currency, row?.original?.totalAmount)?.fullFormatAmountWithoutSpace}
               </p>
             </div>
           ) : (
             <NoDataCell />
           );
         }
-      }
+      },
+      ...getStaticFields()
     ];
     setColumns([...extracolumns, ActionsRenderer]);
   };
@@ -122,9 +119,7 @@ const Expenses = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip
-          title={row?.original?.canDelete && row?.original?.status === EXPENSE_STATUS.unreported ? 'Delete' : 'You can not delete it is reported'}
-        >
+        <HtmlTooltip title={row?.original?.canDelete && row?.original?.status === EXPENSE_STATUS.unreported ? 'Delete' : 'You can not delete it is reported'}    >
           <span>
             <IconButton
               size="small"
@@ -175,12 +170,12 @@ const Expenses = () => {
     }
     return deepFilter;
   };
+
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     try {
-      let data: any = [],
-        count;
+      let data: any = [], count;
       const response: any = await axiosInstance().get(`${expenses.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
       data = response?.data?.data;
       count = response?.data?.count;
@@ -213,27 +208,24 @@ const Expenses = () => {
     }
     if (recordsToDelete.length > 0) {
       setDeleteLoading(true);
-      axiosInstance()
-        .put(`${expenses.api}/remove`, {
-          ids: recordsToDelete
-        })
-        .then(({ data }) => {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-          dispatch({ type: 'selection', selectedRecords: [] });
-          setShowDeleteConfirmBox(false);
-          setDeleteLoading(false);
-          if (deleteRecord) setDeleteRecord({});
-          fetchData();
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-          setShowDeleteConfirmBox(false);
-          setDeleteLoading(false);
+      axiosInstance().put(`${expenses.api}/remove`, {
+        ids: recordsToDelete
+      }).then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
         });
+        dispatch({ type: 'selection', selectedRecords: [] });
+        setShowDeleteConfirmBox(false);
+        setDeleteLoading(false);
+        if (deleteRecord) setDeleteRecord({});
+        fetchData();
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+        setShowDeleteConfirmBox(false);
+        setDeleteLoading(false);
+      });
     }
   };
 
@@ -308,12 +300,11 @@ const Expenses = () => {
         {showDeleteConfirmBox ? (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${
-              deleteRecord
-                ? `${resources?.expenses?.titleSingular?.toLowerCase()} :
+            message={`Are you sure you want to delete ${deleteRecord
+              ? `${resources?.expenses?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.expenseNumber}`
-                : `selected ${resources?.expenses?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.expenses?.titlePlural?.toLowerCase()}`
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
