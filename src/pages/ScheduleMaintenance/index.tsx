@@ -4,7 +4,6 @@ import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
-import { FiExternalLink } from 'react-icons/fi';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
@@ -25,8 +24,9 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 
 const ScheduleMaintenance = () => {
-  const renderedFrom = camelCase(sidebarResource.scheduleMaintenance);
   const { setToastConfig } = useContext(CustomToastContext);
+
+  const renderedFrom = camelCase(sidebarResource.scheduleMaintenance);
 
   const {
     state: { permissions, resources }
@@ -34,11 +34,11 @@ const ScheduleMaintenance = () => {
 
   const types = [
     {
-      key: `Products`,
+      key: resources?.product?.titlePlural,
       value: 1
     },
     {
-      key: `Serialized Assets`,
+      key: resources?.serializedAsset?.titlePlural,
       value: 2
     }
   ];
@@ -63,104 +63,34 @@ const ScheduleMaintenance = () => {
   }, [selectedType]);
 
   const fetchGridColumns = async () => {
-    let response;
-    if(selectedType===1){
-      response = await axiosInstance().get(`/field?resource=${sidebarResource.product}&view=true`);
-    }
-    else{
-      response = await axiosInstance().get(`/field?resource=${sidebarResource.serializedAsset}&view=true`);
-    }
+    setColumns(null)
+
+    let response = await axiosInstance().get(`/field?resource=${selectedType === 1 ? sidebarResource.product : sidebarResource.serializedAsset}&view=true`);
     const fields = response?.data?.data?.map((e) => e?.fieldData);
 
     let coloum: any = [];
-
     let newColumns;
-    if(selectedType===1){
-      fields
-        ?.filter((e) => ['productName']?.includes(e.fieldName))
-        ?.forEach((ele) => {
-          if (ele?.fieldName === 'productName') {
-            coloum.push({
-              accessor: 'productName',
-              Header: ele?.fieldLabel,
-              width: 200,
-              Cell: ({ row }) => (
-                <div className="flex items-center gap-2">
-                  <p className="text-truncate">{row.original.productName}</p>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      window.open(`${routes.productDetail.path}/${row?.original?.productId}`);
-                    }}
-                  >
-                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                  </IconButton>
-                </div>
-              )
-            });
-          }
-        });
-        newColumns = generateColumns(
-          renderedFrom,
-          fields?.filter((e) => ['productDescription', 'productNumber']?.includes(e?.fieldName))
-        );
+    if (selectedType === 1) {
+      newColumns = generateColumns(renderedFrom, fields?.filter((e) => ['productName', 'productDescription', 'productNumber']?.includes(e?.fieldName)), routes.productDetail.path);
     }
-    else{
-      fields
-        ?.filter((e) => ['assetNumber']?.includes(e.fieldName))
-        ?.forEach((ele) => {
-          if (ele?.fieldName === 'assetNumber') {
-            coloum.push({
-              accessor: 'assetNumber',
-              Header: ele?.fieldLabel,
-              width: 200,
-              Cell: ({ row }) => (
-                <div className="flex items-center gap-2">
-                  <p className="text-truncate">{row.original.assetNumber}</p>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      window.open(`${routes.serializedAssetDetail.path}/${row?.original?.assetId}`);
-                    }}
-                  >
-                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                  </IconButton>
-                </div>
-              )
-            });
-          }
-        });
-        newColumns = generateColumns(
-          renderedFrom,
-          fields?.filter((e) => ['productDescription','productCategory']?.includes(e?.fieldName))
-        );
-        newColumns.push({
-          accessor: 'productNumber',
-          Header: 'Product Number',
-          width: 200,
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) => (row.original?.product?.productNumber ? <p>{displayDate(row.original?.product?.productNumber)}</p> : <NoDataCell />)
-        })
+    else {
+      newColumns = generateColumns(renderedFrom, fields?.filter((e) => ['assetNumber', 'product', 'productCategory']?.includes(e?.fieldName)), routes.serializedAssetDetail.path);
     }
-
-    coloum = [
-      ...coloum,
-      ...newColumns,
-      {
-        accessor: 'effectiveDate',
-        Header: 'Effective Date',
-        width: 200,
-        disableFilters: true,
-        disableSortBy: true,
-        Cell: ({ row }) => (row.original?.effectiveDate ? <p>{displayDate(row.original?.effectiveDate)}</p> : <NoDataCell />)
-      },
-      {
-        accessor: 'duration',
-        Header: 'Duration',
-        width: 200,
-        Cell: ({ row }) => (row.original?.duration ? <p>{row.original?.duration}</p> : <NoDataCell />)
-      }
+    coloum = [...newColumns,
+    {
+      accessor: 'effectiveDate',
+      Header: 'Effective Date',
+      width: 200,
+      disableFilters: true,
+      disableSortBy: true,
+      Cell: ({ row }) => (row.original?.effectiveDate ? <p>{displayDate(row.original?.effectiveDate)}</p> : <NoDataCell />)
+    },
+    {
+      accessor: 'duration',
+      Header: 'Duration',
+      width: 200,
+      Cell: ({ row }) => (row.original?.duration ? <p>{row.original?.duration}</p> : <NoDataCell />)
+    }
     ];
     coloum.push({
       accessor: 'action',
@@ -212,27 +142,21 @@ const ScheduleMaintenance = () => {
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    axiosInstance()
-      .get(`${product.api}/scheduledMaintenance${queryString}`, { cancelToken: cancelTokenSource?.token })
+    axiosInstance().get(`${product.api}/scheduledMaintenance${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(
         ({
           data: {
             data: { data, count }
           }
         }) => {
-          let rows = data.map((u, index) => {
-            let res: any = {
-              ...prepareDataForGrid(u)
-            };
-            res.productName = u?.productDetail?.optionLabel || '';
-            res.productId = u?.productDetail?.optionValue || '';
-            res.productDescription = u?.productDetail?.productDescription || '';
-            res.productNumber = u?.productDetail?.productNumber || '';
-
-            res.assetNumber = u?.serializedAssetDetail?.assetNumber || '';
-            res.assetId = u?.serializedAssetDetail?._id || '';
-            res.productDescription = u?.serializedAssetDetail?.product?.productDescription || '';
-            res.productCategory = u?.serializedAssetDetail?.productCategory.optionLabel || '';
+          let rows = data.map((e) => {
+            let res: any = { ...e };
+            if (selectedType === 1) {
+              res = { ...res, ...prepareDataForGrid(e?.productDetail) }
+            }
+            else {
+              res = { ...res, ...prepareDataForGrid(e?.serializedAssetDetail) }
+            }
             return res;
           });
           dispatch({ type: 'initialize', data: rows, count: count });
@@ -249,10 +173,10 @@ const ScheduleMaintenance = () => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
 
     if (selectedType === 1) {
-      deepFilter = deepFilter + `&type=product`;
+      deepFilter = deepFilter + `&materialType=${MATERIAL_TYPE.product}`;
     }
-    else{
-      deepFilter = deepFilter + `&type=serializedAsset`;
+    else {
+      deepFilter = deepFilter + `&materialType=${MATERIAL_TYPE.serializedAsset}`;
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
@@ -285,25 +209,22 @@ const ScheduleMaintenance = () => {
   const handleAdd = (_data) => {
     if (rowsToAdd?.length && _data) {
       setIsSubmitting(true);
-      axiosInstance()
-        .post(`${product.api}/scheduledMaintenance`, {
-          materials: rowsToAdd?.map((r) => r?._id),
-          type: selectedType === 1? MATERIAL_TYPE.product : MATERIAL_TYPE.serializedAsset,
-          effectiveDate: _data?.effectiveDate,
-          duration: _data?.duration
-        })
-        .then(({ data }) => {
-          fetchData();
-          setIsSubmitting(false);
-          setOpenCustomDataDialog({ open: false, data: null });
-          setOpenAssignProductDialog(false);
-          setOpenAssignSerializedAssetDialog(false);
-          setRowsToAdd([]);
-        })
-        .catch((error) => {
-          setIsSubmitting(false);
-          setToastConfig(error);
-        });
+      axiosInstance().post(`${product.api}/scheduledMaintenance`, {
+        materials: rowsToAdd?.map((r) => r?._id),
+        materialType: selectedType === 1 ? MATERIAL_TYPE.product : MATERIAL_TYPE.serializedAsset,
+        effectiveDate: _data?.effectiveDate,
+        duration: _data?.duration
+      }).then(({ data }) => {
+        fetchData();
+        setIsSubmitting(false);
+        setOpenCustomDataDialog({ open: false, data: null });
+        setOpenAssignProductDialog(false);
+        setOpenAssignSerializedAssetDialog(false);
+        setRowsToAdd([]);
+      }).catch((error) => {
+        setIsSubmitting(false);
+        setToastConfig(error);
+      });
     } else if (_data && openCustomDataDialog?.data?._id) {
       setIsSubmitting(true);
       axiosInstance()
@@ -359,12 +280,10 @@ const ScheduleMaintenance = () => {
         <ThemeButton
           id={'add-menu-button'}
           mobileTooltip="Add"
-          startIcon={isMobile ? null : <Add />}
+          startIcon={<Add />}
           onClick={handleClick}
-          aria-controls="add-menu"
-          mode="light"
           iconForMobile={<Add />}
-          endIcon={isMobile ? null : <ExpandMore fontSize="small" />}
+          endIcon={<ExpandMore fontSize="small" />}
         >
           Add
         </ThemeButton>
@@ -379,22 +298,24 @@ const ScheduleMaintenance = () => {
           open={Boolean(anchorEl)}
           onClose={handleClose}
         >
-          <MenuItem
-            onClick={() => {
-              setOpenAssignProductDialog(true);
-              handleClose();
-            }}
-          >
-            {`Add Existing ${resources?.product?.titlePlural}`}
-          </MenuItem>
-          <MenuItem
-            onClick={() => {
-              setOpenAssignSerializedAssetDialog(true);
-              handleClose();
-            }}
-          >
-            {`Add Existing ${resources?.serializedAsset?.titlePlural}`}
-          </MenuItem>
+          {selectedType === 1 ?
+            <MenuItem
+              onClick={() => {
+                setOpenAssignProductDialog(true);
+                handleClose();
+              }}
+            >
+              {`Add Existing ${resources?.product?.titlePlural}`}
+            </MenuItem>
+            :
+            <MenuItem
+              onClick={() => {
+                setOpenAssignSerializedAssetDialog(true);
+                handleClose();
+              }}
+            >
+              {`Add Existing ${resources?.serializedAsset?.titlePlural}`}
+            </MenuItem>}
         </Menu>
       </>
     );
@@ -441,7 +362,7 @@ const ScheduleMaintenance = () => {
           toggleButtonList={types}
           selectedType={selectedType}
           setSelectedType={setSelectedType}
-          leftSideContents={<LeftSideContent />}
+          leftSideContentsOfSearchFilter={<LeftSideContent />}
           searchValue={search}
           onSearch={handleSearch}
           isActionButtonVisible={true}
@@ -502,11 +423,10 @@ const ScheduleMaintenance = () => {
             loading={isSubmitting}
           />
         )}
-
         {showConfirmBox.open && (
           <ConfirmationDialogRaw
             open={true}
-            message={`Are you sure you want to delete this product(s)?`}
+            message={`Are you sure you want to remove selected item(s)?`}
             okBtnLoading={isDeleting}
             onClose={() => {
               setShowConfirmBox({ open: false, data: null });
