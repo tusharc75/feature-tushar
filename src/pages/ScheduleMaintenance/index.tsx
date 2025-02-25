@@ -63,7 +63,7 @@ const ScheduleMaintenance = () => {
   }, [selectedType]);
 
   const fetchGridColumns = async () => {
-    setColumns(null)
+    setColumns(null);
 
     let response = await axiosInstance().get(`/field?resource=${selectedType === 1 ? sidebarResource.product : sidebarResource.serializedAsset}&view=true`);
     const fields = response?.data?.data?.map((e) => e?.fieldData);
@@ -149,16 +149,7 @@ const ScheduleMaintenance = () => {
             data: { data, count }
           }
         }) => {
-          let rows = data.map((e) => {
-            let res: any = { ...e };
-            if (selectedType === 1) {
-              res = { ...res, ...prepareDataForGrid(e?.productDetail) }
-            }
-            else {
-              res = { ...res, ...prepareDataForGrid(e?.serializedAssetDetail) }
-            }
-            return res;
-          });
+          const rows = data.map((e) => prepareDataForGrid(e));
           dispatch({ type: 'initialize', data: rows, count: count });
           dispatch({ type: 'loading', loading: false });
         }
