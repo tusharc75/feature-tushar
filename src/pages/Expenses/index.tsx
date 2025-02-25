@@ -14,7 +14,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { gridLoadingTimeout, prepareDataForGrid, expenses, sidebarResource, EXPENSE_STATUS, formatAmountWithCurrency } from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, expenses, sidebarResource, EXPENSE_STATUS, formatAmountWithCurrency, getDefaultMyRecordType } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { cloneDisable } from 'src/constants/messageHelpers';
@@ -142,10 +142,8 @@ const Expenses = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
-    if (isExport) {
-      deepFilter = `?`;
-    }
+    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
+
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (filterByIds?.length) {
