@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Dialog, IconButton, Typography, TextField, InputAdornment } from '@mui/material';
+import { Dialog, IconButton, Typography, TextField, InputAdornment, Box } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Grid from '@mui/material/Grid2';
@@ -7,23 +7,21 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { CustomDialogTransition } from 'src/constants/helpers';
+import { CustomDialogTransition, formatAmountWithCurrency } from 'src/constants/helpers';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const ItemizeExpenses = ({
-  open,
   onClose,
-  textFields,
-  value,
-  addTextField,
+  setLineItems,
+  lineItems,
+  currency,
   currencySymbol,
-  removeTextField,
-  handleInputChange,
-  fullScreen,
-  setFullScreen,
-  isSubmitting
+  isSubmitting,
+  totalAmount
 }) => {
   const [touchedFields, setTouchedFields] = useState({});
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const handleBlur = (index, field) => {
     setTouchedFields((prev) => ({
@@ -33,7 +31,21 @@ const ItemizeExpenses = ({
   };
 
   const isFormValid = () => {
-    return textFields.every((field) => field.description.trim() !== '' && field.amount > 0);
+    return lineItems.every((field) => field.description.trim() !== '' && field.amount > 0);
+  };
+
+  const addLineItem = () => {
+    setLineItems([...lineItems, { id: lineItems.length, description: '', amount: '' }]);
+  };
+
+  const removeLineItem = (id) => {
+    setLineItems(lineItems.filter((field) => field.id !== id));
+  };
+
+  const handleInputChange = (index, field, event) => {
+    const newFields = [...lineItems];
+    newFields[index][field] = event.target.value;
+    setLineItems(newFields);
   };
 
   return (
@@ -48,10 +60,10 @@ const ItemizeExpenses = ({
           onClose();
         }
       }}
-      open={open}
+      open={true}
     >
       <CustomDialogHeader
-        title="Itemize your Expense"
+        title="Itemize"
         onClose={onClose}
         isMinimized={!fullScreen}
         onMinimizeMaximize={() => {
@@ -61,9 +73,17 @@ const ItemizeExpenses = ({
       />
       <CustomDialogContent>
         <div>
-          {textFields.map((field, index) => (
+          <Box pb={2}>
+            <ThemeButton
+              startIcon={<AddIcon fontSize="small" />}
+              onClick={addLineItem}
+            >
+              Add
+            </ThemeButton>
+          </Box>
+          {lineItems?.map((field, index) => (
             <Grid container spacing={2} key={field.id} sx={{ alignItems: 'center', marginBottom: 2 }}>
-              <Grid size={{ xs: 5 }}>
+              <Grid size={{ xs: 8 }}>
                 <TextField
                   label="Description"
                   size="small"
@@ -71,11 +91,12 @@ const ItemizeExpenses = ({
                   onChange={(event) => handleInputChange(index, 'description', event)}
                   onBlur={() => handleBlur(index, 'description')}
                   fullWidth
+                  required
                   error={touchedFields[index]?.description && field.description.trim() === ''}
                   helperText={touchedFields[index]?.description && field.description.trim() === '' ? 'Description is required' : ''}
                 />
               </Grid>
-              <Grid size={{ xs: 5 }}>
+              <Grid size={{ xs: 3 }}>
                 <TextField
                   label="Amount"
                   type="number"
@@ -84,6 +105,7 @@ const ItemizeExpenses = ({
                   onChange={(event) => handleInputChange(index, 'amount', event)}
                   onBlur={() => handleBlur(index, 'amount')}
                   fullWidth
+                  required
                   error={touchedFields[index]?.amount && field.amount <= 0}
                   helperText={touchedFields[index]?.amount && field.amount <= 0 ? 'Amount is Required' : ''}
                   slotProps={{
@@ -93,26 +115,20 @@ const ItemizeExpenses = ({
                   }}
                 />
               </Grid>
-              <Grid size={{ xs: 2 }}>
-                <IconButton onClick={() => removeTextField(field.id)} aria-label="delete">
-                  <DeleteIcon color="error" fontSize="small" />
-                </IconButton>
+              <Grid size={{ xs: 1 }}>
+                <HtmlTooltip title="Remove">
+                  <IconButton onClick={() => removeLineItem(field.id)} aria-label="delete">
+                    <DeleteIcon color="error" fontSize="small" />
+                  </IconButton>
+                </HtmlTooltip>
               </Grid>
             </Grid>
           ))}
-          <Grid container spacing={2} sx={{ alignItems: 'center', marginTop: 2 }}>
-            <Grid size={{ xs: 8 }} sx={{ display: 'flex', alignItems: 'center' }}>
-              <ThemeButton onClick={addTextField} buttonType="themeBorder" sx={{ marginRight: 0.5 }} aria-label="add">
-                <AddIcon fontSize="small" />
-                Add
-              </ThemeButton>
-            </Grid>
-            <Grid size={{ xs: 4 }} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <Typography variant="h6">
-                Total Amount: {currencySymbol} {value}
-              </Typography>
-            </Grid>
-          </Grid>
+          <div className="grid justify-end pt-3">
+            <span className='font-medium'>
+              Total Amount: {formatAmountWithCurrency(currency, totalAmount)?.fullFormatAmountWithoutSpace}
+            </span>
+          </div>
         </div>
       </CustomDialogContent>
       <CustomDialogFooter>
