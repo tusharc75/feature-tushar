@@ -80,7 +80,7 @@ const ServiceOrderDetailsPage = () => {
       let newServiceOrderSteps = serviceOrderSteps.filter((s) => s.name !== 'Field Ticket Invoice');
       setSteps(newServiceOrderSteps);
     } else {
-      setSteps(serviceOrderSteps);
+      fetchPolicy();
     }
   }, [isOffline]);
 
