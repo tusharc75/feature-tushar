@@ -12,13 +12,10 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { displayDateTime, fieldServiceOrder, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { fieldServiceOrder, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import StartStopLogsDialog from 'src/pages/FieldTicket/material/StartStopLogsDialog';
-import StartStopDate from 'src/pages/FieldTicket/material/StartStopDateDialog';
 import { FiExternalLink } from 'react-icons/fi';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 
@@ -30,13 +27,6 @@ const Technicians = ({ allowedToEdit, serviceOrderData, selectedService, stepFul
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [technicianDialog, setTechnicianDialog] = useState(false);
-  const [startEndDateConfermationDialog, setStartEndDateConfermationDialog] = useState({
-    open: false,
-    type: null,
-    loading: false,
-    minDate: null
-  });
-  const [viewStartStopLog, setViewStartStopLog] = useState({ open: false, _id: null });
 
   const {
     state: { permissions }
@@ -62,18 +52,6 @@ const Technicians = ({ allowedToEdit, serviceOrderData, selectedService, stepFul
         Cell: ({ row }) => (
           <div className="d-flex align-items-center gap-2">
             <h5 className="text-truncate">{row?.original?.index}</h5>
-            <HtmlTooltip title={'View Logs'}>
-              <span>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    setViewStartStopLog({ open: true, _id: row?.original?._id });
-                  }}
-                >
-                  <VisibilityIcon fontSize="small" color="primary" />
-                </IconButton>
-              </span>
-            </HtmlTooltip>
           </div>
         )
       },
@@ -153,22 +131,6 @@ const Technicians = ({ allowedToEdit, serviceOrderData, selectedService, stepFul
           }}
           original={row?.original}
         />
-      },
-      {
-        accessor: 'startDate',
-        Header: 'Start Date',
-        disableFilters: true,
-        disableSortBy: true,
-        width: 250,
-        Cell: ({ row }) => (row.original?.startDate ? <p>{displayDateTime(row.original?.startDate)}</p> : <NoDataCell />)
-      },
-      {
-        accessor: 'endDate',
-        Header: 'End Date',
-        disableFilters: true,
-        disableSortBy: true,
-        width: 250,
-        Cell: ({ row }) => (row.original?.endDate ? <p>{displayDateTime(row.original?.endDate)}</p> : <NoDataCell />)
       },
       {
         accessor: 'action',
@@ -282,93 +244,9 @@ const Technicians = ({ allowedToEdit, serviceOrderData, selectedService, stepFul
       });
   };
 
-  const handleUpdateStartEndDate = (values, type) => {
-    const value: any = {
-      type: type,
-      referenceId: serviceOrderData?._id,
-      _id: selectedRecords?.map((r) => r?._id)
-    };
-    setStartEndDateConfermationDialog({ ...startEndDateConfermationDialog, loading: true });
-    if (type != 'stop') {
-      value.startDate = values?.startDate;
-    }
-    if (type === 'stop' || type === 'startStop') {
-      value.endDate = values?.endDate;
-    }
-    axiosInstance()
-      .put(`${fieldServiceOrder.api}/${serviceOrderData?._id}/technician/start-end-date`, value)
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data?.message
-        });
-        setStartEndDateConfermationDialog({ open: false, type: null, loading: false, minDate: null });
-        fetchData();
-      })
-      .catch((error) => {
-        setStartEndDateConfermationDialog({ open: false, type: null, loading: false, minDate: null });
-        toastConfig.setToastConfig(error);
-      });
-  };
-
   const actionButtonMenuItems = () => {
     return (
       <>
-        <MenuItem
-          disabled={selectedRecords?.every((r) => r?.endDate || (!r?.startDate && !r?.endDate)) ? false : true}
-          onClick={() => {
-            const dates = [];
-            selectedRecords?.forEach((d: any) => {
-              if (d?.endDate) {
-                dates.push(new Date(d?.endDate));
-              }
-            });
-            let date = null;
-            if (dates?.length) {
-              date = new Date(Math.max(...dates));
-              date.setDate(date.getDate() + 1);
-            }
-            setStartEndDateConfermationDialog({ open: true, type: 'start', loading: false, minDate: date });
-          }}
-        >
-          Start
-        </MenuItem>
-        <MenuItem
-          disabled={selectedRecords?.every((r) => r?.startDate && !r?.endDate) ? false : true}
-          onClick={() => {
-            const dates = [];
-            selectedRecords?.forEach((d: any) => {
-              dates.push(new Date(d?.startDate));
-            });
-            let date = null;
-            if (dates?.length) {
-              date = new Date(Math.max(...dates));
-            }
-            setStartEndDateConfermationDialog({ open: true, type: 'stop', loading: false, minDate: date });
-          }}
-        >
-          Stop
-        </MenuItem>
-        <MenuItem
-          disabled={selectedRecords?.every((r) => (r?.startDate && r?.endDate) || (!r?.startDate && !r?.endDate)) ? false : true}
-          onClick={() => {
-            const dates = [];
-            selectedRecords?.forEach((d: any) => {
-              if (d?.endDate) {
-                dates.push(new Date(d?.endDate));
-              }
-            });
-            let date = null;
-            if (dates?.length) {
-              date = new Date(Math.max(...dates));
-              date.setDate(date.getDate() + 1);
-            }
-            setStartEndDateConfermationDialog({ open: true, type: 'startStop', loading: false, minDate: date });
-          }}
-        >
-          Start/Stop
-        </MenuItem>
         <HtmlTooltip title={Boolean(selectedRecords.length) ? 'Delete selected records' : 'Select records to delete'}>
           <MenuItem
             disabled={isDeleting}
@@ -442,32 +320,6 @@ const Technicians = ({ allowedToEdit, serviceOrderData, selectedService, stepFul
           onClose={() => setDeleteData(null)}
           onOk={() => handleDelete(deleteData)}
           okBtnLoading={isDeleting}
-        />
-      )}
-
-      {startEndDateConfermationDialog.open && (
-        <StartStopDate
-          type={startEndDateConfermationDialog.type}
-          onClose={() => {
-            setStartEndDateConfermationDialog({ open: false, type: null, loading: false, minDate: null });
-          }}
-          handleSubmit={(value) => {
-            handleUpdateStartEndDate(value, startEndDateConfermationDialog.type);
-          }}
-          loading={startEndDateConfermationDialog.loading}
-          minStartDate={startEndDateConfermationDialog.minDate}
-        />
-      )}
-
-      {viewStartStopLog?.open && (
-        <StartStopLogsDialog
-          onClose={() => {
-            setViewStartStopLog({ open: false, _id: null });
-          }}
-          referenceId={serviceOrderData?._id}
-          _id={viewStartStopLog?._id}
-          fetchRecords={fetchData}
-          referenceType={'fieldServiceOrder'}
         />
       )}
     </>

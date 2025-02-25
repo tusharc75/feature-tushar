@@ -555,7 +555,6 @@ const Material = ({ serviceOrderData, stepFullScreen, allowedToEdit, setNextStep
           allowedToEdit={allowedToEdit}
           services={dataRows?.filter((e) => e.type === MATERIAL_TYPE.service)}
           serviceOrderData={serviceOrderData}
-          fetchMaterial={fetchMaterial}
           stepFullScreen={stepFullScreen}
           fetchData={fetchData}
           refreshChild={refreshChild}

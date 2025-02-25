@@ -12,7 +12,6 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
-import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { flattenArray } from 'src/constants/columns';
@@ -23,20 +22,13 @@ import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import MaterialQtyDialog from './MaterialQtyDialog';
 import EditIcon from '@mui/icons-material/Edit';
-import HistoryIcon from '@mui/icons-material/History';
-import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
-import ConsumablesQtyDialog from 'src/pages/WorkOrder/Consumables/ConsumablesQtyDialog';
-import History from '../../ProductInventory/LedgerHistory';
-import QtyRequestLog from 'src/pages/WorkOrder/Consumables/QtyRequestLog';
 import { camelCase } from 'lodash';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
-import HideWhenOffline from 'src/components/HideWhenOffline';
 import { FiExternalLink } from 'react-icons/fi';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
 
-const Consumables = ({ allowedToEdit, services, serviceOrderData, fetchMaterial, stepFullScreen, fetchData: fetchserviceOrderData, refreshChild }) => {
+const Consumables = ({ allowedToEdit, services, serviceOrderData, stepFullScreen, fetchData: fetchserviceOrderData, refreshChild }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_Consumables`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -51,10 +43,6 @@ const Consumables = ({ allowedToEdit, services, serviceOrderData, fetchMaterial,
   const [isConsumableEdit, setIsConsumableEdit] = useState({ open: false, data: null, showSaveAndNext: false });
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
-  const [consumeRequest, setConsumeRequest] = useState(false);
-  const [openConsumablesQtyDialog, setOpenConsumablesQtyDialog] = useState(false);
-  const [openLogDialog, setOpenLogDialog] = useState({ open: false, product: '', uniqueId: null, data: null });
-  const [historyDialog, setHistoryDialog] = useState({ open: false, _id: '', product: '', productName: '' });
   const [isSubmitting, setSubmitting] = useState(false);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -77,23 +65,7 @@ const Consumables = ({ allowedToEdit, services, serviceOrderData, fetchMaterial,
     }
   }, [services]);
 
-  const {
-    state: { user }
-  }: any = useData();
-
   useEffect(() => {
-    var allowRequest = false;
-    if (user?.user?.brandPolicy?.workOrderConsumableRequest) {
-      if (
-        (serviceOrderData?.warehouse?.manager && serviceOrderData?.warehouse?.manager?.includes(user?.user?._id)) ||
-        (serviceOrderData?.warehouse?.materialHandlers && serviceOrderData?.warehouse?.materialHandlers?.includes(user?.user?._id))
-      ) {
-        allowRequest = false;
-      } else {
-        allowRequest = true;
-      }
-    }
-    setConsumeRequest(allowRequest);
     fetchColumns();
   }, [serviceOrderData]);
 
@@ -201,19 +173,6 @@ const Consumables = ({ allowedToEdit, services, serviceOrderData, fetchMaterial,
       },
       ...newColumns,
       {
-        accessor: 'requestedQty',
-        Header: 'Requested Qty',
-        width: 150,
-        cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
-      },
-      {
-        accessor: 'consumedQty',
-        Header: 'Consumed Qty',
-        primaryField: true,
-        width: 150,
-        cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
-      },
-      {
         accessor: 'action',
         Header: 'Actions',
         width: 150,
@@ -236,46 +195,17 @@ const Consumables = ({ allowedToEdit, services, serviceOrderData, fetchMaterial,
                 <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
               </IconButton>
             </HtmlTooltip>
-            {row.original?.isqtyRequestLog && (
-              <HtmlTooltip title="View Requests">
-                <IconButton
-                  size="small"
-                  aria-label="Requests"
-                  onClick={() => {
-                    setOpenLogDialog({ open: true, product: row?.original?.materialId, uniqueId: row.original._id, data: row.original });
-                  }}
-                >
-                  <FormatListBulletedIcon fontSize="small" color={'primary'} />
-                </IconButton>
-              </HtmlTooltip>
-            )}
-            <HtmlTooltip title="History">
-              <IconButton
-                size="small"
-                aria-label="History"
-                onClick={() => {
-                  setHistoryDialog({
-                    open: true,
-                    _id: row?.original?._id,
-                    product: row?.original?.materialId,
-                    productName: row?.original?.productName
-                  });
-                }}
-              >
-                <HistoryIcon fontSize="small" color={'primary'} />
-              </IconButton>
-            </HtmlTooltip>
             <HtmlTooltip title={'Delete'}>
               <span>
                 <IconButton
                   size="small"
                   aria-label="Delete"
-                  disabled={row?.original?.consumedQty || row?.original?.requestedQty ? true : false}
+                  disabled={!allowedToEdit}
                   onClick={() => {
                     setDeleteData([{ id: row.original._id }]);
                   }}
                 >
-                  <DeleteIcon fontSize="small" color={row?.original?.consumedQty || row?.original?.requestedQty ? 'disabled' : 'error'} />
+                  <DeleteIcon fontSize="small" color={allowedToEdit ? 'error' : 'disabled'} />
                 </IconButton>
               </span>
             </HtmlTooltip>
@@ -446,14 +376,6 @@ const Consumables = ({ allowedToEdit, services, serviceOrderData, fetchMaterial,
         });
         return;
       }
-      if (parseInt(inputField.qty) < (updatedData?.consumedQty || 0) + (updatedData?.requestedQty || 0)) {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'error',
-          message: 'Quantity can not be less than consumed quantity'
-        });
-        return;
-      }
     }
     let rows: any = [{ ...dataRow, ...updatedData }];
     rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData, serviceOrderData?.currency);
@@ -472,18 +394,6 @@ const Consumables = ({ allowedToEdit, services, serviceOrderData, fetchMaterial,
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     dispatch({ type: 'update', data: [] });
     setTabValue(newValue);
-  };
-
-  const rightSideContents = () => {
-    return (
-      <>
-        <HideWhenOffline>
-          <ThemeButton disabled={!Boolean(selectedRecords?.length)} onClick={() => setOpenConsumablesQtyDialog(true)} buttonType="theme">
-            {consumeRequest ? 'Request ' : 'Consume '} {selectedRecords?.length > 0 ? '(' + selectedRecords?.length + ')' : ''}
-          </ThemeButton>
-        </HideWhenOffline>
-      </>
-    );
   };
 
   const actionButtonMenuItems = () => {
@@ -557,7 +467,6 @@ const Consumables = ({ allowedToEdit, services, serviceOrderData, fetchMaterial,
                 isActionButtonVisible={true}
                 actionButtonMenuItems={actionButtonMenuItems()}
                 actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
-                rightSideContents={rightSideContents()}
                 hasXpadding
               />
             </>
@@ -622,50 +531,6 @@ const Consumables = ({ allowedToEdit, services, serviceOrderData, fetchMaterial,
           loading={isUpdating}
           showSaveAndNext={isConsumableEdit.showSaveAndNext}
           referenceType={'consumables'}
-        />
-      )}
-      {openConsumablesQtyDialog && (
-        <ConsumablesQtyDialog
-          referenceId={serviceOrderData?._id}
-          referenceType={sidebarResource.fieldServiceOrder}
-          onClose={() => setOpenConsumablesQtyDialog(false)}
-          onSuccess={() => {
-            fetchData();
-            fetchMaterial();
-            setOpenConsumablesQtyDialog(false);
-          }}
-          warehouse={serviceOrderData?.warehouse}
-          selectedRecords={selectedRecords?.map((e) => ({ ...e, product: e?.productName }))}
-          serviceName={null}
-          consumeRequest={consumeRequest}
-          serialNumberRequired={false}
-        />
-      )}
-      {openLogDialog.open && (
-        <QtyRequestLog
-          uniqueId={openLogDialog.uniqueId}
-          referenceId={serviceOrderData?._id}
-          referenceType={sidebarResource.fieldServiceOrder}
-          productName={openLogDialog?.data?.productName}
-          product={openLogDialog?.product}
-          onClose={() => {
-            setOpenLogDialog({
-              open: false,
-              uniqueId: null,
-              product: null,
-              data: null
-            });
-            fetchData();
-          }}
-        />
-      )}
-      {historyDialog.open && (
-        <History
-          handleClose={() => setHistoryDialog({ open: false, _id: '', product: '', productName: '' })}
-          productName={historyDialog.productName}
-          referenceId={serviceOrderData?._id}
-          uniqueId={historyDialog._id}
-          product={historyDialog.product}
         />
       )}
 
