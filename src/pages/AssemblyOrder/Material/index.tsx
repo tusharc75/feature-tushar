@@ -19,10 +19,11 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { CHILD_RESOURCE, MATERIAL_TYPE } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, SERIALIZED_PACKAGES_STATUS, warehouse, WORK_ORDER_TYPE } from '../../../constants/helpers';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import MaterialQtyDialog from 'src/pages/AssemblyOrder/Material/MaterialQtyDialog';
+import AssignSerializedPackagesDialog from 'src/components/AssignRolesDialog/AssignSerializedPackagesDialog';
 
 const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -43,6 +44,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
   const [columns, setColumns] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [isSubmitting, setSubmitting] = useState(false);
+  const [openSerializedPackagesDialog, setOpenSerializedPackagesDialog] = useState(false);
   const { generateColumns } = useColumns();
 
   useEffect(() => {
@@ -83,7 +85,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, table }) => (
           <div className="flex items-center gap-2">
-            {allowedToEdit ? (
+            {allowedToEdit && ![MATERIAL_TYPE.serializedPackage]?.includes(row?.original?.type) ? (
               <h5
                 onClick={() => {
                   setMaterialEdit({ open: true, data: row?.original });
@@ -98,11 +100,11 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
             )}
             {allowedToEdit && row.original.type === MATERIAL_TYPE.package && (
               <>
-                {row.original?.subRows?.length > 0 &&
+                {row.original?.subRows?.length > 0 && (
                   <Box>
                     <span>({row.original?.subRows?.length})</span>
                   </Box>
-                }
+                )}
                 <Box>
                   <HtmlTooltip title={`Add Existing ${resources?.packages?.titlePlural}`}>
                     <IconButton
@@ -121,7 +123,11 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
               <IconButton
                 size="small"
                 onClick={() => {
-                  window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  if (row?.original?.type === MATERIAL_TYPE.serializedPackage) {
+                    window.open(`${routes.serializedPackagesDetail.path}/${row.original.serializedPackageId}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
                 }}
               >
                 <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
@@ -149,30 +155,34 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
       sticky: 'right',
       Cell: ({ row, table }) => (
         <>
-          <HtmlTooltip title={allowedToEdit ? 'Edit' : ''}>
-            <IconButton
-              size="small"
-              aria-label="Details"
-              disabled={allowedToEdit ? false : true}
-              onClick={() => {
-                setMaterialEdit({ open: true, data: row?.original });
-              }}
-            >
-              <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
-            </IconButton>
-          </HtmlTooltip>
-          <HtmlTooltip title={row.original?.canDelete ? 'Delete' : 'Work Order is already assigned'}>
-            <IconButton
-              size="small"
-              aria-label="Details"
-              onClick={() => {
-                setDeleteData([row.original._id]);
-              }}
-              disabled={row.original?.canDelete ? false : true}
-            >
-              <DeleteIcon fontSize="small" color={row.original?.canDelete ? 'error' : 'disabled'} />
-            </IconButton>
-          </HtmlTooltip>
+          {row?.original?.type != MATERIAL_TYPE.serializedPackage && (
+            <>
+              <HtmlTooltip title={allowedToEdit ? 'Edit' : ''}>
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  disabled={allowedToEdit ? false : true}
+                  onClick={() => {
+                    setMaterialEdit({ open: true, data: row?.original });
+                  }}
+                >
+                  <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+                </IconButton>
+              </HtmlTooltip>
+              <HtmlTooltip title={row.original?.canDelete ? 'Delete' : 'Work Order is already assigned'}>
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    setDeleteData([row.original._id]);
+                  }}
+                  disabled={row.original?.canDelete ? false : true}
+                >
+                  <DeleteIcon fontSize="small" color={row.original?.canDelete ? 'error' : 'disabled'} />
+                </IconButton>
+              </HtmlTooltip>
+            </>
+          )}
         </>
       )
     });
@@ -194,6 +204,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
 
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     let rows = data?.material?.filter((e) => e.parentId === null);
+    const serializedPackages = data?.serializedPackages || [];
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
@@ -202,7 +213,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
       parent.canDelete = true;
-      parent.subRows = generateNestedData(data.material, parent);
+      parent.subRows = generateNestedData(data.material, serializedPackages, parent);
       if (parent.subRows?.find((r) => !r?.canDelete)) {
         parent.canDelete = false;
       }
@@ -221,7 +232,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
     dispatch({ type: 'loading', loading: false });
   };
 
-  const generateNestedData = (material, parent) => {
+  const generateNestedData = (material, serializedPackages, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
@@ -239,9 +250,17 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
             : '';
       _subRow.qty = _subRow.qty;
       _subRow.canDelete = _subRow?.workOrder ? false : true;
-      _subRow.subRows = generateNestedData(material, _subRow);
+      _subRow.subRows = generateNestedData(material, serializedPackages, _subRow);
     });
-    return subRows;
+
+    const serializedPackae = serializedPackages?.filter((p) => p?.uniqueId === parent?._id);
+    serializedPackae?.forEach((_p, i) => {
+      _p.index = parent.index + '.' + `${i + 1}`;
+      _p.detail = _p?.serializedPackage?.optionLabel;
+      _p.serializedPackageId = _p?.serializedPackage?.optionValue;
+    });
+
+    return [...subRows, ...serializedPackae];
   };
 
   const handleAdd = async (rows) => {
@@ -256,6 +275,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
       if (allFields?.some((f) => f?.fieldName === 'warehouse')) {
         element.warehouse = assemblyOrderData?.warehouse?.optionValue;
       }
+      element.workOrderType = WORK_ORDER_TYPE.assemblyOrder;
       material.push(element);
     });
 
@@ -312,8 +332,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
     const data = [];
     rows?.forEach((element) => {
       data.push({
-        _id: element._id,
-        qty: element.qty,
+        ...element,
         ...(allFields?.some((f) => f?.fieldName === 'warehouse')
           ? { warehouse: element?.warehouse ? element?.warehouse : assemblyOrderData?.warehouse?.optionValue }
           : {})
@@ -352,9 +371,37 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
     );
   };
 
+  const handleAssignSerializedPackage = (serializedPackages) => {
+    setSubmitting(true);
+    axiosInstance()
+      .post(`${routes.assemblyOrder.path}/material/${assemblyOrderData._id}/serialized-packages`, serializedPackages)
+      .then(({ data }) => {
+        dispatch({ type: 'selection', selectedRecords: [] });
+        setOpenSerializedPackagesDialog(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchData();
+        setSubmitting(false);
+      })
+      .catch((error) => {
+        setSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const actionButtonMenuItems = () => {
     return (
       <>
+        {selectedRecords?.some((r) => r?.workOrderType === WORK_ORDER_TYPE.disassemblyOrder) && (
+          <MenuItem
+            onClick={() => {
+              setOpenSerializedPackagesDialog(true);
+            }}
+          >{`Assign ${resources?.serializedPackages?.titleSingular}`}</MenuItem>
+        )}
         <MenuItem
           disabled={selectedRecords?.every((e) => !e.hideSelection && e.canDelete) ? false : true}
           onClick={() => {
@@ -437,6 +484,28 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
           loading={isUpdating}
           isBulkedit={false}
           material={material}
+        />
+      )}
+
+      {openSerializedPackagesDialog && (
+        <AssignSerializedPackagesDialog
+          onSuccess={handleAssignSerializedPackage}
+          handleClose={() => {
+            setOpenSerializedPackagesDialog(false);
+          }}
+          extraFilterById={[{ field: 'warehouse', term: { $in: [assemblyOrderData?.warehouse?.optionValue] } }]}
+          extraDeepFilter={[{ field: 'status', term: [SERIALIZED_PACKAGES_STATUS.available, SERIALIZED_PACKAGES_STATUS.underReview] }]}
+          isSubmitting={isSubmitting}
+          ids={dataRows?.map((d) => d?.serializedPackageId)}
+          selectedPackages={selectedRecords
+            ?.filter((r) => [WORK_ORDER_TYPE.disassemblyOrder]?.includes(r?.workOrderType))
+            ?.map((r) => ({
+              uniqueId: r?._id,
+              package: r?.packageDetail?._id,
+              packageName: r?.packageDetail?.packageName,
+              qty: r?.qty,
+              warehouse: r?.warehouse?.optionValue || assemblyOrderData?.warehouse?.optionValue
+            }))}
         />
       )}
     </Fragment>
