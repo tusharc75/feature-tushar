@@ -10,7 +10,7 @@ import {
   EXPENSE_STATUS,
   expenseReport,
   expenses,
-  getUniqueCurrencies,
+  formatAmountWithCurrency,
   gridLoadingTimeout,
   prepareDataForGrid,
   sidebarResource
@@ -79,7 +79,7 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
           return row?.original?.totalAmount ? (
             <div>
               <p className="text-truncate">
-                {getUniqueCurrencies().find((d) => d.currencyCode === row?.original?.currency)?.symbolNative} {row?.original?.totalAmount}
+                {formatAmountWithCurrency(row?.original?.currency, row?.original?.totalAmount)?.fullFormatAmountWithoutSpace}{' '}
               </p>
             </div>
           ) : (
@@ -264,14 +264,14 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
             <CommonSkeleton lenArray={[...Array(8).keys()]} />
           </Box>
         )}
-        <Grid container justifyContent="flex-end" className="mt-2">
+        <Grid container justifyContent="flex-end" className="pt-2">
           <Grid>
-            <TableContainer component={Paper}>
+            <TableContainer className='border'>
               <Table sx={{ minWidth: 400 }} aria-label="spanning table">
                 <TableBody>
                   <TableRow>
                     <TableCell rowSpan={3} />
-                    <TableCell colSpan={2} sx={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
+                    <TableCell colSpan={2} sx={{ fontSize: '1rem' }}>
                       <strong>Total :</strong>
                     </TableCell>
                     <TableCell align="right" sx={{ fontSize: '1rem' }}>{`${subtotal}`}</TableCell>
