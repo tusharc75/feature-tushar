@@ -392,16 +392,28 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
       });
   };
 
+  const checkUniqueWarehouse = (records = []) => {
+    if (!records?.length) return true;
+
+    if (
+      records?.every(
+        (r) => [WORK_ORDER_TYPE.disassemblyOrder]?.includes(r?.workOrderType) && r?.warehouse?.optionValue === records[0]?.warehouse?.optionValue
+      )
+    ) {
+      return false;
+    }
+    return true;
+  };
+
   const actionButtonMenuItems = () => {
     return (
       <>
-        {selectedRecords?.some((r) => r?.workOrderType === WORK_ORDER_TYPE.disassemblyOrder) && (
-          <MenuItem
-            onClick={() => {
-              setOpenSerializedPackagesDialog(true);
-            }}
-          >{`Assign ${resources?.serializedPackages?.titleSingular}`}</MenuItem>
-        )}
+        <MenuItem
+          disabled={checkUniqueWarehouse(selectedRecords?.filter((r) => r?.type === MATERIAL_TYPE.package))}
+          onClick={() => {
+            setOpenSerializedPackagesDialog(true);
+          }}
+        >{`Assign ${resources?.serializedPackages?.titleSingular}`}</MenuItem>
         <MenuItem
           disabled={selectedRecords?.every((e) => !e.hideSelection && e.canDelete) ? false : true}
           onClick={() => {
