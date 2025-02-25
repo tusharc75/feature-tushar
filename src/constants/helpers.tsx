@@ -177,6 +177,10 @@ export const serviceOrderSteps: stepInterface[] = [
   { name: 'Field Ticket Invoice', title: 'Invoices', icon: 'invoice' }
 ];
 
+export const serviceOrderSteps2: stepInterface[] = [
+  { name: 'Add', title: 'Add', icon: 'add' },
+];
+
 export const subcontractAssemblySteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
   { name: 'Loading', title: 'Loading', icon: 'ticket' },

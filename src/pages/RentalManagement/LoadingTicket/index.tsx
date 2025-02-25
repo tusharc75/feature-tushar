@@ -327,7 +327,7 @@ const LoadingTicket = ({
           {
             accessor: 'jobCount',
             Header: assetFields?.find((f) => f.fieldName === 'jobCount')?.fieldLabel || 'Job Count',
-            Cell: ({ row }) => (row?.original?.jobCount ? <h5 className="text-truncate">{row?.original?.jobCount}</h5> : <NoDataCell />)
+            Cell: ({ row }) => (row?.original?.jobCount || row?.original?.jobCount === 0 ? <h5 className="text-truncate">{row?.original?.jobCount}</h5> : <NoDataCell />)
           }
         ]
         : []),

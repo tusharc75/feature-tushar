@@ -313,7 +313,7 @@ const Assign = ({ serializedPackagesData }) => {
 
   const disableAssignSerializedAssets = () => {
     if (selectedRecords.length === 0) return true;
-    const flatArray = selectedRecords.filter((f) => f.type === MATERIAL_TYPE.product && f.qty > f.assetQty);
+    const flatArray = selectedRecords.filter((f) => f.type === MATERIAL_TYPE.product && f.qty > f.assetQty && f?.serializedProduct);
     return flatArray.length === 0;
   };
 
