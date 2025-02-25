@@ -41,101 +41,82 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showItemizeDialog, setShowItemizeDialog] = useState(false);
-  const [value, setValue] = useState('');
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [title, setTitle] = useState('');
-  const [textFields, setTextFields] = useState([]);
+
+  const [lineItems, setLineItems] = useState([]);
+  const [totalAmount, setTotalAmount] = useState(0);
+
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [isDisabled, setIsDisabled] = useState(false);
 
-  const addTextField = () => {
-    setTextFields([...textFields, { id: textFields.length, description: '', amount: '' }]);
-  };
-
-  const handleInputChange = (index, field, event) => {
-    const newFields = [...textFields];
-    newFields[index][field] = event.target.value;
-    setTextFields(newFields);
-  };
-
   const handleChange = (event) => {
-    setValue(event.target.value);
-  };
-
-  const removeTextField = (id) => {
-    setTextFields(textFields.filter((field) => field.id !== id));
-  };
-
-  const calculateTotal = () => {
-    const newValue = textFields
-      .reduce((total, field) => {
-        const amount = parseFloat(field.amount) || 0;
-        return total + amount;
-      }, 0)
-      .toFixed(2);
-    return setValue(newValue);
+    setTotalAmount(parseFloat(event.target.value));
   };
 
   useEffect(() => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.expenses}`)
-      .then(({ data: { data } }) => {
-        const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-        const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-        if (expenseId) {
-          axiosInstance()
-            .get(`${expenses.api}/` + expenseId)
-            .then(({ data: { data } }) => {
-              if (isClone) {
-                const { _id, brand, createdBy, history, expenseNumber, updatedBy, ...rest } = data;
-                setTitle(`Clone - ${expenseNumber}`);
-                rest.expenseNumber = GenerateResourceLineNumber(fieldsDataForCreate);
-                rest.status = EXPENSE_STATUS.unreported;
-                setInitialData({
-                  fields: fieldsDataForCreate,
-                  values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
-                });
-              } else {
-                setValue(data.totalAmount);
-                setTextFields(data.lineItems);
-                if (data.status !== EXPENSE_STATUS.unreported) {
-                  setIsDisabled(true);
-                }
-                setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data.currency)?.symbolNative);
-                setTitle(`Edit - ${data.expenseNumber}`);
-                setInitialData({
-                  fields: fieldsDataForUpdate,
-                  values: { ...getObjKeysWithValues(data, fieldsDataForUpdate) }
-                });
-              }
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
+    const newValue = lineItems.reduce((total, field) => {
+      const amount = parseFloat(field.amount) || 0;
+      return total + amount;
+    }, 0).toFixed(2);
+    setTotalAmount(parseFloat(newValue));
+  }, [lineItems]);
+
+  useEffect(() => {
+    axiosInstance().get(`/field?resource=${sidebarResource.expenses}`).then(({ data: { data } }) => {
+      const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+      if (expenseId) {
+        axiosInstance().get(`${expenses.api}/` + expenseId).then(({ data: { data } }) => {
+          if (isClone) {
+            const { _id, brand, createdBy, history, expenseNumber, updatedBy, ...rest } = data;
+            setTitle(`Clone - ${expenseNumber}`);
+            rest.expenseNumber = GenerateResourceLineNumber(fieldsDataForCreate);
+            rest.status = EXPENSE_STATUS.unreported;
+            setInitialData({
+              fields: fieldsDataForCreate,
+              values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
             });
-        } else {
-          setTitle(`Create ${resources?.expenses?.titleSingular}`);
-          let initialData = getObjKeys('', fieldsDataForCreate);
-          initialData['expenseNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
-          if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
-            initialData['currency'] = user.user?.brandCurrency;
+          } else {
+            setTotalAmount(data.totalAmount);
+            setLineItems(data.lineItems);
+            if (data.status !== EXPENSE_STATUS.unreported) {
+              setIsDisabled(true);
+            }
+            setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data.currency)?.symbolNative);
+            setTitle(`Edit - ${data.expenseNumber}`);
+            setInitialData({
+              fields: fieldsDataForUpdate,
+              values: { ...getObjKeysWithValues(data, fieldsDataForUpdate) }
+            });
           }
-          initialData['users'] = [user?.user?._id];
-          setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === initialData['currency'])?.symbolNative);
-          setInitialData({
-            fields: fieldsDataForCreate,
-            values: initialData
+        })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
           });
+      } else {
+        setTitle(`Create ${resources?.expenses?.titleSingular}`);
+        let initialData = getObjKeys('', fieldsDataForCreate);
+        initialData['expenseNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
+        if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
+          initialData['currency'] = user.user?.brandCurrency;
         }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+        initialData['users'] = [user?.user?._id];
+        setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === initialData['currency'])?.symbolNative);
+        setInitialData({
+          fields: fieldsDataForCreate,
+          values: initialData
+        });
+      }
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
   }, []);
 
-  const handleSubmit = (values) => {
+  const handleSubmit = (values: any) => {
     setIsSubmitting(true);
-    values.totalAmount = value;
-    values.lineItems = textFields;
+    values.totalAmount = totalAmount;
+    values.lineItems = lineItems?.map((e) => { return { ...e, amount: parseFloat(e?.amount) } });
     if (expenseId && isClone === false) {
       values._id = expenseId;
       axiosInstance()
@@ -242,8 +223,8 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
                         required
                         type="number"
                         size="small"
-                        disabled={textFields.length > 0 || isDisabled}
-                        value={showItemizeDialog ? calculateTotal() : value}
+                        disabled={lineItems.length > 0 || isDisabled}
+                        value={totalAmount}
                         onChange={handleChange}
                         fullWidth
                         slotProps={{
@@ -303,17 +284,13 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
               )}
               {showItemizeDialog && (
                 <ItemizeExpenses
-                  open={showItemizeDialog}
                   onClose={() => setShowItemizeDialog(false)}
-                  textFields={textFields}
-                  value={value}
-                  addTextField={addTextField}
+                  setLineItems={setLineItems}
+                  lineItems={lineItems}
+                  currency={values?.currency}
                   currencySymbol={currencySymbol}
-                  removeTextField={removeTextField}
-                  handleInputChange={handleInputChange}
-                  fullScreen={fullScreen}
-                  setFullScreen={setFullScreen}
                   isSubmitting={isSubmitting}
+                  totalAmount={totalAmount}
                 />
               )}
             </>

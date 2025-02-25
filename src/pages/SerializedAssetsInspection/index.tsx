@@ -243,7 +243,7 @@ const SerializedAssetInspection = () => {
     if (showFilteredRecordsOnly) {
       deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
-    return `${deepFilter}&filterType=and`;
+    return `${deepFilter}`;
   };
 
   const handleStatusChange = (status) => {
@@ -267,13 +267,13 @@ const SerializedAssetInspection = () => {
         comment: obj?.reason ? obj?.reason : '',
         reference: { _id: '', type: INVENTORY_HISTORY_TYPE.serializedAssets }
       })
-      .then(() => {
+      .then(({ data }) => {
         dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: `Status changed to ${obj?.status}`
+          message: data?.message
         });
       })
       .catch((error) => {

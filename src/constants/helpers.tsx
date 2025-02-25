@@ -3028,7 +3028,19 @@ export const WORK_ORDER_STATUS = {
 export const WORK_ORDER_TYPE = {
   repairOrder: 'Repair Order',
   productionOrder: 'Production Order',
-  assemblyOrder: 'Assembly Order'
+  assemblyOrder: 'Assembly Order',
+  preInspectionOrder: 'Pre Inspection Order',
+  postInspectionOrder: 'Post Inspection Order',
+  disassemblyOrder: 'Disassembly Order',
+};
+
+export const WORK_ORDER_TYPE_LABEL = {
+  [WORK_ORDER_TYPE.repairOrder]: 'Repair',
+  [WORK_ORDER_TYPE.productionOrder]: 'Production',
+  [WORK_ORDER_TYPE.assemblyOrder]: 'Assembly',
+  [WORK_ORDER_TYPE.preInspectionOrder]: 'Pre Inspection',
+  [WORK_ORDER_TYPE.postInspectionOrder]: 'Post Inspection',
+  [WORK_ORDER_TYPE.disassemblyOrder]: 'Disassembly',
 };
 
 export const IRT_APPROVER_STATUS = {
