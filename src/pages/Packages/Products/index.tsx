@@ -17,7 +17,7 @@ import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { packages, sidebarResource, prepareDataForGrid } from 'src/constants/helpers';
+import { packages, sidebarResource, prepareDataForGrid, WORK_ORDER_TYPE_LABEL, WORK_ORDER_TYPE } from 'src/constants/helpers';
 
 const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false }) => {
   const renderedFrom = `${camelCase(sidebarResource?.packages)}_product`;
@@ -25,7 +25,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
   const { setToastConfig } = useContext(CustomToastContext);
 
   const {
-    state: { permissions, user, resources }
+    state: { permissions, user }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -39,6 +39,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
   const [tabValue, setTabValue] = useState(0);
+  const [selectedResource, setSelectedResource] = useState('');
 
   useEffect(() => {
     fetchColumns();
@@ -46,16 +47,14 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
 
   useEffect(() => {
     fetchData();
-  }, [tabValue]);
+  }, [selectedResource]);
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
     let api = `${packages.api}/${packageId}/products`;
-    if (tabValue === 1) {
-      api += `?type=${sidebarResource.assemblyOrder}`;
-    } else if (tabValue === 2) {
-      api += `?type=${sidebarResource.disassemblyOrder}`;
+    if (selectedResource) {
+      api += `?type=${selectedResource}`;
     }
     axiosInstance()
       .get(api).then(({ data: { data } }) => {
@@ -107,7 +106,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
       .put(`${packages.api}/${packageId}/products`, {
         ids: [row._id],
         qty: Number(data.qty),
-        type: tabValue === 1 ? sidebarResource.assemblyOrder : tabValue === 2 ? sidebarResource.disassemblyOrder : ''
+        type: selectedResource
       })
       .then(({ data }) => {
         setToastConfig({
@@ -124,7 +123,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
     setRemovingProducts(true);
     const productIds = showProductConfirmBox?.data?.map((d) => d._id) || [];
     axiosInstance()
-      .put(`${packages.api}/${packageId}/products/remove`, { ids: productIds, type: tabValue === 1 ? sidebarResource.assemblyOrder : tabValue === 2 ? sidebarResource.disassemblyOrder : '' })
+      .put(`${packages.api}/${packageId}/products/remove`, { ids: productIds, type: selectedResource })
       .then(({ data }) => {
         setRemovingProducts(false);
         setShowProductConfirmBox({ open: false, data: null });
@@ -148,7 +147,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
       .post(`${packages.api}/material`, {
         ids: [packageId],
         products: rows.map((d: any) => ({ product: d.id, qty: Number(d.qty) })),
-        type: tabValue === 1 ? sidebarResource.assemblyOrder : tabValue === 2 ? sidebarResource.disassemblyOrder : ''
+        type: selectedResource
       })
       .then(({ data }) => {
         fetchData();
@@ -199,7 +198,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
       .put(`${packages.api}/material/${packageId}/order`, {
         packageType: 'Product',
         data: rows || [],
-        type: tabValue === 1 ? sidebarResource.assemblyOrder : tabValue === 2 ? sidebarResource.disassemblyOrder : ''
+        type: selectedResource
       })
       .then(() => {
         fetchData();
@@ -226,7 +225,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
             }}
             isExportAllOrSomeFeature={true}
             ids={[]}
-            additionalParams={`refrenceId=${packageId}${tabValue === 1 ? `&type=${sidebarResource.assemblyOrder}` : tabValue === 2 ? `&type=${sidebarResource.disassemblyOrder}` : ''}`}
+            additionalParams={`refrenceId=${packageId}${selectedResource ? `&type=${selectedResource}` : ''}`}
           />
           {dataRows?.length > 0 ? (
             <ThemeButton
@@ -241,17 +240,25 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
   };
 
   const handleMainTabChange = (event: any, newValue: number) => {
+    setSelectedResource(newValue === 1 ? WORK_ORDER_TYPE.assemblyOrder :
+      newValue === 2 ? WORK_ORDER_TYPE.preInspectionOrder :
+        newValue === 3 ? WORK_ORDER_TYPE.postInspectionOrder :
+          newValue === 4 ? WORK_ORDER_TYPE.disassemblyOrder :
+            ''
+    )
     setTabValue(newValue);
   };
 
   return (
     <>
-      {(permissions?.assemblyOrder?.isRead || permissions?.disassemblyOrder?.isRead) && (
+      {(permissions?.assemblyOrder?.isRead) && (
         <>
           <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
             <CustomTab value={0} label={`Individual`} />
-            {permissions?.assemblyOrder?.isRead && <CustomTab value={1} label={`${resources?.assemblyOrder?.titleSingular}`} />}
-            {permissions?.disassemblyOrder?.isRead && <CustomTab value={2} label={`${resources?.disassemblyOrder?.titleSingular}`} />}
+            <CustomTab value={1} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.assemblyOrder]} />
+            <CustomTab value={2} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.preInspectionOrder]} />
+            <CustomTab value={3} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.postInspectionOrder]} />
+            <CustomTab value={4} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.disassemblyOrder]} />
           </CustomTabs>
         </>
       )}

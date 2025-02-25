@@ -13,7 +13,15 @@ import { ListingPageHeader } from '../PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 import { useData } from 'src/StateProvider/Provider';
 
-const AssignSerializedPackagesDialog = ({ onSuccess, handleClose, ids = [], extraDeepFilter = [], extraFilterById = [], isSubmitting = false }) => {
+const AssignSerializedPackagesDialog = ({
+  onSuccess,
+  handleClose,
+  ids = [],
+  extraDeepFilter = [],
+  extraFilterById = [],
+  isSubmitting = false,
+  selectedPackages = []
+}) => {
   const renderedFrom = `${camelCase(sidebarResource?.serializedPackages)}`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -22,6 +30,8 @@ const AssignSerializedPackagesDialog = ({ onSuccess, handleClose, ids = [], extr
   const { generateColumns } = useColumns();
 
   const [columns, setColumns] = useState(null);
+  const [packages, setPackages] = useState([]);
+  const [selectedPackage, setSelectedPackage] = useState(null);
 
   const {
     state: { resources }
@@ -35,7 +45,7 @@ const AssignSerializedPackagesDialog = ({ onSuccess, handleClose, ids = [], extr
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
-  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, selectedPackage]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -87,6 +97,14 @@ const AssignSerializedPackagesDialog = ({ onSuccess, handleClose, ids = [], extr
       });
     }
 
+    if (selectedPackages?.length) {
+      if (selectedPackage) {
+        filterByIds.push({ field: 'package', term: { $in: [selectedPackage] } });
+      } else {
+        filterByIds.push({ field: 'package', term: { $in: selectedPackages?.map((p) => p?.package) } });
+      }
+    }
+
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
@@ -114,6 +132,80 @@ const AssignSerializedPackagesDialog = ({ onSuccess, handleClose, ids = [], extr
     dispatch({ type: 'search', search: e.target.value });
   };
 
+  const handleAdd = () => {
+    if (selectedPackages?.length) {
+      const data = [];
+      selectedPackages?.forEach((ele) => {
+        let qty = ele.qty;
+        while (qty) {
+          const result = selectedRecords?.filter((f) => f.packageId === ele.package && !f.isCounted);
+          if (result.length) {
+            data.push({ uniqueId: ele?.uniqueId, serializedPackage: result[0]._id });
+            result[0].isCounted = true;
+          }
+          qty--;
+        }
+      });
+      onSuccess(data);
+    } else {
+      onSuccess(selectedRecords);
+    }
+  };
+
+  useEffect(() => {
+    let tempPackages = [];
+    selectedPackages?.map((d) => {
+      const alreadyAdded = tempPackages.find((obj) => obj.package === d.package);
+      if (alreadyAdded) {
+        alreadyAdded.qty = d?.qty + alreadyAdded.qty;
+      } else {
+        tempPackages.push({ ...d });
+      }
+    });
+    tempPackages?.forEach((e) => {
+      e.qty = e?.qty - selectedRecords?.filter((obj) => obj.packageId === e.package).length;
+    });
+    setPackages(tempPackages);
+  }, [selectedRecords]);
+
+  const leftSideContents = () => {
+    return (
+      <>
+        <Box style={{ display: 'inline' }}>
+          {packages?.length > 0
+            ? packages?.map((d) => (
+                <Box
+                  m={0.5}
+                  p={1}
+                  border={1}
+                  className={`cursor-pointer rounded-sm ${
+                    selectedPackage === d.package ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
+                  }`}
+                  borderColor="var(--common-border-color)"
+                  onClick={() => {
+                    if (selectedPackage === d.id) {
+                      setSelectedPackage(null);
+                    } else {
+                      setSelectedPackage(d.package);
+                    }
+                  }}
+                  style={{ display: 'inline-block' }}
+                >
+                  {d?.qty < 0 ? (
+                    <span key={d.packageName} className="text-error">{`${d.packageName} (${d?.qty})`}</span>
+                  ) : d?.qty === 0 ? (
+                    <span key={d.packageName} className="text-success">{`${d.packageName} (${d?.qty})`}</span>
+                  ) : (
+                    <span key={d.packageName}>{`${d.packageName} (${d?.qty})`}</span>
+                  )}
+                </Box>
+              ))
+            : null}
+        </Box>
+      </>
+    );
+  };
+
   return (
     <Dialog
       TransitionComponent={CustomDialogTransition}
@@ -136,16 +228,15 @@ const AssignSerializedPackagesDialog = ({ onSuccess, handleClose, ids = [], extr
           searchValue={search}
           onSearch={handleSearch}
           isActionButtonVisible={false}
+          leftSideContents={leftSideContents()}
           addButtonProps={{
-            disabled: isSubmitting || selectedRecords?.length === 0,
+            disabled: isSubmitting || selectedRecords?.length === 0 || packages?.some((d) => d?.qty < 0),
             loading: isSubmitting,
             iconsEnabled: false,
             text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : '',
             textAddShow: true
           }}
-          addButtonOnclick={() => {
-            onSuccess(selectedRecords);
-          }}
+          addButtonOnclick={handleAdd}
           isAddButtonVisible={true}
           setQueryString={false}
         />

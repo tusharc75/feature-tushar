@@ -68,10 +68,13 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
 
   const [columns, setColumns] = useState(null);
 
+  useEffect(() => {
+    fetchFields()
+  }, []);
+
   const fetchFields = () => {
     setColumns(null);
-    axiosInstance()
-      .get(`/field?resource=${serializedAsset.resource}`)
+    axiosInstance().get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
         const newColumns = generateColumns(
           renderedFrom,
@@ -250,7 +253,6 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
   const fetchAssetsData = async (checkAutoComplete = false) => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
-    await fetchFields();
     try {
       let assetData: any = await fetchAssets();
       let ticketData: any = await fetchLoadingTickets();

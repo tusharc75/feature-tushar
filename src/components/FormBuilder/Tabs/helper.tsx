@@ -276,5 +276,22 @@ export const resourcePolicy = [
         defaultValue: false
       }
     ]
-  }
+  },
+  {
+    resource: sidebarResource.fieldServiceOrder,
+    policy: [
+      {
+        fieldName: 'addServicesAndTechnicians',
+        fieldLabel: 'Add Services and Technicians',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
+        fieldName: 'showAddPackages',
+        fieldLabel: 'Show Add Packages',
+        type: 'checkBox',
+        defaultValue: false
+      },
+    ]
+  },
 ];

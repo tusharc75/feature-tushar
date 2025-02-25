@@ -177,6 +177,10 @@ export const serviceOrderSteps: stepInterface[] = [
   { name: 'Field Ticket Invoice', title: 'Invoices', icon: 'invoice' }
 ];
 
+export const serviceOrderSteps2: stepInterface[] = [
+  { name: 'Add', title: 'Add', icon: 'add' },
+];
+
 export const subcontractAssemblySteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
   { name: 'Loading', title: 'Loading', icon: 'ticket' },
@@ -409,7 +413,8 @@ export const sidebarResource = {
   workflowReport: 'Workflow Report',
   equiptAi: 'Equipt Ai',
   productTypes: 'Product Types',
-  packageCategory: 'Package Category'
+  packageCategory: 'Package Category',
+  scheduleMaintenance: 'Schedule Maintenance'
 };
 
 export const primaryFields = {
@@ -3023,7 +3028,19 @@ export const WORK_ORDER_STATUS = {
 export const WORK_ORDER_TYPE = {
   repairOrder: 'Repair Order',
   productionOrder: 'Production Order',
-  assemblyOrder: 'Assembly Order'
+  assemblyOrder: 'Assembly Order',
+  preInspectionOrder: 'Pre Inspection Order',
+  postInspectionOrder: 'Post Inspection Order',
+  disassemblyOrder: 'Disassembly Order',
+};
+
+export const WORK_ORDER_TYPE_LABEL = {
+  [WORK_ORDER_TYPE.repairOrder]: 'Repair',
+  [WORK_ORDER_TYPE.productionOrder]: 'Production',
+  [WORK_ORDER_TYPE.assemblyOrder]: 'Assembly',
+  [WORK_ORDER_TYPE.preInspectionOrder]: 'Pre Inspection',
+  [WORK_ORDER_TYPE.postInspectionOrder]: 'Post Inspection',
+  [WORK_ORDER_TYPE.disassemblyOrder]: 'Disassembly',
 };
 
 export const IRT_APPROVER_STATUS = {

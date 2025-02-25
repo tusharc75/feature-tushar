@@ -19,7 +19,6 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
-
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import {
   ACTIVITY_RESOURCE,
@@ -28,6 +27,7 @@ import {
   checkIsAllowedToEdit,
   fieldServiceOrder,
   serviceOrderSteps,
+  serviceOrderSteps2,
   sidebarResource
 } from '../../constants/helpers';
 import { findOne, objectStore } from '../../constants/indexdbhelper';
@@ -39,6 +39,7 @@ import ServiceOrderViews from './RoadMapViews';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { generateAddFieldTicket } from 'src/pages/FieldServiceOrder/walkmeSteps';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import Material from './material';
 
 const ServiceOrderDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -68,7 +69,7 @@ const ServiceOrderDetailsPage = () => {
   const [currentStep, setCurrentStep] = useState(null);
   const [statusOptions, setStatusOptions] = useState([]);
 
-  const [steps, setSteps] = useState(serviceOrderSteps);
+  const [steps, setSteps] = useState([]);
   const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
   const [resourceData, setResourceData] = useState(null);
 
@@ -79,7 +80,7 @@ const ServiceOrderDetailsPage = () => {
       let newServiceOrderSteps = serviceOrderSteps.filter((s) => s.name !== 'Field Ticket Invoice');
       setSteps(newServiceOrderSteps);
     } else {
-      setSteps(serviceOrderSteps);
+      fetchPolicy();
     }
   }, [isOffline]);
 
@@ -134,14 +135,14 @@ const ServiceOrderDetailsPage = () => {
 
       setAllowedToEdit(
         permissions?.fieldServiceOrder?.isUpdate &&
-          checkIsAllowedToEdit(user, sidebarResource.fieldServiceOrder, data) &&
-          ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
+        checkIsAllowedToEdit(user, sidebarResource.fieldServiceOrder, data) &&
+        ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
       );
       setAllowedToDelete(
         permissions?.fieldServiceOrder?.isDelete &&
-          checkIsAllowedToDelete(user, sidebarResource.fieldServiceOrder, data.owner.optionValue) &&
-          data.canDelete &&
-          ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
+        checkIsAllowedToDelete(user, sidebarResource.fieldServiceOrder, data.owner.optionValue) &&
+        data.canDelete &&
+        ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
       );
       let fieldServiceSteps = permissions?.invoice?.isRead ? steps : steps?.filter((e) => e.name !== 'Field Ticket Invoice');
       setSteps(fieldServiceSteps);
@@ -165,7 +166,14 @@ const ServiceOrderDetailsPage = () => {
         } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.fieldServiceOrder}`);
         if (data) {
           setResourceData(data);
+          if (data?.policy?.addServicesAndTechnicians) {
+            setSteps(serviceOrderSteps2);
+          } else {
+            setSteps(serviceOrderSteps);
+          }
         }
+      } else {
+        setSteps(serviceOrderSteps);
       }
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -302,15 +310,26 @@ const ServiceOrderDetailsPage = () => {
               }}
             />
             {steps[currentStep]?.name === steps[0]?.name && serviceOrderData && (
-              <FieldTicket
-                serviceOrderData={serviceOrderData}
-                serviceOrderFields={serviceOrderFields}
-                setNextStep={setNextStep}
-                allowedToEdit={allowedToEdit}
-                handleChangeStatus={handleChangeStatus}
-                resource={sidebarResource.fieldServiceOrder}
-                fetchServiceOrderData={fetchServiceOrderData}
-              />
+              resourceData?.policy?.addServicesAndTechnicians ? (
+                <Material
+                  serviceOrderData={serviceOrderData}
+                  allowedToEdit={allowedToEdit}
+                  setNextStep={setNextStep}
+                  handleChangeStatus={handleChangeStatus}
+                  resourcePolicy={resourceData?.policy}
+                  stepFullScreen={stepFullScreen}
+                  fetchData={fetchServiceOrderData}
+                />) : (
+                <FieldTicket
+                  serviceOrderData={serviceOrderData}
+                  serviceOrderFields={serviceOrderFields}
+                  setNextStep={setNextStep}
+                  allowedToEdit={allowedToEdit}
+                  handleChangeStatus={handleChangeStatus}
+                  resource={sidebarResource.fieldServiceOrder}
+                  fetchServiceOrderData={fetchServiceOrderData}
+                />
+              )
             )}
             {/* {steps[currentStep]?.name === steps[1]?.name && serviceOrderData && (
               <Services
