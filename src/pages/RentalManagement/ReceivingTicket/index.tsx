@@ -1667,7 +1667,8 @@ const ReceivingTicket = ({
   };
 
   const handleReceivedItems = () => {
-    const statusPolicy = checkAssetPolicy(ASSET_STATUS.underReview, true);
+    const receivingStatus = user?.user?.brandPolicy?.rentalReceivingStatus ? user?.user?.brandPolicy?.rentalReceivingStatus : ASSET_STATUS.underReview;
+    const statusPolicy = checkAssetPolicy(receivingStatus, true);
     if (statusPolicy && onReceiveAssetDataCapture) {
       const returnTicketIds = uniq(map(selectedRecords?.filter((e) => e?.returnTicketId), 'returnTicketId'));
       const records = [...dataRows?.filter((e) => returnTicketIds?.includes(e?.returnTicketId))];
