@@ -172,8 +172,9 @@ const ServiceOrderDetailsPage = () => {
             setSteps(serviceOrderSteps);
           }
         }
+      } else {
+        setSteps(serviceOrderSteps);
       }
-      setSteps(serviceOrderSteps);
     } catch (error) {
       toastConfig.setToastConfig(error);
     }

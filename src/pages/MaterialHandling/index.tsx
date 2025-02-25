@@ -310,34 +310,12 @@ const MaterialHandling = () => {
     {
       fieldData: {
         _id: '630dc2429ec41869052396b7',
-        fieldName: 'fieldServiceOrder',
-        fieldLabel: resources?.fieldServiceOrder?.titlePlural,
-        lookup: true,
-        lookupResource: sidebarResource.fieldServiceOrder,
-        resource: sidebarResource.materialHandling,
-        type: 'dropDown',
-        order: 6,
-        required: false,
-        sectionName: 'Material Handeling Filter',
-        isTooltip: false,
-        editAble: false,
-        brand: user?.user?.brand,
-        roleType: 0,
-        sectionProperties: ''
-      },
-      isRead: true,
-      isCreate: true,
-      isUpdate: true
-    },
-    {
-      fieldData: {
-        _id: '630dc2429ec41869052396b8',
         fieldName: 'createDate',
         fieldLabel: 'Requested Date',
         lookup: false,
         resource: sidebarResource.materialHandling,
         type: 'date',
-        order: 7,
+        order: 6,
         required: false,
         sectionName: 'Material Handeling Filter',
         isTooltip: false,
@@ -427,9 +405,7 @@ const MaterialHandling = () => {
                                     ? data?.workOrderNumber
                                     : data?.referenceType === sidebarResource.fieldTicket
                                       ? data?.fieldTicketNumber
-                                      : data?.referenceType === sidebarResource.fieldServiceOrder
-                                        ? data?.fieldServiceOrderNumber
-                                        : ''}
+                                      : ''}
                                 </span>
                               </Typography>
                               <Box pl={1}>
@@ -440,8 +416,6 @@ const MaterialHandling = () => {
                                       route = routes?.workOrderDetail?.path;
                                     } else if (data?.referenceType === sidebarResource.fieldTicket) {
                                       route = routes.fieldTicketDetail.path;
-                                    } else if (data?.referenceType === sidebarResource.fieldServiceOrder) {
-                                      route = routes.fieldServiceOrderDetail.path;
                                     }
                                     window.open(`${route}/${data?._id}`);
                                   }}
@@ -464,7 +438,7 @@ const MaterialHandling = () => {
                                 </Typography>
                               </>
                             )}
-                            {(data?.referenceType === sidebarResource.fieldTicket || data?.referenceType === sidebarResource.fieldServiceOrder) && (
+                            {data?.referenceType === sidebarResource.fieldTicket && (
                               <>
                                 <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 600 }}>
                                   Customer :{' '}
