@@ -1,6 +1,5 @@
 import { Fragment, useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
-
 import Grid from '@mui/material/Grid2';
 import {
   CustomDialogTransition,
@@ -8,7 +7,6 @@ import {
   sidebarResource,
   serializedAsset,
   getObjKeys,
-  DELIVERY_TICKET_TYPE
 } from '../../../constants/helpers';
 import Dialog from '@mui/material/Dialog';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -34,7 +32,7 @@ export default function AssetDetailsChangeDialog({
   setAssetsData,
   staticLookUpFilters = {},
   productsDefaultData = [],
-  ticketType = null
+  stopAutoIncrementIds = []
 }) {
   const {
     state: { resources }
@@ -94,7 +92,7 @@ export default function AssetDetailsChangeDialog({
             initialValues[`${e.fieldName}_orignal`] = initialValues[e.fieldName];
             initialValues[e.fieldName] = 0;
           } else if (e?.type === 'decimal' && statusPolicy?.autoIncrementDecimalField) {
-            if (!ticketType || (ticketType && ticketType !== DELIVERY_TICKET_TYPE.return)) {
+            if (!stopAutoIncrementIds?.includes(data?._id)) {
               autoIncrementFieldNameValue[`${e.fieldName}_${data?._id}`] = initialValues[e.fieldName] || 0;
               initialValues[e.fieldName] = (initialValues[e.fieldName] || 0) + 1;
             }
