@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem, Table, TableBody, TableCell, TableContainer, TableRow, Typography } from '@mui/material';
+import { Box, IconButton, MenuItem, Table, TableBody, TableCell, TableContainer, TableRow } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
