@@ -275,7 +275,9 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
       if (allFields?.some((f) => f?.fieldName === 'warehouse')) {
         element.warehouse = assemblyOrderData?.warehouse?.optionValue;
       }
-      element.workOrderType = WORK_ORDER_TYPE.assemblyOrder;
+      if (allFields?.some((f) => f?.fieldName === 'workOrderType')) {
+        element.workOrderType = WORK_ORDER_TYPE.assemblyOrder;
+      }
       material.push(element);
     });
 
@@ -393,13 +395,15 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
   };
 
   const checkUniqueWarehouse = (records = []) => {
-    if (!records?.length) return true;
-
-    if (
-      records?.every(
-        (r) => [WORK_ORDER_TYPE.disassemblyOrder]?.includes(r?.workOrderType) && r?.warehouse?.optionValue === records[0]?.warehouse?.optionValue
-      )
-    ) {
+    if (!allFields?.find((f) => f?.fieldName === 'warehouse')) {
+      return true;
+    }
+    if (!records?.length) {
+      return true;
+    }
+    if (records?.every((r) => [WORK_ORDER_TYPE.disassemblyOrder]?.includes(r?.workOrderType)
+      && r?.warehouse?.optionValue === records[0]?.warehouse?.optionValue
+    )) {
       return false;
     }
     return true;
@@ -430,35 +434,31 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
   return (
     <Fragment>
       {allowedToEdit && (
-        <>
-          <DetailsPageHeader
-            isAddButtonVisible={true}
-            addButtonMenuItems={addButtonMenuItems()}
-            isActionButtonVisible={true}
-            actionButtonMenuItems={actionButtonMenuItems()}
-            actionButtonProps={{ disabled: selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true }}
-            hasXpadding
-          />
-        </>
+        <DetailsPageHeader
+          isAddButtonVisible={true}
+          addButtonMenuItems={addButtonMenuItems()}
+          isActionButtonVisible={true}
+          actionButtonMenuItems={actionButtonMenuItems()}
+          actionButtonProps={{ disabled: selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true }}
+          hasXpadding
+        />
       )}
       {columns ? (
-        <>
-          <Box zIndex={5} width={'100%'}>
-            <CustomReactTable
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
-              columns={columns}
-              state={state}
-              dispatch={dispatch}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchData}
-              onSaveEdit={onSaveInlineEdit}
-              hideSelection={!allowedToEdit}
-              hideAction={!allowedToEdit}
-              isClientSideGrid={true}
-              expander={true}
-            />
-          </Box>
-        </>
+        <Box zIndex={5} width={'100%'}>
+          <CustomReactTable
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            refreshGrid={fetchData}
+            onSaveEdit={onSaveInlineEdit}
+            hideSelection={!allowedToEdit}
+            hideAction={!allowedToEdit}
+            isClientSideGrid={true}
+            expander={true}
+          />
+        </Box>
       ) : (
         <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />

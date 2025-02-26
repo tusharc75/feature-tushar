@@ -154,7 +154,8 @@ const ReceivingTicket = ({
     statusPolicy: null,
     _ids: null,
     referenceData: {},
-    ticketType: null
+    ticketType: null,
+    stopAutoIncrementIds: []
   });
   const [assetsData, setAssetsData] = useState([]);
   const [transferAnotherPackageDialog, setTransferAnotherPackageialog] = useState(false);
@@ -163,6 +164,7 @@ const ReceivingTicket = ({
   const [openAssetDataDialog, setOpenAssetDataDialog] = useState(false);
 
   const [allMaterial, setAllMaterial] = useState(false);
+  const [onReceiveAssetDataCapture, setOnReceiveAssetDataCapture] = useState(false);
 
   const {
     state: { user, permissions, selectedEntity, resources }
@@ -601,6 +603,7 @@ const ReceivingTicket = ({
         consumeProducts = productResponse?.data?.data?.consumeProducts;
         productSerialNumbers = productResponse?.data?.data?.productSerialNumbers;
         nonSerializedInventory = productResponse?.data?.data?.nonSerializedInventory;
+        setOnReceiveAssetDataCapture(productResponse?.data?.data?.defaultDeliveryTicketStatus === DELIVERY_TICKET_STATUS.inTransit ? true : false);
 
         const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData._id}/invoice/material-end-date-qty`);
         invoiceData = invoiceResponse?.data?.data?.material || [];
@@ -1234,7 +1237,7 @@ const ReceivingTicket = ({
           {
             accessor: 'jobCount',
             Header: assetFields?.find((f) => f.fieldName === 'jobCount')?.fieldLabel || 'jobCount',
-            Cell: ({ row }) => (row?.original?.jobCount ? <h5 className="text-truncate">{row?.original?.jobCount}</h5> : <NoDataCell />)
+            Cell: ({ row }) => (row?.original?.jobCount || row?.original?.jobCount === 0 ? <h5 className="text-truncate">{row?.original?.jobCount}</h5> : <NoDataCell />)
           }
         ]
         : []),
@@ -1504,17 +1507,27 @@ const ReceivingTicket = ({
     setColumns(column);
   };
 
-  const checkAssetPolicy = (status) => {
+  const checkAssetPolicy = (status, getFromTicketIds = false) => {
     let result: any = null;
     const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === status);
+    let records = selectedRecords;
+    if (getFromTicketIds) {
+      const receivingTicketIds = uniq(map(selectedRecords?.filter((e) => e?.receivingTicketId), 'receivingTicketId'));
+      const returnTicketIds = uniq(map(selectedRecords?.filter((e) => e?.returnTicketId), 'returnTicketId'));
+      records = [
+        ...selectedRecords?.filter((e) => !e?.receivingTicketId && !e?.returnTicketId),
+        ...dataRows?.filter((e) => receivingTicketIds?.includes(e?.receivingTicketId)),
+        ...dataRows?.filter((e) => returnTicketIds?.includes(e?.returnTicketId))
+      ];
+    }
     if (statusPolicy) {
       if (statusPolicy?.products && statusPolicy?.products?.length > 0) {
-        const assetIds = selectedRecords?.filter((r) => r?.type === 'Asset' && statusPolicy?.products?.includes(r?.productId))?.map((a) => a?._id);
+        const assetIds = records?.filter((r) => r?.type === 'Asset' && statusPolicy?.products?.includes(r?.productId))?.map((a) => a?._id);
         if (assetIds && assetIds?.length > 0) {
           result = { statusPolicy: statusPolicy, assetIds: assetIds };
         }
       } else {
-        result = { statusPolicy: statusPolicy, assetIds: selectedRecords?.filter((r) => r?.type === 'Asset')?.map((a) => a?._id) };
+        result = { statusPolicy: statusPolicy, assetIds: records?.filter((r) => r?.type === 'Asset')?.map((a) => a?._id) };
       }
     }
     return result;
@@ -1571,13 +1584,14 @@ const ReceivingTicket = ({
     }
     const receivingStatus = user?.user?.brandPolicy?.rentalReceivingStatus ? user?.user?.brandPolicy?.rentalReceivingStatus : ASSET_STATUS.underReview;
     const statusPolicy = checkAssetPolicy(receivingStatus);
-    if (statusPolicy && selectedRecords?.filter((e) => e.type === 'Asset')?.length) {
+    if (statusPolicy && selectedRecords?.filter((e) => e.type === 'Asset')?.length && !onReceiveAssetDataCapture) {
       setOpenAssetDetailDialog({
         open: open,
         statusPolicy: statusPolicy?.statusPolicy,
         _ids: statusPolicy?.assetIds,
         referenceData: data,
-        ticketType: ticketType
+        ticketType: ticketType,
+        stopAutoIncrementIds: ticketType === DELIVERY_TICKET_TYPE.return ? selectedRecords?.filter((e) => e.type === 'Asset')?.map((e) => e._id) : []
       });
     } else {
       setShowTicketDialog({ open: open, ticketType: ticketType, data: data });
@@ -1587,18 +1601,21 @@ const ReceivingTicket = ({
   const handleAddAssetToRepairJob = (repairJobId) => {
     let assets = uniqBy(selectedRecords, '_id').map((e: any) => ({
       _id: e._id,
-      currentStatus: e.status,
+      currentStatus: e.status
     }));
-    axiosInstance().post(`${repairJob.api}/${repairJobId}/assets`, { assets }).then(({ data }) => {
-      axiosInstance()
-        .patch(`${repairJob.api}/${repairJobId}/status`, { status: REPAIR_JOB_STATUS.inProgress })
-        .then(({ data: { data } }) => { })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-    });
+    axiosInstance()
+      .post(`${repairJob.api}/${repairJobId}/assets`, { assets })
+      .then(({ data }) => {
+        axiosInstance()
+          .patch(`${repairJob.api}/${repairJobId}/status`, { status: REPAIR_JOB_STATUS.inProgress })
+          .then(({ data: { data } }) => { })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const handleAddAssetsToRepairOrder = async (repairOrderData: any) => {
@@ -1649,26 +1666,58 @@ const ReceivingTicket = ({
     }
   };
 
-  const handelProcessTickets = () => {
+  const handleReceivedItems = () => {
+    const receivingStatus = user?.user?.brandPolicy?.rentalReceivingStatus ? user?.user?.brandPolicy?.rentalReceivingStatus : ASSET_STATUS.underReview;
+    const statusPolicy = checkAssetPolicy(receivingStatus, true);
+    if (statusPolicy && onReceiveAssetDataCapture) {
+      const returnTicketIds = uniq(map(selectedRecords?.filter((e) => e?.returnTicketId), 'returnTicketId'));
+      const records = [...dataRows?.filter((e) => returnTicketIds?.includes(e?.returnTicketId))];
+      setOpenAssetDetailDialog({
+        open: true,
+        statusPolicy: statusPolicy?.statusPolicy,
+        _ids: statusPolicy?.assetIds,
+        referenceData: null,
+        ticketType: 'receiveItems',
+        stopAutoIncrementIds: records?.map((e) => e._id)
+      });
+    } else {
+      handelProcessTickets();
+    }
+  };
+
+  const handelProcessTickets = (assetsData = null) => {
     let data = {};
-    const receivingTicketId = uniq(map(selectedRecords, 'receivingTicketId'));
-    const returnTicketId = uniq(map(selectedRecords, 'returnTicketId'));
-    const ticketIds: any = [];
-    receivingTicketId?.forEach((e) => {
-      if (e && e !== undefined) {
-        ticketIds.push(e);
-      }
-    });
-    returnTicketId?.forEach((e) => {
-      if (e && e !== undefined) {
-        ticketIds.push(e);
-      }
-    });
+    const receivingTicketIds = uniq(map(selectedRecords?.filter((e) => e?.receivingTicketId), 'receivingTicketId'));
+    const returnTicketIds = uniq(map(selectedRecords?.filter((e) => e?.returnTicketId), 'returnTicketId'));
+    const ticketIds: any = [...receivingTicketIds, ...returnTicketIds];
+
+    const assets: any = [];
+    if (assetsData) {
+      const records = [
+        ...selectedRecords?.filter((e) => !e?.receivingTicketId && !e?.returnTicketId),
+        ...dataRows?.filter((e) => receivingTicketIds?.includes(e?.receivingTicketId)),
+        ...dataRows?.filter((e) => returnTicketIds?.includes(e?.returnTicketId))
+      ];
+      records?.forEach((ele) => {
+        const obj: any = {
+          asset: ele?._id,
+          uniqueId: ele?.uniqueId,
+          deliveryTicketId: ele?.receivingTicketId || ele?.returnTicketId
+        };
+        const matchedAsset = assetsData?.find((e) => e._id === obj?.asset);
+        if (matchedAsset) {
+          const { _id, ...assetData } = matchedAsset;
+          obj.assetData = assetData;
+        }
+        assets.push(obj);
+      });
+    }
     if (ticketIds.length) {
       data['_ids'] = ticketIds;
       data['status'] = DELIVERY_TICKET_STATUS.delivered;
       data['signatures'] = [];
       data['warehouse'] = rentalManagementData?.warehouse?.optionValue;
+      data['assets'] = assets;
       axiosInstance()
         .post(`${deliveryTicket.api}/updatebulk`, data)
         .then(({ data: { data } }) => {
@@ -1677,7 +1726,7 @@ const ReceivingTicket = ({
             type: 'success',
             message: `Received Successfully`
           });
-          if (receivingTicketId?.length &&
+          if (receivingTicketIds?.length &&
             selectedRecords?.filter((e) => e.type === 'Asset' && !e.subleaseAsset)?.length &&
             user?.user?.brandPolicy?.rentalRepairAutoCreate
           ) {
@@ -2165,7 +2214,7 @@ const ReceivingTicket = ({
                 setShowRemoveAssetFromReceivingTicketDialog,
                 setShowQtyDialog,
                 handelProcessLoadingTickets,
-                handelProcessTickets,
+                handleReceivedItems,
                 isOffline,
                 setIsExistingRentalJob,
                 setAddSerializedAssetDialog,
@@ -2190,7 +2239,7 @@ const ReceivingTicket = ({
                 setOpenAssetDataDialog,
                 assetPolicyData,
                 validateAction,
-                resources
+                resources,
               }}
             />
           }
@@ -2393,15 +2442,19 @@ const ReceivingTicket = ({
         <AssetDetailsChangeDialog
           ids={openAssetDetailDialog._ids}
           statusPolicy={openAssetDetailDialog.statusPolicy}
-          setAssetsData={setAssetsData}
-          ticketType={openAssetDetailDialog.ticketType}
-          onClose={() => setOpenAssetDetailDialog({ open: false, statusPolicy: null, _ids: null, referenceData: null, ticketType: null })}
-          onSuccess={() => {
-            const referenceData = openAssetDetailDialog.referenceData;
-            const ticketType = openAssetDetailDialog.ticketType;
-            setOpenAssetDetailDialog({ open: false, statusPolicy: null, _ids: null, referenceData: null, ticketType: null });
-            setShowTicketDialog({ open: true, ticketType: ticketType, data: referenceData });
+          setAssetsData={openAssetDetailDialog.ticketType === 'receiveItems' ? null : setAssetsData}
+          onClose={() => setOpenAssetDetailDialog({ open: false, statusPolicy: null, _ids: null, referenceData: null, ticketType: null, stopAutoIncrementIds: [] })}
+          onSuccess={(rows) => {
+            if (openAssetDetailDialog.ticketType === 'receiveItems') {
+              handelProcessTickets(rows);
+            } else {
+              const referenceData = openAssetDetailDialog.referenceData;
+              const ticketType = openAssetDetailDialog.ticketType;
+              setShowTicketDialog({ open: true, ticketType: ticketType, data: referenceData });
+            }
+            setOpenAssetDetailDialog({ open: false, statusPolicy: null, _ids: null, referenceData: null, ticketType: null, stopAutoIncrementIds: [] });
           }}
+          stopAutoIncrementIds={openAssetDetailDialog.stopAutoIncrementIds}
         />
       )}
       {showQtyDialog.open && (
@@ -2409,7 +2462,9 @@ const ReceivingTicket = ({
           products={selectedRecords.filter((d: any) => d?.type === 'Product')}
           onSuccess={(data) => {
             setShowQtyDialog({ data: data, open: false });
-            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingStatus ? user?.user?.brandPolicy?.rentalReceivingStatus : ASSET_STATUS.underReview;
+            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingStatus
+              ? user?.user?.brandPolicy?.rentalReceivingStatus
+              : ASSET_STATUS.underReview;
             const statusPolicy = checkAssetPolicy(receivingStatus);
             if (statusPolicy && selectedRecords?.filter((e) => e.type === 'Asset')?.length) {
               setOpenAssetDetailDialog((ps: any) => ({ ...ps, open: true }));
@@ -2743,7 +2798,7 @@ const ActionButtonMenuItems = ({
   setShowRemoveAssetFromReceivingTicketDialog,
   setShowQtyDialog,
   handelProcessLoadingTickets,
-  handelProcessTickets,
+  handleReceivedItems,
   isOffline,
   setIsExistingRentalJob,
   setAddSerializedAssetDialog,
@@ -2767,7 +2822,7 @@ const ActionButtonMenuItems = ({
   setOpenAssetDataDialog,
   assetPolicyData,
   validateAction,
-  resources
+  resources,
 }) => {
   const checkUniqStatus = () => {
     if (selectedRecords.length === 0) {
@@ -3031,7 +3086,7 @@ const ActionButtonMenuItems = ({
             id={'received-items-menu-item'}
             onClick={() => {
               if (validateAction(rentalManagementActions.receiveItems)) {
-                handelProcessTickets();
+                handleReceivedItems();
               }
             }}
             disabled={!permissions?.deliveryTicket?.isUpdate}
