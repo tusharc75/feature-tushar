@@ -104,7 +104,7 @@ const FleetReceiver = () => {
           fleets?.length > 0 ? (
             <Grid container spacing={2}>
               {fleets?.map((data, index) => (
-                <Grid size={{xs:12, sm:6, md:4}}>
+                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                   <Box
                     key={index}
                     className={`${classes.fleetBox} p-[15px] md:p-[27px_20px_45px]`}
@@ -117,9 +117,9 @@ const FleetReceiver = () => {
                         <LocalShippingIcon className="w-full" />
                       </Box>
                       <Box className="basis-[calc(100%-calc(30px+16px))]">
-                        <Typography className={classes.primaryText}>Fleet : {data?.fleet?.fleetNumber}</Typography>
+                        <Typography className={classes.primaryText}>Name : {data?.fleet?.fleetNumber}</Typography>
                         <Typography className={classes.secondaryText}>
-                          <strong>PRS :</strong> {data?.asset?.assetNumber}
+                          <strong>Unit :</strong> {data?.asset?.assetNumber}
                         </Typography>
                         <Typography className={classes.secondaryText}>
                           <strong>Job :</strong> {data?.job?.jobNumber}

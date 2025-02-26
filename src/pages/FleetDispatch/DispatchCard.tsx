@@ -126,22 +126,21 @@ const FleetDispatchBox = ({ data, id, index, cardType }) => {
     <li className={cn(`list-none`)} key={id} style={style} ref={setNodeRef} {...attributes} {...listeners}>
       {cardType === 'fleet' ? (
         <Box
-          className={`${classes.fleetBox} p-[15px]  min-[1201px]:p-[18px_14px_24px_18px] ${
-            shouldChangeBg ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,white)]'
-          }`}
+          className={`${classes.fleetBox} p-[15px]  min-[1201px]:p-[18px_14px_24px_18px] ${shouldChangeBg ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,white)]'
+            }`}
         >
           <div>
             <div className="mb-[14px] md:mb-[24px]">
-              <Typography className={classes.primaryText}>Fleet : {data?.fleetNumber}</Typography>
+              <Typography className={classes.primaryText}>Name : {data?.fleetNumber}</Typography>
               <Typography className={classes.secondaryText}>
                 <strong>Location :</strong> {data?.currentLocation?.optionLabel}
               </Typography>
             </div>
-            <Box className={`${classes.gaugeContainer} gap-4`}>
+            {/* <Box className={`${classes.gaugeContainer} gap-4`}>
               <MetricsWithIcon type="temperature" suffixText={<> °F</>} value={data?.temperature || 30} />
               <MetricsWithIcon type="pressure" suffixText={<> PSI</>} value={data?.pressure || 30} />
               <MetricsWithIcon type="volume" suffixText={<> MMcf</>} value={data?.volume || 30} />
-            </Box>
+            </Box> */}
           </div>
         </Box>
       ) : (
@@ -153,7 +152,7 @@ const FleetDispatchBox = ({ data, id, index, cardType }) => {
             <Box>
               <Typography className={classes.primaryText}>{data?.jobNumber}</Typography>
               <Typography className={classes.primaryText}>
-                <strong>PRS :</strong> {data?.asset?.assetNumber}
+                <strong>Unit :</strong> {data?.asset?.assetNumber}
               </Typography>
               <Typography className={classes.secondaryText}>
                 <strong>Customer :</strong> {data?.customerContact?.optionLabel}
