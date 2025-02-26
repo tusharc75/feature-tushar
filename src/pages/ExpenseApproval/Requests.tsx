@@ -3,10 +3,9 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import { EXPENSE_STATUS, expenseReport, expenses, sidebarResource } from '../../constants/helpers';
+import { EXPENSE_STATUS, expenseReport, sidebarResource } from '../../constants/helpers';
 import Expenses from 'src/pages/ExpensesReport/Expenses';
 
 const Requests = ({ referenceId, fetchDataMaster }) => {
@@ -15,10 +14,6 @@ const Requests = ({ referenceId, fetchDataMaster }) => {
   const [loadingDetails, setLoadingDetails] = useState(true);
   const [rowsData, setRowsData] = useState(null);
   const [resourceData, setResourceData] = useState(null);
-
-  const {
-    state: { user }
-  }: any = useData();
 
   useEffect(() => {
     if (referenceId) {
@@ -37,8 +32,8 @@ const Requests = ({ referenceId, fetchDataMaster }) => {
         setLoadingDetails(false);
       })
       .catch((error) => {
-        setLoadingDetails(false);
         toastConfig.setToastConfig(error);
+        setLoadingDetails(false);
       });
   };
 

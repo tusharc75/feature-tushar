@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem, Paper, Table, TableBody, TableCell, TableContainer, TableRow } from '@mui/material';
+import { Box, IconButton, MenuItem, Table, TableBody, TableCell, TableContainer, TableRow, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
@@ -266,15 +266,17 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
         )}
         <Grid container justifyContent="flex-end" className="pt-2">
           <Grid>
-            <TableContainer className='border'>
+            <TableContainer className="border">
               <Table sx={{ minWidth: 400 }} aria-label="spanning table">
                 <TableBody>
                   <TableRow>
                     <TableCell rowSpan={3} />
                     <TableCell colSpan={2} sx={{ fontSize: '1rem' }}>
-                      <strong>Total :</strong>
+                      <span className="font-medium">Total Amount :</span>
                     </TableCell>
-                    <TableCell align="right" sx={{ fontSize: '1rem' }}>{`${subtotal}`}</TableCell>
+                    <TableCell align="right" sx={{ fontSize: '1rem' }}>
+                      <span className="font-small">{subtotal}</span>
+                    </TableCell>
                   </TableRow>
                 </TableBody>
               </Table>

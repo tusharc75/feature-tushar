@@ -6,7 +6,7 @@ import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTab
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, EXPENSE_STATUS, expenseReport } from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, EXPENSE_STATUS, expenseApproval } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import Grid from '@mui/material/Grid2';
@@ -97,7 +97,7 @@ const ExpenseApproval = () => {
     try {
       let data: any = [],
         count;
-      const response: any = await axiosInstance().get(`${expenseReport.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
+      const response: any = await axiosInstance().get(`${expenseApproval.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
       data = response?.data?.data;
       count = response?.data?.count;
       data = data.filter((item) => item.status === EXPENSE_STATUS.awaitingApproval || item.status === EXPENSE_STATUS.approved);
