@@ -63,10 +63,8 @@ const DispatchDialog = ({ handleClose, handleSucess, fleet, job }) => {
       open={true}
     >
       <CustomDialogHeader
-        title={'Dispatch Fleet'}
-        onClose={(e, reason) => {
-          handleClose();
-        }}
+        title={'Dispatch'}
+        onClose={handleClose}
         isMinimized={!fullScreen}
         onMinimizeMaximize={() => {
           setFullScreen((prevState) => !prevState);
@@ -80,16 +78,16 @@ const DispatchDialog = ({ handleClose, handleSucess, fleet, job }) => {
         </div>
         <Box marginY={2}>
           <Grid spacing={2} container>
-            <Grid size={{xs:12, sm:6, md:6}}>
+            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
               <TextField variant="outlined" type="text" label="Job Number" fullWidth margin="dense" size="small" value={job?.jobNumber} />
             </Grid>
-            <Grid size={{xs:12, sm:6, md:6}}>
-              <TextField variant="outlined" type="text" label="PRS" fullWidth margin="dense" size="small" value={job?.asset?.assetNumber} />
+            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+              <TextField variant="outlined" type="text" label="Unit" fullWidth margin="dense" size="small" value={job?.asset?.assetNumber} />
             </Grid>
-            <Grid size={{xs:12, sm:6, md:6}}>
-              <TextField variant="outlined" type="text" label="Fleet Number" fullWidth margin="dense" size="small" value={fleet?.fleetNumber} />
+            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+              <TextField variant="outlined" type="text" label="Name" fullWidth margin="dense" size="small" value={fleet?.fleetNumber} />
             </Grid>
-            <Grid size={{xs:12, sm:6, md:6}}>
+            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
               <TextField variant="outlined" type="text" label="Location" fullWidth margin="dense" size="small" value={job?.shippingAddress?.optionLabel} />
             </Grid>
           </Grid>
@@ -100,7 +98,7 @@ const DispatchDialog = ({ handleClose, handleSucess, fleet, job }) => {
         </div>
         <Box marginY={2}>
           <Grid spacing={2} container>
-            <Grid size={{xs:12, sm:6, md:6}}>
+            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
               <FormTypes
                 fieldData={null}
                 values={dispatchData}
@@ -124,7 +122,7 @@ const DispatchDialog = ({ handleClose, handleSucess, fleet, job }) => {
                 imageOrFileUploadCompletePercentage={null}
               />
             </Grid>
-            <Grid size={{xs:12, sm:6, md:6}}>
+            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
               <FormTypes
                 fieldData={null}
                 values={dispatchData}
@@ -148,7 +146,7 @@ const DispatchDialog = ({ handleClose, handleSucess, fleet, job }) => {
                 imageOrFileUploadCompletePercentage={null}
               />
             </Grid>
-            <Grid size={{xs:12, sm:6, md:6}}>
+            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
               <TextField
                 variant="outlined"
                 type="text"

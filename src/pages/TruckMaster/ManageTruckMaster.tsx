@@ -41,15 +41,15 @@ const ManageTruckMaster = ({ isClone = false, id = null, onClose, onSuccess }) =
             .get(`${routes?.truckMaster.path}/` + id)
             .then(({ data: { data } }) => {
               if (isClone) {
-                const { _id, brand, createdBy, truckName, updatedBy, ...rest } = data;
-                setTitle(`Clone - ${truckName}`);
+                const { _id, brand, createdBy, fleetNumber, updatedBy, ...rest } = data;
+                setTitle(`Clone - ${fleetNumber}`);
                 setInitialData({
                   fields: fieldsDataForCreate,
                   values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
                 });
                 setLoading(false);
               } else {
-                setTitle(`Editing - ${data.truckName}`);
+                setTitle(`Editing - ${data.fleetNumber}`);
                 setInitialData({
                   fields: fieldsDataForUpdate,
                   values: getObjKeysWithValues(data, fieldsDataForUpdate)
