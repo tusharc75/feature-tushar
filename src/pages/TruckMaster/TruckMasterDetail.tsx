@@ -160,7 +160,7 @@ const TruckMasterDetail = () => {
       <Box className="headerbox-v1">
         <Box className="nav-v1">
           <CustomBreadCrumbs
-            routes={[{ ...routes.truckMaster, title: resources?.truckMaster?.titlePlural }, { title: truckMasterData?.truckName }]}
+            routes={[{ ...routes.truckMaster, title: resources?.truckMaster?.titlePlural }, { title: truckMasterData?.fleetNumber }]}
           />
         </Box>
         <Box className="controls-v1">
@@ -212,7 +212,7 @@ const TruckMasterDetail = () => {
               </ThemeButton>
             )}
             {permissions?.truckMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-            <ActivityButton referenceId={truckMasterData?._id} resource={ACTIVITY_RESOURCE.truckMaster} resourceLabel={truckMasterData?.truckName} />
+            <ActivityButton referenceId={truckMasterData?._id} resource={ACTIVITY_RESOURCE.truckMaster} resourceLabel={truckMasterData?.fleetNumber} />
           </Box>
         </Box>
       </Box>
@@ -254,7 +254,7 @@ const TruckMasterDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.truckMaster?.titleSingular?.toLowerCase()} : ${truckMasterData?.truckName} ?`}
+          message={`Are you sure you want to delete ${resources?.truckMaster?.titleSingular?.toLowerCase()} : ${truckMasterData?.fleetNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
