@@ -10,7 +10,7 @@ import CustomDatePicker from 'src/components/CustomDatePicker';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export default function StartStopDate({ onClose, type, loading, handleSubmit, data = null, minStartDate = null, maxEndDate = null }) {
-  const [initialValues, setInitialValues] = useState({ startDate: new Date(), endDate: new Date() });
+  const [initialValues, setInitialValues] = useState(null);
 
   useEffect(() => {
     if (data) {
@@ -21,7 +21,9 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
     } else {
       if (minStartDate) {
         let date = new Date(minStartDate);
-        setInitialValues({ startDate: date, endDate: date });
+        setInitialValues({ startDate: date, ...(type !== 'startStop' && type !== 'stop' ? {} : { endDate: date }) });
+      } else {
+        setInitialValues({ startDate: new Date(), ...(type !== 'startStop' && type !== 'stop' ? {} : { endDate: new Date() }) });
       }
     }
   }, [data, type]);

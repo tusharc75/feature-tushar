@@ -21,6 +21,7 @@ import StartStopLogsDialog from 'src/pages/FieldTicket/material/StartStopLogsDia
 import StartStopDate from 'src/pages/FieldTicket/material/StartStopDateDialog';
 import { FiExternalLink } from 'react-icons/fi';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
+import { Edit } from '@mui/icons-material';
 
 const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFullScreen }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Technicians`;
@@ -34,7 +35,8 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
     open: false,
     type: null,
     loading: false,
-    minDate: null
+    minDate: null,
+    data: null
   });
   const [viewStartStopLog, setViewStartStopLog] = useState({ open: false, _id: null });
 
@@ -181,19 +183,35 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
         canDrag: false,
         Cell: ({ row }) => {
           return allowedToEdit ? (
-            <HtmlTooltip title={'Delete'}>
-              <span>
-                <IconButton
-                  size="small"
-                  aria-label="Details"
-                  onClick={() => {
-                    setDeleteData([row.original._id]);
-                  }}
-                >
-                  <DeleteIcon fontSize="small" color={'error'} />
-                </IconButton>
-              </span>
-            </HtmlTooltip>
+            <>
+              <HtmlTooltip title={'Delete'}>
+                <span>
+                  <IconButton
+                    size="small"
+                    aria-label="Details"
+                    onClick={() => {
+                      setDeleteData([row.original._id]);
+                    }}
+                  >
+                    <DeleteIcon fontSize="small" color={'error'} />
+                  </IconButton>
+                </span>
+              </HtmlTooltip>
+              {row?.original?.logCount === 1 && (
+                <HtmlTooltip title={`Update Start/End Date`}>
+                  <span>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        setStartEndDateConfermationDialog({ open: true, type: 'startStop', loading: false, minDate: null, data: row?.original });
+                      }}
+                    >
+                      <Edit fontSize="small" color={'primary'} />
+                    </IconButton>
+                  </span>
+                </HtmlTooltip>
+              )}
+            </>
           ) : null;
         }
       }
@@ -284,31 +302,36 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
   };
 
   const handleUpdateStartEndDate = (values, type) => {
-    const value: any = {
-      type: type,
-      referenceId: fieldTicketData?._id,
-      _id: selectedRecords?.map((r) => r?._id)
-    };
+    let value: any;
+    if (type === 'updateLog') {
+      value = values;
+    } else {
+      value = {
+        type: type,
+        referenceId: fieldTicketData?._id,
+        _id: selectedRecords?.map((r) => r?._id)
+      };
+    }
     setStartEndDateConfermationDialog({ ...startEndDateConfermationDialog, loading: true });
-    if (type != 'stop') {
+    if (type !== 'stop') {
       value.startDate = values?.startDate;
     }
     if (type === 'stop' || type === 'startStop') {
       value.endDate = values?.endDate;
     }
     axiosInstance()
-      .put(`${fieldTicket.api}/technician/start-end-date`, value)
+      .put(`${fieldTicket.api}/technician/${type === 'updateLog' ? 'update-log' : 'start-end-date'}`, value)
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data?.message
         });
-        setStartEndDateConfermationDialog({ open: false, type: null, loading: false, minDate: null });
+        setStartEndDateConfermationDialog({ open: false, type: null, loading: false, minDate: null, data: null });
         fetchData();
       })
       .catch((error) => {
-        setStartEndDateConfermationDialog({ open: false, type: null, loading: false, minDate: null });
+        setStartEndDateConfermationDialog({ open: false, type: null, loading: false, minDate: null, data: null });
         toastConfig.setToastConfig(error);
       });
   };
@@ -330,7 +353,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
               date = new Date(Math.max(...dates));
               date.setDate(date.getDate() + 1);
             }
-            setStartEndDateConfermationDialog({ open: true, type: 'start', loading: false, minDate: date });
+            setStartEndDateConfermationDialog({ open: true, type: 'start', loading: false, minDate: date, data: null });
           }}
         >
           Start
@@ -346,7 +369,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
             if (dates?.length) {
               date = new Date(Math.max(...dates));
             }
-            setStartEndDateConfermationDialog({ open: true, type: 'stop', loading: false, minDate: date });
+            setStartEndDateConfermationDialog({ open: true, type: 'stop', loading: false, minDate: date, data: null });
           }}
         >
           Stop
@@ -365,7 +388,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
               date = new Date(Math.max(...dates));
               date.setDate(date.getDate() + 1);
             }
-            setStartEndDateConfermationDialog({ open: true, type: 'startStop', loading: false, minDate: date });
+            setStartEndDateConfermationDialog({ open: true, type: 'startStop', loading: false, minDate: date, data: null });
           }}
         >
           Start/Stop
@@ -450,13 +473,18 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
         <StartStopDate
           type={startEndDateConfermationDialog.type}
           onClose={() => {
-            setStartEndDateConfermationDialog({ open: false, type: null, loading: false, minDate: null });
+            setStartEndDateConfermationDialog({ open: false, type: null, loading: false, minDate: null, data: null });
           }}
-          handleSubmit={(value) => {
-            handleUpdateStartEndDate(value, startEndDateConfermationDialog.type);
+          handleSubmit={(value, _id) => {
+            if (startEndDateConfermationDialog?.data) {
+              handleUpdateStartEndDate({...value, _id}, 'updateLog');
+            } else {
+              handleUpdateStartEndDate(value, startEndDateConfermationDialog.type);
+            }
           }}
           loading={startEndDateConfermationDialog.loading}
           minStartDate={startEndDateConfermationDialog.minDate}
+          data={startEndDateConfermationDialog.data}
         />
       )}
 
