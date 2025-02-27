@@ -8,7 +8,6 @@ import routes from 'src/components/Helpers/Routes';
 import { displayDate, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AssignTechnicianDialog from '../Roadmap/AssignTechnicianDialog';
-import Autocomplete from '@mui/material/Autocomplete';
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import { FiExternalLink } from 'react-icons/fi';
@@ -33,6 +32,27 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
     }
   ];
 
+  const [TECHNICIAN_RESOURCES, SET_TECHNICIAN_RESOURCES] = useState(TECHNICIAN_RESOURCE);
+
+  const fetchfieldServiceOrderPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.fieldServiceOrder}`);
+      if (data?.policy?.addServicesAndTechnicians && permissions?.fieldServiceOrder?.isRead) {
+        const newResources = [...TECHNICIAN_RESOURCE];
+        newResources.push({
+          key: 'fieldServiceOrder',
+          resource: sidebarResource.fieldServiceOrder,
+          title: resources?.fieldServiceOrder?.titleSingular
+        });
+        SET_TECHNICIAN_RESOURCES(newResources);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
   const [serviceTypes, setServiceTypes] = useState([]);
@@ -43,15 +63,19 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    fetchfieldServiceOrderPolicy();
+  }, []);
+
+  useEffect(() => {
     const options: any = [];
-    TECHNICIAN_RESOURCE?.forEach((item) => {
+    TECHNICIAN_RESOURCES?.forEach((item) => {
       if (permissions[item.key] && permissions[item.key]?.isRead === true) {
         options.push(item);
       }
     });
     setServiceTypes(options);
     setSelectedType(options[0]?.key || '');
-  }, []);
+  }, [TECHNICIAN_RESOURCES]);
 
   useEffect(() => {
     updateSelectedRecord(selectedRecords);
@@ -112,18 +136,42 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
       },
       ...(selectedType === 'fieldTicket'
         ? [
+          {
+            accessor: 'fieldTicketNumber',
+            Header: 'Field Ticket',
+            width: 200,
+            Cell: ({ row }) =>
+              row.original['fieldTicketNumber'] ? (
+                <div className="flex items-center gap-1">
+                  <p title={row.original.fieldTicketNumber}>{row.original.fieldTicketNumber}</p>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.fieldTicketDetail.path}/${row.original.resourceId}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                </div>
+              ) : (
+                <NoDataCell />
+              )
+          }
+        ]
+        : selectedType === 'rentalManagement'
+          ? [
             {
-              accessor: 'fieldTicketNumber',
-              Header: 'Field Ticket',
+              accessor: 'rentalJobName',
+              Header: 'Rental Job',
               width: 200,
               Cell: ({ row }) =>
-                row.original['fieldTicketNumber'] ? (
+                row.original['rentalJobName'] ? (
                   <div className="flex items-center gap-1">
-                    <p title={row.original.fieldTicketNumber}>{row.original.fieldTicketNumber}</p>
+                    <p title={row.original.rentalJobName}>{row.original.rentalJobName}</p>
                     <IconButton
                       size="small"
                       onClick={() => {
-                        window.open(`${routes.fieldTicketDetail.path}/${row.original.resourceId}`);
+                        window.open(`${routes.rentalManagementDetail.path}/${row.original.resourceId}`);
                       }}
                     >
                       <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
@@ -134,30 +182,30 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
                 )
             }
           ]
-        : selectedType === 'rentalManagement'
+          : selectedType === 'fieldServiceOrder'
           ? [
-              {
-                accessor: 'rentalJobName',
-                Header: 'Rental Job',
-                width: 200,
-                Cell: ({ row }) =>
-                  row.original['rentalJobName'] ? (
-                    <div className="flex items-center gap-1">
-                      <p title={row.original.rentalJobName}>{row.original.rentalJobName}</p>
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          window.open(`${routes.rentalManagementDetail.path}/${row.original.resourceId}`);
-                        }}
-                      >
-                        <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                      </IconButton>
-                    </div>
-                  ) : (
-                    <NoDataCell />
-                  )
-              }
-            ]
+            {
+              accessor: 'fieldServiceOrderNumber',
+              Header: 'Field Service Order',
+              width: 200,
+              Cell: ({ row }) =>
+                row.original['fieldServiceOrderNumber'] ? (
+                  <div className="flex items-center gap-1">
+                    <p title={row.original.fieldServiceOrderNumber}>{row.original.fieldServiceOrderNumber}</p>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.fieldServiceOrderDetail.path}/${row.original.resourceId}`);
+                      }}
+                    >
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                    </IconButton>
+                  </div>
+                ) : (
+                  <NoDataCell />
+                )
+            }
+          ]
           : []),
       {
         accessor: 'serviceName',
@@ -228,7 +276,6 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
           row.original['estimateEndDate'] ? <p className="text-truncate">{displayDate(row.original.estimateEndDate)}</p> : <NoDataCell />
       }
     ];
-
     setColumns(columns);
   };
 

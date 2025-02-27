@@ -167,9 +167,9 @@ const Technicians = ({ allowedToEdit, serviceOrderData, selectedService, stepFul
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
 
-    let api = `${fieldServiceOrder.api}/${serviceOrderData?._id}/technician`;
+    let api = `${fieldServiceOrder.api}/technician?fieldServiceOrder=${serviceOrderData?._id}`;
     if (selectedService && selectedService?.optionValue !== 'All') {
-      api = `${api}?serviceId=${selectedService?.optionValue}&uniqueId=${selectedService?._id}`;
+      api = `${api}&serviceId=${selectedService?.optionValue}&uniqueId=${selectedService?._id}`;
     }
     axiosInstance()
       .get(api)
@@ -197,7 +197,7 @@ const Technicians = ({ allowedToEdit, serviceOrderData, selectedService, stepFul
   const handleDelete = async (rows) => {
     setIsDeleting(true);
     axiosInstance()
-      .put(`${fieldServiceOrder.api}/${serviceOrderData?._id}/technician`, { ids: rows })
+      .put(`${fieldServiceOrder.api}/technician`, { ids: rows })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -220,6 +220,7 @@ const Technicians = ({ allowedToEdit, serviceOrderData, selectedService, stepFul
     rows.forEach((d) => {
       const element: any = {};
       element.technician = d?._id;
+      element.fieldServiceOrder = serviceOrderData?._id;
       element.uniqueId = selectedService?._id;
       element.service = selectedService?.optionValue !== 'All' ? selectedService?.optionValue : null;
       element.status = 'Assigned';
@@ -229,7 +230,7 @@ const Technicians = ({ allowedToEdit, serviceOrderData, selectedService, stepFul
       technician.push(element);
     });
     axiosInstance()
-      .post(`${fieldServiceOrder.api}/${serviceOrderData?._id}/technician`, { technician })
+      .post(`${fieldServiceOrder.api}/technician`, { technician })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
