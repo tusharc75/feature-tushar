@@ -2,7 +2,7 @@ import { Box, IconButton, MenuItem, Table, TableBody, TableCell, TableContainer,
 import Grid from '@mui/material/Grid2';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -39,8 +39,6 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
   const { selectedRecords } = state;
   const [deleteData, setDeleteData] = useState(null);
   const [subtotal, setSubtotal] = useState(0);
-  const currentDataRef = useRef([]);
-  const deletedIdsRef = useRef(new Set());
   const [selectedExpense, setSelectedExpense] = useState([]);
   const [showAddExistingExpenseModal, setShowAddExistingExpenseModal] = useState(false);
   const [showManageExpensesDialog, setShowManageExpensesDialog] = useState({ open: false, idToClone: null });
@@ -111,14 +109,12 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
         fetchedRows.push(finalObject);
       });
 
-      const deduplicatedFetchedRows = Array.from(new Map(fetchedRows.map((item) => [item._id, item])).values());
-      const filteredRows = deduplicatedFetchedRows.filter((row) => !deletedIdsRef.current.has(row._id));
+      const duplicatedFetchedRows = Array.from(new Map(fetchedRows.map((item) => [item._id, item])).values());
 
-      const sum = filteredRows.reduce((acc, row) => acc + (Number(row.totalAmount) || 0), 0).toFixed(2);
+      const sum = duplicatedFetchedRows.reduce((acc, row) => acc + (Number(row.totalAmount) || 0), 0).toFixed(2);
       setSubtotal(sum);
 
-      currentDataRef.current = filteredRows;
-      dispatch({ type: 'initialize', data: filteredRows, count: filteredRows.length });
+      dispatch({ type: 'initialize', data: duplicatedFetchedRows, count: duplicatedFetchedRows.length });
 
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
@@ -130,7 +126,11 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
   };
 
   const updateExpensesStatus = () => {
-    axiosInstance().patch(`${expenseReport.api}/status/${reportData._id}`, { status: EXPENSE_STATUS.unSubmitted });
+    axiosInstance()
+      .patch(`${expenseReport.api}/status/${reportData._id}`, { status: EXPENSE_STATUS.unSubmitted })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const handleSaveAndSubmit = async (newExpenses) => {
@@ -146,23 +146,25 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
       _id: reportData._id,
       reportTitle: reportData.reportTitle,
       status: reportData.status,
-      expenses: expense
+      expenses: expense,
+      users: [...reportData.users.map((user) => user.optionValue)]
     };
 
-    try {
-      const response = await axiosInstance().put(`${expenseReport.api}`, payload);
-      await updateExpensesStatus();
-      fetchDataMaster();
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: response.data.message
+    await axiosInstance()
+      .put(`${expenseReport.api}`, payload)
+      .then(({ data }) => {
+        updateExpensesStatus();
+        fetchDataMaster();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setIsSubmitting(false);
       });
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
-
-    setIsSubmitting(false);
   };
 
   const ActionsRenderer = {
