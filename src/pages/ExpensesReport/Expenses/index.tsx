@@ -274,10 +274,10 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
                 <TableBody>
                   <TableRow>
                     <TableCell rowSpan={3} />
-                    <TableCell colSpan={2} sx={{ fontSize: '1rem' }}>
+                    <TableCell colSpan={2}>
                       <span className="font-semibold">Total Amount :</span>
                     </TableCell>
-                    <TableCell align="right" sx={{ fontSize: '1rem' }}>
+                    <TableCell align="right">
                       <span className="font-small">{subtotal}</span>
                     </TableCell>
                   </TableRow>
