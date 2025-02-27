@@ -169,16 +169,13 @@ export const assetsReceivingSteps: stepInterface[] = [
 
 export const serviceOrderSteps: stepInterface[] = [
   { name: 'Field Ticket', title: 'Field Tickets', icon: 'receivingTicket' },
-  // { name: 'Add Services', title: 'Add', icon: 'add' },
-  // { name: 'Add Products', title: 'Products', icon: 'assign' },
-  // { name: 'Assign Technician', title: 'Technician', icon: 'assign' },
-  // { name: 'Technician Dispatch', title: 'Dispatch', icon: 'dispatch' },
-  // { name: 'Invoice', title: 'Invoice', icon: 'invoice' },
   { name: 'Field Ticket Invoice', title: 'Invoices', icon: 'invoice' }
 ];
 
 export const serviceOrderSteps2: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
+  { name: 'Technician Dispatch', title: 'Dispatch', icon: 'dispatch' },
+  { name: 'Invoice', title: 'Invoice', icon: 'invoice' },
 ];
 
 export const subcontractAssemblySteps: stepInterface[] = [

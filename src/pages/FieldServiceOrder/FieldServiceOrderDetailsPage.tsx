@@ -110,17 +110,16 @@ const ServiceOrderDetailsPage = () => {
   };
 
   useEffect(() => {
-    if (id) {
+    if (id && steps?.length) {
       getServiceOrderFields();
       fetchServiceOrderData();
-      fetchPolicy();
     }
     if (walkmeInstance && walkmeInstance.type === 'flow') {
       walkmeInstance.instance.push(generateAddFieldTicket(true).steps);
       // immediately start next step
       walkmeInstance.handleNext();
     }
-  }, [id]);
+  }, [id, steps]);
 
   const fetchServiceOrderData = async () => {
     try {
@@ -160,20 +159,16 @@ const ServiceOrderDetailsPage = () => {
 
   const fetchPolicy = async () => {
     try {
-      if (!isOffline) {
-        const {
-          data: { data }
-        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.fieldServiceOrder}`);
-        if (data) {
-          setResourceData(data);
-          if (data?.policy?.addServicesAndTechnicians) {
-            setSteps(serviceOrderSteps2);
-          } else {
-            setSteps(serviceOrderSteps);
-          }
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.fieldServiceOrder}`);
+      if (data) {
+        setResourceData(data);
+        if (data?.policy?.addServicesAndTechnicians) {
+          setSteps(serviceOrderSteps2);
+        } else {
+          setSteps(serviceOrderSteps);
         }
-      } else {
-        setSteps(serviceOrderSteps);
       }
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -235,6 +230,7 @@ const ServiceOrderDetailsPage = () => {
         toastConfig.setToastConfig(error);
       });
   };
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
