@@ -5,6 +5,7 @@ import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
+import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
@@ -378,29 +379,32 @@ const ScheduleMaintenance = () => {
           </Box>
         )}
         {openAssignProductDialog && (
-          <AssignProductDialog
-            handleCloseDialog={() => setOpenAssignProductDialog(false)}
+          <AssignDynamicDialog
+            resource={sidebarResource.product}
             onSuccess={(rows) => {
               setRowsToAdd(rows);
               setOpenCustomDataDialog({ open: true, data: null });
             }}
-            serialized={true}
-            isSubmitting={false}
-            ids={dataRows?.map((d) => d?.materialId)}
-            hideQty={true}
-          />
+            handleClose={() => {
+            setOpenAssignProductDialog(false)
+            }}
+            fromResource={sidebarResource.scheduleMaintenance}
+            isSubmitting={isSubmitting}
+         />
         )}
         {openAssignSerializedAssetDialog && (
-          <AssignSerializedAssetDialog
-            handleClose={() => setOpenAssignSerializedAssetDialog(false)}
-            handleSucess={(rows) => {
-              setRowsToAdd(rows);
-              setOpenCustomDataDialog({ open: true, data: null });
+          <AssignDynamicDialog
+            resource={sidebarResource.serializedAsset}
+            onSuccess={(rows) => {
+            setRowsToAdd(rows);
+            setOpenCustomDataDialog({ open: true, data: null });
             }}
-            isAssigning={false}
-            ids={dataRows?.map((d) => d?.materialId)}
-            reference={null}
-          />
+            handleClose={() => {
+              setOpenAssignSerializedAssetDialog(false)
+            }}
+            fromResource={sidebarResource.scheduleMaintenance}
+            isSubmitting={isSubmitting}
+         />
         )}
         {openCustomDataDialog.open && (
           <ManageScheduleMaintenance

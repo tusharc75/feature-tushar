@@ -13,7 +13,7 @@ import routes from '../Helpers/Routes';
 import { ListingPageHeader } from '../PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
-const AssignDynamicDialog = ({ onSuccess, handleClose, resource, isSubmitting, ids = [], extraDeepFilter = [], extraFilterById = [] }) => {
+const AssignDynamicDialog = ({ onSuccess, handleClose, resource, isSubmitting, ids = [], extraDeepFilter = [], extraFilterById = [], fromResource = null, fromResourceId = null }) => {
 
   const renderedFrom = camelCase(`${resource}`);
 
@@ -116,6 +116,14 @@ const AssignDynamicDialog = ({ onSuccess, handleClose, resource, isSubmitting, i
 
     if (ids?.length > 0) {
       deepFilter = `${deepFilter}&ignoreIds=${JSON.stringify(ids)}`;
+    }
+
+    if(fromResource){
+      deepFilter = `${deepFilter}&fromResource=${fromResource}`;
+    }
+    
+    if(fromResourceId){
+      deepFilter = `${deepFilter}&fromResourceId=${fromResourceId}`;
     }
 
     if (selectedEntity) {

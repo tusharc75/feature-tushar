@@ -520,8 +520,9 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
           handleClose={() => {
             setAddMaterialDialog({ open: false, materialType: '' });
           }}
-          ids={condition?.filter((c) => c?.materialType === addMaterialDialog.materialType)?.map((e) => e.materialId)}
           isSubmitting={isSubmitting}
+          fromResource={sidebarResource.pricingCondition}
+          fromResourceId={pricingConditionId}
         />
       )}
       {addMaterialDialog.open && addMaterialDialog.materialType === MATERIAL_TYPE.package && (
@@ -533,8 +534,9 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
           handleClose={() => {
             setAddMaterialDialog({ open: false, materialType: '' });
           }}
-          ids={condition?.filter((c) => c?.materialType === addMaterialDialog.materialType)?.map((e) => e.materialId)}
           isSubmitting={isSubmitting}
+          fromResource={sidebarResource.pricingCondition}
+          fromResourceId={pricingConditionId}
         />
       )}
       {addMaterialDialog.open && addMaterialDialog.materialType === MATERIAL_TYPE.service && (
@@ -546,7 +548,8 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
           handleClose={() => {
             setAddMaterialDialog({ open: false, materialType: '' });
           }}
-          ids={condition?.filter((c) => c?.materialType === addMaterialDialog.materialType)?.map((e) => e.materialId)}
+          fromResource={sidebarResource.pricingCondition}
+          fromResourceId={pricingConditionId}
           isSubmitting={isSubmitting}
         />
       )}
