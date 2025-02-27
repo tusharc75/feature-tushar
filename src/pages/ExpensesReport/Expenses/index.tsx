@@ -154,6 +154,7 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
       .put(`${expenseReport.api}`, payload)
       .then(({ data }) => {
         updateExpensesStatus();
+        setIsSubmitting(false);
         fetchDataMaster();
         toastConfig.setToastConfig({
           open: true,
