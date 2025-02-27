@@ -872,7 +872,6 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
           onSuccess={(rows) => {
             handleAddConsumables(rows, consumablesDialog?.data ? consumablesDialog?.data : selectedRecords);
           }}
-          serialized={false}
           isSubmitting={isSubmitting}
         />
       )}
@@ -1036,8 +1035,8 @@ const ActionButtonMenuItems = ({
         }}
         disabled={
           selectedRecords?.length &&
-          selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || checkParentProduct([d], d?.parentId)) &&
-          selectedRecords?.every((d) => d.workOrderId === selectedRecords[0]?.workOrderId)
+            selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || checkParentProduct([d], d?.parentId)) &&
+            selectedRecords?.every((d) => d.workOrderId === selectedRecords[0]?.workOrderId)
             ? false
             : true
         }
@@ -1051,7 +1050,7 @@ const ActionButtonMenuItems = ({
         }}
         disabled={
           selectedRecords?.every((s) => s?.workOrderType === selectedRecords[0]?.workOrderType) &&
-          selectedRecords.some((e) => e?.canAutoCompleteWorkOrder)
+            selectedRecords.some((e) => e?.canAutoCompleteWorkOrder)
             ? false
             : true
         }
@@ -1061,8 +1060,8 @@ const ActionButtonMenuItems = ({
       <MenuItem
         disabled={
           checkUniqWorkOrder() &&
-          (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
-            selectedRecords?.filter((e) => checkParentProduct([e], e?.parentId))?.length === 1)
+            (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
+              selectedRecords?.filter((e) => checkParentProduct([e], e?.parentId))?.length === 1)
             ? false
             : true
         }

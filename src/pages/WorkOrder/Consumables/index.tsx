@@ -11,8 +11,6 @@ import {
   OTHER_MATERIAL_TYPE,
   QUOTATION_STATUS,
   WORK_ORDER_TYPE,
-  product,
-  repairOrder,
   sidebarResource,
   workOrder
 } from 'src/constants/helpers';
@@ -691,7 +689,7 @@ const Consumables = ({
                   }))
               );
             }}
-            serialized={false}
+            serialized={workOrderData?.type === WORK_ORDER_TYPE.repairOrder ? false : null}
             extraDeepFilter={[{ field: 'expenseItem', term: 'No' }]}
             isSubmitting={isSubmitting}
           />
