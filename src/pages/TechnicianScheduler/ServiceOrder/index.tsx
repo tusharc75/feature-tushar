@@ -114,6 +114,7 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
           obj.customerAccountId = ele?.customerAccount?.optionValue;
           obj.estimateStartDate = ele?.service?.estimateStartDate;
           obj.estimateEndDate = ele?.service?.estimateEndDate;
+          obj.resourceNumber = ele?.fieldTicketNumber || ele?.fieldServiceOrderNumber || ele?.rentalJobName;
           rows.push(obj);
         });
         dispatch({ type: 'initialize', data: rows, count: rows?.length });
@@ -134,79 +135,29 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
         sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
       },
-      ...(selectedType === 'fieldTicket'
-        ? [
-          {
-            accessor: 'fieldTicketNumber',
-            Header: 'Field Ticket',
-            width: 200,
-            Cell: ({ row }) =>
-              row.original['fieldTicketNumber'] ? (
-                <div className="flex items-center gap-1">
-                  <p title={row.original.fieldTicketNumber}>{row.original.fieldTicketNumber}</p>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      window.open(`${routes.fieldTicketDetail.path}/${row.original.resourceId}`);
-                    }}
-                  >
-                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                  </IconButton>
-                </div>
-              ) : (
-                <NoDataCell />
-              )
-          }
-        ]
-        : selectedType === 'rentalManagement'
-          ? [
-            {
-              accessor: 'rentalJobName',
-              Header: 'Rental Job',
-              width: 200,
-              Cell: ({ row }) =>
-                row.original['rentalJobName'] ? (
-                  <div className="flex items-center gap-1">
-                    <p title={row.original.rentalJobName}>{row.original.rentalJobName}</p>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.rentalManagementDetail.path}/${row.original.resourceId}`);
-                      }}
-                    >
-                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                    </IconButton>
-                  </div>
-                ) : (
-                  <NoDataCell />
-                )
-            }
-          ]
-          : selectedType === 'fieldServiceOrder'
-          ? [
-            {
-              accessor: 'fieldServiceOrderNumber',
-              Header: 'Field Service Order',
-              width: 200,
-              Cell: ({ row }) =>
-                row.original['fieldServiceOrderNumber'] ? (
-                  <div className="flex items-center gap-1">
-                    <p title={row.original.fieldServiceOrderNumber}>{row.original.fieldServiceOrderNumber}</p>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.fieldServiceOrderDetail.path}/${row.original.resourceId}`);
-                      }}
-                    >
-                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                    </IconButton>
-                  </div>
-                ) : (
-                  <NoDataCell />
-                )
-            }
-          ]
-          : []),
+      {
+        accessor: 'resourceNumber',
+        Header: `${selectedType === 'fieldTicket' ? 'Field Ticket' : selectedType === 'fieldServiceOrder' ? 'Field Service Order' : 'Rental Job'}`,
+        width: 200,
+        Cell: ({ row }) =>
+          row.original['resourceNumber'] ? (
+            <div className="flex items-center gap-1">
+              <p title={row.original.resourceNumber}>{row.original.resourceNumber}</p>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(
+                    `${selectedType === 'fieldTicket' ? routes.fieldTicketDetail.path : selectedType === 'fieldServiceOrder' ? routes.fieldServiceOrderDetail.path : routes.rentalManagementDetail.path}/${row.original.resourceId}`
+                  );
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            </div>
+          ) : (
+            <NoDataCell />
+          )
+      },
       {
         accessor: 'serviceName',
         Header: 'Service Name',
