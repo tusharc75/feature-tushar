@@ -41,7 +41,7 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
   const [subtotal, setSubtotal] = useState(0);
   const [selectedExpense, setSelectedExpense] = useState([]);
   const [showAddExistingExpenseModal, setShowAddExistingExpenseModal] = useState(false);
-  const [showManageExpensesDialog, setShowManageExpensesDialog] = useState({ open: false, idToClone: null });
+  const [showManageExpensesDialog, setShowManageExpensesDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteconfirmBox, setDeleteConfirmBox] = useState(false);
@@ -210,7 +210,7 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
         </MenuItem>
         <MenuItem
           onClick={() => {
-            setShowManageExpensesDialog({ open: true, idToClone: null });
+            setShowManageExpensesDialog(true);
           }}
         >
           {`Create New ${resources?.expenses?.titlePlural}`}
@@ -308,12 +308,12 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
             isSubmitting={isSubmitting}
           />
         )}
-        {showManageExpensesDialog.open && (
+        {showManageExpensesDialog && (
           <ManageExpenses
-            expenseId={showManageExpensesDialog.idToClone}
-            onClose={() => setShowManageExpensesDialog({ open: false, idToClone: null })}
+            expenseId={null}
+            onClose={() => setShowManageExpensesDialog(false)}
             onSuccess={async (data) => {
-              setShowManageExpensesDialog({ open: false, idToClone: null });
+              setShowManageExpensesDialog(false);
               handleSaveAndSubmit(data);
               fetchData();
             }}
