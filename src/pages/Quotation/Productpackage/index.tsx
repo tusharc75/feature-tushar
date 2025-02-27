@@ -374,9 +374,6 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       }
       _subRow.subRows = generateNestedData(material, _subRow);
     });
-    if (subRows.length === 0 && parent.type === MATERIAL_TYPE.package) {
-      parent.isValid = false;
-    }
     if (parent.type === MATERIAL_TYPE.package) {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }

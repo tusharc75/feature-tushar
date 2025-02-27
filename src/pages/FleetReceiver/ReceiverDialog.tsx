@@ -59,10 +59,8 @@ const ReceiverDialog = ({ handleClose, handleSucess, data }) => {
       open={true}
     >
       <CustomDialogHeader
-        title={'Receive Fleet'}
-        onClose={(e, reason) => {
-          handleClose();
-        }}
+        title={'Receive'}
+        onClose={handleClose}
         isMinimized={!fullScreen}
         onMinimizeMaximize={() => {
           setFullScreen((prevState) => !prevState);
@@ -76,16 +74,16 @@ const ReceiverDialog = ({ handleClose, handleSucess, data }) => {
         </div>
         <Box marginY={2}>
           <Grid spacing={2} container>
-            <Grid size={{xs:12, sm:6, md:6}}>
+            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
               <TextField variant="outlined" type="text" label="Job Number" fullWidth margin="dense" size="small" value={data?.job?.jobNumber} />
             </Grid>
-            <Grid size={{xs:12, sm:6, md:6}}>
-              <TextField variant="outlined" type="text" label="PRS" fullWidth margin="dense" size="small" value={data?.asset?.assetNumber} />
+            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+              <TextField variant="outlined" type="text" label="Unit" fullWidth margin="dense" size="small" value={data?.asset?.assetNumber} />
             </Grid>
-            <Grid size={{xs:12, sm:6, md:6}}>
-              <TextField variant="outlined" type="text" label="Fleet Number" fullWidth margin="dense" size="small" value={data?.fleet?.fleetNumber} />
+            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+              <TextField variant="outlined" type="text" label="Name" fullWidth margin="dense" size="small" value={data?.fleet?.fleetNumber} />
             </Grid>
-            <Grid size={{xs:12, sm:6, md:6}}>
+            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
               <TextField variant="outlined" type="text" label="Location" fullWidth margin="dense" size="small" value={data?.job?.shippingAddress?.optionLabel} />
             </Grid>
           </Grid>
@@ -96,7 +94,7 @@ const ReceiverDialog = ({ handleClose, handleSucess, data }) => {
         </div>
         <Box marginY={2}>
           <Grid spacing={2} container>
-            <Grid size={{xs:12, sm:6, md:6}}>
+            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
               <FormTypes
                 fieldData={null}
                 values={dispatchData}
@@ -120,7 +118,7 @@ const ReceiverDialog = ({ handleClose, handleSucess, data }) => {
                 imageOrFileUploadCompletePercentage={null}
               />
             </Grid>
-            <Grid size={{xs:12, sm:6, md:6}}>
+            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
               <FormTypes
                 fieldData={null}
                 values={dispatchData}
@@ -144,7 +142,7 @@ const ReceiverDialog = ({ handleClose, handleSucess, data }) => {
                 imageOrFileUploadCompletePercentage={null}
               />
             </Grid>
-            <Grid size={{xs:12, sm:6, md:6}}>
+            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
               <TextField
                 variant="outlined"
                 type="text"
