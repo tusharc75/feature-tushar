@@ -20,10 +20,10 @@ import { FiExternalLink } from 'react-icons/fi';
 
 const renderedFrom = `${camelCase(sidebarResource?.serviceMaster)}_product`;
 
+
 function Product({ id }) {
-  const isMobile = useMediaQuery('(max-width:600px)');
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { dataRows, selectedRecords } = state;
+  const { selectedRecords } = state;
 
   const {
     state: { permissions }
@@ -37,17 +37,7 @@ function Product({ id }) {
   const [openAssignProductDialog, setOpenAssignProductDialog] = useState(false);
 
   const [columns, setColumns] = useState(null);
-  const [anchorActionEl, setAnchorActionEl] = useState(null);
-
   const [isSubmitting, setSubmitting] = useState(false);
-
-  const openActions = (event) => {
-    setAnchorActionEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorActionEl(null);
-  };
 
   useEffect(() => {
     fetchGridColumns();
@@ -114,7 +104,7 @@ function Product({ id }) {
             width: 100,
             Cell: ({ row }) => (
               <div style={{ display: 'flex', alignItems: 'center' }}>
-                <p>{row.original?.productDetail[field?.fieldData?.fieldName] ? 'Yes' : 'No' || <NoDataCell />}</p>
+                <p>{row.original?.productDetail[field?.fieldData?.fieldName] ? 'Yes' : 'No'}</p>
               </div>
             )
           });
@@ -273,21 +263,19 @@ function Product({ id }) {
   const rightSideContents = () => {
     return (
       <>
-        {isMobile ? null : (
-          <ImportExportMenu
-            permissions={permissions?.packages}
-            module="products"
-            api={`${serviceMaster.api}/product/${id}`}
-            afterImportCompleted={() => {
-              fetchData();
-            }}
-            isExportAllOrSomeFeature={true}
-            total={selectedRecords.length}
-            recordsToExport={selectedRecords.length}
-            ids={selectedRecords?.length ? selectedRecords?.map((obj) => obj._id) : []}
-            additionalParams={`serviceId=${id}`}
-          />
-        )}
+        <ImportExportMenu
+          permissions={permissions?.packages}
+          module="products"
+          api={`${serviceMaster.api}/product/${id}`}
+          afterImportCompleted={() => {
+            fetchData();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={selectedRecords.length}
+          recordsToExport={selectedRecords.length}
+          ids={selectedRecords?.length ? selectedRecords?.map((obj) => obj._id) : []}
+          additionalParams={`serviceId=${id}`}
+        />
       </>
     );
   };
@@ -298,7 +286,6 @@ function Product({ id }) {
         <MenuItem
           onClick={() => {
             setShowConfirmBox({ open: true, data: selectedRecords });
-            closeActions();
           }}
         >
           Delete
@@ -359,7 +346,7 @@ function Product({ id }) {
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
-          serialized={false}
+          serialized={permissions?.assemblyOrder?.isRead ? null : false}
           extraDeepFilter={[{ field: 'expenseItem', term: 'No' }]}
           isSubmitting={isSubmitting}
         />
