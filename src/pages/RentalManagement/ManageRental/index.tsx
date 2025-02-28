@@ -132,9 +132,11 @@ const ManageRentalManagementDialog = ({
         }
         initialData['rentalJobName'] = GenerateResourceLineNumber(fieldsDataForCreate);
         if (referenceData) {
-          if (fieldsDataForCreate?.some((e) => e.fieldName === 'warehouse')) {
-            initialData['warehouse'] = referenceData?.warehouse;
-          }
+          Object.keys(referenceData).forEach((_key) => {
+            if (fieldsDataForCreate?.some((e) => e.fieldName === _key)) {
+              initialData[_key] = referenceData[_key];
+            }
+          });
         }
         setRentalData({
           fields: fieldsDataForCreate,
@@ -395,8 +397,8 @@ const ManageRentalManagementDialog = ({
                                         imageOrFileUploadCompletePercentage={
                                           ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                             ? (completePercentage) => {
-                                              setUploadingImageOrFileProgress(completePercentage);
-                                            }
+                                                setUploadingImageOrFileProgress(completePercentage);
+                                              }
                                             : null
                                         }
                                         fields={rentalData.fields}

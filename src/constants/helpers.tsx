@@ -177,9 +177,7 @@ export const serviceOrderSteps: stepInterface[] = [
   { name: 'Field Ticket Invoice', title: 'Invoices', icon: 'invoice' }
 ];
 
-export const serviceOrderSteps2: stepInterface[] = [
-  { name: 'Add', title: 'Add', icon: 'add' },
-];
+export const serviceOrderSteps2: stepInterface[] = [{ name: 'Add', title: 'Add', icon: 'add' }];
 
 export const subcontractAssemblySteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
@@ -190,7 +188,7 @@ export const subcontractAssemblySteps: stepInterface[] = [
 export const assemblyOrderSteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
   { name: 'Work Order', title: 'Work Order', icon: 'workOrder' },
-  { name: 'Loading', title: 'Loading', icon: 'ticket' },
+  // { name: 'Loading', title: 'Loading', icon: 'ticket' },
   { name: 'Final Slip', title: 'Slip', icon: 'invoice' }
 ];
 
