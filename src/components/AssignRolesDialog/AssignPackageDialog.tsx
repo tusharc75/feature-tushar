@@ -1,4 +1,4 @@
-import { Box, Dialog, Grid, IconButton } from '@mui/material';
+import { Box, Dialog, IconButton } from '@mui/material';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -20,6 +20,7 @@ import Services from 'src/pages/Packages/Services';
 import Products from 'src/pages/Packages/Products';
 import Packages from 'src/pages/Packages/Packages';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import Grid from '@mui/material/Grid2';
 
 const AssignPackageDialog = ({
   onSuccess,
@@ -283,7 +284,7 @@ const AssignPackageDialog = ({
         {showConfirmationDialog && (
           <ConfirmationDialog
             open={true}
-            message="Please confirm this if you want to split this quantity into multiple line item(s)?"
+            message="Do you want to split this quantity into multiple line item(s)?"
             onOk={() => {
               setShowConfirmationDialog(false);
               const data: any = [];
@@ -301,6 +302,8 @@ const AssignPackageDialog = ({
               setShowConfirmationDialog(false);
               onSuccess(selectedRecords);
             }}
+            forwardText="Yes"
+            cancelText="No"
           />
         )}
 
@@ -334,7 +337,7 @@ const AssignPackageDialog = ({
                   <CustomTab value={2}>Sub Packages</CustomTab>
                 </CustomTabs>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={12} md={12} lg={12}>
+                  <Grid size={{ md: 12, lg: 12, xs: 12, sm: 12 }}>
                     <TabPanel value={tabValue} index={0}>
                       {tabValue === 0 && <Services packageData={open?.data} packageId={open?.data?._id} allowedToEdit={false} fullHeight={true} />}
                     </TabPanel>
