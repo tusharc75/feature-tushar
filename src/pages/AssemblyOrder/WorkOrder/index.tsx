@@ -376,6 +376,10 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
       }
     });
 
+    if (rows?.every((r) => r?.workOrderStatus === WORK_ORDER_STATUS.completed)) {
+      setNextStep(true);
+    }
+
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };

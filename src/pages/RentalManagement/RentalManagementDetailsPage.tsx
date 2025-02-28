@@ -90,7 +90,6 @@ const RentalManagementDetailsPage = () => {
   const [isDisableCustomerAccount, setIsDisableCustomerAccount] = useState(false);
 
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
-  const [hideDeliveryTicketDelivered, setHideDeliveryTicketDelivered] = useState(false);
 
   const [rentalSteps, setRentalSteps] = useState([]);
 
@@ -137,7 +136,6 @@ const RentalManagementDetailsPage = () => {
     }
     if (!isOffline) {
       fetchAssetStatusRights();
-      checkDeliveryTicketFields();
     }
     if (walkmeInstance && walkmeInstance.type === 'flow') {
       walkmeInstance.instance.push(generateAddExistingProduct(true).steps);
@@ -199,23 +197,6 @@ const RentalManagementDetailsPage = () => {
       .catch((err) => { });
   };
 
-  const checkDeliveryTicketFields = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.deliveryTicket}&view=true`)
-      .then(({ data: { data } }) => {
-        if (data?.length) {
-          data?.some((o) => {
-            if (o?.fieldData?.fieldName === 'status') {
-              if (o?.fieldData?.option?.find((e) => e.default)?.optionValue === DELIVERY_TICKET_STATUS.delivered) {
-                setHideDeliveryTicketDelivered(true);
-              }
-              return true;
-            }
-          });
-        }
-      })
-      .catch((err) => { });
-  };
 
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0 && currentStep <= 7) {
@@ -627,7 +608,6 @@ const RentalManagementDetailsPage = () => {
                 <LoadingTicket
                   fetchRentalData={fetchRentalManagementData}
                   rentalManagementData={rentalManagementData}
-                  currentStep={currentStep}
                   setNextStep={setNextStep}
                   setNextStepToolTip={setNextStepToolTip}
                   renderedFrom={`${renderedFrom}_grid-3`}
@@ -636,7 +616,6 @@ const RentalManagementDetailsPage = () => {
                   allowUpdateStatus={allowUpdateStatus}
                   stepFullScreen={stepFullScreen}
                   rentalPolicyData={resourceData?.policy}
-                  hideDeliveryTicketDelivered={hideDeliveryTicketDelivered}
                 />
               )}
               {['On Field', 'Receiving Ticket']?.includes(rentalSteps[currentStep]?.name) && rentalManagementData && (
@@ -652,7 +631,6 @@ const RentalManagementDetailsPage = () => {
                   stepFullScreen={stepFullScreen}
                   allowUpdateStatus={allowUpdateStatus}
                   rentalPolicyData={resourceData?.policy}
-                  hideDeliveryTicketDelivered={hideDeliveryTicketDelivered}
                 />
               )}
               {rentalSteps[currentStep]?.name === 'Final Slip' && rentalManagementData && (

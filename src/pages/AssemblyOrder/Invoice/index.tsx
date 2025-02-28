@@ -163,10 +163,19 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
           ? _subRow.productDetail?.productName
           : _subRow?.type === MATERIAL_TYPE.serializedAsset
             ? _subRow?.assetDetail?.assetNumber
+            : _subRow?.type === MATERIAL_TYPE.package
+              ? _subRow?.packageDetail?.packageName
+              : '';
+      _subRow.description =
+        _subRow.type === MATERIAL_TYPE.product
+          ? _subRow?.productDetail?.productDescription
+          : _subRow?.type === MATERIAL_TYPE.package
+            ? _subRow?.packageDetail?.packageDescription
             : '';
-      _subRow.description = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription : '';
       _subRow.qty = _subRow.qty || 1;
       _subRow.qtyDisplay = _subRow.qty || 1;
+      _subRow.serializedPackageId = _subRow?.serializedPackageDetail?._id;
+      _subRow.serializedPackageNumber = _subRow?.serializedPackageDetail?.serializedPackageNumber;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
