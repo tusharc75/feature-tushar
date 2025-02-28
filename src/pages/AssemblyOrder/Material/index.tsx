@@ -6,7 +6,6 @@ import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
-import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
@@ -19,7 +18,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { CHILD_RESOURCE, MATERIAL_TYPE, SERIALIZED_PACKAGES_STATUS, warehouse, WORK_ORDER_TYPE } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, SERIALIZED_PACKAGES_STATUS, WORK_ORDER_TYPE } from '../../../constants/helpers';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import MaterialQtyDialog from 'src/pages/AssemblyOrder/Material/MaterialQtyDialog';
@@ -45,6 +44,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
   const [allFields, setAllFields] = useState([]);
   const [isSubmitting, setSubmitting] = useState(false);
   const [openSerializedPackagesDialog, setOpenSerializedPackagesDialog] = useState(false);
+  const [childPackageWithoutParentDialog, setChildPackageWithoutParentDialog] = useState({ open: false, data: null });
   const { generateColumns } = useColumns();
 
   useEffect(() => {
@@ -263,7 +263,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
     return [...subRows, ...serializedPackae];
   };
 
-  const handleAdd = async (rows) => {
+  const handleAdd = async (rows, onlyAddChildren= false ) => {
     setSubmitting(true);
     const material: any = [];
     rows.forEach((d) => {
@@ -278,6 +278,9 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
       if (allFields?.some((f) => f?.fieldName === 'workOrderType')) {
         element.workOrderType = WORK_ORDER_TYPE.assemblyOrder;
       }
+      if (element.type === MATERIAL_TYPE.package && onlyAddChildren) {
+        element.onlyAddChildren = true;
+      }
       material.push(element);
     });
 
@@ -285,6 +288,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
       .post(`${routes.assemblyOrder.path}/material/${assemblyOrderData._id}`, { material })
       .then(({ data }) => {
         dispatch({ type: 'selection', selectedRecords: [] });
+        setChildPackageWithoutParentDialog({ open: false, data: null });
         setAddDialog({ open: false, parentId: null });
         toastConfig.setToastConfig({
           open: true,
@@ -296,6 +300,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
       })
       .catch((error) => {
         setSubmitting(false);
+        setChildPackageWithoutParentDialog({ open: false, data: null });
         toastConfig.setToastConfig(error);
       });
   };
@@ -478,7 +483,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
         <AssignPackageDialog
           handleClose={() => setAddDialog({ open: false, parentId: null })}
           onSuccess={(rows) => {
-            handleAdd(rows);
+            setChildPackageWithoutParentDialog({ open: true, data: rows });
           }}
           isSubmitting={isSubmitting}
           packageType={'product'}
@@ -518,6 +523,22 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
               qty: r?.qty,
               warehouse: r?.warehouse?.optionValue || assemblyOrderData?.warehouse?.optionValue
             }))}
+        />
+      )}
+
+      {childPackageWithoutParentDialog.open && (
+        <ConfirmationDialog
+          open={true}
+          message="Do you want to add child package(s) without parent?"
+          onOk={() => {
+            handleAdd(childPackageWithoutParentDialog.data, true);
+          }}
+          onClose={() => {
+            handleAdd(childPackageWithoutParentDialog.data); 
+          }}
+          forwardText="Yes"
+          cancelText="No"
+          okBtnLoading={isSubmitting}
         />
       )}
     </Fragment>

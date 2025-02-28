@@ -65,7 +65,7 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician, han
       setSelected(data?._id);
     } else if (selectedRecords?.length === 1) {
       handleAssignTechnician(data);
-    } else if (selectedRecords?.length === 0) {
+    } else if (selectedRecords?.length === 0 && data?.technicianHistoryId) {
       handleUnAssignTechnician(data);
     }
   };
