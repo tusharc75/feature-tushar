@@ -1,5 +1,4 @@
 import { Box, IconButton, MenuItem } from '@mui/material';
-import FileCopyIcon from '@mui/icons-material/FileCopy';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -13,7 +12,7 @@ import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { gridLoadingTimeout, prepareDataForGrid, expenseReport, sidebarResource, expenses, EXPENSE_STATUS } from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, expenseReport, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { deleteDisable } from 'src/constants/messageHelpers';

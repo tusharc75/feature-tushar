@@ -14,7 +14,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { EXPENSE_STATUS, expenseReport, expenses, sidebarResource } from '../../constants/helpers';
+import { EXPENSE_STATUS, expenseReport, sidebarResource } from '../../constants/helpers';
 import Step from '../DynamicForm/Step';
 import ManageExpenseReports from 'src/pages/ExpensesReport/ManageExpenseReports';
 import Expenses from 'src/pages/ExpensesReport/Expenses';
@@ -114,37 +114,41 @@ const ExpenseReportDetail = () => {
     }
   };
 
-  const handleDelete = async () => {
-    try {
-      await axiosInstance().put(`${expenseReport.api}/remove`, { ids: [expenseReportData._id] });
-
-      if (expenseReportData?.expenses?.length > 0) {
-        await axiosInstance().patch(`${expenseReport.api}/status/${expenseReportData._id}`, { status: EXPENSE_STATUS.unreported });
-      }
-      setShowConfirmBox(false);
-
-      history.push(`${routes?.expenseReport?.path}`);
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-      setShowConfirmBox(false);
-    }
+  const handleDelete = () => {
+    axiosInstance()
+      .put(`${expenseReport.api}/remove`, { ids: [expenseReportData._id] })
+      .then(() => {
+        setShowConfirmBox(false);
+        history.push(`${routes?.expenseReport?.path}`);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setShowConfirmBox(false);
+      });
   };
 
-  const handleDeleteExpense = async (expenseIds: string[]) => {
-    try {
-      await axiosInstance().put(`${routes.expenseReport.path}/${expenseReportData._id}/expenses/remove`, { expenseIds });
-
-      fetchData();
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+  const handleDeleteExpense = (expenseIds: string[]) => {
+    axiosInstance()
+      .put(`${routes.expenseReport.path}/${expenseReportData._id}/expenses/remove`, { expenseIds })
+      .then(() => {
+        fetchData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const handleStatusChange = (status) => {
-    axiosInstance().patch(`${expenseReport.api}/status/${expenseReportData._id}`, {
-      status
-    });
-    fetchData();
+    axiosInstance()
+      .patch(`${expenseReport.api}/status/${expenseReportData._id}`, {
+        status
+      })
+      .then(() => {
+        fetchData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   return (
@@ -170,13 +174,12 @@ const ExpenseReportDetail = () => {
                       handleStatusChange(
                         expenseReportData?.status === EXPENSE_STATUS.awaitingApproval ? EXPENSE_STATUS.recalled : EXPENSE_STATUS.awaitingApproval
                       );
-                      fetchData();
                     }}
                     mobileTooltip={expenseReportData?.status === EXPENSE_STATUS.awaitingApproval ? 'Recall' : 'Send For Approval'}
                   >
                     {expenseReportData?.status === EXPENSE_STATUS.awaitingApproval ? 'Recall' : 'Send For Approval'}
                   </ThemeButton>
-                  {expenseReportData?.status !== EXPENSE_STATUS.awaitingApproval && (
+                  {allowedToEdit && (
                     <ThemeButton
                       iconForMobile={<Edit />}
                       disabled={!allowedToEdit}

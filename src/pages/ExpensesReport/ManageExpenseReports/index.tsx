@@ -20,7 +20,6 @@ import {
   expenseReport,
   yupSchema,
   sidebarResource,
-  expenses,
   EXPENSE_STATUS,
   getObjKeys
 } from '../../../constants/helpers';
@@ -77,7 +76,7 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
           setTitle(`Create ${resources?.expenseReport?.titleSingular}`);
           let initialData = getObjKeys('', fieldsDataForCreate);
           initialData['status'] = EXPENSE_STATUS.draft;
-          initialData['users'] = user?.user?._id;
+          initialData['users'] = [user?.user?._id];
           setInitialData({
             fields: fieldsDataForCreate,
             values: initialData
