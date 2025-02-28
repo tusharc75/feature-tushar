@@ -630,7 +630,7 @@ const LoadingTicket = ({
         });
       }
       else {
-        let rows = material.filter((e) => e.parentId === null)?.filter((ele) => checkProductInside(ele, material) === true);
+        let rows = material.filter((e) => e.parentId === null)?.filter((ele) => checkProductInside(ele, material));
         newRows = []
         rows.forEach((parent, i) => {
           if (parent.type === MATERIAL_TYPE.product &&
@@ -644,10 +644,11 @@ const LoadingTicket = ({
             parent.type = parent?.type
             parent.serializedProduct = parent?.productDetail?.serializedProduct || false;
             parent.detail = parent.type === MATERIAL_TYPE.package ? parent?.packageDetail?.packageName
-              : parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productName : '';
+              : parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productName
+                : parent.type === MATERIAL_TYPE.service ? parent?.serviceDetail?.serviceName : '';
             parent.description = parent.type === MATERIAL_TYPE.package ? parent?.packageDetail?.packageDescription || ''
-              : parent.type === MATERIAL_TYPE.product
-                ? parent?.productDetail?.productDescription || '' : '';
+              : parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productDescription || '' :
+                parent.type === MATERIAL_TYPE.service ? parent?.serviceDetail?.serviceDescription || '' : '';
             parent.subRows = generateNestedData(parent, material, productAssets, loadingTicketProducts,
               consumeProducts, nonSerializedInventory, nonSerializeAsset, productSerialNumbers);
             newRows.push(parent)
@@ -727,16 +728,20 @@ const LoadingTicket = ({
         subRows = [...subRows, ...subProductRows]
       }
       else {
-        _subRow.index = parent.index + '.' + (subRows?.length + 1);
-        _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct || false;
-        _subRow.detail = _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageName
-          : _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productName : '';
-        _subRow.description = _subRow.type === MATERIAL_TYPE.package
-          ? _subRow?.packageDetail?.packageDescription || '' : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow?.productDetail?.productDescription || '' : '';
-        _subRow.subRows = generateNestedData(_subRow, material, productAssets, loadingTicketProducts,
-          consumeProducts, nonSerializedInventory, nonSerializeAsset, productSerialNumbers);
-        subRows.push(_subRow);
+        if (_subRow.type === MATERIAL_TYPE.service && !material?.find((e) => e.parentId === _subRow._id && e.type === MATERIAL_TYPE.product)) {
+        } else {
+          _subRow.index = parent.index + '.' + (subRows?.length + 1);
+          _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct || false;
+          _subRow.detail = _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageName
+            : _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productName :
+              _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceName : '';
+          _subRow.description = _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageDescription || ''
+            : _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription || '' :
+              _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceDescription || '' : '';
+          _subRow.subRows = generateNestedData(_subRow, material, productAssets, loadingTicketProducts,
+            consumeProducts, nonSerializedInventory, nonSerializeAsset, productSerialNumbers);
+          subRows.push(_subRow);
+        }
       }
     });
     return subRows;
@@ -1858,7 +1863,7 @@ const ActionButtonMenuItems = ({
               }
             }}
             id={'delivered-to-customer-menu-item'}
-            disabled={!permissions?.deliveryTicket?.isUpdate}
+            disabled={!permissions?.deliveryTicket?.isUpdate || getFilterSelectedRecords()?.length === 0}
           >
             Delivered to Customer
           </MenuItem>
@@ -1999,6 +2004,7 @@ const ActionButtonMenuItems = ({
             }
           }}
           id={'last-status-menu-item'}
+          disabled={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.length === 0}
         >
           Replace Asset
         </MenuItem>
@@ -2012,7 +2018,7 @@ const ActionButtonMenuItems = ({
               }
             }}
             id={'cancel-specific-line-item-menu-item'}
-            disabled={!permissions?.deliveryTicket?.isUpdate}
+            disabled={!permissions?.deliveryTicket?.isUpdate || getFilterSelectedRecords()?.length === 0}
           >
             Cancel Specific Line Items
           </MenuItem>
@@ -2026,7 +2032,7 @@ const ActionButtonMenuItems = ({
             }
           }}
           id={'cancel-loading-ticket-menu-item'}
-          disabled={!permissions?.deliveryTicket?.isDelete}
+          disabled={!permissions?.deliveryTicket?.isDelete || getFilterSelectedRecords()?.length === 0}
         >
           Cancel Loading Ticket(s)
         </MenuItem>

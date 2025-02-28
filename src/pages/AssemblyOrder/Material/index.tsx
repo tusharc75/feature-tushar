@@ -263,7 +263,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
     return [...subRows, ...serializedPackae];
   };
 
-  const handleAdd = async (rows, onlyAddChildren= false ) => {
+  const handleAdd = async (rows, onlyAddChildren = false) => {
     setSubmitting(true);
     const material: any = [];
     rows.forEach((d) => {
@@ -529,12 +529,12 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
       {childPackageWithoutParentDialog.open && (
         <ConfirmationDialog
           open={true}
-          message="Do you want to add child package(s) without parent?"
+          message={`Would you like to add only the child ${resources?.packages?.titlePlural} ?`}
           onOk={() => {
             handleAdd(childPackageWithoutParentDialog.data, true);
           }}
           onClose={() => {
-            handleAdd(childPackageWithoutParentDialog.data); 
+            handleAdd(childPackageWithoutParentDialog.data);
           }}
           forwardText="Yes"
           cancelText="No"
