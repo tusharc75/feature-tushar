@@ -105,8 +105,7 @@ const ReceivingTicket = ({
   isProcessor,
   allowUpdateStatus,
   stepFullScreen,
-  rentalPolicyData,
-  hideDeliveryTicketDelivered
+  rentalPolicyData
 }) => {
   const walkmeInstance = useGetWalkmeInstance();
   const { setWalkmeData } = useSetWalkmeData();
@@ -165,6 +164,7 @@ const ReceivingTicket = ({
 
   const [allMaterial, setAllMaterial] = useState(false);
   const [onReceiveAssetDataCapture, setOnReceiveAssetDataCapture] = useState(false);
+  const [hideDeliveryTicketDelivered, setHideDeliveryTicketDelivered] = useState(false);
 
   const {
     state: { user, permissions, selectedEntity, resources }
@@ -604,6 +604,7 @@ const ReceivingTicket = ({
         productSerialNumbers = productResponse?.data?.data?.productSerialNumbers;
         nonSerializedInventory = productResponse?.data?.data?.nonSerializedInventory;
         setOnReceiveAssetDataCapture(productResponse?.data?.data?.defaultDeliveryTicketStatus === DELIVERY_TICKET_STATUS.inTransit ? true : false);
+        setHideDeliveryTicketDelivered(productResponse?.data?.data?.defaultDeliveryTicketStatus === DELIVERY_TICKET_STATUS.delivered ? true : false);
 
         const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData._id}/invoice/material-end-date-qty`);
         invoiceData = invoiceResponse?.data?.data?.material || [];
