@@ -247,7 +247,7 @@ const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource
       </>
     );
   } else if (type === 'dropDown') {
-    let options = [];
+    let options = data?.option && data?.option?.length ? data?.option : []
     if (data?.fieldOption) {
       options = fields?.find((e) => e?.fieldData?.fieldName === data?.fieldOption)?.fieldData?.option || [];
     }
