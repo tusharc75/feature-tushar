@@ -178,11 +178,11 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
         }
       },
       {
-        accessor: 'workOrder',
+        accessor: 'workOrderNumber',
         Header: 'Work Order',
         width: 200,
         Cell: ({ row }) =>
-          row.original.workOrder ? (
+          row.original.workOrderNumber ? (
             <div className="flex items-center gap-2">
               <h5 className="text-truncate">{row.original?.workOrderNumber}</h5>
               <IconButton
