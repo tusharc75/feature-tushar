@@ -268,6 +268,7 @@ const AssemblyOrderDetail = () => {
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={allowedToEdit}
                 setCurrentStep={setCurrentStep}
+                nextStep={nextStep}
               />
             )}
             {/* {assemblyOrderProcessStepsNames[currentStep] === 'Loading' && assemblyOrderData && (
