@@ -47,7 +47,7 @@ const ManageScheduleMaintenance = ({ data = null, handleClose, handleSave, loadi
         {({ values, errors, touched, setFieldValue, submitForm }) => (
           <>
             <CustomDialogHeader
-              title={'Custom Data'}
+              title={`Custom Data (${data['assetNumber'] ? data['assetNumber'] : data['productName']})`}
               onClose={handleClose}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
