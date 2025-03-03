@@ -223,6 +223,16 @@ export const resourcePolicy = [
         fieldLabel: 'Service Price Required',
         type: 'checkBox',
         defaultValue: false
+      },
+      {
+        fieldName: 'loadingReceivingDefaultView',
+        fieldLabel: 'Loading Receiving Default View',
+        type: 'dropDown',
+        option: [
+          { optionValue: 'flat', optionLabel: 'Flat', order: 0 },
+          { optionValue: 'parentChild', optionLabel: 'Parent Child', order: 1 },
+        ],
+        defaultValue: ''
       }
     ]
   },

@@ -133,7 +133,13 @@ const LoadingTicket = ({
   const [hideDeliveryTicketDelivered, setHideDeliveryTicketDelivered] = useState(false);
   const [fieldLabels, setFieldLabels] = useState(null);
 
-  const [view, setView] = useState('flat');
+  const [view, setView] = useState(rentalPolicyData?.loadingReceivingDefaultView || 'flat');
+
+  useEffect(() => {
+    if (rentalPolicyData?.loadingReceivingDefaultView) {
+      setView(rentalPolicyData?.loadingReceivingDefaultView)
+    }
+  }, [rentalPolicyData]);
 
   useEffect(() => {
     fetchPolicy();

@@ -170,7 +170,7 @@ const ReceivingTicket = ({
   const [allMaterial, setAllMaterial] = useState(false);
   const [onReceiveAssetDataCapture, setOnReceiveAssetDataCapture] = useState(false);
   const [hideDeliveryTicketDelivered, setHideDeliveryTicketDelivered] = useState(false);
-  const [view, setView] = useState('flat');
+  const [view, setView] = useState(rentalPolicyData?.loadingReceivingDefaultView || 'flat');
   const [fieldLabels, setFieldLabels] = useState(null);
 
   const {
@@ -197,6 +197,12 @@ const ReceivingTicket = ({
     fetchPolicy();
     fetchFieldLabels()
   }, []);
+
+  useEffect(() => {
+    if (rentalPolicyData?.loadingReceivingDefaultView) {
+      setView(rentalPolicyData?.loadingReceivingDefaultView)
+    }
+  }, [rentalPolicyData]);
 
   useEffect(() => {
     if (fieldLabels) {
