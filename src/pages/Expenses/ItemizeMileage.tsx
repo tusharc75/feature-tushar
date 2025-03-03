@@ -1,12 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import {
-  Dialog,
-  IconButton,
-  TextField,
-  InputAdornment,
-  Box,
-  Autocomplete
-} from '@mui/material';
+import { Dialog, IconButton, TextField, InputAdornment, Box, Autocomplete } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import Grid from '@mui/material/Grid2';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -18,15 +11,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { CustomDialogTransition, formatAmountWithCurrency } from 'src/constants/helpers';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
-const ItemizeMileage = ({
-  onClose,
-  setLineItems,
-  lineItems,
-  currency,
-  currencySymbol,
-  isSubmitting,
-  totalAmount
-}) => {
+const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySymbol, isSubmitting, totalAmount }) => {
   const [touchedFields, setTouchedFields] = useState({});
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [fromSuggestions, setFromSuggestions] = useState([]);
@@ -48,19 +33,13 @@ const ItemizeMileage = ({
   const handleFromInputChange = (event, value, reason) => {
     if (reason === 'input') {
       if (value?.length > 1 && fromAutocompleteServiceRef.current) {
-        fromAutocompleteServiceRef.current.getPlacePredictions(
-          { input: value },
-          (predictions, status) => {
-            if (
-              status === window.google.maps.places.PlacesServiceStatus.OK &&
-              predictions
-            ) {
-              setFromSuggestions(predictions);
-            } else {
-              setFromSuggestions([]);
-            }
+        fromAutocompleteServiceRef.current.getPlacePredictions({ input: value }, (predictions, status) => {
+          if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
+            setFromSuggestions(predictions);
+          } else {
+            setFromSuggestions([]);
           }
-        );
+        });
       } else {
         setFromSuggestions([]);
       }
@@ -70,19 +49,13 @@ const ItemizeMileage = ({
   const handleToInputChange = (event, value, reason) => {
     if (reason === 'input') {
       if (value?.length > 2 && toAutocompleteServiceRef.current) {
-        toAutocompleteServiceRef.current.getPlacePredictions(
-          { input: value },
-          (predictions, status) => {
-            if (
-              status === window.google.maps.places.PlacesServiceStatus.OK &&
-              predictions
-            ) {
-              setToSuggestions(predictions);
-            } else {
-              setToSuggestions([]);
-            }
+        toAutocompleteServiceRef.current.getPlacePredictions({ input: value }, (predictions, status) => {
+          if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
+            setToSuggestions(predictions);
+          } else {
+            setToSuggestions([]);
           }
-        );
+        });
       } else {
         setToSuggestions([]);
       }
@@ -91,9 +64,7 @@ const ItemizeMileage = ({
 
   const handleSelectLocation = (index, prediction, isFrom) => {
     if (!prediction?.place_id || !window.google) return;
-    const placesService = new window.google.maps.places.PlacesService(
-      document.createElement('div')
-    );
+    const placesService = new window.google.maps.places.PlacesService(document.createElement('div'));
 
     placesService.getDetails({ placeId: prediction.place_id }, (placeResult) => {
       if (placeResult && placeResult.geometry) {
@@ -125,16 +96,11 @@ const ItemizeMileage = ({
   };
 
   const isFormValid = () => {
-    return lineItems.every(
-      (item) => item.fromLocation && item.toLocation && item.rate > 0
-    );
+    return lineItems.every((item) => item.fromLocation && item.toLocation && item.rate > 0);
   };
 
   const addLineItem = () => {
-    setLineItems([
-      ...lineItems,
-      { id: lineItems.length, fromLocation: null, toLocation: null, rate: '' }
-    ]);
+    setLineItems([...lineItems, { id: lineItems.length, fromLocation: null, toLocation: null, rate: '', amount: totalAmount }]);
   };
 
   const removeLineItem = (id) => {
@@ -169,7 +135,7 @@ const ItemizeMileage = ({
         showManimizeMaximize={true}
       />
       <CustomDialogContent>
-        <Box>
+        <div>
           <Box pb={2}>
             <ThemeButton startIcon={<AddIcon fontSize="small" />} onClick={addLineItem}>
               Add
@@ -177,16 +143,12 @@ const ItemizeMileage = ({
           </Box>
           {lineItems.map((item, index) => (
             <Grid container spacing={2} key={item.id} alignItems="center" sx={{ marginBottom: 2 }}>
-              <Grid size={{xs:6}}>
+              <Grid size={{ xs: 6 }}>
                 <Autocomplete
                   options={fromSuggestions}
                   filterOptions={(x) => x}
                   getOptionLabel={(option) => option?.description || ''}
-                  value={
-                    item.fromLocation
-                      ? { description: item.fromLocation.description }
-                      : null
-                  }
+                  value={item.fromLocation ? { description: item.fromLocation.description } : null}
                   onInputChange={handleFromInputChange}
                   onChange={(event, newValue) => {
                     if (newValue) {
@@ -204,26 +166,18 @@ const ItemizeMileage = ({
                       size="small"
                       onBlur={() => handleBlur(index, 'fromLocation')}
                       error={touchedFields[index]?.fromLocation && !item.fromLocation}
-                      helperText={
-                        touchedFields[index]?.fromLocation && !item.fromLocation
-                          ? 'Location is required'
-                          : ''
-                      }
+                      helperText={touchedFields[index]?.fromLocation && !item.fromLocation ? 'Location is required' : ''}
                       required
                     />
                   )}
                 />
               </Grid>
-              <Grid size={{xs:6}}>
+              <Grid size={{ xs: 6 }}>
                 <Autocomplete
                   options={toSuggestions}
                   filterOptions={(x) => x}
                   getOptionLabel={(option) => option?.description || ''}
-                  value={
-                    item.toLocation
-                      ? { description: item.toLocation.description }
-                      : null
-                  }
+                  value={item.toLocation ? { description: item.toLocation.description } : null}
                   onInputChange={handleToInputChange}
                   onChange={(event, newValue) => {
                     if (newValue) {
@@ -241,17 +195,13 @@ const ItemizeMileage = ({
                       size="small"
                       onBlur={() => handleBlur(index, 'toLocation')}
                       error={touchedFields[index]?.toLocation && !item.toLocation}
-                      helperText={
-                        touchedFields[index]?.toLocation && !item.toLocation
-                          ? 'Location is required'
-                          : ''
-                      }
+                      helperText={touchedFields[index]?.toLocation && !item.toLocation ? 'Location is required' : ''}
                       required
                     />
                   )}
                 />
               </Grid>
-              <Grid size={{xs:6}}>
+              <Grid size={{ xs: 6 }}>
                 <TextField
                   label="Rate"
                   type="number"
@@ -262,29 +212,10 @@ const ItemizeMileage = ({
                   fullWidth
                   required
                   error={touchedFields[index]?.rate && item.rate <= 0}
-                  helperText={
-                    touchedFields[index]?.rate && item.rate <= 0
-                      ? 'Rate is required'
-                      : ''
-                  }
+                  helperText={touchedFields[index]?.rate && item.rate <= 0 ? 'Rate is required' : ''}
                 />
               </Grid>
-              <Grid size={{xs:6}}>
-                <TextField
-                  label="Amount"
-                  type="number"
-                  size="small"
-                  value={totalAmount}
-                  disabled
-                  fullWidth
-                  slotProps={{
-                    input: {
-                      startAdornment: <InputAdornment position="start">{currencySymbol}</InputAdornment>
-                    }
-                  }}
-                />
-              </Grid>
-              <Grid size={{xs:2}}>
+              <Grid size={{ xs: 2 }}>
                 <HtmlTooltip title="Remove">
                   <IconButton onClick={() => removeLineItem(item.id)} aria-label="delete">
                     <DeleteIcon color="error" fontSize="small" />
@@ -293,19 +224,16 @@ const ItemizeMileage = ({
               </Grid>
             </Grid>
           ))}
-        </Box>
+          <div className="grid justify-end pt-3">
+            <span className="font-medium">Total Amount: {formatAmountWithCurrency(currency, totalAmount)?.fullFormatAmountWithoutSpace}</span>
+          </div>
+        </div>
       </CustomDialogContent>
       <CustomDialogFooter>
         <ThemeButton buttonType="transparent" id="dialog-cancel-button" onClick={onClose}>
           Cancel
         </ThemeButton>
-        <ThemeButton
-          isLoading={isSubmitting}
-          buttonType="theme"
-          id="dialog-save-button"
-          disabled={!isFormValid() || isSubmitting}
-          onClick={onClose}
-        >
+        <ThemeButton isLoading={isSubmitting} buttonType="theme" id="dialog-save-button" disabled={!isFormValid() || isSubmitting} onClick={onClose}>
           Save
         </ThemeButton>
       </CustomDialogFooter>
