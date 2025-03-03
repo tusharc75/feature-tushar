@@ -3,11 +3,8 @@ import { Box, IconButton, Menu, MenuItem } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
-import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
-import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -23,15 +20,17 @@ import { displayDate, MATERIAL_TYPE, prepareDataForGrid, product, sidebarResourc
 import ManageScheduleMaintenance from 'src/pages/ScheduleMaintenance/ManageScheduleMaintenance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
+import queryString from 'query-string';
+import { useHistory } from 'react-router-dom';
 
 const ScheduleMaintenance = () => {
   const { setToastConfig } = useContext(CustomToastContext);
 
-  const renderedFrom = camelCase(sidebarResource.scheduleMaintenance);
-
   const {
     state: { permissions, resources }
   }: any = useData();
+
+  const history = useHistory();
 
   const types = [
     {
@@ -44,6 +43,8 @@ const ScheduleMaintenance = () => {
     }
   ];
 
+  const { type }: any = queryString.parse(history.location.search);
+
   const [columns, setColumns] = useState(null);
   const [openAssignProductDialog, setOpenAssignProductDialog] = useState(false);
   const [openAssignSerializedAssetDialog, setOpenAssignSerializedAssetDialog] = useState(false);
@@ -52,16 +53,19 @@ const ScheduleMaintenance = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, data: null });
   const [isDeleting, setIsDeleting] = useState(false);
-  const [selectedType, setSelectedType] = useState(1);
+  const [selectedType, setSelectedType] = useState(type || 1);
+
+  const renderedFrom = `${camelCase(sidebarResource.scheduleMaintenance)}_${selectedType}`;
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { rowCount, dataRows, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchGridColumns();
   }, [selectedType]);
+
 
   const fetchGridColumns = async () => {
     setColumns(null);
@@ -244,7 +248,7 @@ const ScheduleMaintenance = () => {
     const { data } = showConfirmBox;
     axiosInstance()
       .put(`${product.api}/scheduledMaintenance/remove`, {
-        ids: data?.map((d) => d?._id)
+        ids: data?.map((d) => d?.uniqueId)
       })
       .then(() => {
         dispatch({ type: 'selection', selectedRecords: [] });
@@ -386,25 +390,25 @@ const ScheduleMaintenance = () => {
               setOpenCustomDataDialog({ open: true, data: null });
             }}
             handleClose={() => {
-            setOpenAssignProductDialog(false)
+              setOpenAssignProductDialog(false)
             }}
             fromResource={sidebarResource.scheduleMaintenance}
             isSubmitting={isSubmitting}
-         />
+          />
         )}
         {openAssignSerializedAssetDialog && (
           <AssignDynamicDialog
             resource={sidebarResource.serializedAsset}
             onSuccess={(rows) => {
-            setRowsToAdd(rows);
-            setOpenCustomDataDialog({ open: true, data: null });
+              setRowsToAdd(rows);
+              setOpenCustomDataDialog({ open: true, data: null });
             }}
             handleClose={() => {
               setOpenAssignSerializedAssetDialog(false)
             }}
             fromResource={sidebarResource.scheduleMaintenance}
             isSubmitting={isSubmitting}
-         />
+          />
         )}
         {openCustomDataDialog.open && (
           <ManageScheduleMaintenance
