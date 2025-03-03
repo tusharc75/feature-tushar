@@ -124,22 +124,6 @@ export const removeAssetsInRental = async (id, assets) => {
     }
 }
 
-export const uniqueProduct = (material, nonSerializedInventory) => {
-    const result: any = []
-    material.filter((e) => !e?.productDetail?.serializedProduct && e.type === MATERIAL_TYPE.product)?.forEach((ele) => {
-        const warehouseProduct = nonSerializedInventory?.filter((e) => e._id === ele._id);
-        if (warehouseProduct?.length) {
-            warehouseProduct.forEach(element => {
-                result.push({ ...ele, qty: element.qty, warehouse: element.warehouse })
-            });
-        }
-        else {
-            result.push({ ...ele, qty: getNestedQty(material, ele) })
-        }
-    })
-    return result;
-}
-
 export const getNestedQty = (material, parent) => {
     const subRows: any = material.filter((e) => e._id === parent.parentId);
     if (subRows.length === 1) {
