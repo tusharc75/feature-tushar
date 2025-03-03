@@ -3964,3 +3964,13 @@ export function sortByAnotherArray(targetArray, orderArray) {
     return index === -1 ? Infinity : index;
   });
 }
+
+export const STANDARD_SUPPORTED_IMAGE_TYPES = {
+  'image/jpeg': ['.jpg', '.jpeg'],
+  'image/png': ['.png'],
+  'image/gif': ['.gif'],
+  'image/bmp': ['.bmp'],
+  'image/webp': ['.webp'],
+  'image/heic': ['.heic'],
+  'image/heif': ['.heif']
+};
