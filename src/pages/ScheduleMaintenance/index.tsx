@@ -68,8 +68,9 @@ const ScheduleMaintenance = () => {
 
 
   const fetchGridColumns = async () => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'initialize', data: [], count: 0 });
     setColumns(null);
-
     let response = await axiosInstance().get(`/field?resource=${selectedType === 1 ? sidebarResource.product : sidebarResource.serializedAsset}&view=true`);
     const fields = response?.data?.data?.map((e) => e?.fieldData);
 

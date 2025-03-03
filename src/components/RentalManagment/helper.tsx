@@ -1,5 +1,5 @@
 
-import { CHILD_RESOURCE, PRICING_SETUP_TYPE, getObjKeysWithValues, pricingCondition } from '../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, getObjKeysWithValues, pricingCondition } from '../../constants/helpers';
 import { objectStore, findOne } from '../../constants/indexdbhelper';
 import axiosInstance from '../../axios/axiosInstance';
 import { autoCalculateSpecificFields, CURReplaceByCurrencySingle } from '../../constants/formulaUtility';
@@ -398,3 +398,17 @@ export const getUniqueWellNumber = (data) => {
     return uniq(wellNumber);
 }
 
+
+export const checkProductInside = (item, material) => {
+    if (item?.type === MATERIAL_TYPE.product) {
+        return true;
+    }
+    const child = material?.filter((e) => e.parentId === item?._id);
+    if (child?.some((e) => e?.type === MATERIAL_TYPE.product)) {
+        return true;
+    }
+    if (child?.filter((e) => e?.type === MATERIAL_TYPE.package)?.some((ele) => checkProductInside(ele, material))) {
+        return true;
+    }
+    return false;
+};

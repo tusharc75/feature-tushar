@@ -21,7 +21,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
+import { checkProductInside, fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 import {
   ASSET_STATUS,
   DELIVERY_TICKET_REFERENCE_TYPE,
@@ -324,19 +324,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     }
   };
 
-  const checkProductInside = (item, material) => {
-    if (item?.type === 'product') {
-      return true;
-    }
-    const child = material?.filter((e) => e.parentId === item?._id);
-    if (child?.some((e) => e?.type === 'product')) {
-      return true;
-    }
-    if (child?.filter((e) => e?.type === 'package')?.some((ele) => checkProductInside(ele, material))) {
-      return true;
-    }
-    return false;
-  };
 
   const fetchData = async () => {
     setNextStep(false);
