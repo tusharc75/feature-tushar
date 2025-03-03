@@ -2,7 +2,7 @@ import { Box, Dialog, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import Autocomplete from '@mui/material/Autocomplete';
 import { FieldArray, Form, Formik } from 'formik';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -13,8 +13,11 @@ import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { useData } from 'src/StateProvider/Provider';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const SerializedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderIds = null }) => {
+  const { setToastConfig } = useContext(CustomToastContext);
+
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialValues, setInitialValues] = useState({ serializedPackages: [] });
   const [packageOptions, setPackageOptions] = useState([]);
@@ -49,7 +52,7 @@ const SerializedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrde
           }))
         });
       })
-      .catch((error) => { });
+      .catch((error) => {});
   }, [assemblyOrderId]);
 
   const fetchFieldLabel = async () => {
@@ -94,7 +97,9 @@ const SerializedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrde
       .then((res) => {
         onSuccess();
       })
-      .catch((error) => { });
+      .catch((error) => {
+        setToastConfig(error);
+      });
   };
 
   return (
