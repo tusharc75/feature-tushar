@@ -22,6 +22,7 @@ import StartStopDate from 'src/pages/FieldTicket/material/StartStopDateDialog';
 import { FiExternalLink } from 'react-icons/fi';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import { Edit } from '@mui/icons-material';
+import dayjs from 'dayjs';
 
 const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFullScreen }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Technicians`;
@@ -35,10 +36,10 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
     open: false,
     type: null,
     loading: false,
-    minDate: null,
+    minDateTime: null,
     data: null
   });
-  const [viewStartStopLog, setViewStartStopLog] = useState({ open: false, _id: null });
+  const [viewStartStopLog, setViewStartStopLog] = useState({ open: false, technicianId: null });
 
   const {
     state: { permissions }
@@ -69,7 +70,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
                 <IconButton
                   size="small"
                   onClick={() => {
-                    setViewStartStopLog({ open: true, _id: row?.original?._id });
+                    setViewStartStopLog({ open: true, technicianId: row?.original?.technicianId });
                   }}
                 >
                   <VisibilityIcon fontSize="small" color="primary" />
@@ -184,6 +185,20 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
         Cell: ({ row }) => {
           return allowedToEdit ? (
             <>
+              {row?.original?.logCount === 1 && (
+                <HtmlTooltip title={`Update Start/End Date`}>
+                  <span>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        setStartEndDateConfermationDialog({ open: true, type: 'startStop', loading: false, minDateTime: null, data: row?.original });
+                      }}
+                    >
+                      <Edit fontSize="small" color={'primary'} />
+                    </IconButton>
+                  </span>
+                </HtmlTooltip>
+              )}
               <HtmlTooltip title={'Delete'}>
                 <span>
                   <IconButton
@@ -197,20 +212,6 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
                   </IconButton>
                 </span>
               </HtmlTooltip>
-              {row?.original?.logCount === 1 && (
-                <HtmlTooltip title={`Update Start/End Date`}>
-                  <span>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        setStartEndDateConfermationDialog({ open: true, type: 'startStop', loading: false, minDate: null, data: row?.original });
-                      }}
-                    >
-                      <Edit fontSize="small" color={'primary'} />
-                    </IconButton>
-                  </span>
-                </HtmlTooltip>
-              )}
             </>
           ) : null;
         }
@@ -281,8 +282,8 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
       element.service = selectedService?.optionValue !== 'All' ? selectedService?.optionValue : null;
       element.status = 'Assigned';
       element.warehouse = fieldTicketData?.warehouse?.optionValue;
-      element.startDate = fieldTicketData?.estimateStartDate || new Date();
-      element.endDate = fieldTicketData?.estimateEndDate || new Date();
+      element.startDate = fieldTicketData?.estimateStartDate || dayjs.tz().toDate();
+      element.endDate = fieldTicketData?.estimateEndDate || dayjs.tz().toDate()
       technician.push(element);
     });
     axiosInstance()
@@ -327,11 +328,11 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
           type: 'success',
           message: data?.message
         });
-        setStartEndDateConfermationDialog({ open: false, type: null, loading: false, minDate: null, data: null });
+        setStartEndDateConfermationDialog({ open: false, type: null, loading: false, minDateTime: null, data: null });
         fetchData();
       })
       .catch((error) => {
-        setStartEndDateConfermationDialog({ open: false, type: null, loading: false, minDate: null, data: null });
+        setStartEndDateConfermationDialog({ open: false, type: null, loading: false, minDateTime: null, data: null });
         toastConfig.setToastConfig(error);
       });
   };
@@ -351,9 +352,9 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
             let date = null;
             if (dates?.length) {
               date = new Date(Math.max(...dates));
-              date.setDate(date.getDate() + 1);
+              date.setMinutes(date.getMinutes() + 1);
             }
-            setStartEndDateConfermationDialog({ open: true, type: 'start', loading: false, minDate: date, data: null });
+            setStartEndDateConfermationDialog({ open: true, type: 'start', loading: false, minDateTime: date, data: null });
           }}
         >
           Start
@@ -369,7 +370,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
             if (dates?.length) {
               date = new Date(Math.max(...dates));
             }
-            setStartEndDateConfermationDialog({ open: true, type: 'stop', loading: false, minDate: date, data: null });
+            setStartEndDateConfermationDialog({ open: true, type: 'stop', loading: false, minDateTime: date, data: null });
           }}
         >
           Stop
@@ -386,9 +387,9 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
             let date = null;
             if (dates?.length) {
               date = new Date(Math.max(...dates));
-              date.setDate(date.getDate() + 1);
+              date.setMinutes(date.getMinutes() + 1);
             }
-            setStartEndDateConfermationDialog({ open: true, type: 'startStop', loading: false, minDate: date, data: null });
+            setStartEndDateConfermationDialog({ open: true, type: 'startStop', loading: false, minDateTime: date, data: null });
           }}
         >
           Start/Stop
@@ -473,17 +474,17 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
         <StartStopDate
           type={startEndDateConfermationDialog.type}
           onClose={() => {
-            setStartEndDateConfermationDialog({ open: false, type: null, loading: false, minDate: null, data: null });
+            setStartEndDateConfermationDialog({ open: false, type: null, loading: false, minDateTime: null, data: null });
           }}
           handleSubmit={(value, _id) => {
             if (startEndDateConfermationDialog?.data) {
-              handleUpdateStartEndDate({...value, _id}, 'updateLog');
+              handleUpdateStartEndDate({ ...value, _id }, 'updateLog');
             } else {
               handleUpdateStartEndDate(value, startEndDateConfermationDialog.type);
             }
           }}
           loading={startEndDateConfermationDialog.loading}
-          minStartDate={startEndDateConfermationDialog.minDate}
+          minStartDateTime={startEndDateConfermationDialog.minDateTime}
           data={startEndDateConfermationDialog.data}
         />
       )}
@@ -491,10 +492,11 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
       {viewStartStopLog?.open && (
         <StartStopLogsDialog
           onClose={() => {
-            setViewStartStopLog({ open: false, _id: null });
+            setViewStartStopLog({ open: false, technicianId: null });
           }}
           referenceId={fieldTicketData?._id}
-          _id={viewStartStopLog?._id}
+          service={selectedService}
+          technician={viewStartStopLog?.technicianId}
           fetchRecords={fetchData}
         />
       )}

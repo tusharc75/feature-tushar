@@ -10,7 +10,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import Webcam from 'react-webcam';
-import { cn, convertBase64ToBlob, CustomDialogTransition } from 'src/constants/helpers';
+import { cn, convertBase64ToBlob, CustomDialogTransition, STANDARD_SUPPORTED_IMAGE_TYPES } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ErrorType, useDropZone } from 'src/hooks';
@@ -167,16 +167,34 @@ const SignatureDialog = ({ onSave, open, close }) => {
 
   const handleDrop = (files: File[]) => {
     if (!files || !files.length) return;
+    const fileExt = files[0]?.name?.split('.')?.pop()?.toLowerCase();
     const reader = new FileReader();
-    reader.readAsDataURL(files[0]);
-    reader.onload = () => {
-      const image = reader.result as string;
-      setPicture(image);
-      setUploadedFile(image);
-    };
-    reader.onerror = (error) => {
-      setToastConfig({ open: true, type: 'warning', message: 'Something went wrong' });
-    };
+    if (fileExt === 'heic' || fileExt === 'heif') {
+      const formData = new FormData();
+      formData.append('file', files[0]);
+      axiosInstance()
+        .post('/user/image/heic-to-jpg', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        })
+        .then(({ data }) => {
+          setPicture(data.url);
+          setUploadedFile(data.url);
+        })
+        .catch((err) => {
+          setToastConfig(err);
+          return;
+        });
+    } else {
+      reader.readAsDataURL(files[0]);
+      reader.onload = () => {
+        const image = reader.result as string;
+        setPicture(image);
+        setUploadedFile(image);
+      };
+      reader.onerror = (error) => {
+        setToastConfig({ open: true, type: 'warning', message: 'Something went wrong' });
+      };
+    }
   };
 
   const handleToggleMode = () => {
@@ -207,7 +225,9 @@ const SignatureDialog = ({ onSave, open, close }) => {
           className="sr-only"
           title="Upload signature"
           name="signature"
-          accept="image/*"
+          accept={Object.entries(STANDARD_SUPPORTED_IMAGE_TYPES)
+            .map(([mimeType, exts]) => [mimeType, ...exts])
+            .join(',')}
           onChange={(e) => {
             e.target.files && handleDrop(Array.from(e.target.files));
             e.target.value = '';

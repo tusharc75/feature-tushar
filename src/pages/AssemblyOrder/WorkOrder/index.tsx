@@ -39,12 +39,13 @@ import PackageNumberDialog from 'src/pages/AssemblyOrder/WorkOrder/PackageNumber
 import DescriptionIcon from '@mui/icons-material/Description';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
-const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScreen, allowedToEdit, setCurrentStep }) => {
+const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScreen, allowedToEdit, setCurrentStep, nextStep }) => {
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -177,11 +178,11 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
         }
       },
       {
-        accessor: 'workOrder',
+        accessor: 'workOrderNumber',
         Header: 'Work Order',
         width: 200,
         Cell: ({ row }) =>
-          row.original.workOrder ? (
+          row.original.workOrderNumber ? (
             <div className="flex items-center gap-2">
               <h5 className="text-truncate">{row.original?.workOrderNumber}</h5>
               <IconButton
@@ -679,6 +680,22 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
       });
   };
 
+  const rightSideContents = () => {
+    return (
+      <>
+        <PreviewDownload
+          fileName={`${resources?.assemblyOrder?.titlePlural}-${assemblyOrderData?.assemblyOrderNumber}`}
+          resource={sidebarResource.assemblyOrder}
+          referenceId={assemblyOrderData._id}
+          referenceLabel={assemblyOrderData?.assemblyOrderNumber}
+          columns={columns}
+          isAsyncDownload={true}
+          defaultColumns={['index', `detail`, `description`, `qty`]}
+        />
+      </>
+    );
+  };
+
   return (
     <>
       {isAutoCreating && (
@@ -714,6 +731,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
         }
         actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
         hasXpadding
+        rightSideContents={nextStep ? rightSideContents() : null}
       />
       {columns ? (
         <>

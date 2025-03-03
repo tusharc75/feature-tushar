@@ -142,7 +142,12 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = parent.packageDetail?.packageName || '';
+      parent.detail =
+        parent?.type === MATERIAL_TYPE.package
+          ? parent.packageDetail?.packageName
+          : parent?.type === MATERIAL_TYPE.serializedAsset
+            ? parent?.assetDetail?.assetNumber
+            : '';
       parent.description = parent?.packageDetail?.packageDescription || '';
       parent.qtyDisplay = parent.qty;
       parent.serializedPackageId = parent?.serializedPackageDetail?._id;

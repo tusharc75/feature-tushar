@@ -53,7 +53,7 @@ import { getNestedQty, getRentalDeliveryTicket, getRentalProductAssets } from '.
 import DateDialog from './DateDialog';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import { FiExternalLink } from 'react-icons/fi';
-import { getParentWellNumber, getUniqueWellNumber } from 'src/components/RentalManagment/helper';
+import { checkProductInside, getParentWellNumber, getUniqueWellNumber } from 'src/components/RentalManagment/helper';
 import PreviewDownloadMultiple from '../../../components/DeliveryTicket/PreviewDownloadMultiple';
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateDeliveredToCustomer, generateLoadingStepCreateTicketSteps, nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
@@ -133,7 +133,13 @@ const LoadingTicket = ({
   const [hideDeliveryTicketDelivered, setHideDeliveryTicketDelivered] = useState(false);
   const [fieldLabels, setFieldLabels] = useState(null);
 
-  const [view, setView] = useState('flat');
+  const [view, setView] = useState(rentalPolicyData?.loadingReceivingDefaultView || 'flat');
+
+  useEffect(() => {
+    if (rentalPolicyData?.loadingReceivingDefaultView) {
+      setView(rentalPolicyData?.loadingReceivingDefaultView)
+    }
+  }, [rentalPolicyData]);
 
   useEffect(() => {
     fetchPolicy();
@@ -269,6 +275,9 @@ const LoadingTicket = ({
                 }
                 else if (row?.original?.type === MATERIAL_TYPE.package) {
                   window.open(`${routes.packagesDetail.path}/${row?.original?._id}`);
+                }
+                else if (row?.original?.type === MATERIAL_TYPE.service) {
+                  window.open(`${routes.serviceMasterDetail.path}/${row?.original?._id}`);
                 }
                 else {
                   window.open(`${routes.productDetail.path}/${row?.original?.materialId}`);
@@ -695,20 +704,6 @@ const LoadingTicket = ({
     }
   };
 
-  const checkProductInside = (item, material) => {
-    if (item?.type === MATERIAL_TYPE.product) {
-      return true;
-    }
-    const child = material?.filter((e) => e.parentId === item?._id);
-    if (child?.some((e) => e?.type === MATERIAL_TYPE.product)) {
-      return true;
-    }
-    if (child?.filter((e) => e?.type === MATERIAL_TYPE.package)?.some((ele) => checkProductInside(ele, material))) {
-      return true;
-    }
-    return false;
-  };
-
   const generateNestedData = (parent, material, productAssets, loadingTicketProducts,
     consumeProducts, nonSerializedInventory, nonSerializeAsset, productSerialNumbers) => {
     let subRows: any = [];
@@ -951,18 +946,18 @@ const LoadingTicket = ({
     setWalkmeData(walkmeData);
   };
 
-  const getFilterSelectedRecords = (materialType = null) => {
+  const getFilterSelectedRecords = (materialType = null, records = selectedRecords) => {
     if (materialType) {
       if (materialType === MATERIAL_TYPE.serializedAsset) {
-        return selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)
+        return records?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)
       }
       else {
-        return selectedRecords?.filter((e) => ((e.type === MATERIAL_TYPE.product
+        return records?.filter((e) => ((e.type === MATERIAL_TYPE.product
           && (!e?.serializedProduct || (e?.serializedProduct && e?.productSerialNumbers?.length > 0))))
         )
       }
     }
-    return selectedRecords?.filter((e) => (e.type === MATERIAL_TYPE.serializedAsset ||
+    return records?.filter((e) => (e.type === MATERIAL_TYPE.serializedAsset ||
       (e.type === MATERIAL_TYPE.product && (!e?.serializedProduct || (e?.serializedProduct && e?.productSerialNumbers?.length > 0))))
     )
   }
@@ -1215,9 +1210,10 @@ const LoadingTicket = ({
     const errorMessages = [];
     var records = [...getFilterSelectedRecords()];
     if (action === rentalManagementActions.cancelLoadingTicket) {
+      const allRecord = getFilterSelectedRecords(null, flattenArray(dataRows))
       const loadingTicketIds = uniq(map(selectedRecords?.filter((e) => e?.loadingTicketId), 'loadingTicketId'));
       records = [...getFilterSelectedRecords()?.filter((e) => !e?.loadingTicketId),
-      ...dataRows?.filter((e) => loadingTicketIds?.includes(e?.loadingTicketId))];
+      ...allRecord?.filter((e) => loadingTicketIds?.includes(e?.loadingTicketId))];
     }
     records?.forEach((e) => {
       if (action === rentalManagementActions.createLoadingTicket) {
