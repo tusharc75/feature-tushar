@@ -118,7 +118,6 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
                   values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
                 });
               } else {
-                console.log(data);
                 setTotalAmount(data.totalAmount);
                 setLineItems(data.lineItems);
                 if (data.status !== EXPENSE_STATUS.unreported) {
