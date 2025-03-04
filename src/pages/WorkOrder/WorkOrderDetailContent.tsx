@@ -252,7 +252,7 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
     }
   };
 
-  const updateStatus = (status, assetStatus = null, workOrderCost = null, assetsData = null) => {
+  const updateStatus = (status, assetStatus = null, workOrderCost = null, assetsData = null, serializedPackages = null) => {
     setIsSubmitting(true);
     const data: any = { status: status };
     if (assetStatus) {
@@ -268,6 +268,13 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
         data.assetData = assetData;
       }
     }
+    if (serializedPackages) {
+      data.serializedPackagesData = {
+        assemblyOrderId: workOrderData?.assemblyOrder?.optionValue,
+        serializedPackages: serializedPackages
+      };
+    }
+
     axiosInstance()
       .patch(`${workOrder.api}/status/${id}`, data)
       .then(({ data: { data } }) => {
@@ -277,6 +284,7 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
           type: 'success',
           message: data
         });
+        setOpenSerializedPackageDialog(false);
         setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null });
         fetchWorkOrderData();
         setIsSubmitting(false);
@@ -382,10 +390,10 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
       type: 'menuItem',
       isVisible:
         permissions?.repairJob?.isCreate &&
-        allowedToEdit &&
-        workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
-        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-        !workOrderData?.currentRepairJob
+          allowedToEdit &&
+          workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
+          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+          !workOrderData?.currentRepairJob
           ? true
           : false,
       children: `Create ${resources?.repairJob?.titleSingular}`,
@@ -477,9 +485,9 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
       children: 'Create Version Without Existing Data',
       isVisible: Boolean(
         allowedToEdit &&
-          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-          !workOrderData?.currentRepairJob &&
-          workOrderData?.canCreateWorkOrderVersion
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+        !workOrderData?.currentRepairJob &&
+        workOrderData?.canCreateWorkOrderVersion
       )
     },
     {
@@ -492,9 +500,9 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
       },
       isVisible: Boolean(
         allowedToEdit &&
-          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-          !workOrderData?.currentRepairJob &&
-          workOrderData?.canCreateWorkOrderVersion
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+        !workOrderData?.currentRepairJob &&
+        workOrderData?.canCreateWorkOrderVersion
       ),
       disabled: false
     },
@@ -836,10 +844,10 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
           }}
           assemblyOrderId={workOrderData?.assemblyOrder?.optionValue}
           workOrderIds={[id]}
-          onSuccess={() => {
-            setOpenSerializedPackageDialog(false);
-            updateStatus(WORK_ORDER_STATUS.completed);
+          onSuccess={(_data) => {
+            updateStatus(WORK_ORDER_STATUS.completed, null, null, null, _data);
           }}
+          isSubmitting={isSubmitting}
         />
       )}
     </Box>

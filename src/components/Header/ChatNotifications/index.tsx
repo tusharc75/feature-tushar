@@ -115,7 +115,7 @@ const ChatNotification = () => {
           toggle: true,
           _id: d._id
         })
-        .then(() => {})
+        .then(() => { })
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
@@ -156,7 +156,7 @@ const ChatNotification = () => {
     <>
       {isMobile ? (
         <>
-          <MenuItem onClick={anchorEl === null ? getAllNotifications : () => {}}>
+          <MenuItem onClick={anchorEl === null ? getAllNotifications : () => { }}>
             <Badge
               variant="dot"
               overlap="circular"
@@ -171,19 +171,20 @@ const ChatNotification = () => {
           </MenuItem>
         </>
       ) : (
-        <IconButton
-          id="notificationButton"
-          aria-describedby={notificationId}
-          aria-label="settings"
-          color="inherit"
-          title="Notifications"
-          onClick={getAllNotifications}
-          className={`[margin-inline:8px_!important] [padding:5px_!important]`}
-        >
-          <Badge variant="dot" overlap="circular" badgeContent={notification ? notification.count : 0} color="secondary">
-            <ChatBubbleOutlineOutlined />
-          </Badge>
-        </IconButton>
+        <HtmlTooltip title={'Chats'}>
+          <IconButton
+            id="notificationButton"
+            aria-describedby={notificationId}
+            aria-label="settings"
+            color="inherit"
+            onClick={getAllNotifications}
+            className={`[margin-inline:8px_!important] [padding:5px_!important]`}
+          >
+            <Badge variant="dot" overlap="circular" badgeContent={notification ? notification.count : 0} color="secondary">
+              <ChatBubbleOutlineOutlined />
+            </Badge>
+          </IconButton>
+        </HtmlTooltip>
       )}
       <Popover
         PaperProps={{
