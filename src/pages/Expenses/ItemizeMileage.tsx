@@ -19,8 +19,6 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
   const fromAutocompleteServiceRef = useRef(null);
   const toAutocompleteServiceRef = useRef(null);
 
-  console.log(policyData);
-
   useEffect(() => {
     if (window.google && window.google.maps && window.google.maps.places) {
       if (!fromAutocompleteServiceRef.current) {
