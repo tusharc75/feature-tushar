@@ -100,7 +100,7 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
   };
 
   const addLineItem = () => {
-    setLineItems([...lineItems, { id: lineItems.length+1, fromLocation: null, toLocation: null, rate: '', amount: totalAmount }]);
+    setLineItems([...lineItems, { id: lineItems.length, fromLocation: null, toLocation: null, rate: '', amount: totalAmount }]);
   };
 
   const removeLineItem = (id) => {
