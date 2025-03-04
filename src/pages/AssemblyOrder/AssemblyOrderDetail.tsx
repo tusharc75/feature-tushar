@@ -138,9 +138,9 @@ const AssemblyOrderDetail = () => {
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.assemblyOrder, data) && data?.status != ASSEMBLY_ORDER_STATUS.converted);
         setAllowedToDelete(
           permissions?.assemblyOrder?.isDelete &&
-            checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
-            data?.canDelete &&
-            data?.status != ASSEMBLY_ORDER_STATUS.converted
+          checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
+          data?.canDelete &&
+          data?.status != ASSEMBLY_ORDER_STATUS.converted
         );
         setAssemblyOrderData({ ...data });
       })
