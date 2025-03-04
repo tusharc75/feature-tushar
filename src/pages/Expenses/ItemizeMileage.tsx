@@ -236,7 +236,7 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
               </Grid>
               <Grid size={{ xs: 6 }}>
                 <TextField
-                  label="Distance in KM"
+                  label="Distance in KMs"
                   type="number"
                   size="small"
                   disabled
