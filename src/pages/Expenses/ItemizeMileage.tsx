@@ -30,6 +30,19 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
     }
   }, []);
 
+  const haversineDistance = (lat1, lon1, lat2, lon2) => {
+    const toRad = (x) => (x * Math.PI) / 180;
+    const R = 6371;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
   const handleFromInputChange = (event, value, reason) => {
     if (reason === 'input') {
       if (value?.length > 1 && fromAutocompleteServiceRef.current) {
@@ -65,28 +78,42 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
   const handleSelectLocation = (index, prediction, isFrom) => {
     if (!prediction?.place_id || !window.google) return;
     const placesService = new window.google.maps.places.PlacesService(document.createElement('div'));
-
+  
     placesService.getDetails({ placeId: prediction.place_id }, (placeResult) => {
       if (placeResult && placeResult.geometry) {
         const lat = placeResult.geometry.location.lat();
         const lng = placeResult.geometry.location.lng();
-
+  
         const newFields = [...lineItems];
         const newLocation = {
           lat,
           lng,
           description: prediction.description
         };
-
+  
         if (isFrom) {
           newFields[index].fromLocation = newLocation;
         } else {
           newFields[index].toLocation = newLocation;
         }
+  
+        if (newFields[index].fromLocation && newFields[index].toLocation) {
+          const { lat: lat1, lng: lon1 } = newFields[index].fromLocation;
+          const { lat: lat2, lng: lon2 } = newFields[index].toLocation;
+  
+          const distance = haversineDistance(lat1, lon1, lat2, lon2);
+          newFields[index].distance = distance.toFixed(2);
+  
+          if (newFields[index].rate) {
+            newFields[index].amount = (distance * newFields[index].rate).toFixed(2);
+          }
+        }
+  
         setLineItems(newFields);
       }
     });
   };
+  
 
   const handleBlur = (index, field) => {
     setTouchedFields((prev) => ({
@@ -100,18 +127,24 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
   };
 
   const addLineItem = () => {
-    setLineItems([...lineItems, { id: lineItems.length, fromLocation: null, toLocation: null, rate: '', amount: totalAmount }]);
+    setLineItems([...lineItems, { id: lineItems.length, fromLocation: null, toLocation: null, rate: '', distance: '', amount: '' }]);
   };
 
   const removeLineItem = (id) => {
     setLineItems(lineItems.filter((item) => item.id !== id));
   };
 
-  const handleRateChange = (index, event) => {
+  const handleInputChange = (index, field, event) => {
     const newFields = [...lineItems];
-    newFields[index].rate = event.target.value;
+    newFields[index][field] = event.target.value;
+  
+    if (field === "rate" && newFields[index].distance) {
+      newFields[index].amount = (newFields[index].distance * newFields[index].rate).toFixed(2);
+    }
+  
     setLineItems(newFields);
   };
+  
 
   return (
     <Dialog
@@ -203,16 +236,61 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
               </Grid>
               <Grid size={{ xs: 6 }}>
                 <TextField
+                  label="Distance in KMs"
+                  type="number"
+                  size="small"
+                  disabled
+                  value={item.distance}
+                  onChange={(event) => {
+                    const newValue = Number(event.target.value);
+                    if (newValue >= 0 || event.target.value === '') {
+                      handleInputChange(index,'distance', event);
+                    }
+                  }}
+                  onBlur={() => handleBlur(index, 'distance')}
+                  fullWidth
+                  required
+                  error={touchedFields[index]?.distance && item.distance <= 0}
+                  helperText={touchedFields[index]?.distance && item.distance <= 0 ? 'Distance is required' : ''}
+                />
+              </Grid>
+              <Grid size={{ xs: 6 }}>
+                <TextField
                   label="Rate"
                   type="number"
                   size="small"
                   value={item.rate}
-                  onChange={(event) => handleRateChange(index, event)}
+                  onChange={(event) => {
+                    const newValue = Number(event.target.value);
+                    if (newValue >= 0 || event.target.value === '') {
+                      handleInputChange(index,'rate', event);
+                    }
+                  }}
                   onBlur={() => handleBlur(index, 'rate')}
                   fullWidth
                   required
                   error={touchedFields[index]?.rate && item.rate <= 0}
                   helperText={touchedFields[index]?.rate && item.rate <= 0 ? 'Rate is required' : ''}
+                />
+              </Grid>
+              <Grid size={{ xs: 6 }}>
+                <TextField
+                  label="Amount"
+                  type="number"
+                  size="small"
+                  disabled
+                  value={item.amount}
+                  onChange={(event) => {
+                    const newValue = Number(event.target.value);
+                    if (newValue >= 0 || event.target.value === '') {
+                      handleInputChange(index, 'amount', event);
+                    }
+                  }}
+                  onBlur={() => handleBlur(index, 'amount')}
+                  fullWidth
+                  required
+                  error={touchedFields[index]?.amount && item.amount <= 0}
+                  helperText={touchedFields[index]?.amount && item.amount <= 0 ? 'Amount is required' : ''}
                 />
               </Grid>
               <Grid size={{ xs: 2 }}>
