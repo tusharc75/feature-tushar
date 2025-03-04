@@ -50,13 +50,18 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
   const [lineItems, setLineItems] = useState([]);
   const [resourceData, setResourceData] = useState(null);
   const [totalAmount, setTotalAmount] = useState(0);
+  const [totalFare, setTotalFare] = useState(0);
   const [totalDistance, setTotalDistance] = useState(0);
-
+  const [mileageItems, setMileageItems] = useState([])
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [isDisabled, setIsDisabled] = useState(false);
 
   const handleChange = (event) => {
+    if(isMileage){
+      setTotalFare(parseFloat(event.target.value))
+    }else{
     setTotalAmount(parseFloat(event.target.value));
+    }
   };
 
   useEffect(() => {
@@ -68,7 +73,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
     let tDistance = 0;
     
     if (isMileage) {
-      total = lineItems
+      total = mileageItems
         .reduce((acc, item) => {
           if (item.fromLocation && item.toLocation && item.rate > 0) {
             const distance = haversineDistance(
@@ -83,7 +88,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
           return acc;
         }, 0)
         .toFixed(2);
-      
+      setTotalFare(parseFloat(total));
       setTotalDistance(parseFloat(tDistance.toFixed(2)));
     } else {
       total = lineItems
@@ -92,9 +97,9 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
           return total + amount;
         }, 0)
         .toFixed(2);
+        setTotalAmount(parseFloat(total));
     }
-    setTotalAmount(parseFloat(total));
-  }, [lineItems]);
+  }, [lineItems, mileageItems]);
 
   const haversineDistance = (lat1, lon1, lat2, lon2) => {
     const toRad = (x) => (x * Math.PI) / 180;
@@ -131,9 +136,10 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
                   values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
                 });
               } else {
-                setTotalAmount(data.totalAmount);
+                data.type === 'Mileage' ? setTotalFare(data.totalAmount) : setTotalAmount(data.totalAmount);
                 setTotalDistance(data.totalDistance);
                 setLineItems(data.lineItems);
+                setMileageItems(data.lineItems);
                 if (data.status !== EXPENSE_STATUS.unreported) {
                   setIsDisabled(true);
                 }
@@ -183,11 +189,18 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
 
   const handleSubmit = (values: any) => {
     setIsSubmitting(true);
-    values.totalAmount = totalAmount;
-    values.totalDistance = totalDistance;
-    values.lineItems = lineItems?.map((e) => {
-      return { ...e, amount: parseFloat(e?.amount), distance: parseFloat(e?.distance), rate: parseFloat(e?.rate) };
-    });
+    if(isMileage){
+      values.totalAmount = totalFare;
+      values.totalDistance = totalDistance;
+      values.lineItems = mileageItems?.map((e) => {
+        return { ...e, amount: parseFloat(e?.amount), distance: parseFloat(e?.distance), rate: parseFloat(e?.rate) };
+      });
+    }else{
+      values.totalAmount = totalAmount;
+      values.lineItems = lineItems?.map((e) => {
+        return { ...e, amount: parseFloat(e?.amount)};
+      });
+    }
     if (expenseId && isClone === false) {
       values._id = expenseId;
       axiosInstance()
@@ -311,8 +324,8 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
                         required
                         type="number"
                         size="small"
-                        disabled={lineItems.length > 0 || isDisabled}
-                        value={totalAmount}
+                        disabled={lineItems.length > 0 || mileageItems.length>0 || isDisabled}
+                        value={values['type'] === 'Mileage' ? totalFare : totalAmount}
                         onChange={handleChange}
                         fullWidth
                         slotProps={{
@@ -329,7 +342,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
                         required
                         type="number"
                         size="small"
-                        disabled={lineItems.length > 0 || isDisabled}
+                        disabled={mileageItems.length>0 || isDisabled}
                         value={totalDistance}
                         onChange={handleChange}
                         fullWidth
@@ -393,12 +406,12 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
               {showMileageDialog && (
                 <ItemizeMileage
                   onClose={() => setShowMileageDialog(false)}
-                  setLineItems={setLineItems}
-                  lineItems={lineItems}
+                  setLineItems={setMileageItems}
+                  lineItems={mileageItems}
                   currency={values?.currency}
                   currencySymbol={currencySymbol}
                   isSubmitting={isSubmitting}
-                  totalAmount={totalAmount}
+                  totalAmount={totalFare}
                   policyData={resourceData?.policy}
                 />
               )}
