@@ -11,13 +11,15 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { CustomDialogTransition, formatAmountWithCurrency } from 'src/constants/helpers';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
-const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySymbol, isSubmitting, totalAmount }) => {
+const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySymbol, isSubmitting, totalAmount, policyData }) => {
   const [touchedFields, setTouchedFields] = useState({});
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [fromSuggestions, setFromSuggestions] = useState([]);
   const [toSuggestions, setToSuggestions] = useState([]);
   const fromAutocompleteServiceRef = useRef(null);
   const toAutocompleteServiceRef = useRef(null);
+
+  console.log(policyData);
 
   useEffect(() => {
     if (window.google && window.google.maps && window.google.maps.places) {
@@ -32,12 +34,17 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
 
   const haversineDistance = (lat1, lon1, lat2, lon2) => {
     const toRad = (x) => (x * Math.PI) / 180;
-    const R = 6371;
+    const R_KM = 6371;
+    const R_MILE = 3958.8;
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
     const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
+    if(policyData?.distanceUnit === 'mile'){
+      return R_MILE * c;
+    }else{
+      return R_KM * c;
+    }
   };
 
   const handleFromInputChange = (event, value, reason) => {
@@ -231,7 +238,7 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
               </Grid>
               <Grid size={{ xs: 6 }}>
                 <TextField
-                  label="Distance in KMs"
+                  label={`Distance (${policyData?.distanceUnit})`}
                   type="number"
                   size="small"
                   disabled

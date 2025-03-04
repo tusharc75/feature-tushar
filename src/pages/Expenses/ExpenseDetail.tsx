@@ -173,9 +173,9 @@ const ExpenseDetail = () => {
                         <TableRow>
                           <TableCell align="left">From</TableCell>
                           <TableCell align="left">To</TableCell>
-                          <TableCell align="center">Distance (KM)</TableCell>
-                          <TableCell align="center">Rate</TableCell>
-                          <TableCell align="center">Amount</TableCell>
+                          <TableCell align="right">Distance ({resourceData?.policy?.distanceUnit})</TableCell>
+                          <TableCell align="right">Rate</TableCell>
+                          <TableCell align="right">Amount</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
@@ -183,11 +183,11 @@ const ExpenseDetail = () => {
                           <TableRow key={row.id}>
                             <TableCell align="left">{row.fromLocation?.description || '-'}</TableCell>
                             <TableCell align="left">{row.toLocation?.description || '-'}</TableCell>
-                            <TableCell align="center">{row.distance || '-'}</TableCell>
-                            <TableCell align="center">
+                            <TableCell align="right">{row.distance || '-'}</TableCell>
+                            <TableCell align="right">
                               {formatAmountWithCurrency(expensesData?.currency, row?.rate)?.fullFormatAmountWithoutSpace}
                             </TableCell>
-                            <TableCell align="center">
+                            <TableCell align="right">
                               {formatAmountWithCurrency(expensesData?.currency, row?.amount)?.fullFormatAmountWithoutSpace}
                             </TableCell>
                           </TableRow>
@@ -197,9 +197,11 @@ const ExpenseDetail = () => {
                             <Typography variant="subtitle2">Total </Typography>
                           </TableCell>
                           <TableCell />
-                          <TableCell align='center'><Typography variant="subtitle2">{expensesData?.totalDistance}</Typography></TableCell>
+                          <TableCell align="right">
+                            <Typography variant="subtitle2">{expensesData?.totalDistance}</Typography>
+                          </TableCell>
                           <TableCell />
-                          <TableCell align="center">
+                          <TableCell align="right">
                             <Typography variant="subtitle2">
                               {formatAmountWithCurrency(expensesData?.currency, expensesData?.totalAmount)?.fullFormatAmountWithoutSpace}
                             </Typography>

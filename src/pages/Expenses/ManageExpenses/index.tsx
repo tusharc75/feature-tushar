@@ -48,6 +48,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
   const [title, setTitle] = useState('');
   const [isMileage, setIsMileage] = useState(false);
   const [lineItems, setLineItems] = useState([]);
+  const [resourceData, setResourceData] = useState(null);
   const [totalAmount, setTotalAmount] = useState(0);
   const [totalDistance, setTotalDistance] = useState(0);
 
@@ -57,6 +58,10 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
   const handleChange = (event) => {
     setTotalAmount(parseFloat(event.target.value));
   };
+
+  useEffect(() => {
+    fetchPolicy();
+  }, [])
 
   useEffect(() => {
     let total;
@@ -93,12 +98,17 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
 
   const haversineDistance = (lat1, lon1, lat2, lon2) => {
     const toRad = (x) => (x * Math.PI) / 180;
-    const R = 6371;
+    const R_KM = 6371;
+    const R_MILE = 3958.8;
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
     const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
+    if(resourceData?.policy?.distanceUnit === 'mile'){
+      return R_MILE * c;
+    }else{
+      return R_KM * c;
+    }
   };
 
   useEffect(() => {
@@ -157,6 +167,19 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
         toastConfig.setToastConfig(error);
       });
   }, []);
+
+    const fetchPolicy = async () => {
+      try {
+        const {
+          data: { data }
+        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.expenses}`);
+        if (data) {
+          setResourceData(data);
+        }
+      } catch (error) {
+        toastConfig.setToastConfig(error);
+      }
+    };
 
   const handleSubmit = (values: any) => {
     setIsSubmitting(true);
@@ -376,6 +399,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
                   currencySymbol={currencySymbol}
                   isSubmitting={isSubmitting}
                   totalAmount={totalAmount}
+                  policyData={resourceData?.policy}
                 />
               )}
             </>
