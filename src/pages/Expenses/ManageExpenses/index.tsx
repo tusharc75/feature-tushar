@@ -57,8 +57,9 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
   };
 
   useEffect(() => {
+    let total;
     if(isMileage){
-      const total = lineItems.reduce((acc, item) => {
+      total = lineItems.reduce((acc, item) => {
         if (
           item.fromLocation &&
           item.toLocation &&
@@ -74,16 +75,16 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
         }
         return acc;
       }, 0).toFixed(2);
-      setTotalAmount(parseFloat(total));
     }else{
-    const newValue = lineItems
+    total = lineItems
       .reduce((total, field) => {
         const amount = parseFloat(field.amount) || 0;
         return total + amount;
       }, 0)
       .toFixed(2);
-    setTotalAmount(parseFloat(newValue));}
-  }, [lineItems]);
+    }
+    setTotalAmount(parseFloat(total));
+  }, []);
 
   const haversineDistance = (lat1, lon1, lat2, lon2) => {
     const toRad = (x) => (x * Math.PI) / 180;
