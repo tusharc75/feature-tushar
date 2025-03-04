@@ -538,6 +538,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
         .then(({ data }) => {
           setCompleting(false);
           setCompleteConfirmBox(false);
+          setOpenSerializedPackageDialog({ open: false, ids: [] });
           fetchData();
           checkAllWorkOrderComplete();
           toastConfig.setToastConfig({
@@ -547,7 +548,6 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
           });
         })
         .catch((err) => {
-          setCompleteConfirmBox(false);
           setCompleting(false);
           toastConfig.setToastConfig(err);
         });
@@ -796,7 +796,6 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
           }}
         />
       )}
-
       {openSerializedPackageDialog.open && (
         <PackageNumberDialog
           onClose={() => {
@@ -808,11 +807,10 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
           onSuccess={() => {
             setCompleteConfirmBox(false);
             handleAutoComplete(openSerializedPackageDialog.ids);
-            setOpenSerializedPackageDialog({ open: false, ids: [] });
           }}
+          isSubmitting={isCompleting}
         />
       )}
-
       {addServicesDialog.open && !addServicesDialog.new && (
         <AssignServiceDialog
           handleClose={() => setAddServicesDialog({ open: false, new: false })}

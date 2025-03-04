@@ -310,21 +310,21 @@ const Header = () => {
     >
       {user?.entity && user.entity.length
         ? user.entity.map((curEntity) => (
-            <MenuItem
-              title={curEntity.entityName}
-              key={curEntity._id}
-              selected={selectedEntity === curEntity._id}
-              onClick={() => {
-                handleSelectedEnity(curEntity._id);
-                closeEntitiesMenu();
-                window.location.reload();
-              }}
-            >
-              <Typography className={`line-clamp-1 max-w-[200px]`}>{curEntity.entityName}</Typography>
-              <Box component="span" marginX={1} />
-              {selectedEntity === curEntity._id && <Chip size="small" label="Current" color="primary" />}
-            </MenuItem>
-          ))
+          <MenuItem
+            title={curEntity.entityName}
+            key={curEntity._id}
+            selected={selectedEntity === curEntity._id}
+            onClick={() => {
+              handleSelectedEnity(curEntity._id);
+              closeEntitiesMenu();
+              window.location.reload();
+            }}
+          >
+            <Typography className={`line-clamp-1 max-w-[200px]`}>{curEntity.entityName}</Typography>
+            <Box component="span" marginX={1} />
+            {selectedEntity === curEntity._id && <Chip size="small" label="Current" color="primary" />}
+          </MenuItem>
+        ))
         : null}
     </Menu>
   );
@@ -465,9 +465,8 @@ const Header = () => {
         <Toolbar className={`bg-[--dark-primary,white] ${styles.mainConainer}`} style={{ color: themeColor === 'light' ? '#3d3d3d' : '#fff' }}>
           <Box
             component="div"
-            className={`${isSidebarOpen && sidebarOpenedByButton ? styles.drawerOpen : styles.drawerClosed} ${styles.leftContent} ${
-              styles.flexAlignCenter
-            } flex-grow`}
+            className={`${isSidebarOpen && sidebarOpenedByButton ? styles.drawerOpen : styles.drawerClosed} ${styles.leftContent} ${styles.flexAlignCenter
+              } flex-grow`}
           >
             <div className={` ${styles.toggleButton}`}>
               <IconButton
@@ -550,56 +549,16 @@ const Header = () => {
                     {themeColor === 'light' ? <MoonIcon /> : <SunIcon />}
                   </IconButton>
                 </HtmlTooltip>
-
                 <Notification />
               </div>
-
-              {/* Remove below false to show chat notification icon */}
-
               <div>
-                {/* <IconButton
-                  id="chatNotificationButton"
-                  aria-describedby={fullScreenChatNotificationId}
-                  aria-label="settings"
-                  color="inherit"
-                  title="Chats"
-                  onClick={handleFullScreenChatNotificationClick}
-                  className={styles.showIconLayout}
-                >
-                  <Badge variant="dot" overlap="circular" badgeContent={chatNotification ? chatNotification.count : 0} color="secondary">
-                    <ChatBubbleOutlineOutlinedIcon className="setIcon" style={{ maxWidth: 22 }} />
-                  </Badge>
-                </IconButton>
-
-                <Popover
-                  className="mr-2"
-                  id={fullScreenChatNotificationId}
-                  open={fullScreenChatNotificationOpen}
-                  anchorEl={fullScreenChatNotificationAnchorEl}
-                  onClose={handleFullScreenChatNotificationClose}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'center'
-                  }}
-                  transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'center'
-                  }}
-                >
-                  {loadingChatNotifications ? (
-                    <Typography className="m-3">Loading Chat Notifications...</Typography>
-                  ) : chatNotificationList.length === 0 ? (
-                    <Typography className="m-3">No Chat Notifications found</Typography>
-                  ) : (
-                    <ChatNotificationContent data={chatNotificationList} />
-                  )}
-                </Popover> */}
                 <ChatNotification />
               </div>
-
-              <IconButton id="helpButton" aria-label="help" color="inherit" onClick={openHelperModal} className={styles.showIconLayout} title="Help">
-                <HelpOutlineIcon className="setIcon" />
-              </IconButton>
+              <HtmlTooltip title='User Manual'>
+                <IconButton id="helpButton" aria-label="help" color="inherit" onClick={openHelperModal} className={styles.showIconLayout} >
+                  <HelpOutlineIcon className="setIcon" />
+                </IconButton>
+              </HtmlTooltip>
             </div>
           )}
           {isMobile && (
