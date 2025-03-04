@@ -159,10 +159,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
     setIsSubmitting(true);
     values.totalAmount = totalAmount;
     values.lineItems = lineItems?.map((e) => {
-      return { ...e, amount: parseFloat(e?.amount) };
-    });
-    values.lineItems = lineItems?.map((e) => {
-      return { ...e, rate: parseFloat(e?.rate) };
+      return { ...e, amount: parseFloat(e?.amount), distance: parseFloat(e?.distance), rate: parseFloat(e?.rate) };
     });
     if (expenseId && isClone === false) {
       values._id = expenseId;
