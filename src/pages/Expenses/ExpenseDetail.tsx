@@ -81,7 +81,8 @@ const ExpenseDetail = () => {
   };
 
   const fetchData = async () => {
-    axiosInstance().get(`${expenses.api}/${id}`)
+    axiosInstance()
+      .get(`${expenses.api}/${id}`)
       .then(({ data: { data } }) => {
         setAllowedToEdit(permissions?.expenses?.isUpdate);
         setAllowedToDelete(permissions?.expenses?.isDelete && data.status === EXPENSE_STATUS.unreported);
@@ -164,40 +165,82 @@ const ExpenseDetail = () => {
               </div>
             )}
             {expensesData ? (
-              <div className="pt-3">
-                <TableContainer className='border'>
-                  <Table sx={{ minWidth: 700 }} size="medium" aria-label="spanning table">
-                    {expensesData?.lineItems?.length > 0 && (
+              expensesData.type === 'Mileage' ? (
+                <div className="pt-3">
+                  <TableContainer className="border">
+                    <Table sx={{ minWidth: 700 }} size="medium" aria-label="mileage table">
                       <TableHead>
                         <TableRow>
-                          <TableCell>Description</TableCell>
-                          <TableCell align="right">Amount</TableCell>
+                          <TableCell align="center">From</TableCell>
+                          <TableCell />
+                          <TableCell align="center">To</TableCell>
+                          <TableCell align="center">Rate</TableCell>
                         </TableRow>
                       </TableHead>
-                    )}
-                    <TableBody>
-                      {expensesData?.lineItems?.map((row) => (
-                        <TableRow key={row.id}>
-                          <TableCell>{row.description}</TableCell>
-                          <TableCell align="right">
-                            {formatAmountWithCurrency(expensesData?.currency, row?.amount)?.fullFormatAmountWithoutSpace}
+
+                      <TableBody>
+                        {expensesData?.lineItems?.map((row) => (
+                          <TableRow key={row.id}>
+                            <TableCell align="center">{row.fromLocation?.description || '-'}</TableCell>
+                            <TableCell />
+                            <TableCell align="center">{row.toLocation?.description || '-'}</TableCell>
+                            <TableCell align="center">
+                              {formatAmountWithCurrency(expensesData?.currency, row?.rate)?.fullFormatAmountWithoutSpace}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                        <TableRow>
+                          <TableCell align="center">
+                            <Typography variant="subtitle2">Total Amount</Typography>
+                          </TableCell>
+                          <TableCell />
+                          <TableCell />
+                          <TableCell align="center">
+                            <Typography variant="subtitle2">
+                              {formatAmountWithCurrency(expensesData?.currency, expensesData?.totalAmount)?.fullFormatAmountWithoutSpace}
+                            </Typography>
                           </TableCell>
                         </TableRow>
-                      ))}
-                      <TableRow>
-                        <TableCell>
-                          <Typography variant="subtitle2">Total Amount</Typography>
-                        </TableCell>
-                        <TableCell align="right">
-                          <Typography variant="subtitle2">
-                            {formatAmountWithCurrency(expensesData?.currency, expensesData?.totalAmount)?.fullFormatAmountWithoutSpace}
-                          </Typography>
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </div>
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </div>
+              ) : (
+                <div className="pt-3">
+                  <TableContainer className="border">
+                    <Table sx={{ minWidth: 700 }} size="medium" aria-label="spanning table">
+                      {expensesData?.lineItems?.length > 0 && (
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Description</TableCell>
+                            <TableCell align="right">Amount</TableCell>
+                          </TableRow>
+                        </TableHead>
+                      )}
+                      <TableBody>
+                        {expensesData?.lineItems?.map((row) => (
+                          <TableRow key={row.id}>
+                            <TableCell>{row.description}</TableCell>
+                            <TableCell align="right">
+                              {formatAmountWithCurrency(expensesData?.currency, row?.amount)?.fullFormatAmountWithoutSpace}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                        <TableRow>
+                          <TableCell>
+                            <Typography variant="subtitle2">Total Amount</Typography>
+                          </TableCell>
+                          <TableCell align="right">
+                            <Typography variant="subtitle2">
+                              {formatAmountWithCurrency(expensesData?.currency, expensesData?.totalAmount)?.fullFormatAmountWithoutSpace}
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </div>
+              )
             ) : (
               <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />

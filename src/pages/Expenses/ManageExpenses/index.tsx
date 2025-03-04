@@ -29,6 +29,7 @@ import {
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ItemizeExpenses from 'src/pages/Expenses/ItemizeExpenses';
+import ItemizeMileage from 'src/pages/Expenses/ItemizeMileage';
 
 const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailPage = true, onClose, onSuccess }) => {
   const history = useHistory();
@@ -41,9 +42,10 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showItemizeDialog, setShowItemizeDialog] = useState(false);
+  const [showMileageDialog, setShowMileageDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [title, setTitle] = useState('');
-
+  const [isMileage, setIsMileage] = useState(false)
   const [lineItems, setLineItems] = useState([]);
   const [totalAmount, setTotalAmount] = useState(0);
 
@@ -55,68 +57,113 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
   };
 
   useEffect(() => {
-    const newValue = lineItems.reduce((total, field) => {
-      const amount = parseFloat(field.amount) || 0;
-      return total + amount;
-    }, 0).toFixed(2);
-    setTotalAmount(parseFloat(newValue));
+    let total;
+    if(isMileage){
+      total = lineItems.reduce((acc, item) => {
+        if (
+          item.fromLocation &&
+          item.toLocation &&
+          item.rate > 0
+        ) {
+          const distance = haversineDistance(
+            item.fromLocation.lat,
+            item.fromLocation.lng,
+            item.toLocation.lat,
+            item.toLocation.lng
+          );
+          return acc + distance * parseFloat(item.rate);
+        }
+        return acc;
+      }, 0).toFixed(2);
+    }else{
+    total = lineItems
+      .reduce((total, field) => {
+        const amount = parseFloat(field.amount) || 0;
+        return total + amount;
+      }, 0)
+      .toFixed(2);
+    }
+    setTotalAmount(parseFloat(total));
   }, [lineItems]);
 
+  const haversineDistance = (lat1, lon1, lat2, lon2) => {
+    const toRad = (x) => (x * Math.PI) / 180;
+    const R = 6371;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
   useEffect(() => {
-    axiosInstance().get(`/field?resource=${sidebarResource.expenses}`).then(({ data: { data } }) => {
-      const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-      if (expenseId) {
-        axiosInstance().get(`${expenses.api}/` + expenseId).then(({ data: { data } }) => {
-          if (isClone) {
-            const { _id, brand, createdBy, history, expenseNumber, updatedBy, ...rest } = data;
-            setTitle(`Clone - ${expenseNumber}`);
-            rest.expenseNumber = GenerateResourceLineNumber(fieldsDataForCreate);
-            rest.status = EXPENSE_STATUS.unreported;
-            setInitialData({
-              fields: fieldsDataForCreate,
-              values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
+    axiosInstance()
+      .get(`/field?resource=${sidebarResource.expenses}`)
+      .then(({ data: { data } }) => {
+        const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+        const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+        if (expenseId) {
+          axiosInstance()
+            .get(`${expenses.api}/` + expenseId)
+            .then(({ data: { data } }) => {
+              if (isClone) {
+                const { _id, brand, createdBy, history, expenseNumber, updatedBy, ...rest } = data;
+                setTitle(`Clone - ${expenseNumber}`);
+                rest.expenseNumber = GenerateResourceLineNumber(fieldsDataForCreate);
+                rest.status = EXPENSE_STATUS.unreported;
+                setInitialData({
+                  fields: fieldsDataForCreate,
+                  values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
+                });
+              } else {
+                setTotalAmount(data.totalAmount);
+                setLineItems(data.lineItems);
+                if (data.status !== EXPENSE_STATUS.unreported) {
+                  setIsDisabled(true);
+                }
+                setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data.currency)?.symbolNative);
+                setTitle(`Edit - ${data.expenseNumber}`);
+                setInitialData({
+                  fields: fieldsDataForUpdate,
+                  values: { ...getObjKeysWithValues(data, fieldsDataForUpdate) }
+                });
+              }
+            })
+            .catch((error) => {
+              toastConfig.setToastConfig(error);
             });
-          } else {
-            setTotalAmount(data.totalAmount);
-            setLineItems(data.lineItems);
-            if (data.status !== EXPENSE_STATUS.unreported) {
-              setIsDisabled(true);
-            }
-            setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data.currency)?.symbolNative);
-            setTitle(`Edit - ${data.expenseNumber}`);
-            setInitialData({
-              fields: fieldsDataForUpdate,
-              values: { ...getObjKeysWithValues(data, fieldsDataForUpdate) }
-            });
+        } else {
+          setTitle(`Create ${resources?.expenses?.titleSingular}`);
+          let initialData = getObjKeys('', fieldsDataForCreate);
+          initialData['expenseNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
+          if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
+            initialData['currency'] = user.user?.brandCurrency;
           }
-        })
-          .catch((error) => {
-            toastConfig.setToastConfig(error);
+          initialData['users'] = [user?.user?._id];
+          setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === initialData['currency'])?.symbolNative);
+          setInitialData({
+            fields: fieldsDataForCreate,
+            values: initialData
           });
-      } else {
-        setTitle(`Create ${resources?.expenses?.titleSingular}`);
-        let initialData = getObjKeys('', fieldsDataForCreate);
-        initialData['expenseNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
-        if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
-          initialData['currency'] = user.user?.brandCurrency;
         }
-        initialData['users'] = [user?.user?._id];
-        setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === initialData['currency'])?.symbolNative);
-        setInitialData({
-          fields: fieldsDataForCreate,
-          values: initialData
-        });
-      }
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-    });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   }, []);
 
   const handleSubmit = (values: any) => {
     setIsSubmitting(true);
     values.totalAmount = totalAmount;
-    values.lineItems = lineItems?.map((e) => { return { ...e, amount: parseFloat(e?.amount) } });
+    values.lineItems = lineItems?.map((e) => {
+      return { ...e, amount: parseFloat(e?.amount) };
+    });
+    values.lineItems = lineItems?.map((e) => {
+      return { ...e, rate: parseFloat(e?.rate) };
+    });
     if (expenseId && isClone === false) {
       values._id = expenseId;
       axiosInstance()
@@ -235,7 +282,18 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
                       />
                     </Grid>
                     <Grid size={{ xs: 6, sm: 6, md: 6, lg: 6 }} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                      <ThemeButton buttonType="transparent" disabled={isDisabled} onClick={() => setShowItemizeDialog(true)}>
+                      <ThemeButton
+                        buttonType="transparent"
+                        disabled={isDisabled}
+                        onClick={() => {
+                          if (values['type'] === 'Mileage') {
+                            setShowMileageDialog(true);
+                            setIsMileage(true);
+                          } else {
+                            setShowItemizeDialog(true);
+                          }
+                        }}
+                      >
                         Itemize
                       </ThemeButton>
                     </Grid>
@@ -285,6 +343,17 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
               {showItemizeDialog && (
                 <ItemizeExpenses
                   onClose={() => setShowItemizeDialog(false)}
+                  setLineItems={setLineItems}
+                  lineItems={lineItems}
+                  currency={values?.currency}
+                  currencySymbol={currencySymbol}
+                  isSubmitting={isSubmitting}
+                  totalAmount={totalAmount}
+                />
+              )}
+              {showMileageDialog && (
+                <ItemizeMileage
+                  onClose={() => setShowMileageDialog(false)}
                   setLineItems={setLineItems}
                   lineItems={lineItems}
                   currency={values?.currency}
