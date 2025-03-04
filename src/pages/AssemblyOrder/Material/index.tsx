@@ -212,7 +212,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
       parent.description = parent?.packageDetail?.packageDescription || '';
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
-      parent.canDelete = true;
+      parent.canDelete = parent?.workOrder ? false : true;
       parent.subRows = generateNestedData(data.material, serializedPackages, parent);
       if (parent.subRows?.find((r) => !r?.canDelete)) {
         parent.canDelete = false;
@@ -406,9 +406,11 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
     if (!records?.length) {
       return true;
     }
-    if (records?.every((r) => [WORK_ORDER_TYPE.disassemblyOrder]?.includes(r?.workOrderType)
-      && r?.warehouse?.optionValue === records[0]?.warehouse?.optionValue
-    )) {
+    if (
+      records?.every(
+        (r) => [WORK_ORDER_TYPE.disassemblyOrder]?.includes(r?.workOrderType) && r?.warehouse?.optionValue === records[0]?.warehouse?.optionValue
+      )
+    ) {
       return false;
     }
     return true;
