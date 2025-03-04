@@ -130,7 +130,7 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
   };
 
   const addLineItem = () => {
-    setLineItems([...lineItems, { id: lineItems.length, fromLocation: null, toLocation: null, rate: '', distance: '', amount: '' }]);
+    setLineItems([...lineItems, { id: lineItems.length, fromLocation: null, toLocation: null, rate: policyData?.perUnitRate, distance: '', amount: '' }]);
   };
 
   const removeLineItem = (id) => {
@@ -260,6 +260,7 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
                   type="number"
                   size="small"
                   value={item.rate}
+                  disabled
                   onChange={(event) => {
                     const newValue = Number(event.target.value);
                     if (newValue >= 0 || event.target.value === '') {
