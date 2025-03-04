@@ -172,20 +172,23 @@ const ExpenseDetail = () => {
                       <TableHead>
                         <TableRow>
                           <TableCell align="center">From</TableCell>
-                          <TableCell />
                           <TableCell align="center">To</TableCell>
+                          <TableCell align="center">Distance (KM)</TableCell>
                           <TableCell align="center">Rate</TableCell>
+                          <TableCell align="center">Amount</TableCell>
                         </TableRow>
                       </TableHead>
-
                       <TableBody>
                         {expensesData?.lineItems?.map((row) => (
                           <TableRow key={row.id}>
                             <TableCell align="center">{row.fromLocation?.description || '-'}</TableCell>
-                            <TableCell />
                             <TableCell align="center">{row.toLocation?.description || '-'}</TableCell>
+                            <TableCell align="center">{row.distance || '-'}</TableCell>
                             <TableCell align="center">
                               {formatAmountWithCurrency(expensesData?.currency, row?.rate)?.fullFormatAmountWithoutSpace}
+                            </TableCell>
+                            <TableCell align="center">
+                              {formatAmountWithCurrency(expensesData?.currency, row?.amount)?.fullFormatAmountWithoutSpace}
                             </TableCell>
                           </TableRow>
                         ))}
@@ -193,6 +196,7 @@ const ExpenseDetail = () => {
                           <TableCell align="center">
                             <Typography variant="subtitle2">Total Amount</Typography>
                           </TableCell>
+                          <TableCell />
                           <TableCell />
                           <TableCell />
                           <TableCell align="center">
