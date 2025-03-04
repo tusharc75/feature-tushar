@@ -92,14 +92,7 @@ const SerializedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrde
   };
 
   const handleSubmit = (values) => {
-    axiosInstance()
-      .post(`${routes.assemblyOrder.path}/work-order/${assemblyOrderId}/serialized-package`, { serializedPackages: values?.serializedPackages })
-      .then((res) => {
-        onSuccess();
-      })
-      .catch((error) => {
-        setToastConfig(error);
-      });
+    onSuccess(values?.serializedPackages);
   };
 
   return (
