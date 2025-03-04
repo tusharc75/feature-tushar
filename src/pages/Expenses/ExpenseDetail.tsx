@@ -133,7 +133,7 @@ const ExpenseDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <Fragment>
-              {expensesData?.status !== EXPENSE_STATUS.approved && (
+              {expensesData?.status !== EXPENSE_STATUS.approved && expensesData?.status !== EXPENSE_STATUS.awaitingApproval && (
                 <ThemeButton
                   iconForMobile={<Edit />}
                   disabled={!allowedToEdit}
@@ -171,8 +171,8 @@ const ExpenseDetail = () => {
                     <Table sx={{ minWidth: 700 }} size="medium" aria-label="mileage table">
                       <TableHead>
                         <TableRow>
-                          <TableCell align="center">From</TableCell>
-                          <TableCell align="center">To</TableCell>
+                          <TableCell align="left">From</TableCell>
+                          <TableCell align="left">To</TableCell>
                           <TableCell align="center">Distance (KM)</TableCell>
                           <TableCell align="center">Rate</TableCell>
                           <TableCell align="center">Amount</TableCell>
@@ -181,8 +181,8 @@ const ExpenseDetail = () => {
                       <TableBody>
                         {expensesData?.lineItems?.map((row) => (
                           <TableRow key={row.id}>
-                            <TableCell align="center">{row.fromLocation?.description || '-'}</TableCell>
-                            <TableCell align="center">{row.toLocation?.description || '-'}</TableCell>
+                            <TableCell align="left">{row.fromLocation?.description || '-'}</TableCell>
+                            <TableCell align="left">{row.toLocation?.description || '-'}</TableCell>
                             <TableCell align="center">{row.distance || '-'}</TableCell>
                             <TableCell align="center">
                               {formatAmountWithCurrency(expensesData?.currency, row?.rate)?.fullFormatAmountWithoutSpace}
@@ -193,11 +193,11 @@ const ExpenseDetail = () => {
                           </TableRow>
                         ))}
                         <TableRow>
-                          <TableCell align="center">
-                            <Typography variant="subtitle2">Total Amount</Typography>
+                          <TableCell align="left">
+                            <Typography variant="subtitle2">Total </Typography>
                           </TableCell>
                           <TableCell />
-                          <TableCell />
+                          <TableCell align='center'><Typography variant="subtitle2">{expensesData?.totalDistance}</Typography></TableCell>
                           <TableCell />
                           <TableCell align="center">
                             <Typography variant="subtitle2">

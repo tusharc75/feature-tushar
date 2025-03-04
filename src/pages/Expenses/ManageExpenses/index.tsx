@@ -30,6 +30,7 @@ import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ItemizeExpenses from 'src/pages/Expenses/ItemizeExpenses';
 import ItemizeMileage from 'src/pages/Expenses/ItemizeMileage';
+import AddIcon from '@mui/icons-material/Add';
 
 const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailPage = true, onClose, onSuccess }) => {
   const history = useHistory();
@@ -45,9 +46,10 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
   const [showMileageDialog, setShowMileageDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [title, setTitle] = useState('');
-  const [isMileage, setIsMileage] = useState(false)
+  const [isMileage, setIsMileage] = useState(false);
   const [lineItems, setLineItems] = useState([]);
   const [totalAmount, setTotalAmount] = useState(0);
+  const [totalDistance, setTotalDistance] = useState(0);
 
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [isDisabled, setIsDisabled] = useState(false);
@@ -58,30 +60,33 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
 
   useEffect(() => {
     let total;
-    if(isMileage){
-      total = lineItems.reduce((acc, item) => {
-        if (
-          item.fromLocation &&
-          item.toLocation &&
-          item.rate > 0
-        ) {
-          const distance = haversineDistance(
-            item.fromLocation.lat,
-            item.fromLocation.lng,
-            item.toLocation.lat,
-            item.toLocation.lng
-          );
-          return acc + distance * parseFloat(item.rate);
-        }
-        return acc;
-      }, 0).toFixed(2);
-    }else{
-    total = lineItems
-      .reduce((total, field) => {
-        const amount = parseFloat(field.amount) || 0;
-        return total + amount;
-      }, 0)
-      .toFixed(2);
+    let tDistance = 0;
+    
+    if (isMileage) {
+      total = lineItems
+        .reduce((acc, item) => {
+          if (item.fromLocation && item.toLocation && item.rate > 0) {
+            const distance = haversineDistance(
+              item.fromLocation.lat,
+              item.fromLocation.lng,
+              item.toLocation.lat,
+              item.toLocation.lng
+            );
+            tDistance += parseFloat(distance.toFixed(2)); 
+            return acc + distance * parseFloat(item.rate);
+          }
+          return acc;
+        }, 0)
+        .toFixed(2);
+      
+      setTotalDistance(parseFloat(tDistance.toFixed(2)));
+    } else {
+      total = lineItems
+        .reduce((total, field) => {
+          const amount = parseFloat(field.amount) || 0;
+          return total + amount;
+        }, 0)
+        .toFixed(2);
     }
     setTotalAmount(parseFloat(total));
   }, [lineItems]);
@@ -91,10 +96,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
     const R = 6371;
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   };
@@ -120,6 +122,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
                 });
               } else {
                 setTotalAmount(data.totalAmount);
+                setTotalDistance(data.totalDistance);
                 setLineItems(data.lineItems);
                 if (data.status !== EXPENSE_STATUS.unreported) {
                   setIsDisabled(true);
@@ -158,6 +161,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
   const handleSubmit = (values: any) => {
     setIsSubmitting(true);
     values.totalAmount = totalAmount;
+    values.totalDistance = totalDistance;
     values.lineItems = lineItems?.map((e) => {
       return { ...e, amount: parseFloat(e?.amount), distance: parseFloat(e?.distance), rate: parseFloat(e?.rate) };
     });
@@ -261,6 +265,23 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
                   />
                   <Grid container spacing={2} sx={{ display: 'flex', flexDirection: 'column' }}>
                     <Grid size={{ xs: 6, sm: 6, md: 6, lg: 6 }}>
+                      <ThemeButton
+                        startIcon={<AddIcon fontSize="small" />}
+                        disabled={isDisabled}
+                        onClick={() => {
+                          if (values['type'] === 'Mileage') {
+                            setShowMileageDialog(true);
+                            setIsMileage(true);
+                          } else {
+                            setShowItemizeDialog(true);
+                          }
+                        }}
+                      >
+                        Itemize {values['type'] === 'Mileage' ? 'Mileage' : 'Expense'}
+                      </ThemeButton>
+                    </Grid>
+                    <Grid container spacing={2}>
+                    <Grid size={{ xs: 6, sm: 6, md: 6, lg: 6 }}>
                       <TextField
                         id="outlined-required"
                         label="Total Amount"
@@ -278,22 +299,20 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
                         }}
                       />
                     </Grid>
-                    <Grid size={{ xs: 6, sm: 6, md: 6, lg: 6 }} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                      <ThemeButton
-                        buttonType="transparent"
-                        disabled={isDisabled}
-                        onClick={() => {
-                          if (values['type'] === 'Mileage') {
-                            setShowMileageDialog(true);
-                            setIsMileage(true);
-                          } else {
-                            setShowItemizeDialog(true);
-                          }
-                        }}
-                      >
-                        Itemize
-                      </ThemeButton>
-                    </Grid>
+                    {values['type'] === 'Mileage' && <Grid size={{ xs: 6, sm: 6, md: 6, lg: 6 }}>
+                      <TextField
+                        id="outlined-required"
+                        label="Total Distance"
+                        required
+                        type="number"
+                        size="small"
+                        disabled={lineItems.length > 0 || isDisabled}
+                        value={totalDistance}
+                        onChange={handleChange}
+                        fullWidth
+                      />
+                    </Grid>}
+                  </Grid>
                   </Grid>
                 </Form>
               </CustomDialogContent>
