@@ -252,7 +252,7 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
     }
   };
 
-  const updateStatus = (status, assetStatus = null, workOrderCost = null, assetsData = null) => {
+  const updateStatus = (status, assetStatus = null, workOrderCost = null, assetsData = null, serializedPackages = null) => {
     setIsSubmitting(true);
     const data: any = { status: status };
     if (assetStatus) {
@@ -268,6 +268,13 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
         data.assetData = assetData;
       }
     }
+    if (serializedPackages) {
+      data.serializedPackagesData = {
+        assemblyOrderId: workOrderData?.assemblyOrder?.optionValue,
+        serializedPackages: serializedPackages
+      };
+    }
+
     axiosInstance()
       .patch(`${workOrder.api}/status/${id}`, data)
       .then(({ data: { data } }) => {
@@ -836,9 +843,9 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
           }}
           assemblyOrderId={workOrderData?.assemblyOrder?.optionValue}
           workOrderIds={[id]}
-          onSuccess={() => {
+          onSuccess={(_data) => {
             setOpenSerializedPackageDialog(false);
-            updateStatus(WORK_ORDER_STATUS.completed);
+            updateStatus(WORK_ORDER_STATUS.completed, null, null, null, _data);
           }}
         />
       )}

@@ -129,7 +129,7 @@ const PackageDetails = () => {
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>{!permissions?.assemblyOrder?.isRead && !permissions?.disassemblyOrder?.isRead ? 'Individual ' : ''}Services</CustomTab>
           <CustomTab value={2}>{!permissions?.assemblyOrder?.isRead && !permissions?.disassemblyOrder?.isRead ? 'Individual ' : ''}Products</CustomTab>
-          <CustomTab value={3}>{!permissions?.assemblyOrder?.isRead ? 'Individual ' : ''}Sub Packages</CustomTab>
+          <CustomTab value={3}>Sub Packages</CustomTab>
         </CustomTabs>
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, sm: 12, md: 12 }}>
