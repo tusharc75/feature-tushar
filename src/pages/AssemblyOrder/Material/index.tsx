@@ -478,18 +478,22 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
           okBtnLoading={isDeleting}
         />
       )}
-
       {addDialog.open && (
         <AssignPackageDialog
           handleClose={() => setAddDialog({ open: false, parentId: null })}
           onSuccess={(rows) => {
-            setChildPackageWithoutParentDialog({ open: true, data: rows });
+            if (rows?.find((e) => e?.packages?.length)) {
+              setChildPackageWithoutParentDialog({ open: true, data: rows });
+            }
+            else {
+              handleAdd(rows);
+            }
           }}
           isSubmitting={isSubmitting}
           packageType={'product'}
+          forceSplitQuantity={true}
         />
       )}
-
       {materialEdit.open && (
         <MaterialQtyDialog
           onClose={() => {
@@ -503,7 +507,6 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
           material={material}
         />
       )}
-
       {openSerializedPackagesDialog && (
         <AssignSerializedPackagesDialog
           onSuccess={handleAssignSerializedPackage}
@@ -525,7 +528,6 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
             }))}
         />
       )}
-
       {childPackageWithoutParentDialog.open && (
         <ConfirmationDialog
           open={true}
