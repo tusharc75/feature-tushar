@@ -84,7 +84,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
       .toFixed(2);
     }
     setTotalAmount(parseFloat(total));
-  }, []);
+  }, [lineItems]);
 
   const haversineDistance = (lat1, lon1, lat2, lon2) => {
     const toRad = (x) => (x * Math.PI) / 180;
