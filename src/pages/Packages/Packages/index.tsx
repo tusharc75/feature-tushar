@@ -17,7 +17,6 @@ import { isMobile } from 'react-device-detect';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { GrDrag } from 'react-icons/gr';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
-import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 
 const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = false }) => {
   const renderedFrom = `${camelCase(sidebarResource?.packages)}_packages'}`;
@@ -38,24 +37,16 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
   const [arrangeView, setArrangeView] = useState(false);
   const [isArranging, setIsArranging] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
-  const [tabValue, setTabValue] = useState(0);
-  const [selectedResource, setSelectedResource] = useState('');
 
   useEffect(() => {
     fetchGridColumns();
-  }, []);
-
-  useEffect(() => {
     fetchData();
-  }, [selectedResource]);
+  }, []);
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
     let api = `${packages.api}/${packageId}/package`;
-    if (selectedResource) {
-      api += `?type=${selectedResource}`;
-    }
     axiosInstance()
       .get(api).then(({ data: { data } }) => {
         let rows = data?.map((u, index) => {
@@ -106,7 +97,6 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
         .put(`${packages.api}/${packageId}/package`, {
           ids: [row?._id],
           qty: Number(data?.qty),
-          type: selectedResource
         })
         .then(() => {
           fetchData();
@@ -121,7 +111,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
     setRemovingProducts(true);
     const Ids = selectedRecords.map((d) => d._id);
     axiosInstance()
-      .put(`${packages.api}/${packageId}/package/remove`, { ids: Ids, type: selectedResource })
+      .put(`${packages.api}/${packageId}/package/remove`, { ids: Ids })
       .then(() => {
         setRemovingProducts(false);
         setShowProductConfirmBox(false);
@@ -140,7 +130,6 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
       .post(`${packages.api}/${packageId}/package`, {
         ids: [packageId],
         packages: rows?.map((d: any) => ({ packageId: d?._id, qty: d?.qty ? Number(d?.qty) : Number(1) })),
-        type: selectedResource
       })
       .then(() => {
         setShowProductAssignDialog(false);
@@ -192,7 +181,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
             }}
             isExportAllOrSomeFeature={true}
             ids={[]}
-            additionalParams={`refrenceId=${packageId}${selectedResource ? `&type=${selectedResource}` : ''}`}
+            additionalParams={`refrenceId=${packageId}`}
           />
           {dataRows?.length > 0 ? (
             <ThemeButton
@@ -216,7 +205,6 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
       .put(`${packages.api}/material/${packageId}/order`, {
         packageType: 'Package',
         data: rows || [],
-        type: selectedResource
       })
       .then(() => {
         fetchData();
@@ -230,21 +218,8 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
       });
   };
 
-  const handleMainTabChange = (event: any, newValue: number) => {
-    setSelectedResource(newValue === 1 ? WORK_ORDER_TYPE.assemblyOrder : '')
-    setTabValue(newValue);
-  };
-
   return (
     <>
-      {permissions?.assemblyOrder?.isRead && (
-        <>
-          <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
-            <CustomTab value={0} label={`Individual`} />
-            <CustomTab value={1} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.assemblyOrder]} />
-          </CustomTabs>
-        </>
-      )}
       <DetailsPageHeader
         isAddButtonVisible={allowedToEdit}
         addButtonMenuItems={addButtonMenuItems()}
