@@ -160,6 +160,9 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
     values.lineItems = lineItems?.map((e) => {
       return { ...e, amount: parseFloat(e?.amount) };
     });
+    values.lineItems = lineItems?.map((e) => {
+      return { ...e, rate: parseFloat(e?.rate) };
+    });
     if (expenseId && isClone === false) {
       values._id = expenseId;
       axiosInstance()
