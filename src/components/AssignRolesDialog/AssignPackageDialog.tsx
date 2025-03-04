@@ -29,7 +29,8 @@ const AssignPackageDialog = ({
   customerAccount = null,
   ids = [],
   isSubmitting = false,
-  hideQty = false
+  hideQty = false,
+  forceSplitQuantity = false
 }) => {
   const renderedFrom = `${camelCase(sidebarResource?.packages)}`;
   const toastConfig = useContext(CustomToastContext);
@@ -252,16 +253,26 @@ const AssignPackageDialog = ({
             textAddShow: true
           }}
           addButtonOnclick={() => {
-            if (selectedRecords?.some((r) => r?.qty > 1)) {
-              setShowConfirmationDialog(true);
-            } else {
-              onSuccess(selectedRecords);
+            if (forceSplitQuantity) {
+              const data: any = [];
+              selectedRecords?.forEach((r) => {
+                for (let i = 0; i < r?.qty; i++) {
+                  data.push({ ...r, qty: 1 });
+                }
+              });
+              onSuccess(data);
+            }
+            else {
+              if (selectedRecords?.some((r) => r?.qty > 1)) {
+                setShowConfirmationDialog(true);
+              } else {
+                onSuccess(selectedRecords);
+              }
             }
           }}
           isAddButtonVisible={true}
           setQueryString={false}
         />
-
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 250px)'}
@@ -280,7 +291,6 @@ const AssignPackageDialog = ({
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-
         {showConfirmationDialog && (
           <ConfirmationDialog
             open={true}
@@ -290,10 +300,7 @@ const AssignPackageDialog = ({
               const data: any = [];
               selectedRecords?.forEach((r) => {
                 for (let i = 0; i < r?.qty; i++) {
-                  data.push({
-                    ...r,
-                    qty: 1
-                  });
+                  data.push({ ...r, qty: 1 });
                 }
               });
               onSuccess(data);

@@ -304,4 +304,25 @@ export const resourcePolicy = [
       },
     ]
   },
+  {
+    resource: sidebarResource.expenses,
+    policy: [
+      {
+        fieldName: 'distanceUnit',
+        fieldLabel: 'Distance Unit',
+        type: 'dropDown',
+        option: [
+          { optionValue: 'km', optionLabel: 'km', order: 0 },
+          { optionValue: 'mile', optionLabel: 'mile', order: 1 },
+        ],
+        defaultValue: ''
+      },
+      {
+        fieldName: 'perUnitRate',
+        fieldLabel: 'Per Unit Rate',
+        type: 'number',
+        defaultValue: ''
+      }
+    ]
+  },
 ];

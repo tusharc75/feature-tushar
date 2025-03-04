@@ -353,6 +353,11 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
         errors['qty'] = 'The quantity is less than what was assigned.';
       }
     }
+    if (isBulkedit && values?.qty) {
+      if (selectedProducts?.find((e) => e?.assetQty || e?.nonSerializedQty)) {
+        errors['qty'] = `Bulk quantity update is restricted when an asset is assigned or a ticket is created`;
+      }
+    }
     if (isQtyOnly && rowData && values.qty > rowData.qty) {
       errors['qty'] = `Quantity can not be greater than ${rowData?.qty}`;
     }
