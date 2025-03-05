@@ -143,8 +143,6 @@ const ServiceOrderDetailsPage = () => {
         data.canDelete &&
         ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
       );
-      let fieldServiceSteps = permissions?.invoice?.isRead ? steps : steps?.filter((e) => e.name !== 'Field Ticket Invoice');
-      setSteps(fieldServiceSteps);
       if ([SERVICE_ORDER_STATUS.closed]?.includes(data?.status)) {
         setCurrentStep(steps?.length - 1);
       } else {
@@ -167,7 +165,7 @@ const ServiceOrderDetailsPage = () => {
         if (data?.policy?.addServicesAndTechnicians) {
           setSteps(serviceOrderSteps2);
         } else {
-          setSteps(serviceOrderSteps);
+          setSteps(permissions?.invoice?.isRead ? serviceOrderSteps : serviceOrderSteps?.filter((e) => e.name !== 'Field Ticket Invoice'));
         }
       }
     } catch (error) {
