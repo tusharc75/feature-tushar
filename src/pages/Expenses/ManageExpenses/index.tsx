@@ -192,6 +192,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
     if(isMileage){
       values.totalAmount = totalFare;
       values.totalDistance = totalDistance;
+      values.unit = resourceData?.policy?.distanceUnit;
       values.lineItems = mileageItems?.map((e) => {
         return { ...e, amount: parseFloat(e?.amount), distance: parseFloat(e?.distance), rate: parseFloat(e?.rate) };
       });

@@ -73,6 +73,46 @@ const Expenses = () => {
           );
         }
       },
+      {
+        accessor: 'totalDistance',
+        Header: 'Total Distance',
+        minWidth: 100,
+        width: 150,
+        disableFilters: true,
+        disableSortBy: false,
+        canDrag: true,
+        Cell: ({ row }) => {
+          return row?.original?.totalDistance ? (
+            <div>
+              <p className="text-truncate">
+                {row?.original?.totalDistance}
+              </p>
+            </div>
+          ) : (
+            <NoDataCell />
+          );
+        }
+      },
+      {
+        accessor: 'distanceUnit',
+        Header: 'Distance Unit',
+        minWidth: 100,
+        width: 150,
+        disableFilters: true,
+        disableSortBy: false,
+        canDrag: true,
+        Cell: ({ row }) => {
+          return row?.original?.unit ? (
+            <div>
+              <p className="text-truncate">
+                {row?.original?.unit}
+              </p>
+            </div>
+          ) : (
+            <NoDataCell />
+          );
+        }
+      },
       ...getStaticFields()
     ];
     setColumns([...extracolumns, ActionsRenderer]);
