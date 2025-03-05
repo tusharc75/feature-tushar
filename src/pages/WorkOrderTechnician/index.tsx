@@ -150,11 +150,33 @@ const WorkOrderTechnician = () => {
       isRead: permissions && permissions?.productionOrder ? permissions?.productionOrder?.isRead : false,
       isCreate: permissions && permissions?.productionOrder ? permissions?.productionOrder?.isCreate : false,
       isUpdate: permissions && permissions?.productionOrder ? permissions?.productionOrder?.isUpdate : false
+    },
+    {
+      fieldData: {
+        _id: '630dc2429ea41869032395b5',
+        fieldName: 'assemblyOrder',
+        fieldLabel: resources?.assemblyOrder?.titlePlural,
+        lookup: true,
+        lookupResource: sidebarResource.assemblyOrder,
+        resource: sidebarResource.workOrderTechnician,
+        type: 'dropDown',
+        order: 4,
+        required: false,
+        sectionName: 'Work Order Technician Filter',
+        isTooltip: false,
+        editAble: false,
+        brand: user?.brand,
+        roleType: 0,
+        sectionProperties: ''
+      },
+      isRead: permissions && permissions?.assemblyOrder ? permissions?.assemblyOrder?.isRead : false,
+      isCreate: permissions && permissions?.assemblyOrder ? permissions?.assemblyOrder?.isCreate : false,
+      isUpdate: permissions && permissions?.assemblyOrder ? permissions?.assemblyOrder?.isUpdate : false
     }
   ];
 
   const [viewType, setViewType] = useState<ViewType>(() => {
-    return (localStorage.getItem(`${renderedFrom}_view`) as ViewType) || 'table-view';
+    return (localStorage.getItem(`${renderedFrom}_view`) as ViewType) || 'card-view';
   });
   const [tableViewStatus, setTableViewStatus] = useState<TableViewStatus>('Pending');
   const [selectedServiceStatus, setSelectedServiceStatus] = useState([
@@ -208,7 +230,7 @@ const WorkOrderTechnician = () => {
         {
           disabled:
             selectedRecords?.length &&
-              selectedRecords?.filter((s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length ===
+            selectedRecords?.filter((s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length ===
               selectedRecords?.length
               ? false
               : true,

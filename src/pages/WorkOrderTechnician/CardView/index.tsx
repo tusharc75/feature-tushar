@@ -53,6 +53,7 @@ const CardView = (props, ref) => {
       { accessor: 'productionOrderNumber', title: resources?.productionOrder?.titleSingular, type: 'text' },
       { accessor: 'spoolNumber', title: 'Spool Number', type: 'text' },
       { accessor: 'repairOrderNumber', title: resources?.repairOrder?.titleSingular, type: 'text' },
+      { accessor: 'assemblyOrderNumber', title: resources?.assemblyOrder?.titleSingular, type: 'text' },
       { accessor: 'serializedAsset', title: 'Asset', type: 'text' },
       { accessor: 'assignedWorkStations', title: 'Work Stations', type: 'text' },
       {
@@ -118,6 +119,7 @@ const CardView = (props, ref) => {
             newObj['workOrderNumber'] = item.workOrderDetail?.workOrderNumber;
             newObj['repairOrderNumber'] = item.workOrderDetail?.repairOrder?.optionLabel;
             newObj['productionOrderNumber'] = item.workOrderDetail?.productionOrder?.optionLabel;
+            newObj['assemblyOrderNumber'] = item.workOrderDetail?.assemblyOrder?.optionLabel;
             newObj['spoolNumber'] = item.workOrderDetail?.spoolNumber;
             newObj['serializedAsset'] = item.workOrderDetail?.serializedAsset?.optionLabel;
             newObj['assignedWorkStations'] = item?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString();
