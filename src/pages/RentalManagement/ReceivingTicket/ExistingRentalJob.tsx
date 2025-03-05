@@ -226,7 +226,20 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
             setShowRentalDialog(false);
           }}
           onSuccess={(data) => {
-            handlePerformTransfer(data);
+            setShowRentalDialog(false);
+            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingStatus ? user?.user?.brandPolicy?.rentalReceivingStatus : ASSET_STATUS.underReview;
+            const statusPolicy = checkAssetPolicy(receivingStatus);
+            if (statusPolicy && ![ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(productInventory[0]?.status)) {
+              setOpenAssetDataDialog({
+                open: true,
+                statusPolicy: statusPolicy?.statusPolicy,
+                _ids: statusPolicy?.assetIds,
+                type: 'underReview',
+                data: data
+              });
+            } else {
+              handlePerformTransfer(data);
+            }
           }}
         />
       )}
@@ -266,7 +279,7 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
           onSuccess={(_assetData) => {
             if (openAssetDataDialog.type === 'underReview') {
               setUnderReviewAssetData(_assetData);
-              handlePerformTransfer(selectedRecords[0]);
+              handlePerformTransfer(openAssetDataDialog.data);
             } else {
               handleMoveAsset(openAssetDataDialog.data, selectedPackage, underReviewAssetData, _assetData);
               setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: null, data: null });
