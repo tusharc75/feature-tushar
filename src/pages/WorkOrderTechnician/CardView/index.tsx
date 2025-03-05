@@ -51,10 +51,10 @@ const CardView = (props, ref) => {
       { accessor: 'serviceName', type: 'title' },
       { accessor: 'workOrderNumber', title: 'Work Order', type: 'text' },
       { accessor: 'productionOrderNumber', title: resources?.productionOrder?.titleSingular, type: 'text' },
-      { accessor: 'spoolNumber', title: 'Spool Number', type: 'text' },
       { accessor: 'repairOrderNumber', title: resources?.repairOrder?.titleSingular, type: 'text' },
       { accessor: 'assemblyOrderNumber', title: resources?.assemblyOrder?.titleSingular, type: 'text' },
-      { accessor: 'serializedAsset', title: 'Asset', type: 'text' },
+      { accessor: 'serializedAsset', title: resources?.serializedAsset?.titleSingular, type: 'text' },
+      { accessor: 'package', title: resources?.packages?.titleSingular, type: 'text' },
       { accessor: 'assignedWorkStations', title: 'Work Stations', type: 'text' },
       {
         type: 'tooltip',
@@ -120,8 +120,8 @@ const CardView = (props, ref) => {
             newObj['repairOrderNumber'] = item.workOrderDetail?.repairOrder?.optionLabel;
             newObj['productionOrderNumber'] = item.workOrderDetail?.productionOrder?.optionLabel;
             newObj['assemblyOrderNumber'] = item.workOrderDetail?.assemblyOrder?.optionLabel;
-            newObj['spoolNumber'] = item.workOrderDetail?.spoolNumber;
             newObj['serializedAsset'] = item.workOrderDetail?.serializedAsset?.optionLabel;
+            newObj['package'] = item.workOrderDetail?.package?.optionLabel;
             newObj['assignedWorkStations'] = item?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString();
             if (column !== WORKORDER_SERVICE_STATUS.completed) {
               newObj['estimateCompleteDate'] = item.workOrderDetail?.estimateCompleteDate;
@@ -143,7 +143,7 @@ const CardView = (props, ref) => {
         dispatch({ type: 'setData', setData: (prev) => setData(prev, appendData), setCount: (prevCount) => ({ ...prevCount, [column]: count }) });
         dispatch({ type: 'page', setPage: (prev) => ({ ...prev, [column]: page }) });
       })
-      .catch((err) => {})
+      .catch((err) => { })
       .finally(() => {
         dispatch({ type: 'loading', loading: (prev) => ({ ...prev, [column]: false }) });
       });
