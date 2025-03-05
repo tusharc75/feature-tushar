@@ -9,7 +9,6 @@ import axiosInstance from '../../axios/axiosInstance';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, EXPENSE_STATUS, expenseApproval } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import Grid from '@mui/material/Grid2';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import Requests from 'src/pages/ExpenseApproval/Requests';
 
@@ -131,46 +130,58 @@ const ExpenseApproval = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ ...routes.expenseApproval, title: resources?.expenseApproval?.titlePlural }]} />
+          <CustomBreadCrumbs
+            routes={[
+              {
+                ...routes.expenseApproval,
+                title: resources?.expenseApproval?.titlePlural
+              }
+            ]}
+          />
         </Box>
       </Box>
-      <Box className={`detail-container-v1`}>
+      <Box className="detail-container-v1">
         {reportData ? (
           reportData?.length > 0 ? (
-            <Grid container spacing={2}>
-              <div className="grid grid-cols-1 gap-8 md:grid-cols-[400px_1fr]">
-                <div className="container-with-border p-[20px] md:min-h-[calc(100vh-200px)]">
-                  <CustomReactTable
-                    showOnlyMobileView={true}
-                    height={'calc(100vh - 200px)'}
-                    columns={columns}
-                    state={state}
-                    dispatch={dispatch}
-                    renderedFrom={renderedFrom}
-                    refreshGrid={fetchData}
-                    resource={sidebarResource.expenseReport}
-                    showOnlyShowFilteredRecordSwitch={false}
-                    hideSelection={true}
-                    setWholeRowsCellColor={(row) =>
-                      row._id === selectedExpenseReport?._id
-                        ? ' [box-shadow:inset_0px_0px_0px_3px_var(--new-theme-color)_!important]  transition-bg duration-300'
-                        : ' transition-bg duration-300'
-                    }
-                    onRowClick={onRowClick}
-                    showFilters={true}
-                  />
-                </div>
-                <div className="container-with-border p-[20px]">
-                  {selectedExpenseReport && (
-                    <Box p={3}>
-                      <Requests referenceId={selectedExpenseReport?._id} fetchDataMaster={fetchData} />
-                    </Box>
-                  )}
-                </div>
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-[400px_1fr]">
+              <div className="container-with-border p-[20px] md:min-h-[calc(100vh-200px)]">
+                <CustomReactTable
+                  showOnlyMobileView={true}
+                  height="calc(100vh - 200px)"
+                  columns={columns}
+                  state={state}
+                  dispatch={dispatch}
+                  renderedFrom={renderedFrom}
+                  refreshGrid={fetchData}
+                  resource={sidebarResource.expenseReport}
+                  showOnlyShowFilteredRecordSwitch={false}
+                  hideSelection={true}
+                  setWholeRowsCellColor={(row) =>
+                    row._id === selectedExpenseReport?._id
+                      ? ' [box-shadow:inset_0px_0px_0px_3px_var(--new-theme-color)_!important] transition-bg duration-300'
+                      : ' transition-bg duration-300'
+                  }
+                  onRowClick={onRowClick}
+                  showFilters={true}
+                />
               </div>
-            </Grid>
+              <div className="container-with-border p-[20px]">
+                {selectedExpenseReport && (
+                  <Box p={3}>
+                    <Requests referenceId={selectedExpenseReport?._id} fetchDataMaster={fetchData} />
+                  </Box>
+                )}
+              </div>
+            </div>
           ) : (
-            <Box style={{ minHeight: 'calc(100vh - 349px)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <Box
+              style={{
+                minHeight: 'calc(100vh - 349px)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}
+            >
               <Typography>No Request !</Typography>
             </Box>
           )
@@ -183,5 +194,4 @@ const ExpenseApproval = () => {
     </Box>
   );
 };
-
 export default ExpenseApproval;

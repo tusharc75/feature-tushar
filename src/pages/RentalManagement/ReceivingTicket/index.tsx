@@ -758,7 +758,7 @@ const ReceivingTicket = ({
         });
       }
 
-      const flattenRows = flattenArray(newRows)
+      const flattenRows = getFilterSelectedRecords(null, flattenArray(newRows))
       if (flattenRows?.length) {
         if (user?.user?.brandPolicy?.rentalOnFieldStep && currentStep === RENTAL_STEPS.onField) {
           if (flattenRows.filter((e) => e?.receivingTicketId || e?.returnTicketId).length) {
@@ -892,6 +892,7 @@ const ReceivingTicket = ({
       obj.currentLocationNotMatchWithGps = _subRow?.inventory?.currentLocationNotMatchWithGps;
       obj.productName = _subRow?.inventory?.product?.optionLabel;
       obj.materialId = _subRow?.inventory?.product?.optionValue;
+      obj.productId = _subRow?.inventory?.product?.optionValue;
       obj.warehouse = _subRow?.inventory?.warehouse?.optionLabel;
       obj.warehouseId = _subRow?.inventory?.warehouse?.optionValue;
       obj.currentOwner = _subRow?.inventory?.currentOwner;
@@ -2342,7 +2343,7 @@ const ReceivingTicket = ({
               }}
             />
           }
-          actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+          actionButtonProps={{ disabled: getFilterSelectedRecords()?.length === 0 }}
           rightSideContents={rightSideContents()}
           rightSideContentsAfterAction={rightSideContentsAfterAction()}
           hasXpadding
@@ -3123,7 +3124,7 @@ const ActionButtonMenuItems = ({
                 {user?.user?.brandPolicy?.rentalOnFieldStep ? `Create Return Ticket (Chargeable)` : `Create Receiving Ticket (Chargeable)`}
               </MenuItem>
             </HtmlTooltip>
-            {getFilterSelectedRecords().length &&
+            {getFilterSelectedRecords().length > 0 &&
               getFilterSelectedRecords()?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
               getFilterSelectedRecords()?.length ? (
               <MenuItem
@@ -3199,7 +3200,7 @@ const ActionButtonMenuItems = ({
             {`Transfer to another ${resources?.rentalManagement?.titleSingular}`}
           </MenuItem>
         )}
-      {getFilterSelectedRecords()?.length &&
+      {getFilterSelectedRecords()?.length > 0 &&
         getFilterSelectedRecords()?.every((e) => e?.status === ASSET_STATUS.inUse) &&
         getFilterSelectedRecords()?.every((e) => e?.loadingTicketId) &&
         !getFilterSelectedRecords()?.some((e) => e?.receivingTicketId || e?.returnTicketId) &&

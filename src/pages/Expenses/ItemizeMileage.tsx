@@ -11,7 +11,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { CustomDialogTransition, formatAmountWithCurrency } from 'src/constants/helpers';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
-const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySymbol, isSubmitting, totalAmount }) => {
+const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySymbol, isSubmitting, totalAmount, policyData }) => {
   const [touchedFields, setTouchedFields] = useState({});
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [fromSuggestions, setFromSuggestions] = useState([]);
@@ -32,15 +32,17 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
 
   const haversineDistance = (lat1, lon1, lat2, lon2) => {
     const toRad = (x) => (x * Math.PI) / 180;
-    const R = 6371;
+    const R_KM = 6371;
+    const R_MILE = 3958.8;
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
+    if(policyData?.distanceUnit === 'mile'){
+      return R_MILE * c;
+    }else{
+      return R_KM * c;
+    }
   };
 
   const handleFromInputChange = (event, value, reason) => {
@@ -83,37 +85,36 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
       if (placeResult && placeResult.geometry) {
         const lat = placeResult.geometry.location.lat();
         const lng = placeResult.geometry.location.lng();
-  
+
         const newFields = [...lineItems];
         const newLocation = {
           lat,
           lng,
           description: prediction.description
         };
-  
+
         if (isFrom) {
           newFields[index].fromLocation = newLocation;
         } else {
           newFields[index].toLocation = newLocation;
         }
-  
+
         if (newFields[index].fromLocation && newFields[index].toLocation) {
           const { lat: lat1, lng: lon1 } = newFields[index].fromLocation;
           const { lat: lat2, lng: lon2 } = newFields[index].toLocation;
-  
+
           const distance = haversineDistance(lat1, lon1, lat2, lon2);
           newFields[index].distance = distance.toFixed(2);
-  
+
           if (newFields[index].rate) {
             newFields[index].amount = (distance * newFields[index].rate).toFixed(2);
           }
         }
-  
+
         setLineItems(newFields);
       }
     });
   };
-  
 
   const handleBlur = (index, field) => {
     setTouchedFields((prev) => ({
@@ -127,7 +128,7 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
   };
 
   const addLineItem = () => {
-    setLineItems([...lineItems, { id: lineItems.length, fromLocation: null, toLocation: null, rate: '', distance: '', amount: '' }]);
+    setLineItems([...lineItems, { id: lineItems.length, fromLocation: null, toLocation: null, rate: policyData?.perUnitRate, distance: '', amount: '' }]);
   };
 
   const removeLineItem = (id) => {
@@ -137,14 +138,13 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
   const handleInputChange = (index, field, event) => {
     const newFields = [...lineItems];
     newFields[index][field] = event.target.value;
-  
-    if (field === "rate" && newFields[index].distance) {
+
+    if (field === 'rate' && newFields[index].distance) {
       newFields[index].amount = (newFields[index].distance * newFields[index].rate).toFixed(2);
     }
-  
+
     setLineItems(newFields);
   };
-  
 
   return (
     <Dialog
@@ -236,7 +236,7 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
               </Grid>
               <Grid size={{ xs: 6 }}>
                 <TextField
-                  label="Distance in KMs"
+                  label={`Distance (${policyData?.distanceUnit})`}
                   type="number"
                   size="small"
                   disabled
@@ -244,14 +244,12 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
                   onChange={(event) => {
                     const newValue = Number(event.target.value);
                     if (newValue >= 0 || event.target.value === '') {
-                      handleInputChange(index,'distance', event);
+                      handleInputChange(index, 'distance', event);
                     }
                   }}
                   onBlur={() => handleBlur(index, 'distance')}
                   fullWidth
                   required
-                  error={touchedFields[index]?.distance && item.distance <= 0}
-                  helperText={touchedFields[index]?.distance && item.distance <= 0 ? 'Distance is required' : ''}
                 />
               </Grid>
               <Grid size={{ xs: 6 }}>
@@ -260,10 +258,11 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
                   type="number"
                   size="small"
                   value={item.rate}
+                  disabled
                   onChange={(event) => {
                     const newValue = Number(event.target.value);
                     if (newValue >= 0 || event.target.value === '') {
-                      handleInputChange(index,'rate', event);
+                      handleInputChange(index, 'rate', event);
                     }
                   }}
                   onBlur={() => handleBlur(index, 'rate')}
@@ -289,8 +288,11 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
                   onBlur={() => handleBlur(index, 'amount')}
                   fullWidth
                   required
-                  error={touchedFields[index]?.amount && item.amount <= 0}
-                  helperText={touchedFields[index]?.amount && item.amount <= 0 ? 'Amount is required' : ''}
+                  slotProps={{
+                    input: {
+                      startAdornment: <InputAdornment position="start">{currencySymbol}</InputAdornment>
+                    }
+                  }}
                 />
               </Grid>
               <Grid size={{ xs: 2 }}>
