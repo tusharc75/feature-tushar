@@ -173,7 +173,8 @@ const ExpenseDetail = () => {
                         <TableRow>
                           <TableCell align="left">From</TableCell>
                           <TableCell align="left">To</TableCell>
-                          <TableCell align="right">Distance ({resourceData?.policy?.distanceUnit})</TableCell>
+                          <TableCell align="right">Distance</TableCell>
+                          <TableCell align="right">Unit</TableCell>
                           <TableCell align="right">Rate</TableCell>
                           <TableCell align="right">Amount</TableCell>
                         </TableRow>
@@ -184,6 +185,7 @@ const ExpenseDetail = () => {
                             <TableCell align="left">{row.fromLocation?.description || '-'}</TableCell>
                             <TableCell align="left">{row.toLocation?.description || '-'}</TableCell>
                             <TableCell align="right">{row.distance || '-'}</TableCell>
+                            <TableCell align="right">{resourceData?.policy?.distanceUnit}</TableCell>
                             <TableCell align="right">
                               {formatAmountWithCurrency(expensesData?.currency, row?.rate)?.fullFormatAmountWithoutSpace}
                             </TableCell>
@@ -200,6 +202,7 @@ const ExpenseDetail = () => {
                           <TableCell align="right">
                             <Typography variant="subtitle2">{expensesData?.totalDistance}</Typography>
                           </TableCell>
+                          <TableCell />
                           <TableCell />
                           <TableCell align="right">
                             <Typography variant="subtitle2">
