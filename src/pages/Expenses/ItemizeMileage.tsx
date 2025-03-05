@@ -239,7 +239,6 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
                   label={`Distance (${policyData?.distanceUnit})`}
                   type="number"
                   size="small"
-                  disabled
                   value={item.distance}
                   onChange={(event) => {
                     const newValue = Number(event.target.value);
@@ -250,6 +249,8 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
                   onBlur={() => handleBlur(index, 'distance')}
                   fullWidth
                   required
+                  error={touchedFields[index]?.distance && item.distance <= 0}
+                  helperText={touchedFields[index]?.distance && item.distance <= 0 ? 'Distance is required' : ''}
                 />
               </Grid>
               <Grid size={{ xs: 6 }}>
@@ -258,7 +259,6 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
                   type="number"
                   size="small"
                   value={item.rate}
-                  disabled
                   onChange={(event) => {
                     const newValue = Number(event.target.value);
                     if (newValue >= 0 || event.target.value === '') {
