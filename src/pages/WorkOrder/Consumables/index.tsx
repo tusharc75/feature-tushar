@@ -653,7 +653,7 @@ const Consumables = ({
         <Grid size={{ xs: 12, md: 12, sm: 12 }}>
           {columns ? (
             <CustomReactTable
-              height={isCreate ? 'calc(100vh - 140px)' : 'calc(100vh - 345px)'}
+              height={isCreate ? 'calc(100vh - 300px)' : 'calc(100vh - 345px)'}
               columns={columns}
               state={state}
               dispatch={dispatch}

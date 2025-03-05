@@ -10,11 +10,7 @@ const WorkOrderDetails = () => {
   const parsed = queryString.parse(history.location.search);
   const { tab }: any = parsed;
 
-  return <WorkOrderDetailContent
-    id={id}
-    tab={tab}
-    resource={sidebarResource?.workOrder}
-  />;
+  return <WorkOrderDetailContent id={id} tab={tab} resource={sidebarResource?.workOrder} />;
 };
 
 export default WorkOrderDetails;
