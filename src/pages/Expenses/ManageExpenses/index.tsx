@@ -192,6 +192,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
     if(isMileage){
       values.totalAmount = totalFare;
       values.totalDistance = totalDistance;
+      values.unit = resourceData?.policy?.distanceUnit;
       values.lineItems = mileageItems?.map((e) => {
         return { ...e, amount: parseFloat(e?.amount), distance: parseFloat(e?.distance), rate: parseFloat(e?.rate) };
       });
@@ -313,7 +314,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
                           }
                         }}
                       >
-                        Itemize {values['type'] === 'Mileage' ? 'Mileage' : 'Expense'}
+                        {values['type'] === 'Mileage' ? 'Add Mileage' : 'Itemize Expense'}
                       </ThemeButton>
                     </Grid>
                     <Grid container spacing={2}>
