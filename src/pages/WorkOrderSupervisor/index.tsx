@@ -235,7 +235,7 @@ const WorkOrderSupervisor = () => {
         lookupResource: sidebarResource.assemblyOrder,
         resource: sidebarResource.workOrderSupervisor,
         type: 'dropDown',
-        order: 4,
+        order: 5,
         required: false,
         sectionName: 'Work Order Superviser Filter',
         isTooltip: false,
@@ -257,7 +257,7 @@ const WorkOrderSupervisor = () => {
         lookupResource: sidebarResource.serializedAsset,
         resource: sidebarResource.workOrderSupervisor,
         type: 'dropDown',
-        order: 4,
+        order: 6,
         required: false,
         sectionName: 'Work Order Superviser Filter',
         isTooltip: false,
@@ -269,6 +269,28 @@ const WorkOrderSupervisor = () => {
       isRead: permissions && permissions?.serializedAsset ? permissions?.serializedAsset?.isRead : false,
       isCreate: permissions && permissions?.serializedAsset ? permissions?.serializedAsset?.isCreate : false,
       isUpdate: permissions && permissions?.serializedAsset ? permissions?.serializedAsset?.isUpdate : false
+    },
+    {
+      fieldData: {
+        _id: '670dc2429gc81866052385b5',
+        fieldName: 'customerAccount',
+        fieldLabel: resources?.customerAccount?.titlePlural,
+        lookup: true,
+        lookupResource: sidebarResource.customerAccount,
+        resource: sidebarResource.workOrderSupervisor,
+        type: 'dropDown',
+        order: 7,
+        required: false,
+        sectionName: 'Work Order Superviser Filter',
+        isTooltip: false,
+        editAble: false,
+        brand: user?.brand,
+        roleType: 0,
+        sectionProperties: ''
+      },
+      isRead: permissions && permissions?.customerAccount ? permissions?.customerAccount?.isRead : false,
+      isCreate: permissions && permissions?.customerAccount ? permissions?.customerAccount?.isCreate : false,
+      isUpdate: permissions && permissions?.customerAccount ? permissions?.customerAccount?.isUpdate : false
     }
   ];
 
