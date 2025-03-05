@@ -864,7 +864,6 @@ const WorkOrderSupervisor = () => {
   const handleApplyFilter = (filterByIdsP = filterByIds) => {
     setShowFilter(false);
     const queryString = getQueryString(true, filterByIdsP);
-    console.log('aaaaaaa', filterByIdsP, queryString);
     dispatch({ type: 'setFilterQuery', filterQuery: queryString });
   };
 
