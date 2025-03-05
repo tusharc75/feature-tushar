@@ -367,7 +367,7 @@ const Services = ({
           : nonSerializeAsset?.filter((e) => e._id === parent._id).length +
           data?.nonSerializedInventory?.filter((d) => d?._id === parent?._id)?.reduce((sum, row) => sum + row?.qty || 0, 0);
         parent.canDelete =
-          parent.type === MATERIAL_TYPE.service && parent?.serviceLog
+          parent.type === MATERIAL_TYPE.service && parent?.serviceLog?.length
             ? false
             : parent?.assetQty > 0 || data.inventory?.filter((e) => e.isReplaced && e._id === parent._id)?.length
               ? false
@@ -477,7 +477,7 @@ const Services = ({
         ? inventory?.filter((e) => e._id === _subRow._id).length + productSerialNumbers?.filter((e) => e._id === _subRow._id).length
         : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
       _subRow.canDelete =
-        _subRow.type === MATERIAL_TYPE.service && _subRow?.serviceLog ? false : _subRow?.assetQty > 0 ? false : _subRow?.status ? false : true;
+        _subRow.type === MATERIAL_TYPE.service && _subRow?.serviceLog?.length ? false : _subRow?.assetQty > 0 ? false : _subRow?.status ? false : true;
       _subRow.nonSerializedQty =
         _subRow.type === MATERIAL_TYPE.service &&
           !_subRow.serializedProduct &&
@@ -759,10 +759,9 @@ const Services = ({
         }}
         isActionButtonVisible={true}
         actionButtonMenuItems={actionButtonMenuItems()}
-        actionButtonProps={{ disabled: !Boolean(selectedRecords && selectedRecords.filter((e) => e.canDelete).length) }}
+        actionButtonProps={{ disabled: selectedRecords.length === 0 }}
         hasXpadding
       />
-
       {columns ? (
         <CustomReactTable
           height={permissions?.employeeMaster?.isRead ? '300px' : stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}

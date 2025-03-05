@@ -658,6 +658,10 @@ const LoadingTicket = ({
             parent.description = parent.type === MATERIAL_TYPE.package ? parent?.packageDetail?.packageDescription || ''
               : parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productDescription || '' :
                 parent.type === MATERIAL_TYPE.service ? parent?.serviceDetail?.serviceDescription || '' : '';
+            if (parent.type === MATERIAL_TYPE.package) {
+              parent.status = ASSET_STATUS.notApplied;
+              parent.rentalAssetStatus = ''
+            }
             parent.subRows = generateNestedData(parent, material, productAssets, loadingTicketProducts,
               consumeProducts, nonSerializedInventory, nonSerializeAsset, productSerialNumbers);
             newRows.push(parent)
@@ -733,6 +737,10 @@ const LoadingTicket = ({
           _subRow.description = _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageDescription || ''
             : _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription || '' :
               _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceDescription || '' : '';
+          if (_subRow.type === MATERIAL_TYPE.package) {
+            _subRow.status = ASSET_STATUS.notApplied;
+            _subRow.rentalAssetStatus = ''
+          }
           _subRow.subRows = generateNestedData(_subRow, material, productAssets, loadingTicketProducts,
             consumeProducts, nonSerializedInventory, nonSerializeAsset, productSerialNumbers);
           subRows.push(_subRow);
