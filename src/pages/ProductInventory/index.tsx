@@ -559,7 +559,7 @@ const InventoryProduct = () => {
               : TOOLTIP_MESSAGE.add
           }}
           actionMenuItems={
-            <ActionMenuItems {...{ permissions, setInventory, selectedRecords, plantId, checkReport, handleRemap, handleRemapPurchaseOrder }} />
+            <ActionMenuItems {...{ permissions, setInventory, selectedRecords, plantId, checkReport, handleRemap, handleRemapPurchaseOrder,user }} />
           }
           isAddButtonVisible={false}
         />
@@ -745,7 +745,7 @@ const LeftSideContents = ({
   );
 };
 
-const ActionMenuItems = ({ permissions, setInventory, selectedRecords, plantId, checkReport, handleRemap, handleRemapPurchaseOrder }) => {
+const ActionMenuItems = ({ permissions, setInventory, selectedRecords, plantId, checkReport, handleRemap, handleRemapPurchaseOrder, user }) => {
   return (
     <>
       <MenuItem
@@ -757,7 +757,7 @@ const ActionMenuItems = ({ permissions, setInventory, selectedRecords, plantId, 
         Add
       </MenuItem>
       <MenuItem
-        disabled={permissions?.productInventory?.isUpdate ? false : true}
+        disabled={permissions?.productInventory?.isUpdate && user?.user?.brandPolicy?.allowNegativeInventory ? false : true}
         onClick={() => {
           setInventory({ open: true, product: selectedRecords, type: 'remove' });
         }}
