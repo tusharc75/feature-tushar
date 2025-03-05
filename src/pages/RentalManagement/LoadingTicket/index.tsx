@@ -665,7 +665,7 @@ const LoadingTicket = ({
         });
       }
 
-      const flattenRows = flattenArray(newRows)
+      const flattenRows = getFilterSelectedRecords(null, flattenArray(newRows))
       if (flattenRows?.length) {
         if (user?.user?.brandPolicy?.rentalOnFieldStep) {
           if (flattenRows.filter((e) => e.loadingTicketStatus).length) {
