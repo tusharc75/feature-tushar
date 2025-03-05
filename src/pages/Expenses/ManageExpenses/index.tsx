@@ -313,7 +313,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
                           }
                         }}
                       >
-                        Itemize {values['type'] === 'Mileage' ? 'Mileage' : 'Expense'}
+                        {values['type'] === 'Mileage' ? 'Add Mileage' : 'Itemize Expense'}
                       </ThemeButton>
                     </Grid>
                     <Grid container spacing={2}>
