@@ -228,6 +228,28 @@ const WorkOrderSupervisor = () => {
     },
     {
       fieldData: {
+        _id: '630da2429ec41869052395b5',
+        fieldName: 'assemblyOrder',
+        fieldLabel: resources?.assemblyOrder?.titlePlural,
+        lookup: true,
+        lookupResource: sidebarResource.assemblyOrder,
+        resource: sidebarResource.workOrderSupervisor,
+        type: 'dropDown',
+        order: 4,
+        required: false,
+        sectionName: 'Work Order Superviser Filter',
+        isTooltip: false,
+        editAble: false,
+        brand: user?.brand,
+        roleType: 0,
+        sectionProperties: ''
+      },
+      isRead: permissions && permissions?.assemblyOrder ? permissions?.assemblyOrder?.isRead : false,
+      isCreate: permissions && permissions?.assemblyOrder ? permissions?.assemblyOrder?.isCreate : false,
+      isUpdate: permissions && permissions?.assemblyOrder ? permissions?.assemblyOrder?.isUpdate : false
+    },
+    {
+      fieldData: {
         _id: '630dc2429gc81869052385b5',
         fieldName: 'serializedAsset',
         fieldLabel: resources?.serializedAsset?.titlePlural,
@@ -278,6 +300,13 @@ const WorkOrderSupervisor = () => {
         type: 'link',
         title: resources?.productionOrder?.titleSingular,
         link: (data) => `${routes?.productionOrderDetail?.path}/${data?.productionOrder?.optionValue}`,
+        target: '_blank'
+      },
+      {
+        accessor: 'assemblyOrderNumber',
+        type: 'link',
+        title: resources?.assemblyOrder?.titleSingular,
+        link: (data) => `${routes?.assemblyOrderDetail?.path}/${data?.assemblyOrder?.optionValue}`,
         target: '_blank'
       },
       {
@@ -394,6 +423,7 @@ const WorkOrderSupervisor = () => {
                 const newObj = { ...item };
                 newObj['productionOrderNumber'] = newObj?.productionOrder?.optionLabel;
                 newObj['repairOrderNumber'] = newObj?.repairOrder?.optionLabel;
+                newObj['assemblyOrderNumber'] = newObj?.assemblyOrder?.optionLabel;
                 newObj['serviceName'] = newObj?.service?.optionLabel;
                 newObj['assignedUser'] = newObj?.assignedUsers?.map((e) => e?.optionLabel)?.toString();
                 newObj['workStation'] = newObj?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString();
@@ -539,7 +569,6 @@ const WorkOrderSupervisor = () => {
     }
   };
 
-
   const assignWorkStationButton = {
     label: `Assign ${resources?.workStations?.titlePlural}`,
     disabled: selectedRecordsS?.some((r) => r?.status === WORKORDER_SERVICE_STATUS.completed) || selectedRecordsS?.length === 0,
@@ -612,15 +641,15 @@ const WorkOrderSupervisor = () => {
             ? [...(viewType === 'card-view' ? [createRepairOrderButton] : [])]
             : selectedRecords?.every((r) => r?.status !== WORKORDER_SERVICE_STATUS.planned)
               ? [
-                assignTechnicianButton,
-                ...(canShowWorkStationButton ? [assignWorkStationButton] : []),
-                ...(viewType === 'card-view' ? [addProductConsumablesButton] : [])
-              ]
+                  assignTechnicianButton,
+                  ...(canShowWorkStationButton ? [assignWorkStationButton] : []),
+                  ...(viewType === 'card-view' ? [addProductConsumablesButton] : [])
+                ]
               : [
-                assignTechnicianButton,
-                ...(canShowWorkStationButton ? [assignWorkStationButton] : []),
-                ...(viewType === 'card-view' ? [addProductConsumablesButton, createRepairOrderButton] : [])
-              ]
+                  assignTechnicianButton,
+                  ...(canShowWorkStationButton ? [assignWorkStationButton] : []),
+                  ...(viewType === 'card-view' ? [addProductConsumablesButton, createRepairOrderButton] : [])
+                ]
     };
     return data;
   }, [resources?.workStations?.titlePlural, selectedRecords, selectedRecordsS, selectedRecordsP, viewType, tableViewStatus]);
@@ -629,13 +658,13 @@ const WorkOrderSupervisor = () => {
     return [
       ...(permissions?.workOrderPlanning?.isRead
         ? [
-          {
-            label: WORKORDER_SERVICE_STATUS.planned,
-            selected: tableViewStatus === WORKORDER_SERVICE_STATUS.planned,
-            value: WORKORDER_SERVICE_STATUS.planned,
-            startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.planned]
-          }
-        ]
+            {
+              label: WORKORDER_SERVICE_STATUS.planned,
+              selected: tableViewStatus === WORKORDER_SERVICE_STATUS.planned,
+              value: WORKORDER_SERVICE_STATUS.planned,
+              startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.planned]
+            }
+          ]
         : []),
       {
         label: WORKORDER_SERVICE_STATUS.pending,
@@ -754,7 +783,7 @@ const WorkOrderSupervisor = () => {
                 </>
               ) : (
                 <div className="flex">
-                  <ToggleButtonGroup size="small" exclusive value={resourceType} onChange={(e, newVal) => { }}>
+                  <ToggleButtonGroup size="small" exclusive value={resourceType} onChange={(e, newVal) => {}}>
                     <ToggleButton value={'workOrder'} onClick={() => setResourceType('workOrder')}>
                       {resources?.workOrder?.titleSingular}
                     </ToggleButton>
@@ -920,20 +949,21 @@ const WorkOrderSupervisor = () => {
           workOrderData={
             assignTechnicianDialog.multiple
               ? selectedRecordsS?.map((r) => ({
-                uniqueId: r?.uniqueId,
-                workOrderId: r?.workOrder
-              }))
+                  uniqueId: r?.uniqueId,
+                  workOrderId: r?.workOrder
+                }))
               : [
-                {
-                  uniqueId: selectedServiceData?.uniqueId,
-                  workOrderId: selectedServiceData?.workOrder
-                }
-              ]
+                  {
+                    uniqueId: selectedServiceData?.uniqueId,
+                    workOrderId: selectedServiceData?.workOrder
+                  }
+                ]
           }
           assignedUsers={
             assignTechnicianDialog.multiple
-              ? selectedRecordsS?.every(val => isEqual(val?.assignedUsers, selectedRecordsS[0]?.assignedUsers))
-                ? selectedRecordsS[0]?.assignedUsers : []
+              ? selectedRecordsS?.every((val) => isEqual(val?.assignedUsers, selectedRecordsS[0]?.assignedUsers))
+                ? selectedRecordsS[0]?.assignedUsers
+                : []
               : selectedServiceData?.assignedUsers
           }
           reference={'service'}
@@ -953,20 +983,22 @@ const WorkOrderSupervisor = () => {
           workOrderData={
             workStationAssignDialog.multiple
               ? selectedRecordsS?.map((r) => ({
-                uniqueId: r?.uniqueId,
-                workOrderId: r?.workOrder
-              }))
+                  uniqueId: r?.uniqueId,
+                  workOrderId: r?.workOrder
+                }))
               : [
-                {
-                  uniqueId: selectedServiceData?.uniqueId,
-                  workOrderId: selectedServiceData?._id
-                }
-              ]
+                  {
+                    uniqueId: selectedServiceData?.uniqueId,
+                    workOrderId: selectedServiceData?._id
+                  }
+                ]
           }
-          workStations={workStationAssignDialog.multiple
-            ? selectedRecordsS?.every(val => isEqual(val?.assignedWorkStations, selectedRecordsS[0]?.assignedWorkStations))
-              ? selectedRecordsS[0]?.assignedWorkStations : []
-            : selectedServiceData?.assignedWorkStations
+          workStations={
+            workStationAssignDialog.multiple
+              ? selectedRecordsS?.every((val) => isEqual(val?.assignedWorkStations, selectedRecordsS[0]?.assignedWorkStations))
+                ? selectedRecordsS[0]?.assignedWorkStations
+                : []
+              : selectedServiceData?.assignedWorkStations
           }
           handleClose={() => {
             setWorkStationAssignDialog({ open: false, multiple: false });

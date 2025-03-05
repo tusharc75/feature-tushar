@@ -758,7 +758,7 @@ const ReceivingTicket = ({
         });
       }
 
-      const flattenRows = flattenArray(newRows)
+      const flattenRows = getFilterSelectedRecords(null, flattenArray(newRows))
       if (flattenRows?.length) {
         if (user?.user?.brandPolicy?.rentalOnFieldStep && currentStep === RENTAL_STEPS.onField) {
           if (flattenRows.filter((e) => e?.receivingTicketId || e?.returnTicketId).length) {
@@ -892,6 +892,7 @@ const ReceivingTicket = ({
       obj.currentLocationNotMatchWithGps = _subRow?.inventory?.currentLocationNotMatchWithGps;
       obj.productName = _subRow?.inventory?.product?.optionLabel;
       obj.materialId = _subRow?.inventory?.product?.optionValue;
+      obj.productId = _subRow?.inventory?.product?.optionValue;
       obj.warehouse = _subRow?.inventory?.warehouse?.optionLabel;
       obj.warehouseId = _subRow?.inventory?.warehouse?.optionValue;
       obj.currentOwner = _subRow?.inventory?.currentOwner;
@@ -2342,7 +2343,7 @@ const ReceivingTicket = ({
               }}
             />
           }
-          actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+          actionButtonProps={{ disabled: getFilterSelectedRecords()?.length === 0 }}
           rightSideContents={rightSideContents()}
           rightSideContentsAfterAction={rightSideContentsAfterAction()}
           hasXpadding
@@ -2989,7 +2990,7 @@ const ActionButtonMenuItems = ({
                 }
               }
             }}
-            disabled={!permissions?.deliveryTicket?.isUpdate || getFilterSelectedRecords()?.length === 0}
+            disabled={!permissions?.deliveryTicket?.isUpdate}
           >
             Received on Field
           </MenuItem>
@@ -3118,7 +3119,7 @@ const ActionButtonMenuItems = ({
                     handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant);
                   }
                 }}
-                disabled={!permissions?.deliveryTicket?.isCreate || getFilterSelectedRecords()?.length === 0}
+                disabled={!permissions?.deliveryTicket?.isCreate}
               >
                 {user?.user?.brandPolicy?.rentalOnFieldStep ? `Create Return Ticket (Chargeable)` : `Create Receiving Ticket (Chargeable)`}
               </MenuItem>
@@ -3148,7 +3149,7 @@ const ActionButtonMenuItems = ({
                     }
                   }
                 }}
-                disabled={!permissions?.deliveryTicket?.isCreate || getFilterSelectedRecords()?.length === 0}
+                disabled={!permissions?.deliveryTicket?.isCreate}
               >
                 {user?.user?.brandPolicy?.rentalOnFieldStep ? `Create Return Ticket (Spares)` : `Create Return Ticket (Non-Chargeable)`}
               </MenuItem>
@@ -3162,7 +3163,7 @@ const ActionButtonMenuItems = ({
                       handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.supplier);
                     }
                   }}
-                  disabled={!permissions?.deliveryTicket?.isCreate || getFilterSelectedRecords()?.length === 0}
+                  disabled={!permissions?.deliveryTicket?.isCreate}
                 >
                   Create Delivery Ticket for Supplier
                 </MenuItem>
@@ -3179,7 +3180,7 @@ const ActionButtonMenuItems = ({
                 handleReceivedItems();
               }
             }}
-            disabled={!permissions?.deliveryTicket?.isUpdate || getFilterSelectedRecords()?.length === 0}
+            disabled={!permissions?.deliveryTicket?.isUpdate}
           >
             {`Received Items`}
           </MenuItem>
@@ -3195,7 +3196,6 @@ const ActionButtonMenuItems = ({
                 setIsExistingRentalJob(true);
               }
             }}
-            disabled={getFilterSelectedRecords()?.length === 0}
           >
             {`Transfer to another ${resources?.rentalManagement?.titleSingular}`}
           </MenuItem>
@@ -3210,7 +3210,6 @@ const ActionButtonMenuItems = ({
             onClick={() => {
               setTransferAnotherPackageialog(true);
             }}
-            disabled={getFilterSelectedRecords()?.length === 0}
           >
             {`Transfer to another Package`}
           </MenuItem>
@@ -3218,7 +3217,6 @@ const ActionButtonMenuItems = ({
       {currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep && (
         <MenuItem
           id={'replace-asset-menu-item'}
-          disabled={getFilterSelectedRecords()?.length === 0}
           onClick={() => {
             if (validateAction(rentalManagementActions.replaceAsset)) {
               const products = [];
@@ -3247,7 +3245,6 @@ const ActionButtonMenuItems = ({
           (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) && (
           <MenuItem
             id={'swap-in-use-assets-menu-item'}
-            disabled={getFilterSelectedRecords()?.length === 0}
             onClick={() => {
               if (validateAction(rentalManagementActions.swapInUseAssets)) {
                 const products = [];
@@ -3279,7 +3276,6 @@ const ActionButtonMenuItems = ({
               setShowRepairJobDialog(true);
             }
           }}
-          disabled={getFilterSelectedRecords()?.length === 0}
         >
           {`Create ${resources?.repairJob?.titleSingular}`}
         </MenuItem>
@@ -3292,7 +3288,6 @@ const ActionButtonMenuItems = ({
               setShowRepairOrderDialog({ open: true, inUseAsset: false });
             }
           }}
-          disabled={getFilterSelectedRecords()?.length === 0}
         >
           {`Create ${resources?.repairOrder?.titleSingular}`}
         </MenuItem>
@@ -3309,7 +3304,6 @@ const ActionButtonMenuItems = ({
             onClick={() => {
               setShowRepairOrderDialog({ open: true, inUseAsset: true });
             }}
-            disabled={getFilterSelectedRecords()?.length === 0}
           >
             {`Create ${resources?.repairOrder?.titleSingular} (${ASSET_STATUS.inUse} Assets)`}
           </MenuItem>
@@ -3326,7 +3320,7 @@ const ActionButtonMenuItems = ({
                       setShowConformationRevertTicket(true);
                     }
                   }}
-                  disabled={!permissions?.deliveryTicket?.isUpdate || getFilterSelectedRecords()?.length === 0}
+                  disabled={!permissions?.deliveryTicket?.isUpdate}
                 >
                   Cancel Specific Line Items
                 </MenuItem>
@@ -3340,7 +3334,7 @@ const ActionButtonMenuItems = ({
                     setShowConformationCancleTicket({ open: true });
                   }
                 }}
-                disabled={!permissions?.deliveryTicket?.isUpdate || getFilterSelectedRecords()?.length === 0}
+                disabled={!permissions?.deliveryTicket?.isUpdate}
               >
                 Cancel Receiving/Return Ticket(s)
               </MenuItem>
@@ -3365,7 +3359,6 @@ const ActionButtonMenuItems = ({
                 setShowConformationConsumeMultiple(true);
               }
             }}
-            disabled={getFilterSelectedRecords()?.length === 0}
           >
             {RENTAL_INTERNAL_ASSET_STATUS.consumed}
           </MenuItem>
@@ -3384,7 +3377,6 @@ const ActionButtonMenuItems = ({
             onClick={() => {
               setShowConformationConsume({ open: true, type: 'revert' });
             }}
-            disabled={getFilterSelectedRecords()?.length === 0}
           >
             {`Revert Consumed Qty`}
           </MenuItem>
@@ -3408,7 +3400,6 @@ const ActionButtonMenuItems = ({
               });
             }
           }}
-          disabled={getFilterSelectedRecords()?.length === 0}
         >
           Update - Start Date/End Date
         </MenuItem>
@@ -3427,7 +3418,6 @@ const ActionButtonMenuItems = ({
             onClick={() => {
               setOpenAssetDataDialog(true);
             }}
-            disabled={getFilterSelectedRecords()?.length === 0}
             id={'change-asset-data-menu-item'}
           >
             Change Assets Data
