@@ -1,7 +1,7 @@
 import { Avatar, Box } from '@mui/material';
 import { Image } from '@mui/icons-material';
 import InfoIcon from '@mui/icons-material/Info';
-import { isArray, isEmpty, isObject } from 'lodash';
+import { isArray, isEmpty, isObject, startCase } from 'lodash';
 import camelCase from 'lodash/camelCase';
 import { memo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
@@ -24,6 +24,7 @@ import {
   formatAmountWithCurrency,
   formatTotalforTableFooter,
   getUniqueCurrencies,
+  MATERIAL_TYPE,
   sidebarResourceObjectFromValues,
   sortByAnotherArray
 } from 'src/constants/helpers';
@@ -39,7 +40,7 @@ const hideColumns = ['salutation', 'middleName', 'lastName', 'suffix'];
 
 export function useColumns() {
   const {
-    state: { permissions, user }
+    state: { permissions, user, resources }
   }: any = useData();
 
   const { gridMetaData } = useGridMetaData();
@@ -515,7 +516,14 @@ export function useColumns() {
     [gridMetaData, permissions, user?.user?.brandCurrency]
   );
 
-  return { generateColumns, checkStaticField, getColumnHiddenStatus };
+  const getMaterialLabel = (materialType) => {
+    if (materialType === MATERIAL_TYPE.package) {
+      return resources?.packages?.titleSingular || startCase(materialType);
+    }
+    return startCase(materialType);
+  }
+
+  return { generateColumns, checkStaticField, getColumnHiddenStatus, getMaterialLabel };
 }
 
 const DropDownMultiSelect = memo(({ row, field }: any) => {

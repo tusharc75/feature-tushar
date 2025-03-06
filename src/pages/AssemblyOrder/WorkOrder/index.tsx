@@ -1,6 +1,6 @@
 import { Box, IconButton, MenuItem, Typography } from '@mui/material';
 import { CheckCircle, Delete } from '@mui/icons-material';
-import { flatMap, map, orderBy, startCase, uniq } from 'lodash';
+import { flatMap, map, orderBy, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
 import { FiExternalLink } from 'react-icons/fi';
@@ -71,7 +71,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
   const [openSerializedPackageDialog, setOpenSerializedPackageDialog] = useState({ open: false, ids: [] });
   const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, workOrder: null });
 
-  const { generateColumns } = useColumns();
+  const { generateColumns, getMaterialLabel } = useColumns();
 
   useEffect(() => {
     setNextStep(false);
@@ -107,8 +107,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
 
   const fetchFields = async () => {
     const response = await fetch_child_resource_fields(CHILD_RESOURCE.assemblyOrderMaterial, assemblyOrderData?.currency || 'USD', false);
-    var data = response?.filter((e) => !['detail', 'description']?.includes(e?.fieldName));
-
+    var data = response;
     const {
       data: { data: serializedPackageFieldData }
     } = await axiosInstance().put(`/field/find-field-labels`, {
@@ -138,7 +137,8 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
         Header: 'Type',
         width: 100,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (row.original['type'] ? <h5>{`${startCase(row.original?.type)} `}</h5> : <NoDataCell />)
+        Cell: ({ row }) => (row.original['type'] ? <h5>{`${getMaterialLabel(row.original?.type)}`}</h5> : <NoDataCell />),
+        accessorFn: (original) => { return getMaterialLabel(original?.type) }
       },
       {
         accessor: 'detail',
@@ -969,6 +969,21 @@ const ActionButtonMenuItems = ({
   setArrangeView,
   setAttachmentsDialog
 }) => {
+
+  const checkUniqWorkOrderType = () => {
+    if (selectedRecords.length === 0) {
+      return false;
+    }
+    else if (selectedRecords?.find((e) => !e?.workOrderType)) {
+      return true;
+    }
+    else if (uniq(map(selectedRecords?.filter((r) => r?.workOrderType), 'workOrderType')).length === 1) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
   return (
     <>
       <MenuItem
@@ -1068,15 +1083,12 @@ const ActionButtonMenuItems = ({
           setAutoCompleteData(selectedRecords?.filter((e) => e?.canAutoCompleteWorkOrder));
           setCompleteConfirmBox(true);
         }}
-        disabled={
-          selectedRecords?.every((s) => s?.workOrderType === selectedRecords[0]?.workOrderType) &&
-            selectedRecords.some((e) => e?.canAutoCompleteWorkOrder)
-            ? false
-            : true
-        }
+        disabled={checkUniqWorkOrderType() &&
+          selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.package)?.length > 0 &&
+          selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.package).every((e) => e?.canAutoCompleteWorkOrder) ? false : true}
       >
         Auto Complete Work Order(s)
-      </MenuItem>
+      </MenuItem >
       <MenuItem
         disabled={
           checkUniqWorkOrder() &&
