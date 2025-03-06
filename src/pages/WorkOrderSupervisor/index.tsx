@@ -108,7 +108,11 @@ const WorkOrderSupervisor = () => {
   const [showFilter, setShowFilter] = useState(false);
   const [filterByIds, setFilterByIds] = useState([]);
   const [filterTerm, setFilterTerm] = useState({});
-  const [selectedResource, setSelectedResource] = useState(sidebarResource.repairOrder);
+  const [selectedResource, setSelectedResource] = useState({
+    label: resources?.repairOrder?.titlePlural,
+    selected: true,
+    value: sidebarResource.repairOrder
+  });
 
   useEffect(() => {
     resetSelectedRecords();
@@ -183,7 +187,7 @@ const WorkOrderSupervisor = () => {
       isCreate: permissions && permissions?.workOrder ? permissions?.workOrder?.isCreate : false,
       isUpdate: permissions && permissions?.workOrder ? permissions?.workOrder?.isUpdate : false
     },
-    ...(selectedResource === sidebarResource.repairOrder
+    ...(selectedResource?.value === sidebarResource.repairOrder
       ? [
           {
             fieldData: {
@@ -231,7 +235,7 @@ const WorkOrderSupervisor = () => {
           }
         ]
       : []),
-    ...(selectedResource === sidebarResource.productionOrder
+    ...(selectedResource?.value === sidebarResource.productionOrder
       ? [
           {
             fieldData: {
@@ -257,7 +261,7 @@ const WorkOrderSupervisor = () => {
           }
         ]
       : []),
-    ...([sidebarResource.repairOrder, sidebarResource.productionOrder]?.includes(selectedResource)
+    ...([sidebarResource.repairOrder, sidebarResource.productionOrder]?.includes(selectedResource?.value)
       ? [
           {
             fieldData: {
@@ -283,7 +287,7 @@ const WorkOrderSupervisor = () => {
           }
         ]
       : []),
-    ...(selectedResource === sidebarResource.assemblyOrder
+    ...(selectedResource?.value === sidebarResource.assemblyOrder
       ? [
           {
             fieldData: {
@@ -482,7 +486,7 @@ const WorkOrderSupervisor = () => {
 
   const fetchSingleColumn = useCallback(
     (column: string, page = 0, appendData = true, filterQuery) => {
-      let api = `${workOrderSupervisor.api}/work-order-service?page=${page}&status=${column}&limit=${limit}&resource=${selectedResource}${filterQuery}`;
+      let api = `${workOrderSupervisor.api}/work-order-service?page=${page}&status=${column}&limit=${limit}&resource=${selectedResource?.value}${filterQuery}`;
       if (column === WORKORDER_SERVICE_STATUS.planned) {
         const filterByIds = queryStringPlanned(filterQuery);
         api = `${workOrder.api}/work-order-planning?page=${page}&limit=${limit}&deepFilter=${encodeURIComponent(
@@ -609,7 +613,7 @@ const WorkOrderSupervisor = () => {
 
   useEffect(() => {
     const tempVisibleColumns = [];
-    if (permissions?.workOrderPlanning?.isRead && selectedResource === sidebarResource.repairOrder) {
+    if (permissions?.workOrderPlanning?.isRead && selectedResource?.value === sidebarResource.repairOrder) {
       tempVisibleColumns.push(WORKORDER_SERVICE_STATUS.planned);
     }
     dispatch({
@@ -778,7 +782,7 @@ const WorkOrderSupervisor = () => {
 
   const statusMenuItems = useMemo(() => {
     return [
-      ...(permissions?.workOrderPlanning?.isRead && selectedResource === sidebarResource.repairOrder
+      ...(permissions?.workOrderPlanning?.isRead && selectedResource?.value === sidebarResource.repairOrder
         ? [
             {
               label: WORKORDER_SERVICE_STATUS.planned,
@@ -815,7 +819,7 @@ const WorkOrderSupervisor = () => {
         ? [
             {
               label: resources?.repairOrder?.titlePlural,
-              selected: selectedResource === sidebarResource.repairOrder,
+              selected: selectedResource?.value === sidebarResource.repairOrder,
               value: sidebarResource.repairOrder
             }
           ]
@@ -824,7 +828,7 @@ const WorkOrderSupervisor = () => {
         ? [
             {
               label: resources?.productionOrder?.titlePlural,
-              selected: selectedResource === sidebarResource.productionOrder,
+              selected: selectedResource?.value === sidebarResource.productionOrder,
               value: sidebarResource.productionOrder
             }
           ]
@@ -833,13 +837,13 @@ const WorkOrderSupervisor = () => {
         ? [
             {
               label: resources?.assemblyOrder?.titlePlural,
-              selected: selectedResource === sidebarResource.assemblyOrder,
+              selected: selectedResource?.value === sidebarResource.assemblyOrder,
               value: sidebarResource.assemblyOrder
             }
           ]
         : [])
     ] as ButtonMenuProps<string>['items'];
-  }, []);
+  }, [selectedResource]);
 
   const moreButtonMenuItems: ButtonMenuProps<string>['items'] = useMemo(() => {
     return [
@@ -937,11 +941,11 @@ const WorkOrderSupervisor = () => {
                   <ButtonMenu
                     showChevron={true}
                     items={resourceItems}
-                    onItemClick={(e, item) => {
-                      setSelectedResource(item?.value);
+                    onItemClick={(e, item: any) => {
+                      setSelectedResource(item);
                     }}
                   >
-                    <span className="flex items-center gap-2 [&_svg]:text-[18px]">{selectedResource}</span>
+                    <span className="flex items-center gap-2 [&_svg]:text-[18px]">{selectedResource?.label}</span>
                   </ButtonMenu>
                 </>
               ) : (
@@ -1062,7 +1066,7 @@ const WorkOrderSupervisor = () => {
               filterQuery={filterQuery}
               ref={workOrderListRef}
               status={tableViewStatus}
-              selectedResource={selectedResource}
+              selectedResource={selectedResource?.value}
               consumablesDialog={consumablesDialog.open}
               setConsumablesDialog={setConsumablesDialog}
               repairOrderDialog={repairOrderDialog}
