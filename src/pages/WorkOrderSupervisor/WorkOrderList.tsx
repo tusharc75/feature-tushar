@@ -347,18 +347,56 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
             });
           } else {
             rows = data.map((u) => {
+              const resource =
+                selectedResource === sidebarResource?.repairOrder
+                  ? 'repairOrder'
+                  : selectedResource === sidebarResource?.productionOrder
+                    ? 'productionOrder'
+                    : selectedResource === sidebarResource?.assemblyOrder
+                      ? 'assemblyOrder'
+                      : '';
               let finalObject: any = prepareDataForGrid(u, user);
-              const type = u?.repairOrder
-                ? sidebarResource.repairOrder
-                : u?.productionOrder
-                  ? sidebarResource.productionOrder
-                  : u?.assemblyOrder
-                    ? sidebarResource.assemblyOrder
-                    : '';
+
+              delete u?.workOrderDetail?.brand;
+              delete u?.workOrderDetail?.collaborator;
+              delete u?.workOrderDetail?.createdBy;
+              delete u?.workOrderDetail?.stepData;
+              delete u?.workOrderDetail?.updatedBy;
+              delete u?.workOrderDetail?.updatedBy;
+              delete u?.workOrderDetail?.entity;
+              delete u?.workOrderDetail?.rentalJob;
+
+              const workOrderObject: any = prepareDataForGrid(u?.workOrderDetail, user);
+              workOrderObject.workOrder = workOrderObject?._id;
+              workOrderObject.workOrderStatus = workOrderObject?.status;
+              delete workOrderObject?._id;
+              delete workOrderObject?.id;
+              delete workOrderObject?.status;
+
+              delete u?.[resource]?.brand;
+              delete u?.[resource]?.[`${resource}Number`];
+              delete u?.[resource]?.collaborator;
+              delete u?.[resource]?.createDate;
+              delete u?.[resource]?.createdBy;
+              delete u?.[resource]?.entity;
+              delete u?.[resource]?.owner;
+              delete u?.[resource]?.pdfTemplate;
+              delete u?.[resource]?.processStatus;
+              delete u?.[resource]?.type;
+              delete u?.[resource]?.updatedBy;
+              delete u?.[resource]?.user;
+              delete u?.[resource]?.warehouse;
+
+              const resourceObject: any = prepareDataForGrid(u?.[resource], user);
+              resourceObject[`${resource}Status`] = resourceObject?.status;
+              delete resourceObject?._id;
+              delete resourceObject?.id;
+              delete resourceObject?.status;
+
               finalObject.assignedUsers = u?.assignedUsers;
               finalObject.assignedWorkStations = u?.assignedWorkStations;
-              finalObject.type = type;
-              return finalObject;
+
+              return { ...finalObject, ...workOrderObject, ...resourceObject };
             });
           }
           dispatch({ type: 'initialize', data: rows, count: countC });
