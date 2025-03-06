@@ -28,6 +28,7 @@ import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
 import { getObjKeysWithValues } from '../../../constants/helpers';
 import { fetch_child_resource_fields, fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
+import SendIcon from '@mui/icons-material/Send';
 
 const QuoteBuilder = ({
   quotationData,
@@ -397,7 +398,9 @@ const QuoteBuilder = ({
           </>
         )}
         {allowedToEdit && currentStep === 'DOA' && DOAData?.length === 0 && (
-          <ThemeButton buttonType="transparent" onClick={handleSendForDOA}>
+          <ThemeButton
+            startIcon={<SendIcon />}
+            onClick={handleSendForDOA}>
             Send for DOA
           </ThemeButton>
         )}
