@@ -14,6 +14,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { isMobile, isTablet } from 'react-device-detect';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { FiExternalLink } from 'react-icons/fi';
+import { useData } from 'src/StateProvider/Provider';
 
 const AddRentalDataDialog = ({ onSuccess, onClose, rentalId, type, isSubmitting = false, currency, ids = [] }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Rental_Material`;
@@ -24,6 +25,10 @@ const AddRentalDataDialog = ({ onSuccess, onClose, rentalId, type, isSubmitting 
 
   const [columns, setColumns] = useState(null);
   const [allFields, setAllFields] = useState([]);
+
+  const {
+    state: { resources }
+  }: any = useData();
 
   useEffect(() => {
     fetchFields();
@@ -206,7 +211,7 @@ const AddRentalDataDialog = ({ onSuccess, onClose, rentalId, type, isSubmitting 
     >
       <CustomDialogHeader
         title={
-          type === MATERIAL_TYPE.product ? `Add Rental Consumables` : type === MATERIAL_TYPE.package ? `Add Rental Packages` : `Add Rental Assets`
+          type === MATERIAL_TYPE.product ? `Add Rental Consumables` : type === MATERIAL_TYPE.package ? `Add Rental ${resources?.packages?.titlePlural}` : `Add Rental Assets`
         }
         showManimizeMaximize={false}
         showRequiredLabel={false}

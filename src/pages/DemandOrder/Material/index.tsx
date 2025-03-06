@@ -21,14 +21,19 @@ import routes from '../../../components/Helpers/Routes';
 import MaterialDialog from './MaterialDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
+import { useData } from 'src/StateProvider/Provider';
 
-const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit, resources }) => {
+const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit }) => {
   const renderedFrom = `${camelCase(sidebarResource?.demandOrder)}_material`;
 
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { generateColumns } = useColumns();
+
+  const {
+    state: { permissions, resources }
+  }: any = useData();
 
   const [isUpdating, setUpdating] = useState(false);
   const [materialEdit, setMaterialEdit] = useState({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
@@ -345,13 +350,15 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit, resourc
         >
           Add Existing Products
         </MenuItem>
-        <MenuItem
-          onClick={() => {
-            setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
-          }}
-        >
-          Add Existing Packages
-        </MenuItem>
+        {permissions?.packages?.isRead &&
+          <MenuItem
+            onClick={() => {
+              setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
+            }}
+          >
+            {`Add Existing ${resources?.packages?.titlePlural}`}
+          </MenuItem>
+        }
       </>
     );
   };

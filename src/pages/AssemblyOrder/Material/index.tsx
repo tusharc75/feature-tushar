@@ -31,7 +31,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
   const { dataRows, selectedRecords } = state;
 
   const {
-    state: { user, permissions, resources }
+    state: { resources }
   }: any = useData();
 
   const [isUpdating, setUpdating] = useState(false);
@@ -372,7 +372,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
             setAddDialog({ open: true, parentId: null });
           }}
         >
-          Add Existing Packages
+          {`Add Existing ${resources?.packages?.titlePlural}`}
         </MenuItem>
       </>
     );

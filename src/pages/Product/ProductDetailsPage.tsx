@@ -260,10 +260,10 @@ const ProductDetailsPage = () => {
           <CustomTab value={0} label={'Details'} />
           {(permissions?.serializedAsset || permissions?.productionOrder) && <CustomTab value={1} label={'Child Products'} />}
           {permissions?.serviceMaster && <CustomTab value={2} label={'Services/Consumables'} />}
-          {permissions?.serviceMaster && <CustomTab value={3} label={'Service Packages'} />}
+          {permissions?.serviceMaster && <CustomTab value={3} label={`Service ${resources?.packages?.titlePlural}`} />}
           {permissions?.repairType && <CustomTab value={4} label={'Repair Types'} />}
           {permissions?.eCommercePolicy?.isRead && productData?.productTemplate && <CustomTab value={5} label={'Product Images'} />}
-          {permissions?.packages && <CustomTab value={6} label={'Product Packages'} />}
+          {permissions?.packages && <CustomTab value={6} label={`Product ${resources?.packages?.titlePlural}`} />}
           {(permissions?.serializedAsset || permissions?.productionOrder) && <CustomTab value={7} label={'Parent Products'} />}
           {permissions?.productInventory?.isRead && <CustomTab value={8} label={'History'} />}
           {productData?.digitalProduct && <CustomTab value={9} label={'Digital'} />}
