@@ -108,6 +108,7 @@ const WorkOrderSupervisor = () => {
   const [showFilter, setShowFilter] = useState(false);
   const [filterByIds, setFilterByIds] = useState([]);
   const [filterTerm, setFilterTerm] = useState({});
+  const [selectedResource, setSelectedResource] = useState(sidebarResource.repairOrder);
 
   useEffect(() => {
     resetSelectedRecords();
@@ -182,79 +183,161 @@ const WorkOrderSupervisor = () => {
       isCreate: permissions && permissions?.workOrder ? permissions?.workOrder?.isCreate : false,
       isUpdate: permissions && permissions?.workOrder ? permissions?.workOrder?.isUpdate : false
     },
+    ...(selectedResource === sidebarResource.repairOrder
+      ? [
+          {
+            fieldData: {
+              _id: '630dc2429ec41869052395b4',
+              fieldName: 'repairOrder',
+              fieldLabel: resources?.repairOrder?.titlePlural,
+              lookup: true,
+              lookupResource: sidebarResource.repairOrder,
+              resource: sidebarResource.workOrderSupervisor,
+              type: 'dropDown',
+              order: 3,
+              required: false,
+              sectionName: 'Work Order Superviser Filter',
+              isTooltip: false,
+              editAble: false,
+              brand: user?.brand,
+              roleType: 0,
+              sectionProperties: ''
+            },
+            isRead: permissions && permissions?.repairOrder ? permissions?.repairOrder?.isRead : false,
+            isCreate: permissions && permissions?.repairOrder ? permissions?.repairOrder?.isCreate : false,
+            isUpdate: permissions && permissions?.repairOrder ? permissions?.repairOrder?.isUpdate : false
+          },
+          {
+            fieldData: {
+              _id: '630dc2429gc81869052385b5',
+              fieldName: 'serializedAsset',
+              fieldLabel: resources?.serializedAsset?.titlePlural,
+              lookup: true,
+              lookupResource: sidebarResource.serializedAsset,
+              resource: sidebarResource.workOrderSupervisor,
+              type: 'dropDown',
+              order: 4,
+              required: false,
+              sectionName: 'Work Order Superviser Filter',
+              isTooltip: false,
+              editAble: false,
+              brand: user?.brand,
+              roleType: 0,
+              sectionProperties: ''
+            },
+            isRead: permissions && permissions?.serializedAsset ? permissions?.serializedAsset?.isRead : false,
+            isCreate: permissions && permissions?.serializedAsset ? permissions?.serializedAsset?.isCreate : false,
+            isUpdate: permissions && permissions?.serializedAsset ? permissions?.serializedAsset?.isUpdate : false
+          }
+        ]
+      : []),
+    ...(selectedResource === sidebarResource.productionOrder
+      ? [
+          {
+            fieldData: {
+              _id: '630dc2429ec41869052395b5',
+              fieldName: 'productionOrder',
+              fieldLabel: resources?.productionOrder?.titlePlural,
+              lookup: true,
+              lookupResource: sidebarResource.productionOrder,
+              resource: sidebarResource.workOrderSupervisor,
+              type: 'dropDown',
+              order: 4,
+              required: false,
+              sectionName: 'Work Order Superviser Filter',
+              isTooltip: false,
+              editAble: false,
+              brand: user?.brand,
+              roleType: 0,
+              sectionProperties: ''
+            },
+            isRead: permissions && permissions?.productionOrder ? permissions?.productionOrder?.isRead : false,
+            isCreate: permissions && permissions?.productionOrder ? permissions?.productionOrder?.isCreate : false,
+            isUpdate: permissions && permissions?.productionOrder ? permissions?.productionOrder?.isUpdate : false
+          }
+        ]
+      : []),
+    ...([sidebarResource.repairOrder, sidebarResource.productionOrder]?.includes(selectedResource)
+      ? [
+          {
+            fieldData: {
+              _id: '670dc2429gc87266052385b9',
+              fieldName: 'product',
+              fieldLabel: resources?.product?.titlePlural,
+              lookup: true,
+              lookupResource: sidebarResource.product,
+              resource: sidebarResource.workOrderSupervisor,
+              type: 'dropDown',
+              order: 5,
+              required: false,
+              sectionName: 'Work Order Superviser Filter',
+              isTooltip: false,
+              editAble: false,
+              brand: user?.brand,
+              roleType: 0,
+              sectionProperties: ''
+            },
+            isRead: permissions && permissions?.product ? permissions?.product?.isRead : false,
+            isCreate: permissions && permissions?.product ? permissions?.product?.isCreate : false,
+            isUpdate: permissions && permissions?.product ? permissions?.product?.isUpdate : false
+          }
+        ]
+      : []),
+    ...(selectedResource === sidebarResource.assemblyOrder
+      ? [
+          {
+            fieldData: {
+              _id: '630da2429ec41869052395b5',
+              fieldName: 'assemblyOrder',
+              fieldLabel: resources?.assemblyOrder?.titlePlural,
+              lookup: true,
+              lookupResource: sidebarResource.assemblyOrder,
+              resource: sidebarResource.workOrderSupervisor,
+              type: 'dropDown',
+              order: 3,
+              required: false,
+              sectionName: 'Work Order Superviser Filter',
+              isTooltip: false,
+              editAble: false,
+              brand: user?.brand,
+              roleType: 0,
+              sectionProperties: ''
+            },
+            isRead: permissions && permissions?.assemblyOrder ? permissions?.assemblyOrder?.isRead : false,
+            isCreate: permissions && permissions?.assemblyOrder ? permissions?.assemblyOrder?.isCreate : false,
+            isUpdate: permissions && permissions?.assemblyOrder ? permissions?.assemblyOrder?.isUpdate : false
+          },
+          {
+            fieldData: {
+              _id: '630da2429ec47869056395b5',
+              fieldName: 'package',
+              fieldLabel: resources?.packages?.titlePlural,
+              lookup: true,
+              lookupResource: sidebarResource.packages,
+              resource: sidebarResource.workOrderSupervisor,
+              type: 'dropDown',
+              order: 4,
+              required: false,
+              sectionName: 'Work Order Superviser Filter',
+              isTooltip: false,
+              editAble: false,
+              brand: user?.brand,
+              roleType: 0,
+              sectionProperties: ''
+            },
+            isRead: permissions && permissions?.packages ? permissions?.packages?.isRead : false,
+            isCreate: permissions && permissions?.packages ? permissions?.packages?.isCreate : false,
+            isUpdate: permissions && permissions?.packages ? permissions?.packages?.isUpdate : false
+          }
+        ]
+      : []),
     {
       fieldData: {
-        _id: '630dc2429ec41869052395b4',
-        fieldName: 'repairOrder',
-        fieldLabel: resources?.repairOrder?.titlePlural,
+        _id: '670dc2429gc88866052385b9',
+        fieldName: 'warehouse',
+        fieldLabel: resources?.warehouse?.titlePlural,
         lookup: true,
-        lookupResource: sidebarResource.repairOrder,
-        resource: sidebarResource.workOrderSupervisor,
-        type: 'dropDown',
-        order: 3,
-        required: false,
-        sectionName: 'Work Order Superviser Filter',
-        isTooltip: false,
-        editAble: false,
-        brand: user?.brand,
-        roleType: 0,
-        sectionProperties: ''
-      },
-      isRead: permissions && permissions?.repairOrder ? permissions?.repairOrder?.isRead : false,
-      isCreate: permissions && permissions?.repairOrder ? permissions?.repairOrder?.isCreate : false,
-      isUpdate: permissions && permissions?.repairOrder ? permissions?.repairOrder?.isUpdate : false
-    },
-    {
-      fieldData: {
-        _id: '630dc2429ec41869052395b5',
-        fieldName: 'productionOrder',
-        fieldLabel: resources?.productionOrder?.titlePlural,
-        lookup: true,
-        lookupResource: sidebarResource.productionOrder,
-        resource: sidebarResource.workOrderSupervisor,
-        type: 'dropDown',
-        order: 4,
-        required: false,
-        sectionName: 'Work Order Superviser Filter',
-        isTooltip: false,
-        editAble: false,
-        brand: user?.brand,
-        roleType: 0,
-        sectionProperties: ''
-      },
-      isRead: permissions && permissions?.productionOrder ? permissions?.productionOrder?.isRead : false,
-      isCreate: permissions && permissions?.productionOrder ? permissions?.productionOrder?.isCreate : false,
-      isUpdate: permissions && permissions?.productionOrder ? permissions?.productionOrder?.isUpdate : false
-    },
-    {
-      fieldData: {
-        _id: '630da2429ec41869052395b5',
-        fieldName: 'assemblyOrder',
-        fieldLabel: resources?.assemblyOrder?.titlePlural,
-        lookup: true,
-        lookupResource: sidebarResource.assemblyOrder,
-        resource: sidebarResource.workOrderSupervisor,
-        type: 'dropDown',
-        order: 5,
-        required: false,
-        sectionName: 'Work Order Superviser Filter',
-        isTooltip: false,
-        editAble: false,
-        brand: user?.brand,
-        roleType: 0,
-        sectionProperties: ''
-      },
-      isRead: permissions && permissions?.assemblyOrder ? permissions?.assemblyOrder?.isRead : false,
-      isCreate: permissions && permissions?.assemblyOrder ? permissions?.assemblyOrder?.isCreate : false,
-      isUpdate: permissions && permissions?.assemblyOrder ? permissions?.assemblyOrder?.isUpdate : false
-    },
-    {
-      fieldData: {
-        _id: '630dc2429gc81869052385b5',
-        fieldName: 'serializedAsset',
-        fieldLabel: resources?.serializedAsset?.titlePlural,
-        lookup: true,
-        lookupResource: sidebarResource.serializedAsset,
+        lookupResource: sidebarResource.warehouse,
         resource: sidebarResource.workOrderSupervisor,
         type: 'dropDown',
         order: 6,
@@ -266,9 +349,9 @@ const WorkOrderSupervisor = () => {
         roleType: 0,
         sectionProperties: ''
       },
-      isRead: permissions && permissions?.serializedAsset ? permissions?.serializedAsset?.isRead : false,
-      isCreate: permissions && permissions?.serializedAsset ? permissions?.serializedAsset?.isCreate : false,
-      isUpdate: permissions && permissions?.serializedAsset ? permissions?.serializedAsset?.isUpdate : false
+      isRead: permissions && permissions?.warehouse ? permissions?.warehouse?.isRead : false,
+      isCreate: permissions && permissions?.warehouse ? permissions?.warehouse?.isCreate : false,
+      isUpdate: permissions && permissions?.warehouse ? permissions?.warehouse?.isUpdate : false
     },
     {
       fieldData: {
@@ -399,7 +482,7 @@ const WorkOrderSupervisor = () => {
 
   const fetchSingleColumn = useCallback(
     (column: string, page = 0, appendData = true, filterQuery) => {
-      let api = `${workOrderSupervisor.api}/work-order-service?page=${page}&status=${column}&limit=${limit}${filterQuery}`;
+      let api = `${workOrderSupervisor.api}/work-order-service?page=${page}&status=${column}&limit=${limit}&resource=${selectedResource}${filterQuery}`;
       if (column === WORKORDER_SERVICE_STATUS.planned) {
         const filterByIds = queryStringPlanned(filterQuery);
         api = `${workOrder.api}/work-order-planning?page=${page}&limit=${limit}&deepFilter=${encodeURIComponent(
@@ -476,7 +559,7 @@ const WorkOrderSupervisor = () => {
           dispatch({ type: 'loading', loading: (prev) => ({ ...prev, [column]: false }) });
         });
     },
-    [dispatch, limit, toastConfig]
+    [dispatch, limit, toastConfig, selectedResource]
   );
 
   const getQueryString = useCallback(
@@ -523,6 +606,23 @@ const WorkOrderSupervisor = () => {
       dispatch({ type: 'refreshData' });
     }
   };
+
+  useEffect(() => {
+    const tempVisibleColumns = [];
+    if (permissions?.workOrderPlanning?.isRead && selectedResource === sidebarResource.repairOrder) {
+      tempVisibleColumns.push(WORKORDER_SERVICE_STATUS.planned);
+    }
+    dispatch({
+      type: 'visibleColumns',
+      visibleColumns: [
+        ...tempVisibleColumns,
+        WORKORDER_SERVICE_STATUS.pending,
+        WORKORDER_SERVICE_STATUS.inProgress,
+        WORKORDER_SERVICE_STATUS.completed
+      ]
+    });
+    onClickRefreshIcon();
+  }, [selectedResource]);
 
   const handleAddConsumables = (rows, records = []) => {
     const data: any = [];
@@ -678,7 +778,7 @@ const WorkOrderSupervisor = () => {
 
   const statusMenuItems = useMemo(() => {
     return [
-      ...(permissions?.workOrderPlanning?.isRead
+      ...(permissions?.workOrderPlanning?.isRead && selectedResource === sidebarResource.repairOrder
         ? [
             {
               label: WORKORDER_SERVICE_STATUS.planned,
@@ -708,6 +808,38 @@ const WorkOrderSupervisor = () => {
       }
     ] as ButtonMenuProps<string>['items'];
   }, [tableViewStatus]);
+
+  const resourceItems = useMemo(() => {
+    return [
+      ...(permissions?.repairOrder?.isRead
+        ? [
+            {
+              label: resources?.repairOrder?.titlePlural,
+              selected: selectedResource === sidebarResource.repairOrder,
+              value: sidebarResource.repairOrder
+            }
+          ]
+        : []),
+      ...(permissions?.productionOrder?.isRead
+        ? [
+            {
+              label: resources?.productionOrder?.titlePlural,
+              selected: selectedResource === sidebarResource.productionOrder,
+              value: sidebarResource.productionOrder
+            }
+          ]
+        : []),
+      ...(permissions?.assemblyOrder?.isRead
+        ? [
+            {
+              label: resources?.assemblyOrder?.titlePlural,
+              selected: selectedResource === sidebarResource.assemblyOrder,
+              value: sidebarResource.assemblyOrder
+            }
+          ]
+        : [])
+    ] as ButtonMenuProps<string>['items'];
+  }, []);
 
   const moreButtonMenuItems: ButtonMenuProps<string>['items'] = useMemo(() => {
     return [
@@ -802,6 +934,15 @@ const WorkOrderSupervisor = () => {
                       </span>
                     </ButtonMenu>
                   )}
+                  <ButtonMenu
+                    showChevron={true}
+                    items={resourceItems}
+                    onItemClick={(e, item) => {
+                      setSelectedResource(item?.value);
+                    }}
+                  >
+                    <span className="flex items-center gap-2 [&_svg]:text-[18px]">{selectedResource}</span>
+                  </ButtonMenu>
                 </>
               ) : (
                 <div className="flex">
@@ -921,6 +1062,7 @@ const WorkOrderSupervisor = () => {
               filterQuery={filterQuery}
               ref={workOrderListRef}
               status={tableViewStatus}
+              selectedResource={selectedResource}
               consumablesDialog={consumablesDialog.open}
               setConsumablesDialog={setConsumablesDialog}
               repairOrderDialog={repairOrderDialog}
