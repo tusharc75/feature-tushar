@@ -767,7 +767,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       {showConfirmVersion.open && (
         <ConfirmationDialog
           open={showConfirmVersion.open}
-          message={`Are you sure you want to new version ?`}
+          message={`Are you sure you want to create a new version ?`}
           onClose={() => {
             setShowConfirmVersion({ open: false, withData: 0 });
           }}
