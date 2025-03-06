@@ -41,7 +41,7 @@
     font-weight: 400;
     line-height: 1.57;
     display: grid;
-    grid-template-columns: 13ch 1fr;
+    grid-template-columns: 14ch 1fr;
     gap: 10px;
     white-space: nowrap;
     overflow: hidden;
@@ -49,6 +49,10 @@
 
     span {
       font-weight: 600;
+      overflow: hidden;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 
