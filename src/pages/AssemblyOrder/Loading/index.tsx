@@ -33,7 +33,7 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
 
   const fetchFields = async () => {
     const response = await fetch_child_resource_fields(CHILD_RESOURCE.assemblyOrderMaterial, assemblyOrderData?.currency || 'USD', allowedToEdit);
-    const data = response?.filter((e) => !['detail', 'description']?.includes(e?.fieldName));
+    const data = response;
     let newColumns = generateColumns(renderedFrom, data, null, false, assemblyOrderData?.currency || 'USD');
 
     const {
