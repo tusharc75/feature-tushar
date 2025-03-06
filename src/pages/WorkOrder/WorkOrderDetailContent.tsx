@@ -399,6 +399,8 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       type: 'menuItem',
       isVisible:
         permissions?.repairJob?.isCreate &&
+          workOrderData?.serializedAsset &&
+          workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
           allowedToEdit &&
           workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
           ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
@@ -413,7 +415,10 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       type: 'menuItem',
       id: `Repair Job Receive`,
       isVisible:
-        permissions?.repairJob?.isUpdate && allowedToEdit && workOrderData?.type === WORK_ORDER_TYPE.repairOrder && workOrderData?.currentRepairJob
+        permissions?.repairJob?.isUpdate &&
+          allowedToEdit &&
+          workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
+          workOrderData?.currentRepairJob
           ? true
           : false,
       children: `Receive Asset From Supplier`,
@@ -424,7 +429,11 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       id: 'Scrap Asset',
       type: 'menuItem',
       isVisible: Boolean(
-        workOrderData?.serializedAsset && allowedToEdit && !workOrderData?.currentRepairJob && workOrderData?.status !== WORK_ORDER_STATUS.completed
+        workOrderData?.serializedAsset &&
+        workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
+        allowedToEdit &&
+        !workOrderData?.currentRepairJob &&
+        workOrderData?.status !== WORK_ORDER_STATUS.completed
       ),
       children: `${ASSET_STATUS.scrap} Asset`,
       tooltip: `${ASSET_STATUS.scrap} Asset`,

@@ -1771,10 +1771,14 @@ const ReceivingTicket = ({
   const handleReceivedItems = () => {
     const receivingStatus = user?.user?.brandPolicy?.rentalReceivingStatus ? user?.user?.brandPolicy?.rentalReceivingStatus : ASSET_STATUS.underReview;
     const statusPolicy = checkAssetPolicy(receivingStatus, true);
-
+    const receivingTicketIds = uniq(map(getFilterSelectedRecords()?.filter((e) => e?.receivingTicketId), 'receivingTicketId'));
     const returnTicketIds = uniq(map(getFilterSelectedRecords()?.filter((e) => e?.returnTicketId), 'returnTicketId'));
     const allRecord = getFilterSelectedRecords(null, flattenArray(dataRows))
-    const records = [...allRecord?.filter((e) => returnTicketIds?.includes(e?.returnTicketId))];
+    const records = [
+      ...getFilterSelectedRecords()?.filter((e) => !e?.receivingTicketId && !e?.returnTicketId),
+      ...allRecord?.filter((e) => receivingTicketIds?.includes(e?.receivingTicketId)),
+      ...allRecord?.filter((e) => returnTicketIds?.includes(e?.returnTicketId))
+    ];
     if (statusPolicy && onReceiveAssetDataCapture && records?.find((e) => e.type === MATERIAL_TYPE.serializedAsset)) {
       setOpenAssetDetailDialog({
         open: true,
@@ -1782,7 +1786,7 @@ const ReceivingTicket = ({
         _ids: statusPolicy?.assetIds,
         referenceData: null,
         ticketType: 'receiveItems',
-        stopAutoIncrementIds: records?.map((e) => e._id)
+        stopAutoIncrementIds: records?.filter((e) => e?.returnTicketId && e.type === MATERIAL_TYPE.serializedAsset)?.map((e) => e._id)
       });
     } else {
       handelProcessTickets();

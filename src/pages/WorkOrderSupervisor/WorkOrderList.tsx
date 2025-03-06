@@ -34,6 +34,7 @@ type Props = {
   status: string;
   renderedFrom: string;
   state: TInitialState;
+  selectedResource: string;
   dispatch: Dispatch<TActios>;
   consumablesDialog: boolean;
   setConsumablesDialog: (value: any) => void;
@@ -52,7 +53,21 @@ export type WorkOrderListRef = {
 };
 
 const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
-  ({ filterQuery, status, renderedFrom, state, dispatch, consumablesDialog, setConsumablesDialog, setRepairOrderDialog, tableHead = null }, ref) => {
+  (
+    {
+      filterQuery,
+      status,
+      selectedResource,
+      renderedFrom,
+      state,
+      dispatch,
+      consumablesDialog,
+      setConsumablesDialog,
+      setRepairOrderDialog,
+      tableHead = null
+    },
+    ref
+  ) => {
     const toastConfig = useContext(CustomToastContext);
     const {
       state: { user, permissions, resources }
@@ -282,17 +297,9 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
       let data;
       const response = await axiosInstance().get(`/field?resource=${sidebarResource['workOrder']}&view=true`, { cancelToken: cancelToken?.token });
       data = response?.data?.data?.filter((f) =>
-        [
-          'spoolNumber',
-          'status',
-          'competencies',
-          'productionOrder',
-          'repairOrder',
-          'assemblyOrder',
-          'expectedCompletionDate',
-          'warehouse',
-          'type'
-        ]?.includes(f?.fieldData?.fieldName)
+        ['spoolNumber', 'status', 'competencies', 'productionOrder', 'repairOrder', 'assemblyOrder', 'expectedCompletionDate', 'warehouse']?.includes(
+          f?.fieldData?.fieldName
+        )
       );
       const newColumns = generateColumns(renderedFrom, data, routes?.workOrderDetail.path);
 
@@ -367,7 +374,7 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
     };
 
     const getQueryString = () => {
-      let deepFilter = `?page=${page}&limit=${limit}`;
+      let deepFilter = `?page=${page}&limit=${limit}&resource=${selectedResource}`;
 
       if (status === WORKORDER_SERVICE_STATUS.planned) {
         const filterByIds = queryStringPlanned(filterQuery);
@@ -469,6 +476,19 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
       setWorkStationAssignDialog
     }));
 
+    const getColumns = (columns) => {
+      if (selectedResource === sidebarResource.repairOrder) {
+        return columns?.filter((c) => !['productionOrder', 'assemblyOrder']?.includes(c?.accessor));
+      }
+      if (selectedResource === sidebarResource.productionOrder) {
+        return columns?.filter((c) => !['repairOrder', 'assemblyOrder', 'serializedAsset', 'rentalJob']?.includes(c?.accessor));
+      }
+      if (selectedResource === sidebarResource.assemblyOrder) {
+        return columns?.filter((c) => !['productionOrder', 'repairOrder', 'serializedAsset', 'rentalJob']?.includes(c?.accessor));
+      }
+      return columns;
+    };
+
     return (
       <>
         <div className="[&_.table-container-v1>div]:mt-0">
@@ -476,7 +496,7 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
             <CustomReactTable
               topLeftSlot={tableHead}
               height={'calc(100vh - 280px)'}
-              columns={columns}
+              columns={getColumns(columns)}
               state={state}
               dispatch={dispatch}
               renderedFrom={renderedFrom}
