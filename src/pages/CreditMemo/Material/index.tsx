@@ -615,7 +615,7 @@ const Material = ({ creditMemoData, allowedToEdit, fetchCreditMemoData }) => {
               setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
             }}
           >
-            {`Add Existing Packages`}
+            {`Add Existing ${resources?.packages?.titlePlural}`}
           </MenuItem>
         )}
         {permissions?.serviceMaster?.isRead && (

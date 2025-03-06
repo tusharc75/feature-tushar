@@ -60,7 +60,7 @@ const Services = ({
   const toastConfig = useContext(CustomToastContext);
   const { setWalkmeData } = useSetWalkmeData();
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [isUpdating, setUpdating] = useState(false);
@@ -697,7 +697,7 @@ const Services = ({
               setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
             }}
           >
-            {`Add Existing Service Packages`}
+            {`Add Existing Service ${resources?.packages?.titlePlural}`}
           </MenuItem>
         )}
         <MenuItem

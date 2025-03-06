@@ -28,7 +28,7 @@ import { FiExternalLink } from 'react-icons/fi';
 const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [isUpdating, setUpdating] = useState(false);
@@ -350,13 +350,15 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
         >
           Add Services
         </MenuItem>
-        <MenuItem
-          onClick={() => {
-            setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
-          }}
-        >
-          Add Service Packages
-        </MenuItem>
+        {permissions?.packages?.isRead &&
+          <MenuItem
+            onClick={() => {
+              setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
+            }}
+          >
+            {`Add Service ${resources?.packages?.titlePlural}`}
+          </MenuItem>
+        }
       </>
     );
   };
@@ -403,7 +405,7 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
             />
           </>
         )}
-        <Grid size={{xs:12, md:12, sm:12}}>
+        <Grid size={{ xs: 12, md: 12, sm: 12 }}>
           {columns ? (
             <Box zIndex={5}>
               <CustomReactTable
