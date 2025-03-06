@@ -108,11 +108,26 @@ const WorkOrderSupervisor = () => {
   const [showFilter, setShowFilter] = useState(false);
   const [filterByIds, setFilterByIds] = useState([]);
   const [filterTerm, setFilterTerm] = useState({});
-  const [selectedResource, setSelectedResource] = useState({
-    label: resources?.repairOrder?.titlePlural,
-    selected: true,
-    value: sidebarResource.repairOrder
-  });
+
+  const getDefaultSelectedResource = () => {
+    const _key = permissions?.repairOrder?.isRead
+      ? 'repairOrder'
+      : permissions?.productionOrder?.isRead
+        ? 'productionOrder'
+        : permissions?.assemblyOrder?.isRead
+          ? 'assemblyOrder'
+          : '';
+    if (_key) {
+      return {
+        label: resources?.[_key]?.titlePlural,
+        selected: true,
+        value: sidebarResource[_key]
+      };
+    }
+    return null;
+  };
+
+  const [selectedResource, setSelectedResource] = useState(getDefaultSelectedResource());
 
   useEffect(() => {
     resetSelectedRecords();
