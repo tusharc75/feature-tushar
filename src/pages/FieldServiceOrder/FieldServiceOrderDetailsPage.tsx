@@ -162,7 +162,7 @@ const ServiceOrderDetailsPage = () => {
       } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.fieldServiceOrder}`);
       if (data) {
         setResourceData(data);
-        if (data?.policy?.addServicesAndTechnicians) {
+        if (data?.policy?.addServices || data?.policy?.addTechnicians || data?.policy?.addConsumables) {
           setSteps(serviceOrderSteps2);
         } else {
           setSteps(permissions?.invoice?.isRead ? serviceOrderSteps : serviceOrderSteps?.filter((e) => e.name !== 'Field Ticket Invoice'));
@@ -304,7 +304,7 @@ const ServiceOrderDetailsPage = () => {
               }}
             />
             {steps[currentStep]?.name === steps[0]?.name && serviceOrderData && (
-              resourceData?.policy?.addServicesAndTechnicians ? (
+              resourceData?.policy?.addServices || resourceData?.policy?.addTechnicians || resourceData?.policy?.addConsumables ? (
                 <Material
                   serviceOrderData={serviceOrderData}
                   allowedToEdit={allowedToEdit}
@@ -313,7 +313,8 @@ const ServiceOrderDetailsPage = () => {
                   resourcePolicy={resourceData?.policy}
                   stepFullScreen={stepFullScreen}
                   fetchData={fetchServiceOrderData}
-                />) : (
+                />
+              ) : (
                 <FieldTicket
                   serviceOrderData={serviceOrderData}
                   serviceOrderFields={serviceOrderFields}

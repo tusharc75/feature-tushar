@@ -270,6 +270,7 @@ const Technicians = ({ allowedToEdit, serviceOrderData, selectedService, stepFul
             <DetailsPageHeader
               isAddButtonVisible={true}
               addButtonProps={{ onClick: () => setTechnicianDialog(true), id: 'add-technician' }}
+              addButtonText='Assign'
               isActionButtonVisible={true}
               actionButtonMenuItems={actionButtonMenuItems()}
               actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
