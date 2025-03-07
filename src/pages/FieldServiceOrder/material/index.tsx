@@ -62,7 +62,9 @@ const Material = ({ serviceOrderData, stepFullScreen, allowedToEdit, setNextStep
   const { generateColumns } = useColumns();
 
   useEffect(() => {
-    fetchFields();
+    if (resourcePolicy?.addServices) {
+      fetchFields();
+    }
   }, [serviceOrderData]);
 
   useEffect(() => {
@@ -516,7 +518,7 @@ const Material = ({ serviceOrderData, stepFullScreen, allowedToEdit, setNextStep
 
   return (
     <>
-      {allowedToEdit && (
+      {allowedToEdit && resourcePolicy?.addServices && (
         <>
           <DetailsPageHeader
             isAddButtonVisible={true}
@@ -546,20 +548,25 @@ const Material = ({ serviceOrderData, stepFullScreen, allowedToEdit, setNextStep
           />
         </Box>
       ) : (
-        <Box p={2} height={300}>
-          <CommonSkeleton lenArray={[...Array(3).keys()]} xs={12} sm={12} md={12} lg={12} />
+        resourcePolicy?.addServices ? (
+          <Box p={2} height={300}>
+            <CommonSkeleton lenArray={[...Array(3).keys()]} xs={12} sm={12} md={12} lg={12} />
+          </Box>
+        ) : null
+      )}
+      {(resourcePolicy?.addTechnicians || resourcePolicy?.addConsumables) && (
+        <Box mt={3}>
+          <Consumables
+            allowedToEdit={allowedToEdit}
+            services={dataRows?.filter((e) => e.type === MATERIAL_TYPE.service)}
+            serviceOrderData={serviceOrderData}
+            stepFullScreen={stepFullScreen}
+            fetchData={fetchData}
+            refreshChild={refreshChild}
+            resourcePolicy={resourcePolicy}
+          />
         </Box>
       )}
-      <Box mt={3}>
-        <Consumables
-          allowedToEdit={allowedToEdit}
-          services={dataRows?.filter((e) => e.type === MATERIAL_TYPE.service)}
-          serviceOrderData={serviceOrderData}
-          stepFullScreen={stepFullScreen}
-          fetchData={fetchData}
-          refreshChild={refreshChild}
-        />
-      </Box>
       {materialDialog?.open && materialDialog?.type === MATERIAL_TYPE.service && (
         <AssignServiceDialog
           onSuccess={(rows) => {
