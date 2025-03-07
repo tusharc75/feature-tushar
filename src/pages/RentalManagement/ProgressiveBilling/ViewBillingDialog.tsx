@@ -33,6 +33,7 @@ import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { useData } from 'src/StateProvider/Provider';
 import { FiExternalLink } from 'react-icons/fi';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess, allowCreateInvoice, isLatestInvoice }) => {
   const renderedFrom = `${camelCase(sidebarResource.rentalManagementInvoice)}_view_invoice`;
@@ -201,9 +202,9 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
         disableSortBy: true,
         canDrag: false,
         Cell: ({ row }) => (
-          <Grid container spacing={1}>
+          <div className="flex items-center gap-1">
             {row.original['type'] !== MATERIAL_TYPE.other && row.original.isEditable && row.original.qty > 1 && (
-              <>
+              <HtmlTooltip title='Edit'>
                 <IconButton
                   size="small"
                   aria-label="Details"
@@ -211,26 +212,27 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
                     setIsProductEdit({ open: true, rowData: row.original });
                   }}
                 >
-                  <EditIcon color="primary" />
+                  <EditIcon color="primary" fontSize="small" />
                 </IconButton>
-                <Box ml={1} />
-              </>
+              </HtmlTooltip>
             )}
             {row.original['type'] !== MATERIAL_TYPE.other && (
-              <IconButton
-                disabled={!isLatestInvoice}
-                size="small"
-                aria-label="Details"
-                onClick={() => {
-                  const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                  getNestedSubRows(obj, row.original);
-                  setViewBillDialogConfirm({ open: true, rows: obj });
-                }}
-              >
-                <Delete fontSize="small" color={isLatestInvoice ? 'error' : 'disabled'} />
-              </IconButton>
+              <HtmlTooltip title='Delete'>
+                <IconButton
+                  disabled={!isLatestInvoice}
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                    getNestedSubRows(obj, row.original);
+                    setViewBillDialogConfirm({ open: true, rows: obj });
+                  }}
+                >
+                  <Delete fontSize="small" color={isLatestInvoice ? 'error' : 'disabled'} />
+                </IconButton>
+              </HtmlTooltip>
             )}
-          </Grid>
+          </div>
         )
       });
       setColumns(column);
