@@ -433,7 +433,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
         workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
         allowedToEdit &&
         !workOrderData?.currentRepairJob &&
-        workOrderData?.status !== WORK_ORDER_STATUS.completed
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)
       ),
       children: `${ASSET_STATUS.scrap} Asset`,
       tooltip: `${ASSET_STATUS.scrap} Asset`,
