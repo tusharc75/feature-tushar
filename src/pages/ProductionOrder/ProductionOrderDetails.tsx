@@ -142,8 +142,8 @@ const ProductionOrderDetails = () => {
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.productionOrder, data));
         setAllowedToDelete(
           permissions?.productionOrder?.isDelete &&
-          checkIsAllowedToDelete(user, sidebarResource.productionOrder, data.owner.optionValue) &&
-          data?.canDelete
+            checkIsAllowedToDelete(user, sidebarResource.productionOrder, data.owner.optionValue) &&
+            data?.canDelete
         );
         setProductionOrderData({ ...data });
       })
@@ -204,10 +204,11 @@ const ProductionOrderDetails = () => {
           <Box className="control-buttons-v1">
             {productionOrderData ? (
               <>
+                {console.log('productionOrderData', productionOrderData)}
                 {permissions?.productionOrder?.isUpdate &&
                   allowedToEdit &&
                   productionOrderData?.status !== PRODUCTION_ORDER_STATUS.completed &&
-                  productionOrderData?.processStatus === productionOrderProcessStepsNames[productionOrderProcessStepsNames?.length - 1] && (
+                  productionOrderProcessStepsNames[currentStep] === 'Final Slip' && (
                     <ButtonWithPulse
                       onClick={() => {
                         updateOrderStatus(PRODUCTION_ORDER_STATUS.completed);
@@ -266,21 +267,23 @@ const ProductionOrderDetails = () => {
               handleNext={
                 productionOrderProcessStepsNames[currentStep] === 'Add'
                   ? () => {
-                    setNextStep(false);
-                    axiosInstance()
-                      .get(`/production-order/${productionOrderData?._id}/work-order/validate-work-order`)
-                      .then(({ data: { data } }) => {
-                        if (data) {
-                          setCurrentStep((prevStep) => {
-                            const newStep = prevStep + 1;
-                            return newStep;
-                          });
-                        }
-                      })
-                      .catch((err) => {
-                        toastConfig.setToastConfig(err);
-                      });
-                  }
+                      setNextStep(false);
+                      axiosInstance()
+                        .get(`/production-order/${productionOrderData?._id}/work-order/validate-work-order`)
+                        .then(({ data: { data } }) => {
+                          if (data) {
+                            let newStep;
+                            setCurrentStep((prevStep) => {
+                              newStep = prevStep + 1;
+                              return newStep;
+                            });
+                            dynamicFormUpdateProcessStatus(sidebarResource.productionOrder, productionOrderProcessStepsNames[newStep], id);
+                          }
+                        })
+                        .catch((err) => {
+                          toastConfig.setToastConfig(err);
+                        });
+                    }
                   : null
               }
               updateStatus={(step: number) => {
