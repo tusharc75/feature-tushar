@@ -12,7 +12,7 @@ import { BiRefresh } from 'react-icons/bi';
 import { BsCheckLg, BsExclamationLg, BsPlusLg, BsFillSkipEndFill } from 'react-icons/bs';
 import { FaUser as UserIcon } from 'react-icons/fa';
 import { MdBolt } from 'react-icons/md';
-import { CustomDialogTransition, displayDateTime } from 'src/constants/helpers';
+import { CustomDialogTransition, displayDate, displayDateTime } from 'src/constants/helpers';
 import dayjs from 'dayjs';
 
 const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) => {
@@ -55,7 +55,7 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
 
   const group = (data: any) => {
     const groups = data?.reduce((data1, data2) => {
-      const date = data2.date.split('T')[0];
+      const date = displayDate(data2.date);
       if (!data1[date]) {
         data1[date] = [];
       }
@@ -206,7 +206,7 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
                 return (
                   <div key={key} className={styles.singleGroup}>
                     <Box key={key}>
-                      <p className={styles.date}>{displayDateTime(key, 'MMM Do YYYY')}</p>
+                      <p className={styles.date}>{key}</p>
                     </Box>
                     <div className={styles.logContainer}>
                       {rows[key]?.map((row: any) => {

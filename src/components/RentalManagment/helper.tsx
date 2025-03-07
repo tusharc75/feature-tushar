@@ -113,6 +113,17 @@ export const sumOnParent = (parent, child, fields, currency) => {
             }
         });
     });
+
+
+    let discountPercentageDecimalPlaces = fields?.find((e) => e.fieldName === 'discountPercentage')?.decimalPlaces
+    if (!discountPercentageDecimalPlaces && discountPercentageDecimalPlaces !== 0) {
+        discountPercentageDecimalPlaces = 2
+    }
+    let taxPercentageDecimalPlaces = fields?.find((e) => e.fieldName === 'taxPercentage')?.decimalPlaces
+    if (!taxPercentageDecimalPlaces && taxPercentageDecimalPlaces !== 0) {
+        taxPercentageDecimalPlaces = 2
+    }
+
     parent.forEach((row) => {
         resetFields.forEach((ele) => {
             if (ele.type === "amount") {
@@ -121,19 +132,29 @@ export const sumOnParent = (parent, child, fields, currency) => {
                 }
             }
             else if (ele.fieldName === "discountPercentage") {
-                let value = parseFloat(((sumValues[`discount_${currency?.toLowerCase()}`] / sumValues[`totalPrice_${currency?.toLowerCase()}`]) * 100)?.toFixed(2));;
+                let value = parseFloat(((sumValues[`discount_${currency?.toLowerCase()}`] / sumValues[`totalPrice_${currency?.toLowerCase()}`]) * 100)?.toFixed(discountPercentageDecimalPlaces));;
                 if (value) {
                     row[ele.fieldName] = value;
                 }
             }
             else if (ele.fieldName === "taxPercentage") {
-                let value = parseFloat(((sumValues[`tax_${currency?.toLowerCase()}`] / (sumValues[`totalPrice_${currency?.toLowerCase()}`] - sumValues[`discount_${currency?.toLowerCase()}`])) * 100)?.toFixed(2));
-                if (value) {
-                    row[ele.fieldName] = value;
+                const taxChild = child?.filter((e) => e?.taxPercentage);
+                if (taxChild?.length && taxChild?.every((e) => e?.taxPercentage === taxChild[0]?.taxPercentage)) {
+                    row[ele.fieldName] = taxChild[0]?.taxPercentage;
+                }
+                else {
+                    let value = parseFloat(((sumValues[`tax_${currency?.toLowerCase()}`] / (sumValues[`totalPrice_${currency?.toLowerCase()}`] - sumValues[`discount_${currency?.toLowerCase()}`])) * 100)?.toFixed(taxPercentageDecimalPlaces));
+                    if (value) {
+                        row[ele.fieldName] = value;
+                    }
                 }
             }
             else if (ele.type === 'percent') {
-                let value = parseFloat((sumValues[ele.fieldName] / child?.length)?.toFixed(2));
+                let percentDecimalPlaces = fields?.find((e) => e.fieldName === ele.fieldName)?.decimalPlaces
+                if (!percentDecimalPlaces && percentDecimalPlaces !== 0) {
+                    percentDecimalPlaces = 2
+                }
+                let value = parseFloat((sumValues[ele.fieldName] / child?.length)?.toFixed(percentDecimalPlaces));
                 if (value) {
                     row[ele.fieldName] = value;
                 }
@@ -197,12 +218,18 @@ export const resetValueZero = (material, fields, parentId) => {
     const result = [];
     material?.filter((e) => e.parentId === parentId)?.forEach((child) => {
         resetFields.forEach((fieldName) => {
-            child[fieldName] = 0;
+            if (fieldName === 'taxPercentage' && child?.taxCode) {
+            } else {
+                child[fieldName] = 0;
+            }
         })
         result.push(child)
         material?.filter((e) => e?.parentId === child?._id)?.forEach((subChild) => {
             resetFields.forEach((fieldName) => {
-                child[fieldName] = 0;
+                if (fieldName === 'taxPercentage' && child?.taxCode) {
+                } else {
+                    child[fieldName] = 0;
+                }
             })
             result.push(subChild)
         })
