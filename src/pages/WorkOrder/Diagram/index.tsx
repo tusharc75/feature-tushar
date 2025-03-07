@@ -147,18 +147,17 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
           </Box>
         )}
         <Box pt={2} pb={2}>
-          <Box className="h-[calc(100vh-250px)] overflow-auto">
+          <Box className="h-[calc(100vh-300px)] overflow-auto">
             <div className="grid gap-3">
               {rowData &&
                 rowData?.map((file, index) => {
                   return (
                     <div key={file._id} className="rounded-md border shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${
-                          expended[file?._id]
-                            ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
-                            : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
-                        }`}
+                        className={`head flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${expended[file?._id]
+                          ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
+                          : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
+                          }`}
                         onClick={() => {
                           setExpended((prev) => ({
                             ...prev,
@@ -366,12 +365,12 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
 };
 
 export default Diagram;
-// const extension = fileName?.split('.').pop()
 
 type ImagePreviewProps = {
   name: string;
   url: string;
 };
+
 const ImagePreview = ({ name, url }: ImagePreviewProps) => {
   const toastConfig = useContext(CustomToastContext);
   const [src, setSrc] = useState(null);
@@ -402,9 +401,9 @@ const ImagePreview = ({ name, url }: ImagePreviewProps) => {
   }, [url]);
 
   return (
-    <div className="mb-[--py] flex h-[200px] min-w-[400px] max-w-fit items-center justify-center overflow-hidden px-[--px]">
+    <div className="mb-[--py] flex h-[500px]  max-w-fit items-center justify-center overflow-hidden px-[--px]">
       {src ? (
-        <img src={src} alt={name} className="mr-auto max-h-full max-w-full rounded-md border" />
+        <img src={src} alt={name} className="mr-auto max-h-full max-w-full" />
       ) : (
         <p>Loading...{progress >= 0 ? progress : 0}%</p>
       )}

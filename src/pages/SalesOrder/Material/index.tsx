@@ -42,7 +42,7 @@ const renderedFrom = `${camelCase(sidebarResource.salesOrder)}_Material`;
 const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrderData, updateJobStatus, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions }
+    state: { resources, permissions }
   }: any = useData();
   const [isUpdating, setUpdating] = useState(false);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false, showSaveAndNext: false });
@@ -550,7 +550,6 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
             {`Add Existing Products`}
           </MenuItem>
         )}
-
         {permissions?.packages?.isRead && (
           <MenuItem
             color="primary"
@@ -558,7 +557,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
               setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
             }}
           >
-            {`Add Existing Packages`}
+            {`Add Existing ${resources?.packages?.titlePlural}`}
           </MenuItem>
         )}
         {permissions?.serviceMaster?.isRead && (
@@ -736,22 +735,26 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
             >
               Add Existing Products
             </MenuItem>
-            <MenuItem
-              onClick={() => {
-                setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: addchildDialog.parentId });
-                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
-              }}
-            >
-              Add Existing Packages
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                setAddDialog({ open: true, type: MATERIAL_TYPE.service, parentId: addchildDialog.parentId });
-                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
-              }}
-            >
-              Add Existing Services
-            </MenuItem>
+            {permissions?.packages?.isRead && (
+              <MenuItem
+                onClick={() => {
+                  setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: addchildDialog.parentId });
+                  setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
+                }}
+              >
+                {`Add Existing ${resources?.packages?.titlePlural}`}
+              </MenuItem>
+            )}
+            {permissions?.serviceMaster?.isRead && (
+              <MenuItem
+                onClick={() => {
+                  setAddDialog({ open: true, type: MATERIAL_TYPE.service, parentId: addchildDialog.parentId });
+                  setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
+                }}
+              >
+                Add Existing Services
+              </MenuItem>
+            )}
           </MenuList>
         </Popover>
       )}

@@ -2,7 +2,6 @@ import { Box, IconButton, MenuItem } from '@mui/material';
 import Add from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
@@ -31,7 +30,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
   const { dataRows, selectedRecords } = state;
 
   const {
-    state: { user, permissions, resources }
+    state: { resources }
   }: any = useData();
 
   const [isUpdating, setUpdating] = useState(false);
@@ -45,7 +44,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
   const [isSubmitting, setSubmitting] = useState(false);
   const [openSerializedPackagesDialog, setOpenSerializedPackagesDialog] = useState(false);
   const [childPackageWithoutParentDialog, setChildPackageWithoutParentDialog] = useState({ open: false, data: null });
-  const { generateColumns } = useColumns();
+  const { generateColumns, getMaterialLabel } = useColumns();
 
   useEffect(() => {
     fetchFields();
@@ -53,7 +52,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
 
   const fetchFields = async () => {
     const response = await fetch_child_resource_fields(CHILD_RESOURCE.assemblyOrderMaterial, assemblyOrderData?.currency || 'USD', allowedToEdit);
-    var data = response?.filter((e) => !['detail', 'description']?.includes(e?.fieldName));
+    var data = response;
     setAllFields(JSON.parse(JSON.stringify(data)));
     let newColumns = generateColumns(renderedFrom, data, null, false, assemblyOrderData?.currency || 'USD');
 
@@ -74,7 +73,8 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
         width: 100,
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
-        Cell: ({ row }) => (row.original['type'] ? <h5>{`${startCase(row.original?.type)} `}</h5> : <NoDataCell />)
+        Cell: ({ row }) => (row.original['type'] ? <h5>{`${getMaterialLabel(row.original?.type)}`}</h5> : <NoDataCell />),
+        accessorFn: (original) => { return getMaterialLabel(original?.type) }
       },
       {
         accessor: 'detail',
@@ -372,7 +372,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
             setAddDialog({ open: true, parentId: null });
           }}
         >
-          Add Existing Packages
+          {`Add Existing ${resources?.packages?.titlePlural}`}
         </MenuItem>
       </>
     );

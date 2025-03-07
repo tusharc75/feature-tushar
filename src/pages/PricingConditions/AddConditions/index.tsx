@@ -355,7 +355,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                   setAddMaterialDialog({ open: true, materialType: MATERIAL_TYPE.package });
                 }}
               >
-                Add Existing Packages
+                {`Add Existing ${resources?.packages?.titlePlural}`}
               </MenuItem>
             )}
             {permissions?.serviceMaster?.isRead && (

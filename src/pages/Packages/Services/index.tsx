@@ -281,7 +281,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
       {showServiceAssignDialog && (
         <AssignServiceDialog
           handleClose={() => setShowServiceAssignDialog(false)}
-          ids={selectedResource ? [] : [...dataRows?.map((e) => e._id)]}
+          ids={[...dataRows?.map((e) => e._id)]}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
