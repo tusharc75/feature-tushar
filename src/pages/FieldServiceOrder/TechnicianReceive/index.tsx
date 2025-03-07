@@ -17,13 +17,13 @@ import { FiExternalLink } from 'react-icons/fi';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import DateDialog from '../DateDialog';
 
-const TechnicianDispatch = ({ allowedToEdit, serviceOrderId, stepFullScreen, setNextStep }) => {
-  const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_TechnicianDispatch`;
+const TechnicianDispatch = ({ allowedToEdit, serviceOrderId, stepFullScreen }) => {
+  const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_TechnicianReceive`;
 
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-  const [dispatchDateDialog, setDispatchDateDialog] = useState({ open: false, data: null });
+  const [receiveDateDialog, setReceiveDateDialog] = useState({ open: false, data: null, minDate: null });
 
   const {
     state: { permissions }
@@ -134,12 +134,19 @@ const TechnicianDispatch = ({ allowedToEdit, serviceOrderId, stepFullScreen, set
         width: 250,
         Cell: ({ row }) => (row.original?.startDate ? <p>{displayDate(row.original?.startDate)}</p> : <NoDataCell />)
       },
+      {
+        accessor: 'receiveDate',
+        Header: 'Receive Date',
+        disableFilters: true,
+        disableSortBy: true,
+        width: 250,
+        Cell: ({ row }) => (row.original?.endDate ? <p>{displayDate(row.original?.endDate)}</p> : <NoDataCell />)
+      },
     ];
     setColumns(column);
   };
 
   const fetchData = async () => {
-    setNextStep(false);
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
 
@@ -158,9 +165,6 @@ const TechnicianDispatch = ({ allowedToEdit, serviceOrderId, stepFullScreen, set
           res.competencies = u?.technician?.competencies;
           return res;
         });
-        if (rows?.some((r) => r?.startDate)) {
-          setNextStep(true);
-        }
 
         dispatch({ type: 'initialize', data: rows, count: rows?.length });
         dispatch({ type: 'loading', loading: false });
@@ -170,10 +174,10 @@ const TechnicianDispatch = ({ allowedToEdit, serviceOrderId, stepFullScreen, set
       });
   };
 
-  const handleDispatch = (ids, date) => {
+  const handleReceive = (ids, date) => {
     setSubmitting(true);
     axiosInstance()
-      .post(`${fieldServiceOrder.api}/technician/dispatch`, { _ids: ids, date: date, fieldServiceOrder: serviceOrderId })
+      .post(`${fieldServiceOrder.api}/technician/receive`, { _ids: ids, date: date, fieldServiceOrder: serviceOrderId })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -181,27 +185,30 @@ const TechnicianDispatch = ({ allowedToEdit, serviceOrderId, stepFullScreen, set
           message: data?.message
         });
         setSubmitting(false);
-        setDispatchDateDialog({ open: false, data: null });
+        setReceiveDateDialog({ open: false, data: null, minDate: null });
         fetchData();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
         setSubmitting(false);
-        setDispatchDateDialog({ open: false, data: null });
+        setReceiveDateDialog({ open: false, data: null, minDate: null });
       });
   };
 
   const actionButtonMenuItems = () => {
     return (
       <>
-        <HtmlTooltip title={'Dispatch Technicians'}>
+        <HtmlTooltip title={'Receive Technicians'}>
           <MenuItem
-            disabled={submitting}
+            disabled={submitting || selectedRecords?.some((d) => !d?.startDate)}
             onClick={() => {
-              setDispatchDateDialog({ open: true, data: selectedRecords?.map((d) => d?._id) });
+              const minDate = new Date(
+                Math.min(...selectedRecords.map((d) => new Date(d.startDate).getTime()))
+              );            
+              setReceiveDateDialog({ open: true, data: selectedRecords?.map((d) => d?._id), minDate: minDate });
             }}
           >
-            Dispatch
+            Receive
           </MenuItem>
         </HtmlTooltip>
       </>
@@ -244,16 +251,17 @@ const TechnicianDispatch = ({ allowedToEdit, serviceOrderId, stepFullScreen, set
           </Grid>
         </Grid>
       </Box>
-      {dispatchDateDialog.open && (
+      {receiveDateDialog.open && (
         <DateDialog
-          title={'Select Dispatch Date'}
+          title={'Select Receive Date'}
           onClose={() => {
-            setDispatchDateDialog({ open: false, data: null });
+            setReceiveDateDialog({ open: false, data: null, minDate: null });
           }}
           handleSubmit={(date) => {
-            handleDispatch(dispatchDateDialog.data, date);
+            handleReceive(receiveDateDialog.data, date);
           }}
           loading={submitting}
+          minDate={receiveDateDialog.minDate}
         />
       )}
     </>

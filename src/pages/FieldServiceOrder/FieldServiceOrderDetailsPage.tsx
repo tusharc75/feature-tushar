@@ -41,6 +41,7 @@ import { generateAddFieldTicket } from 'src/pages/FieldServiceOrder/walkmeSteps'
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import Material from './material';
 import TechnicianDispatch from './TechnicianDispatch';
+import TechnicianReceive from './TechnicianReceive';
 
 const ServiceOrderDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -321,33 +322,6 @@ const ServiceOrderDetailsPage = () => {
                 fetchData={fetchServiceOrderData}
               />
             )}
-            {/* {steps[currentStep]?.name === steps[1]?.name && serviceOrderData && (
-              <Services
-                serviceOrderData={serviceOrderData}
-                setNextStep={setNextStep}
-                renderedFrom={`${renderedFrom}_grid-1`}
-                stepFullScreen={stepFullScreen}
-                allowedToEdit={allowedToEdit}
-              />
-            )}
-            {steps[currentStep]?.name === steps[2]?.name && serviceOrderData && (
-              <Products
-                serviceOrderData={serviceOrderData}
-                setNextStep={setNextStep}
-                renderedFrom={`${renderedFrom}_grid-2`}
-                stepFullScreen={stepFullScreen}
-                allowedToEdit={allowedToEdit}
-              />
-            )}
-            {steps[currentStep]?.name === steps[3]?.name && serviceOrderData && (
-              <Technician
-                serviceOrderData={serviceOrderData}
-                setNextStep={setNextStep}
-                renderedFrom={`${renderedFrom}_grid-3`}
-                stepFullScreen={stepFullScreen}
-                allowedToEdit={allowedToEdit}
-              />
-            )}*/}
             {steps[currentStep]?.name === steps[1]?.name && serviceOrderData && (
               <TechnicianDispatch
                 serviceOrderId={id}
@@ -356,18 +330,13 @@ const ServiceOrderDetailsPage = () => {
                 allowedToEdit={allowedToEdit}
               />
             )}
-            {/*{steps[currentStep]?.name === steps[5]?.name && serviceOrderData && (
-              <Technician
-                serviceOrderData={serviceOrderData}
-                setNextStep={setNextStep}
-                renderedFrom={`${renderedFrom}_grid-5`}
+             {steps[currentStep]?.name === steps[2]?.name && serviceOrderData && (
+              <TechnicianReceive
+                serviceOrderId={id}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={allowedToEdit}
-                fromInvoice={true}
-                updateStatus={handleChangeStatus}
-                statusOptions={statusOptions}
               />
-            )} */}
+            )}
           </TabPanel>
         </ContentFullScreen>
         <TabPanel value={tabValue} index={2}>
