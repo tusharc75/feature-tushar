@@ -423,7 +423,6 @@ const WorkOrderSupervisor = () => {
                 return newObj;
               });
             } else {
-              console.log('datadata', data);
               rows = data.map((item) => {
                 const newObj = { ...item };
                 newObj['productionOrderId'] = newObj?.productionOrder?.productionOrderNumber;
@@ -433,7 +432,7 @@ const WorkOrderSupervisor = () => {
                 newObj['assemblyOrderId'] = newObj?.assemblyOrder?._id;
                 newObj['assemblyOrderNumber'] = newObj?.assemblyOrder?.assemblyOrderNumber;
                 newObj['workOrder'] = newObj?.workOrderDetail?._id;
-                newObj['workOrderOrderNumber'] = newObj?.workOrderDetail?.workOrderNumber;
+                newObj['workOrderNumber'] = newObj?.workOrderDetail?.workOrderNumber;
                 newObj['serviceName'] = newObj?.service?.optionLabel;
                 newObj['assignedUser'] = newObj?.assignedUsers?.map((e) => e?.optionLabel)?.toString();
                 newObj['workStation'] = newObj?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString();
