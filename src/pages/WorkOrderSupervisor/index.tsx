@@ -713,7 +713,7 @@ const WorkOrderSupervisor = () => {
         startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.completed]
       }
     ] as ButtonMenuProps<string>['items'];
-  }, [tableViewStatus]);
+  }, [tableViewStatus, selectedResource]);
 
   const resourceItems = useMemo(() => {
     return [
@@ -832,6 +832,13 @@ const WorkOrderSupervisor = () => {
                       onItemClick={(e, item) => {
                         tableDispatch({ type: 'pageChange', page: 0 });
                         setTableViewStatus(item.value as TableViewStatus);
+                        if (item?.value === WORKORDER_SERVICE_STATUS.planned) {
+                          setSelectedResource({
+                            label: resources?.repairOrder?.titlePlural,
+                            selected: selectedResource?.value === sidebarResource.repairOrder,
+                            value: sidebarResource.repairOrder
+                          });
+                        }
                       }}
                     >
                       <span className="flex items-center gap-2 [&_svg]:text-[18px]">
@@ -842,6 +849,7 @@ const WorkOrderSupervisor = () => {
                   )}
                   <ButtonMenu
                     showChevron={true}
+                    disabled={tableViewStatus === WORKORDER_SERVICE_STATUS.planned}
                     items={resourceItems}
                     onItemClick={(e, item: any) => {
                       setSelectedResource(item);
