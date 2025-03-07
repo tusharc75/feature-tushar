@@ -39,7 +39,7 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
       const {
         data: { data }
       } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.fieldServiceOrder}`);
-      if (data?.policy?.addServicesAndTechnicians && permissions?.fieldServiceOrder?.isRead) {
+      if (data?.policy?.addTechnicians && permissions?.fieldServiceOrder?.isRead) {
         const newResources = [...TECHNICIAN_RESOURCE];
         newResources.push({
           key: 'fieldServiceOrder',
