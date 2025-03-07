@@ -243,7 +243,6 @@ const Material = ({ serviceOrderData, stepFullScreen, allowedToEdit, setNextStep
   };
 
   const fetchMaterial = async () => {
-    setNextStep(false);
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
     let data;
@@ -279,13 +278,6 @@ const Material = ({ serviceOrderData, stepFullScreen, allowedToEdit, setNextStep
       parent.canDelete = parent.canDelete ?? true;
       parent.subRows = generateNestedData(data, parent, isPriceRequired);
     });
-    if (rows?.length) {
-      if (rows.filter((_rows) => _rows.isValid === false).length > 0) {
-        setNextStep(false);
-      } else {
-        setNextStep(true);
-      }
-    }
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
     setRefreshChild(!refreshChild);
@@ -564,6 +556,7 @@ const Material = ({ serviceOrderData, stepFullScreen, allowedToEdit, setNextStep
             fetchData={fetchData}
             refreshChild={refreshChild}
             resourcePolicy={resourcePolicy}
+            setNextStep={setNextStep}
           />
         </Box>
       )}

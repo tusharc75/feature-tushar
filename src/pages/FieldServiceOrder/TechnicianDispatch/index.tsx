@@ -1,58 +1,67 @@
-import { Box, IconButton, MenuItem } from '@mui/material';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import SendIcon from '@mui/icons-material/Send';
-import { Fragment, useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
+import { IconButton, MenuItem } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Grid from '@mui/material/Grid2';
+import { camelCase } from 'lodash';
+import { useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { useData } from '../../../StateProvider/Provider';
-import axiosInstance from '../../../axios/axiosInstance';
-import HtmlTooltip from '../../../components/CustomTooltipTitle';
+import { displayDate, fieldServiceOrder, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { displayDateTime, fieldServiceOrder } from '../../../constants/helpers';
-import DispatchMaterial from './DispatchMaterial';
 import { FiExternalLink } from 'react-icons/fi';
+import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
+import DateDialog from '../DateDialog';
 
-const TechnicianDispatch = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
+const TechnicianDispatch = ({ allowedToEdit, serviceOrderId, stepFullScreen, setNextStep }) => {
+  const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_TechnicianDispatch`;
+
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { user, permissions }
-  }: any = useData();
-
-  const [showDispatchMaterial, setShowDispatchMaterial] = useState({ open: false, data: [] });
   const [columns, setColumns] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [dispatchDateDialog, setDispatchDateDialog] = useState({ open: false, data: null });
 
+  const {
+    state: { permissions }
+  }: any = useData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
 
   useEffect(() => {
-    fetchFields();
+    fetchColumns();
+    fetchData();
   }, []);
 
-  useEffect(() => {
-    fetchData();
-  }, [columns]);
-
-  const fetchFields = async () => {
+  const fetchColumns = async () => {
     const column: any = [
       {
-        accessor: 'service',
-        Header: ' Service',
-        minWidth: 300,
-        width: 300,
-        disabled: true,
-        sticky: isMobile || isTablet ? 'none' : 'left',
+        accessor: 'index',
+        Header: 'Index',
+        width: 70,
+        sticky: 'left',
+        Cell: ({ row }) => (
+          <div className="d-flex align-items-center gap-2">
+            <h5 className="text-truncate">{row?.original?.index}</h5>
+          </div>
+        )
+      },
+      {
+        accessor: 'technicianName',
+        Header: 'Name',
+        width: 250,
         Cell: ({ row }) => (
           <div className="flex items-center gap-2">
-            {row.original?.service?.serviceName}
+            <p className="text-truncate" title={row.original.technicianName}>
+              {row.original.technicianName}
+            </p>
             <IconButton
               size="small"
-              style={{ marginLeft: '10px' }}
               onClick={() => {
-                window.open(`${routes.serviceMasterDetail.path}/${row.original?.service?._id}`);
+                window.open(`${routes.employeeMasterDetail.path}/${row.original.technicianId}`);
               }}
             >
               <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
@@ -61,264 +70,189 @@ const TechnicianDispatch = ({ serviceOrderData, setNextStep, renderedFrom, stepF
         )
       },
       {
-        accessor: 'technician',
-        Header: 'Technician',
-        minWidth: 300,
-        width: 300,
-        disabled: true,
-        sticky: isMobile || isTablet ? 'none' : 'left',
-        Cell: ({ row }) => (
-          <div className="flex items-center gap-2">
-            {`${row.original?.technician?.firstName} ${row.original?.technician?.lastName} - (${row.original?.technician?.employeeNumber})`}
-            <IconButton
-              size="small"
-              style={{ marginLeft: '10px' }}
-              onClick={() => {
-                window.open(`${routes.employeeMasterDetail.path}/${row.original?.technician?._id}`);
-              }}
-            >
-              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-            </IconButton>
-          </div>
-        )
+        accessor: 'service',
+        Header: 'Service',
+        width: 250,
+        Cell: ({ row }) =>
+          row.original?.service ? (
+            <div className="flex items-center gap-2">
+              <p className="text-truncate" title={row.original.service}>
+                {row.original.service}
+              </p>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.serviceMasterDetail.path}/${row.original.serviceId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            </div>
+          ) : (
+            <NoDataCell />
+          )
       },
       {
         accessor: 'status',
         Header: 'Status',
         width: 200,
-        Cell: ({ row }) => {
-          return row.original['status'] ? <p className="text-truncate">{row.original.status}</p> : <NoDataCell />;
-        }
+        Cell: ({ row }) => (row.original['status'] ? <p>{row.original?.status}</p> : <NoDataCell />)
       },
       {
-        accessor: 'estimateStartDate',
-        Header: 'Estimate Start Date',
-        width: 200,
-        Cell: ({ row }) => {
-          return row.original['estimateStartDate'] ? <p>{displayDateTime(row.original['estimateStartDate'])}</p> : <NoDataCell />;
-        }
+        accessor: 'competencyType',
+        Header: 'Competency Type',
+        width: 250,
+        Cell: ({ row }) => <DropdownCell
+          permissions={permissions}
+          permissionForLinks={{}}
+          field={{
+            fieldName: 'competencyType',
+            lookupResource: sidebarResource.competencyType
+          }}
+          original={row?.original}
+        />
       },
       {
-        accessor: 'estimateEndDate',
-        Header: 'Estimate End Date',
-        width: 200,
-        Cell: ({ row }) => {
-          return row.original['estimateEndDate'] ? <p>{displayDateTime(row.original['estimateEndDate'])}</p> : <NoDataCell />;
-        }
-      }
+        accessor: 'competencies',
+        Header: 'Competencies',
+        width: 250,
+        Cell: ({ row }) => <DropdownCell
+          permissions={permissions}
+          permissionForLinks={{}}
+          field={{
+            fieldName: 'competencies',
+            lookupResource: sidebarResource.competencies
+          }}
+          original={row?.original}
+        />
+      },
+      {
+        accessor: 'dispatchedDate',
+        Header: 'Dispatched Date',
+        disableFilters: true,
+        disableSortBy: true,
+        width: 250,
+        Cell: ({ row }) => (row.original?.startDate ? <p>{displayDate(row.original?.startDate)}</p> : <NoDataCell />)
+      },
     ];
-    column.push({
-      accessor: 'action',
-      Header: 'Actions',
-      minWidth: 100,
-      width: 100,
-      sticky: 'right',
-      disableFilters: true,
-      disableSortBy: true,
-      canDrag: false,
-      Cell: ({ row }) => {
-        return allowedToEdit ? (
-          row.original.status === 'Assigned' ? (
-            <HtmlTooltip title={'Dispatch'}>
-              <span>
-                <IconButton
-                  size="small"
-                  aria-label="Dispatch"
-                  onClick={() => {
-                    const obj: any = [
-                      {
-                        _id: row.original._id,
-                        technician: row.original?.technician?._id,
-                        material: row.original?.material
-                      }
-                    ];
-                    if (row.original?.material?.length) {
-                      setShowDispatchMaterial({ open: true, data: obj });
-                    } else {
-                      handleDispatch(obj);
-                    }
-                  }}
-                >
-                  <SendIcon fontSize="small" color={'primary'} />
-                </IconButton>
-              </span>
-            </HtmlTooltip>
-          ) : row.original.status === 'Dispatched' ? (
-            <HtmlTooltip title={'Complete'}>
-              <span>
-                <IconButton
-                  size="small"
-                  aria-label="Complete"
-                  onClick={() => {
-                    const obj: any = [{ _id: row.original._id, technician: row.original?.technician?._id }];
-                    handleCompleted(obj);
-                  }}
-                >
-                  <CheckCircleIcon fontSize="small" color={'primary'} />
-                </IconButton>
-              </span>
-            </HtmlTooltip>
-          ) : null
-        ) : null;
-      }
-    });
     setColumns(column);
   };
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
-    setNextStep(false);
 
-    var data: any = [];
-    const response = await axiosInstance().get(`${fieldServiceOrder.api}/${serviceOrderData._id}/material`);
-    data = response?.data?.data?.material;
-
-    const responseTechnician = await axiosInstance().get(`${fieldServiceOrder.api}/${serviceOrderData._id}/technician`);
-    const technician = responseTechnician?.data?.data;
-
-    const rows: any = [];
-
-    data
-      .filter((e) => e.parentId === null && e.type === 'service')
-      .forEach((parent, i) => {
-        technician
-          .filter((e) => e.uniqueId === parent._id)
-          ?.forEach((element, i) => {
-            const obj: any = {};
-            obj._id = element._id;
-            // obj._id = parent._id;
-            obj.service = parent.serviceDetail;
-            obj.technician = element?.technician;
-            obj.estimateStartDate = element?.estimateStartDate;
-            obj.estimateEndDate = element?.estimateEndDate;
-            obj.material = data?.filter((ele) => ele.parentId === parent._id && ele.type === 'product');
-            obj.status = element?.status;
-            rows.push(obj);
-          });
-      });
-    if (rows.some((d) => d.status !== 'Completed')) {
-      setNextStep(false);
-    } else {
-      setNextStep(true);
-    }
-
-    dispatch({ type: 'initialize', data: rows, count: rows?.length });
-    dispatch({ type: 'loading', loading: false });
-  };
-
-  const handleDispatch = (rows) => {
+    let api = `${fieldServiceOrder.api}/technician?fieldServiceOrder=${serviceOrderId}`;
     axiosInstance()
-      .put(`${fieldServiceOrder.api}/${serviceOrderData?._id}/technician/dispatched`, rows)
-      .then(({ data }) => {
-        setShowDispatchMaterial({ open: false, data: [] });
-        fetchData();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
+      .get(api)
+      .then(({ data: { data } }) => {
+        let rows = data?.technician?.map((u, i) => {
+          let res: any = {
+            ...prepareDataForGrid(u)
+          };
+          res.index = i + 1;
+          res.technicianName = u?.technician['firstName'] + ' ' + u?.technician['lastName'];
+          res.technicianId = u?.technician['_id'];
+          res.competencyType = u?.technician?.competencyType;
+          res.competencies = u?.technician?.competencies;
+          return res;
         });
+
+        dispatch({ type: 'initialize', data: rows, count: rows?.length });
+        dispatch({ type: 'loading', loading: false });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   };
 
-  const handleCompleted = (rows) => {
+  const handleDispatch = (ids, date) => {
+    setSubmitting(true);
     axiosInstance()
-      .put(`${fieldServiceOrder.api}/${serviceOrderData?._id}/technician/complete`, rows)
+      .post(`${fieldServiceOrder.api}/technician/dispatch`, { _ids: ids, date: date, fieldServiceOrder: serviceOrderId })
       .then(({ data }) => {
-        fetchData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: data.message
+          message: data?.message
         });
+        setSubmitting(false);
+        setDispatchDateDialog({ open: false, data: null });
+        fetchData();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+        setSubmitting(false);
+        setDispatchDateDialog({ open: false, data: null });
       });
   };
 
   const actionButtonMenuItems = () => {
     return (
       <>
-        <MenuItem
-          disabled={selectedRecords?.filter((e) => e.status === 'Assigned')?.length === selectedRecords?.length ? false : true}
-          onClick={() => {
-            const obj: any = selectedRecords.map((ele) => {
-              return {
-                _id: ele?._id,
-                technician: ele?.technician?._id,
-                material: ele?.material?.map((e) => {
-                  return { _id: e._id, type: 'product', product: e.materialId };
-                })
-              };
-            });
-            handleDispatch(obj);
-          }}
-        >
-          Dispatched
-        </MenuItem>
-        <MenuItem
-          disabled={selectedRecords?.filter((e) => e.status === 'Dispatched')?.length === selectedRecords?.length ? false : true}
-          onClick={() => {
-            const obj: any = selectedRecords.map((ele) => {
-              return { _id: ele?._id, technician: ele?.technician?._id };
-            });
-            handleCompleted(obj);
-          }}
-        >
-          Completed
-        </MenuItem>
+        <HtmlTooltip title={'Dispatch Technicians'}>
+          <MenuItem
+            disabled={submitting}
+            onClick={() => {
+              setDispatchDateDialog({ open: true, data: selectedRecords?.map((d) => d?._id) });
+            }}
+          >
+            Dispatch
+          </MenuItem>
+        </HtmlTooltip>
       </>
     );
   };
 
   return (
-    <Fragment>
-      {allowedToEdit && (
-        <DetailsPageHeader
-          isActionButtonVisible={true}
-          actionButtonProps={{ disabled: !Boolean(selectedRecords && selectedRecords.length) }}
-          actionButtonMenuItems={actionButtonMenuItems()}
-          isAddButtonVisible={false}
-          hasXpadding
-        />
-      )}
-      <>
-        {columns ? (
-          <Box zIndex={5}>
-            <CustomReactTable
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
-              columns={columns}
-              state={state}
-              dispatch={dispatch}
-              refreshGrid={fetchData}
-              hideSelection={!allowedToEdit}
-              hideAction={!allowedToEdit}
-              renderedFrom={renderedFrom}
-              isClientSideGrid={true}
+    <>
+      <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
+        {allowedToEdit && (
+          <>
+            <DetailsPageHeader
+              isAddButtonVisible={false}
+              isActionButtonVisible={true}
+              actionButtonMenuItems={actionButtonMenuItems()}
+              actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
+              hasXpadding
             />
-          </Box>
-        ) : (
-          <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
+          </>
         )}
-      </>
-      {showDispatchMaterial.open && (
-        <DispatchMaterial
-          handleClose={() => {
-            setShowDispatchMaterial({ open: false, data: [] });
+        <Grid container spacing={2}>
+          <Grid size={{ xs: 12, md: 12, sm: 12 }}>
+            {columns ? (
+              <CustomReactTable
+                height={stepFullScreen ? 'calc(100vh - 300px)' : '300px'}
+                columns={columns}
+                state={state}
+                dispatch={dispatch}
+                renderedFrom={renderedFrom}
+                isClientSideGrid={true}
+                hideSelection={!allowedToEdit}
+                hideAction={!allowedToEdit}
+                refreshGrid={fetchData}
+              />
+            ) : (
+              <Box p={2} height={300}>
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+              </Box>
+            )}
+          </Grid>
+        </Grid>
+      </Box>
+      {dispatchDateDialog.open && (
+        <DateDialog
+          title={'Select Dispatch Date'}
+          onClose={() => {
+            setDispatchDateDialog({ open: false, data: null });
           }}
-          data={showDispatchMaterial.data}
-          handleSubmit={(rows) => {
-            handleDispatch(rows);
+          handleSubmit={(date) => {
+            handleDispatch(dispatchDateDialog.data, date);
           }}
+          loading={submitting}
         />
       )}
-    </Fragment>
+    </>
   );
 };
 

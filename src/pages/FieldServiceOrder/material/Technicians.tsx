@@ -19,7 +19,7 @@ import routes from '../../../components/Helpers/Routes';
 import { FiExternalLink } from 'react-icons/fi';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 
-const Technicians = ({ allowedToEdit, serviceOrderData, selectedService, stepFullScreen }) => {
+const Technicians = ({ allowedToEdit, serviceOrderData, selectedService, stepFullScreen, setNextStep }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_Technicians`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -164,6 +164,7 @@ const Technicians = ({ allowedToEdit, serviceOrderData, selectedService, stepFul
   };
 
   const fetchData = async () => {
+    setNextStep(false);
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
 
@@ -185,11 +186,14 @@ const Technicians = ({ allowedToEdit, serviceOrderData, selectedService, stepFul
           res.competencies = u?.technician?.competencies;
           return res;
         });
-
+        if (rows?.length > 0) {
+          setNextStep(true);
+        }
         dispatch({ type: 'initialize', data: rows, count: rows?.length });
         dispatch({ type: 'loading', loading: false });
       })
       .catch((error) => {
+        setNextStep(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -223,10 +227,7 @@ const Technicians = ({ allowedToEdit, serviceOrderData, selectedService, stepFul
       element.fieldServiceOrder = serviceOrderData?._id;
       element.uniqueId = selectedService?._id;
       element.service = selectedService?.optionValue !== 'All' ? selectedService?.optionValue : null;
-      element.status = 'Assigned';
       element.warehouse = serviceOrderData?.warehouse?.optionValue;
-      element.startDate = serviceOrderData?.estimateStartDate || new Date();
-      element.endDate = serviceOrderData?.estimateEndDate || new Date();
       technician.push(element);
     });
     axiosInstance()

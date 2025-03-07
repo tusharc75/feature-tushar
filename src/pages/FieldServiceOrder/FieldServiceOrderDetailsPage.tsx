@@ -40,6 +40,7 @@ import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { generateAddFieldTicket } from 'src/pages/FieldServiceOrder/walkmeSteps';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import Material from './material';
+import TechnicianDispatch from './TechnicianDispatch';
 
 const ServiceOrderDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -273,7 +274,9 @@ const ServiceOrderDetailsPage = () => {
           {(resourceData?.policy?.addServices || resourceData?.policy?.addTechnicians || resourceData?.policy?.addConsumables) && !isOffline && (
             <CustomTab value={1}>Details</CustomTab>
           )}
-          <CustomTab value={2}>{resources?.fieldTicket?.titlePlural}</CustomTab>
+          {(!resourceData?.policy?.addServices && !resourceData?.policy?.addTechnicians && !resourceData?.policy?.addConsumables) && (
+            <CustomTab value={2}>{resources?.fieldTicket?.titlePlural}</CustomTab>
+          )}
           {!isOffline && <CustomTab value={3}>{resources?.invoice?.titlePlural}</CustomTab>}
           {!(isMobile && !isTablet) && !isOffline && <CustomTab value={4}>Views</CustomTab>}
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 5}>{tab?.tabName}</CustomTab>)}
@@ -344,17 +347,16 @@ const ServiceOrderDetailsPage = () => {
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={allowedToEdit}
               />
-            )}
-            {steps[currentStep]?.name === steps[4]?.name && serviceOrderData && (
+            )}*/}
+            {steps[currentStep]?.name === steps[1]?.name && serviceOrderData && (
               <TechnicianDispatch
-                serviceOrderData={serviceOrderData}
+                serviceOrderId={id}
                 setNextStep={setNextStep}
-                renderedFrom={`${renderedFrom}_grid-4`}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={allowedToEdit}
               />
             )}
-            {steps[currentStep]?.name === steps[5]?.name && serviceOrderData && (
+            {/*{steps[currentStep]?.name === steps[5]?.name && serviceOrderData && (
               <Technician
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
@@ -366,14 +368,6 @@ const ServiceOrderDetailsPage = () => {
                 statusOptions={statusOptions}
               />
             )} */}
-            {steps[currentStep]?.name === steps[1]?.name && serviceOrderData && (
-              <Invoices
-                resourceId={serviceOrderData?._id}
-                resource={sidebarResource.fieldTicket}
-                invoiceFieldName="fieldServiceOrder"
-                fetchParentData={fetchServiceOrderData}
-              />
-            )}
           </TabPanel>
         </ContentFullScreen>
         <TabPanel value={tabValue} index={2}>
