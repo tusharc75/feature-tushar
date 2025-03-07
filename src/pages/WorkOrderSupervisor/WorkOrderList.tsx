@@ -77,15 +77,16 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
 
     const { generateColumns } = useColumns();
 
-    const [allColumns, setAllColumns] = useState(null);
+    const [workOrderColumns, setWorkOrderColumns] = useState(null);
     const [columns, setColumns] = useState(null);
     const [serviceOpen, setServiceOpen] = useState({ open: false, id: null });
     const [assignTechnicianDialog, setAssignTechnicianDialog] = useState(false);
     const [workStationAssignDialog, setWorkStationAssignDialog] = useState(false);
     const [submitting, setSubmitting] = useState(false);
+
     useEffect(() => {
       const cancelToken = axios.CancelToken.source();
-      fetchGridColumns(cancelToken);
+      fetchWorkOrderColumns(cancelToken);
       return () => cancelToken.cancel();
     }, []);
 
@@ -97,20 +98,63 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
       return () => cancelToken.cancel();
     }, [page, limit, sorting, status, filterQuery, filters]);
 
-    const createColumns = (newColumns) => {
-      if (newColumns && newColumns?.length) {
-        setColumns(null);
-        const serializedAssetColumn = {
-          accessor: 'serializedAsset',
-          Header: resources?.serializedAsset?.titleSingular,
+    const fetchWorkOrderColumns = async (cancelToken?: CancelTokenSource) => {
+      let data;
+      const response = await axiosInstance().get(`/field?resource=${sidebarResource['workOrder']}&view=true`, { cancelToken: cancelToken?.token });
+      data = response?.data?.data?.filter(
+        (f) =>
+          !['workOrderNumber', 'type', 'status', 'serviceProcessStatus', 'pdfTemplate', 'owner', 'collaborator']?.includes(f?.fieldData?.fieldName)
+      );
+      const newColumns = generateColumns(renderedFrom, data, routes?.workOrderDetail.path);
+
+      const fixedInitialColumns = [
+        {
+          accessor: 'workOrderNumber',
+          Header: 'Work Order Number',
           Cell: ({ row }) =>
-            row?.original['serializedAsset'] ? (
-              <div className="flex items-center gap-1">
-                <h5 className=" text-truncate">{row.original.serializedAsset}</h5>
+            row?.original?.workOrderNumber && row.original.workOrder ? (
+              <div>
+                <h5
+                  className="link text-truncate"
+                  onClick={() => {
+                    setServiceOpen({ open: true, id: row?.original?.workOrder });
+                  }}
+                >
+                  {row.original.workOrderNumber}
+                </h5>
                 <IconButton
                   size="small"
                   onClick={() => {
-                    window.open(`${routes?.serializedAssetDetail?.path}/${row.original.serializedAssetId}`);
+                    window.open(`${routes?.workOrderDetail?.path}/${row.original.workOrder}`);
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
+                <Box ml={1}>
+                  {row?.original?.canPerformInfo ? (
+                    <HtmlTooltip title={row?.original?.canPerformInfo} arrow placement="top" enterTouchDelay={0}>
+                      <Info className="text-red-500 [font-size:20px_!important]" />
+                    </HtmlTooltip>
+                  ) : null}
+                </Box>
+              </div>
+            ) : (
+              <NoDataCell />
+            )
+        },
+        {
+          accessor: 'service',
+          Header: 'Service',
+          disableFilters: true,
+          disableSortBy: true,
+          Cell: ({ row }) =>
+            row.original['service'] && row.original.serviceId ? (
+              <div className="flex items-center gap-1">
+                <h5 className="text-truncate">{row.original.service}</h5>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(`${routes?.serviceMasterDetail?.path}/${row.original.serviceId}`);
                   }}
                 >
                   <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
@@ -119,204 +163,81 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
             ) : (
               <NoDataCell />
             )
-        };
+        },
+        {
+          accessor: 'status',
+          Header: 'Status',
+          disableFilters: true,
+          disableSortBy: true,
+          Cell: ({ row }) =>
+            row.original['status'] ? (
+              <div className="flex items-center gap-1">
+                <h5 className="text-truncate">{row.original.status}</h5>
+              </div>
+            ) : (
+              <NoDataCell />
+            )
+        }
+      ];
 
-        const extraColumns = [
-          ...(status === WORKORDER_SERVICE_STATUS.planned
-            ? [serializedAssetColumn]
-            : [
-                {
-                  accessor: 'workOrderNumber',
-                  Header: 'Work Order Number',
-                  Cell: ({ row }) =>
-                    row?.original?.workOrderNumber && row.original.workOrder ? (
-                      <div>
-                        <h5
-                          className="link text-truncate"
-                          onClick={() => {
-                            setServiceOpen({ open: true, id: row?.original?.workOrder });
-                          }}
-                        >
-                          {row.original.workOrderNumber}
-                        </h5>
-                        <IconButton
-                          size="small"
-                          onClick={() => {
-                            window.open(`${routes?.workOrderDetail?.path}/${row.original.workOrder}`);
-                          }}
-                        >
-                          <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                        </IconButton>
-                        <Box ml={1}>
-                          {row?.original?.canPerformInfo ? (
-                            <HtmlTooltip title={row?.original?.canPerformInfo} arrow placement="top" enterTouchDelay={0}>
-                              <Info className="text-red-500 [font-size:20px_!important]" />
-                            </HtmlTooltip>
-                          ) : null}
-                        </Box>
-                      </div>
-                    ) : (
-                      <NoDataCell />
-                    )
-                }
-              ]),
-          {
-            accessor: 'service',
-            Header: 'Service',
-            disableFilters: true,
-            disableSortBy: true,
-            Cell: ({ row }) =>
-              row.original['service'] && row.original.serviceId ? (
-                <div className="flex items-center gap-1">
-                  <h5 className="text-truncate">{row.original.service}</h5>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      window.open(`${routes?.serviceMasterDetail?.path}/${row.original.serviceId}`);
-                    }}
-                  >
-                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                  </IconButton>
-                </div>
-              ) : (
-                <NoDataCell />
-              )
-          },
-          ...(status === WORKORDER_SERVICE_STATUS.planned
-            ? [
-                {
-                  accessor: 'product',
-                  Header: resources?.product?.titleSingular,
-                  disableFilters: true,
-                  disableSortBy: true,
-                  Cell: ({ row }) =>
-                    row.original['product'] && row.original.productId ? (
-                      <div className="flex items-center gap-1">
-                        <h5 className="text-truncate">{row.original.product}</h5>
-                        <IconButton
-                          size="small"
-                          onClick={() => {
-                            window.open(`${routes?.productDetail?.path}/${row.original.productId}`);
-                          }}
-                        >
-                          <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                        </IconButton>
-                      </div>
-                    ) : (
-                      <NoDataCell />
-                    )
-                },
-                {
-                  accessor: 'dueDate',
-                  Header: 'Due Date',
-                  disableFilters: true,
-                  disableSortBy: true,
-                  Cell: ({ row }) =>
-                    row.original['dueDate'] ? <h5 className="text-truncate">{displayDate(row.original.dueDate)}</h5> : <NoDataCell />
-                }
-              ]
-            : []),
-          {
-            accessor: 'assignedWorkStations',
-            Header: 'Work Stations',
-            disableFilters: true,
-            disableSortBy: true,
-            Cell: ({ row }) =>
-              row.original['assignedWorkStations'] ? (
-                <DropdownCell
-                  permissions={permissions}
-                  permissionForLinks={{}}
-                  field={{
-                    fieldName: 'assignedWorkStations',
-                    lookupResource: sidebarResource.workStations
-                  }}
-                  original={row?.original}
-                />
-              ) : (
-                <NoDataCell />
-              )
-          },
-          {
-            accessor: 'assignedUsers',
-            Header: 'Technician',
-            disableFilters: true,
-            disableSortBy: true,
-            Cell: ({ row }) =>
-              row?.original['assignedUsers'] ? (
-                <DropdownCell
-                  permissions={permissions}
-                  permissionForLinks={{}}
-                  field={{
-                    fieldName: 'assignedUsers',
-                    lookupResource: sidebarResource.user
-                  }}
-                  original={row?.original}
-                />
-              ) : (
-                <NoDataCell />
-              )
-          },
-          ...(status === WORKORDER_SERVICE_STATUS.planned
-            ? []
-            : [
-                {
-                  accessor: 'rentalJob',
-                  Header: resources?.rentalManagement?.titleSingular,
-                  Cell: ({ row }) =>
-                    row?.original['rentalJob'] ? (
-                      <div className="flex items-center gap-1">
-                        <h5 className=" text-truncate">{row.original.rentalJob}</h5>
-                        <IconButton
-                          size="small"
-                          onClick={() => {
-                            window.open(`${routes?.rentalManagementDetail?.path}/${row.original.rentalJobId}`);
-                          }}
-                        >
-                          <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                        </IconButton>
-                      </div>
-                    ) : (
-                      <NoDataCell />
-                    )
-                },
-                serializedAssetColumn
-              ])
-        ];
-        const finalColumns = [
-          ...extraColumns.slice(0, 2),
-          ...(status === WORKORDER_SERVICE_STATUS.planned
-            ? newColumns?.filter((c) => ['status', 'repairOrder', 'warehouse']?.includes(c?.accessor))
-            : newColumns),
-          ...extraColumns.slice(2)
-        ];
-        setColumns(finalColumns);
-      }
+      setWorkOrderColumns([...fixedInitialColumns, ...newColumns]);
     };
 
-    const fetchGridColumns = async (cancelToken?: CancelTokenSource) => {
+    const fetchResourceColumns = async () => {
       let data;
-      const response = await axiosInstance().get(`/field?resource=${sidebarResource['workOrder']}&view=true`, { cancelToken: cancelToken?.token });
-      data = response?.data?.data?.filter((f) =>
-        ['spoolNumber', 'status', 'competencies', 'productionOrder', 'repairOrder', 'assemblyOrder', 'expectedCompletionDate', 'warehouse']?.includes(
-          f?.fieldData?.fieldName
-        )
-      );
-      const newColumns = generateColumns(renderedFrom, data, routes?.workOrderDetail.path);
-
-      newColumns?.forEach((c) => {
-        if (c?.accessor === 'status') {
-          c.disableFilters = true;
-          c.disableSortBy = true;
+      const response = await axiosInstance().get(`/field?resource=${selectedResource}&view=true`);
+      data = response?.data?.data?.filter((f) => ['customerAccount', 'rentalJob']?.includes(f?.fieldData?.fieldName));
+      const newColumns = generateColumns(renderedFrom, data);
+      const extraColumns = [
+        {
+          accessor: 'assignedWorkStations',
+          Header: 'Work Stations',
+          disableFilters: true,
+          disableSortBy: true,
+          Cell: ({ row }) =>
+            row.original['assignedWorkStations'] ? (
+              <DropdownCell
+                permissions={permissions}
+                permissionForLinks={{}}
+                field={{
+                  fieldName: 'assignedWorkStations',
+                  lookupResource: sidebarResource.workStations
+                }}
+                original={row?.original}
+              />
+            ) : (
+              <NoDataCell />
+            )
+        },
+        {
+          accessor: 'assignedUsers',
+          Header: 'Technician',
+          disableFilters: true,
+          disableSortBy: true,
+          Cell: ({ row }) =>
+            row?.original['assignedUsers'] ? (
+              <DropdownCell
+                permissions={permissions}
+                permissionForLinks={{}}
+                field={{
+                  fieldName: 'assignedUsers',
+                  lookupResource: sidebarResource.user
+                }}
+                original={row?.original}
+              />
+            ) : (
+              <NoDataCell />
+            )
         }
-      });
-      setColumns([]);
-      setAllColumns(newColumns);
-      createColumns(newColumns);
+      ];
+      setColumns([...workOrderColumns, ...newColumns, ...extraColumns]);
     };
 
     useEffect(() => {
-      createColumns(allColumns);
-    }, [status]);
+      if (selectedResource && workOrderColumns?.length) {
+        fetchResourceColumns();
+      }
+    }, [selectedResource, workOrderColumns]);
 
     const fetchData = (cancelToken?: CancelTokenSource) => {
       dispatch({ type: 'selection', selectedRecords: [] });
@@ -355,48 +276,29 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
                     : selectedResource === sidebarResource?.assemblyOrder
                       ? 'assemblyOrder'
                       : '';
-              let finalObject: any = prepareDataForGrid(u, user);
 
-              delete u?.workOrderDetail?.brand;
-              delete u?.workOrderDetail?.collaborator;
-              delete u?.workOrderDetail?.createdBy;
-              delete u?.workOrderDetail?.stepData;
-              delete u?.workOrderDetail?.updatedBy;
-              delete u?.workOrderDetail?.updatedBy;
-              delete u?.workOrderDetail?.entity;
-              delete u?.workOrderDetail?.rentalJob;
+              const workOrderData = {
+                ...u?.workOrderDetail,
+                workOrder: u?.workOrderDetail?._id
+              };
+              delete workOrderData?.status;
+              delete workOrderData?.type;
+              delete workOrderData?.serviceProcessStatus;
+              delete workOrderData?.pdfTemplate;
+              delete workOrderData?.owner;
+              delete workOrderData?.collaborator;
+              delete workOrderData?._id;
 
-              const workOrderObject: any = prepareDataForGrid(u?.workOrderDetail, user);
-              workOrderObject.workOrder = workOrderObject?._id;
-              workOrderObject.workOrderStatus = workOrderObject?.status;
-              delete workOrderObject?._id;
-              delete workOrderObject?.id;
-              delete workOrderObject?.status;
+              const resourceData = { customerAccount: u?.[resource]?.customerAccount, rentalJob: u?.[resource]?.rentalJob || {} };
 
-              delete u?.[resource]?.brand;
-              delete u?.[resource]?.[`${resource}Number`];
-              delete u?.[resource]?.collaborator;
-              delete u?.[resource]?.createDate;
-              delete u?.[resource]?.createdBy;
-              delete u?.[resource]?.entity;
-              delete u?.[resource]?.owner;
-              delete u?.[resource]?.pdfTemplate;
-              delete u?.[resource]?.processStatus;
-              delete u?.[resource]?.type;
-              delete u?.[resource]?.updatedBy;
-              delete u?.[resource]?.user;
-              delete u?.[resource]?.warehouse;
-
-              const resourceObject: any = prepareDataForGrid(u?.[resource], user);
-              resourceObject[`${resource}Status`] = resourceObject?.status;
-              delete resourceObject?._id;
-              delete resourceObject?.id;
-              delete resourceObject?.status;
+              delete u?.workOrderDetail;
+              delete u?.[resource];
+              const finalObject: any = prepareDataForGrid({ ...u, ...workOrderData, ...resourceData }, user);
 
               finalObject.assignedUsers = u?.assignedUsers;
               finalObject.assignedWorkStations = u?.assignedWorkStations;
 
-              return { ...finalObject, ...workOrderObject, ...resourceObject };
+              return finalObject;
             });
           }
           dispatch({ type: 'initialize', data: rows, count: countC });
@@ -515,6 +417,40 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
     }));
 
     const getColumns = (columns) => {
+      if (status === WORKORDER_SERVICE_STATUS.planned) {
+        const newColumn = columns?.filter((c) =>
+          ['service', 'warehouse', 'repairOrder', 'status', 'product', 'assignedWorkStations', 'assignedUsers']?.includes(c?.accessor)
+        );
+        newColumn?.unshift({
+          accessor: 'serializedAsset',
+          Header: resources?.serializedAsset?.titleSingular,
+          Cell: ({ row }) =>
+            row?.original['serializedAsset'] ? (
+              <div className="flex items-center gap-1">
+                <h5 className=" text-truncate">{row.original.serializedAsset}</h5>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(`${routes?.serializedAssetDetail?.path}/${row.original.serializedAssetId}`);
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
+              </div>
+            ) : (
+              <NoDataCell />
+            )
+        });
+        newColumn.splice(6, 0, {
+          accessor: 'dueDate',
+          Header: 'Due Date',
+          disableFilters: true,
+          disableSortBy: true,
+          Cell: ({ row }) => (row.original['dueDate'] ? <h5 className="text-truncate">{displayDate(row.original.dueDate)}</h5> : <NoDataCell />)
+        });
+
+        return newColumn;
+      }
       if (selectedResource === sidebarResource.repairOrder) {
         return columns?.filter((c) => !['productionOrder', 'assemblyOrder']?.includes(c?.accessor));
       }
