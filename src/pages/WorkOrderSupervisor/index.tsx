@@ -439,6 +439,7 @@ const WorkOrderSupervisor = () => {
                 newObj['serializedAsset'] = item?.workOrderDetail?.serializedAsset?.optionLabel;
                 newObj['serializedAssetId'] = item?.workOrderDetail?.serializedAsset?.optionValue;
                 newObj['createDate'] = item?.workOrderDetail?.createDate;
+                newObj['warehouse'] = item?.workOrderDetail?.warehouse;
                 return newObj;
               });
             }
