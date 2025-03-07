@@ -38,7 +38,6 @@ const FieldTicket = ({
   serviceOrderData,
   serviceOrderFields = [],
   fetchServiceOrderData,
-  setNextStep,
   allowedToEdit,
   handleChangeStatus,
   resource,
@@ -145,7 +144,6 @@ const FieldTicket = ({
 
   const fetchData = async (cancelToken?: CancelTokenSource) => {
     try {
-      setNextStep(false);
       dispatch({ type: 'loading', loading: true });
       dispatch({ type: 'selection', selectedRecords: [] });
       let data, count;
@@ -178,7 +176,6 @@ const FieldTicket = ({
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
-      setNextStep(true);
       dispatch({ type: 'loading', loading: false });
     } catch (e) {
       toastConfig.setToastConfig(e);
