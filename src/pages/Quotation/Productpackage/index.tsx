@@ -915,6 +915,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           handleClose={() => {
             setSubmitState({ open: false, values: null, rowData: null });
           }}
+          needCalculate={true}
         />
       )}
       {showCostDialog.open && (

@@ -1203,6 +1203,7 @@ const Productpackage = ({
           handleClose={() => {
             setSubmitState({ open: false, values: null, rowData: null });
           }}
+          needCalculate={true}
         />
       )}
       {openAssetAvailibility && (
