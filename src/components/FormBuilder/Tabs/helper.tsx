@@ -348,7 +348,7 @@ export const resourcePolicy = [
           { optionValue: MATERIAL_TYPE.product, optionLabel: 'Product', order: 0 },
           { optionValue: MATERIAL_TYPE.package, optionLabel: 'Package', order: 1 },
           { optionValue: MATERIAL_TYPE.service, optionLabel: 'Service', order: 2 },
-          { optionValue: 'competency', optionLabel: 'Competency', order: 2 }
+          { optionValue: 'competency', optionLabel: 'Competency', order: 3 }
         ],
         defaultValue: []
       }
