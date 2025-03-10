@@ -62,19 +62,15 @@ const RentalAssetHistoryDialog = ({ asset, rentalJob, fields, onClose }) => {
         disableFilters: true,
         disableSortBy: false,
         Cell: ({ row }) =>
-          row.original?.user ? (
             <div>
-              {row?.original?.rentalJobId ? (
-                <Link className="link" title={row.original.rentalJob} to={`${routes.userDetail.path}/${row.original?.userId}`} target="_blank">
+              {row?.original?.user ? (
+                <Link className="link" title={row.original?.user} to={`${routes.userDetail.path}/${row.original?.userId}`} target="_blank">
                   {row.original?.user}
                 </Link>
               ) : (
                 <NoDataCell />
               )}
             </div>
-          ) : (
-            <NoDataCell />
-          )
       }
     ];
     let columns = generateColumns(renderedFrom, fields)?.map((col) => {
