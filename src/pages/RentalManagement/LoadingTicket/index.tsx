@@ -658,7 +658,7 @@ const LoadingTicket = ({
             parent.description = parent.type === MATERIAL_TYPE.package ? parent?.packageDetail?.packageDescription || ''
               : parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productDescription || '' :
                 parent.type === MATERIAL_TYPE.service ? parent?.serviceDetail?.serviceDescription || '' : '';
-            if (parent.type === MATERIAL_TYPE.package) {
+            if ([MATERIAL_TYPE.package, MATERIAL_TYPE.service]?.includes(parent.type)) {
               parent.status = ASSET_STATUS.notApplied;
               parent.rentalAssetStatus = ''
             }
@@ -737,7 +737,7 @@ const LoadingTicket = ({
           _subRow.description = _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageDescription || ''
             : _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription || '' :
               _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceDescription || '' : '';
-          if (_subRow.type === MATERIAL_TYPE.package) {
+          if ([MATERIAL_TYPE.package, MATERIAL_TYPE.service]?.includes(_subRow.type)) {
             _subRow.status = ASSET_STATUS.notApplied;
             _subRow.rentalAssetStatus = ''
           }
