@@ -60,24 +60,22 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       .then(({ data: { data, count } }) => {
         setCondition(JSON.parse(JSON.stringify(data)));
         data.forEach((element) => {
-          element.detail = `${
-            element.materialType === MATERIAL_TYPE.product
-              ? element.productDetail?.productName
-              : element.materialType === MATERIAL_TYPE.service
-                ? element.serviceDetail?.serviceName
-                : element.materialType === MATERIAL_TYPE.package
-                  ? element.packageDetail?.packageName
-                  : element.competencyDetail.competencyName
-          }`;
-          element.description = `${
-            element.materialType === MATERIAL_TYPE.product
-              ? element.productDetail?.productDescription
-              : element.materialType === MATERIAL_TYPE.service
-                ? element.serviceDetail?.serviceDescription
-                : element.materialType === MATERIAL_TYPE.package
-                  ? element.packageDetail?.packageDescription
-                  : ''
-          }`;
+          element.detail = `${element.materialType === MATERIAL_TYPE.product
+            ? element.productDetail?.productName
+            : element.materialType === MATERIAL_TYPE.service
+              ? element.serviceDetail?.serviceName
+              : element.materialType === MATERIAL_TYPE.package
+                ? element.packageDetail?.packageName
+                : element.competencyDetail.competencyName
+            }`;
+          element.description = `${element.materialType === MATERIAL_TYPE.product
+            ? element.productDetail?.productDescription
+            : element.materialType === MATERIAL_TYPE.service
+              ? element.serviceDetail?.serviceDescription
+              : element.materialType === MATERIAL_TYPE.package
+                ? element.packageDetail?.packageDescription
+                : ''
+            }`;
           element.materialType = startCase(element.materialType);
           element.conditionType = PRICING_TYPE?.filter((e) => element.conditionType?.includes(e.optionValue))
             ?.map((e) => e.optionLabel)
@@ -219,14 +217,13 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
               size="small"
               onClick={() => {
                 window.open(
-                  `${
-                    row?.original?.materialType === 'Product'
-                      ? routes.productDetail.path
-                      : row?.original?.materialType === 'Service'
-                        ? routes.serviceMasterDetail.path
-                        : row?.original?.materialType === 'Package'
-                          ? routes.packagesDetail.path
-                          : routes?.competenciesDetail.path
+                  `${row?.original?.materialType === 'Product'
+                    ? routes.productDetail.path
+                    : row?.original?.materialType === 'Service'
+                      ? routes.serviceMasterDetail.path
+                      : row?.original?.materialType === 'Package'
+                        ? routes.packagesDetail.path
+                        : routes?.competenciesDetail.path
                   }/${row?.original?.materialId}`
                 );
               }}
@@ -418,7 +415,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
               }}
               hideDefaultImportExport={true}
               extraImportExportLinks={[
-                {
+                ...(permissions?.product?.isRead && !resourceData?.policy?.hideMaterialAdd?.includes(MATERIAL_TYPE.product) ? [{
                   title: 'Product Template',
                   api: `${pricingCondition.api}/template?materialType=product&child=true&ids=${JSON.stringify([pricingConditionId])}`,
                   type: 'download'
@@ -432,37 +429,39 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                   title: 'Product Import',
                   api: `${pricingCondition.api}/import?materialType=product&child=true&ids=${JSON.stringify([pricingConditionId])}`,
                   type: 'import'
-                },
-                {
-                  title: 'Package Template',
-                  api: `${pricingCondition.api}/template?materialType=package&child=true&ids=${JSON.stringify([pricingConditionId])}`,
-                  type: 'download'
-                },
-                {
-                  title: 'Package Export',
-                  api: `${pricingCondition.api}/template?export=true&materialType=package&child=true&ids=${JSON.stringify([pricingConditionId])}&uniqueIds=${JSON.stringify(selectedRecords?.map((e) => e._id))}`,
-                  type: 'export'
-                },
-                {
-                  title: 'Package Import',
-                  api: `${pricingCondition.api}/import?materialType=package&child=true&ids=${JSON.stringify([pricingConditionId])}`,
-                  type: 'import'
-                },
-                {
-                  title: 'Service Template',
-                  api: `${pricingCondition.api}/template?materialType=service&child=true&ids=${JSON.stringify([pricingConditionId])}`,
-                  type: 'download'
-                },
-                {
-                  title: 'Service Export',
-                  api: `${pricingCondition.api}/template?export=true&materialType=service&child=true&ids=${JSON.stringify([pricingConditionId])}&uniqueIds=${JSON.stringify(selectedRecords?.map((e) => e._id))}`,
-                  type: 'export'
-                },
-                {
-                  title: 'Service Import',
-                  api: `${pricingCondition.api}/import?materialType=service&child=true&ids=${JSON.stringify([pricingConditionId])}`,
-                  type: 'import'
-                }
+                }] : []),
+                ...(permissions?.packages?.isRead && !resourceData?.policy?.hideMaterialAdd?.includes(MATERIAL_TYPE.package) ?
+                  [{
+                    title: 'Package Template',
+                    api: `${pricingCondition.api}/template?materialType=package&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                    type: 'download'
+                  },
+                  {
+                    title: 'Package Export',
+                    api: `${pricingCondition.api}/template?export=true&materialType=package&child=true&ids=${JSON.stringify([pricingConditionId])}&uniqueIds=${JSON.stringify(selectedRecords?.map((e) => e._id))}`,
+                    type: 'export'
+                  },
+                  {
+                    title: 'Package Import',
+                    api: `${pricingCondition.api}/import?materialType=package&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                    type: 'import'
+                  }] : []),
+                ...(permissions?.serviceMaster?.isRead && !resourceData?.policy?.hideMaterialAdd?.includes(MATERIAL_TYPE.service) ? [
+                  {
+                    title: 'Service Template',
+                    api: `${pricingCondition.api}/template?materialType=service&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                    type: 'download'
+                  },
+                  {
+                    title: 'Service Export',
+                    api: `${pricingCondition.api}/template?export=true&materialType=service&child=true&ids=${JSON.stringify([pricingConditionId])}&uniqueIds=${JSON.stringify(selectedRecords?.map((e) => e._id))}`,
+                    type: 'export'
+                  },
+                  {
+                    title: 'Service Import',
+                    api: `${pricingCondition.api}/import?materialType=service&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                    type: 'import'
+                  }] : [])
               ]}
               ids={[pricingConditionId]}
             />
@@ -606,9 +605,8 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete pricing setup condition  ${
-            deleteRecord?.productDetail?.productName || deleteRecord?.packageDetail?.packageName || ''
-          } ?`}
+          message={`Are you sure you want to delete pricing setup condition  ${deleteRecord?.productDetail?.productName || deleteRecord?.packageDetail?.packageName || ''
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

@@ -1,5 +1,4 @@
 import { Box } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 import EditIcon from '@mui/icons-material/Edit';
 import { Skeleton } from '@mui/material';
 import queryString from 'query-string';
@@ -184,16 +183,15 @@ const SalesOrderDetails = () => {
           <Box className="control-buttons-v1">
             {salesOrderData ? (
               <>
-                {permissions?.salesOrder?.isUpdate &&
-                  [SALES_ORDER_STATUS.readyToInvoice, SALES_ORDER_STATUS.invoiced].includes(salesOrderData?.status) && (
-                    <ButtonWithPulse
-                      onClick={() => {
-                        setShowClosedConfirmBox(true);
-                      }}
-                    >
-                      Close
-                    </ButtonWithPulse>
-                  )}
+                {permissions?.salesOrder?.isUpdate && [SALES_ORDER_STATUS.invoiced].includes(salesOrderData?.status) && (
+                  <ButtonWithPulse
+                    onClick={() => {
+                      setShowClosedConfirmBox(true);
+                    }}
+                  >
+                    Close
+                  </ButtonWithPulse>
+                )}
                 {permissions?.salesOrder?.isUpdate && [SALES_ORDER_STATUS.closed].includes(salesOrderData?.status) && (
                   <ThemeButton
                     iconForMobile={false}
