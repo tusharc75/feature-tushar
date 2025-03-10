@@ -505,6 +505,7 @@ const QtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, subleaseData,
                   handleClose={() => {
                     setSubmitState({ open: false, values: null });
                   }}
+                  needCalculate={false}
                 />
               )}
               {showConfirmDialog ? (
