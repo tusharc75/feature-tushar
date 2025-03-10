@@ -42,6 +42,7 @@ import {
   RENTAL_INTERNAL_ASSET_STATUS,
   RENTAL_STEPS,
   REPAIR_JOB_STATUS,
+  REPAIR_ORDER_STATUS,
   dateFormatToSend,
   deliveryTicket,
   displayDate,
@@ -921,8 +922,15 @@ const ReceivingTicket = ({
           obj.isRepairJob = true;
           obj.repairJob = repairJob?._id;
         }
-        const repairOrder = transactionData?.repairOrder?.find((e) => e?.assetId === obj?._id);
-        if (repairOrder) {
+        let repairOrders = transactionData?.repairOrder?.filter((e) => e?.assetId === obj?._id);
+        if (repairOrders?.length) {
+          let repairOrder
+          if (repairOrders?.length > 1 && repairOrders.find((e) => e.status !== REPAIR_ORDER_STATUS.completed)) {
+            repairOrder = repairOrders.find((e) => e.status !== REPAIR_ORDER_STATUS.completed)
+          }
+          else {
+            repairOrder = repairOrders[0]
+          }
           obj.isRepairOrder = true;
           obj.repairOrder = repairOrder?._id;
         }
