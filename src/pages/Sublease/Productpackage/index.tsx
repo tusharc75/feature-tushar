@@ -498,6 +498,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           handleClose={() => {
             setSubmitState({ open: false, values: null, rowData: null });
           }}
+          needCalculate={true}
         />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'product' && (

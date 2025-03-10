@@ -5,7 +5,7 @@ import { MATERIAL_TYPE, sidebarResource } from "src/constants/helpers";
 import { useData } from "src/StateProvider/Provider";
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
-const MaterialUpdateActions = ({ resource, values, referenceData, allFields, material, rowData, handleUpdateData, handleClose, isBulkedit = false, selectedRecords = [] }) => {
+const MaterialUpdateActions = ({ resource, values, referenceData, allFields, material, rowData, handleUpdateData, handleClose, needCalculate, isBulkedit = false, selectedRecords = [] }) => {
 
   const {
     state: { user }
@@ -54,7 +54,7 @@ const MaterialUpdateActions = ({ resource, values, referenceData, allFields, mat
           values,
           allFields,
           rowData,
-          referenceData?.currency);
+          referenceData?.currency, needCalculate);
         handleUpdateData(rows);
         setShowConfirmationDialog({ open: false, type: '' });
       }

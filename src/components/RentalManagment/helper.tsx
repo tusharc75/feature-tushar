@@ -279,13 +279,20 @@ const calculateParentRows = (material: any[], rows: any, fields: any[], rowData:
     }
 };
 
-export const calculateRowsField = async (material: any[], values: any, fields: any[], rowData: any, currency: any) => {
+export const calculateRowsField = async (material: any[], values: any, fields: any[], rowData: any, currency: any, needCalculate = true) => {
     currency = (currency || 'USD')?.toLowerCase()
     let rows: any = []
     let childs: any = []
 
-    const calValues = autoCalculateSpecificFields(values, { ...values, ...rowData }, fields)
-    const newRowData = { ...rowData, ...calValues }
+    let newRowData = null;
+
+    if (needCalculate) {
+        const calValues = autoCalculateSpecificFields(values, { ...values, ...rowData }, fields)
+        newRowData = { ...rowData, ...calValues }
+    }
+    else {
+        newRowData = { ...rowData, ...values }
+    }
 
     if (rowData.parentId) {
         rows.push(newRowData)
