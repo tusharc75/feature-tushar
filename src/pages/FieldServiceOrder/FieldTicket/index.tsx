@@ -309,7 +309,7 @@ const FieldTicket = ({
             setOpenDialog({ open: true, isClone: false, id: null });
           }}
         >
-          {`Create ${resources?.fieldTicket?.titlePlural}`}
+          {`Create ${resources?.fieldTicket?.titleSingular}`}
         </MenuItem>
       </>
     );
@@ -361,7 +361,7 @@ const FieldTicket = ({
       )}
       {columns ? (
         <CustomReactTable
-          height={resource === sidebarResource.fieldServiceOrder ? 'calc(100vh - 393px)' : 'calc(100vh - 200px)'}
+          height={resource === sidebarResource.fieldServiceOrder ? 'calc(100vh - 300px)' : 'calc(100vh - 200px)'}
           columns={columns}
           state={state}
           dispatch={dispatch}
