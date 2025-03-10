@@ -1,46 +1,40 @@
 import { IconButton, MenuItem } from '@mui/material';
 import Box from '@mui/material/Box/Box';
 import Grid from '@mui/material/Grid2';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { fieldServiceOrder, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { displayDate, fieldServiceOrder, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
 import { FiExternalLink } from 'react-icons/fi';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
+import DateDialog from '../DateDialog';
 
-const Technicians = ({ allowedToEdit, serviceOrderData, selectedService, stepFullScreen, setNextStep }) => {
-  const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_Technicians`;
+const TechnicianDispatch = ({ allowedToEdit, serviceOrderId, stepFullScreen }) => {
+  const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_TechnicianReceive`;
 
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
-  const [deleteData, setDeleteData] = useState(null);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [technicianDialog, setTechnicianDialog] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [receiveDateDialog, setReceiveDateDialog] = useState({ open: false, data: null, minDate: null });
 
   const {
     state: { permissions }
   }: any = useData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { dataRows, selectedRecords } = state;
+  const { selectedRecords } = state;
 
   useEffect(() => {
     fetchColumns();
-  }, []);
-
-  useEffect(() => {
     fetchData();
-  }, [selectedService]);
+  }, []);
 
   const fetchColumns = async () => {
     const column: any = [
@@ -133,45 +127,30 @@ const Technicians = ({ allowedToEdit, serviceOrderData, selectedService, stepFul
         />
       },
       {
-        accessor: 'action',
-        Header: 'Actions',
-        minWidth: 100,
-        width: 100,
-        sticky: 'right',
+        accessor: 'dispatchedDate',
+        Header: 'Dispatched Date',
         disableFilters: true,
         disableSortBy: true,
-        canDrag: false,
-        Cell: ({ row }) => {
-          return allowedToEdit ? (
-            <HtmlTooltip title={'Delete'}>
-              <span>
-                <IconButton
-                  size="small"
-                  aria-label="Details"
-                  onClick={() => {
-                    setDeleteData([row.original._id]);
-                  }}
-                >
-                  <DeleteIcon fontSize="small" color={'error'} />
-                </IconButton>
-              </span>
-            </HtmlTooltip>
-          ) : null;
-        }
-      }
+        width: 250,
+        Cell: ({ row }) => (row.original?.startDate ? <p>{displayDate(row.original?.startDate)}</p> : <NoDataCell />)
+      },
+      {
+        accessor: 'receiveDate',
+        Header: 'Receive Date',
+        disableFilters: true,
+        disableSortBy: true,
+        width: 250,
+        Cell: ({ row }) => (row.original?.endDate ? <p>{displayDate(row.original?.endDate)}</p> : <NoDataCell />)
+      },
     ];
     setColumns(column);
   };
 
   const fetchData = async () => {
-    setNextStep(false);
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
 
-    let api = `${fieldServiceOrder.api}/technician?fieldServiceOrder=${serviceOrderData?._id}`;
-    if (selectedService && selectedService?.optionValue !== 'All') {
-      api = `${api}&serviceId=${selectedService?.optionValue}&uniqueId=${selectedService?._id}`;
-    }
+    let api = `${fieldServiceOrder.api}/technician?fieldServiceOrder=${serviceOrderId}`;
     axiosInstance()
       .get(api)
       .then(({ data: { data } }) => {
@@ -186,77 +165,50 @@ const Technicians = ({ allowedToEdit, serviceOrderData, selectedService, stepFul
           res.competencies = u?.technician?.competencies;
           return res;
         });
-        if (rows?.length > 0) {
-          setNextStep(true);
-        }
+
         dispatch({ type: 'initialize', data: rows, count: rows?.length });
         dispatch({ type: 'loading', loading: false });
       })
       .catch((error) => {
-        setNextStep(false);
         toastConfig.setToastConfig(error);
       });
   };
 
-  const handleDelete = async (rows) => {
-    setIsDeleting(true);
+  const handleReceive = (ids, date) => {
+    setSubmitting(true);
     axiosInstance()
-      .put(`${fieldServiceOrder.api}/technician`, { ids: rows })
+      .post(`${fieldServiceOrder.api}/technician/receive`, { _ids: ids, date: date, fieldServiceOrder: serviceOrderId })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data?.message
         });
-        setIsDeleting(false);
-        fetchData();
-        setDeleteData(null);
-      })
-      .catch((error) => {
-        setIsDeleting(false);
-        toastConfig.setToastConfig(error);
-        setDeleteData(null);
-      });
-  };
-
-  const handleAssign = (rows) => {
-    const technician: any = [];
-    rows.forEach((d) => {
-      const element: any = {};
-      element.technician = d?._id;
-      element.fieldServiceOrder = serviceOrderData?._id;
-      element.uniqueId = selectedService?._id;
-      element.service = selectedService?.optionValue !== 'All' ? selectedService?.optionValue : null;
-      element.warehouse = serviceOrderData?.warehouse?.optionValue;
-      technician.push(element);
-    });
-    axiosInstance()
-      .post(`${fieldServiceOrder.api}/technician`, { technician })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data?.message
-        });
-        setTechnicianDialog(false);
+        setSubmitting(false);
+        setReceiveDateDialog({ open: false, data: null, minDate: null });
         fetchData();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+        setSubmitting(false);
+        setReceiveDateDialog({ open: false, data: null, minDate: null });
       });
   };
 
   const actionButtonMenuItems = () => {
     return (
       <>
-        <HtmlTooltip title={Boolean(selectedRecords.length) ? 'Delete selected records' : 'Select records to delete'}>
+        <HtmlTooltip title={'Receive Technicians'}>
           <MenuItem
-            disabled={isDeleting}
+            disabled={submitting || selectedRecords?.some((d) => !d?.startDate)}
             onClick={() => {
-              setDeleteData(selectedRecords?.map((d) => d?._id));
+              const minDate = new Date(
+                Math.min(...selectedRecords.map((d) => new Date(d.startDate).getTime()))
+              );            
+              setReceiveDateDialog({ open: true, data: selectedRecords?.map((d) => d?._id), minDate: minDate });
             }}
           >
-            Delete
+            Receive
           </MenuItem>
         </HtmlTooltip>
       </>
@@ -269,9 +221,7 @@ const Technicians = ({ allowedToEdit, serviceOrderData, selectedService, stepFul
         {allowedToEdit && (
           <>
             <DetailsPageHeader
-              isAddButtonVisible={true}
-              addButtonProps={{ onClick: () => setTechnicianDialog(true), id: 'add-technician' }}
-              addButtonText='Assign'
+              isAddButtonVisible={false}
               isActionButtonVisible={true}
               actionButtonMenuItems={actionButtonMenuItems()}
               actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
@@ -301,32 +251,21 @@ const Technicians = ({ allowedToEdit, serviceOrderData, selectedService, stepFul
           </Grid>
         </Grid>
       </Box>
-
-      {technicianDialog && (
-        <AssignEmployeeDialog
-          reference={camelCase(sidebarResource.fieldServiceOrder)}
-          onSuccess={(data) => {
-            handleAssign(data);
+      {receiveDateDialog.open && (
+        <DateDialog
+          title={'Select Receive Date'}
+          onClose={() => {
+            setReceiveDateDialog({ open: false, data: null, minDate: null });
           }}
-          handleClose={() => {
-            setTechnicianDialog(false);
+          handleSubmit={(date) => {
+            handleReceive(receiveDateDialog.data, date);
           }}
-          warehouse={serviceOrderData?.warehouse?.optionValue}
-          ids={dataRows?.map((d) => d?.technicianId)}
-        />
-      )}
-
-      {deleteData && (
-        <ConfirmationDialog
-          open={true}
-          message={`Are you sure you want to delete the record(s)?`}
-          onClose={() => setDeleteData(null)}
-          onOk={() => handleDelete(deleteData)}
-          okBtnLoading={isDeleting}
+          loading={submitting}
+          minDate={receiveDateDialog.minDate}
         />
       )}
     </>
   );
 };
 
-export default Technicians;
+export default TechnicianDispatch;

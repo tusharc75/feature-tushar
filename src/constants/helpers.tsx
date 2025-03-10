@@ -175,7 +175,7 @@ export const serviceOrderSteps: stepInterface[] = [
 export const serviceOrderSteps2: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
   { name: 'Technician Dispatch', title: 'Dispatch', icon: 'dispatch' },
-  { name: 'Invoice', title: 'Invoice', icon: 'invoice' }
+  { name: 'Receive', title: 'Receive', icon: 'receiveProduct' }
 ];
 
 export const subcontractAssemblySteps: stepInterface[] = [

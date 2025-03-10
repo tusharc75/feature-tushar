@@ -28,7 +28,7 @@ import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceFi
 import { FiExternalLink } from 'react-icons/fi';
 import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
 
-const Consumables = ({ allowedToEdit, services, serviceOrderData, stepFullScreen, fetchData: fetchserviceOrderData, refreshChild, resourcePolicy }) => {
+const Consumables = ({ allowedToEdit, services, serviceOrderData, stepFullScreen, fetchData: fetchserviceOrderData, refreshChild, resourcePolicy, setNextStep }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_Consumables`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -466,6 +466,7 @@ const Consumables = ({ allowedToEdit, services, serviceOrderData, stepFullScreen
           serviceOrderData={serviceOrderData}
           selectedService={selectedServiceOption}
           stepFullScreen={stepFullScreen}
+          setNextStep={setNextStep}
         />
       </TabPanel>
       <TabPanel value={tabValue} index={1}>
