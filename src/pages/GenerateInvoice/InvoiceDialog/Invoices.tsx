@@ -108,7 +108,7 @@ const Invoices = ({ resourceId, resource, invoiceFieldName, fetchParentData = nu
                 setIsConformDialogVisible(true);
               }}
             >
-              <DeleteIcon color={row.original?.canDelete ? 'error' : 'disabled'} />
+              <DeleteIcon fontSize="small" color={row.original?.canDelete ? 'error' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -197,7 +197,7 @@ const Invoices = ({ resourceId, resource, invoiceFieldName, fetchParentData = nu
 
   return (
     <Box>
-      <Grid size={{xs:12, md:12, sm:12}} className="mt-3">
+      <Grid size={{ xs: 12, md: 12, sm: 12 }} className="mt-3">
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
