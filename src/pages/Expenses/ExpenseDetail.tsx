@@ -169,7 +169,7 @@ const ExpenseDetail = () => {
               expensesData.type === 'Mileage' ? (
                 <Box className={`single-form-v1 mt-4`} style={{ overflow: 'hidden' }}>
                   <Box className={'form-head-v1'} justifyContent="space-between" alignItems="center">
-                    <Typography variant="subtitle2">Mileage Details</Typography>
+                    <Typography variant="subtitle2">Mileage</Typography>
                   </Box>
                   <Box className="formdata-v1">
                     <Grid
@@ -277,7 +277,7 @@ const ExpenseDetail = () => {
               ) : (
                 <Box className={`single-form-v1 mt-4`} style={{ overflow: 'hidden' }}>
                   <Box className={'form-head-v1'} justifyContent="space-between" alignItems="center">
-                    <Typography variant="subtitle2">Expense Details</Typography>
+                    <Typography variant="subtitle2">Expense</Typography>
                   </Box>
                   <Box className="formdata-v1">
                     <Grid
@@ -317,12 +317,12 @@ const ExpenseDetail = () => {
                       ))}
                       <Grid container direction="row">
                         <Grid size={{ xs: 6 }}>
-                          <Typography className="table-head-v1  bt-0 br-0 text-truncate" style={{ width: '100%' }}>
+                          <Typography className={`table-head-v1 br-0 text-truncate ${expensesData?.lineItems?.length > 0 ? 'bt-0' : ''}`} style={{ width: '100%' }}>
                             Total Amount
                           </Typography>
                         </Grid>
                         <Grid size={{ xs: 6 }} sx={{ textAlign: 'right' }}>
-                          <Typography className="table-head-v1  bt-0 text-truncate" style={{ width: '100%' }}>
+                          <Typography className={`table-head-v1 text-truncate ${expensesData?.lineItems?.length > 0 ? 'bt-0' : ''}`} style={{ width: '100%' }}>
                             {formatAmountWithCurrency(expensesData?.currency, expensesData?.totalAmount)?.fullFormatAmountWithoutSpace || '-'}
                           </Typography>
                         </Grid>

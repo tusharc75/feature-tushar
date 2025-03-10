@@ -75,7 +75,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, workOrder: null });
 
   const [isAutoCreating, setIsAutoCreating] = useState({ open: false, total: 0, done: 0 });
-
+  const [showCloseReopenConfirmation, setShowCloseReopenConfirmation] = useState({ open: false, type: '' });
   const [serviceOptions, setServiceOptions] = useState([]);
   const [selectedServiceOption, setSelectedServiceOption] = useState(null);
   const { generateColumns } = useColumns();
@@ -444,6 +444,9 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       if (parent?.workOrder?.status === WORK_ORDER_STATUS.new) {
         parent.canAutoCompleteWorkOrder = true;
       }
+      parent.canCloseWorkOrder = data.material
+        ?.filter((m) => m?.parentId === parent?._id && m?.type === MATERIAL_TYPE.service)
+        ?.every((s) => s?.status === WORKORDER_SERVICE_STATUS.completed);
       parent.canDelete = false;
       if (parent?.subRows?.length === 0 && parent?.workOrder?.status !== WORK_ORDER_STATUS.completed) {
         parent.canDelete = true;
@@ -744,6 +747,28 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     }
   };
 
+  const closeWorkOrders = () => {
+    setSubmitting(true);
+    const ids = selectedRecords?.filter((e) => !e?.parentId && e?.canCloseWorkOrder)?.map((e) => e?.workOrder?._id);
+    const data: any = { status: WORK_ORDER_STATUS.completed, ids: ids };
+    axiosInstance()
+      .put(`${workOrder.api}/update-multiple-status`, data)
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchData();
+        setSubmitting(false);
+        setShowCloseReopenConfirmation({ open: false, type: '' });
+      })
+      .catch((error) => {
+        setSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const isDisabledCompleteService = () => {
     const records = selectedRecords?.filter(
       (e) => e?.type === MATERIAL_TYPE.service && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.includes(e?.status)
@@ -763,12 +788,14 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         }
       }
       if (!disabled) {
-        if (
-          dataRows
-            ?.find((d) => d?._id === record?.parentId)
-            ?.subRows?.filter((s) => s?.order < record?.order)
-            ?.every((r) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(r?.status))
-        ) {
+        const subRows = dataRows
+          ?.find((d) => d?._id === record?.parentId)
+          ?.subRows?.filter((s) => s?.order < record?.order && s?.type === MATERIAL_TYPE.service);
+        if (subRows?.length) {
+          if (subRows?.every((r) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(r?.status))) {
+            data.push(record);
+          }
+        } else {
           data.push(record);
         }
       }
@@ -874,7 +901,8 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               setShowServiceActionConfirmBox,
               isDisabledCompleteService,
               setDeleteData,
-              setShowConfirmBox
+              setShowConfirmBox,
+              setShowCloseReopenConfirmation
             }}
           />
         }
@@ -995,16 +1023,32 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         <ConfirmationDialog
           okBtnLoading={isSubmitting}
           open={showServiceActionConfirmBox.open}
-          message={`Are you sure you want to ${showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed
-            ? 'complete'
-            : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
-              ? 'skip'
-              : 'revert'
-            } this Service(s)`}
+          message={`Are you sure you want to ${
+            showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed
+              ? 'complete'
+              : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
+                ? 'skip'
+                : 'revert'
+          } this Service(s)`}
           onClose={() => {
             setShowServiceActionConfirmBox({ open: false, action: '' });
           }}
           onOk={handleCompleteService}
+        />
+      )}
+      {showCloseReopenConfirmation.open && (
+        <ConfirmationDialog
+          open={showCloseReopenConfirmation.open}
+          message={`Are you sure you want to ${showCloseReopenConfirmation.type} work order(s) ?`}
+          onClose={() => {
+            setShowCloseReopenConfirmation({ open: false, type: '' });
+          }}
+          onOk={() => {
+            if (showCloseReopenConfirmation.type === 'Close') {
+              closeWorkOrders();
+            }
+          }}
+          okBtnLoading={isSubmitting}
         />
       )}
       {showConfirmBox && (
@@ -1101,7 +1145,8 @@ const ActionButtonMenuItems = ({
   setShowServiceActionConfirmBox,
   isDisabledCompleteService,
   setDeleteData,
-  setShowConfirmBox
+  setShowConfirmBox,
+  setShowCloseReopenConfirmation
 }) => {
   return (
     <>
@@ -1189,8 +1234,8 @@ const ActionButtonMenuItems = ({
         }}
         disabled={
           selectedRecords?.length &&
-            selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || (d.type === MATERIAL_TYPE.product && !d?.parentId)) &&
-            selectedRecords?.every((d) => d.workOrder?._id === selectedRecords[0]?.workOrder?._id)
+          selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || (d.type === MATERIAL_TYPE.product && !d?.parentId)) &&
+          selectedRecords?.every((d) => d.workOrder?._id === selectedRecords[0]?.workOrder?._id)
             ? false
             : true
         }
@@ -1209,8 +1254,8 @@ const ActionButtonMenuItems = ({
       <MenuItem
         disabled={
           checkUniqWorkOrder() &&
-            (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
-              selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length === 1)
+          (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
+            selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length === 1)
             ? false
             : true
         }
@@ -1264,6 +1309,16 @@ const ActionButtonMenuItems = ({
       >
         Revert Service
       </MenuItem>
+      {selectedRecords?.filter((e) => !e?.parentId)?.every((r) => r?.canCloseWorkOrder) && (
+        <MenuItem
+          onClick={() => {
+            setShowCloseReopenConfirmation({ open: true, type: 'Close' });
+          }}
+          id="close-work-order"
+        >
+          Close Work Order(s)
+        </MenuItem>
+      )}
       <MenuItem
         onClick={() => {
           setDeleteData(selectedRecords?.filter((e) => e?.canDelete));

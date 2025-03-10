@@ -206,7 +206,10 @@ const Consumables = ({
               'No'
             )}
           </p>
-        )
+        ),
+        accessorFn: (original) => {
+          return original?.serializedProduct ? 'Yes' : 'No';
+        },
       }
     ];
     const extracolumns: any = [
