@@ -921,6 +921,7 @@ const Services = ({
           handleClose={() => {
             setSubmitState({ open: false, values: null, rowData: null })
           }}
+          needCalculate={true}
         />
       }
     </Fragment>

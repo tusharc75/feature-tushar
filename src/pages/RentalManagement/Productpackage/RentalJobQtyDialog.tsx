@@ -703,6 +703,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                   handleClose={() => {
                     setSubmitState({ open: false, values: null })
                   }}
+                  needCalculate={false}
                 />
               }
             </Fragment>

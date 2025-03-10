@@ -652,6 +652,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
                   handleClose={() => {
                     setSubmitState({ open: false, values: null });
                   }}
+                  needCalculate={false}
                 />
               )}
               {showConfirmDialog ? (
