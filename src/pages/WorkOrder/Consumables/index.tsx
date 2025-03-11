@@ -767,7 +767,7 @@ const Consumables = ({
         )}
         {assignAssetDialog && (
           <AssignSerializedAssetDialog
-            reference={'workOrder_assign_asset'}
+            reference={'workOrder'}
             referenceData={{ warehouse: warehouse?.optionValue }}
             ids={[]}
             handleClose={() => setAssignAssetDialog(false)}
