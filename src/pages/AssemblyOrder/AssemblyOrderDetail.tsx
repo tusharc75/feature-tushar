@@ -138,9 +138,9 @@ const AssemblyOrderDetail = () => {
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.assemblyOrder, data) && data?.status != ASSEMBLY_ORDER_STATUS.converted);
         setAllowedToDelete(
           permissions?.assemblyOrder?.isDelete &&
-          checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
-          data?.canDelete &&
-          data?.status != ASSEMBLY_ORDER_STATUS.converted
+            checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
+            data?.canDelete &&
+            ![ASSEMBLY_ORDER_STATUS.converted, ASSEMBLY_ORDER_STATUS.partiallyConverted]?.includes(data?.status)
         );
         setAssemblyOrderData({ ...data });
       })
@@ -200,11 +200,9 @@ const AssemblyOrderDetail = () => {
           <Box className="control-buttons-v1">
             {assemblyOrderData ? (
               <>
-                {permissions?.rentalManagement?.isCreate &&
-                  assemblyOrderProcessStepsNames[currentStep] === 'Final Slip' &&
-                  ![ASSEMBLY_ORDER_STATUS.converted]?.includes(assemblyOrderData?.status) && (
-                    <ThemeButton onClick={() => setOpenRentalDialog(true)}>{`Convert to ${resources?.rentalManagement?.titleSingular}`}</ThemeButton>
-                  )}
+                {permissions?.rentalManagement?.isCreate && assemblyOrderData?.canConvert && !assemblyOrderData?.rentalJob && (
+                  <ThemeButton onClick={() => setOpenRentalDialog(true)}>{`Convert to ${resources?.rentalManagement?.titleSingular}`}</ThemeButton>
+                )}
                 {permissions?.assemblyOrder?.isUpdate && allowedToEdit && (
                   <ThemeButton iconForMobile={<EditIcon />} onClick={() => setOpenUpdateDialog(true)} mobileTooltip={'Edit'}>
                     {'Edit'}

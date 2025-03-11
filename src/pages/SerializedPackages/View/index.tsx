@@ -56,10 +56,8 @@ const SerializedPackagesView = ({ serializedPackagesData }) => {
       const assets = allAssetsResponse?.data?.data || [];
 
       const {
-        data: {
-          data: { material }
-        }
-      } = await axiosInstance().get(`${routes.serializedPackages.path}/${serializedPackagesData?.package?.optionValue}/package-material`);
+        data: { data: material }
+      } = await axiosInstance().get(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/material`);
 
       let xPosition = 0;
       let flow = [
@@ -92,10 +90,14 @@ const SerializedPackagesView = ({ serializedPackagesData }) => {
       var yPrev = 0;
 
       let rows = material.filter((e) => !e.parentId);
-      rows.forEach((parent, i) => {
+      rows?.forEach((parent, i) => {
         parent.index = i + 1;
         parent.detail =
-          parent.type === MATERIAL_TYPE.product ? parent?.productName : parent.type === MATERIAL_TYPE.package ? parent?.packageName : '';
+          parent?.type === MATERIAL_TYPE.product
+            ? parent?.productDetail?.productName
+            : parent?.type === MATERIAL_TYPE.package
+              ? parent?.packageDetail?.packageName
+              : '';
         parent.subRows = generateNestedData(material, assets, parent);
       });
       generateFlowData(rows, xPosition, flow, flowEdge, serializedPackagesData._id, yPrev);
@@ -119,7 +121,7 @@ const SerializedPackagesView = ({ serializedPackagesData }) => {
         targetPosition: 'left',
         data: {
           ref_type: node.type,
-          ref_id: MATERIAL_TYPE.serializedAsset === node?.type ? node.asset : node._id,
+          ref_id: MATERIAL_TYPE.serializedAsset === node?.type ? node.asset : node.materialId,
           label: (
             <HtmlTooltip arrow placement="top" title={startCase(camelCase(node.type))}>
               <div>
@@ -168,7 +170,7 @@ const SerializedPackagesView = ({ serializedPackagesData }) => {
     });
     if (assets?.length > 0) {
       const assetsSubRows = assets.filter((e) => {
-        return e.product === parent._id && (parent.package ? parent._id === e.package : true);
+        return e.product === parent.materialId && (parent.package ? parent.materialId === e.package : true);
       });
       assetsSubRows.forEach((_subRow, j) => {
         _subRow.index = parent.index + '.' + (j + 1 + (subRows?.length || 0));
