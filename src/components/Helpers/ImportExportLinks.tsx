@@ -52,7 +52,8 @@ export default function ImportExportLinks({
   visibleColumns = {},
   asyncExport = false,
   asyncImport = false,
-  resource = null
+  resource = null,
+  hideDownloadTemplate = false
 }) {
   const classes = useStyles();
   const isMobile = useMediaQuery('(max-width: 960px)');
@@ -478,7 +479,7 @@ export default function ImportExportLinks({
             </span>
             <ExportIcon />
           </label>
-          {isDownloadExcel && !onlyExport && (
+          {isDownloadExcel && !onlyExport && !hideDownloadTemplate && (
             <>
               {/* <Divider orientation="vertical" flexItem className={isBackgroundWhite ? classes.darkLinkDivider : classes.linkDivider} /> */}
               <label
