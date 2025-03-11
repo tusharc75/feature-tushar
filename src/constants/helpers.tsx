@@ -864,7 +864,11 @@ export const getObjKeys = (val: string | boolean = '', fields: any[]) => {
       if (!option && key.required && key.option?.length === 1) {
         option = key.option[0];
       }
-      obj[key.fieldName] = value ? value : option ? option.optionValue : '';
+      if (key?.visibilityCondition?.length) {
+        obj[key.fieldName] = ''
+      } else {
+        obj[key.fieldName] = value ? value : option ? option.optionValue : '';
+      }
     } else if (key.type === 'multiSelect') {
       let defaultOptions = key.option?.filter((item: any) => item.default === true);
       if (defaultOptions?.length === 0 && key.required && key.option?.length === 1) {
@@ -873,8 +877,12 @@ export const getObjKeys = (val: string | boolean = '', fields: any[]) => {
       if (value && isArray(value) && value?.length && key.fieldName === 'collaborator' && obj['owner']) {
         value = value?.filter((e) => obj['owner'] !== e);
       }
-      const options = defaultOptions?.map((data: any) => data.optionValue);
-      obj[key.fieldName] = value ? (typeof value === 'string' ? [value] : value) : options;
+      if (key?.visibilityCondition?.length) {
+        obj[key.fieldName] = []
+      } else {
+        const options = defaultOptions?.map((data: any) => data.optionValue);
+        obj[key.fieldName] = value ? (typeof value === 'string' ? [value] : value) : options;
+      }
     } else if (key.type === 'freeStyleMultiSelect') {
       const defaultOptions = key.option?.filter((item: any) => item.default === true);
       const options = defaultOptions?.map((data: any) => data.optionValue);

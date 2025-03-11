@@ -278,7 +278,7 @@ const ServiceOrderDetailsPage = () => {
           {(!resourceData?.policy?.addServices && !resourceData?.policy?.addTechnicians && !resourceData?.policy?.addConsumables) && (
             <CustomTab value={2}>{resources?.fieldTicket?.titlePlural}</CustomTab>
           )}
-          {!isOffline && <CustomTab value={3}>{resources?.invoice?.titlePlural}</CustomTab>}
+          {!isOffline && permissions?.invoice?.isRead && <CustomTab value={3}>{resources?.invoice?.titlePlural}</CustomTab>}
           {!(isMobile && !isTablet) && !isOffline && <CustomTab value={4}>Views</CustomTab>}
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 5}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
@@ -293,7 +293,6 @@ const ServiceOrderDetailsPage = () => {
             )}
           </Box>
         </TabPanel>
-
         <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
           <TabPanel value={tabValue} index={1}>
             <Steps
@@ -330,7 +329,7 @@ const ServiceOrderDetailsPage = () => {
                 allowedToEdit={allowedToEdit}
               />
             )}
-             {steps[currentStep]?.name === steps[2]?.name && serviceOrderData && (
+            {steps[currentStep]?.name === steps[2]?.name && serviceOrderData && (
               <TechnicianReceive
                 serviceOrderId={id}
                 stepFullScreen={stepFullScreen}

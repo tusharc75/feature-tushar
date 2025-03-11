@@ -37,7 +37,7 @@ const ExpenseReport = () => {
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
-
+  const [expenseReportData, setExpenseReportData] = useState(null);
   const { generateColumns, checkStaticField } = useColumns();
 
   useEffect(() => {
@@ -141,6 +141,7 @@ const ExpenseReport = () => {
       const response: any = await axiosInstance().get(`${expenseReport.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
       data = response?.data?.data;
       count = response?.data?.count;
+      setExpenseReportData(data);
       let rows = data.map((u) => {
         let finalObject: any = prepareDataForGrid(u, user);
         finalObject['isChecked'] = false;
@@ -271,6 +272,7 @@ const ExpenseReport = () => {
         <ManageExpenseReports
           expenseReportId={showManageExpenseReportDialog.idToClone}
           fetchReportData={fetchData}
+          expenseReportData={expenseReportData}
           onClose={() => setShowManageExpenseReportDialog({ open: false, idToClone: null })}
           onSuccess={(data) => {
             history.push(`${routes?.expenseReportDetail?.path}/${data._id}`);
