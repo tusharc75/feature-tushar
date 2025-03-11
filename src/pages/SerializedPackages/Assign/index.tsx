@@ -130,14 +130,6 @@ const Assign = ({ serializedPackagesData }) => {
           return row.original['productNumber'] ? <p className="text-truncate">{row.original.productNumber}</p> : <NoDataCell />;
         }
       },
-      {
-        accessor: 'productCategory',
-        Header: 'Product Category',
-        width: 200,
-        Cell: ({ row }) => {
-          return row.original['productCategory'] ? <p className="text-truncate">{row.original.productCategory}</p> : <NoDataCell />;
-        }
-      },
       ...(productFields?.find((e) => e.fieldName === 'position')
         ? [
             {
@@ -210,9 +202,9 @@ const Assign = ({ serializedPackagesData }) => {
           parent.index = i + 1;
           parent.detail =
             parent?.type === MATERIAL_TYPE.product
-              ? parent?.productDetail?.optionLabel
+              ? parent?.productDetail?.productName
               : parent?.type === MATERIAL_TYPE.package
-                ? parent?.packageDetail?.optionLabel
+                ? parent?.packageDetail?.packageName
                 : '';
           parent.description =
             parent?.type === MATERIAL_TYPE.product
@@ -221,7 +213,6 @@ const Assign = ({ serializedPackagesData }) => {
                 ? parent?.packageDetail?.packageDescription
                 : '';
           parent.productNumber = parent?.type === MATERIAL_TYPE.product ? parent?.productDetail?.productNumber : '';
-          parent.productCategory = parent?.type === MATERIAL_TYPE.product ? parent?.productDetail?.productCategory?.optionLabel : '';
           parent.serializedProduct = parent?.type === MATERIAL_TYPE.product ? parent?.productDetail?.serializedProduct : false;
           parent.assetQty = parent?.type === MATERIAL_TYPE.product ? assets.filter((e) => e.product === parent?.materialId)?.length : 0;
           parent.subRows = generateNestedData(data, assets, parent);
@@ -247,12 +238,10 @@ const Assign = ({ serializedPackagesData }) => {
             ? _subRow?.packageDescription || ''
             : '';
       _subRow.productNumber = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productNumber : '';
-      _subRow.productCategory = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productCategory?.optionLabel || '' : '';
-
       _subRow.assetQty =
         _subRow.type === MATERIAL_TYPE.product
           ? assets.filter((e) => {
-              return e.product === _subRow._id && (_subRow.package ? _subRow._id === e.package : true);
+              return e.product === _subRow.materialId && (_subRow.package ? _subRow.materialId === e.package : true);
             })?.length
           : 0;
       _subRow.subRows = generateNestedData(material, assets, _subRow);

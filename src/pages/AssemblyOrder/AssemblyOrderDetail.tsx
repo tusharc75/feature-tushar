@@ -200,12 +200,9 @@ const AssemblyOrderDetail = () => {
           <Box className="control-buttons-v1">
             {assemblyOrderData ? (
               <>
-                {permissions?.rentalManagement?.isCreate &&
-                  assemblyOrderData?.canConvertToRentalJob &&
-                  !assemblyOrderData?.rentalJob &&
-                  assemblyOrderProcessStepsNames[currentStep] === 'Work Order' && (
-                    <ThemeButton onClick={() => setOpenRentalDialog(true)}>{`Convert to ${resources?.rentalManagement?.titleSingular}`}</ThemeButton>
-                  )}
+                {permissions?.rentalManagement?.isCreate && assemblyOrderData?.canConvert && !assemblyOrderData?.rentalJob && (
+                  <ThemeButton onClick={() => setOpenRentalDialog(true)}>{`Convert to ${resources?.rentalManagement?.titleSingular}`}</ThemeButton>
+                )}
                 {permissions?.assemblyOrder?.isUpdate && allowedToEdit && (
                   <ThemeButton iconForMobile={<EditIcon />} onClick={() => setOpenUpdateDialog(true)} mobileTooltip={'Edit'}>
                     {'Edit'}

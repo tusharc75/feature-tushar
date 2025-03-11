@@ -94,9 +94,9 @@ const SerializedPackagesView = ({ serializedPackagesData }) => {
         parent.index = i + 1;
         parent.detail =
           parent?.type === MATERIAL_TYPE.product
-            ? parent?.productDetail?.optionLabel
+            ? parent?.productDetail?.productName
             : parent?.type === MATERIAL_TYPE.package
-              ? parent?.packageDetail?.optionLabel
+              ? parent?.packageDetail?.packageName
               : '';
         parent.subRows = generateNestedData(material, assets, parent);
       });
