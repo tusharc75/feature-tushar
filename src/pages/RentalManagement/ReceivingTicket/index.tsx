@@ -3424,6 +3424,13 @@ const ActionButtonMenuItems = ({
             RENTAL_INTERNAL_ASSET_STATUS.standBy,
             RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable
           ]?.includes(r?.rentalAssetStatus)
+        ) && getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.every(
+          (r) => [
+            ASSET_STATUS.reserved,
+            ASSET_STATUS.inUse,
+            ASSET_STATUS.standBy,
+            ASSET_STATUS.standByNotChargeable
+          ]?.includes(r?.status)
         ) && (
           <MenuItem
             onClick={() => {
