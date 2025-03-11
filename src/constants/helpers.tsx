@@ -90,7 +90,7 @@ export const salesOrderProcessSteps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
   { name: 'Process', title: 'Process', icon: 'process' },
   { name: 'Loading', title: 'Loading', icon: 'ticket' },
-  { name: 'Invoice', title: 'Invoice', icon: 'invoice' }
+  { name: 'Invoice', title: 'Slip', icon: 'invoice' }
 ];
 
 export const bulkAssetCreationSteps: stepInterface[] = [
