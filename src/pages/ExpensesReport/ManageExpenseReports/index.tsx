@@ -73,15 +73,15 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
               toastConfig.setToastConfig(error);
             });
         } else {
-          let now = new Date();
-          let currentYear = now.getFullYear();
-          let currentMonth = now.getMonth();
+          let now = new Date(); 
+          let currentYear = now.getFullYear(); 
+          let currentMonth = now.getMonth(); 
 
-          if (expenseReportData && expenseReportData.length > 0) {
-            const reportedMonths = new Set(
-              expenseReportData.map((report) => {
-                const d = new Date(report.fromDate);
-                return `${d.getFullYear()}-${d.getMonth()}`;
+          if (expenseReportData && expenseReportData.length > 0) { 
+            const reportedMonths = new Set( 
+              expenseReportData.map((report) => { 
+                const d = new Date(report.fromDate); 
+                return `${d.getFullYear()}-${d.getMonth()}`; 
               })
             );
 
@@ -102,8 +102,8 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
           let initialData = getObjKeys('', fieldsDataForCreate);
           initialData['status'] = EXPENSE_STATUS.draft;
           initialData['users'] = [user?.user?._id];
-          initialData['fromDate'] = fromDate;
-          initialData['toDate'] = toDate;
+          initialData['fromDate'] = fromDate; 
+          initialData['toDate'] = toDate; 
           setInitialData({
             fields: fieldsDataForCreate,
             values: initialData
