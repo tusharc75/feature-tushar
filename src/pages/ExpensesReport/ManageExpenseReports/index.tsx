@@ -31,7 +31,7 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { useTableReducer } from 'src/components/CustomReactTable';
 import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
 
-const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose, onSuccess }) => {
+const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose, onSuccess, expenseReportData = null }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -73,10 +73,37 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
               toastConfig.setToastConfig(error);
             });
         } else {
+          let now = new Date();
+          let currentYear = now.getFullYear();
+          let currentMonth = now.getMonth();
+
+          if (expenseReportData && expenseReportData.length > 0) {
+            const reportedMonths = new Set(
+              expenseReportData.map((report) => {
+                const d = new Date(report.fromDate);
+                return `${d.getFullYear()}-${d.getMonth()}`;
+              })
+            );
+
+            while (reportedMonths.has(`${currentYear}-${currentMonth}`)) {
+              if (currentMonth === 11) {
+                currentMonth = 0;
+                currentYear++;
+              } else {
+                currentMonth++;
+              }
+            }
+          }
+
+          const fromDate = new Date(currentYear, currentMonth, 2);
+          const toDate = new Date(currentYear, currentMonth + 1, 1);
+
           setTitle(`Create ${resources?.expenseReport?.titleSingular}`);
           let initialData = getObjKeys('', fieldsDataForCreate);
           initialData['status'] = EXPENSE_STATUS.draft;
           initialData['users'] = [user?.user?._id];
+          initialData['fromDate'] = fromDate;
+          initialData['toDate'] = toDate;
           setInitialData({
             fields: fieldsDataForCreate,
             values: initialData
@@ -174,13 +201,13 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
         >
           {`Add Existing ${resources?.expenses?.titlePlural}`}
         </MenuItem>
-        <MenuItem
+        {/* <MenuItem
           onClick={() => {
             setShowManageExpensesDialog({ open: true, idToClone: null });
           }}
         >
           {`Create New ${resources?.expenses?.titlePlural}`}
-        </MenuItem>
+        </MenuItem> */}
       </>
     );
   };
@@ -296,6 +323,7 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
                   open={showAddExistingExpenseModal}
                   onClose={() => setShowAddExistingExpenseModal(false)}
                   fullScreen
+                  expenseReportData={values}
                   setFullScreen={setFullScreen}
                   isSubmitting={isSubmitting}
                   onSave={handleSaveExpenses}
