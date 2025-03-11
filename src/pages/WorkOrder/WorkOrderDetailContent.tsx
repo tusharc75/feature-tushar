@@ -679,8 +679,12 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
         <TabPanel value={tabValue} index={2}>
           {workOrderData && (
             <Consumables
-              allowedToEdit={allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.onHold && !workOrderData?.deleted ? true : false}
-              isCreate={true}
+              allowedToEdit={workOrderData.type === WORK_ORDER_TYPE.repairOrder ?
+                allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.onHold && !workOrderData?.deleted ? true : false :
+                [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) && !workOrderData?.deleted ? false : allowedToEdit}
+              isCreate={workOrderData.type === WORK_ORDER_TYPE.repairOrder ? allowedToEdit :
+                [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) ? false : allowedToEdit
+              }
               service={null}
               uniqueId={null}
               stepId={null}
@@ -694,8 +698,12 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
         <TabPanel value={tabValue} index={3}>
           {workOrderData && (
             <Consumables
-              allowedToEdit={allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.onHold && !workOrderData?.deleted ? true : false}
-              isCreate={true}
+              allowedToEdit={workOrderData.type === WORK_ORDER_TYPE.repairOrder ?
+                allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.onHold && !workOrderData?.deleted ? true : false :
+                [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) && !workOrderData?.deleted ? false : allowedToEdit}
+              isCreate={workOrderData.type === WORK_ORDER_TYPE.repairOrder ? allowedToEdit :
+                [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) ? false : allowedToEdit
+              }
               service={null}
               uniqueId={null}
               stepId={null}
