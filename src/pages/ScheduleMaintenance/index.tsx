@@ -121,18 +121,19 @@ const ScheduleMaintenance = () => {
               </IconButton>
             </span>
           </HtmlTooltip>
-          <HtmlTooltip title="Delete">
-            <span>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  setShowConfirmBox({ open: true, data: [row.original] });
-                }}
-              >
-                <Delete fontSize="small" color="error" />
-              </IconButton>
-            </span>
-          </HtmlTooltip>
+          {selectedType === 1 &&
+            <HtmlTooltip title="Delete">
+              <span>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    setShowConfirmBox({ open: true, data: [row.original] });
+                  }}
+                >
+                  <Delete fontSize="small" color="error" />
+                </IconButton>
+              </span>
+            </HtmlTooltip>}
         </>
       )
     });
@@ -208,7 +209,7 @@ const ScheduleMaintenance = () => {
       setIsSubmitting(true);
       axiosInstance().post(`${product.api}/scheduledMaintenance`, {
         materials: rowsToAdd?.map((r) => r?._id),
-        materialType: selectedType === 1 ? MATERIAL_TYPE.product : MATERIAL_TYPE.serializedAsset,
+        materialType: MATERIAL_TYPE.product,
         effectiveDate: _data?.effectiveDate,
         duration: _data?.duration
       }).then(({ data }) => {
@@ -295,24 +296,14 @@ const ScheduleMaintenance = () => {
           open={Boolean(anchorEl)}
           onClose={handleClose}
         >
-          {selectedType === 1 ?
-            <MenuItem
-              onClick={() => {
-                setOpenAssignProductDialog(true);
-                handleClose();
-              }}
-            >
-              {`Add Existing ${resources?.product?.titlePlural}`}
-            </MenuItem>
-            :
-            <MenuItem
-              onClick={() => {
-                setOpenAssignSerializedAssetDialog(true);
-                handleClose();
-              }}
-            >
-              {`Add Existing ${resources?.serializedAsset?.titlePlural}`}
-            </MenuItem>}
+          <MenuItem
+            onClick={() => {
+              setOpenAssignProductDialog(true);
+              handleClose();
+            }}
+          >
+            {`Add Existing ${resources?.product?.titlePlural}`}
+          </MenuItem>
         </Menu>
       </>
     );
@@ -359,10 +350,10 @@ const ScheduleMaintenance = () => {
           toggleButtonList={types}
           selectedType={selectedType}
           setSelectedType={setSelectedType}
-          leftSideContentsOfSearchFilter={<LeftSideContent />}
+          leftSideContentsOfSearchFilter={selectedType === 1 ? <LeftSideContent /> : null}
           searchValue={search}
           onSearch={handleSearch}
-          isActionButtonVisible={true}
+          isActionButtonVisible={selectedType === 1 ? true : false}
           actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
           isAddButtonVisible={false}
