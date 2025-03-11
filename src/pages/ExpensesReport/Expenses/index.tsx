@@ -208,13 +208,13 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
         >
           {`Add Existing ${resources?.expenses?.titlePlural}`}
         </MenuItem>
-        <MenuItem
+        {/* <MenuItem
           onClick={() => {
             setShowManageExpensesDialog(true);
           }}
         >
           {`Create New ${resources?.expenses?.titlePlural}`}
-        </MenuItem>
+        </MenuItem> */}
       </>
     );
   };
