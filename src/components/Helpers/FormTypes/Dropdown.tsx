@@ -31,6 +31,7 @@ import ManageWellNumber from 'src/pages/WellNumber/ManageWellNumber';
 import { NewAddressOptionList } from '../../../StateProvider/AddressProvider';
 import AddMultiple from '../../../pages/DynamicForm/AddMultiple';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { isFieldVisible } from 'src/components/Helpers/FormTypes';
 
 type renderRowProps = {
   setSize: (index: number, height: number) => void;
@@ -330,7 +331,7 @@ function Dropdown({
   const fieldDependentOn = fieldData?.lookupDependentOn ? fields?.find((d) => d.fieldName === fieldData?.lookupDependentOn) : null;
   const isDisabled = fieldData?.lookupDependentOn && fieldData?.lookupDependentOn !== '' && fieldDependentOn && !!!values[fieldDependentOn.fieldName];
 
-  const handleLookUpDependent = (name, val, fields, setFieldValue) => {
+  const handleLookUpDependent = (name, val, fields, setFieldValue, overRideValues) => {
     const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
     if (filterFields?.length) {
       filterFields?.forEach((ele: any) => {
@@ -350,29 +351,36 @@ function Dropdown({
               setFieldValue(ele?.fieldName, '');
             }
           }
-          handleLookUpDependent(ele?.fieldName, val, fields, setFieldValue);
+          handleLookUpDependent(ele?.fieldName, val, fields, setFieldValue, overRideValues);
         } else if (ele?.type === 'dropDown' && (!ele?.lookupDependentOnField || ele?.lookupDependentOnField === '') && val && val?.optionValue) {
-          const filterFieldDropDownOptions = ele?.option?.filter((o: any) => {
-            if (o?.hasOwnProperty(ele?.lookupDependentOn)) {
-              if (Array.isArray(o[ele?.lookupDependentOn])) {
-                return o[ele?.lookupDependentOn]?.includes(val?.optionValue);
-              } else {
-                return o[ele?.lookupDependentOn] === val?.optionValue;
+          let allowDefaultValue = true;
+          if (ele?.visibilityCondition?.length && !isFieldVisible(ele, fields, { ...values, ...overRideValues })) {
+            allowDefaultValue = false;
+          }
+          if (allowDefaultValue) {
+            const filterFieldDropDownOptions = ele?.option?.filter((o: any) => {
+              if (o?.hasOwnProperty(ele?.lookupDependentOn)) {
+                if (Array.isArray(o[ele?.lookupDependentOn])) {
+                  return o[ele?.lookupDependentOn]?.includes(val?.optionValue);
+                } else {
+                  return o[ele?.lookupDependentOn] === val?.optionValue;
+                }
               }
+              return false;
+            });
+            if (filterFieldDropDownOptions?.length === 1) {
+              setFieldValue(ele?.fieldName, filterFieldDropDownOptions[0]?.optionValue);
+              handleLookUpDependent(ele?.fieldName, filterFieldDropDownOptions[0], fields, setFieldValue, overRideValues);
+            } else if (filterFieldDropDownOptions?.find((f) => f?.default === true)) {
+              setFieldValue(ele?.fieldName, filterFieldDropDownOptions?.find((f) => f?.default === true)?.optionValue);
+              handleLookUpDependent(
+                ele?.fieldName,
+                filterFieldDropDownOptions?.find((f) => f?.default === true),
+                fields,
+                setFieldValue,
+                overRideValues
+              );
             }
-            return false;
-          });
-          if (filterFieldDropDownOptions?.length === 1) {
-            setFieldValue(ele?.fieldName, filterFieldDropDownOptions[0]?.optionValue);
-            handleLookUpDependent(ele?.fieldName, filterFieldDropDownOptions[0], fields, setFieldValue);
-          } else if (filterFieldDropDownOptions?.find((f) => f?.default === true)) {
-            setFieldValue(ele?.fieldName, filterFieldDropDownOptions?.find((f) => f?.default === true)?.optionValue);
-            handleLookUpDependent(
-              ele?.fieldName,
-              filterFieldDropDownOptions?.find((f) => f?.default === true),
-              fields,
-              setFieldValue
-            );
           }
         }
       });
@@ -414,36 +422,36 @@ function Dropdown({
                 onChange={
                   onChange
                     ? (e, value: any, reason) => {
-                        const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
-                        if (isSelectedAll) {
-                          onChange(e, dropdownOptions(option, values, fields, fieldData), reason);
-                        } else {
-                          onChange(e, value, reason);
-                        }
+                      const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
+                      if (isSelectedAll) {
+                        onChange(e, dropdownOptions(option, values, fields, fieldData), reason);
+                      } else {
+                        onChange(e, value, reason);
                       }
+                    }
                     : (e, value: any, reason) => {
-                        if (setFieldValue) {
-                          const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
+                      if (setFieldValue) {
+                        const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
 
-                          if (isSelectedAll) {
-                            // If "Select All" is selected, set all other options as values
-                            setFieldValue(
-                              name,
-                              dropdownOptions(option, values, fields, fieldData).map((item) => item.optionValue)
-                            );
-                          } else {
-                            // Remove "Select All" if it was selected and set the values accordingly
-                            setFieldValue(
-                              name,
-                              value.map((val) => val.optionValue)
-                            );
-                          }
-                          const fieldChange: any = getNestedlookupDependentOn(fields, name);
-                          fieldChange?.forEach((val: any) => {
-                            setFieldValue(val.fieldName, val.value);
-                          });
+                        if (isSelectedAll) {
+                          // If "Select All" is selected, set all other options as values
+                          setFieldValue(
+                            name,
+                            dropdownOptions(option, values, fields, fieldData).map((item) => item.optionValue)
+                          );
+                        } else {
+                          // Remove "Select All" if it was selected and set the values accordingly
+                          setFieldValue(
+                            name,
+                            value.map((val) => val.optionValue)
+                          );
                         }
+                        const fieldChange: any = getNestedlookupDependentOn(fields, name);
+                        fieldChange?.forEach((val: any) => {
+                          setFieldValue(val.fieldName, val.value);
+                        });
                       }
+                    }
                 }
                 forcePopupIcon={true}
                 renderInput={(params) => (
@@ -478,24 +486,29 @@ function Dropdown({
                     onChange
                       ? onChange
                       : (e, val) => {
-                          if (setFieldValue) {
-                            handleChange(name, val && val.optionValue ? val.optionValue : '');
-                            const fieldChange: any = getNestedlookupDependentOn(fields, name);
-                            fieldChange?.forEach((val: any) => {
-                              setFieldValue(val.fieldName, val.value);
-                            });
-                            handleLookUpDependent(name, val, fields, setFieldValue);
-                            if (name === 'customerAccount') {
-                              if (fields?.find((f) => f?.fieldName === 'toOpenInvoice')) {
-                                if (val?.defaultOpenInvoice) {
-                                  setFieldValue('toOpenInvoice', true);
-                                } else {
-                                  setFieldValue('toOpenInvoice', false);
-                                }
+                        if (setFieldValue) {
+                          const overRideValues = {}
+                          handleChange(name, val && val.optionValue ? val.optionValue : '');
+                          overRideValues[name] = val && val.optionValue ? val.optionValue : '';
+                          const fieldChange: any = getNestedlookupDependentOn(fields, name);
+                          fieldChange?.forEach((val: any) => {
+                            setFieldValue(val.fieldName, val.value);
+                            overRideValues[val.fieldName] = val && val.optionValue ? val.optionValue : '';
+                          });
+                          if (name === 'customerAccount') {
+                            if (fields?.find((f) => f?.fieldName === 'toOpenInvoice')) {
+                              if (val?.defaultOpenInvoice) {
+                                setFieldValue('toOpenInvoice', true);
+                                overRideValues['toOpenInvoice'] = true
+                              } else {
+                                setFieldValue('toOpenInvoice', false);
+                                overRideValues['toOpenInvoice'] = false
                               }
                             }
                           }
+                          handleLookUpDependent(name, val, fields, setFieldValue, overRideValues);
                         }
+                      }
                   }
                   selectOnFocus
                   clearOnBlur
