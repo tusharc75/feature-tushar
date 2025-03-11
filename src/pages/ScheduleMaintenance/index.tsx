@@ -223,13 +223,33 @@ const ScheduleMaintenance = () => {
         setIsSubmitting(false);
         setToastConfig(error);
       });
-    } else if (_data && openCustomDataDialog?.data?._id) {
+    } else if (_data && openCustomDataDialog?.data?.uniqueId) {
       setIsSubmitting(true);
       axiosInstance()
         .put(`${product.api}/scheduledMaintenance`, {
-          _id: openCustomDataDialog?.data?._id,
+          _id: openCustomDataDialog?.data?.uniqueId,
           effectiveDate: _data?.effectiveDate,
           duration: _data?.duration
+        })
+        .then(({ data }) => {
+          fetchData();
+          setIsSubmitting(false);
+          setOpenCustomDataDialog({ open: false, data: null });
+          setOpenAssignProductDialog(false);
+          setOpenAssignSerializedAssetDialog(false);
+        })
+        .catch((error) => {
+          setIsSubmitting(false);
+          setToastConfig(error);
+        });
+    } else if (_data && !openCustomDataDialog?.data?.uniqueId) {
+      setIsSubmitting(true);
+      axiosInstance()
+        .post(`${product.api}/scheduledMaintenance`, {
+          materials: [openCustomDataDialog?.data?._id],
+          effectiveDate: _data?.effectiveDate,
+          duration: _data?.duration,
+          materialType: MATERIAL_TYPE.serializedAsset,
         })
         .then(({ data }) => {
           fetchData();
@@ -343,6 +363,7 @@ const ScheduleMaintenance = () => {
             fetchData();
           }}
           additionalParams={getQueryString(true)}
+          hideDownloadTemplate={selectedType === 2}
         />
       </div>
       <CustomContainer>
