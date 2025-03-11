@@ -43,6 +43,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [isSubmitting, setSubmitting] = useState(false);
+  const [resourceData, setResourceData] = useState(null);
 
   useEffect(() => {
     fetchCondition();
@@ -90,6 +91,23 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
+  };
+
+  useEffect(() => {
+    fetchPolicy();
+  }, []);
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.pricingCondition}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
   };
 
   const getQueryString = () => {
@@ -338,7 +356,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             open={Boolean(addAnchorEl)}
             onClose={closeAddActions}
           >
-            {permissions?.product?.isRead && (
+            {permissions?.product?.isRead && !resourceData?.policy?.hideMaterialAdd?.includes(MATERIAL_TYPE.product) && (
               <MenuItem
                 onClick={() => {
                   closeAddActions();
@@ -348,17 +366,17 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                 Add Existing Products
               </MenuItem>
             )}
-            {permissions?.packages?.isRead && (
+            {permissions?.packages?.isRead && !resourceData?.policy?.hideMaterialAdd?.includes(MATERIAL_TYPE.package) && (
               <MenuItem
                 onClick={() => {
                   closeAddActions();
                   setAddMaterialDialog({ open: true, materialType: MATERIAL_TYPE.package });
                 }}
               >
-                Add Existing Packages
+                {`Add Existing ${resources?.packages?.titlePlural}`}
               </MenuItem>
             )}
-            {permissions?.serviceMaster?.isRead && (
+            {permissions?.serviceMaster?.isRead && !resourceData?.policy?.hideMaterialAdd?.includes(MATERIAL_TYPE.service) && (
               <MenuItem
                 onClick={() => {
                   closeAddActions();
@@ -368,7 +386,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                 Add Existing Services
               </MenuItem>
             )}
-            {permissions?.competencies?.isRead && (
+            {permissions?.competencies?.isRead && !resourceData?.policy?.hideMaterialAdd?.includes('competency') && (
               <MenuItem
                 onClick={() => {
                   closeAddActions();
@@ -397,7 +415,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
               }}
               hideDefaultImportExport={true}
               extraImportExportLinks={[
-                {
+                ...(permissions?.product?.isRead && !resourceData?.policy?.hideMaterialAdd?.includes(MATERIAL_TYPE.product) ? [{
                   title: 'Product Template',
                   api: `${pricingCondition.api}/template?materialType=product&child=true&ids=${JSON.stringify([pricingConditionId])}`,
                   type: 'download'
@@ -411,37 +429,39 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                   title: 'Product Import',
                   api: `${pricingCondition.api}/import?materialType=product&child=true&ids=${JSON.stringify([pricingConditionId])}`,
                   type: 'import'
-                },
-                {
-                  title: 'Package Template',
-                  api: `${pricingCondition.api}/template?materialType=package&child=true&ids=${JSON.stringify([pricingConditionId])}`,
-                  type: 'download'
-                },
-                {
-                  title: 'Package Export',
-                  api: `${pricingCondition.api}/template?export=true&materialType=package&child=true&ids=${JSON.stringify([pricingConditionId])}&uniqueIds=${JSON.stringify(selectedRecords?.map((e) => e._id))}`,
-                  type: 'export'
-                },
-                {
-                  title: 'Package Import',
-                  api: `${pricingCondition.api}/import?materialType=package&child=true&ids=${JSON.stringify([pricingConditionId])}`,
-                  type: 'import'
-                },
-                {
-                  title: 'Service Template',
-                  api: `${pricingCondition.api}/template?materialType=service&child=true&ids=${JSON.stringify([pricingConditionId])}`,
-                  type: 'download'
-                },
-                {
-                  title: 'Service Export',
-                  api: `${pricingCondition.api}/template?export=true&materialType=service&child=true&ids=${JSON.stringify([pricingConditionId])}&uniqueIds=${JSON.stringify(selectedRecords?.map((e) => e._id))}`,
-                  type: 'export'
-                },
-                {
-                  title: 'Service Import',
-                  api: `${pricingCondition.api}/import?materialType=service&child=true&ids=${JSON.stringify([pricingConditionId])}`,
-                  type: 'import'
-                }
+                }] : []),
+                ...(permissions?.packages?.isRead && !resourceData?.policy?.hideMaterialAdd?.includes(MATERIAL_TYPE.package) ?
+                  [{
+                    title: 'Package Template',
+                    api: `${pricingCondition.api}/template?materialType=package&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                    type: 'download'
+                  },
+                  {
+                    title: 'Package Export',
+                    api: `${pricingCondition.api}/template?export=true&materialType=package&child=true&ids=${JSON.stringify([pricingConditionId])}&uniqueIds=${JSON.stringify(selectedRecords?.map((e) => e._id))}`,
+                    type: 'export'
+                  },
+                  {
+                    title: 'Package Import',
+                    api: `${pricingCondition.api}/import?materialType=package&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                    type: 'import'
+                  }] : []),
+                ...(permissions?.serviceMaster?.isRead && !resourceData?.policy?.hideMaterialAdd?.includes(MATERIAL_TYPE.service) ? [
+                  {
+                    title: 'Service Template',
+                    api: `${pricingCondition.api}/template?materialType=service&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                    type: 'download'
+                  },
+                  {
+                    title: 'Service Export',
+                    api: `${pricingCondition.api}/template?export=true&materialType=service&child=true&ids=${JSON.stringify([pricingConditionId])}&uniqueIds=${JSON.stringify(selectedRecords?.map((e) => e._id))}`,
+                    type: 'export'
+                  },
+                  {
+                    title: 'Service Import',
+                    api: `${pricingCondition.api}/import?materialType=service&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                    type: 'import'
+                  }] : [])
               ]}
               ids={[pricingConditionId]}
             />

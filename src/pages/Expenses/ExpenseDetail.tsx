@@ -16,6 +16,7 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { EXPENSE_STATUS, expenses, formatAmountWithCurrency, sidebarResource } from '../../constants/helpers';
 import Step from '../DynamicForm/Step';
 import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
+import Grid from '@mui/material/Grid2';
 
 const ExpenseDetail = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -166,89 +167,169 @@ const ExpenseDetail = () => {
             )}
             {expensesData ? (
               expensesData.type === 'Mileage' ? (
-                <div className="pt-3">
-                  <TableContainer className="border">
-                    <Table sx={{ minWidth: 700 }} size="medium" aria-label="mileage table">
-                      <TableHead>
-                        <TableRow>
-                          <TableCell align="left">From</TableCell>
-                          <TableCell align="left">To</TableCell>
-                          <TableCell align="right">Distance</TableCell>
-                          <TableCell align="right">Unit</TableCell>
-                          <TableCell align="right">Rate</TableCell>
-                          <TableCell align="right">Amount</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {expensesData?.lineItems?.map((row) => (
-                          <TableRow key={row.id}>
-                            <TableCell align="left">{row.fromLocation?.description || '-'}</TableCell>
-                            <TableCell align="left">{row.toLocation?.description || '-'}</TableCell>
-                            <TableCell align="right">{row.distance || '-'}</TableCell>
-                            <TableCell align="right">{resourceData?.policy?.distanceUnit}</TableCell>
-                            <TableCell align="right">
-                              {formatAmountWithCurrency(expensesData?.currency, row?.rate)?.fullFormatAmountWithoutSpace}
-                            </TableCell>
-                            <TableCell align="right">
-                              {formatAmountWithCurrency(expensesData?.currency, row?.amount)?.fullFormatAmountWithoutSpace}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                        <TableRow>
-                          <TableCell align="left">
-                            <Typography variant="subtitle2">Total </Typography>
-                          </TableCell>
-                          <TableCell />
-                          <TableCell align="right">
-                            <Typography variant="subtitle2">{expensesData?.totalDistance}</Typography>
-                          </TableCell>
-                          <TableCell />
-                          <TableCell />
-                          <TableCell align="right">
-                            <Typography variant="subtitle2">
-                              {formatAmountWithCurrency(expensesData?.currency, expensesData?.totalAmount)?.fullFormatAmountWithoutSpace}
+                <Box className={`single-form-v1 mt-4`} style={{ overflow: 'hidden' }}>
+                  <Box className={'form-head-v1'} justifyContent="space-between" alignItems="center">
+                    <Typography variant="subtitle2">Mileage</Typography>
+                  </Box>
+                  <Box className="formdata-v1">
+                    <Grid
+                      container
+                      direction="column"
+                      sx={{
+                        overflow: 'hidden'
+                      }}
+                    >
+                      <Grid container direction="row">
+                        <Grid size={{ xs: 2 }}>
+                          <Typography className="table-head-v1  br-0 text-truncate" style={{ width: '100%' }} variant="body1">
+                            From
+                          </Typography>
+                        </Grid>
+                        <Grid size={{ xs: 2 }}>
+                          <Typography className="table-head-v1  br-0 text-truncate" style={{ width: '100%' }} variant="body1">
+                            To
+                          </Typography>
+                        </Grid>
+                        <Grid size={{ xs: 2 }} sx={{ textAlign: 'right' }}>
+                          <Typography className="table-head-v1  br-0 text-truncate" style={{ width: '100%' }} variant="body1">
+                            Distance
+                          </Typography>
+                        </Grid>
+                        <Grid size={{ xs: 2 }} sx={{ textAlign: 'right' }}>
+                          <Typography className="table-head-v1  br-0 text-truncate" style={{ width: '100%' }} variant="body1">
+                            Unit
+                          </Typography>
+                        </Grid>
+                        <Grid size={{ xs: 2 }} sx={{ textAlign: 'right' }}>
+                          <Typography className="table-head-v1  br-0 text-truncate" style={{ width: '100%' }} variant="body1">
+                            Rate
+                          </Typography>
+                        </Grid>
+                        <Grid size={{ xs: 2 }} sx={{ textAlign: 'right' }}>
+                          <Typography className="table-head-v1 text-truncate" style={{ width: '100%' }} variant="body1">
+                            Amount
+                          </Typography>
+                        </Grid>
+                      </Grid>
+                      {expensesData?.lineItems?.map((row) => (
+                        <Grid container direction="row" key={row.id}>
+                          <Grid size={{ xs: 2 }}>
+                            <Typography className="table-body-v1 bt-0 br-0 text-truncate" style={{ width: '100%' }} variant="body2">
+                              {row.fromLocation?.description || '-'}
                             </Typography>
-                          </TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </div>
+                          </Grid>
+                          <Grid size={{ xs: 2 }}>
+                            <Typography className="table-body-v1 bt-0 br-0 text-truncate" style={{ width: '100%' }} variant="body2">
+                              {row.toLocation?.description || '-'}
+                            </Typography>
+                          </Grid>
+                          <Grid size={{ xs: 2 }} sx={{ textAlign: 'right' }}>
+                            <Typography className="table-body-v1 bt-0 br-0" style={{ width: '100%' }} variant="body2">
+                              {row.distance || '-'}
+                            </Typography>
+                          </Grid>
+                          <Grid size={{ xs: 2 }} sx={{ textAlign: 'right' }}>
+                            <Typography className="table-body-v1 bt-0 br-0" style={{ width: '100%' }} variant="body2">
+                              {resourceData?.policy?.distanceUnit || '-'}
+                            </Typography>
+                          </Grid>
+                          <Grid size={{ xs: 2 }} sx={{ textAlign: 'right' }}>
+                            <Typography className="table-body-v1 bt-0 br-0" style={{ width: '100%' }} variant="body2">
+                              {formatAmountWithCurrency(expensesData?.currency, row?.rate)?.fullFormatAmountWithoutSpace || '-'}
+                            </Typography>{' '}
+                          </Grid>
+                          <Grid size={{ xs: 2 }} sx={{ textAlign: 'right' }}>
+                            <Typography className="table-body-v1 bt-0" style={{ width: '100%' }} variant="body2">
+                              {formatAmountWithCurrency(expensesData?.currency, row?.amount)?.fullFormatAmountWithoutSpace || '-'}
+                            </Typography>
+                          </Grid>
+                        </Grid>
+                      ))}
+                      <Grid container direction="row">
+                        <Grid size={{ xs: 2 }}>
+                          <Typography className="table-head-v1  bt-0 br-0" style={{ width: '100%' }}>
+                            Total
+                          </Typography>
+                        </Grid>
+                        <Grid size={{ xs: 2 }}>
+                          <Typography className="table-head-v1  bt-0 br-0" style={{ width: '100%', height: '100%' }}></Typography>
+                        </Grid>
+                        <Grid size={{ xs: 2 }} sx={{ textAlign: 'right' }}>
+                          <Typography className="table-head-v1  bt-0 br-0" style={{ width: '100%' }}>
+                            {expensesData?.totalDistance || '-'}
+                          </Typography>
+                        </Grid>
+                        <Grid size={{ xs: 2 }}>
+                          <Typography className="table-head-v1  bt-0 br-0" style={{ width: '100%', height: '100%' }}></Typography>
+                        </Grid>
+                        <Grid size={{ xs: 2 }}>
+                          <Typography className="table-head-v1  bt-0 br-0" style={{ width: '100%', height: '100%' }}></Typography>
+                        </Grid>
+                        <Grid size={{ xs: 2 }} sx={{ textAlign: 'right' }}>
+                          <Typography className="table-head-v1  bt-0" style={{ width: '100%' }}>
+                            {formatAmountWithCurrency(expensesData?.currency, expensesData?.totalAmount)?.fullFormatAmountWithoutSpace || '-'}
+                          </Typography>
+                        </Grid>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </Box>
               ) : (
-                <div className="pt-3">
-                  <TableContainer className="border">
-                    <Table sx={{ minWidth: 700 }} size="medium" aria-label="spanning table">
+                <Box className={`single-form-v1 mt-4`} style={{ overflow: 'hidden' }}>
+                  <Box className={'form-head-v1'} justifyContent="space-between" alignItems="center">
+                    <Typography variant="subtitle2">Expense</Typography>
+                  </Box>
+                  <Box className="formdata-v1">
+                    <Grid
+                      container
+                      direction="column"
+                      sx={{
+                        overflow: 'hidden'
+                      }}
+                    >
                       {expensesData?.lineItems?.length > 0 && (
-                        <TableHead>
-                          <TableRow>
-                            <TableCell>Description</TableCell>
-                            <TableCell align="right">Amount</TableCell>
-                          </TableRow>
-                        </TableHead>
-                      )}
-                      <TableBody>
-                        {expensesData?.lineItems?.map((row) => (
-                          <TableRow key={row.id}>
-                            <TableCell>{row.description}</TableCell>
-                            <TableCell align="right">
-                              {formatAmountWithCurrency(expensesData?.currency, row?.amount)?.fullFormatAmountWithoutSpace}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                        <TableRow>
-                          <TableCell>
-                            <Typography variant="subtitle2">Total Amount</Typography>
-                          </TableCell>
-                          <TableCell align="right">
-                            <Typography variant="subtitle2">
-                              {formatAmountWithCurrency(expensesData?.currency, expensesData?.totalAmount)?.fullFormatAmountWithoutSpace}
+                        <Grid container direction="row">
+                          <Grid size={{ xs: 6 }}>
+                            <Typography className="table-head-v1  br-0 text-truncate" style={{ width: '100%' }} variant="body1">
+                              Description
                             </Typography>
-                          </TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </div>
+                          </Grid>
+                          <Grid size={{ xs: 6 }} sx={{ textAlign: 'right' }}>
+                            <Typography className="table-head-v1 text-truncate" style={{ width: '100%' }} variant="body1">
+                              Amount
+                            </Typography>
+                          </Grid>
+                        </Grid>
+                      )}
+                      {expensesData?.lineItems?.map((row) => (
+                        <Grid container direction="row" key={row.id}>
+                          <Grid size={{ xs: 6 }}>
+                            <Typography className="table-body-v1 bt-0 br-0 text-truncate" style={{ width: '100%' }} variant="body2">
+                              {row.description}
+                            </Typography>
+                          </Grid>
+                          <Grid size={{ xs: 6 }} sx={{ textAlign: 'right' }}>
+                            <Typography className="table-body-v1 bt-0 text-truncate" style={{ width: '100%' }} variant="body2">
+                              {formatAmountWithCurrency(expensesData?.currency, row?.amount)?.fullFormatAmountWithoutSpace || '-'}
+                            </Typography>
+                          </Grid>
+                        </Grid>
+                      ))}
+                      <Grid container direction="row">
+                        <Grid size={{ xs: 6 }}>
+                          <Typography className={`table-head-v1 br-0 text-truncate ${expensesData?.lineItems?.length > 0 ? 'bt-0' : ''}`} style={{ width: '100%' }}>
+                            Total Amount
+                          </Typography>
+                        </Grid>
+                        <Grid size={{ xs: 6 }} sx={{ textAlign: 'right' }}>
+                          <Typography className={`table-head-v1 text-truncate ${expensesData?.lineItems?.length > 0 ? 'bt-0' : ''}`} style={{ width: '100%' }}>
+                            {formatAmountWithCurrency(expensesData?.currency, expensesData?.totalAmount)?.fullFormatAmountWithoutSpace || '-'}
+                          </Typography>
+                        </Grid>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </Box>
               )
             ) : (
               <div className="p-2">

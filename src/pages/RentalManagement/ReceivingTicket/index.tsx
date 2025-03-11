@@ -42,6 +42,7 @@ import {
   RENTAL_INTERNAL_ASSET_STATUS,
   RENTAL_STEPS,
   REPAIR_JOB_STATUS,
+  REPAIR_ORDER_STATUS,
   dateFormatToSend,
   deliveryTicket,
   displayDate,
@@ -746,8 +747,7 @@ const ReceivingTicket = ({
             parent.manualStartDate = parent?.actualStartDate;
             parent.manualEndDate = parent?.actualEndDate;
             parent.startDate = parent?.actualStartDate;
-            parent.endDate = parent?.actualEndDate;
-            if (parent.type === MATERIAL_TYPE.package) {
+            if ([MATERIAL_TYPE.package, MATERIAL_TYPE.service]?.includes(parent.type)) {
               parent.status = ASSET_STATUS.notApplied;
               parent.rentalAssetStatus = ''
             }
@@ -785,7 +785,7 @@ const ReceivingTicket = ({
         setNextStep(true);
       }
 
-      setUniqueReceivingTicket(deliveryTicketList?.filter((e) => e?.type === DELIVERY_TICKET_TYPE.return && (e?.products?.length || e?.assets?.length))?.map((e) => e._id));
+      setUniqueReceivingTicket(deliveryTicketList?.filter((e) => [DELIVERY_TICKET_TYPE.receiving, DELIVERY_TICKET_TYPE.return]?.includes(e?.ticketType) && (e?.products?.length || e?.assets?.length))?.map((e) => e._id));
 
       const services: any = [];
       if (rentalPolicyData?.showServiceOnFieldStep) {
@@ -853,7 +853,7 @@ const ReceivingTicket = ({
           _subRow.manualEndDate = _subRow?.actualEndDate;
           _subRow.startDate = _subRow?.actualStartDate;
           _subRow.endDate = _subRow?.actualEndDate;
-          if (_subRow.type === MATERIAL_TYPE.package) {
+          if ([MATERIAL_TYPE.package, MATERIAL_TYPE.service]?.includes(_subRow.type)) {
             _subRow.status = ASSET_STATUS.notApplied;
             _subRow.rentalAssetStatus = ''
           }
@@ -922,8 +922,15 @@ const ReceivingTicket = ({
           obj.isRepairJob = true;
           obj.repairJob = repairJob?._id;
         }
-        const repairOrder = transactionData?.repairOrder?.find((e) => e?.assetId === obj?._id);
-        if (repairOrder) {
+        let repairOrders = transactionData?.repairOrder?.filter((e) => e?.assetId === obj?._id);
+        if (repairOrders?.length) {
+          let repairOrder
+          if (repairOrders?.length > 1 && repairOrders.find((e) => e.status !== REPAIR_ORDER_STATUS.completed)) {
+            repairOrder = repairOrders.find((e) => e.status !== REPAIR_ORDER_STATUS.completed)
+          }
+          else {
+            repairOrder = repairOrders[0]
+          }
           obj.isRepairOrder = true;
           obj.repairOrder = repairOrder?._id;
         }

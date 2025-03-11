@@ -878,7 +878,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
                 setAssignRentalDataDialog({ open: true, type: MATERIAL_TYPE.package });
               }}
             >
-              Add Rental Packages
+              {`Add Rental ${resources?.packages?.titlePlural}`}
             </MenuItem>
           </>
         )}

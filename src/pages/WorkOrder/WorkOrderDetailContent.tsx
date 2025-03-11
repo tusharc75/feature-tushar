@@ -433,7 +433,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
         workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
         allowedToEdit &&
         !workOrderData?.currentRepairJob &&
-        workOrderData?.status !== WORK_ORDER_STATUS.completed
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)
       ),
       children: `${ASSET_STATUS.scrap} Asset`,
       tooltip: `${ASSET_STATUS.scrap} Asset`,
@@ -767,7 +767,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       {showConfirmVersion.open && (
         <ConfirmationDialog
           open={showConfirmVersion.open}
-          message={`Are you sure you want to new version ?`}
+          message={`Are you sure you want to create a new version ?`}
           onClose={() => {
             setShowConfirmVersion({ open: false, withData: 0 });
           }}

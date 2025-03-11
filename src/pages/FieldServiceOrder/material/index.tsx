@@ -62,7 +62,9 @@ const Material = ({ serviceOrderData, stepFullScreen, allowedToEdit, setNextStep
   const { generateColumns } = useColumns();
 
   useEffect(() => {
-    fetchFields();
+    if (resourcePolicy?.addServices) {
+      fetchFields();
+    }
   }, [serviceOrderData]);
 
   useEffect(() => {
@@ -241,7 +243,6 @@ const Material = ({ serviceOrderData, stepFullScreen, allowedToEdit, setNextStep
   };
 
   const fetchMaterial = async () => {
-    setNextStep(false);
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
     let data;
@@ -277,13 +278,6 @@ const Material = ({ serviceOrderData, stepFullScreen, allowedToEdit, setNextStep
       parent.canDelete = parent.canDelete ?? true;
       parent.subRows = generateNestedData(data, parent, isPriceRequired);
     });
-    if (rows?.length) {
-      if (rows.filter((_rows) => _rows.isValid === false).length > 0) {
-        setNextStep(false);
-      } else {
-        setNextStep(true);
-      }
-    }
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
     setRefreshChild(!refreshChild);
@@ -516,7 +510,7 @@ const Material = ({ serviceOrderData, stepFullScreen, allowedToEdit, setNextStep
 
   return (
     <>
-      {allowedToEdit && (
+      {allowedToEdit && resourcePolicy?.addServices && (
         <>
           <DetailsPageHeader
             isAddButtonVisible={true}
@@ -546,20 +540,26 @@ const Material = ({ serviceOrderData, stepFullScreen, allowedToEdit, setNextStep
           />
         </Box>
       ) : (
-        <Box p={2} height={300}>
-          <CommonSkeleton lenArray={[...Array(3).keys()]} xs={12} sm={12} md={12} lg={12} />
+        resourcePolicy?.addServices ? (
+          <Box p={2} height={300}>
+            <CommonSkeleton lenArray={[...Array(3).keys()]} xs={12} sm={12} md={12} lg={12} />
+          </Box>
+        ) : null
+      )}
+      {(resourcePolicy?.addTechnicians || resourcePolicy?.addConsumables) && (
+        <Box mt={3}>
+          <Consumables
+            allowedToEdit={allowedToEdit}
+            services={dataRows?.filter((e) => e.type === MATERIAL_TYPE.service)}
+            serviceOrderData={serviceOrderData}
+            stepFullScreen={stepFullScreen}
+            fetchData={fetchData}
+            refreshChild={refreshChild}
+            resourcePolicy={resourcePolicy}
+            setNextStep={setNextStep}
+          />
         </Box>
       )}
-      <Box mt={3}>
-        <Consumables
-          allowedToEdit={allowedToEdit}
-          services={dataRows?.filter((e) => e.type === MATERIAL_TYPE.service)}
-          serviceOrderData={serviceOrderData}
-          stepFullScreen={stepFullScreen}
-          fetchData={fetchData}
-          refreshChild={refreshChild}
-        />
-      </Box>
       {materialDialog?.open && materialDialog?.type === MATERIAL_TYPE.service && (
         <AssignServiceDialog
           onSuccess={(rows) => {

@@ -28,7 +28,7 @@ import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceFi
 import { FiExternalLink } from 'react-icons/fi';
 import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
 
-const Consumables = ({ allowedToEdit, services, serviceOrderData, stepFullScreen, fetchData: fetchserviceOrderData, refreshChild }) => {
+const Consumables = ({ allowedToEdit, services, serviceOrderData, stepFullScreen, fetchData: fetchserviceOrderData, refreshChild, resourcePolicy, setNextStep }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_Consumables`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -37,7 +37,7 @@ const Consumables = ({ allowedToEdit, services, serviceOrderData, stepFullScreen
   const [consumablesDialog, setConsumablesDialog] = useState(false);
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
-  const [tabValue, setTabValue] = useState(0);
+  const [tabValue, setTabValue] = useState(resourcePolicy?.addTechnicians ? 0 : 1);
   const [serviceOption, setServiceOption] = useState(null);
   const [selectedServiceOption, setSelectedServiceOption] = useState({ optionLabel: 'All', optionValue: 'All', _id: null });
   const [isConsumableEdit, setIsConsumableEdit] = useState({ open: false, data: null, showSaveAndNext: false });
@@ -66,11 +66,15 @@ const Consumables = ({ allowedToEdit, services, serviceOrderData, stepFullScreen
   }, [services]);
 
   useEffect(() => {
-    fetchColumns();
+    if (resourcePolicy?.addConsumables) {
+      fetchColumns();
+    }
   }, [serviceOrderData]);
 
   useEffect(() => {
-    fetchData();
+    if (resourcePolicy?.addConsumables) {
+      fetchData();
+    }
   }, [selectedServiceOption, tabValue, refreshChild]);
 
   const fetchColumns = async () => {
@@ -428,7 +432,7 @@ const Consumables = ({ allowedToEdit, services, serviceOrderData, stepFullScreen
 
   return (
     <>
-      {allowedToEdit && serviceOption?.length > 0 && (
+      {allowedToEdit && serviceOption?.length > 0 && resourcePolicy?.addServices &&(
         <Box style={{ maxWidth: '400px' }} mb={3}>
           <Autocomplete
             id={'select-service'}
@@ -453,11 +457,19 @@ const Consumables = ({ allowedToEdit, services, serviceOrderData, stepFullScreen
         </Box>
       )}
       <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
-        <CustomTab value={0} label={'Products/Consumables'} id={'products-consumables-tab'} />
-        <CustomTab value={1} label={'Technicians'} id={'technicians-tab'} />
+        {resourcePolicy?.addTechnicians && <CustomTab value={0} label={'Technicians'} id={'technicians-tab'} />}
+        {resourcePolicy?.addConsumables && <CustomTab value={1} label={'Products/Consumables'} id={'products-consumables-tab'} />}
       </CustomTabs>
-
       <TabPanel value={tabValue} index={0}>
+        <Technicians
+          allowedToEdit={allowedToEdit}
+          serviceOrderData={serviceOrderData}
+          selectedService={selectedServiceOption}
+          stepFullScreen={stepFullScreen}
+          setNextStep={setNextStep}
+        />
+      </TabPanel>
+      <TabPanel value={tabValue} index={1}>
         <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
           {allowedToEdit && (
             <>
@@ -494,15 +506,7 @@ const Consumables = ({ allowedToEdit, services, serviceOrderData, stepFullScreen
             </Grid>
           </Grid>
         </Box>
-      </TabPanel>
-      <TabPanel value={tabValue} index={1}>
-        <Technicians
-          allowedToEdit={allowedToEdit}
-          serviceOrderData={serviceOrderData}
-          selectedService={selectedServiceOption}
-          stepFullScreen={stepFullScreen}
-        />
-      </TabPanel>
+      </TabPanel>  
       {consumablesDialog && (
         <AssignProductDialog
           handleCloseDialog={() => setConsumablesDialog(false)}

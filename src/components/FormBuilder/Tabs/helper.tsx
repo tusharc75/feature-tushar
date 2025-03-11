@@ -230,7 +230,7 @@ export const resourcePolicy = [
         type: 'dropDown',
         option: [
           { optionValue: 'flat', optionLabel: 'Flat', order: 0 },
-          { optionValue: 'parentChild', optionLabel: 'Parent Child', order: 1 },
+          { optionValue: 'parentChild', optionLabel: 'Parent Child', order: 1 }
         ],
         defaultValue: ''
       }
@@ -291,8 +291,20 @@ export const resourcePolicy = [
     resource: sidebarResource.fieldServiceOrder,
     policy: [
       {
-        fieldName: 'addServicesAndTechnicians',
-        fieldLabel: 'Add Services and Technicians',
+        fieldName: 'addServices',
+        fieldLabel: 'Add Services',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
+        fieldName: 'addTechnicians',
+        fieldLabel: 'Add Technicians',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
+        fieldName: 'addConsumables',
+        fieldLabel: 'Add Consumables',
         type: 'checkBox',
         defaultValue: false
       },
@@ -301,7 +313,7 @@ export const resourcePolicy = [
         fieldLabel: 'Show Add Packages',
         type: 'checkBox',
         defaultValue: false
-      },
+      }
     ]
   },
   {
@@ -313,7 +325,7 @@ export const resourcePolicy = [
         type: 'dropDown',
         option: [
           { optionValue: 'km', optionLabel: 'km', order: 0 },
-          { optionValue: 'mile', optionLabel: 'mile', order: 1 },
+          { optionValue: 'mile', optionLabel: 'mile', order: 1 }
         ],
         defaultValue: ''
       },
@@ -325,4 +337,21 @@ export const resourcePolicy = [
       }
     ]
   },
+  {
+    resource: sidebarResource.pricingCondition,
+    policy: [
+      {
+        fieldName: 'hideMaterialAdd',
+        fieldLabel: 'Hide Material Add',
+        type: 'multiSelect',
+        option: [
+          { optionValue: MATERIAL_TYPE.product, optionLabel: 'Product', order: 0 },
+          { optionValue: MATERIAL_TYPE.package, optionLabel: 'Package', order: 1 },
+          { optionValue: MATERIAL_TYPE.service, optionLabel: 'Service', order: 2 },
+          { optionValue: 'competency', optionLabel: 'Competency', order: 3 }
+        ],
+        defaultValue: []
+      }
+    ]
+  }
 ];

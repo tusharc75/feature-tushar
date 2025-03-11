@@ -12,7 +12,7 @@ import { BiRefresh } from 'react-icons/bi';
 import { BsCheckLg, BsExclamationLg, BsPlusLg, BsFillSkipEndFill } from 'react-icons/bs';
 import { FaUser as UserIcon } from 'react-icons/fa';
 import { MdBolt } from 'react-icons/md';
-import { CustomDialogTransition, displayDateTime } from 'src/constants/helpers';
+import { CustomDialogTransition, displayDate, displayDateTime } from 'src/constants/helpers';
 import dayjs from 'dayjs';
 
 const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) => {
@@ -55,7 +55,7 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
 
   const group = (data: any) => {
     const groups = data?.reduce((data1, data2) => {
-      const date = data2.date.split('T')[0];
+      const date = displayDate(data2.date);
       if (!data1[date]) {
         data1[date] = [];
       }
@@ -70,6 +70,7 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
     completed: 'Completed',
     passed: 'Passed',
     skipped: 'Skipped',
+    unSkipped: 'Un-Skipped',
     failed: 'Failed',
     valueAdded: 'valueAdded',
     valueUpdated: 'valueUpdated',
@@ -86,6 +87,9 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
         icon = <BsCheckLg />;
         break;
       case operations.skipped:
+        icon = <BsCheckLg />;
+        break;
+      case operations.unSkipped:
         icon = <BsCheckLg />;
         break;
       case operations.start:
@@ -128,6 +132,9 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
       case operations.skipped:
         color = { '--icon-color': '#138A86', '--icon-bg-color': '#E2FBEC' } as React.CSSProperties;
         break;
+      case operations.unSkipped:
+        color = { '--icon-color': '#138A86', '--icon-bg-color': '#E2FBEC' } as React.CSSProperties;
+        break;
       case operations.failed:
         color = { '--icon-color': '#D15241', '--icon-bg-color': '#FEE4E0' } as React.CSSProperties;
         break;
@@ -164,6 +171,9 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
         break;
       case operations.skipped:
         message = `<span>Skipped</span> ${stepName} ${serviceName}`;
+        break;
+      case operations.unSkipped:
+        message = `<span>Started</span> ${stepName} ${serviceName}`;
         break;
       case operations.valueAdded:
         message = `<span>Added value</span> ${stepName} ${serviceName}`;
@@ -206,7 +216,7 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
                 return (
                   <div key={key} className={styles.singleGroup}>
                     <Box key={key}>
-                      <p className={styles.date}>{displayDateTime(key, 'MMM Do YYYY')}</p>
+                      <p className={styles.date}>{key}</p>
                     </Box>
                     <div className={styles.logContainer}>
                       {rows[key]?.map((row: any) => {

@@ -40,6 +40,8 @@ import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { generateAddFieldTicket } from 'src/pages/FieldServiceOrder/walkmeSteps';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import Material from './material';
+import TechnicianDispatch from './TechnicianDispatch';
+import TechnicianReceive from './TechnicianReceive';
 
 const ServiceOrderDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -162,7 +164,7 @@ const ServiceOrderDetailsPage = () => {
       } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.fieldServiceOrder}`);
       if (data) {
         setResourceData(data);
-        if (data?.policy?.addServicesAndTechnicians) {
+        if (data?.policy?.addServices || data?.policy?.addTechnicians || data?.policy?.addConsumables) {
           setSteps(serviceOrderSteps2);
         } else {
           setSteps(permissions?.invoice?.isRead ? serviceOrderSteps : serviceOrderSteps?.filter((e) => e.name !== 'Field Ticket Invoice'));
@@ -270,9 +272,15 @@ const ServiceOrderDetailsPage = () => {
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
-          <CustomTab value={1}>Details</CustomTab>
-          {!(isMobile && !isTablet) && !isOffline && <CustomTab value={2}>Views</CustomTab>}
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
+          {(resourceData?.policy?.addServices || resourceData?.policy?.addTechnicians || resourceData?.policy?.addConsumables) && !isOffline && (
+            <CustomTab value={1}>Details</CustomTab>
+          )}
+          {(!resourceData?.policy?.addServices && !resourceData?.policy?.addTechnicians && !resourceData?.policy?.addConsumables) && (
+            <CustomTab value={2}>{resources?.fieldTicket?.titlePlural}</CustomTab>
+          )}
+          {!isOffline && <CustomTab value={3}>{resources?.invoice?.titlePlural}</CustomTab>}
+          {!(isMobile && !isTablet) && !isOffline && <CustomTab value={4}>Views</CustomTab>}
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 5}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -304,93 +312,65 @@ const ServiceOrderDetailsPage = () => {
               }}
             />
             {steps[currentStep]?.name === steps[0]?.name && serviceOrderData && (
-              resourceData?.policy?.addServicesAndTechnicians ? (
-                <Material
-                  serviceOrderData={serviceOrderData}
-                  allowedToEdit={allowedToEdit}
-                  setNextStep={setNextStep}
-                  handleChangeStatus={handleChangeStatus}
-                  resourcePolicy={resourceData?.policy}
-                  stepFullScreen={stepFullScreen}
-                  fetchData={fetchServiceOrderData}
-                />) : (
-                <FieldTicket
-                  serviceOrderData={serviceOrderData}
-                  serviceOrderFields={serviceOrderFields}
-                  setNextStep={setNextStep}
-                  allowedToEdit={allowedToEdit}
-                  handleChangeStatus={handleChangeStatus}
-                  resource={sidebarResource.fieldServiceOrder}
-                  fetchServiceOrderData={fetchServiceOrderData}
-                />
-              )
-            )}
-            {/* {steps[currentStep]?.name === steps[1]?.name && serviceOrderData && (
-              <Services
+              <Material
                 serviceOrderData={serviceOrderData}
-                setNextStep={setNextStep}
-                renderedFrom={`${renderedFrom}_grid-1`}
-                stepFullScreen={stepFullScreen}
                 allowedToEdit={allowedToEdit}
+                setNextStep={setNextStep}
+                handleChangeStatus={handleChangeStatus}
+                resourcePolicy={resourceData?.policy}
+                stepFullScreen={stepFullScreen}
+                fetchData={fetchServiceOrderData}
               />
             )}
-            {steps[currentStep]?.name === steps[2]?.name && serviceOrderData && (
-              <Products
-                serviceOrderData={serviceOrderData}
-                setNextStep={setNextStep}
-                renderedFrom={`${renderedFrom}_grid-2`}
-                stepFullScreen={stepFullScreen}
-                allowedToEdit={allowedToEdit}
-              />
-            )}
-            {steps[currentStep]?.name === steps[3]?.name && serviceOrderData && (
-              <Technician
-                serviceOrderData={serviceOrderData}
-                setNextStep={setNextStep}
-                renderedFrom={`${renderedFrom}_grid-3`}
-                stepFullScreen={stepFullScreen}
-                allowedToEdit={allowedToEdit}
-              />
-            )}
-            {steps[currentStep]?.name === steps[4]?.name && serviceOrderData && (
-              <TechnicianDispatch
-                serviceOrderData={serviceOrderData}
-                setNextStep={setNextStep}
-                renderedFrom={`${renderedFrom}_grid-4`}
-                stepFullScreen={stepFullScreen}
-                allowedToEdit={allowedToEdit}
-              />
-            )}
-            {steps[currentStep]?.name === steps[5]?.name && serviceOrderData && (
-              <Technician
-                serviceOrderData={serviceOrderData}
-                setNextStep={setNextStep}
-                renderedFrom={`${renderedFrom}_grid-5`}
-                stepFullScreen={stepFullScreen}
-                allowedToEdit={allowedToEdit}
-                fromInvoice={true}
-                updateStatus={handleChangeStatus}
-                statusOptions={statusOptions}
-              />
-            )} */}
             {steps[currentStep]?.name === steps[1]?.name && serviceOrderData && (
-              <Invoices
-                resourceId={serviceOrderData?._id}
-                resource={sidebarResource.fieldTicket}
-                invoiceFieldName="fieldServiceOrder"
-                fetchParentData={fetchServiceOrderData}
+              <TechnicianDispatch
+                serviceOrderId={id}
+                setNextStep={setNextStep}
+                stepFullScreen={stepFullScreen}
+                allowedToEdit={allowedToEdit}
+              />
+            )}
+             {steps[currentStep]?.name === steps[2]?.name && serviceOrderData && (
+              <TechnicianReceive
+                serviceOrderId={id}
+                stepFullScreen={stepFullScreen}
+                allowedToEdit={allowedToEdit}
               />
             )}
           </TabPanel>
         </ContentFullScreen>
         <TabPanel value={tabValue} index={2}>
+          {serviceOrderData && serviceOrderFields?.length ? (
+            <FieldTicket
+              serviceOrderData={serviceOrderData}
+              serviceOrderFields={serviceOrderFields}
+              allowedToEdit={allowedToEdit}
+              handleChangeStatus={handleChangeStatus}
+              resource={sidebarResource.fieldServiceOrder}
+              fetchServiceOrderData={fetchServiceOrderData}
+            />
+          ) : (
+            <div className="p-2">
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </div>
+          )}
+        </TabPanel>
+        <TabPanel value={tabValue} index={3}>
+          <Invoices
+            resourceId={id}
+            resource={sidebarResource.fieldTicket}
+            invoiceFieldName="fieldServiceOrder"
+            fetchParentData={fetchServiceOrderData}
+          />
+        </TabPanel>
+        <TabPanel value={tabValue} index={4}>
           <Box>{serviceOrderData && <ServiceOrderViews serviceData={serviceOrderData} />}</Box>
         </TabPanel>
         {resourceData &&
           resourceData?.tabs?.length > 0 &&
           resourceData?.tabs?.map((tab, i) => {
             return (
-              <TabPanel value={tabValue} index={i + 3}>
+              <TabPanel value={tabValue} index={i + 5}>
                 <Step
                   tab={tab}
                   resourcePolicyId={resourceData?._id}

@@ -46,7 +46,7 @@ import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdate
 const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, renderedFrom, stepFullScreen, version, allowedToEdit, updateDOASetup }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
   const { generateColumns } = useColumns();
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -693,7 +693,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
               setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
             }}
           >
-            Add Existing Packages
+            {`Add Existing ${resources?.packages?.titlePlural}`}
           </MenuItem>
         )}
         {(quotationData?.type === QUOTATION_TYPE.rentalJob && !user?.user?.brandPolicy?.rentalService) ||
@@ -915,6 +915,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           handleClose={() => {
             setSubmitState({ open: false, values: null, rowData: null });
           }}
+          needCalculate={true}
         />
       )}
       {showCostDialog.open && (
@@ -1058,7 +1059,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
                   setAddchildDialog({ open: false, parentId: null, parentType: null, serializedProduct: false, top: null, bottom: null });
                 }}
               >
-                Add Existing Packages
+                {`Add Existing ${resources?.packages?.titlePlural}`}
               </MenuItem>
             )}
             {quotationData?.type === QUOTATION_TYPE.rentalJob && !user?.user?.brandPolicy?.rentalService ? null : quotationData?.type ===

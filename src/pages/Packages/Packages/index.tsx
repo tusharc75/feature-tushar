@@ -146,9 +146,8 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
   const addButtonMenuItems = () => {
     return (
       <>
-        <MenuItem onClick={() => setShowProductAssignDialog(true)}>Add Existing Product Packages</MenuItem>
-        <Box ml={1} />
-        <MenuItem onClick={() => setShowServiceAssignDialog(true)}>Add Existing Service Packages</MenuItem>
+        <MenuItem onClick={() => setShowProductAssignDialog(true)}>{`Add Existing Product ${resources?.packages?.titlePlural}`}</MenuItem>
+        <MenuItem onClick={() => setShowServiceAssignDialog(true)}>{`Add Existing Service ${resources?.packages?.titlePlural}`}</MenuItem>
       </>
     );
   };
