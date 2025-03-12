@@ -27,6 +27,7 @@ import { generateAddStepEditProduct } from 'src/pages/Sublease/walkmeSteps';
 import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
 import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 import { useData } from 'src/StateProvider/Provider';
+import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
 
 const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchData, renderedFrom, allowedToEdit, stepFullScreen }) => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -348,7 +349,23 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       }
     }
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
-    if (inputField['qty'] < rowData?.assetQty) {
+    let isValid = true;
+    const child: any = flattenArray(dataRows).filter((e) => e.parentId === rowData?._id);
+    if (child?.length) {
+      child?.forEach((e) => {
+        let qty = parseFloat(inputField['qty']) * e?.qty;
+        if (qty < e?.assetQty) {
+          isValid = false;
+          return;
+        }
+      });
+    } else {
+      const qty = getParentMultiplier(material, rowData) * parseFloat(inputField['qty']);
+      if (qty < rowData?.assetQty) {
+        isValid = false;
+      }
+    }
+    if (!isValid) {
       toastConfig.setToastConfig({
         open: true,
         type: 'error',
@@ -479,6 +496,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           subleaseData={subleaseData}
           rowData={recordToUpdate}
           material={material}
+          dataRows={flattenArray(dataRows)}
           selectedProducts={selectedRecords}
           loading={isUpdating}
         />
