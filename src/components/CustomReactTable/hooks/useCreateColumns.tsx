@@ -190,9 +190,9 @@ const selectionColumn = ({ resource, renderedFrom }) => ({
       ) : (
         <IndeterminateCheckbox
           {...{
-            checked: row.getIsSelected() ? true : false,
-            value: row.getIsSelected() ? true : false,
-            indeterminate: row.getIsSomeSelected(),
+            checked: row.getIsSelected(),
+            value: row.getIsSelected(),
+            // indeterminate: row.getIsSomeSelected(),
             onChange: row.getToggleSelectedHandler(),
             id: `${(resource || renderedFrom).split(' ').join('-')}-table-checkbox-${row.index || 0}`
           }}
