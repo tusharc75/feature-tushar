@@ -138,7 +138,9 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
         width: 100,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (row.original['type'] ? <h5>{`${getMaterialLabel(row.original?.type)}`}</h5> : <NoDataCell />),
-        accessorFn: (original) => { return getMaterialLabel(original?.type) }
+        accessorFn: (original) => {
+          return getMaterialLabel(original?.type);
+        }
       },
       {
         accessor: 'detail',
@@ -528,13 +530,20 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
       });
   };
 
-  const handleAutoComplete = (ids) => {
+  const handleAutoComplete = (ids, serializedPackages = null) => {
     setCompleting(true);
+    const data: any = {
+      workOrders: ids
+    };
+    if (serializedPackages) {
+      data.serializedPackagesData = {
+        assemblyOrderId: assemblyOrderData?._id,
+        serializedPackages: serializedPackages
+      };
+    }
     if (ids.length) {
       axiosInstance()
-        .put(`${routes.assemblyOrder.path}/work-order/${assemblyOrderData._id}/auto-complete`, {
-          workOrders: ids
-        })
+        .put(`${routes.assemblyOrder.path}/work-order/${assemblyOrderData._id}/auto-complete`, data)
         .then(({ data }) => {
           setCompleting(false);
           setCompleteConfirmBox(false);
@@ -804,9 +813,9 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
           }}
           assemblyOrderId={assemblyOrderData._id}
           workOrderIds={openSerializedPackageDialog.ids}
-          onSuccess={() => {
+          onSuccess={(_data) => {
             setCompleteConfirmBox(false);
-            handleAutoComplete(openSerializedPackageDialog.ids);
+            handleAutoComplete(openSerializedPackageDialog.ids, _data);
           }}
           isSubmitting={isCompleting}
         />
@@ -969,15 +978,19 @@ const ActionButtonMenuItems = ({
   setArrangeView,
   setAttachmentsDialog
 }) => {
-
   const checkUniqWorkOrderType = () => {
     if (selectedRecords.length === 0) {
       return false;
-    }
-    else if (selectedRecords?.find((e) => !e?.workOrderType)) {
+    } else if (selectedRecords?.find((e) => !e?.workOrderType)) {
       return true;
-    }
-    else if (uniq(map(selectedRecords?.filter((r) => r?.workOrderType), 'workOrderType')).length === 1) {
+    } else if (
+      uniq(
+        map(
+          selectedRecords?.filter((r) => r?.workOrderType),
+          'workOrderType'
+        )
+      ).length === 1
+    ) {
       return true;
     } else {
       return false;
@@ -1070,8 +1083,8 @@ const ActionButtonMenuItems = ({
         }}
         disabled={
           selectedRecords?.length &&
-            selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || checkParentProduct([d], d?.parentId)) &&
-            selectedRecords?.every((d) => d.workOrderId === selectedRecords[0]?.workOrderId)
+          selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || checkParentProduct([d], d?.parentId)) &&
+          selectedRecords?.every((d) => d.workOrderId === selectedRecords[0]?.workOrderId)
             ? false
             : true
         }
@@ -1083,17 +1096,21 @@ const ActionButtonMenuItems = ({
           setAutoCompleteData(selectedRecords?.filter((e) => e?.canAutoCompleteWorkOrder));
           setCompleteConfirmBox(true);
         }}
-        disabled={checkUniqWorkOrderType() &&
+        disabled={
+          checkUniqWorkOrderType() &&
           selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.package)?.length > 0 &&
-          selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.package).every((e) => e?.canAutoCompleteWorkOrder) ? false : true}
+          selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.package).every((e) => e?.canAutoCompleteWorkOrder)
+            ? false
+            : true
+        }
       >
         Auto Complete Work Order(s)
-      </MenuItem >
+      </MenuItem>
       <MenuItem
         disabled={
           checkUniqWorkOrder() &&
-            (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
-              selectedRecords?.filter((e) => checkParentProduct([e], e?.parentId))?.length === 1)
+          (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
+            selectedRecords?.filter((e) => checkParentProduct([e], e?.parentId))?.length === 1)
             ? false
             : true
         }
