@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { Dialog, Box, IconButton } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { CustomDialogTransition, displayDate, fieldTicket, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, displayDateTime, fieldTicket, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { camelCase, isEmpty } from 'lodash';
 import { Link } from 'react-router-dom';
@@ -16,24 +16,28 @@ import { Delete, Edit } from '@mui/icons-material';
 import StartStopDate from './StartStopDateDialog';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
-const StartStopLogsDialog = ({ onClose, referenceId, _id, fetchRecords }) => {
+const StartStopLogsDialog = ({ onClose, referenceId, service, fetchRecords, technician }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_start_stop_logs`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows } = state;
-  const [startStopDateDialog, setStartStopDateDialog] = useState({ open: false, loading: false, minStartDate: null, maxEndDate: null, data: null });
+  const [startStopDateDialog, setStartStopDateDialog] = useState({ open: false, loading: false, minStartDateTime: null, maxEndDateTime: null, data: null });
   const [confirmDialog, setConfirmDialog] = useState({ open: false, _id: null });
   const [okBtnLoading, setOkBtnLoading] = useState(false);
 
   useEffect(() => {
     fetchData();
-  }, [_id, referenceId]);
+  }, [referenceId, technician, service]);
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
+    let api = `${fieldTicket.api}/technician/start-stop-logs?referenceId=${referenceId}&technician=${technician}`;
+    if (service && service?.optionValue !== 'All') {
+      api = `${api}&service=${service?.optionValue}&uniqueId=${service?._id}`;
+    }
     axiosInstance()
-      .get(`${fieldTicket.api}/technician/start-stop-logs?referenceId=${referenceId}&_id=${_id}`)
+      .get(api)
       .then(({ data: { data } }) => {
         dispatch({ type: 'initialize', data: data, count: data?.length });
         dispatch({ type: 'loading', loading: false });
@@ -55,7 +59,7 @@ const StartStopLogsDialog = ({ onClose, referenceId, _id, fetchRecords }) => {
           <>
             {row?.original?.startDate ? (
               <>
-                <h5 className="text-truncate">{displayDate(row.original?.startDate)}</h5>
+                <h5 className="text-truncate">{displayDateTime(row.original?.startDate)}</h5>
               </>
             ) : (
               <NoDataCell />
@@ -75,7 +79,7 @@ const StartStopLogsDialog = ({ onClose, referenceId, _id, fetchRecords }) => {
           <>
             {row?.original?.endDate ? (
               <>
-                <h5 className="text-truncate">{displayDate(row.original?.endDate)}</h5>
+                <h5 className="text-truncate">{displayDateTime(row.original?.endDate)}</h5>
               </>
             ) : (
               <NoDataCell />
@@ -155,15 +159,13 @@ const StartStopLogsDialog = ({ onClose, referenceId, _id, fetchRecords }) => {
                     });
                     if (minStartDate) {
                       minStartDate = new Date(minStartDate);
-                      minStartDate.setDate(minStartDate.getDate() + 1);
-                      minStartDate.setHours(0, 0, 0, 0);
+                      minStartDate.setMinutes(minStartDate.getMinutes() + 1);
                     }
                     if (maxEndDate) {
                       maxEndDate = new Date(maxEndDate);
-                      maxEndDate.setDate(maxEndDate.getDate() - 1);
-                      maxEndDate.setHours(23, 59, 59, 999);
+                      maxEndDate.setMinutes(maxEndDate.getMinutes() - 1);
                     }
-                    setStartStopDateDialog({ open: true, loading: false, minStartDate: minStartDate, maxEndDate: maxEndDate, data: row?.original });
+                    setStartStopDateDialog({ open: true, loading: false, minStartDateTime: minStartDate, maxEndDateTime: maxEndDate, data: row?.original });
                   }}
                 >
                   <Edit fontSize="small" color={'primary'} />
@@ -199,12 +201,12 @@ const StartStopLogsDialog = ({ onClose, referenceId, _id, fetchRecords }) => {
           type: 'success',
           message: data?.message
         });
-        setStartStopDateDialog({ open: false, loading: false, minStartDate: null, maxEndDate: null, data: null });
+        setStartStopDateDialog({ open: false, loading: false, minStartDateTime: null, maxEndDateTime: null, data: null });
         fetchData();
         fetchRecords();
       })
       .catch((error) => {
-        setStartStopDateDialog({ open: false, loading: false, minStartDate: null, maxEndDate: null, data: null });
+        setStartStopDateDialog({ open: false, loading: false, minStartDateTime: null, maxEndDateTime: null, data: null });
         toastConfig.setToastConfig(error);
       });
   };
@@ -269,14 +271,14 @@ const StartStopLogsDialog = ({ onClose, referenceId, _id, fetchRecords }) => {
           <StartStopDate
             type={startStopDateDialog?.data?.endDate ? 'startStop' : 'start'}
             onClose={() => {
-              setStartStopDateDialog({ open: false, loading: false, minStartDate: null, maxEndDate: null, data: null });
+              setStartStopDateDialog({ open: false, loading: false, minStartDateTime: null, maxEndDateTime: null, data: null });
             }}
             handleSubmit={(values, _id) => {
               handleUpdateLog(values, _id);
             }}
             loading={startStopDateDialog.loading}
-            minStartDate={startStopDateDialog.minStartDate}
-            maxEndDate={startStopDateDialog.maxEndDate}
+            minStartDateTime={startStopDateDialog.minStartDateTime}
+            maxEndDateTime={startStopDateDialog.maxEndDateTime}
             data={startStopDateDialog.data}
           />
         )}

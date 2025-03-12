@@ -249,7 +249,6 @@ const DemandOrderDetails = () => {
               demandOrderData={demandOrderData}
               fetchDemadOrderData={fetchData}
               allowedToEdit={allowedToEdit}
-              resources={resources}
             />
           )}
         </TabPanel>

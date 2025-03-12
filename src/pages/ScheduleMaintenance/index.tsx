@@ -1,12 +1,10 @@
 import { Add, Delete, Edit, ExpandMore } from '@mui/icons-material';
-import { Box, IconButton, Menu, MenuItem } from '@mui/material';
+import { Autocomplete, Box, IconButton, Menu, MenuItem, TextField } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile } from 'react-device-detect';
-import { FiExternalLink } from 'react-icons/fi';
 import axiosInstance from 'src/axios/axiosInstance';
-import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -18,73 +16,84 @@ import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { displayDate, prepareDataForGrid, product, sidebarResource } from 'src/constants/helpers';
+import { displayDate, MATERIAL_TYPE, prepareDataForGrid, product, sidebarResource } from 'src/constants/helpers';
 import ManageScheduleMaintenance from 'src/pages/ScheduleMaintenance/ManageScheduleMaintenance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
+import queryString from 'query-string';
+import { useHistory } from 'react-router-dom';
 
 const ScheduleMaintenance = () => {
-  const renderedFrom = camelCase(sidebarResource.scheduleMaintenance);
   const { setToastConfig } = useContext(CustomToastContext);
 
   const {
     state: { permissions, resources }
   }: any = useData();
 
+  const history = useHistory();
+
+  const types = [
+    {
+      key: resources?.product?.titlePlural,
+      value: 1
+    },
+    {
+      key: resources?.serializedAsset?.titlePlural,
+      value: 2
+    }
+  ];
+
+  const { type }: any = queryString.parse(history.location.search);
+
   const [columns, setColumns] = useState(null);
   const [openAssignProductDialog, setOpenAssignProductDialog] = useState(false);
+  const [openAssignSerializedAssetDialog, setOpenAssignSerializedAssetDialog] = useState(false);
   const [openCustomDataDialog, setOpenCustomDataDialog] = useState({ open: false, data: null });
   const [rowsToAdd, setRowsToAdd] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, data: null });
   const [isDeleting, setIsDeleting] = useState(false);
+  const [selectedType, setSelectedType] = useState(type || 1);
+  const [products, setProducts] = useState([]);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+  const renderedFrom = `${camelCase(sidebarResource.scheduleMaintenance)}_${selectedType}`;
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { rowCount, dataRows, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchGridColumns();
-  }, []);
+    setSelectedProduct(null);
+  }, [selectedType]);
 
   const fetchGridColumns = async () => {
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.product}&view=true`);
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'initialize', data: [], count: 0 });
+    setColumns(null);
+    let response = await axiosInstance().get(
+      `/field?resource=${selectedType === 1 ? sidebarResource.product : sidebarResource.serializedAsset}&view=true`
+    );
     const fields = response?.data?.data?.map((e) => e?.fieldData);
 
     let coloum: any = [];
-
-    fields
-      ?.filter((e) => ['productName']?.includes(e.fieldName))
-      ?.forEach((ele) => {
-        if (ele?.fieldName === 'productName') {
-          coloum.push({
-            accessor: 'productName',
-            Header: ele?.fieldLabel,
-            width: 200,
-            Cell: ({ row }) => (
-              <div className="flex items-center gap-2">
-                <p className="text-truncate">{row.original.productName}</p>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes.productDetail.path}/${row?.original?.productId}`);
-                  }}
-                >
-                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                </IconButton>
-              </div>
-            )
-          });
-        }
-      });
-    const newColumns = generateColumns(
-      renderedFrom,
-      fields?.filter((e) => ['productDescription', 'productNumber']?.includes(e?.fieldName))
-    );
-
+    let newColumns;
+    if (selectedType === 1) {
+      newColumns = generateColumns(
+        renderedFrom,
+        fields?.filter((e) => ['productName', 'productDescription', 'productNumber']?.includes(e?.fieldName)),
+        routes.productDetail.path
+      );
+    } else {
+      newColumns = generateColumns(
+        renderedFrom,
+        fields?.filter((e) => ['assetNumber', 'product', 'productCategory']?.includes(e?.fieldName)),
+        routes.serializedAssetDetail.path
+      );
+    }
     coloum = [
-      ...coloum,
       ...newColumns,
       {
         accessor: 'effectiveDate',
@@ -124,29 +133,43 @@ const ScheduleMaintenance = () => {
               </IconButton>
             </span>
           </HtmlTooltip>
-          <HtmlTooltip title="Delete">
-            <span>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  setShowConfirmBox({ open: true, data: [row.original] });
-                }}
-              >
-                <Delete fontSize="small" color="error" />
-              </IconButton>
-            </span>
-          </HtmlTooltip>
+          {row?.original?.effectiveDate && row?.original?.duration && (
+            <HtmlTooltip title="Delete">
+              <span>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    setShowConfirmBox({ open: true, data: [row.original] });
+                  }}
+                >
+                  <Delete fontSize="small" color="error" />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          )}
         </>
       )
     });
     setColumns([...coloum, ...getStaticFields()]);
   };
 
+  const fetchProducts = async () => {
+    try {
+      const response = await axiosInstance().get(`${product.api}/scheduledMaintenance/product`);
+      setProducts(response?.data?.data || []);
+    } catch (e) {
+      setToastConfig(e);
+    }
+  }
+
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
+    if (selectedType === 2) {
+      fetchProducts();
+    }
     return () => cancelTokenSource.cancel();
-  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, selectedType, selectedProduct]);
 
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
@@ -159,16 +182,7 @@ const ScheduleMaintenance = () => {
             data: { data, count }
           }
         }) => {
-          let rows = data.map((u, index) => {
-            let res: any = {
-              ...prepareDataForGrid(u)
-            };
-            res.productName = u?.productDetail?.optionLabel || '';
-            res.productId = u?.productDetail?.optionValue || '';
-            res.productDescription = u?.productDetail?.productDescription || '';
-            res.productNumber = u?.productDetail?.productNumber || '';
-            return res;
-          });
+          const rows = data.map((e) => prepareDataForGrid(e));
           dispatch({ type: 'initialize', data: rows, count: count });
           dispatch({ type: 'loading', loading: false });
         }
@@ -182,7 +196,20 @@ const ScheduleMaintenance = () => {
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
 
+    if (selectedType === 1) {
+      deepFilter = deepFilter + `&materialType=${MATERIAL_TYPE.product}`;
+    } else {
+      deepFilter = deepFilter + `&materialType=${MATERIAL_TYPE.serializedAsset}`;
+    }
+
     const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    if (selectedProduct?.optionValue) {
+      filterByIds.push({
+        field: 'product',
+        term: selectedProduct?.optionValue
+      })
+    }
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -214,7 +241,8 @@ const ScheduleMaintenance = () => {
       setIsSubmitting(true);
       axiosInstance()
         .post(`${product.api}/scheduledMaintenance`, {
-          products: rowsToAdd?.map((r) => r?._id),
+          materials: rowsToAdd?.map((r) => r?._id),
+          materialType: MATERIAL_TYPE.product,
           effectiveDate: _data?.effectiveDate,
           duration: _data?.duration
         })
@@ -223,17 +251,18 @@ const ScheduleMaintenance = () => {
           setIsSubmitting(false);
           setOpenCustomDataDialog({ open: false, data: null });
           setOpenAssignProductDialog(false);
+          setOpenAssignSerializedAssetDialog(false);
           setRowsToAdd([]);
         })
         .catch((error) => {
           setIsSubmitting(false);
           setToastConfig(error);
         });
-    } else if (_data && openCustomDataDialog?.data?._id) {
+    } else if (_data && openCustomDataDialog?.data?.uniqueId) {
       setIsSubmitting(true);
       axiosInstance()
         .put(`${product.api}/scheduledMaintenance`, {
-          _id: openCustomDataDialog?.data?._id,
+          _id: openCustomDataDialog?.data?.uniqueId,
           effectiveDate: _data?.effectiveDate,
           duration: _data?.duration
         })
@@ -242,6 +271,27 @@ const ScheduleMaintenance = () => {
           setIsSubmitting(false);
           setOpenCustomDataDialog({ open: false, data: null });
           setOpenAssignProductDialog(false);
+          setOpenAssignSerializedAssetDialog(false);
+        })
+        .catch((error) => {
+          setIsSubmitting(false);
+          setToastConfig(error);
+        });
+    } else if (_data && !openCustomDataDialog?.data?.uniqueId) {
+      setIsSubmitting(true);
+      axiosInstance()
+        .post(`${product.api}/scheduledMaintenance`, {
+          materials: [openCustomDataDialog?.data?._id],
+          effectiveDate: _data?.effectiveDate,
+          duration: _data?.duration,
+          materialType: MATERIAL_TYPE.serializedAsset
+        })
+        .then(({ data }) => {
+          fetchData();
+          setIsSubmitting(false);
+          setOpenCustomDataDialog({ open: false, data: null });
+          setOpenAssignProductDialog(false);
+          setOpenAssignSerializedAssetDialog(false);
         })
         .catch((error) => {
           setIsSubmitting(false);
@@ -255,7 +305,7 @@ const ScheduleMaintenance = () => {
     const { data } = showConfirmBox;
     axiosInstance()
       .put(`${product.api}/scheduledMaintenance/remove`, {
-        ids: data?.map((d) => d?._id)
+        ids: data?.map((d) => d?.uniqueId)
       })
       .then(() => {
         dispatch({ type: 'selection', selectedRecords: [] });
@@ -280,38 +330,54 @@ const ScheduleMaintenance = () => {
     };
     return (
       <>
-        <ThemeButton
-          id={'add-menu-button'}
-          mobileTooltip="Add"
-          startIcon={isMobile ? null : <Add />}
-          onClick={handleClick}
-          aria-controls="add-menu"
-          mode="light"
-          iconForMobile={<Add />}
-          endIcon={isMobile ? null : <ExpandMore fontSize="small" />}
-        >
-          Add
-        </ThemeButton>
-        <Menu
-          anchorEl={anchorEl}
-          keepMounted
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'left'
-          }}
-          id="add-menu"
-          open={Boolean(anchorEl)}
-          onClose={handleClose}
-        >
-          <MenuItem
-            onClick={() => {
-              setOpenAssignProductDialog(true);
-              handleClose();
+        {selectedType === 2 && (
+          <Autocomplete
+            id="products"
+            fullWidth
+            options={products}
+            renderInput={(params) => <TextField {...params} size="small" variant="outlined" label="Select Product" margin="none" />}
+            getOptionLabel={(option) => option?.optionLabel || ''}
+            isOptionEqualToValue={(option: any, val) => (option ? option?.optionValue === val?.optionValue : false)}
+            onChange={(e, val) => {
+              setSelectedProduct(val);
             }}
-          >
-            {`Add Existing ${resources?.product?.titlePlural}`}
-          </MenuItem>
-        </Menu>
+            value={selectedProduct}
+          />
+        )}
+        {selectedType === 1 && (
+          <>
+            <ThemeButton
+              id={'add-menu-button'}
+              mobileTooltip="Add"
+              startIcon={<Add />}
+              onClick={handleClick}
+              iconForMobile={<Add />}
+              endIcon={<ExpandMore fontSize="small" />}
+            >
+              Add
+            </ThemeButton>
+            <Menu
+              anchorEl={anchorEl}
+              keepMounted
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              id="add-menu"
+              open={Boolean(anchorEl)}
+              onClose={handleClose}
+            >
+              <MenuItem
+                onClick={() => {
+                  setOpenAssignProductDialog(true);
+                  handleClose();
+                }}
+              >
+                {`Add Existing ${resources?.product?.titlePlural}`}
+              </MenuItem>
+            </Menu>
+          </>
+        )}
       </>
     );
   };
@@ -319,7 +385,10 @@ const ScheduleMaintenance = () => {
   const ActionMenuItems = () => {
     return (
       <>
-        <MenuItem disabled={selectedRecords.length === 0} onClick={() => setShowConfirmBox({ open: true, data: selectedRecords })}>
+        <MenuItem
+          disabled={selectedRecords.length === 0 || selectedRecords?.some((d: any) => !d?.effectiveDate || !d?.duration)}
+          onClick={() => setShowConfirmBox({ open: true, data: selectedRecords })}
+        >
           Delete
         </MenuItem>
       </>
@@ -350,11 +419,15 @@ const ScheduleMaintenance = () => {
             fetchData();
           }}
           additionalParams={getQueryString(true)}
+          hideDownloadTemplate={selectedType === 2}
         />
       </div>
       <CustomContainer>
         <ListingPageHeader
-          leftSideContents={<LeftSideContent />}
+          toggleButtonList={types}
+          selectedType={selectedType}
+          setSelectedType={setSelectedType}
+          leftSideContentsOfSearchFilter={<LeftSideContent />}
           searchValue={search}
           onSearch={handleSearch}
           isActionButtonVisible={true}
@@ -379,19 +452,33 @@ const ScheduleMaintenance = () => {
           </Box>
         )}
         {openAssignProductDialog && (
-          <AssignProductDialog
-            handleCloseDialog={() => setOpenAssignProductDialog(false)}
+          <AssignDynamicDialog
+            resource={sidebarResource.product}
             onSuccess={(rows) => {
               setRowsToAdd(rows);
               setOpenCustomDataDialog({ open: true, data: null });
             }}
-            serialized={true}
-            isSubmitting={false}
-            ids={dataRows?.map((d) => d?.productId)}
-            hideQty={true}
+            handleClose={() => {
+              setOpenAssignProductDialog(false);
+            }}
+            fromResource={sidebarResource.scheduleMaintenance}
+            isSubmitting={isSubmitting}
           />
         )}
-
+        {openAssignSerializedAssetDialog && (
+          <AssignDynamicDialog
+            resource={sidebarResource.serializedAsset}
+            onSuccess={(rows) => {
+              setRowsToAdd(rows);
+              setOpenCustomDataDialog({ open: true, data: null });
+            }}
+            handleClose={() => {
+              setOpenAssignSerializedAssetDialog(false);
+            }}
+            fromResource={sidebarResource.scheduleMaintenance}
+            isSubmitting={isSubmitting}
+          />
+        )}
         {openCustomDataDialog.open && (
           <ManageScheduleMaintenance
             data={openCustomDataDialog?.data}
@@ -404,11 +491,10 @@ const ScheduleMaintenance = () => {
             loading={isSubmitting}
           />
         )}
-
         {showConfirmBox.open && (
           <ConfirmationDialogRaw
             open={true}
-            message={`Are you sure you want to delete this product(s)?`}
+            message={`Are you sure you want to remove selected item(s)?`}
             okBtnLoading={isDeleting}
             onClose={() => {
               setShowConfirmBox({ open: false, data: null });

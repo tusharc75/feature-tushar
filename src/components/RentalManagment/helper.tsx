@@ -1,5 +1,5 @@
 
-import { CHILD_RESOURCE, PRICING_SETUP_TYPE, getObjKeysWithValues, pricingCondition } from '../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, getObjKeysWithValues, pricingCondition } from '../../constants/helpers';
 import { objectStore, findOne } from '../../constants/indexdbhelper';
 import axiosInstance from '../../axios/axiosInstance';
 import { autoCalculateSpecificFields, CURReplaceByCurrencySingle } from '../../constants/formulaUtility';
@@ -279,13 +279,20 @@ const calculateParentRows = (material: any[], rows: any, fields: any[], rowData:
     }
 };
 
-export const calculateRowsField = async (material: any[], values: any, fields: any[], rowData: any, currency: any) => {
+export const calculateRowsField = async (material: any[], values: any, fields: any[], rowData: any, currency: any, needCalculate = true) => {
     currency = (currency || 'USD')?.toLowerCase()
     let rows: any = []
     let childs: any = []
 
-    const calValues = autoCalculateSpecificFields(values, { ...values, ...rowData }, fields)
-    const newRowData = { ...rowData, ...calValues }
+    let newRowData = null;
+
+    if (needCalculate) {
+        const calValues = autoCalculateSpecificFields(values, { ...values, ...rowData }, fields)
+        newRowData = { ...rowData, ...calValues }
+    }
+    else {
+        newRowData = { ...rowData, ...values }
+    }
 
     if (rowData.parentId) {
         rows.push(newRowData)
@@ -425,3 +432,17 @@ export const getUniqueWellNumber = (data) => {
     return uniq(wellNumber);
 }
 
+
+export const checkProductInside = (item, material) => {
+    if (item?.type === MATERIAL_TYPE.product) {
+        return true;
+    }
+    const child = material?.filter((e) => e.parentId === item?._id);
+    if (child?.some((e) => e?.type === MATERIAL_TYPE.product)) {
+        return true;
+    }
+    if (child?.filter((e) => e?.type === MATERIAL_TYPE.package)?.some((ele) => checkProductInside(ele, material))) {
+        return true;
+    }
+    return false;
+};

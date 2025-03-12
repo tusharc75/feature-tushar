@@ -34,7 +34,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
 
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions }
+    state: { resources, permissions }
   }: any = useData();
   const [isUpdating, setUpdating] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
@@ -575,7 +575,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
               setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
             }}
           >
-            {`Add Existing Packages`}
+            {`Add Existing ${resources?.packages?.titlePlural}`}
           </MenuItem>
         )}
         {permissions?.serviceMaster?.isRead && (

@@ -223,6 +223,16 @@ export const resourcePolicy = [
         fieldLabel: 'Service Price Required',
         type: 'checkBox',
         defaultValue: false
+      },
+      {
+        fieldName: 'loadingReceivingDefaultView',
+        fieldLabel: 'Loading Receiving Default View',
+        type: 'dropDown',
+        option: [
+          { optionValue: 'flat', optionLabel: 'Flat', order: 0 },
+          { optionValue: 'parentChild', optionLabel: 'Parent Child', order: 1 }
+        ],
+        defaultValue: ''
       }
     ]
   },
@@ -274,6 +284,73 @@ export const resourcePolicy = [
         fieldLabel: 'County From Tax Master',
         type: 'checkBox',
         defaultValue: false
+      }
+    ]
+  },
+  {
+    resource: sidebarResource.fieldServiceOrder,
+    policy: [
+      {
+        fieldName: 'addServices',
+        fieldLabel: 'Add Services',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
+        fieldName: 'addTechnicians',
+        fieldLabel: 'Add Technicians',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
+        fieldName: 'addConsumables',
+        fieldLabel: 'Add Consumables',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
+        fieldName: 'showAddPackages',
+        fieldLabel: 'Show Add Packages',
+        type: 'checkBox',
+        defaultValue: false
+      }
+    ]
+  },
+  {
+    resource: sidebarResource.expenses,
+    policy: [
+      {
+        fieldName: 'distanceUnit',
+        fieldLabel: 'Distance Unit',
+        type: 'dropDown',
+        option: [
+          { optionValue: 'km', optionLabel: 'km', order: 0 },
+          { optionValue: 'mile', optionLabel: 'mile', order: 1 }
+        ],
+        defaultValue: ''
+      },
+      {
+        fieldName: 'perUnitRate',
+        fieldLabel: 'Per Unit Rate',
+        type: 'number',
+        defaultValue: ''
+      }
+    ]
+  },
+  {
+    resource: sidebarResource.pricingCondition,
+    policy: [
+      {
+        fieldName: 'hideMaterialAdd',
+        fieldLabel: 'Hide Material Add',
+        type: 'multiSelect',
+        option: [
+          { optionValue: MATERIAL_TYPE.product, optionLabel: 'Product', order: 0 },
+          { optionValue: MATERIAL_TYPE.package, optionLabel: 'Package', order: 1 },
+          { optionValue: MATERIAL_TYPE.service, optionLabel: 'Service', order: 2 },
+          { optionValue: 'competency', optionLabel: 'Competency', order: 3 }
+        ],
+        defaultValue: []
       }
     ]
   }

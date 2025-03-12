@@ -72,7 +72,7 @@ const ManageRentalManagementDialog = ({
       const response: any = await axiosInstance().get('/field?resource=Rental Management');
       fieldData = response?.data?.data;
 
-      fieldData = fieldData?.filter((e) => !['quotation'].includes(e?.fieldData?.fieldName));
+      fieldData = fieldData?.filter((e) => !['quotation', 'assemblyOrder'].includes(e?.fieldData?.fieldName));
 
       var fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       var fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
@@ -132,9 +132,11 @@ const ManageRentalManagementDialog = ({
         }
         initialData['rentalJobName'] = GenerateResourceLineNumber(fieldsDataForCreate);
         if (referenceData) {
-          if (fieldsDataForCreate?.some((e) => e.fieldName === 'warehouse')) {
-            initialData['warehouse'] = referenceData?.warehouse;
-          }
+          Object.keys(referenceData).forEach((_key) => {
+            if (fieldsDataForCreate?.some((e) => e.fieldName === _key)) {
+              initialData[_key] = referenceData[_key];
+            }
+          });
         }
         setRentalData({
           fields: fieldsDataForCreate,

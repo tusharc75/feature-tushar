@@ -389,6 +389,7 @@ const Productpackage = ({
     var nextStepMessage = null;
     var invoiceMaterialData: any = [];
     const loadingTicketProducts: any = [];
+    let nonSerializedInventory: any = []
     if (isOffline) {
       data = await findOne(objectStore.rentalManagement, rentalManagementData._id);
       // data = data?.additionalCost;
@@ -419,6 +420,7 @@ const Productpackage = ({
           });
         }
       });
+      nonSerializedInventory = data?.nonSerializedInventory || []
     }
     let rows = data.material.filter((e) => e.parentId === null).filter((e) => e.type !== MATERIAL_TYPE.service);
 
@@ -433,17 +435,16 @@ const Productpackage = ({
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === MATERIAL_TYPE.service
-          ? parent.serviceDetail
-            ? parent.serviceDetail?.serviceName
+      parent.detail = `${parent.type === MATERIAL_TYPE.service
+        ? parent.serviceDetail
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+        : parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.manualEntry
+            ? parent.detail
             : parent.packageDetail?.packageName
-          : parent.type === MATERIAL_TYPE.product
-            ? parent.productDetail?.productName
-            : parent.type === MATERIAL_TYPE.manualEntry
-              ? parent.detail
-              : parent.packageDetail?.packageName
-      }`;
+        }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -471,7 +472,7 @@ const Productpackage = ({
       parent.assetQty = parent.serializedProduct
         ? inventory?.filter((e) => e._id === parent._id).length + productSerialNumbers?.filter((e) => e._id === parent._id).length
         : nonSerializeAsset?.filter((e) => e._id === parent._id).length +
-          data?.nonSerializedInventory?.filter((d) => d?._id === parent?._id)?.reduce((sum, row) => sum + row?.qty || 0, 0);
+        nonSerializedInventory?.filter((d) => d?._id === parent?._id)?.reduce((sum, row) => sum + row?.qty || 0, 0);
       parent.canDelete =
         parent.type === MATERIAL_TYPE.service && parent?.serviceLog?.length
           ? false
@@ -484,14 +485,16 @@ const Productpackage = ({
                 : true;
       parent.nonSerializedQty =
         parent.type === MATERIAL_TYPE.product &&
-        !parent.serializedProduct &&
-        parent.assetQty === 0 &&
-        parent?.status &&
-        loadingTicketProducts?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)?.length > 0
+          !parent.serializedProduct &&
+          parent.assetQty === 0 &&
+          parent?.status &&
+          loadingTicketProducts?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)?.length > 0
           ? loadingTicketProducts
-              ?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)
-              ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
-          : 0;
+            ?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)
+            ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+          : nonSerializedInventory?.filter((e) => e?._id === parent?._id && e?.product?.optionValue === parent?.materialId)?.length > 0 ?
+            nonSerializedInventory?.filter((e) => e?._id === parent?._id && e?.product?.optionValue === parent?.materialId)?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+            : 0;
       parent.subRows = generateNestedData(
         data.material,
         inventory,
@@ -499,7 +502,8 @@ const Productpackage = ({
         productSerialNumbers,
         parent,
         isPriceRequired,
-        loadingTicketProducts
+        loadingTicketProducts,
+        nonSerializedInventory
       );
       if (parent.type === MATERIAL_TYPE.package && parent.subRows?.length === 0 && !nextStepMessage) {
         nextStepMessage = rentalManagementMessage.addProductInPackage;
@@ -534,21 +538,20 @@ const Productpackage = ({
     dispatch({ type: 'loading', loading: false });
   };
 
-  const generateNestedData = (material, inventory, nonSerializeAsset, productSerialNumbers, parent, isPriceRequired, loadingTicketProducts) => {
+  const generateNestedData = (material, inventory, nonSerializeAsset, productSerialNumbers, parent, isPriceRequired, loadingTicketProducts, nonSerializedInventory) => {
     const currency = rentalManagementData?.currency?.toLowerCase();
 
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow.type === MATERIAL_TYPE.service
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.type === MATERIAL_TYPE.package
-            ? _subRow.packageDetail?.packageName
-            : _subRow.type === MATERIAL_TYPE.product
-              ? _subRow.productDetail?.productName
-              : ''
-      } `;
+      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.service
+        ? _subRow.serviceDetail?.serviceName
+        : _subRow.type === MATERIAL_TYPE.package
+          ? _subRow.packageDetail?.packageName
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow.productDetail?.productName
+            : ''
+        } `;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
@@ -564,7 +567,8 @@ const Productpackage = ({
       }
       _subRow.assetQty = _subRow.serializedProduct
         ? inventory?.filter((e) => e._id === _subRow._id).length + productSerialNumbers?.filter((e) => e._id === _subRow._id).length
-        : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
+        : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length
+        + nonSerializedInventory?.filter((d) => d?._id === _subRow?._id)?.reduce((sum, row) => sum + row?.qty || 0, 0);
       _subRow.canDelete =
         _subRow.type === MATERIAL_TYPE.service && _subRow?.serviceLog?.length
           ? false
@@ -575,13 +579,11 @@ const Productpackage = ({
               : true;
       _subRow.nonSerializedQty =
         _subRow.type === MATERIAL_TYPE.product &&
-        !_subRow.serializedProduct &&
-        _subRow.assetQty === 0 &&
-        _subRow?.status &&
-        loadingTicketProducts?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)?.length > 0
-          ? loadingTicketProducts
-              ?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)
-              ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+          !_subRow.serializedProduct &&
+          _subRow.assetQty === 0 &&
+          _subRow?.status &&
+          loadingTicketProducts?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)?.length > 0 ?
+          loadingTicketProducts?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)?.reduce((sum, row) => sum + (row?.qty || 0), 0)
           : 0;
       _subRow.subRows = generateNestedData(
         material,
@@ -590,7 +592,8 @@ const Productpackage = ({
         productSerialNumbers,
         _subRow,
         isPriceRequired,
-        loadingTicketProducts
+        loadingTicketProducts,
+        nonSerializedInventory
       );
     });
 
@@ -908,7 +911,7 @@ const Productpackage = ({
             setAddExistingProductDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
           }}
         >
-          Add Existing Packages
+          {`Add Existing ${resources?.packages?.titlePlural}`}
         </MenuItem>
         {permissions?.serializedPackages?.isRead && (
           <MenuItem
@@ -1173,7 +1176,7 @@ const Productpackage = ({
                   setAddchildDialog({ open: false, parentId: null, type: null, top: null, bottom: null });
                 }}
               >
-                Add Existing Packages
+                {`Add Existing ${resources?.packages?.titlePlural}`}
               </MenuItem>
             )}
             {permissions?.serviceMaster?.isRead && addchildDialog.type === MATERIAL_TYPE.package && (
@@ -1205,6 +1208,7 @@ const Productpackage = ({
           handleClose={() => {
             setSubmitState({ open: false, values: null, rowData: null });
           }}
+          needCalculate={true}
         />
       )}
       {openAssetAvailibility && (

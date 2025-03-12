@@ -207,7 +207,7 @@ const ProductionOrderDetails = () => {
                 {permissions?.productionOrder?.isUpdate &&
                   allowedToEdit &&
                   productionOrderData?.status !== PRODUCTION_ORDER_STATUS.completed &&
-                  productionOrderData?.processStatus === productionOrderProcessStepsNames[productionOrderProcessStepsNames?.length - 1] && (
+                  productionOrderProcessStepsNames[currentStep] === 'Final Slip' && (
                     <ButtonWithPulse
                       onClick={() => {
                         updateOrderStatus(PRODUCTION_ORDER_STATUS.completed);
@@ -271,10 +271,12 @@ const ProductionOrderDetails = () => {
                       .get(`/production-order/${productionOrderData?._id}/work-order/validate-work-order`)
                       .then(({ data: { data } }) => {
                         if (data) {
+                          let newStep;
                           setCurrentStep((prevStep) => {
-                            const newStep = prevStep + 1;
+                            newStep = prevStep + 1;
                             return newStep;
                           });
+                          dynamicFormUpdateProcessStatus(sidebarResource.productionOrder, productionOrderProcessStepsNames[newStep], id);
                         }
                       })
                       .catch((err) => {

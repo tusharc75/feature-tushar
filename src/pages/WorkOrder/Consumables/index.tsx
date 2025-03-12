@@ -11,8 +11,6 @@ import {
   OTHER_MATERIAL_TYPE,
   QUOTATION_STATUS,
   WORK_ORDER_TYPE,
-  product,
-  repairOrder,
   sidebarResource,
   workOrder
 } from 'src/constants/helpers';
@@ -208,7 +206,10 @@ const Consumables = ({
               'No'
             )}
           </p>
-        )
+        ),
+        accessorFn: (original) => {
+          return original?.serializedProduct ? 'Yes' : 'No';
+        },
       }
     ];
     const extracolumns: any = [
@@ -655,7 +656,7 @@ const Consumables = ({
         <Grid size={{ xs: 12, md: 12, sm: 12 }}>
           {columns ? (
             <CustomReactTable
-              height={isCreate ? 'calc(100vh - 140px)' : 'calc(100vh - 345px)'}
+              height={isCreate ? 'calc(100vh - 300px)' : 'calc(100vh - 345px)'}
               columns={columns}
               state={state}
               dispatch={dispatch}
@@ -691,7 +692,7 @@ const Consumables = ({
                   }))
               );
             }}
-            serialized={false}
+            serialized={workOrderData?.type === WORK_ORDER_TYPE.repairOrder ? false : null}
             extraDeepFilter={[{ field: 'expenseItem', term: 'No' }]}
             isSubmitting={isSubmitting}
           />
@@ -766,7 +767,7 @@ const Consumables = ({
         )}
         {assignAssetDialog && (
           <AssignSerializedAssetDialog
-            reference={'workOrder_assign_asset'}
+            reference={'workOrder'}
             referenceData={{ warehouse: warehouse?.optionValue }}
             ids={[]}
             handleClose={() => setAssignAssetDialog(false)}

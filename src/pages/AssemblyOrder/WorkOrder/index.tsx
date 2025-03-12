@@ -1,6 +1,6 @@
 import { Box, IconButton, MenuItem, Typography } from '@mui/material';
 import { CheckCircle, Delete } from '@mui/icons-material';
-import { flatMap, map, orderBy, startCase, uniq } from 'lodash';
+import { flatMap, map, orderBy, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
 import { FiExternalLink } from 'react-icons/fi';
@@ -12,7 +12,16 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { CHILD_RESOURCE, MATERIAL_SUB_TYPE, MATERIAL_TYPE, sidebarResource, WORK_ORDER_STATUS, workOrder, WORKORDER_SERVICE_STATUS } from 'src/constants/helpers';
+import {
+  CHILD_RESOURCE,
+  MATERIAL_SUB_TYPE,
+  MATERIAL_TYPE,
+  sidebarResource,
+  WORK_ORDER_STATUS,
+  WORK_ORDER_TYPE,
+  workOrder,
+  WORKORDER_SERVICE_STATUS
+} from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import SyncIcon from '@mui/icons-material/Sync';
@@ -30,12 +39,13 @@ import PackageNumberDialog from 'src/pages/AssemblyOrder/WorkOrder/PackageNumber
 import DescriptionIcon from '@mui/icons-material/Description';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
-const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScreen, allowedToEdit, setCurrentStep }) => {
+const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScreen, allowedToEdit, setCurrentStep, nextStep }) => {
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -61,7 +71,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
   const [openSerializedPackageDialog, setOpenSerializedPackageDialog] = useState({ open: false, ids: [] });
   const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, workOrder: null });
 
-  const { generateColumns } = useColumns();
+  const { generateColumns, getMaterialLabel } = useColumns();
 
   useEffect(() => {
     setNextStep(false);
@@ -97,8 +107,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
 
   const fetchFields = async () => {
     const response = await fetch_child_resource_fields(CHILD_RESOURCE.assemblyOrderMaterial, assemblyOrderData?.currency || 'USD', false);
-    var data = response?.filter((e) => !['detail', 'description']?.includes(e?.fieldName));
-
+    var data = response;
     const {
       data: { data: serializedPackageFieldData }
     } = await axiosInstance().put(`/field/find-field-labels`, {
@@ -128,7 +137,8 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
         Header: 'Type',
         width: 100,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (row.original['type'] ? <h5>{`${startCase(row.original?.type)} `}</h5> : <NoDataCell />)
+        Cell: ({ row }) => (row.original['type'] ? <h5>{`${getMaterialLabel(row.original?.type)}`}</h5> : <NoDataCell />),
+        accessorFn: (original) => { return getMaterialLabel(original?.type) }
       },
       {
         accessor: 'detail',
@@ -168,11 +178,11 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
         }
       },
       {
-        accessor: 'workOrder',
+        accessor: 'workOrderNumber',
         Header: 'Work Order',
         width: 200,
         Cell: ({ row }) =>
-          row.original.workOrder ? (
+          row.original.workOrderNumber ? (
             <div className="flex items-center gap-2">
               <h5 className="text-truncate">{row.original?.workOrderNumber}</h5>
               <IconButton
@@ -228,15 +238,16 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
       accessor: 'assignedUsers',
       Header: 'Assigned Technician',
       width: 200,
-      Cell: ({ row }) => (<DropdownCell
-        permissions={permissions}
-        permissionForLinks={{}}
-        field={{
-          fieldName: 'assignedUsers',
-          lookupResource: sidebarResource.user
-        }}
-        original={row?.original}
-      />
+      Cell: ({ row }) => (
+        <DropdownCell
+          permissions={permissions}
+          permissionForLinks={{}}
+          field={{
+            fieldName: 'assignedUsers',
+            lookupResource: sidebarResource.user
+          }}
+          original={row?.original}
+        />
       )
     });
     if (permissions?.workStations) {
@@ -366,12 +377,15 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
       }
     });
 
+    if (rows?.every((r) => r?.workOrderStatus === WORK_ORDER_STATUS.completed)) {
+      setNextStep(true);
+    }
+
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
 
   const generateNestedData = (material, parent) => {
-
     var subPackage: any = material.filter((e) => e?.parentId === parent?._id && e?.type === MATERIAL_TYPE.package);
     subPackage.forEach((_subPackage, index) => {
       _subPackage.index = parent.index + '.' + `${index + 1}`;
@@ -412,13 +426,19 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
     let serviceIndex = 0;
     subRows.forEach((_subRow) => {
       _subRow.index = parent.index + '.' + `${_subRow.type === MATERIAL_TYPE.service ? alphabet[serviceIndex] : productIndex + 1}`;
-      _subRow.detail = _subRow.detail ? _subRow.detail
-        : _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceName
-          : _subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName
+      _subRow.detail = _subRow.detail
+        ? _subRow.detail
+        : _subRow.type === MATERIAL_TYPE.service
+          ? _subRow?.serviceDetail?.serviceName
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow.productDetail?.productName
             : '';
-      _subRow.description = _subRow.description ? _subRow.description
-        : _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceDescription
-          : _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription
+      _subRow.description = _subRow.description
+        ? _subRow.description
+        : _subRow.type === MATERIAL_TYPE.service
+          ? _subRow?.serviceDetail?.serviceDescription
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow?.productDetail?.productDescription
             : '';
       _subRow.qty = _subRow.qty;
       _subRow.workOrder = parent?.workOrder;
@@ -518,6 +538,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
         .then(({ data }) => {
           setCompleting(false);
           setCompleteConfirmBox(false);
+          setOpenSerializedPackageDialog({ open: false, ids: [] });
           fetchData();
           checkAllWorkOrderComplete();
           toastConfig.setToastConfig({
@@ -527,7 +548,6 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
           });
         })
         .catch((err) => {
-          setCompleteConfirmBox(false);
           setCompleting(false);
           toastConfig.setToastConfig(err);
         });
@@ -660,6 +680,22 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
       });
   };
 
+  const rightSideContents = () => {
+    return (
+      <>
+        <PreviewDownload
+          fileName={`${resources?.assemblyOrder?.titlePlural}-${assemblyOrderData?.assemblyOrderNumber}`}
+          resource={sidebarResource.assemblyOrder}
+          referenceId={assemblyOrderData._id}
+          referenceLabel={assemblyOrderData?.assemblyOrderNumber}
+          columns={columns}
+          isAsyncDownload={true}
+          defaultColumns={['index', `detail`, `description`, `qty`]}
+        />
+      </>
+    );
+  };
+
   return (
     <>
       {isAutoCreating && (
@@ -695,6 +731,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
         }
         actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
         hasXpadding
+        rightSideContents={nextStep ? rightSideContents() : null}
       />
       {columns ? (
         <>
@@ -751,7 +788,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
                 }
               });
             }
-            if (autoCompleteData?.every((e) => e.type === MATERIAL_TYPE.package)) {
+            if (autoCompleteData?.every((e) => e.type === MATERIAL_TYPE.package && e?.workOrderType === WORK_ORDER_TYPE.assemblyOrder)) {
               setOpenSerializedPackageDialog({ open: true, ids: ids });
             } else {
               handleAutoComplete(ids);
@@ -759,7 +796,6 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
           }}
         />
       )}
-
       {openSerializedPackageDialog.open && (
         <PackageNumberDialog
           onClose={() => {
@@ -771,11 +807,10 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
           onSuccess={() => {
             setCompleteConfirmBox(false);
             handleAutoComplete(openSerializedPackageDialog.ids);
-            setOpenSerializedPackageDialog({ open: false, ids: [] });
           }}
+          isSubmitting={isCompleting}
         />
       )}
-
       {addServicesDialog.open && !addServicesDialog.new && (
         <AssignServiceDialog
           handleClose={() => setAddServicesDialog({ open: false, new: false })}
@@ -857,7 +892,6 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
           onSuccess={(rows) => {
             handleAddConsumables(rows, consumablesDialog?.data ? consumablesDialog?.data : selectedRecords);
           }}
-          serialized={false}
           isSubmitting={isSubmitting}
         />
       )}
@@ -935,6 +969,21 @@ const ActionButtonMenuItems = ({
   setArrangeView,
   setAttachmentsDialog
 }) => {
+
+  const checkUniqWorkOrderType = () => {
+    if (selectedRecords.length === 0) {
+      return false;
+    }
+    else if (selectedRecords?.find((e) => !e?.workOrderType)) {
+      return true;
+    }
+    else if (uniq(map(selectedRecords?.filter((r) => r?.workOrderType), 'workOrderType')).length === 1) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
   return (
     <>
       <MenuItem
@@ -1034,10 +1083,12 @@ const ActionButtonMenuItems = ({
           setAutoCompleteData(selectedRecords?.filter((e) => e?.canAutoCompleteWorkOrder));
           setCompleteConfirmBox(true);
         }}
-        disabled={selectedRecords.some((e) => e?.canAutoCompleteWorkOrder) ? false : true}
+        disabled={checkUniqWorkOrderType() &&
+          selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.package)?.length > 0 &&
+          selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.package).every((e) => e?.canAutoCompleteWorkOrder) ? false : true}
       >
         Auto Complete Work Order(s)
-      </MenuItem>
+      </MenuItem >
       <MenuItem
         disabled={
           checkUniqWorkOrder() &&

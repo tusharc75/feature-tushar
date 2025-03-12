@@ -101,7 +101,7 @@ const CardView = ({ data, fields, setShowManageDialog, setDeleteRecord, setShowD
       <Grid container spacing={2}>
         {data.map((truckMaster, index) => {
           return (
-            <Grid size={{lg:4, md:4, sm:6, xs:12}} key={index}>
+            <Grid size={{ lg: 4, md: 4, sm: 6, xs: 12 }} key={index}>
               <Box
                 className={`${classes.cardBox}`}
                 onClick={(e) => {
@@ -110,16 +110,16 @@ const CardView = ({ data, fields, setShowManageDialog, setDeleteRecord, setShowD
               >
                 <Box className={classes.leftContent}>
                   <Typography className={classes.text}>
-                    <strong>Truck Name :</strong> {truckMaster?.truckName}
+                    <strong>Name :</strong> {truckMaster?.fleetNumber}
                   </Typography>
                   <Typography className={classes.text}>
                     <strong>Current Location :</strong> {truckMaster?.currentLocation?.optionLabel}
                   </Typography>
-                  <Box className={classes.gaugeContainer}>
+                  {/* <Box className={classes.gaugeContainer}>
                     <MetricsWithIcon value={truckMaster?.temperature} type="temperature" suffixText={'°F'} />
                     <MetricsWithIcon value={truckMaster?.pressure} type="pressure" suffixText={'PSI'} />
                     <MetricsWithIcon value={truckMaster?.volume} type="volume" suffixText={'MMcf'} />
-                  </Box>
+                  </Box> */}
                 </Box>
                 <Box className={classes.icons}>
                   <HtmlTooltip title="Attachment">
@@ -206,7 +206,7 @@ const CardView = ({ data, fields, setShowManageDialog, setDeleteRecord, setShowD
         {showActivity.open && <div className="backdrop-new-v1" onClick={() => setActivityShow({ open: false, referenceId: '' })}></div>}
         <div className={`activity-new-v1 ${showActivity.open ? 'show-activity-v1' : 'hide-activity-v1'}`}>
           <Grid container>
-            <Grid size={{xs:12}}>
+            <Grid size={{ xs: 12 }}>
               <div>
                 {showActivity.open && (
                   <Activity
@@ -225,7 +225,7 @@ const CardView = ({ data, fields, setShowManageDialog, setDeleteRecord, setShowD
                       }
                     ]}
                     close={() => setActivityShow({ open: false, referenceId: '' })}
-                    handleActivityRefresh={() => {}}
+                    handleActivityRefresh={() => { }}
                     emails={[]}
                   />
                 )}

@@ -24,12 +24,10 @@ const MapView = ({ handleClose }) => {
   }, []);
 
   const fetchData = () => {
-    axiosInstance()
-      .get(`${routes?.fleetMaster.path}`)
-      .then(({ data: { data } }) => {
-        setFleets(data?.data);
-      })
-      .catch((error) => {});
+    axiosInstance().get(`${routes?.truckMaster.path}`).then(({ data: { data } }) => {
+      setFleets(data?.data);
+    })
+      .catch((error) => { });
   };
   const handleMarkerClick = (marker) => {
     setActiveMarker(marker);
@@ -62,13 +60,7 @@ const MapView = ({ handleClose }) => {
       onClose={handleClose}
       open={true}
     >
-      <CustomDialogHeader
-        title={'Fleet Map'}
-        onClose={(e, reason) => {
-          handleClose();
-        }}
-        showRequiredLabel={false}
-      />
+      <CustomDialogHeader title={'Map'} onClose={handleClose} showRequiredLabel={false} />
       <CustomDialogContent isFooterPresent={false}>
         {fleets ? (
           <Box width={'100%'} height={'100%'} overflow="hidden" borderRadius={1}>
@@ -127,7 +119,7 @@ const MapView = ({ handleClose }) => {
                     pixelOffset: new google.maps.Size(0, -30)
                   }}
                   position={new google.maps.LatLng(activeMarker.currentLocation?.latitude, activeMarker.currentLocation?.longitude)}
-                  //   onCloseClick={handleInfoClose}
+                //   onCloseClick={handleInfoClose}
                 >
                   <Typography>{activeMarker?.fleetNumber ?? ''}</Typography>
                 </InfoWindow>

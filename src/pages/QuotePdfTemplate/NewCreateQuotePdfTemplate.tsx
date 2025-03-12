@@ -171,6 +171,7 @@ export default function NewCreateQuotePdfTemplate() {
   const fetchData = async () => {
     const initialValues = {
       landscape: false,
+      hideAmountTotalSection: false,
       productColumns: defaultProductColumns,
       name: '',
       pageNumberInFooter: false,
@@ -225,6 +226,7 @@ export default function NewCreateQuotePdfTemplate() {
       if (tempPdfTemplate) {
         setIsLandscapChecked(tempPdfTemplate.landscape);
         initialValues.landscape = tempPdfTemplate.landscape;
+        initialValues.hideAmountTotalSection = tempPdfTemplate.hideAmountTotalSection;
         initialValues.productColumns = tempPdfTemplate.productColumns;
         initialValues.name = tempPdfTemplate.name;
         initialValues.pageNumberInFooter = tempPdfTemplate.pageNumberInFooter;
@@ -253,6 +255,7 @@ export default function NewCreateQuotePdfTemplate() {
           } = res;
           setIsLandscapChecked(data?.landscape);
           initialValues.landscape = data?.landscape;
+          initialValues.hideAmountTotalSection = data?.hideAmountTotalSection;
           initialValues.productColumns = data?.productColumns;
           initialValues.name = !isClone ? data?.name : '';
           initialValues.pageNumberInFooter = data?.pageNumberInFooter;
@@ -372,6 +375,7 @@ export default function NewCreateQuotePdfTemplate() {
           }),
           collaborator: values?.collaborator,
           landscape: values?.landscape,
+          hideAmountTotalSection: values?.hideAmountTotalSection,
           productColumns: parseInt(values?.productColumns)
         })
         .then(({ data: { data, message } }) => {
@@ -419,6 +423,7 @@ export default function NewCreateQuotePdfTemplate() {
           }),
           collaborator: values?.collaborator,
           landscape: values?.landscape,
+          hideAmountTotalSection: values?.hideAmountTotalSection,
           productColumns: parseInt(values?.productColumns)
         })
         .then(({ data: { data, message } }) => {
@@ -579,8 +584,8 @@ export default function NewCreateQuotePdfTemplate() {
                             setFieldValue('entity', val && val?.map((d) => d._id));
                             val && val.length !== 0
                               ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
-                                )
+                                ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
+                              )
                               : setOwnerCollaboratorData(ownerCollaboratorDataConst);
                           }}
                           renderInput={(params) => (
@@ -612,10 +617,10 @@ export default function NewCreateQuotePdfTemplate() {
                           onOpen={() =>
                             values['entity'] && values['entity'].length !== 0
                               ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) =>
-                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
-                                  )
+                                ownerCollaboratorDataConst.filter((data) =>
+                                  values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
                                 )
+                              )
                               : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                           }
                           renderInput={(params) => (
@@ -649,10 +654,10 @@ export default function NewCreateQuotePdfTemplate() {
                           onOpen={() =>
                             values['entity'] && values['entity'].length !== 0
                               ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) =>
-                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
-                                  )
+                                ownerCollaboratorDataConst.filter((data) =>
+                                  values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
                                 )
+                              )
                               : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                           }
                           renderInput={(params) => (
@@ -758,6 +763,21 @@ export default function NewCreateQuotePdfTemplate() {
                         />
                       }
                       label="Landscape"
+                    />
+                    <FormControlLabel
+                      disabled={!isClone && !hasPermissionToUpdate}
+                      value={values['hideAmountTotalSection']}
+                      control={
+                        <Checkbox
+                          name="hideAmountTotalSection"
+                          checked={values['hideAmountTotalSection']}
+                          onChange={(e) => {
+                            setFieldValue('hideAmountTotalSection', e.target.checked);
+                          }}
+                          color="primary"
+                        />
+                      }
+                      label="Hide Amount Total Section"
                     />
                   </div>
 

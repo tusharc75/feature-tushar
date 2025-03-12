@@ -72,27 +72,13 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, assem
   };
 
   const handleSubmit = async (values) => {
-    let rows: any = [{ ...rowData, ...values }];
+    let rows: any = [{ ...values, _id: rowData?._id }];
     handleSaveData(rows);
   };
 
   function validate(values) {
     const errors = {};
 
-    if (rowData) {
-      if (rowData.parentId) {
-        const _package = material?.filter((e) => e._id === rowData.parentId);
-        if (_package.length) {
-          if (values.qty * _package[0].qty < rowData.subRows?.length) {
-            errors['qty'] = 'The quantity is less than what was assigned.';
-          }
-        }
-      } else {
-        if (values.qty < rowData.subRows?.length) {
-          errors['qty'] = 'The quantity is less than what was assigned.';
-        }
-      }
-    }
     return errors;
   }
 

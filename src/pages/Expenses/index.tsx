@@ -14,7 +14,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { gridLoadingTimeout, prepareDataForGrid, expenses, sidebarResource, EXPENSE_STATUS, formatAmountWithCurrency } from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, expenses, sidebarResource, EXPENSE_STATUS, formatAmountWithCurrency, getDefaultMyRecordType } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { cloneDisable } from 'src/constants/messageHelpers';
@@ -66,6 +66,46 @@ const Expenses = () => {
             <div>
               <p className="text-truncate">
                 {formatAmountWithCurrency(row?.original?.currency, row?.original?.totalAmount)?.fullFormatAmountWithoutSpace}
+              </p>
+            </div>
+          ) : (
+            <NoDataCell />
+          );
+        }
+      },
+      {
+        accessor: 'totalDistance',
+        Header: 'Total Distance',
+        minWidth: 100,
+        width: 150,
+        disableFilters: true,
+        disableSortBy: false,
+        canDrag: true,
+        Cell: ({ row }) => {
+          return row?.original?.totalDistance ? (
+            <div>
+              <p className="text-truncate">
+                {row?.original?.totalDistance}
+              </p>
+            </div>
+          ) : (
+            <NoDataCell />
+          );
+        }
+      },
+      {
+        accessor: 'distanceUnit',
+        Header: 'Distance Unit',
+        minWidth: 100,
+        width: 150,
+        disableFilters: true,
+        disableSortBy: false,
+        canDrag: true,
+        Cell: ({ row }) => {
+          return row?.original?.unit ? (
+            <div>
+              <p className="text-truncate">
+                {row?.original?.unit}
               </p>
             </div>
           ) : (
@@ -142,10 +182,8 @@ const Expenses = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
-    if (isExport) {
-      deepFilter = `?`;
-    }
+    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
+
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (filterByIds?.length) {

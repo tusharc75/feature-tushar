@@ -74,7 +74,7 @@ type ToolbarButton = {
 
 type ToolbarComponents<T> = ToolbarElement<T> | ToolbarButton | ToolbarMenuItem;
 
-const WorkOrderDetailContent = ({ id, tab, resource }) => {
+const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, defaultSelectedService = null, setDefaultSelectedService = null }) => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
@@ -163,20 +163,24 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
   }, []);
 
   const getWorkOrderCostFields = async () => {
-    let workOrderCost = await fetch_child_resource_fields(CHILD_RESOURCE.workOrderCost, workOrderData?.currency || user.user?.brandCurrency, true);
-    setWorkOrderCostFields(workOrderCost);
+    if (resource !== sidebarResource.workOrderTechnician) {
+      let workOrderCost = await fetch_child_resource_fields(CHILD_RESOURCE.workOrderCost, workOrderData?.currency || user.user?.brandCurrency, true);
+      setWorkOrderCostFields(workOrderCost);
+    }
   };
 
   const getResourceFields = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.workOrder}`)
-      .then(({ data: { data } }) => {
-        const adjustedData = [...data];
-        setWorkOrderFields(adjustedData);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+    if (resource !== sidebarResource.workOrderTechnician) {
+      axiosInstance()
+        .get(`/field?resource=${sidebarResource.workOrder}`)
+        .then(({ data: { data } }) => {
+          const adjustedData = [...data];
+          setWorkOrderFields(adjustedData);
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
+    }
   };
 
   const fetchWorkOrderData = () => {
@@ -186,6 +190,9 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.workOrder, data) && permissions?.workOrder?.isUpdate ? true : false);
         setCompleted(data?.status === WORK_ORDER_STATUS.completed || data?.status === WORK_ORDER_STATUS.onHold || data?.deleted ? true : false);
         setWorkOrderData({ ...data });
+        if (sendWorkOrderData) {
+          sendWorkOrderData(data)
+        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -219,14 +226,16 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
   };
 
   const fetchTotalConsumablesCost = () => {
-    axiosInstance()
-      .get(`${routes?.workOrder?.path}/total-consumables-cost/${id}`)
-      .then(({ data: { data } }) => {
-        setTotalConsumablesCost(data?.totalConsumablesCost);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+    if (resource !== sidebarResource.workOrderTechnician) {
+      axiosInstance()
+        .get(`${routes?.workOrder?.path}/total-consumables-cost/${id}`)
+        .then(({ data: { data } }) => {
+          setTotalConsumablesCost(data?.totalConsumablesCost);
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
+    }
   };
 
   const handleDelete = () => {
@@ -252,7 +261,7 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
     }
   };
 
-  const updateStatus = (status, assetStatus = null, workOrderCost = null, assetsData = null) => {
+  const updateStatus = (status, assetStatus = null, workOrderCost = null, assetsData = null, serializedPackages = null) => {
     setIsSubmitting(true);
     const data: any = { status: status };
     if (assetStatus) {
@@ -268,6 +277,13 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
         data.assetData = assetData;
       }
     }
+    if (serializedPackages) {
+      data.serializedPackagesData = {
+        assemblyOrderId: workOrderData?.assemblyOrder?.optionValue,
+        serializedPackages: serializedPackages
+      };
+    }
+
     axiosInstance()
       .patch(`${workOrder.api}/status/${id}`, data)
       .then(({ data: { data } }) => {
@@ -277,6 +293,7 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
           type: 'success',
           message: data
         });
+        setOpenSerializedPackageDialog(false);
         setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null });
         fetchWorkOrderData();
         setIsSubmitting(false);
@@ -382,6 +399,8 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
       type: 'menuItem',
       isVisible:
         permissions?.repairJob?.isCreate &&
+          workOrderData?.serializedAsset &&
+          workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
           allowedToEdit &&
           workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
           ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
@@ -396,7 +415,10 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
       type: 'menuItem',
       id: `Repair Job Receive`,
       isVisible:
-        permissions?.repairJob?.isUpdate && allowedToEdit && workOrderData?.type === WORK_ORDER_TYPE.repairOrder && workOrderData?.currentRepairJob
+        permissions?.repairJob?.isUpdate &&
+          allowedToEdit &&
+          workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
+          workOrderData?.currentRepairJob
           ? true
           : false,
       children: `Receive Asset From Supplier`,
@@ -407,7 +429,11 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
       id: 'Scrap Asset',
       type: 'menuItem',
       isVisible: Boolean(
-        workOrderData?.serializedAsset && allowedToEdit && !workOrderData?.currentRepairJob && workOrderData?.status !== WORK_ORDER_STATUS.completed
+        workOrderData?.serializedAsset &&
+        workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
+        allowedToEdit &&
+        !workOrderData?.currentRepairJob &&
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)
       ),
       children: `${ASSET_STATUS.scrap} Asset`,
       tooltip: `${ASSET_STATUS.scrap} Asset`,
@@ -544,7 +570,7 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
 
   return (
     <Box className="main-container-v1">
-      <Box className="headerbox-v1">
+      <Box className={resource === sidebarResource.workOrderTechnician ? "" : "headerbox-v1"}>
         {resource === sidebarResource.workOrder && (
           <Box className="nav-v1">
             <CustomBreadCrumbs
@@ -552,35 +578,37 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
             />
           </Box>
         )}
-        <Box className="controls-v1 ml-auto">
-          <Box className="control-buttons-v1 items-center">
-            {workOrderData ? (
-              <>{!workOrderData?.deleted && <RenderHeaderButtons buttonOptions={toolbarButtons} />}</>
-            ) : (
-              <Skeleton variant="text" width="150px" height="40px" />
-            )}
-            <ActivityButton
-              referenceId={workOrderData?._id}
-              resource={ACTIVITY_RESOURCE.workOrder}
-              resourceLabel={workOrderData?.workOrderNumber}
-              extraRelatedTo={{
-                referenceId: workOrderData?.repairOrder?.optionValue,
-                resource: ACTIVITY_RESOURCE.repairOrder
-              }}
-            />
+        {[sidebarResource.workOrder, sidebarResource.workOrderSupervisor]?.includes(resource) &&
+          <Box className="controls-v1 ml-auto">
+            <Box className="control-buttons-v1 items-center">
+              {workOrderData ? (
+                <>{!workOrderData?.deleted && <RenderHeaderButtons buttonOptions={toolbarButtons} />}</>
+              ) : (
+                <Skeleton variant="text" width="150px" height="40px" />
+              )}
+              <ActivityButton
+                referenceId={workOrderData?._id}
+                resource={ACTIVITY_RESOURCE.workOrder}
+                resourceLabel={workOrderData?.workOrderNumber}
+                extraRelatedTo={{
+                  referenceId: workOrderData?.repairOrder?.optionValue,
+                  resource: ACTIVITY_RESOURCE.repairOrder
+                }}
+              />
+            </Box>
           </Box>
-        </Box>
+        }
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0}>Header</CustomTab>
+          {resource === sidebarResource.workOrder && <CustomTab value={0}>Header</CustomTab>}
           <CustomTab value={1}>Services</CustomTab>
           {!user?.user?.brandPolicy?.workOrderConsumableHide && <CustomTab value={2}>Products/Consumables</CustomTab>}
           {[WORK_ORDER_TYPE.productionOrder, WORK_ORDER_TYPE.assemblyOrder]?.includes(workOrderData?.type) && resourceData?.policy?.showBom && (
             <CustomTab value={3}>BOM</CustomTab>
           )}
           <CustomTab value={4}>Drawings</CustomTab>
-          {!(isMobile && !isTablet) && <CustomTab value={5}>Views</CustomTab>}
+          {!(isMobile && !isTablet) && resource === sidebarResource.workOrder && <CustomTab value={5}>Views</CustomTab>}
           {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 6}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
@@ -642,17 +670,21 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
               allowedToEdit={allowedToEdit}
               completed={completed}
               fetchWorkOrderData={fetchWorkOrderData}
-              resource={sidebarResource.workOrder}
-              defaultSelectedService={null}
-              setDefaultSelectedService={null}
+              resource={resource === sidebarResource.workOrderTechnician ? resource : sidebarResource.workOrder}
+              defaultSelectedService={defaultSelectedService}
+              setDefaultSelectedService={setDefaultSelectedService}
             />
           )}
         </TabPanel>
         <TabPanel value={tabValue} index={2}>
           {workOrderData && (
             <Consumables
-              allowedToEdit={allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.onHold && !workOrderData?.deleted ? true : false}
-              isCreate={true}
+              allowedToEdit={workOrderData.type === WORK_ORDER_TYPE.repairOrder ?
+                allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.onHold && !workOrderData?.deleted ? true : false :
+                [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) && !workOrderData?.deleted ? false : allowedToEdit}
+              isCreate={workOrderData.type === WORK_ORDER_TYPE.repairOrder ? allowedToEdit :
+                [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) ? false : allowedToEdit
+              }
               service={null}
               uniqueId={null}
               stepId={null}
@@ -666,8 +698,12 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
         <TabPanel value={tabValue} index={3}>
           {workOrderData && (
             <Consumables
-              allowedToEdit={allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.onHold && !workOrderData?.deleted ? true : false}
-              isCreate={true}
+              allowedToEdit={workOrderData.type === WORK_ORDER_TYPE.repairOrder ?
+                allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.onHold && !workOrderData?.deleted ? true : false :
+                [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) && !workOrderData?.deleted ? false : allowedToEdit}
+              isCreate={workOrderData.type === WORK_ORDER_TYPE.repairOrder ? allowedToEdit :
+                [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) ? false : allowedToEdit
+              }
               service={null}
               uniqueId={null}
               stepId={null}
@@ -739,7 +775,7 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
       {showConfirmVersion.open && (
         <ConfirmationDialog
           open={showConfirmVersion.open}
-          message={`Are you sure you want to new version ?`}
+          message={`Are you sure you want to create a new version ?`}
           onClose={() => {
             setShowConfirmVersion({ open: false, withData: 0 });
           }}
@@ -828,7 +864,6 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
           }}
         />
       )}
-
       {openSerializedPackageDialog && (
         <PackageNumberDialog
           onClose={() => {
@@ -836,10 +871,10 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
           }}
           assemblyOrderId={workOrderData?.assemblyOrder?.optionValue}
           workOrderIds={[id]}
-          onSuccess={() => {
-            setOpenSerializedPackageDialog(false);
-            updateStatus(WORK_ORDER_STATUS.completed);
+          onSuccess={(_data) => {
+            updateStatus(WORK_ORDER_STATUS.completed, null, null, null, _data);
           }}
+          isSubmitting={isSubmitting}
         />
       )}
     </Box>

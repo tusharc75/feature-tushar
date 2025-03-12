@@ -1,6 +1,5 @@
 import { Box, IconButton } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import { startCase } from 'lodash';
 import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FiExternalLink } from 'react-icons/fi';
@@ -16,7 +15,7 @@ import { useData } from 'src/StateProvider/Provider';
 
 const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { generateColumns } = useColumns();
+  const { generateColumns, getMaterialLabel } = useColumns();
   const [columns, setColumns] = useState(null);
 
   const {
@@ -29,7 +28,7 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
 
   const fetchFields = async () => {
     const response = await fetch_child_resource_fields(CHILD_RESOURCE.assemblyOrderMaterial, assemblyOrderData?.currency || 'USD', false);
-    const data = response?.filter((e) => !['detail', 'description']?.includes(e?.fieldName));
+    const data = response;
     let newColumns = generateColumns(renderedFrom, data, null, false, assemblyOrderData?.currency || 'USD');
 
     let coloum: any = [
@@ -49,7 +48,8 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
         width: 150,
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
-        Cell: ({ row }) => (row.original['type'] ? <h5>{`${startCase(row.original?.type)} `}</h5> : <NoDataCell />)
+        Cell: ({ row }) => (row.original['type'] ? <h5>{`${getMaterialLabel(row.original?.type)}`}</h5> : <NoDataCell />),
+        accessorFn: (original) => { return getMaterialLabel(original?.type) }
       },
       {
         accessor: 'detail',
@@ -142,7 +142,12 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = parent.packageDetail?.packageName || '';
+      parent.detail =
+        parent?.type === MATERIAL_TYPE.package
+          ? parent.packageDetail?.packageName
+          : parent?.type === MATERIAL_TYPE.serializedAsset
+            ? parent?.assetDetail?.assetNumber
+            : '';
       parent.description = parent?.packageDetail?.packageDescription || '';
       parent.qtyDisplay = parent.qty;
       parent.serializedPackageId = parent?.serializedPackageDetail?._id;
@@ -163,10 +168,19 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
           ? _subRow.productDetail?.productName
           : _subRow?.type === MATERIAL_TYPE.serializedAsset
             ? _subRow?.assetDetail?.assetNumber
+            : _subRow?.type === MATERIAL_TYPE.package
+              ? _subRow?.packageDetail?.packageName
+              : '';
+      _subRow.description =
+        _subRow.type === MATERIAL_TYPE.product
+          ? _subRow?.productDetail?.productDescription
+          : _subRow?.type === MATERIAL_TYPE.package
+            ? _subRow?.packageDetail?.packageDescription
             : '';
-      _subRow.description = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription : '';
       _subRow.qty = _subRow.qty || 1;
       _subRow.qtyDisplay = _subRow.qty || 1;
+      _subRow.serializedPackageId = _subRow?.serializedPackageDetail?._id;
+      _subRow.serializedPackageNumber = _subRow?.serializedPackageDetail?.serializedPackageNumber;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;

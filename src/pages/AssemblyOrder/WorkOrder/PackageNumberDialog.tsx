@@ -14,7 +14,8 @@ import { CustomDialogTransition, MATERIAL_TYPE, sidebarResource } from 'src/cons
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { useData } from 'src/StateProvider/Provider';
 
-const SerializedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderIds = null }) => {
+const SerializedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderIds = null, isSubmitting }) => {
+
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialValues, setInitialValues] = useState({ serializedPackages: [] });
   const [packageOptions, setPackageOptions] = useState([]);
@@ -89,12 +90,7 @@ const SerializedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrde
   };
 
   const handleSubmit = (values) => {
-    axiosInstance()
-      .post(`${routes.assemblyOrder.path}/work-order/${assemblyOrderId}/serialized-package`, { serializedPackages: values?.serializedPackages })
-      .then((res) => {
-        onSuccess();
-      })
-      .catch((error) => { });
+    onSuccess(values?.serializedPackages);
   };
 
   return (
@@ -222,7 +218,12 @@ const SerializedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrde
                 <ThemeButton buttonType="transparent" onClick={onClose}>
                   Cancel
                 </ThemeButton>
-                <ThemeButton buttonType="theme" onClick={submitForm}>
+                <ThemeButton
+                  isLoading={isSubmitting}
+                  buttonType="theme"
+                  disabled={isSubmitting}
+                  onClick={submitForm}
+                >
                   Save
                 </ThemeButton>
               </CustomDialogFooter>

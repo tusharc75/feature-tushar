@@ -128,7 +128,7 @@ const ColCard: React.FC<IColCard> = ({
             if (!data[item.accessor]) return null;
             return (
               <Typography key={index} className={styles.cardDetails} title={data[item.accessor] || '--'}>
-                <span>{item.title}: </span>
+                <span title={item.title}>{item.title}: </span>
                 {data[item.accessor] || '--'}
               </Typography>
             );
@@ -143,7 +143,7 @@ const ColCard: React.FC<IColCard> = ({
             }
             return (
               <Typography key={index} className={styles.cardDetails}>
-                <span>{item.title}: </span>
+                <span title={item.title}>{item.title}: </span>
                 <span className="flex min-w-0 gap-1">
                   <span className="min-w-0 overflow-hidden text-ellipsis [font-weight:400_!important]">{outsideText}</span>
                   <Link
@@ -163,7 +163,7 @@ const ColCard: React.FC<IColCard> = ({
             if (!data[item.accessor]) return null;
             return (
               <Typography key={index} className={styles.cardDetails}>
-                <span>{item.title}: </span>
+                <span title={item.title}>{item.title}: </span>
                 {data[item.accessor] ? displayDate(data[item.accessor]) : '--'}
               </Typography>
             );
@@ -172,7 +172,7 @@ const ColCard: React.FC<IColCard> = ({
             if (!data[item.accessor]) return null;
             return (
               <Typography key={index} className={styles.cardDetails}>
-                <span>{item.title}: </span>
+                <span title={item.title}>{item.title}: </span>
                 {data[item.accessor] ? displayDate(data[item.accessor]) : '--'}
               </Typography>
             );
@@ -183,7 +183,7 @@ const ColCard: React.FC<IColCard> = ({
             if (stepTimes.length > 0)
               return (
                 <Typography key={index} className={styles.cardDetails}>
-                  <span>{item.title}: </span>
+                  <span title={item.title}>{item.title}: </span>
                   <TimerComponent stepTimes={stepTimes} />
                 </Typography>
               );

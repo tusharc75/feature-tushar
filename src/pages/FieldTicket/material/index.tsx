@@ -370,7 +370,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
       _subRow.detail = _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageName : _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceName : '';
-      _subRow.description = _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageDescription || '' : _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceDescription  : '';
+      _subRow.description = _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageDescription || '' : _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceDescription : '';
       _subRow.competencyType = _subRow?.serviceDetail?.competencyType;
       _subRow.competencies = _subRow?.serviceDetail?.competencies;
       _subRow.qty = _subRow.qty * parent.qty;
@@ -507,7 +507,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           element.estimateStartDate = fieldTicketData ? fieldTicketData?.estimateStartDate : new Date();
           element.estimateEndDate = fieldTicketData ? fieldTicketData?.estimateEndDate : new Date();
           element.isRental = false;
-          if (taxCodeData) {
+          if (taxCodeData && allFields?.find((e) => e?.fieldName === 'taxCode')) {
             element.taxCode = taxCodeData?.optionValue;
             element.taxPercentage = taxCodeData?.taxRate || 0;
           }
@@ -878,7 +878,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
                 setAssignRentalDataDialog({ open: true, type: MATERIAL_TYPE.package });
               }}
             >
-              Add Rental Packages
+              {`Add Rental ${resources?.packages?.titlePlural}`}
             </MenuItem>
           </>
         )}

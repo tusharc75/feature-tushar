@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Dialog, IconButton, Typography, TextField, InputAdornment, Box } from '@mui/material';
+import { Dialog, IconButton, TextField, InputAdornment, Box } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Grid from '@mui/material/Grid2';
@@ -11,15 +11,7 @@ import { CustomDialogTransition, formatAmountWithCurrency } from 'src/constants/
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
-const ItemizeExpenses = ({
-  onClose,
-  setLineItems,
-  lineItems,
-  currency,
-  currencySymbol,
-  isSubmitting,
-  totalAmount
-}) => {
+const ItemizeExpenses = ({ onClose, setLineItems, lineItems, currency, currencySymbol, isSubmitting, totalAmount }) => {
   const [touchedFields, setTouchedFields] = useState({});
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
@@ -74,10 +66,7 @@ const ItemizeExpenses = ({
       <CustomDialogContent>
         <div>
           <Box pb={2}>
-            <ThemeButton
-              startIcon={<AddIcon fontSize="small" />}
-              onClick={addLineItem}
-            >
+            <ThemeButton startIcon={<AddIcon fontSize="small" />} onClick={addLineItem}>
               Add
             </ThemeButton>
           </Box>
@@ -102,7 +91,12 @@ const ItemizeExpenses = ({
                   type="number"
                   size="small"
                   value={field.amount}
-                  onChange={(event) => handleInputChange(index, 'amount', event)}
+                  onChange={(event) => {
+                    const newValue = Number(event.target.value);
+                    if (newValue >= 0 || event.target.value === '') {
+                      handleInputChange(index, 'amount', event);
+                    }
+                  }}
                   onBlur={() => handleBlur(index, 'amount')}
                   fullWidth
                   required
@@ -125,9 +119,7 @@ const ItemizeExpenses = ({
             </Grid>
           ))}
           <div className="grid justify-end pt-3">
-            <span className='font-medium'>
-              Total Amount: {formatAmountWithCurrency(currency, totalAmount)?.fullFormatAmountWithoutSpace}
-            </span>
+            <span className="font-medium">Total Amount: {formatAmountWithCurrency(currency, totalAmount)?.fullFormatAmountWithoutSpace}</span>
           </div>
         </div>
       </CustomDialogContent>

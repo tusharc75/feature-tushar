@@ -5,7 +5,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { CustomDialogTransition, fieldTicket, rentalManagement } from 'src/constants/helpers';
+import { CustomDialogTransition, fieldServiceOrder, fieldTicket, rentalManagement } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleClose, handleSucess }) {
@@ -13,7 +13,13 @@ function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleCl
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleAssign = () => {
-    const type = selectedServiceOrder[0]?.fieldTicketNumber ? 'fieldTicket' : selectedServiceOrder[0]?.rentalJobName ? 'rentalJob' : '';
+    const type = selectedServiceOrder[0]?.fieldTicketNumber
+      ? 'fieldTicket'
+      : selectedServiceOrder[0]?.rentalJobName
+        ? 'rentalJob'
+        : selectedServiceOrder[0]?.fieldServiceOrderNumber
+          ? 'fieldServiceOrder'
+          : '';
     const data = selectedServiceOrder?.map((ele) => {
       return {
         uniqueId: ele?.service?.uniqueId,
@@ -26,15 +32,28 @@ function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleCl
             startDate: ele?.service?.estimateStartDate,
             endDate: ele?.service?.estimateEndDate
           }
-          : {
-            rentalJob: ele?.resourceId,
-            startDate: ele?.estimateStartDate,
-            endDate: ele?.estimateEndDate
-          }),
+          : type === 'rentalJob'
+            ? {
+              rentalJob: ele?.resourceId,
+              startDate: ele?.estimateStartDate,
+              endDate: ele?.estimateEndDate
+            }
+            : {
+              fieldServiceOrder: ele?.resourceId,
+              startDate: ele?.service?.estimateStartDate,
+              endDate: ele?.service?.estimateEndDate
+            }),
         status: 'Assigned'
       };
     });
-    const baseApi = type === 'fieldTicket' ? fieldTicket.api : type === 'rentalJob' ? rentalManagement.api : '';
+    const baseApi =
+      type === 'fieldTicket'
+        ? fieldTicket.api
+        : type === 'rentalJob'
+          ? rentalManagement.api
+          : type === 'fieldServiceOrder'
+            ? fieldServiceOrder.api
+            : '';
     setIsSubmitting(true);
     axiosInstance()
       .post(`${baseApi}/technician`, { technician: data })
@@ -55,7 +74,7 @@ function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleCl
         <Box p={2}>
           <Typography variant="body1" color="textPrimary">
             Do You want to assign{' '}
-            {`${selectedServiceOrder[0]?.service?.serviceName || ''} (${selectedServiceOrder[0]?.fieldTicketNumber || selectedServiceOrder[0]?.rentalJobName})`}{' '}
+            {`${selectedServiceOrder[0]?.service?.serviceName || ''} (${selectedServiceOrder[0]?.fieldTicketNumber || selectedServiceOrder[0]?.rentalJobName || selectedServiceOrder[0]?.fieldServiceOrderNumber})`}{' '}
             to {technicianData?.firstName || ''} {technicianData?.lastName || ''}?
           </Typography>
         </Box>

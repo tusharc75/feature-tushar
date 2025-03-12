@@ -2,11 +2,9 @@ import { Box, IconButton, MenuItem } from '@mui/material';
 import Add from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
-import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
@@ -19,10 +17,11 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { CHILD_RESOURCE, MATERIAL_TYPE } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, SERIALIZED_PACKAGES_STATUS, WORK_ORDER_TYPE } from '../../../constants/helpers';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import MaterialQtyDialog from 'src/pages/AssemblyOrder/Material/MaterialQtyDialog';
+import AssignSerializedPackagesDialog from 'src/components/AssignRolesDialog/AssignSerializedPackagesDialog';
 
 const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -31,7 +30,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
   const { dataRows, selectedRecords } = state;
 
   const {
-    state: { user, permissions, resources }
+    state: { resources }
   }: any = useData();
 
   const [isUpdating, setUpdating] = useState(false);
@@ -43,7 +42,9 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
   const [columns, setColumns] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [isSubmitting, setSubmitting] = useState(false);
-  const { generateColumns } = useColumns();
+  const [openSerializedPackagesDialog, setOpenSerializedPackagesDialog] = useState(false);
+  const [childPackageWithoutParentDialog, setChildPackageWithoutParentDialog] = useState({ open: false, data: null });
+  const { generateColumns, getMaterialLabel } = useColumns();
 
   useEffect(() => {
     fetchFields();
@@ -51,7 +52,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
 
   const fetchFields = async () => {
     const response = await fetch_child_resource_fields(CHILD_RESOURCE.assemblyOrderMaterial, assemblyOrderData?.currency || 'USD', allowedToEdit);
-    var data = response?.filter((e) => !['detail', 'description']?.includes(e?.fieldName));
+    var data = response;
     setAllFields(JSON.parse(JSON.stringify(data)));
     let newColumns = generateColumns(renderedFrom, data, null, false, assemblyOrderData?.currency || 'USD');
 
@@ -72,7 +73,8 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
         width: 100,
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
-        Cell: ({ row }) => (row.original['type'] ? <h5>{`${startCase(row.original?.type)} `}</h5> : <NoDataCell />)
+        Cell: ({ row }) => (row.original['type'] ? <h5>{`${getMaterialLabel(row.original?.type)}`}</h5> : <NoDataCell />),
+        accessorFn: (original) => { return getMaterialLabel(original?.type) }
       },
       {
         accessor: 'detail',
@@ -83,7 +85,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, table }) => (
           <div className="flex items-center gap-2">
-            {allowedToEdit ? (
+            {allowedToEdit && ![MATERIAL_TYPE.serializedPackage]?.includes(row?.original?.type) ? (
               <h5
                 onClick={() => {
                   setMaterialEdit({ open: true, data: row?.original });
@@ -98,11 +100,11 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
             )}
             {allowedToEdit && row.original.type === MATERIAL_TYPE.package && (
               <>
-                {row.original?.subRows?.length > 0 &&
+                {row.original?.subRows?.length > 0 && (
                   <Box>
                     <span>({row.original?.subRows?.length})</span>
                   </Box>
-                }
+                )}
                 <Box>
                   <HtmlTooltip title={`Add Existing ${resources?.packages?.titlePlural}`}>
                     <IconButton
@@ -121,7 +123,11 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
               <IconButton
                 size="small"
                 onClick={() => {
-                  window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  if (row?.original?.type === MATERIAL_TYPE.serializedPackage) {
+                    window.open(`${routes.serializedPackagesDetail.path}/${row.original.serializedPackageId}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
                 }}
               >
                 <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
@@ -149,30 +155,34 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
       sticky: 'right',
       Cell: ({ row, table }) => (
         <>
-          <HtmlTooltip title={allowedToEdit ? 'Edit' : ''}>
-            <IconButton
-              size="small"
-              aria-label="Details"
-              disabled={allowedToEdit ? false : true}
-              onClick={() => {
-                setMaterialEdit({ open: true, data: row?.original });
-              }}
-            >
-              <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
-            </IconButton>
-          </HtmlTooltip>
-          <HtmlTooltip title={row.original?.canDelete ? 'Delete' : 'Work Order is already assigned'}>
-            <IconButton
-              size="small"
-              aria-label="Details"
-              onClick={() => {
-                setDeleteData([row.original._id]);
-              }}
-              disabled={row.original?.canDelete ? false : true}
-            >
-              <DeleteIcon fontSize="small" color={row.original?.canDelete ? 'error' : 'disabled'} />
-            </IconButton>
-          </HtmlTooltip>
+          {row?.original?.type != MATERIAL_TYPE.serializedPackage && (
+            <>
+              <HtmlTooltip title={allowedToEdit ? 'Edit' : ''}>
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  disabled={allowedToEdit ? false : true}
+                  onClick={() => {
+                    setMaterialEdit({ open: true, data: row?.original });
+                  }}
+                >
+                  <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+                </IconButton>
+              </HtmlTooltip>
+              <HtmlTooltip title={row.original?.canDelete ? 'Delete' : 'Work Order is already assigned'}>
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    setDeleteData([row.original._id]);
+                  }}
+                  disabled={row.original?.canDelete ? false : true}
+                >
+                  <DeleteIcon fontSize="small" color={row.original?.canDelete ? 'error' : 'disabled'} />
+                </IconButton>
+              </HtmlTooltip>
+            </>
+          )}
         </>
       )
     });
@@ -194,6 +204,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
 
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     let rows = data?.material?.filter((e) => e.parentId === null);
+    const serializedPackages = data?.serializedPackages || [];
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
@@ -201,8 +212,8 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
       parent.description = parent?.packageDetail?.packageDescription || '';
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
-      parent.canDelete = true;
-      parent.subRows = generateNestedData(data.material, parent);
+      parent.canDelete = parent?.workOrder ? false : true;
+      parent.subRows = generateNestedData(data.material, serializedPackages, parent);
       if (parent.subRows?.find((r) => !r?.canDelete)) {
         parent.canDelete = false;
       }
@@ -221,7 +232,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
     dispatch({ type: 'loading', loading: false });
   };
 
-  const generateNestedData = (material, parent) => {
+  const generateNestedData = (material, serializedPackages, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
@@ -239,12 +250,20 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
             : '';
       _subRow.qty = _subRow.qty;
       _subRow.canDelete = _subRow?.workOrder ? false : true;
-      _subRow.subRows = generateNestedData(material, _subRow);
+      _subRow.subRows = generateNestedData(material, serializedPackages, _subRow);
     });
-    return subRows;
+
+    const serializedPackae = serializedPackages?.filter((p) => p?.uniqueId === parent?._id);
+    serializedPackae?.forEach((_p, i) => {
+      _p.index = parent.index + '.' + `${i + 1}`;
+      _p.detail = _p?.serializedPackage?.optionLabel;
+      _p.serializedPackageId = _p?.serializedPackage?.optionValue;
+    });
+
+    return [...subRows, ...serializedPackae];
   };
 
-  const handleAdd = async (rows) => {
+  const handleAdd = async (rows, onlyAddChildren = false) => {
     setSubmitting(true);
     const material: any = [];
     rows.forEach((d) => {
@@ -256,6 +275,12 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
       if (allFields?.some((f) => f?.fieldName === 'warehouse')) {
         element.warehouse = assemblyOrderData?.warehouse?.optionValue;
       }
+      if (allFields?.some((f) => f?.fieldName === 'workOrderType')) {
+        element.workOrderType = WORK_ORDER_TYPE.assemblyOrder;
+      }
+      if (element.type === MATERIAL_TYPE.package && onlyAddChildren) {
+        element.onlyAddChildren = true;
+      }
       material.push(element);
     });
 
@@ -263,6 +288,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
       .post(`${routes.assemblyOrder.path}/material/${assemblyOrderData._id}`, { material })
       .then(({ data }) => {
         dispatch({ type: 'selection', selectedRecords: [] });
+        setChildPackageWithoutParentDialog({ open: false, data: null });
         setAddDialog({ open: false, parentId: null });
         toastConfig.setToastConfig({
           open: true,
@@ -274,6 +300,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
       })
       .catch((error) => {
         setSubmitting(false);
+        setChildPackageWithoutParentDialog({ open: false, data: null });
         toastConfig.setToastConfig(error);
       });
   };
@@ -312,8 +339,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
     const data = [];
     rows?.forEach((element) => {
       data.push({
-        _id: element._id,
-        qty: element.qty,
+        ...element,
         ...(allFields?.some((f) => f?.fieldName === 'warehouse')
           ? { warehouse: element?.warehouse ? element?.warehouse : assemblyOrderData?.warehouse?.optionValue }
           : {})
@@ -346,15 +372,59 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
             setAddDialog({ open: true, parentId: null });
           }}
         >
-          Add Existing Packages
+          {`Add Existing ${resources?.packages?.titlePlural}`}
         </MenuItem>
       </>
     );
   };
 
+  const handleAssignSerializedPackage = (serializedPackages) => {
+    setSubmitting(true);
+    axiosInstance()
+      .post(`${routes.assemblyOrder.path}/material/${assemblyOrderData._id}/serialized-packages`, serializedPackages)
+      .then(({ data }) => {
+        dispatch({ type: 'selection', selectedRecords: [] });
+        setOpenSerializedPackagesDialog(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchData();
+        setSubmitting(false);
+      })
+      .catch((error) => {
+        setSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const checkUniqueWarehouse = (records = []) => {
+    if (!allFields?.find((f) => f?.fieldName === 'warehouse')) {
+      return true;
+    }
+    if (!records?.length) {
+      return true;
+    }
+    if (
+      records?.every(
+        (r) => [WORK_ORDER_TYPE.disassemblyOrder]?.includes(r?.workOrderType) && r?.warehouse?.optionValue === records[0]?.warehouse?.optionValue
+      )
+    ) {
+      return false;
+    }
+    return true;
+  };
+
   const actionButtonMenuItems = () => {
     return (
       <>
+        <MenuItem
+          disabled={checkUniqueWarehouse(selectedRecords?.filter((r) => r?.type === MATERIAL_TYPE.package))}
+          onClick={() => {
+            setOpenSerializedPackagesDialog(true);
+          }}
+        >{`Assign ${resources?.serializedPackages?.titleSingular}`}</MenuItem>
         <MenuItem
           disabled={selectedRecords?.every((e) => !e.hideSelection && e.canDelete) ? false : true}
           onClick={() => {
@@ -371,35 +441,31 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
   return (
     <Fragment>
       {allowedToEdit && (
-        <>
-          <DetailsPageHeader
-            isAddButtonVisible={true}
-            addButtonMenuItems={addButtonMenuItems()}
-            isActionButtonVisible={true}
-            actionButtonMenuItems={actionButtonMenuItems()}
-            actionButtonProps={{ disabled: selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true }}
-            hasXpadding
-          />
-        </>
+        <DetailsPageHeader
+          isAddButtonVisible={true}
+          addButtonMenuItems={addButtonMenuItems()}
+          isActionButtonVisible={true}
+          actionButtonMenuItems={actionButtonMenuItems()}
+          actionButtonProps={{ disabled: selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true }}
+          hasXpadding
+        />
       )}
       {columns ? (
-        <>
-          <Box zIndex={5} width={'100%'}>
-            <CustomReactTable
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
-              columns={columns}
-              state={state}
-              dispatch={dispatch}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchData}
-              onSaveEdit={onSaveInlineEdit}
-              hideSelection={!allowedToEdit}
-              hideAction={!allowedToEdit}
-              isClientSideGrid={true}
-              expander={true}
-            />
-          </Box>
-        </>
+        <Box zIndex={5} width={'100%'}>
+          <CustomReactTable
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            refreshGrid={fetchData}
+            onSaveEdit={onSaveInlineEdit}
+            hideSelection={!allowedToEdit}
+            hideAction={!allowedToEdit}
+            isClientSideGrid={true}
+            expander={true}
+          />
+        </Box>
       ) : (
         <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -414,18 +480,22 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
           okBtnLoading={isDeleting}
         />
       )}
-
       {addDialog.open && (
         <AssignPackageDialog
           handleClose={() => setAddDialog({ open: false, parentId: null })}
           onSuccess={(rows) => {
-            handleAdd(rows);
+            if (rows?.find((e) => e?.packages?.length)) {
+              setChildPackageWithoutParentDialog({ open: true, data: rows });
+            }
+            else {
+              handleAdd(rows);
+            }
           }}
           isSubmitting={isSubmitting}
           packageType={'product'}
+          forceSplitQuantity={true}
         />
       )}
-
       {materialEdit.open && (
         <MaterialQtyDialog
           onClose={() => {
@@ -437,6 +507,42 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
           loading={isUpdating}
           isBulkedit={false}
           material={material}
+        />
+      )}
+      {openSerializedPackagesDialog && (
+        <AssignSerializedPackagesDialog
+          onSuccess={handleAssignSerializedPackage}
+          handleClose={() => {
+            setOpenSerializedPackagesDialog(false);
+          }}
+          extraFilterById={[{ field: 'warehouse', term: { $in: [assemblyOrderData?.warehouse?.optionValue] } }]}
+          extraDeepFilter={[{ field: 'status', term: [SERIALIZED_PACKAGES_STATUS.available, SERIALIZED_PACKAGES_STATUS.underReview] }]}
+          isSubmitting={isSubmitting}
+          ids={dataRows?.map((d) => d?.serializedPackageId)}
+          selectedPackages={selectedRecords
+            ?.filter((r) => [WORK_ORDER_TYPE.disassemblyOrder]?.includes(r?.workOrderType))
+            ?.map((r) => ({
+              uniqueId: r?._id,
+              package: r?.packageDetail?._id,
+              packageName: r?.packageDetail?.packageName,
+              qty: r?.qty,
+              warehouse: r?.warehouse?.optionValue || assemblyOrderData?.warehouse?.optionValue
+            }))}
+        />
+      )}
+      {childPackageWithoutParentDialog.open && (
+        <ConfirmationDialog
+          open={true}
+          message={`Would you like to add only the child ${resources?.packages?.titlePlural} ?`}
+          onOk={() => {
+            handleAdd(childPackageWithoutParentDialog.data, true);
+          }}
+          onClose={() => {
+            handleAdd(childPackageWithoutParentDialog.data);
+          }}
+          forwardText="Yes"
+          cancelText="No"
+          okBtnLoading={isSubmitting}
         />
       )}
     </Fragment>

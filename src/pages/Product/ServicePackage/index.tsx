@@ -184,7 +184,7 @@ const ServicePackage = ({ renderedFrom, productId }) => {
   const addButtonMenuItems = () => {
     return (
       <>
-        <MenuItem onClick={() => setOpenAddDialog(true)}>Add Service Packages</MenuItem>
+        <MenuItem onClick={() => setOpenAddDialog(true)}>{`Add Service ${resources?.packages?.titlePlural}`}</MenuItem>
       </>
     );
   };

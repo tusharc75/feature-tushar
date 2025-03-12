@@ -46,7 +46,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
   const [isAdding, setIsAdding] = useState(false);
   const [assetAssignedProduct, setAssetAssignedProduct] = useState([]);
   const [material, setMaterial] = useState([]);
-   
+
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
@@ -436,13 +436,15 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
             Add Existing Services
           </MenuItem>
         )}
-        <MenuItem
-          onClick={() => {
-            setAddDialog({ open: true, type: 'package', parentId: null });
-          }}
-        >
-          Add Existing Packages
-        </MenuItem>
+        {permissions?.packages?.isRead &&
+          <MenuItem
+            onClick={() => {
+              setAddDialog({ open: true, type: 'package', parentId: null });
+            }}
+          >
+            {`Add Existing ${resources?.packages?.titlePlural}`}
+          </MenuItem>
+        }
       </>
     );
   };

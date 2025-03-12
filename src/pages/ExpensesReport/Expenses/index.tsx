@@ -1,8 +1,8 @@
-import { Box, IconButton, MenuItem, Paper, Table, TableBody, TableCell, TableContainer, TableRow } from '@mui/material';
+import { Box, IconButton, MenuItem, Table, TableBody, TableCell, TableContainer, TableRow } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -10,7 +10,7 @@ import {
   EXPENSE_STATUS,
   expenseReport,
   expenses,
-  getUniqueCurrencies,
+  formatAmountWithCurrency,
   gridLoadingTimeout,
   prepareDataForGrid,
   sidebarResource
@@ -39,11 +39,9 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
   const { selectedRecords } = state;
   const [deleteData, setDeleteData] = useState(null);
   const [subtotal, setSubtotal] = useState(0);
-  const currentDataRef = useRef([]);
-  const deletedIdsRef = useRef(new Set());
   const [selectedExpense, setSelectedExpense] = useState([]);
   const [showAddExistingExpenseModal, setShowAddExistingExpenseModal] = useState(false);
-  const [showManageExpensesDialog, setShowManageExpensesDialog] = useState({ open: false, idToClone: null });
+  const [showManageExpensesDialog, setShowManageExpensesDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteconfirmBox, setDeleteConfirmBox] = useState(false);
@@ -79,7 +77,7 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
           return row?.original?.totalAmount ? (
             <div>
               <p className="text-truncate">
-                {getUniqueCurrencies().find((d) => d.currencyCode === row?.original?.currency)?.symbolNative} {row?.original?.totalAmount}
+                {formatAmountWithCurrency(row?.original?.currency, row?.original?.totalAmount)?.fullFormatAmountWithoutSpace}{' '}
               </p>
             </div>
           ) : (
@@ -111,14 +109,12 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
         fetchedRows.push(finalObject);
       });
 
-      const deduplicatedFetchedRows = Array.from(new Map(fetchedRows.map((item) => [item._id, item])).values());
-      const filteredRows = deduplicatedFetchedRows.filter((row) => !deletedIdsRef.current.has(row._id));
+      const duplicatedFetchedRows = Array.from(new Map(fetchedRows.map((item) => [item._id, item])).values());
 
-      const sum = filteredRows.reduce((acc, row) => acc + (Number(row.totalAmount) || 0), 0).toFixed(2);
+      const sum = duplicatedFetchedRows.reduce((acc, row) => acc + (Number(row.totalAmount) || 0), 0).toFixed(2);
       setSubtotal(sum);
 
-      currentDataRef.current = filteredRows;
-      dispatch({ type: 'initialize', data: filteredRows, count: filteredRows.length });
+      dispatch({ type: 'initialize', data: duplicatedFetchedRows, count: duplicatedFetchedRows.length });
 
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
@@ -130,7 +126,11 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
   };
 
   const updateExpensesStatus = () => {
-    axiosInstance().patch(`${expenseReport.api}/status/${reportData._id}`, { status: EXPENSE_STATUS.unSubmitted });
+    axiosInstance()
+      .patch(`${expenseReport.api}/status/${reportData._id}`, { status: EXPENSE_STATUS.unSubmitted })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const handleSaveAndSubmit = async (newExpenses) => {
@@ -146,23 +146,26 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
       _id: reportData._id,
       reportTitle: reportData.reportTitle,
       status: reportData.status,
-      expenses: expense
+      expenses: expense,
+      users: [...reportData.users.map((user) => user.optionValue)]
     };
 
-    try {
-      const response = await axiosInstance().put(`${expenseReport.api}`, payload);
-      await updateExpensesStatus();
-      fetchDataMaster();
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: response.data.message
+    await axiosInstance()
+      .put(`${expenseReport.api}`, payload)
+      .then(({ data }) => {
+        updateExpensesStatus();
+        setIsSubmitting(false);
+        fetchDataMaster();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setIsSubmitting(false);
       });
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
-
-    setIsSubmitting(false);
   };
 
   const ActionsRenderer = {
@@ -205,13 +208,13 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
         >
           {`Add Existing ${resources?.expenses?.titlePlural}`}
         </MenuItem>
-        <MenuItem
+        {/* <MenuItem
           onClick={() => {
-            setShowManageExpensesDialog({ open: true, idToClone: null });
+            setShowManageExpensesDialog(true);
           }}
         >
           {`Create New ${resources?.expenses?.titlePlural}`}
-        </MenuItem>
+        </MenuItem> */}
       </>
     );
   };
@@ -264,17 +267,19 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
             <CommonSkeleton lenArray={[...Array(8).keys()]} />
           </Box>
         )}
-        <Grid container justifyContent="flex-end" className="mt-2">
+        <Grid container justifyContent="flex-end" className="pt-2">
           <Grid>
-            <TableContainer component={Paper}>
+            <TableContainer className="border">
               <Table sx={{ minWidth: 400 }} aria-label="spanning table">
                 <TableBody>
                   <TableRow>
                     <TableCell rowSpan={3} />
-                    <TableCell colSpan={2} sx={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
-                      <strong>Total :</strong>
+                    <TableCell colSpan={2}>
+                      <span className="font-semibold">Total Amount :</span>
                     </TableCell>
-                    <TableCell align="right" sx={{ fontSize: '1rem' }}>{`${subtotal}`}</TableCell>
+                    <TableCell align="right">
+                      <span className="font-small">{subtotal}</span>
+                    </TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
@@ -303,12 +308,12 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
             isSubmitting={isSubmitting}
           />
         )}
-        {showManageExpensesDialog.open && (
+        {showManageExpensesDialog && (
           <ManageExpenses
-            expenseId={showManageExpensesDialog.idToClone}
-            onClose={() => setShowManageExpensesDialog({ open: false, idToClone: null })}
+            expenseId={null}
+            onClose={() => setShowManageExpensesDialog(false)}
             onSuccess={async (data) => {
-              setShowManageExpensesDialog({ open: false, idToClone: null });
+              setShowManageExpensesDialog(false);
               handleSaveAndSubmit(data);
               fetchData();
             }}

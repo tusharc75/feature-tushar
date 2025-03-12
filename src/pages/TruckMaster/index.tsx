@@ -312,7 +312,7 @@ const TruckMaster = () => {
           open={showDeleteConfirmBox}
           message={`Are you sure you want to delete ${deleteRecord
             ? `${resources?.truckMaster?.titleSingular?.toLowerCase()} :
-            ${deleteRecord?.truckName || ''}`
+            ${deleteRecord?.fleetNumber || ''}`
             : `selected ${resources?.truckMaster?.titlePlural?.toLowerCase()}`
             } ?`}
           onClose={() => {

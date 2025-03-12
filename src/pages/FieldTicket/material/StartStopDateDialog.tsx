@@ -5,12 +5,12 @@ import { useEffect, useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { CustomDialogTransition, displayDate, normalizeDate } from 'src/constants/helpers';
-import CustomDatePicker from 'src/components/CustomDatePicker';
+import { CustomDialogTransition, displayDateTime } from 'src/constants/helpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
 
-export default function StartStopDate({ onClose, type, loading, handleSubmit, data = null, minStartDate = null, maxEndDate = null }) {
-  const [initialValues, setInitialValues] = useState({ startDate: new Date(), endDate: new Date() });
+export default function StartStopDate({ onClose, type, loading, handleSubmit, data = null, minStartDateTime = null, maxEndDateTime = null }) {
+  const [initialValues, setInitialValues] = useState(null);
 
   useEffect(() => {
     if (data) {
@@ -19,9 +19,11 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
         ...(data.endDate && { endDate: new Date(data.endDate) })
       });
     } else {
-      if (minStartDate) {
-        let date = new Date(minStartDate);
-        setInitialValues({ startDate: date, endDate: date });
+      if (minStartDateTime) {
+        let date = new Date(minStartDateTime);
+        setInitialValues({ startDate: date, ...(type !== 'startStop' && type !== 'stop' ? {} : { endDate: date }) });
+      } else {
+        setInitialValues({ startDate: new Date(), ...(type !== 'startStop' && type !== 'stop' ? {} : { endDate: new Date() }) });
       }
     }
   }, [data, type]);
@@ -32,14 +34,14 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
 
   const validate = (values) => {
     const errors = {};
-    if (values?.endDate && normalizeDate(values?.startDate) > normalizeDate(values.endDate)) {
+    if (values?.endDate && values?.startDate > values.endDate) {
       errors['endDate'] = `Please enter valid end date`;
     }
-    if (minStartDate && normalizeDate(values?.startDate) < normalizeDate(minStartDate)) {
-      errors['startDate'] = `Start Date can't be less than ${displayDate(minStartDate)}`;
+    if (minStartDateTime && values?.startDate < minStartDateTime) {
+      errors['startDate'] = `Start Date can't be less than ${displayDateTime(minStartDateTime)}`;
     }
-    if (maxEndDate && normalizeDate(values?.endDate) > normalizeDate(maxEndDate)) {
-      errors['endDate'] = `End Date can't be greater than ${displayDate(maxEndDate)}`;
+    if (maxEndDateTime && values?.endDate > maxEndDateTime) {
+      errors['endDate'] = `End Date can't be greater than ${displayDateTime(maxEndDateTime)}`;
     }
     return errors;
   };
@@ -70,11 +72,11 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
                 <Grid container spacing={2}>
                   {type !== 'stop' && (
                     <Grid size={{ xs: 12, sm: 12 }}>
-                      <CustomDatePicker
+                      <CustomDateTimePicker
                         fullWidth
                         size="small"
                         margin="none"
-                        {...(minStartDate ? { minDate: minStartDate } : {})}
+                        {...(minStartDateTime ? { minDateTime: minStartDateTime } : {})}
                         label={`Start Date`}
                         value={values.startDate}
                         onChange={(date) => {
@@ -87,17 +89,17 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
                   )}
                   {(type === 'startStop' || type === 'stop') && (
                     <Grid size={{ xs: 12, sm: 12 }}>
-                      <CustomDatePicker
+                      <CustomDateTimePicker
                         fullWidth
                         size="small"
                         margin="none"
-                        minDate={values.startDate}
+                        minDateTime={values.startDate}
                         label={`End Date`}
                         value={values.endDate}
                         onChange={(date) => {
                           setFieldValue('endDate', date);
                         }}
-                        {...(maxEndDate ? { maxDate: maxEndDate } : {})}
+                        {...(maxEndDateTime ? { maxDateTime: maxEndDateTime } : {})}
                         error={touched['endDate'] && Boolean(errors['endDate'])}
                         helperText={touched['endDate'] && errors['endDate']}
                       />

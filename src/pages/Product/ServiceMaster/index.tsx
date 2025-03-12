@@ -337,7 +337,7 @@ const ServiceMaster = (props: Props) => {
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = async (deleteInWorkOrder: boolean= false) => {
     try {
       let serviceIds = [];
       let productIds = [];
@@ -359,17 +359,19 @@ const ServiceMaster = (props: Props) => {
       }
       setDeleting(true);
       if (serviceIds.length > 0) {
-        await axiosInstance().put(`${routes.product.path}/${id}/service-master/remove`, { ids: serviceIds });
+        await axiosInstance().put(`${routes.product.path}/${id}/service-master/remove`, { ids: serviceIds, deleteInWorkOrder });
       }
       if (productIds.length > 0) {
-        await axiosInstance().put(`${routes.product.path}/${id}/service-master/remove-consumables`, { ids: productIds });
+        await axiosInstance().put(`${routes.product.path}/${id}/service-master/remove-consumables`, { ids: productIds, deleteInWorkOrder });
       }
       fetchData();
       setShowDeleteConfirmBox(false);
       setDeleteRecord(null);
       setDeleting(false);
+      setWorkOrderUpdateDialog({ open: false, data: null, type: null });
     } catch (e) {
       setDeleting(false);
+      setWorkOrderUpdateDialog({ open: false, data: null, type: null });
       toastConfig.setToastConfig(e);
     }
   };
@@ -608,7 +610,9 @@ const ServiceMaster = (props: Props) => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
           }}
-          onOk={handleDelete}
+          onOk={() => {
+            setWorkOrderUpdateDialog({ open: true, data: null, type: 'delete' });
+          }}
           okBtnLoading={isDeleting}
         />
       )}
@@ -689,11 +693,15 @@ const ServiceMaster = (props: Props) => {
           open={workOrderUpdateDialog.open}
           message={workOrderUpdateDialog.type === 'add' ?
             `Do you want to add selected Product(s) in existing open ${resources?.workOrder?.titlePlural}?` :
+            workOrderUpdateDialog.type === 'delete' ?
+            `Do you want to delete selected Product(s)(if any) in existing open ${resources?.workOrder?.titlePlural}?` :
             `Do you want to update qty in existing open ${resources?.workOrder?.titlePlural}?
-            Note: If qty is less then consumbed qty work order will not be updated  `}
+            Note: If qty is less then consumed qty work order will not be updated  `}
           onClose={() => {
             if (workOrderUpdateDialog.type === 'edit') {
               handleSaveData(workOrderUpdateDialog.data);
+            } else if (workOrderUpdateDialog.type === 'delete') {
+              handleDelete();
             } else {
               handleAssignConsumable(workOrderUpdateDialog.data);
             }
@@ -701,6 +709,8 @@ const ServiceMaster = (props: Props) => {
           onOk={() => {
             if (workOrderUpdateDialog.type === 'edit') {
               handleSaveData({ ...workOrderUpdateDialog.data, updateInWorkOrder: true });
+            } else if (workOrderUpdateDialog.type === 'delete') {
+              handleDelete(true);
             } else {
               const data = workOrderUpdateDialog.data.map((d) => {
                 return { ...d, addInWorkOrder: true };
@@ -708,7 +718,7 @@ const ServiceMaster = (props: Props) => {
               handleAssignConsumable(data);
             }
           }}
-          okBtnLoading={isAssigning}
+          okBtnLoading={isAssigning || isDeleting}
           cancelText='No'
           forwardText='Yes'
         />

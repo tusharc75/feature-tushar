@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { Box, Dialog, } from '@mui/material';
+import { Box, Dialog } from '@mui/material';
 import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -12,9 +12,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { Link } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
 
-
 const RentalAssetHistoryDialog = ({ asset, rentalJob, fields, onClose }) => {
-
   const renderedFrom = `${camelCase(sidebarResource?.serializedAsset)}_rentalAssetHistory`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -25,43 +23,56 @@ const RentalAssetHistoryDialog = ({ asset, rentalJob, fields, onClose }) => {
   const { generateColumns } = useColumns();
 
   useEffect(() => {
-    const extraColumn = [{
-      accessor: 'rentalJob',
-      Header: 'Rental Job',
-      disableFilters: true,
-      disableSortBy: true,
-      Cell: ({ row }) => (
-        <div>
-          {row?.original?.rentalJobId ? (
-            <Link
-              className="link"
-              title={row.original.rentalJob}
-              to={`${routes.rentalManagementDetail.path}/${row?.original?.rentalJobId}`}
-              target="_blank"
-            >
-              {row.original.rentalJob}
-            </Link>
-          ) : (
-            <NoDataCell />
-          )}
-        </div>
-      ),
-    },
-    {
-      accessor: 'date',
-      Header: 'Date & Time',
-      disabled: true,
-      disableFilters: true,
-      disableSortBy: false,
-      Cell: ({ row }) =>
-        row.original?.date ? (
-          <div title={`${displayDateTime(row.original?.date)}`}>
-            {displayDateTime(row.original?.date)}
+    const extraColumn = [
+      {
+        accessor: 'rentalJob',
+        Header: 'Rental Job',
+        disableFilters: true,
+        disableSortBy: true,
+        Cell: ({ row }) => (
+          <div>
+            {row?.original?.rentalJobId ? (
+              <Link
+                className="link"
+                title={row.original.rentalJob}
+                to={`${routes.rentalManagementDetail.path}/${row?.original?.rentalJobId}`}
+                target="_blank"
+              >
+                {row.original.rentalJob}
+              </Link>
+            ) : (
+              <NoDataCell />
+            )}
           </div>
-        ) : (
-          <NoDataCell />
         )
-    }];
+      },
+      {
+        accessor: 'date',
+        Header: 'Date & Time',
+        disabled: true,
+        disableFilters: true,
+        disableSortBy: false,
+        Cell: ({ row }) =>
+          row.original?.date ? <div title={`${displayDateTime(row.original?.date)}`}>{displayDateTime(row.original?.date)}</div> : <NoDataCell />
+      },
+      {
+        accessor: 'updatedBy',
+        Header: 'Updated By',
+        disabled: true,
+        disableFilters: true,
+        disableSortBy: false,
+        Cell: ({ row }) =>
+            <div>
+              {row?.original?.user ? (
+                <Link className="link" title={row.original?.user} to={`${routes.userDetail.path}/${row.original?.userId}`} target="_blank">
+                  {row.original?.user}
+                </Link>
+              ) : (
+                <NoDataCell />
+              )}
+            </div>
+      }
+    ];
     let columns = generateColumns(renderedFrom, fields)?.map((col) => {
       const { Footer, ...rest } = col;
       return rest;
@@ -70,13 +81,11 @@ const RentalAssetHistoryDialog = ({ asset, rentalJob, fields, onClose }) => {
     setColumns(newColumns);
   }, [fields]);
 
-
   useEffect(() => {
     if (rentalJob && asset) {
       fetchData();
     }
   }, [rentalJob, asset]);
-
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
@@ -136,7 +145,7 @@ const RentalAssetHistoryDialog = ({ asset, rentalJob, fields, onClose }) => {
           </Box>
         )}
       </CustomDialogContent>
-    </Dialog >
+    </Dialog>
   );
 };
 

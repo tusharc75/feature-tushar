@@ -38,7 +38,6 @@ const FieldTicket = ({
   serviceOrderData,
   serviceOrderFields = [],
   fetchServiceOrderData,
-  setNextStep,
   allowedToEdit,
   handleChangeStatus,
   resource,
@@ -145,7 +144,6 @@ const FieldTicket = ({
 
   const fetchData = async (cancelToken?: CancelTokenSource) => {
     try {
-      setNextStep(false);
       dispatch({ type: 'loading', loading: true });
       dispatch({ type: 'selection', selectedRecords: [] });
       let data, count;
@@ -178,7 +176,6 @@ const FieldTicket = ({
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
-      setNextStep(true);
       dispatch({ type: 'loading', loading: false });
     } catch (e) {
       toastConfig.setToastConfig(e);
@@ -312,7 +309,7 @@ const FieldTicket = ({
             setOpenDialog({ open: true, isClone: false, id: null });
           }}
         >
-          {`Create ${resources?.fieldTicket?.titlePlural}`}
+          {`Create ${resources?.fieldTicket?.titleSingular}`}
         </MenuItem>
       </>
     );
@@ -364,7 +361,7 @@ const FieldTicket = ({
       )}
       {columns ? (
         <CustomReactTable
-          height={resource === sidebarResource.fieldServiceOrder ? 'calc(100vh - 393px)' : 'calc(100vh - 200px)'}
+          height={resource === sidebarResource.fieldServiceOrder ? 'calc(100vh - 300px)' : 'calc(100vh - 200px)'}
           columns={columns}
           state={state}
           dispatch={dispatch}

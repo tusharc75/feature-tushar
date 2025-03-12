@@ -8,7 +8,18 @@ import { useParams, useHistory } from 'react-router-dom';
 import queryString from 'query-string';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import { ACTIVITY_RESOURCE, assemblyOrderSteps, checkIsAllowedToDelete, checkIsAllowedToEdit, sidebarResource } from 'src/constants/helpers';
+import {
+  ACTIVITY_RESOURCE,
+  ASSEMBLY_ORDER_STATUS,
+  assemblyOrderSteps,
+  checkIsAllowedToDelete,
+  checkIsAllowedToEdit,
+  cloneResourceData,
+  customerAccount,
+  rentalManagement,
+  sidebarResource,
+  warehouse
+} from 'src/constants/helpers';
 import Steps, { getIndex } from 'src/components/Steps';
 import { isMobile, isTablet } from 'react-device-detect';
 import EditIcon from '@mui/icons-material/Edit';
@@ -28,6 +39,7 @@ import WorkOrder from 'src/pages/AssemblyOrder/WorkOrder';
 import Loading from 'src/pages/AssemblyOrder/Loading';
 import Invoice from 'src/pages/AssemblyOrder/Invoice';
 import RoadmapViews from './RoadMapViews';
+import ManageRentalManagementDialog from 'src/pages/RentalManagement/ManageRental';
 
 const AssemblyOrderDetail = () => {
   const renderedFrom = camelCase(sidebarResource.assemblyOrder);
@@ -41,6 +53,7 @@ const AssemblyOrderDetail = () => {
   const {
     state: { user, permissions, resources }
   }: any = useData();
+
   const [assemblyOrderData, setAssemblyOrderData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [allFields, setAllFields] = useState([]);
@@ -53,6 +66,7 @@ const AssemblyOrderDetail = () => {
   const [currentStep, setCurrentStep] = useState(null);
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [resourceData, setResourceData] = useState(null);
+  const [openRentalDialog, setOpenRentalDialog] = useState(false);
 
   const assemblyOrderProcessStepsNames = useMemo(() => {
     return assemblyOrderSteps.map((item) => item.name);
@@ -121,11 +135,12 @@ const AssemblyOrderDetail = () => {
           setCurrentStep(getIndex(data?.processStatus, assemblyOrderSteps));
         }
 
-        setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.assemblyOrder, data));
+        setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.assemblyOrder, data) && data?.status != ASSEMBLY_ORDER_STATUS.converted);
         setAllowedToDelete(
           permissions?.assemblyOrder?.isDelete &&
             checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
-            data?.canDelete
+            data?.canDelete &&
+            ![ASSEMBLY_ORDER_STATUS.converted, ASSEMBLY_ORDER_STATUS.partiallyConverted]?.includes(data?.status)
         );
         setAssemblyOrderData({ ...data });
       })
@@ -155,6 +170,24 @@ const AssemblyOrderDetail = () => {
     }
   };
 
+  const convertToRental = (rentalData) => {
+    axiosInstance()
+      .put(`${routes?.assemblyOrder?.path}/convert-to-rental`, { assemblyOrder: id, rentalManagement: rentalData?._id })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message || ''
+        });
+        setOpenRentalDialog(false);
+        fetchData();
+        window.open(`${routes.rentalManagementDetail.path}/${rentalData?._id}`);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -167,6 +200,9 @@ const AssemblyOrderDetail = () => {
           <Box className="control-buttons-v1">
             {assemblyOrderData ? (
               <>
+                {permissions?.rentalManagement?.isCreate && assemblyOrderData?.canConvert && !assemblyOrderData?.rentalJob && (
+                  <ThemeButton onClick={() => setOpenRentalDialog(true)}>{`Convert to ${resources?.rentalManagement?.titleSingular}`}</ThemeButton>
+                )}
                 {permissions?.assemblyOrder?.isUpdate && allowedToEdit && (
                   <ThemeButton iconForMobile={<EditIcon />} onClick={() => setOpenUpdateDialog(true)} mobileTooltip={'Edit'}>
                     {'Edit'}
@@ -211,7 +247,7 @@ const AssemblyOrderDetail = () => {
               steps={assemblyOrderSteps}
               currentStep={currentStep}
               setCurrentStep={setCurrentStep}
-              isStepEnded={false}
+              isStepEnded={assemblyOrderData?.status === ASSEMBLY_ORDER_STATUS.converted}
               stepFullScreen={stepFullScreen}
               setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
               updateStatus={(step: number) => {
@@ -235,9 +271,10 @@ const AssemblyOrderDetail = () => {
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={allowedToEdit}
                 setCurrentStep={setCurrentStep}
+                nextStep={nextStep}
               />
             )}
-            {assemblyOrderProcessStepsNames[currentStep] === 'Loading' && assemblyOrderData && (
+            {/* {assemblyOrderProcessStepsNames[currentStep] === 'Loading' && assemblyOrderData && (
               <Loading
                 renderedFrom={`${renderedFrom}_grid-3`}
                 assemblyOrderData={assemblyOrderData}
@@ -245,7 +282,7 @@ const AssemblyOrderDetail = () => {
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={allowedToEdit}
               />
-            )}
+            )} */}
             {assemblyOrderProcessStepsNames[currentStep] === 'Final Slip' && assemblyOrderData && (
               <Invoice renderedFrom={`${renderedFrom}_grid-4`} assemblyOrderData={assemblyOrderData} stepFullScreen={stepFullScreen} />
             )}
@@ -293,6 +330,19 @@ const AssemblyOrderDetail = () => {
             fetchData();
             setOpenUpdateDialog(false);
           }}
+        />
+      )}
+
+      {openRentalDialog && (
+        <ManageRentalManagementDialog
+          isClone={false}
+          rentalManagementId={null}
+          onClose={() => {
+            setOpenRentalDialog(false);
+          }}
+          onSuccess={convertToRental}
+          open={true}
+          referenceData={{ warehouse: assemblyOrderData?.warehouse?.optionValue, customerAccount: assemblyOrderData?.customerAccount?.optionValue }}
         />
       )}
     </Box>

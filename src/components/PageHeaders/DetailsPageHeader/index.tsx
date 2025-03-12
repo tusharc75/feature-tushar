@@ -32,7 +32,9 @@ type DetailsPageHeaderProps = {
   newActionButtonProps?: NewActionButtonProps<any>;
   hasYpadding?: boolean;
   className?: string;
+  rightSideContentsAfterAction?: ReactNode;
   actionButtonType?: 'button' | 'iconButton';
+  addButtonText?: string;
 };
 
 const DetailsPageHeader = ({
@@ -50,7 +52,9 @@ const DetailsPageHeader = ({
   newActionButtonProps,
   hasYpadding = true,
   className = '',
-  actionButtonType = 'button'
+  actionButtonType = 'button',
+  rightSideContentsAfterAction,
+  addButtonText = 'Add'
 }: DetailsPageHeaderProps) => {
   const walkmeInstance = useGetWalkmeInstance();
   const { tooltip: actionButtonTooltip, onClick: actionButtonOnClick, ...restOfActionButtonProps } = actionButtonProps || {};
@@ -106,7 +110,7 @@ const DetailsPageHeader = ({
               iconForMobile={<Add />}
               endIcon={isMobile ? null : addButtonOnClick ? null : <ExpandMore fontSize="small" />}
             >
-              Add
+              {addButtonText}
             </ThemeButton>
           </>
         ) : null}
@@ -201,6 +205,7 @@ const DetailsPageHeader = ({
             </Menu>
           </>
         ) : null}
+        {rightSideContentsAfterAction}
       </div>
     </div>
   );

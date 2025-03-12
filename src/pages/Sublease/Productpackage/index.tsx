@@ -26,6 +26,7 @@ import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateAddStepEditProduct } from 'src/pages/Sublease/walkmeSteps';
 import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
 import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
+import { useData } from 'src/StateProvider/Provider';
 
 const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchData, renderedFrom, allowedToEdit, stepFullScreen }) => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -51,6 +52,10 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitState, setSubmitState] = useState({ open: false, values: null, rowData: null });
+
+  const {
+    state: { permissions, resources }
+  }: any = useData();
 
   useEffect(() => {
     fetchFields();
@@ -365,14 +370,16 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
         >
           Add Existing Products
         </MenuItem>
-        <MenuItem
-          id="add-existing-package-menu-item"
-          onClick={() => {
-            setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
-          }}
-        >
-          Add Existing Packages
-        </MenuItem>
+        {permissions?.packages?.isRead &&
+          <MenuItem
+            id="add-existing-package-menu-item"
+            onClick={() => {
+              setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
+            }}
+          >
+            {`Add Existing ${resources?.packages?.titlePlural}`}
+          </MenuItem>
+        }
       </>
     );
   };
@@ -491,6 +498,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           handleClose={() => {
             setSubmitState({ open: false, values: null, rowData: null });
           }}
+          needCalculate={true}
         />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'product' && (

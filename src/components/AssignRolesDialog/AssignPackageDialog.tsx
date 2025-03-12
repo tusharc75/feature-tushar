@@ -1,4 +1,4 @@
-import { Box, Dialog, Grid, IconButton } from '@mui/material';
+import { Box, Dialog, IconButton } from '@mui/material';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -20,6 +20,7 @@ import Services from 'src/pages/Packages/Services';
 import Products from 'src/pages/Packages/Products';
 import Packages from 'src/pages/Packages/Packages';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import Grid from '@mui/material/Grid2';
 
 const AssignPackageDialog = ({
   onSuccess,
@@ -28,7 +29,8 @@ const AssignPackageDialog = ({
   customerAccount = null,
   ids = [],
   isSubmitting = false,
-  hideQty = false
+  hideQty = false,
+  forceSplitQuantity = false
 }) => {
   const renderedFrom = `${camelCase(sidebarResource?.packages)}`;
   const toastConfig = useContext(CustomToastContext);
@@ -251,16 +253,26 @@ const AssignPackageDialog = ({
             textAddShow: true
           }}
           addButtonOnclick={() => {
-            if (selectedRecords?.some((r) => r?.qty > 1)) {
-              setShowConfirmationDialog(true);
-            } else {
-              onSuccess(selectedRecords);
+            if (forceSplitQuantity) {
+              const data: any = [];
+              selectedRecords?.forEach((r) => {
+                for (let i = 0; i < r?.qty; i++) {
+                  data.push({ ...r, qty: 1 });
+                }
+              });
+              onSuccess(data);
+            }
+            else {
+              if (selectedRecords?.some((r) => r?.qty > 1)) {
+                setShowConfirmationDialog(true);
+              } else {
+                onSuccess(selectedRecords);
+              }
             }
           }}
           isAddButtonVisible={true}
           setQueryString={false}
         />
-
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 250px)'}
@@ -279,20 +291,16 @@ const AssignPackageDialog = ({
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-
         {showConfirmationDialog && (
           <ConfirmationDialog
             open={true}
-            message="Please confirm this if you want to split this quantity into multiple line item(s)?"
+            message="Do you want to split this quantity into multiple line item(s)?"
             onOk={() => {
               setShowConfirmationDialog(false);
               const data: any = [];
               selectedRecords?.forEach((r) => {
                 for (let i = 0; i < r?.qty; i++) {
-                  data.push({
-                    ...r,
-                    qty: 1
-                  });
+                  data.push({ ...r, qty: 1 });
                 }
               });
               onSuccess(data);
@@ -301,6 +309,8 @@ const AssignPackageDialog = ({
               setShowConfirmationDialog(false);
               onSuccess(selectedRecords);
             }}
+            forwardText="Yes"
+            cancelText="No"
           />
         )}
 
@@ -334,7 +344,7 @@ const AssignPackageDialog = ({
                   <CustomTab value={2}>Sub Packages</CustomTab>
                 </CustomTabs>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={12} md={12} lg={12}>
+                  <Grid size={{ md: 12, lg: 12, xs: 12, sm: 12 }}>
                     <TabPanel value={tabValue} index={0}>
                       {tabValue === 0 && <Services packageData={open?.data} packageId={open?.data?._id} allowedToEdit={false} fullHeight={true} />}
                     </TabPanel>

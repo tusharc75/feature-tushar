@@ -298,7 +298,8 @@ const Product = ({ bulkAssetCreationData, setNextStep, renderedFrom, fetchData, 
         });
       })
       .catch((error) => {
-        setLoadingButton(true);
+        setLoadingButton(false);
+        setShowCreateConfirmBox(false);
         toastConfig.setToastConfig(error);
       });
   };

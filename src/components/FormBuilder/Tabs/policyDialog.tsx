@@ -206,15 +206,18 @@ const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource
       />
     );
   } else if (type === 'multiSelect') {
-    const options = data?.option && data?.option?.length ? data?.option : fields
-      ?.filter((ele) => !ele.fieldData?.primaryField)
-      ?.map((e) => {
-        return {
-          optionLabel: e?.fieldData?.fieldLabel,
-          optionValue: e?.fieldData?.fieldName,
-          order: e?.fieldData?.order
-        };
-      });
+    const options =
+      data?.option && data?.option?.length
+        ? data?.option
+        : fields
+            ?.filter((ele) => !ele.fieldData?.primaryField)
+            ?.map((e) => {
+              return {
+                optionLabel: e?.fieldData?.fieldLabel,
+                optionValue: e?.fieldData?.fieldName,
+                order: e?.fieldData?.order
+              };
+            });
     return (
       <>
         {!loading ? (
@@ -247,7 +250,7 @@ const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource
       </>
     );
   } else if (type === 'dropDown') {
-    let options = [];
+    let options = data?.option && data?.option?.length ? data?.option : [];
     if (data?.fieldOption) {
       options = fields?.find((e) => e?.fieldData?.fieldName === data?.fieldOption)?.fieldData?.option || [];
     }
@@ -269,6 +272,25 @@ const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource
             renderInput={(params) => (
               <TextField {...params} margin="dense" label={data?.fieldLabel} name={data?.fieldName} variant="outlined" size="small" />
             )}
+          />
+        </Grid>
+      </Grid>
+    );
+  } else if (type === 'number') {
+    return (
+      <Grid container spacing={2}>
+        <Grid size={{ lg: 6, md: 6, sm: 6, xs: 12 }}>
+          <TextField
+            name={data?.fieldName}
+            variant="outlined"
+            value={data?.data}
+            label={data?.fieldLabel}
+            size="small"
+            fullWidth
+            type="number"
+            onChange={(event: any) => {
+              onChange(null, parseFloat(event.target.value));
+            }}
           />
         </Grid>
       </Grid>
@@ -318,12 +340,14 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
   const [fieldOptions, setFieldOptions] = useState([]);
   const [statusOptions, setStatusOptions] = useState([]);
   const [initialData, setInitialData] = useState({ fieldsData: [...Data?.data], fields: Data?.fields });
+  const [optionLoading, setOptionLoading] = useState(false);
 
   useEffect(() => {
     fetchResourceFields();
   }, []);
 
   const fetchResourceFields = async () => {
+    setOptionLoading(true);
     const updatedFields = [...Data.fields];
     const lookupResources = updatedFields.reduce((acc, ele) => {
       if (ele?.lookupResource) {
@@ -332,13 +356,24 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
       return acc;
     }, []);
     const lookupString = lookupResources?.join(',');
-    const options = await fetchResourceOptions(lookupString);
-    for (const ele of updatedFields) {
-      if (ele?.lookupResource) {
-        ele.option = options[ele.lookupResource];
-      }
+    if (lookupString) {
+      axiosInstance()
+        .get(`/sa-formbuilder/lookup?lookupResource=${lookupString}`)
+        .then(({ data: { data: options } }) => {
+          for (const ele of updatedFields) {
+            if (ele?.lookupResource) {
+              ele.option = options[ele.lookupResource];
+            }
+          }
+          setInitialData((prevState) => ({ ...prevState, fields: updatedFields }));
+          setOptionLoading(false);
+        })
+        .catch((err) => {
+          setOptionLoading(false);
+        });
+    } else {
+      setOptionLoading(false);
     }
-    setInitialData((prevState) => ({ ...prevState, fields: updatedFields }));
   };
 
   useEffect(() => {
@@ -364,7 +399,7 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
 
   return (
     <>
-      {statusOptions?.length > 0 && fieldOptions?.length && initialData ? (
+      {statusOptions?.length > 0 && fieldOptions?.length && initialData && !optionLoading ? (
         <div className="flex flex-col gap-2">
           <div className="mx-2 flex items-center justify-between">
             <Typography variant="subtitle2">{Data.fieldLabel}</Typography>
@@ -507,11 +542,4 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
       )}
     </>
   );
-};
-
-const fetchResourceOptions = async (resources) => {
-  const {
-    data: { data: lookupResourceOptions }
-  } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=${resources}`);
-  return lookupResourceOptions;
 };
