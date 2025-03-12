@@ -10,6 +10,7 @@ import { backendApi } from 'src/config';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { ChatBoxIcon } from 'src/assets/svg/CollaborateSidebar';
 import dayjs from 'dayjs';
+import { useSocket } from 'src/hooks/useSocket';
 
 const Chatter = (props: any) => {
   const { relatedTo } = props;
@@ -22,14 +23,13 @@ const Chatter = (props: any) => {
 
   const { isOffline } = useContext(CustomOfflineContext);
 
-  const token = localStorage.getItem('token');
   const { setToastConfig } = useContext(CustomToastContext);
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState('');
   const [chatterId, setChatterId] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [socket, setSocket] = useState<Socket>(null);
   const [isSending, setSending] = useState(false);
+  const chatSocket = useSocket({namespace:"/chatter"})
 
   const getChatter = () => {
     setLoading(true);
@@ -59,29 +59,17 @@ const Chatter = (props: any) => {
   }, [relatedTo]);
 
   useEffect(() => {
-    if (!token || !chatterId || isOffline) return;
-    const s = io(`${backendApi?.replace('/api', '')}/chatter`, {
-      path: backendApi?.includes('/api') ? '/api/socket.io' : '/socket.io',
-      auth: {
-        token
-      },
-      reconnectionAttempts: 5,
-      reconnectionDelay: 5000,
-      transports: ['websocket', 'pooling']
-    });
-    s.on('connect', () => {
-      s.emit('join', chatterId);
-    });
-    setSocket(s);
-  }, [token, chatterId, isOffline]);
+    if (!chatterId || isOffline || !chatSocket.connected) return;
 
-  // Socket listening for data
-  useEffect(() => {
-    if (!socket) return;
-    socket.on('data', (data) => {
+
+    chatSocket.emit('join', chatterId);
+
+    chatSocket.on('data', (data) => {
       setMessages(data.Messages.reverse());
     });
-  }, [socket]);
+
+    return () =>  {chatSocket.off("connection")}
+  }, [chatterId, isOffline,chatSocket,chatSocket?.connected]);
 
   const createChatter = () => {
     axiosInstance()

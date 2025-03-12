@@ -8,9 +8,9 @@ import Sidebar from 'src/pages/WorkSpace/Sidebar';
 import { TChannel } from 'src/pages/WorkSpace/types';
 import ManageChannel from './ManageChannelDialog';
 import { cn } from 'src/constants/helpers';
-import { backendApi } from 'src/config';
-import io, { Socket } from 'socket.io-client';
+
 import { useData } from 'src/StateProvider/Provider';
+import { useSocket } from 'src/hooks/useSocket';
 
 const Workspace = () => {
   const [channels, setChannels] = useState<TChannel[]>(null);
@@ -18,10 +18,10 @@ const Workspace = () => {
   const [manageChannelDialog, setManageChannelDialog] = useState({ open: false, _id: null });
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const mobScreen = useMediaQuery('(max-width:768px)');
-  const [socket, setSocket] = useState<Socket>(null);
   const [newChat, setNewChat] = useState(false);
   const [newChatUsers, setNewChatUsers] = useState([]);
   const [newChatAddMemberDialog, setNewChatAddMemberDialog] = useState<boolean>(false);
+  const socket = useSocket({namespace:"/workspace/channel"})
   const {
     state: {
       user: { user },
@@ -29,7 +29,6 @@ const Workspace = () => {
     }
   } = useData();
 
-  const token = localStorage.getItem('token');
 
   useEffect(() => {
     fetchChannels();
@@ -104,17 +103,6 @@ const Workspace = () => {
     };
   }, [socket, channels]);
 
-  useEffect(() => {
-    if (!token) return;
-    const s = io(`${backendApi?.replace('/api', '')}/workspace/channel`, {
-      path: backendApi?.includes('/api') ? '/api/socket.io/' : '/socket.io/',
-      auth: { token },
-      reconnectionAttempts: 5,
-      reconnectionDelay: 5000,
-      transports: ['websocket', 'pooling']
-    });
-    setSocket(s);
-  }, [token]);
 
   return (
     <>
