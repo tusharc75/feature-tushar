@@ -25,6 +25,7 @@ import { quotation } from '../../constants/helpers';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 import { camelCase, isEqual, startCase } from 'lodash';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import VariablesDialog from './Variables';
 
 const defaultProductColumns = 7;
 
@@ -96,9 +97,11 @@ export default function NewCreateQuotePdfTemplate() {
   const [table, setTable] = useState([]);
 
   const [variables, setVariables] = useState([]);
+  const [allFields, setAllFields] = useState(null);
   const [formValues, setFormValues] = useState(null);
 
   const [pdfResourceOption, setpdfResourceOption] = useState(null);
+  const [variableDialog, setVariableDialog] = useState(false);
 
   const onBackButtonEvent = (e) => {
     if (hasPermissionToUpdate) {
@@ -148,6 +151,7 @@ export default function NewCreateQuotePdfTemplate() {
           .then(({ data: { data } }) => {
             const vars = data.map((field) => field.fieldData.fieldName);
             setVariables(['entity', ...vars]);
+            setAllFields(data);
           })
           .catch((err) => {
             toastConfig.setToastConfig(err);
@@ -779,6 +783,11 @@ export default function NewCreateQuotePdfTemplate() {
                       }
                       label="Hide Amount Total Section"
                     />
+                    {allFields?.length && (
+                      <ThemeButton onClick={() => setVariableDialog(true)} buttonType="theme">
+                        Variables
+                      </ThemeButton>
+                    )}
                   </div>
 
                   <Grid size={{ xs: 12 }} className="mt-4">
@@ -913,6 +922,13 @@ export default function NewCreateQuotePdfTemplate() {
                   onClose={() => {
                     handleClose();
                   }}
+                />
+              ) : null}
+              {variableDialog ? (
+                <VariablesDialog
+                  fields={allFields}
+                  handleClose={() => setVariableDialog(false)}
+                  id={id}
                 />
               ) : null}
             </div>
