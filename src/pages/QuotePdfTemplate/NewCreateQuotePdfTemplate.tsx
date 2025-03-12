@@ -544,14 +544,14 @@ export default function NewCreateQuotePdfTemplate() {
                         handleClose();
                       }
                     }}
-                    buttonType="transparent"
+                    buttonType="theme"
                   >
                     Close
                   </ThemeButton>
                 </div>
               </div>
               <div className={`main-container ${classes.mainContainer}`}>
-                <Box className={classes.paper}>
+                <Box className={classes.paper} mt={1}>
                   <Grid container>
                     <Grid size={{ xs: 12, md: 6 }}></Grid>
                   </Grid>
@@ -736,55 +736,57 @@ export default function NewCreateQuotePdfTemplate() {
                     />
                   </div>
 
-                  <div className="flex gap-2">
-                    <FormControlLabel
-                      disabled={!isClone && !hasPermissionToUpdate}
-                      value={values['pageNumberInFooter']}
-                      control={
-                        <Checkbox
-                          name="pageNumberInFooter"
-                          checked={values['pageNumberInFooter']}
-                          onChange={(e) => {
-                            setFieldValue('pageNumberInFooter', e.target.checked);
-                          }}
-                          color="primary"
-                        />
-                      }
-                      label="Show page number in footer"
-                    />
-                    <FormControlLabel
-                      disabled={!isClone && !hasPermissionToUpdate}
-                      value={values['landscape']}
-                      control={
-                        <Checkbox
-                          name="landscape"
-                          checked={values['landscape']}
-                          onChange={(e) => {
-                            setIsLandscapChecked(e.target.checked);
-                            setFieldValue('landscape', e.target.checked);
-                          }}
-                          color="primary"
-                        />
-                      }
-                      label="Landscape"
-                    />
-                    <FormControlLabel
-                      disabled={!isClone && !hasPermissionToUpdate}
-                      value={values['hideAmountTotalSection']}
-                      control={
-                        <Checkbox
-                          name="hideAmountTotalSection"
-                          checked={values['hideAmountTotalSection']}
-                          onChange={(e) => {
-                            setFieldValue('hideAmountTotalSection', e.target.checked);
-                          }}
-                          color="primary"
-                        />
-                      }
-                      label="Hide Amount Total Section"
-                    />
-                    {allFields?.length && (
-                      <ThemeButton onClick={() => setVariableDialog(true)} buttonType="theme">
+                  <div className="flex justify-between items-center">
+                    <div className="flex gap-2">
+                      <FormControlLabel
+                        disabled={!isClone && !hasPermissionToUpdate}
+                        value={values['pageNumberInFooter']}
+                        control={
+                          <Checkbox
+                            name="pageNumberInFooter"
+                            checked={values['pageNumberInFooter']}
+                            onChange={(e) => {
+                              setFieldValue('pageNumberInFooter', e.target.checked);
+                            }}
+                            color="primary"
+                          />
+                        }
+                        label="Show page number in footer"
+                      />
+                      <FormControlLabel
+                        disabled={!isClone && !hasPermissionToUpdate}
+                        value={values['landscape']}
+                        control={
+                          <Checkbox
+                            name="landscape"
+                            checked={values['landscape']}
+                            onChange={(e) => {
+                              setIsLandscapChecked(e.target.checked);
+                              setFieldValue('landscape', e.target.checked);
+                            }}
+                            color="primary"
+                          />
+                        }
+                        label="Landscape"
+                      />
+                      <FormControlLabel
+                        disabled={!isClone && !hasPermissionToUpdate}
+                        value={values['hideAmountTotalSection']}
+                        control={
+                          <Checkbox
+                            name="hideAmountTotalSection"
+                            checked={values['hideAmountTotalSection']}
+                            onChange={(e) => {
+                              setFieldValue('hideAmountTotalSection', e.target.checked);
+                            }}
+                            color="primary"
+                          />
+                        }
+                        label="Hide Amount Total Section"
+                      />
+                    </div>
+                    {allFields?.length && id && id !== '0' && !isClone && (
+                      <ThemeButton onClick={() => setVariableDialog(true)}>
                         Variables
                       </ThemeButton>
                     )}

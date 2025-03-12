@@ -66,7 +66,7 @@ export default function VariablesDialog({ fields, handleClose, id }) {
         <CustomDialogContent>
           <>
             <Box mb={2}>
-              <HtmlTooltip title={'Add Variables'} placement="top" arrow enterTouchDelay={0}>
+              <HtmlTooltip title={'Add'} placement="top" arrow enterTouchDelay={0}>
                 <ThemeButton
                   buttonType="theme"
                   onClick={() => setManageVariable({ open: true, data: null })}
@@ -84,6 +84,7 @@ export default function VariablesDialog({ fields, handleClose, id }) {
                 <Table size="small">
                   <TableHead>
                     <TableRow>
+                    <TableCell>Field Name</TableCell>
                       <TableCell>Field Label</TableCell>
                       <TableCell align="right">Actions</TableCell>
                     </TableRow>
@@ -91,7 +92,7 @@ export default function VariablesDialog({ fields, handleClose, id }) {
                   <TableBody>
                     {variables.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={2} align="center">
+                        <TableCell colSpan={3} align="center">
                           <Typography variant="body2" color="textSecondary">
                             No variables added yet
                           </Typography>
@@ -100,9 +101,10 @@ export default function VariablesDialog({ fields, handleClose, id }) {
                     ) : (
                       variables.map((variable) => (
                         <TableRow key={variable._id}>
+                          <TableCell>{variable.fieldName}</TableCell>
                           <TableCell>{variable.fieldLabel}</TableCell>
                           <TableCell align="right">
-                            <HtmlTooltip title="Edit Variable">
+                            <HtmlTooltip title="Edit">
                               <IconButton
                                 size="small"
                                 onClick={() => setManageVariable({ open: true, data: variable })}
@@ -110,7 +112,7 @@ export default function VariablesDialog({ fields, handleClose, id }) {
                                 <Edit fontSize="small" />
                               </IconButton>
                             </HtmlTooltip>
-                            <HtmlTooltip title="Delete Variable">
+                            <HtmlTooltip title="Delete">
                               <IconButton
                                 size="small"
                                 onClick={() => handleDelete(variable._id)}
