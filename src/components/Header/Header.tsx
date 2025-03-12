@@ -9,7 +9,6 @@ import { FiExternalLink } from 'react-icons/fi';
 import { GoChevronLeft, GoChevronRight } from 'react-icons/go';
 import { HiOutlineMenuAlt1 } from 'react-icons/hi';
 import { useHistory } from 'react-router-dom';
-import io, { Socket } from 'socket.io-client';
 import { SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON, useStore } from 'src/StateProvider/fastContext';
 import { SVG } from 'src/assets';
 import { MoonIcon, SunIcon } from 'src/assets/svg/svgIcons';
@@ -33,6 +32,7 @@ import UserProfile from './../UserProfile';
 import ChatNotification from './ChatNotifications';
 import styles from './Header.module.scss';
 import Notification from './Notification';
+import { useSocket } from 'src/hooks/useSocket';
 
 const Header = () => {
   const [themeColor, toggleThemeColor] = useAppTheme();
@@ -60,13 +60,13 @@ const Header = () => {
   }: any = useData();
 
   const history = useHistory();
-  const [socket, setSocket] = useState<Socket>(null);
   const [supportAnchorEl, setSupportAnchorEl] = useState(null);
   const [servicesAnchorEl, setServicesAnchorEl] = useState(null);
   const [entitiesEl, setEntitiesEl] = useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
   const [open, setOpen] = useState(false);
   const anchorRef = useRef(null);
+  const userSocket = useSocket({namespace:"/user"});
 
   const isSupportMenuOpen = Boolean(supportAnchorEl);
   const isArcelorMenuOpen = Boolean(servicesAnchorEl);
@@ -116,42 +116,28 @@ const Header = () => {
     }
   };
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    const s = io(`${backendApi?.replace('/api', '')}/user`, {
-      path: backendApi?.includes('/api') ? '/api/socket.io/' : '/socket.io/',
-      auth: {
-        token
-      },
-      transports: ['websocket', 'pooling'],
-      reconnectionAttempts: 5,
-      reconnectionDelay: 5000
-    });
-    setSocket(s);
-  }, [user]);
-
   // Socket listening for chat data
   useEffect(() => {
-    if (socket && user) {
-      socket.on('connect', () => {
-        socket.emit('join', user.user._id);
-      });
+    if (userSocket && user) {
+      userSocket.emit('join', user.user._id);
 
-      socket.on('data', (data) => {
+      userSocket.on('data', (data) => {
         chatNotification.setCount(chatNotification.count + 1);
       });
-      socket.on('new', (data) => {
+      userSocket.on('new', (data) => {
         dispatch({ type: SET_CHATTER, payload: data });
       });
+      userSocket.on("online-users",(data) => {
+        console.log(data)
+      })
     }
     return () => {
-      if (socket) {
-        socket.disconnect();
-        socket.off('connect');
-        socket.off('data');
+      if (userSocket) {
+        userSocket.off('connect');
+        userSocket.off('data');
       }
     };
-  }, [socket, user]);
+  }, [userSocket,user,userSocket?.connected]);
 
   const handleMobileMenuClose = () => {
     setMobileMoreAnchorEl(null);
