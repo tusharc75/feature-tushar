@@ -6,7 +6,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import { flatMap, map, orderBy, startCase, uniq } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { AutoCompleteIcon } from 'src/assets/svg/svgIcons';
+import { AutoCompleteWorkOrder } from 'src/assets/svg/svgIcons';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -335,7 +335,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                     {row.original['workOrderStatus'] === 'Completed' ? (
                       <CheckCircle className="text-[var(--chip-color-completed)] [font-size:19px_!important] dark:text-green-400" />
                     ) : (
-                      <AutoCompleteIcon size={18} />
+                      <AutoCompleteWorkOrder size={20} className={`${row?.original?.canAutoCompleteWorkOrder ? 'text-[var(--primary-text)]' : ''}`} />
                     )}
                   </IconButton>
                 </HtmlTooltip>
@@ -1023,13 +1023,12 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         <ConfirmationDialog
           okBtnLoading={isSubmitting}
           open={showServiceActionConfirmBox.open}
-          message={`Are you sure you want to ${
-            showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed
-              ? 'complete'
-              : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
-                ? 'skip'
-                : 'revert'
-          } this Service(s)`}
+          message={`Are you sure you want to ${showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed
+            ? 'complete'
+            : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
+              ? 'skip'
+              : 'revert'
+            } this Service(s)`}
           onClose={() => {
             setShowServiceActionConfirmBox({ open: false, action: '' });
           }}
@@ -1234,8 +1233,8 @@ const ActionButtonMenuItems = ({
         }}
         disabled={
           selectedRecords?.length &&
-          selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || (d.type === MATERIAL_TYPE.product && !d?.parentId)) &&
-          selectedRecords?.every((d) => d.workOrder?._id === selectedRecords[0]?.workOrder?._id)
+            selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || (d.type === MATERIAL_TYPE.product && !d?.parentId)) &&
+            selectedRecords?.every((d) => d.workOrder?._id === selectedRecords[0]?.workOrder?._id)
             ? false
             : true
         }
@@ -1254,8 +1253,8 @@ const ActionButtonMenuItems = ({
       <MenuItem
         disabled={
           checkUniqWorkOrder() &&
-          (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
-            selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length === 1)
+            (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
+              selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length === 1)
             ? false
             : true
         }
