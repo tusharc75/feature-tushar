@@ -133,29 +133,33 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
         accessor: 'competencyType',
         Header: 'Competency Type',
         width: 250,
-        Cell: ({ row }) => <DropdownCell
-          permissions={permissions}
-          permissionForLinks={{}}
-          field={{
-            fieldName: 'competencyType',
-            lookupResource: sidebarResource.competencyType
-          }}
-          original={row?.original}
-        />
+        Cell: ({ row }) => (
+          <DropdownCell
+            permissions={permissions}
+            permissionForLinks={{}}
+            field={{
+              fieldName: 'competencyType',
+              lookupResource: sidebarResource.competencyType
+            }}
+            original={row?.original}
+          />
+        )
       },
       {
         accessor: 'competencies',
         Header: 'Competencies',
         width: 250,
-        Cell: ({ row }) => <DropdownCell
-          permissions={permissions}
-          permissionForLinks={{}}
-          field={{
-            fieldName: 'competencies',
-            lookupResource: sidebarResource.competencies
-          }}
-          original={row?.original}
-        />
+        Cell: ({ row }) => (
+          <DropdownCell
+            permissions={permissions}
+            permissionForLinks={{}}
+            field={{
+              fieldName: 'competencies',
+              lookupResource: sidebarResource.competencies
+            }}
+            original={row?.original}
+          />
+        )
       },
       {
         accessor: 'startDate',
@@ -283,7 +287,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
       element.status = 'Assigned';
       element.warehouse = fieldTicketData?.warehouse?.optionValue;
       element.startDate = fieldTicketData?.estimateStartDate || dayjs.tz().toDate();
-      element.endDate = fieldTicketData?.estimateEndDate || dayjs.tz().toDate()
+      element.endDate = fieldTicketData?.estimateEndDate || dayjs.tz().toDate();
       technician.push(element);
     });
     axiosInstance()
@@ -364,7 +368,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
           onClick={() => {
             const dates = [];
             selectedRecords?.forEach((d: any) => {
-              dates.push(new Date(d?.startDate));
+              dates.push(new Date(d?.maxStartDate));
             });
             let date = null;
             if (dates?.length) {
