@@ -12,7 +12,7 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -82,7 +82,7 @@ const ServiceMaster = (props: Props) => {
   };
 
   const fetchGridColumns = (serviceColumns: any) => {
-    const columns: any = [
+    let columns: any = [
       {
         accessor: 'order',
         Header: 'Sequence',
@@ -157,14 +157,14 @@ const ServiceMaster = (props: Props) => {
       },
       ...(serviceColumns && serviceColumns?.some((column) => column?.fieldData?.fieldName === 'frequency')
         ? [
-          {
-            accessor: 'frequency',
-            Header: 'Frequency',
-            width: 150,
-            minWidth: 150,
-            Cell: ({ row }) => (row.original?.frequency ? <p>{row.original?.frequency}</p> : <NoDataCell />)
-          }
-        ]
+            {
+              accessor: 'frequency',
+              Header: 'Frequency',
+              width: 150,
+              minWidth: 150,
+              Cell: ({ row }) => (row.original?.frequency ? <p>{row.original?.frequency}</p> : <NoDataCell />)
+            }
+          ]
         : []),
       {
         accessor: 'stepName',
@@ -200,6 +200,8 @@ const ServiceMaster = (props: Props) => {
         )
       });
     }
+
+    columns = [...columns, ...getStaticFields()];
 
     columns.push({
       accessor: 'action',
@@ -302,6 +304,19 @@ const ServiceMaster = (props: Props) => {
     setColumns([...columns]);
   };
 
+  const generateDataCreatedUpdatedBy = (data: any) => {
+    const obj: any = { ...data };
+    if (data?.createdBy) {
+      data.createdBy = obj?.createdBy?.user?.concatedName;
+      data.createdByDate = obj?.createdBy?.date;
+      data.createdById = obj?.createdBy?.user?._id;
+    }
+    if (data?.updatedBy) {
+      data.updatedBy = obj?.updatedBy?.user?.concatedName;
+      data.updatedByDate = obj?.updatedBy?.date;
+    }
+  };
+
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
@@ -318,6 +333,7 @@ const ServiceMaster = (props: Props) => {
         parent.type = 'Service';
         parent.qty = 1;
         parent.preWork = parent?.preWork ? 'Yes' : 'No';
+        generateDataCreatedUpdatedBy(parent);
         parent.subRows = consumableData
           ?.filter((c) => c?.uniqueId === parent?._id)
           ?.map((c, idx) => {
@@ -327,6 +343,7 @@ const ServiceMaster = (props: Props) => {
             c.detail = c?.productDetail?.productName;
             c.description = c?.productDetail?.productDescription;
             c.type = 'Product';
+            generateDataCreatedUpdatedBy(c);
             return c;
           });
       });
@@ -337,7 +354,7 @@ const ServiceMaster = (props: Props) => {
     }
   };
 
-  const handleDelete = async (deleteInWorkOrder: boolean= false) => {
+  const handleDelete = async (deleteInWorkOrder: boolean = false) => {
     try {
       let serviceIds = [];
       let productIds = [];
@@ -691,12 +708,14 @@ const ServiceMaster = (props: Props) => {
       {workOrderUpdateDialog.open && (
         <ConfirmationDialog
           open={workOrderUpdateDialog.open}
-          message={workOrderUpdateDialog.type === 'add' ?
-            `Do you want to add selected Product(s) in existing open ${resources?.workOrder?.titlePlural}?` :
-            workOrderUpdateDialog.type === 'delete' ?
-            `Do you want to delete selected Product(s)(if any) in existing open ${resources?.workOrder?.titlePlural}?` :
-            `Do you want to update qty in existing open ${resources?.workOrder?.titlePlural}?
-            Note: If qty is less then consumed qty work order will not be updated  `}
+          message={
+            workOrderUpdateDialog.type === 'add'
+              ? `Do you want to add selected Product(s) in existing open ${resources?.workOrder?.titlePlural}?`
+              : workOrderUpdateDialog.type === 'delete'
+                ? `Do you want to delete selected Product(s)(if any) in existing open ${resources?.workOrder?.titlePlural}?`
+                : `Do you want to update qty in existing open ${resources?.workOrder?.titlePlural}?
+            Note: If qty is less then consumed qty work order will not be updated  `
+          }
           onClose={() => {
             if (workOrderUpdateDialog.type === 'edit') {
               handleSaveData(workOrderUpdateDialog.data);
@@ -719,8 +738,8 @@ const ServiceMaster = (props: Props) => {
             }
           }}
           okBtnLoading={isAssigning || isDeleting}
-          cancelText='No'
-          forwardText='Yes'
+          cancelText="No"
+          forwardText="Yes"
         />
       )}
     </Fragment>
