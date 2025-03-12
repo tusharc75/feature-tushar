@@ -152,9 +152,9 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
       }
     }
 
-    if (reference === 'workOrder_assign_asset') {
+    if (reference === 'workOrder') {
       if (referenceData?.warehouse) {
-        deepFilter = `${deepFilter}&plant=${referenceData?.warehouse}`;
+        deepFilter = `${deepFilter}&plant=${referenceData?.warehouse}&availableAsset=1`;
       }
     }
 
@@ -233,37 +233,32 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
   const leftSideContents = () => {
     return (
       <>
-        <Box style={{ display: 'inline' }}>
-          {products.length > 0
-            ? products?.map((d) => (
-                <Box
-                  m={0.5}
-                  p={1}
-                  border={1}
-                  className={`cursor-pointer rounded-sm ${
-                    selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
-                  }`}
-                  borderColor="var(--common-border-color)"
-                  onClick={() => {
-                    if (selectedProduct === d.id) {
-                      setSelectedProduct(null);
-                    } else {
-                      setSelectedProduct(d.id);
-                    }
-                  }}
-                  style={{ display: 'inline-block' }}
-                >
-                  {d?.qty < 0 ? (
-                    <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                  ) : d?.qty === 0 ? (
-                    <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                  ) : (
-                    <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                  )}
-                </Box>
-              ))
-            : null}
-        </Box>
+        {products.length > 0
+          ? products?.map((d) => (
+              <Box
+                className={`MuiBox-root cursor-pointer border p-2 text-[13px] dark:text-gray-300 ${
+                  selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
+                }`}
+                borderColor="var(--common-border-color)"
+                onClick={() => {
+                  if (selectedProduct === d.id) {
+                    setSelectedProduct(null);
+                  } else {
+                    setSelectedProduct(d.id);
+                  }
+                }}
+                style={{ display: 'inline-block' }}
+              >
+                {d?.qty < 0 ? (
+                  <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                ) : d?.qty === 0 ? (
+                  <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                ) : (
+                  <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                )}
+              </Box>
+            ))
+          : null}
       </>
     );
   };

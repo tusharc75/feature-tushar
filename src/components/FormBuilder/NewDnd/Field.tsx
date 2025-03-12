@@ -152,11 +152,10 @@ const Field = ({
       <div
         style={style}
         ref={setNodeRef}
-        className={`${colSpans[data.columnSize - 1] || 'col-span-6'} ${
-          isPreviewVisible
-            ? 'bg-[var(--dark-secondary,theme("colors.blue.200"))]'
-            : 'border border-[var(--common-border-color)] bg-[white] dark:bg-[hsla(240,27%,14%,100%)]'
-        }  flex min-h-[56.5px] items-center justify-center p-2 text-center`}
+        className={`${colSpans[data.columnSize - 1] || 'col-span-6'} ${isPreviewVisible
+          ? 'bg-[var(--dark-secondary,theme("colors.blue.200"))]'
+          : 'border border-[var(--common-border-color)] bg-[white] dark:bg-[hsla(240,27%,14%,100%)]'
+          }  flex min-h-[56.5px] items-center justify-center p-2 text-center`}
       >
         <h6 className="text-center text-2xl font-bold text-gray-400 dark:text-gray-600">Drop {active.data.current.label}</h6>
       </div>
@@ -168,11 +167,10 @@ const Field = ({
       <div
         style={style}
         ref={setNodeRef}
-        className={`${colSpans[data.columnSize - 1] || 'col-span-6'} ${
-          isDragging || isPreviewVisible
-            ? 'bg-[var(--dark-secondary,theme("colors.blue.200"))]'
-            : 'border border-[var(--common-border-color)] bg-[white] dark:bg-[hsla(240,27%,14%,100%)]'
-        }  flex min-h-[56.5px] items-center p-2`}
+        className={`${colSpans[data.columnSize - 1] || 'col-span-6'} ${isDragging || isPreviewVisible
+          ? 'bg-[var(--dark-secondary,theme("colors.blue.200"))]'
+          : 'border border-[var(--common-border-color)] bg-[white] dark:bg-[hsla(240,27%,14%,100%)]'
+          }  flex min-h-[56.5px] items-center p-2`}
       >
         <div className={`${isDragging ? ' opacity-50' : ''} flex-grow`}>
           <div className="grid grid-cols-[1fr_28px] items-center justify-between gap-2 lg:grid-cols-[1fr_50px]">
@@ -181,19 +179,15 @@ const Field = ({
                 <IconButton size="small" {...attributes} {...listeners} className="drag-handle !cursor-grab">
                   <DragIndicator fontSize="small" />
                 </IconButton>
-                {data.editAble ? (
-                  <TextField
-                    id={data._id}
-                    variant="outlined"
-                    margin="none"
-                    size="small"
-                    fullWidth
-                    value={data.fieldLabel}
-                    onChange={(event) => onChangeFieldName(data._id, event.target.value)}
-                  />
-                ) : (
-                  <p className="MuiTypography-body2 line-clamp-1">{data.fieldLabel}</p>
-                )}
+                <TextField
+                  id={data._id}
+                  variant="outlined"
+                  margin="none"
+                  size="small"
+                  fullWidth
+                  value={data.fieldLabel}
+                  onChange={(event) => onChangeFieldName(data._id, event.target.value)}
+                />
               </div>
               <p className="ml-[40px] line-clamp-1 min-w-0 text-gray-500 dark:text-slate-300 lg:ml-0">
                 {FieldList[data?.type?.toUpperCase()]?.label}
@@ -217,10 +211,7 @@ const Field = ({
                 <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
                   <MenuItem onClick={() => handleClickOpenPropertie(data)}>Edit Properties</MenuItem>
                   <MenuItem onClick={() => handleClone(data)}>Clone</MenuItem>
-                  {((['product-template', 'price-template'].includes(module) && data.editAble) ||
-                    ['form-builder-master'].includes(module) ||
-                    data.deletAble ||
-                    true) && <MenuItem onClick={() => deleteField(data._id)}>Delete</MenuItem>}
+                  <MenuItem onClick={() => deleteField(data._id)}>Delete</MenuItem>
                 </Menu>
                 {propertie_open ? (
                   <Properties

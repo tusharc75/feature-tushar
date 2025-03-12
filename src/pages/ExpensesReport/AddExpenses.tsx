@@ -13,8 +13,9 @@ import axios, { CancelTokenSource } from 'axios';
 import { useData } from '../../StateProvider/Provider';
 import { gridLoadingTimeout, prepareDataForGrid, expenses } from '../../constants/helpers';
 import { ListingPageHeader } from 'src/components/PageHeaders';
+import dayjs from 'dayjs';
 
-function AddExpenses({ open, onClose, fullScreen, setFullScreen, isSubmitting = null, onSave, fetchReportData }) {
+function AddExpenses({ open, onClose, fullScreen, setFullScreen, isSubmitting = null, onSave, fetchReportData, expenseReportData = null }) {
   const renderedFrom = camelCase(sidebarResource?.expenses);
   const [columns, setColumns] = useState(null);
   const { generateColumns, checkStaticField } = useColumns();
@@ -28,6 +29,20 @@ function AddExpenses({ open, onClose, fullScreen, setFullScreen, isSubmitting = 
 
   useEffect(() => {
     fetchGridColumns();
+  }, []);
+
+  useEffect(() => {
+    dispatch({
+      type: 'filter',
+      filters: {
+        expenseDate: {
+          filter: {
+            from: `${dayjs.utc(expenseReportData?.fromDate).tz().format('MM/DD/YYYY')}`,
+            to: `${dayjs.utc(expenseReportData?.toDate).tz().format('MM/DD/YYYY')}`
+          }
+        }
+      }
+    });
   }, []);
 
   useEffect(() => {
@@ -57,11 +72,12 @@ function AddExpenses({ open, onClose, fullScreen, setFullScreen, isSubmitting = 
     if (isExport) {
       deepFilter = `?`;
     }
+
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    if (filterByIds?.length) {
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
-    }
+    // if (filterByIds?.length) {
+    //   deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    // }
     if (deepFilters?.length) {
       deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
