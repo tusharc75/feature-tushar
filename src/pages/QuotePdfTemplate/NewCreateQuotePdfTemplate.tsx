@@ -544,13 +544,12 @@ export default function NewCreateQuotePdfTemplate() {
                         handleClose();
                       }
                     }}
-                    buttonType="theme"
                   >
                     Close
                   </ThemeButton>
                 </div>
               </div>
-              <div className={`main-container ${classes.mainContainer}`}>
+              <div className={`main-container`}>
                 <Box className={classes.paper} mt={1}>
                   <Grid container>
                     <Grid size={{ xs: 12, md: 6 }}></Grid>
