@@ -16,6 +16,7 @@ import routes from '../../../components/Helpers/Routes';
 import { FiExternalLink } from 'react-icons/fi';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import DateDialog from '../DateDialog';
+import { Link } from 'react-router-dom';
 
 const TechnicianDispatch = ({ allowedToEdit, serviceOrderId, stepFullScreen }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_TechnicianReceive`;
@@ -70,29 +71,6 @@ const TechnicianDispatch = ({ allowedToEdit, serviceOrderId, stepFullScreen }) =
         )
       },
       {
-        accessor: 'service',
-        Header: 'Service',
-        width: 250,
-        Cell: ({ row }) =>
-          row.original?.service ? (
-            <div className="flex items-center gap-2">
-              <p className="text-truncate" title={row.original.service}>
-                {row.original.service}
-              </p>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(`${routes.serviceMasterDetail.path}/${row.original.serviceId}`);
-                }}
-              >
-                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-              </IconButton>
-            </div>
-          ) : (
-            <NoDataCell />
-          )
-      },
-      {
         accessor: 'status',
         Header: 'Status',
         width: 200,
@@ -135,12 +113,50 @@ const TechnicianDispatch = ({ allowedToEdit, serviceOrderId, stepFullScreen }) =
         Cell: ({ row }) => (row.original?.startDate ? <p>{displayDate(row.original?.startDate)}</p> : <NoDataCell />)
       },
       {
+        accessor: 'startedBy',
+        Header: 'Dispatched By',
+        disableFilters: true,
+        disableSortBy: true,
+        Cell: ({ row }) =>
+          row?.original?.startedById ? (
+            <Link
+              className="link text-truncate"
+              title={row?.original?.startedBy}
+              to={`${routes.userDetail.path}/${row?.original?.startedById}`}
+              target={'_blank'}
+            >
+              {row?.original?.startedBy}
+            </Link>
+          ) : (
+            <NoDataCell />
+          )
+      },
+      {
         accessor: 'receiveDate',
         Header: 'Receive Date',
         disableFilters: true,
         disableSortBy: true,
         width: 250,
         Cell: ({ row }) => (row.original?.endDate ? <p>{displayDate(row.original?.endDate)}</p> : <NoDataCell />)
+      },
+      {
+        accessor: 'endedBy',
+        Header: 'Receive By',
+        disableFilters: true,
+        disableSortBy: true,
+        Cell: ({ row }) =>
+          row?.original?.endedById ? (
+            <Link
+              className="link text-truncate"
+              title={row?.original?.endedBy}
+              to={`${routes.userDetail.path}/${row?.original?.endedById}`}
+              target={'_blank'}
+            >
+              {row?.original?.endedBy}
+            </Link>
+          ) : (
+            <NoDataCell />
+          )
       },
     ];
     setColumns(column);
@@ -204,7 +220,7 @@ const TechnicianDispatch = ({ allowedToEdit, serviceOrderId, stepFullScreen }) =
             onClick={() => {
               const minDate = new Date(
                 Math.min(...selectedRecords.map((d) => new Date(d.startDate).getTime()))
-              );            
+              );
               setReceiveDateDialog({ open: true, data: selectedRecords?.map((d) => d?._id), minDate: minDate });
             }}
           >

@@ -39,9 +39,9 @@ import ServiceOrderViews from './RoadMapViews';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { generateAddFieldTicket } from 'src/pages/FieldServiceOrder/walkmeSteps';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
-import Material from './material';
 import TechnicianDispatch from './TechnicianDispatch';
 import TechnicianReceive from './TechnicianReceive';
+import Technicians from './material/Technicians';
 
 const ServiceOrderDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -311,7 +311,7 @@ const ServiceOrderDetailsPage = () => {
               }}
             />
             {steps[currentStep]?.name === steps[0]?.name && serviceOrderData && (
-              <Material
+              <Technicians
                 serviceOrderData={serviceOrderData}
                 allowedToEdit={allowedToEdit}
                 setNextStep={setNextStep}
