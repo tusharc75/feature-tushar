@@ -26,7 +26,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import SyncIcon from '@mui/icons-material/Sync';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { AutoCompleteIcon } from 'src/assets/svg/svgIcons';
+import { AutoCompleteWorkOrder } from 'src/assets/svg/svgIcons';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import { flattenArray } from 'src/constants/columns';
@@ -294,7 +294,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
                     {row.original['workOrderStatus'] === WORK_ORDER_STATUS.completed ? (
                       <CheckCircle className="text-[var(--chip-color-completed)] [font-size:19px_!important] dark:text-green-400" />
                     ) : (
-                      <AutoCompleteIcon size={18} />
+                      <AutoCompleteWorkOrder size={20} className={`${row?.original?.canAutoCompleteWorkOrder ? 'text-[var(--primary-text)]' : ''}`} />
                     )}
                   </IconButton>
                 </HtmlTooltip>
