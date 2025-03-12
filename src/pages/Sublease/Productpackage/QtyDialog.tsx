@@ -20,6 +20,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import dayjs from 'dayjs';
 import { getPricingConditions } from 'src/components/PricingCondition';
 import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
+import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -27,6 +28,7 @@ interface EditDialogProps {
   subleaseData: any;
   rowData?: object | any;
   material: any[];
+  dataRows: any[];
   selectedProducts: any[];
   isBulkedit: any;
   loading: any;
@@ -34,7 +36,7 @@ interface EditDialogProps {
 
 const rateChangeFields = ['unit', 'pricingMethod', 'pricingCondition'];
 
-const QtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, subleaseData, rowData, material, selectedProducts, isBulkedit, loading }) => {
+const QtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, subleaseData, rowData, material, dataRows, selectedProducts, isBulkedit, loading }) => {
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [allFields, setAllFields] = useState([]);
   const [fields, setFields] = useState([]);
@@ -227,17 +229,25 @@ const QtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, subleaseData,
       errors['qty'] = 'Please enter valid quantity';
     }
     if (rowData && rowData.hideSelection) {
-      if (rowData.parentId) {
-        const _package = material?.filter((e) => e._id === rowData.parentId);
-        if (_package.length) {
-          if (values.qty * _package[0].qty < rowData.assetQty) {
-            errors['qty'] = 'The quantity is less than what was assigned.';
+      let isValid = true;
+      const child: any = dataRows?.filter((e) => e.parentId === rowData?._id);
+      if (child?.length) {
+        child?.forEach((e) => {
+          let qty = values.qty * e?.qty
+          if (qty < e?.assetQty) {
+            isValid = false;
+            return;
           }
+        })
+      }
+      else {
+        const qty = getParentMultiplier(dataRows, rowData) * values.qty
+        if ((qty < rowData?.assetQty)) {
+          isValid = false;
         }
-      } else {
-        if (values.qty < rowData.assetQty) {
-          errors['qty'] = 'The quantity is less than what was assigned.';
-        }
+      }
+      if (!isValid) {
+        errors['qty'] = 'The quantity is less than what was assigned.';
       }
     }
     return errors;
