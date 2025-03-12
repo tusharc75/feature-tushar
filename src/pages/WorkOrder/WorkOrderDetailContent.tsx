@@ -278,12 +278,8 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       }
     }
     if (serializedPackages) {
-      data.serializedPackagesData = {
-        assemblyOrderId: workOrderData?.assemblyOrder?.optionValue,
-        serializedPackages: serializedPackages
-      };
+      data.serializedPackages = serializedPackages;
     }
-
     axiosInstance()
       .patch(`${workOrder.api}/status/${id}`, data)
       .then(({ data: { data } }) => {
