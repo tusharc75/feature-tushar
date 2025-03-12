@@ -73,41 +73,45 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
               toastConfig.setToastConfig(error);
             });
         } else {
-          let now = new Date(); 
-          let currentYear = now.getFullYear(); 
-          let currentMonth = now.getMonth(); 
+          axiosInstance()
+            .get(`${expenseReport.api}/last-expense-report-date`)
+            .then(({ data }) => {
+              if (data?.latestReport?.toDate && data?.latestReport?.fromDate) {
+                const lastFromDate = new Date(data?.latestReport?.fromDate);
+                const lastToDate = new Date(data?.latestReport?.toDate);
 
-          if (expenseReportData && expenseReportData.length > 0) { 
-            const reportedMonths = new Set( 
-              expenseReportData.map((report) => { 
-                const d = new Date(report.fromDate); 
-                return `${d.getFullYear()}-${d.getMonth()}`; 
-              })
-            );
+                const now = new Date();
+                const currentYear = now.getFullYear();
+                const currentMonth = now.getMonth();
 
-            while (reportedMonths.has(`${currentYear}-${currentMonth}`)) {
-              if (currentMonth === 11) {
-                currentMonth = 0;
-                currentYear++;
-              } else {
-                currentMonth++;
+                const lastFromMonth = lastFromDate.getMonth();
+                const lastFromYear = lastFromDate.getFullYear();
+
+                let fromDate, toDate;
+
+                if (lastFromYear === currentYear && lastFromMonth === currentMonth) {
+                  fromDate = new Date(currentYear, currentMonth + 1, 2);
+                  toDate = new Date(currentYear, currentMonth + 2, 1);
+                } else {
+                  fromDate = new Date(currentYear, currentMonth, 2);
+                  toDate = new Date(currentYear, currentMonth + 1, 1);
+                }
+
+                setTitle(`Create ${resources?.expenseReport?.titleSingular}`);
+                let initialData = getObjKeys('', fieldsDataForCreate);
+                initialData['status'] = EXPENSE_STATUS.draft;
+                initialData['users'] = [user?.user?._id];
+                initialData['fromDate'] = fromDate;
+                initialData['toDate'] = toDate;
+                setInitialData({
+                  fields: fieldsDataForCreate,
+                  values: initialData
+                });
               }
-            }
-          }
-
-          const fromDate = new Date(currentYear, currentMonth, 2);
-          const toDate = new Date(currentYear, currentMonth + 1, 1);
-
-          setTitle(`Create ${resources?.expenseReport?.titleSingular}`);
-          let initialData = getObjKeys('', fieldsDataForCreate);
-          initialData['status'] = EXPENSE_STATUS.draft;
-          initialData['users'] = [user?.user?._id];
-          initialData['fromDate'] = fromDate; 
-          initialData['toDate'] = toDate; 
-          setInitialData({
-            fields: fieldsDataForCreate,
-            values: initialData
-          });
+            })
+            .catch((error) => {
+              toastConfig.setToastConfig(error);
+            });
         }
       })
       .catch((error) => {
