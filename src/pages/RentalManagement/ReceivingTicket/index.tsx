@@ -747,6 +747,7 @@ const ReceivingTicket = ({
             parent.manualStartDate = parent?.actualStartDate;
             parent.manualEndDate = parent?.actualEndDate;
             parent.startDate = parent?.actualStartDate;
+            parent.endDate = parent?.actualEndDate;
             if ([MATERIAL_TYPE.package, MATERIAL_TYPE.service]?.includes(parent.type)) {
               parent.status = ASSET_STATUS.notApplied;
               parent.rentalAssetStatus = ''
