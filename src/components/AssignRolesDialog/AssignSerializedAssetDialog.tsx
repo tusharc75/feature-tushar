@@ -233,15 +233,12 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
   const leftSideContents = () => {
     return (
       <>
-        <Box style={{ display: 'inline' }}>
-          {products.length > 0
-            ? products?.map((d) => (
+        {products.length > 0
+          ? products?.map((d) => (
               <Box
-                m={0.5}
-                p={1}
-                border={1}
-                className={`cursor-pointer rounded-sm ${selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
-                  }`}
+                className={`MuiBox-root cursor-pointer border p-2 text-[13px] dark:text-gray-300 ${
+                  selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
+                }`}
                 borderColor="var(--common-border-color)"
                 onClick={() => {
                   if (selectedProduct === d.id) {
@@ -261,8 +258,7 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
                 )}
               </Box>
             ))
-            : null}
-        </Box>
+          : null}
       </>
     );
   };

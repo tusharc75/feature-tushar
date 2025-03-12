@@ -257,40 +257,37 @@ const AssignSerialNumbersDialog = ({
 
   const leftSideContents = () => {
     return (
-      <Box display={'flex'} width={'100%'} justifyContent={'space-between'}>
-        <Box style={{ display: 'inline' }}>
-          {products.length > 0
-            ? products?.map((d) => (
-                <Box
-                  m={0.5}
-                  p={1}
-                  border={1}
-                  className={`cursor-pointer rounded-sm ${
-                    selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
-                  }`}
-                  borderColor="var(--common-border-color)"
-                  onClick={() => {
-                    if (selectedProduct === d.id) {
-                      setSelectedProduct(null);
-                    } else {
-                      setSelectedProduct(d.id);
-                    }
-                  }}
-                  style={{ display: 'inline-block' }}
-                >
-                  {d?.qty < 0 ? (
-                    <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                  ) : d?.qty === 0 ? (
-                    <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                  ) : (
-                    <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                  )}
-                </Box>
-              ))
-            : null}
-        </Box>
+      <>
+        {products.length > 0
+          ? products?.map((d) => (
+              <Box
+                p={1}
+                border={1}
+                className={`MuiBox-root cursor-pointer p-2 text-[13px] dark:text-gray-300 ${
+                  selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
+                }`}
+                borderColor="var(--common-border-color)"
+                onClick={() => {
+                  if (selectedProduct === d.id) {
+                    setSelectedProduct(null);
+                  } else {
+                    setSelectedProduct(d.id);
+                  }
+                }}
+                style={{ display: 'inline-block' }}
+              >
+                {d?.qty < 0 ? (
+                  <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                ) : d?.qty === 0 ? (
+                  <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                ) : (
+                  <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                )}
+              </Box>
+            ))
+          : null}
         {showWarehouseFilter && (
-          <Box pt={1} width={'40%'}>
+          <Box className="min-w-[250px] flex-grow md:max-w-[350px]">
             <Autocomplete
               fullWidth
               options={warehouseOption}
@@ -309,7 +306,7 @@ const AssignSerialNumbersDialog = ({
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  margin="dense"
+                  margin="none"
                   size="small"
                   name="plant"
                   placeholder={resources?.warehouse?.titleSingular}
@@ -321,7 +318,7 @@ const AssignSerialNumbersDialog = ({
             />
           </Box>
         )}
-      </Box>
+      </>
     );
   };
 
