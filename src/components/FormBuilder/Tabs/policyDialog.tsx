@@ -367,6 +367,9 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
           }
           setInitialData((prevState) => ({ ...prevState, fields: updatedFields }));
           setOptionLoading(false);
+        })
+        .catch((err) => {
+          setOptionLoading(false);
         });
     } else {
       setOptionLoading(false);
