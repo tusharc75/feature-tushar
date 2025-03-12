@@ -242,7 +242,7 @@ const Productpackage = ({
                 {row.original.detail}
               </p>
             )}
-            {row.original.type !== MATERIAL_TYPE.manualEntry && (
+            {![MATERIAL_TYPE.manualEntry, MATERIAL_TYPE.product]?.includes(row.original.type) && (
               <Fragment>
                 <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
                   {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
