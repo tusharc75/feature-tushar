@@ -32,20 +32,6 @@ function AddExpenses({ open, onClose, fullScreen, setFullScreen, isSubmitting = 
   }, []);
 
   useEffect(() => {
-    dispatch({
-      type: 'filter',
-      filters: {
-        expenseDate: {
-          filter: {
-            from: `${dayjs.utc(expenseReportData?.fromDate).tz().format('MM/DD/YYYY')}`,
-            to: `${dayjs.utc(expenseReportData?.toDate).tz().format('MM/DD/YYYY')}`
-          }
-        }
-      }
-    });
-  }, []);
-
-  useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
@@ -68,16 +54,14 @@ function AddExpenses({ open, onClose, fullScreen, setFullScreen, isSubmitting = 
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
+    let deepFilter = `?page=${page}&limit=${limit}&deepFilter=[{"field":"expenseDate", "term":{"from":"${`${dayjs.utc(expenseReportData?.fromDate).tz().format('MM/DD/YYYY')}`}", "to":"${`${dayjs.utc(expenseReportData?.toDate).tz().format('MM/DD/YYYY')}`}"}}]`;
+
     if (isExport) {
       deepFilter = `?`;
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    // if (filterByIds?.length) {
-    //   deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
-    // }
     if (deepFilters?.length) {
       deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
