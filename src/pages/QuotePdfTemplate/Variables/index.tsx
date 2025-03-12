@@ -84,8 +84,8 @@ export default function VariablesDialog({ fields, handleClose, id }) {
                 <Table size="small">
                   <TableHead>
                     <TableRow>
-                    <TableCell>Field Name</TableCell>
                       <TableCell>Field Label</TableCell>
+                      <TableCell>Field Name</TableCell>
                       <TableCell align="right">Actions</TableCell>
                     </TableRow>
                   </TableHead>
@@ -101,8 +101,8 @@ export default function VariablesDialog({ fields, handleClose, id }) {
                     ) : (
                       variables.map((variable) => (
                         <TableRow key={variable._id}>
-                          <TableCell>{variable.fieldName}</TableCell>
                           <TableCell>{variable.fieldLabel}</TableCell>
+                          <TableCell>{variable.fieldName}</TableCell>
                           <TableCell align="right">
                             <HtmlTooltip title="Edit">
                               <IconButton
