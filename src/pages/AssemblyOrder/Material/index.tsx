@@ -440,22 +440,6 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
     );
   };
 
-  const handleArrangeRow = async (rows) => {
-    await axiosInstance()
-      .put(
-        `/dynamic-form/arrange-rows`,
-        { _key: 'material', _id: assemblyOrderData?._id, sortedMaterialId: rows?.map((r) => r?._id) },
-        {
-          headers: {
-            Resource: sidebarResource.assemblyOrder
-          }
-        }
-      )
-      .then(() => {
-        fetchData();
-      });
-  };
-
   return (
     <Fragment>
       {allowedToEdit && (
@@ -481,8 +465,9 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
             hideSelection={!allowedToEdit}
             hideAction={!allowedToEdit}
             isClientSideGrid={true}
+            resource={sidebarResource.assemblyOrder}
             expander={true}
-            handleArrangeRow={handleArrangeRow}
+            arrangeRowField={{ key: 'material', _id: assemblyOrderData?._id, materialKey: '_id' }}
           />
         </Box>
       ) : (

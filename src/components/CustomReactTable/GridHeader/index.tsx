@@ -29,7 +29,7 @@ type GridHeaderProps = {
   showFilters: any;
   table: Table<any>;
   showArrangeView: any;
-  handleArrangeRow: any;
+  arrangeRowField: any;
   newColumns: any;
   refreshGrid: any;
   setSelectedReportView: any;
@@ -51,7 +51,7 @@ const GridHeader = ({
   showFilters,
   table,
   showArrangeView,
-  handleArrangeRow,
+  arrangeRowField,
   newColumns,
   refreshGrid,
   setSelectedReportView,
@@ -214,7 +214,9 @@ const GridHeader = ({
               {'Filters'}
             </ThemeButton>
           )}
-          {handleArrangeRow && <ArrangeRow state={state} handleArrangeRow={handleArrangeRow} />}
+          {arrangeRowField && resource && (
+            <ArrangeRow state={state} arrangeRowField={arrangeRowField} resource={resource} refreshGrid={refreshGrid} />
+          )}
           {!hideExportTable && isClientSideGrid ? (
             <HtmlTooltip title={dataRows.length === 0 ? 'No Data to Export' : 'Export to Excel'} placement="top" arrow>
               <span>
