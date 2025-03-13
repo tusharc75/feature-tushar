@@ -120,7 +120,6 @@ const Consumables = ({
 
     const hasChildFields = Array.isArray(childFields) && childFields?.length > 0 ? true : false;
 
-    const column = [];
     const {
       data: { data }
     } = await axiosInstance().put(`/field/find-field-labels`, {
@@ -132,6 +131,13 @@ const Consumables = ({
       ]
     });
     const productFields = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
+    const column: any = [{
+      accessor: 'index',
+      Header: 'Index',
+      width: 70,
+      sticky: 'left',
+      Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
+    }]
     productFields?.forEach((e) => {
       if (e?.fieldName === 'productName') {
         column.push({
@@ -395,10 +401,11 @@ const Consumables = ({
 
         let rows = orderBy(data, 'product.serializedProduct')
           ?.filter((d) => !([MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(d?.type) && d?.parentId))
-          ?.map((u) => {
+          ?.map((u, i) => {
             let res: any = {
               ...prepareDataForGrid(u)
             };
+            res.index = i + 1
             res.productName = u?.product?.optionLabel;
             res.productDescription = u?.product?.productDescription;
             res.productNumber = u?.product?.productNumber;
@@ -406,7 +413,7 @@ const Consumables = ({
             res.assignedAssetQty =
               data?.filter((d) => d?.parentId === u?._id && [MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(d?.type))
                 ?.length || 0;
-            res.subRows = generateNestedData(data, u);
+            res.subRows = generateNestedData(data, u, res.index);
             // if (!consumeRequest) {
             //   res.hideSelection = u?.qty - ((u?.consumedQty || 0) + (u?.requestedQty || 0)) === 0 ? true : false;
             // }
@@ -421,13 +428,14 @@ const Consumables = ({
       });
   };
 
-  const generateNestedData = (material, parent) => {
+  const generateNestedData = (material, parent, parentIndex) => {
     const subRows: any = material
       .filter((e) => [MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(e?.type) && e.parentId === parent._id)
-      ?.map((u) => {
+      ?.map((u, j) => {
         const res: any = {
           ...prepareDataForGrid(u)
         };
+        res.index = parentIndex + '.' + (j + 1);
         res.productName = u?.type === MATERIAL_TYPE.serializedAsset ? u?.serializedAssetDetail?.optionLabel : u?.serialNumberDetail?.optionLabel;
         res.serializedAssetId = u?.serializedAssetDetail?.optionValue;
         return res;
