@@ -38,7 +38,9 @@ import Add from '@mui/icons-material/Add';
 import { FiExternalLink } from 'react-icons/fi';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
+import Technicians from 'src/pages/FieldServiceOrder/material/Technicians';
 
+//Below component is irrelevant as of now [It is useful when Add Services Policy of FSO is there]
 const Material = ({ serviceOrderData, stepFullScreen, allowedToEdit, setNextStep, handleChangeStatus, resourcePolicy, fetchData }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_Material`;
   const toastConfig = useContext(CustomToastContext);
@@ -548,15 +550,16 @@ const Material = ({ serviceOrderData, stepFullScreen, allowedToEdit, setNextStep
       )}
       {(resourcePolicy?.addTechnicians || resourcePolicy?.addConsumables) && (
         <Box mt={3}>
-          <Consumables
+          <Technicians
             allowedToEdit={allowedToEdit}
-            services={dataRows?.filter((e) => e.type === MATERIAL_TYPE.service)}
+            // services={dataRows?.filter((e) => e.type === MATERIAL_TYPE.service)}
             serviceOrderData={serviceOrderData}
             stepFullScreen={stepFullScreen}
             fetchData={fetchData}
-            refreshChild={refreshChild}
+            // refreshChild={refreshChild}
             resourcePolicy={resourcePolicy}
             setNextStep={setNextStep}
+            handleChangeStatus={handleChangeStatus}
           />
         </Box>
       )}
