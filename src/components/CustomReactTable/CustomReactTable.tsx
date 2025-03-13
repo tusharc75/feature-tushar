@@ -91,7 +91,8 @@ const CustomReactTable = ({
   customContentHeight = 300,
   customContent = null,
   isFullScreen = false,
-  showTableHead = true
+  showTableHead = true,
+  handleArrangeRow = null
 }) => {
   const {
     currentEditingCellPosition,
@@ -547,6 +548,7 @@ const CustomReactTable = ({
               showFilters={showFilters}
               table={table}
               showArrangeView={showArrangeView}
+              handleArrangeRow={handleArrangeRow}
               newColumns={newColumns}
               refreshGrid={refreshGrid}
               setSelectedReportView={setSelectedReportView}

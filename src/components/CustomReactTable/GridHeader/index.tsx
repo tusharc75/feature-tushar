@@ -17,6 +17,7 @@ import { createFilterData, createFilterSetData, fetchFieldOptions, filtermodelTo
 import { useUserTempFilters } from 'src/components/CustomReactTable/GridFilter/utils';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import DisplayFilters from 'src/components/CustomReactTable/DisplayFilters';
+import ArrangeRow from 'src/components/CustomReactTable/ArrangeRow';
 
 type GridHeaderProps = {
   resource: any;
@@ -28,6 +29,7 @@ type GridHeaderProps = {
   showFilters: any;
   table: Table<any>;
   showArrangeView: any;
+  handleArrangeRow: any;
   newColumns: any;
   refreshGrid: any;
   setSelectedReportView: any;
@@ -49,6 +51,7 @@ const GridHeader = ({
   showFilters,
   table,
   showArrangeView,
+  handleArrangeRow,
   newColumns,
   refreshGrid,
   setSelectedReportView,
@@ -211,6 +214,7 @@ const GridHeader = ({
               {'Filters'}
             </ThemeButton>
           )}
+          {handleArrangeRow && <ArrangeRow state={state} handleArrangeRow={handleArrangeRow} />}
           {!hideExportTable && isClientSideGrid ? (
             <HtmlTooltip title={dataRows.length === 0 ? 'No Data to Export' : 'Export to Excel'} placement="top" arrow>
               <span>
