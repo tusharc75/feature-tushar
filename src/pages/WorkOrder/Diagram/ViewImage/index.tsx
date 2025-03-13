@@ -5,6 +5,8 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { b64toBlob } from 'src/constants/helpers';
 import { Box, FormControl, Typography } from '@mui/material';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
+import UndoIcon from '@mui/icons-material/Undo';
+import RedoIcon from '@mui/icons-material/Redo';
 
 fabric.IText.prototype.initHiddenTextarea = (function (initHiddenTextarea) {
   return function () {
@@ -28,6 +30,8 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
   const [isHighlighterMode, setHighlighterMode] = useState(false);
   const [brushPaths, setBrushPaths] = useState([]);
   const isSelected = useRef(false);
+  const [highlighterRedoPaths, setHighlighterRedoPaths] = useState([]);
+  const [brushRedoPaths, setBrushRedoPaths] = useState([]);
 
   useEffect(() => {
     // for touchScroll
@@ -265,19 +269,36 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
   };
 
   const handleUndo = () => {
-    if (isHighlighterMode) {
-      const lastHighlighterPath = highlighterPaths.pop();
-      if (lastHighlighterPath) {
+    if (isHighlighterMode && highlighterPaths.length > 0) {
+        const lastHighlighterPath = highlighterPaths.pop();
+        setHighlighterPaths(highlighterPaths);
         canvas.remove(lastHighlighterPath);
         canvas.requestRenderAll();
-      }
-    }
-    if (isDrawingMode) {
-      const lastBrushPath = brushPaths.pop();
-      if (lastBrushPath) {
+        setHighlighterRedoPaths(prev => [...prev, lastHighlighterPath]);
+    } else if (isDrawingMode && brushPaths.length > 0) {
+        const lastBrushPath = brushPaths.pop();
+        setBrushPaths(brushPaths);
         canvas.remove(lastBrushPath);
         canvas.requestRenderAll();
-      }
+        setBrushRedoPaths(prev => [...prev, lastBrushPath]);
+    }
+  };
+
+  const handleRedo = () => {
+    if (isHighlighterMode && highlighterRedoPaths.length > 0) {
+        const path = highlighterRedoPaths.pop();
+        setHighlighterRedoPaths(highlighterRedoPaths);
+        canvas.add(path);
+        path.setCoords();
+        canvas.renderAll();
+        setHighlighterPaths(prev => [...prev, path]);
+    } else if (isDrawingMode && brushRedoPaths.length > 0) {
+        const path = brushRedoPaths.pop();
+        setBrushRedoPaths(brushRedoPaths);
+        canvas.add(path);
+        path.setCoords();
+        canvas.renderAll();
+        setBrushPaths(prev => [...prev, path]);
     }
   };
 
@@ -440,7 +461,13 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
             <ThemeButton
               disabled={loading}
               onClick={handleUndo}
-            > Undo</ThemeButton>
+            > <UndoIcon/></ThemeButton>
+          )}
+          {(isDrawingMode || isHighlighterMode) && (
+            <ThemeButton
+              disabled={isHighlighterMode ? highlighterRedoPaths.length === 0 : brushRedoPaths.length === 0 || loading}
+              onClick={handleRedo}
+            > <RedoIcon /></ThemeButton>
           )}
           <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*" onChange={handleImageUpload} />
           <ThemeButton
