@@ -134,7 +134,7 @@ const ExpenseDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <Fragment>
-              {expensesData?.status !== EXPENSE_STATUS.approved && expensesData?.status !== EXPENSE_STATUS.awaitingApproval && (
+              {expensesData?.status !== EXPENSE_STATUS.approved && expensesData?.status !== EXPENSE_STATUS.awaitingApproval && expensesData?.status !== EXPENSE_STATUS.reimbursed &&(
                 <ThemeButton
                   iconForMobile={<Edit />}
                   disabled={!allowedToEdit}
