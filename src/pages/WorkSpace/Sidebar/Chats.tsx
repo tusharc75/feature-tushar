@@ -161,7 +161,7 @@ function renderRow(
           })}
           className={cn(
             onlineUsers.includes(userId)
-              ? '[&_.MuiBadge-badge]:!bg-red-500 '
+              ? '[&_.MuiBadge-badge]:!bg-green-500'
               : '[&_.MuiBadge-badge]:!bg-[#d9d9d9] dark:[&_.MuiBadge-badge]:!bg-[#757575]'
           )}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
