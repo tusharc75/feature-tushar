@@ -17,7 +17,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { CHILD_RESOURCE, MATERIAL_TYPE, SERIALIZED_PACKAGES_STATUS, WORK_ORDER_TYPE } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, SERIALIZED_PACKAGES_STATUS, sidebarResource, WORK_ORDER_TYPE } from '../../../constants/helpers';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import MaterialQtyDialog from 'src/pages/AssemblyOrder/Material/MaterialQtyDialog';
@@ -74,7 +74,9 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (row.original['type'] ? <h5>{`${getMaterialLabel(row.original?.type)}`}</h5> : <NoDataCell />),
-        accessorFn: (original) => { return getMaterialLabel(original?.type) }
+        accessorFn: (original) => {
+          return getMaterialLabel(original?.type);
+        }
       },
       {
         accessor: 'detail',
@@ -463,7 +465,9 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
             hideSelection={!allowedToEdit}
             hideAction={!allowedToEdit}
             isClientSideGrid={true}
+            resource={sidebarResource.assemblyOrder}
             expander={true}
+            arrangeRowField={{ key: 'material', _id: assemblyOrderData?._id, materialKey: '_id' }}
           />
         </Box>
       ) : (
@@ -486,8 +490,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
           onSuccess={(rows) => {
             if (rows?.find((e) => e?.packages?.length)) {
               setChildPackageWithoutParentDialog({ open: true, data: rows });
-            }
-            else {
+            } else {
               handleAdd(rows);
             }
           }}
