@@ -279,7 +279,7 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
           )}
         </Grid>
       </Grid>
-      {resourcePolicy?.addConsumables && dataRows?.length > 0 ?
+      {resourcePolicy?.addConsumables ?
         <Box mt={3}>
           <Consumables
             allowedToEdit={allowedToEdit}

@@ -39,9 +39,8 @@ import ServiceOrderViews from './RoadMapViews';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { generateAddFieldTicket } from 'src/pages/FieldServiceOrder/walkmeSteps';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
-import TechnicianDispatch from './TechnicianDispatch';
-import TechnicianReceive from './TechnicianReceive';
 import Technicians from './material/Technicians';
+import TechnicianDispatchReceive from './TechnicianDispatchReceive';
 
 const ServiceOrderDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -322,7 +321,7 @@ const ServiceOrderDetailsPage = () => {
               />
             )}
             {steps[currentStep]?.name === steps[1]?.name && serviceOrderData && (
-              <TechnicianDispatch
+              <TechnicianDispatchReceive
                 serviceOrderId={id}
                 setNextStep={setNextStep}
                 stepFullScreen={stepFullScreen}
@@ -330,10 +329,12 @@ const ServiceOrderDetailsPage = () => {
               />
             )}
             {steps[currentStep]?.name === steps[2]?.name && serviceOrderData && (
-              <TechnicianReceive
+              <TechnicianDispatchReceive
                 serviceOrderId={id}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={allowedToEdit}
+                setNextStep={setNextStep}
+                isReceive={true}
               />
             )}
           </TabPanel>

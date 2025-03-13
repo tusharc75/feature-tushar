@@ -51,9 +51,7 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
   }, [serviceOrderData]);
 
   useEffect(() => {
-    if (!isEmpty(selectedTechnician)) {
-      fetchData();
-    }
+    fetchData();
   }, [tabValue, selectedTechnician, refreshChild]);
 
   const fetchColumns = async () => {
@@ -205,7 +203,10 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
       dispatch({ type: 'loading', loading: true });
       dispatch({ type: 'selection', selectedRecords: [] });
       let consumables;
-      let api = `${fieldServiceOrder.api}/${serviceOrderData?._id}/material?type=${MATERIAL_TYPE.product}&technician=${selectedTechnician?.technicianId}`;
+      let api = `${fieldServiceOrder.api}/${serviceOrderData?._id}/material?type=${MATERIAL_TYPE.product}`;
+      if (selectedTechnician?.technicianId) {
+        api = `${api}&technician=${selectedTechnician?.technicianId}`;
+      }
       const response = await axiosInstance().get(api);
       consumables = response?.data?.data?.material;
 
@@ -409,74 +410,62 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
 
   return (
     <>
+      <Box style={{ maxWidth: '400px' }} mb={3}>
+        <Autocomplete
+          id={'select-technician'}
+          size="small"
+          style={{ minWidth: '300px' }}
+          fullWidth
+          options={technicians || []}
+          autoHighlight
+          value={selectedTechnician}
+          getOptionLabel={(option: any) => option?.technicianName || ''}
+          isOptionEqualToValue={(option, val) => (option ? option?.technicianId === val?.technicianId : false)}
+          onChange={(_, val) => {
+            dispatch({ type: 'update', data: [] });
+            setSelectedTechnician(val);
+          }}
+          renderInput={(params) => <TextField {...params} label={'Select Technician'} variant="outlined" />}
+        />
+      </Box>
       <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
         <CustomTab value={0} label={'Products/Consumables'} id={'products-consumables-tab'} />
       </CustomTabs>
       <TabPanel value={tabValue} index={0}>
-        <Box>
-          <Box style={{ maxWidth: '400px' }} mb={3}>
-            <Autocomplete
-              id={'select-technician'}
-              size="small"
-              style={{ minWidth: '300px' }}
-              fullWidth
-              options={technicians || []}
-              autoHighlight
-              value={selectedTechnician}
-              getOptionLabel={(option: any) => option?.technicianName || ''}
-              isOptionEqualToValue={(option, val) => (option ? option?.technicianId === val?.technicianId : false)}
-              onChange={(_, val) => {
-                dispatch({ type: 'update', data: [] });
-                setSelectedTechnician(val);
-              }}
-              renderInput={(params) => <TextField {...params} label={'Select Technician'} variant="outlined" />}
+        {allowedToEdit && (
+          <>
+            <DetailsPageHeader
+              isAddButtonVisible={!isEmpty(selectedTechnician)}
+              addButtonProps={{ onClick: () => setConsumablesDialog(true), id: 'add-product-consumable' }}
+              isActionButtonVisible={true}
+              actionButtonMenuItems={actionButtonMenuItems()}
+              actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
+              hasXpadding
             />
-          </Box>
-          {isEmpty(selectedTechnician) ? (
-            <>
-              <div className="flex h-full items-center justify-center">
-                <p className="text-gray-500">Please select a Technician</p>
-              </div>
-            </>
-          ) : (
-            <>
-              {allowedToEdit && (
-                <>
-                  <DetailsPageHeader
-                    isAddButtonVisible={true}
-                    addButtonProps={{ onClick: () => setConsumablesDialog(true), id: 'add-product-consumable' }}
-                    isActionButtonVisible={true}
-                    actionButtonMenuItems={actionButtonMenuItems()}
-                    actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
-                    hasXpadding
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, md: 12, sm: 12 }}>
+                {columns ? (
+                  <CustomReactTable
+                    height={stepFullScreen ? 'calc(100vh - 300px)' : '300px'}
+                    columns={columns}
+                    state={state}
+                    dispatch={dispatch}
+                    onSaveEdit={onSaveInlineEdit}
+                    renderedFrom={renderedFrom}
+                    isClientSideGrid={true}
+                    hideSelection={allowedToEdit ? false : true}
+                    hideAction={allowedToEdit ? false : true}
+                    refreshGrid={fetchData}
                   />
-                  <Grid container spacing={2}>
-                    <Grid size={{ xs: 12, md: 12, sm: 12 }}>
-                      {columns ? (
-                        <CustomReactTable
-                          height={stepFullScreen ? 'calc(100vh - 300px)' : '300px'}
-                          columns={columns}
-                          state={state}
-                          dispatch={dispatch}
-                          onSaveEdit={onSaveInlineEdit}
-                          renderedFrom={renderedFrom}
-                          isClientSideGrid={true}
-                          hideSelection={allowedToEdit ? false : true}
-                          hideAction={allowedToEdit ? false : true}
-                          refreshGrid={fetchData}
-                        />
-                      ) : (
-                        <Box p={2} height={300}>
-                          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                        </Box>
-                      )}
-                    </Grid>
-                  </Grid>
-                </>
-              )}
-            </>
-          )}
-        </Box>
+                ) : (
+                  <Box p={2} height={300}>
+                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                  </Box>
+                )}
+              </Grid>
+            </Grid>
+          </>
+        )}
       </TabPanel>
       {consumablesDialog && (
         <AssignProductDialog
