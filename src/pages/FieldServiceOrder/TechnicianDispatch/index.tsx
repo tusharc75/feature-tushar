@@ -16,6 +16,7 @@ import routes from '../../../components/Helpers/Routes';
 import { FiExternalLink } from 'react-icons/fi';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import DateDialog from '../DateDialog';
+import { Link } from 'react-router-dom';
 
 const TechnicianDispatch = ({ allowedToEdit, serviceOrderId, stepFullScreen, setNextStep }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_TechnicianDispatch`;
@@ -23,7 +24,7 @@ const TechnicianDispatch = ({ allowedToEdit, serviceOrderId, stepFullScreen, set
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-  const [dispatchDateDialog, setDispatchDateDialog] = useState({ open: false, data: null });
+  const [dispatchDateDialog, setDispatchDateDialog] = useState({ open: false, data: null, technicians: null });
 
   const {
     state: { permissions }
@@ -70,29 +71,6 @@ const TechnicianDispatch = ({ allowedToEdit, serviceOrderId, stepFullScreen, set
         )
       },
       {
-        accessor: 'service',
-        Header: 'Service',
-        width: 250,
-        Cell: ({ row }) =>
-          row.original?.service ? (
-            <div className="flex items-center gap-2">
-              <p className="text-truncate" title={row.original.service}>
-                {row.original.service}
-              </p>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(`${routes.serviceMasterDetail.path}/${row.original.serviceId}`);
-                }}
-              >
-                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-              </IconButton>
-            </div>
-          ) : (
-            <NoDataCell />
-          )
-      },
-      {
         accessor: 'status',
         Header: 'Status',
         width: 200,
@@ -134,6 +112,25 @@ const TechnicianDispatch = ({ allowedToEdit, serviceOrderId, stepFullScreen, set
         width: 250,
         Cell: ({ row }) => (row.original?.startDate ? <p>{displayDate(row.original?.startDate)}</p> : <NoDataCell />)
       },
+      {
+        accessor: 'startedBy',
+        Header: 'Dispatched By',
+        disableFilters: true,
+        disableSortBy: true,
+        Cell: ({ row }) =>
+          row?.original?.startedById ? (
+            <Link
+              className="link text-truncate"
+              title={row?.original?.startedBy}
+              to={`${routes.userDetail.path}/${row?.original?.startedById}`}
+              target={'_blank'}
+            >
+              {row?.original?.startedBy}
+            </Link>
+          ) : (
+            <NoDataCell />
+          )
+      },
     ];
     setColumns(column);
   };
@@ -170,10 +167,10 @@ const TechnicianDispatch = ({ allowedToEdit, serviceOrderId, stepFullScreen, set
       });
   };
 
-  const handleDispatch = (ids, date) => {
+  const handleDispatch = (ids, date, technicians) => {
     setSubmitting(true);
     axiosInstance()
-      .post(`${fieldServiceOrder.api}/technician/dispatch`, { _ids: ids, date: date, fieldServiceOrder: serviceOrderId })
+      .post(`${fieldServiceOrder.api}/technician/dispatch`, { _ids: ids, date: date, fieldServiceOrder: serviceOrderId, technicians })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -181,13 +178,13 @@ const TechnicianDispatch = ({ allowedToEdit, serviceOrderId, stepFullScreen, set
           message: data?.message
         });
         setSubmitting(false);
-        setDispatchDateDialog({ open: false, data: null });
+        setDispatchDateDialog({ open: false, data: null, technicians: null });
         fetchData();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
         setSubmitting(false);
-        setDispatchDateDialog({ open: false, data: null });
+        setDispatchDateDialog({ open: false, data: null, technicians: null });
       });
   };
 
@@ -198,7 +195,7 @@ const TechnicianDispatch = ({ allowedToEdit, serviceOrderId, stepFullScreen, set
           <MenuItem
             disabled={submitting}
             onClick={() => {
-              setDispatchDateDialog({ open: true, data: selectedRecords?.map((d) => d?._id) });
+              setDispatchDateDialog({ open: true, data: selectedRecords?.map((d) => d?._id), technicians: Array.from(new Set(selectedRecords?.map((d) => d?.technicianId))) });
             }}
           >
             Dispatch
@@ -210,48 +207,46 @@ const TechnicianDispatch = ({ allowedToEdit, serviceOrderId, stepFullScreen, set
 
   return (
     <>
-      <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
-        {allowedToEdit && (
-          <>
-            <DetailsPageHeader
-              isAddButtonVisible={false}
-              isActionButtonVisible={true}
-              actionButtonMenuItems={actionButtonMenuItems()}
-              actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
-              hasXpadding
+      {allowedToEdit && (
+        <>
+          <DetailsPageHeader
+            isAddButtonVisible={false}
+            isActionButtonVisible={true}
+            actionButtonMenuItems={actionButtonMenuItems()}
+            actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
+            hasXpadding
+          />
+        </>
+      )}
+      <Grid container spacing={2}>
+        <Grid size={{ xs: 12, md: 12, sm: 12 }}>
+          {columns ? (
+            <CustomReactTable
+              height={stepFullScreen ? 'calc(100vh - 300px)' : '300px'}
+              columns={columns}
+              state={state}
+              dispatch={dispatch}
+              renderedFrom={renderedFrom}
+              isClientSideGrid={true}
+              hideSelection={!allowedToEdit}
+              hideAction={!allowedToEdit}
+              refreshGrid={fetchData}
             />
-          </>
-        )}
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12, md: 12, sm: 12 }}>
-            {columns ? (
-              <CustomReactTable
-                height={stepFullScreen ? 'calc(100vh - 300px)' : '300px'}
-                columns={columns}
-                state={state}
-                dispatch={dispatch}
-                renderedFrom={renderedFrom}
-                isClientSideGrid={true}
-                hideSelection={!allowedToEdit}
-                hideAction={!allowedToEdit}
-                refreshGrid={fetchData}
-              />
-            ) : (
-              <Box p={2} height={300}>
-                <CommonSkeleton lenArray={[...Array(10).keys()]} />
-              </Box>
-            )}
-          </Grid>
+          ) : (
+            <Box p={2} height={300}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+          )}
         </Grid>
-      </Box>
+      </Grid>
       {dispatchDateDialog.open && (
         <DateDialog
           title={'Select Dispatch Date'}
           onClose={() => {
-            setDispatchDateDialog({ open: false, data: null });
+            setDispatchDateDialog({ open: false, data: null, technicians: null });
           }}
           handleSubmit={(date) => {
-            handleDispatch(dispatchDateDialog.data, date);
+            handleDispatch(dispatchDateDialog.data, date, dispatchDateDialog.technicians);
           }}
           loading={submitting}
         />

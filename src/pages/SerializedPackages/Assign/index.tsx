@@ -230,14 +230,19 @@ const Assign = ({ serializedPackagesData }) => {
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
       _subRow.detail =
-        _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageName : _subRow.type === MATERIAL_TYPE.product ? _subRow?.productName : '';
-      _subRow.description =
-        _subRow.type === MATERIAL_TYPE.product
-          ? _subRow?.productDescription || ''
-          : _subRow.type === MATERIAL_TYPE.package
-            ? _subRow?.packageDescription || ''
+        _subRow.type === MATERIAL_TYPE.package
+          ? _subRow?.packageDetail?.packageName
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow?.productDetail?.productName
             : '';
-      _subRow.productNumber = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productNumber : '';
+      _subRow.description =
+        _subRow.type === MATERIAL_TYPE.package
+          ? _subRow?.packageDetail?.packageDescription
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow?.productDetail?.productDescription
+            : '';
+      _subRow.productNumber = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productNumber : '';
+      _subRow.serializedProduct = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.serializedProduct : false;
       _subRow.assetQty =
         _subRow.type === MATERIAL_TYPE.product
           ? assets.filter((e) => {
