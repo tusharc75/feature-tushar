@@ -114,8 +114,6 @@ const ExpenseReportDetail = () => {
     }
   };
 
-  console.log(expenseReportData)
-
   const handleDelete = () => {
     axiosInstance()
       .put(`${expenseReport.api}/remove`, { ids: [expenseReportData._id] })
