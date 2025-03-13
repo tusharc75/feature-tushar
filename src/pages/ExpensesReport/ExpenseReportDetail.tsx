@@ -89,7 +89,7 @@ const ExpenseReportDetail = () => {
         setLoadingDetails(false);
         setAllowedToDelete(permissions?.expenseReport?.isDelete && data?.canDelete);
         setExpenseReportData(data);
-        if (data.status === EXPENSE_STATUS.awaitingApproval || data.status === EXPENSE_STATUS.approved) {
+        if (data.status === EXPENSE_STATUS.awaitingApproval || data.status === EXPENSE_STATUS.approved || data?.status === EXPENSE_STATUS.reimbursed) {
           setAllowedToEdit(false);
         } else {
           setAllowedToEdit(permissions?.expenseReport?.isUpdate);
@@ -113,6 +113,8 @@ const ExpenseReportDetail = () => {
       toastConfig.setToastConfig(error);
     }
   };
+
+  console.log(expenseReportData)
 
   const handleDelete = () => {
     axiosInstance()
@@ -165,7 +167,7 @@ const ExpenseReportDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <Fragment>
-              {expenseReportData?.status !== EXPENSE_STATUS.approved && (
+              {expenseReportData?.status !== EXPENSE_STATUS.approved && expenseReportData?.status !== EXPENSE_STATUS.reimbursed &&(
                 <>
                   <ThemeButton
                     buttonType="theme"

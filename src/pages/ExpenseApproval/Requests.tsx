@@ -1,12 +1,15 @@
-import { Box } from '@mui/material';
+import { Box, Dialog, TextField } from '@mui/material';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import { EXPENSE_STATUS, expenseReport, sidebarResource } from '../../constants/helpers';
+import { CustomDialogTransition, EXPENSE_STATUS, expenseReport, sidebarResource } from '../../constants/helpers';
 import Expenses from 'src/pages/ExpensesReport/Expenses';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 
 const Requests = ({ referenceId, fetchDataMaster }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -14,6 +17,8 @@ const Requests = ({ referenceId, fetchDataMaster }) => {
   const [loadingDetails, setLoadingDetails] = useState(true);
   const [rowsData, setRowsData] = useState(null);
   const [resourceData, setResourceData] = useState(null);
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
 
   useEffect(() => {
     if (referenceId) {
@@ -62,20 +67,48 @@ const Requests = ({ referenceId, fetchDataMaster }) => {
   };
 
   const handleStatusChange = (status) => {
-    console.log(rowsData)
-    // if (!rowsData) return;
-    // try {
-    //   axiosInstance().patch(`${expenseReport.api}/status/${rowsData._id}`, { status });
-    //   fetchDataMaster();
-    // } catch (error) {
-    //   toastConfig.setToastConfig(error);
-    // }
+    if (!rowsData) return;
+    try {
+      axiosInstance().patch(`${expenseReport.api}/status/${rowsData._id}`, { status });
+      fetchDataMaster();
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const openRejectDialog = () => {
+    setRejectReason('');
+    setRejectDialogOpen(true);
+  };
+
+  const handleRejectSave = () => {
+    if (!rowsData) return;
+    const updatedData = {
+      _id: rowsData._id,
+      expenses: rowsData.expenses,
+      fromDate: rowsData.fromDate,
+      reportTitle: rowsData.reportTitle,
+      status: EXPENSE_STATUS.rejected,
+      toDate: rowsData.toDate,
+      rejectReason: rejectReason,
+      users: [...rowsData.users.map((user) => user.optionValue)]
+    };
+
+    axiosInstance()
+      .put(`${expenseReport.api}`, updatedData)
+      .then(() => {
+        setRejectDialogOpen(false);
+        fetchDataMaster();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   return (
     <>
       <Box className="main-container-v1">
-        <Box display="flex" marginBottom={'0.5rem'} gap={'1rem'} justifyContent="flex-end">
+        <Box display="flex" marginBottom="0.5rem" gap="1rem" justifyContent="flex-end">
           <Fragment>
             {rowsData?.status !== EXPENSE_STATUS.approved ? (
               <>
@@ -87,30 +120,25 @@ const Requests = ({ referenceId, fetchDataMaster }) => {
                 >
                   APPROVE
                 </ThemeButton>
-                <ThemeButton
-                  buttonType="red"
-                  onClick={() => {
-                    handleStatusChange(EXPENSE_STATUS.rejected);
-                  }}
-                >
+                <ThemeButton buttonType="red" onClick={openRejectDialog}>
                   REJECT
                 </ThemeButton>
               </>
             ) : (
               <>
-              <ThemeButton
-                buttonType="themeBorder"
-                onClick={() => {
-                  handleStatusChange(EXPENSE_STATUS.reimbursed);
-                }}
-              >
-                REIMBURSED
-              </ThemeButton>
-            </>
+                <ThemeButton
+                  buttonType="themeBorder"
+                  onClick={() => {
+                    handleStatusChange(EXPENSE_STATUS.reimbursed);
+                  }}
+                >
+                  REIMBURSED
+                </ThemeButton>
+              </>
             )}
           </Fragment>
         </Box>
-        <Box className={`detail-container-v1`}>
+        <Box className="detail-container-v1">
           <Box>
             {!loadingDetails && rowsData && fields ? (
               <DetailsPage data={rowsData} fields={fields} />
@@ -139,6 +167,43 @@ const Requests = ({ referenceId, fetchDataMaster }) => {
           </Box>
         </Box>
       </Box>
+      <Dialog
+        open={rejectDialogOpen}
+        onClose={() => {
+          setRejectDialogOpen(false);
+        }}
+        maxWidth="sm"
+        fullWidth
+        TransitionComponent={CustomDialogTransition}
+        aria-labelledby="customized-dialog-title"
+      >
+        <CustomDialogHeader
+          title="Reason for Rejection"
+          onClose={null} 
+          showManimizeMaximize={false}
+        />
+        <CustomDialogContent>
+          <TextField
+          autoFocus
+            id="outlined-multiline-static"
+            label="State Your reason for Rejection"
+            fullWidth
+            required
+            multiline
+            rows={4}
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+          />
+        </CustomDialogContent>
+        <CustomDialogFooter>
+          <ThemeButton buttonType="transparent" onClick={() => setRejectDialogOpen(false)}>
+            Cancel
+          </ThemeButton>
+          <ThemeButton buttonType="theme" onClick={handleRejectSave} disabled={!rejectReason.trim()}>
+            Save
+          </ThemeButton>
+        </CustomDialogFooter>
+      </Dialog>
     </>
   );
 };
