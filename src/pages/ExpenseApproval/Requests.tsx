@@ -62,13 +62,14 @@ const Requests = ({ referenceId, fetchDataMaster }) => {
   };
 
   const handleStatusChange = (status) => {
-    if (!rowsData) return;
-    try {
-      axiosInstance().patch(`${expenseReport.api}/status/${rowsData._id}`, { status });
-      fetchDataMaster();
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    console.log(rowsData)
+    // if (!rowsData) return;
+    // try {
+    //   axiosInstance().patch(`${expenseReport.api}/status/${rowsData._id}`, { status });
+    //   fetchDataMaster();
+    // } catch (error) {
+    //   toastConfig.setToastConfig(error);
+    // }
   };
 
   return (
@@ -76,7 +77,7 @@ const Requests = ({ referenceId, fetchDataMaster }) => {
       <Box className="main-container-v1">
         <Box display="flex" marginBottom={'0.5rem'} gap={'1rem'} justifyContent="flex-end">
           <Fragment>
-            {rowsData?.status !== EXPENSE_STATUS.approved && (
+            {rowsData?.status !== EXPENSE_STATUS.approved ? (
               <>
                 <ThemeButton
                   buttonType="themeBorder"
@@ -95,6 +96,17 @@ const Requests = ({ referenceId, fetchDataMaster }) => {
                   REJECT
                 </ThemeButton>
               </>
+            ) : (
+              <>
+              <ThemeButton
+                buttonType="themeBorder"
+                onClick={() => {
+                  handleStatusChange(EXPENSE_STATUS.reimbursed);
+                }}
+              >
+                REIMBURSED
+              </ThemeButton>
+            </>
             )}
           </Fragment>
         </Box>

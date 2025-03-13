@@ -27,7 +27,11 @@ const ItemizeExpenses = ({ onClose, setLineItems, lineItems, currency, currencyS
   };
 
   const addLineItem = () => {
-    setLineItems([...lineItems, { id: lineItems.length, description: '', amount: '' }]);
+    const lastItem = lineItems[lineItems.length - 1];
+
+    if (!lastItem || (lastItem.description.trim() && lastItem.amount > 0)) {
+      setLineItems([...lineItems, { id: lineItems.length, description: '', amount: '' }]);
+    }
   };
 
   const removeLineItem = (id) => {
@@ -40,6 +44,11 @@ const ItemizeExpenses = ({ onClose, setLineItems, lineItems, currency, currencyS
     setLineItems(newFields);
   };
 
+  const handleClose = () => {
+    setLineItems(lineItems.filter((field) => field.description.trim() !== '' && field.amount > 0));
+    onClose();
+  };
+
   return (
     <Dialog
       maxWidth="md"
@@ -49,14 +58,14 @@ const ItemizeExpenses = ({ onClose, setLineItems, lineItems, currency, currencyS
       aria-labelledby="customized-dialog-title"
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {
-          onClose();
+          handleClose();
         }
       }}
       open={true}
     >
       <CustomDialogHeader
         title="Itemize"
-        onClose={onClose}
+        onClose={handleClose}
         isMinimized={!fullScreen}
         onMinimizeMaximize={() => {
           setFullScreen((prevState) => !prevState);
@@ -124,10 +133,16 @@ const ItemizeExpenses = ({ onClose, setLineItems, lineItems, currency, currencyS
         </div>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <ThemeButton buttonType="transparent" id="dialog-cancel-button" onClick={onClose}>
+        <ThemeButton buttonType="transparent" id="dialog-cancel-button" onClick={handleClose}>
           Cancel
         </ThemeButton>
-        <ThemeButton isLoading={isSubmitting} buttonType="theme" id="dialog-save-button" disabled={!isFormValid() || isSubmitting} onClick={onClose}>
+        <ThemeButton
+          isLoading={isSubmitting}
+          buttonType="theme"
+          id="dialog-save-button"
+          disabled={!isFormValid() || isSubmitting}
+          onClick={handleClose}
+        >
           Save
         </ThemeButton>
       </CustomDialogFooter>
