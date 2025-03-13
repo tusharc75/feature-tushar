@@ -15,16 +15,18 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import { FiExternalLink } from 'react-icons/fi';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
-import DateDialog from '../DateDialog';
 import { Link } from 'react-router-dom';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import { Send, CallReceived } from '@mui/icons-material';
 
-const TechnicianDispatch = ({ allowedToEdit, serviceOrderId, stepFullScreen, setNextStep }) => {
+const TechnicianDispatchReceive = ({ allowedToEdit, serviceOrderId, stepFullScreen, setNextStep, isReceive = false }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_TechnicianDispatch`;
+  if (isReceive) renderedFrom.replace('Dispatch', 'Receive');
 
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-  const [dispatchDateDialog, setDispatchDateDialog] = useState({ open: false, data: null, technicians: null });
+  const [confirmationDialog, setConfirmationDialog] = useState({ open: false, data: null });
 
   const {
     state: { permissions }
@@ -35,9 +37,10 @@ const TechnicianDispatch = ({ allowedToEdit, serviceOrderId, stepFullScreen, set
   useEffect(() => {
     fetchColumns();
     fetchData();
-  }, []);
+  }, [isReceive]);
 
   const fetchColumns = async () => {
+    setColumns(null);
     const column: any = [
       {
         accessor: 'index',
@@ -80,29 +83,33 @@ const TechnicianDispatch = ({ allowedToEdit, serviceOrderId, stepFullScreen, set
         accessor: 'competencyType',
         Header: 'Competency Type',
         width: 250,
-        Cell: ({ row }) => <DropdownCell
-          permissions={permissions}
-          permissionForLinks={{}}
-          field={{
-            fieldName: 'competencyType',
-            lookupResource: sidebarResource.competencyType
-          }}
-          original={row?.original}
-        />
+        Cell: ({ row }) => (
+          <DropdownCell
+            permissions={permissions}
+            permissionForLinks={{}}
+            field={{
+              fieldName: 'competencyType',
+              lookupResource: sidebarResource.competencyType
+            }}
+            original={row?.original}
+          />
+        )
       },
       {
         accessor: 'competencies',
         Header: 'Competencies',
         width: 250,
-        Cell: ({ row }) => <DropdownCell
-          permissions={permissions}
-          permissionForLinks={{}}
-          field={{
-            fieldName: 'competencies',
-            lookupResource: sidebarResource.competencies
-          }}
-          original={row?.original}
-        />
+        Cell: ({ row }) => (
+          <DropdownCell
+            permissions={permissions}
+            permissionForLinks={{}}
+            field={{
+              fieldName: 'competencies',
+              lookupResource: sidebarResource.competencies
+            }}
+            original={row?.original}
+          />
+        )
       },
       {
         accessor: 'dispatchedDate',
@@ -113,7 +120,7 @@ const TechnicianDispatch = ({ allowedToEdit, serviceOrderId, stepFullScreen, set
         Cell: ({ row }) => (row.original?.startDate ? <p>{displayDate(row.original?.startDate)}</p> : <NoDataCell />)
       },
       {
-        accessor: 'startedBy',
+        accessor: 'dispatchedBy',
         Header: 'Dispatched By',
         disableFilters: true,
         disableSortBy: true,
@@ -130,8 +137,66 @@ const TechnicianDispatch = ({ allowedToEdit, serviceOrderId, stepFullScreen, set
           ) : (
             <NoDataCell />
           )
-      },
+      }
     ];
+    if (isReceive) {
+      column.push(
+        {
+          accessor: 'receivedDate',
+          Header: 'Received Date',
+          disableFilters: true,
+          disableSortBy: true,
+          width: 250,
+          Cell: ({ row }) => (row.original?.endDate ? <p>{displayDate(row.original?.endDate)}</p> : <NoDataCell />)
+        },
+        {
+          accessor: 'receivedBy',
+          Header: 'Received By',
+          disableFilters: true,
+          disableSortBy: true,
+          Cell: ({ row }) =>
+            row?.original?.endedById ? (
+              <Link
+                className="link text-truncate"
+                title={row?.original?.endedBy}
+                to={`${routes.userDetail.path}/${row?.original?.endedById}`}
+                target={'_blank'}
+              >
+                {row?.original?.endedBy}
+              </Link>
+            ) : (
+              <NoDataCell />
+            )
+        }
+      );
+    }
+    column.push({
+      accessor: 'action',
+      Header: 'Actions',
+      minWidth: 100,
+      width: 100,
+      sticky: 'right',
+      disableFilters: true,
+      disableSortBy: true,
+      canDrag: false,
+      Cell: ({ row }) => {
+        return allowedToEdit ? (
+          <HtmlTooltip title={`${isReceive ? 'Receive' : 'Dispatch'}`}>
+            <span>
+              <IconButton
+                size="small"
+                disabled={(isReceive && !row?.original?.startDate) || row?.original?.endDate || (!isReceive && row?.original?.startDate)}
+                onClick={() => {
+                  setConfirmationDialog({ open: true, data: [row?.original?._id] });
+                }}
+              >
+                {isReceive ? <CallReceived fontSize="small" /> : <Send fontSize="small" />}
+              </IconButton>
+            </span>
+          </HtmlTooltip>
+        ) : null;
+      }
+    });
     setColumns(column);
   };
 
@@ -167,10 +232,11 @@ const TechnicianDispatch = ({ allowedToEdit, serviceOrderId, stepFullScreen, set
       });
   };
 
-  const handleDispatch = (ids, date, technicians) => {
+  const handleDispatchReceive = (ids) => {
     setSubmitting(true);
+    let api = `${fieldServiceOrder.api}/technician/${isReceive ? 'receive' : 'dispatch'}`;
     axiosInstance()
-      .post(`${fieldServiceOrder.api}/technician/dispatch`, { _ids: ids, date: date, fieldServiceOrder: serviceOrderId, technicians })
+      .post(api, { _ids: ids, fieldServiceOrder: serviceOrderId })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -178,27 +244,31 @@ const TechnicianDispatch = ({ allowedToEdit, serviceOrderId, stepFullScreen, set
           message: data?.message
         });
         setSubmitting(false);
-        setDispatchDateDialog({ open: false, data: null, technicians: null });
+        setConfirmationDialog({ open: false, data: null });
         fetchData();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
         setSubmitting(false);
-        setDispatchDateDialog({ open: false, data: null, technicians: null });
       });
   };
 
   const actionButtonMenuItems = () => {
     return (
       <>
-        <HtmlTooltip title={'Dispatch Technicians'}>
+        <HtmlTooltip title={`${isReceive ? 'Receive' : 'Dispatch'} Technicians`}>
           <MenuItem
-            disabled={submitting}
+            disabled={
+              submitting ||
+              (isReceive && selectedRecords?.some((d) => !d?.startDate)) ||
+              (!isReceive && selectedRecords?.some((d) => d?.startDate)) ||
+              selectedRecords?.some((d) => d?.endDate)
+            }
             onClick={() => {
-              setDispatchDateDialog({ open: true, data: selectedRecords?.map((d) => d?._id), technicians: Array.from(new Set(selectedRecords?.map((d) => d?.technicianId))) });
+              setConfirmationDialog({ open: true, data: selectedRecords?.map((d) => d?._id) });
             }}
           >
-            Dispatch
+            {isReceive ? 'Receive' : 'Dispatch'}
           </MenuItem>
         </HtmlTooltip>
       </>
@@ -222,7 +292,7 @@ const TechnicianDispatch = ({ allowedToEdit, serviceOrderId, stepFullScreen, set
         <Grid size={{ xs: 12, md: 12, sm: 12 }}>
           {columns ? (
             <CustomReactTable
-              height={stepFullScreen ? 'calc(100vh - 300px)' : '300px'}
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
               columns={columns}
               state={state}
               dispatch={dispatch}
@@ -239,20 +309,19 @@ const TechnicianDispatch = ({ allowedToEdit, serviceOrderId, stepFullScreen, set
           )}
         </Grid>
       </Grid>
-      {dispatchDateDialog.open && (
-        <DateDialog
-          title={'Select Dispatch Date'}
+      {confirmationDialog.open && (
+        <ConfirmationDialog
+          open={confirmationDialog.open}
+          message={`Are you sure you want to ${isReceive ? 'Receive' : 'Dispatch'} selected techncian(s)?`}
           onClose={() => {
-            setDispatchDateDialog({ open: false, data: null, technicians: null });
+            setConfirmationDialog({ open: false, data: null });
           }}
-          handleSubmit={(date) => {
-            handleDispatch(dispatchDateDialog.data, date, dispatchDateDialog.technicians);
-          }}
-          loading={submitting}
+          onOk={() => handleDispatchReceive(confirmationDialog.data)}
+          okBtnLoading={submitting}
         />
       )}
     </>
   );
 };
 
-export default TechnicianDispatch;
+export default TechnicianDispatchReceive;

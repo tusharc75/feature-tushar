@@ -44,7 +44,13 @@ const History = ({ id }) => {
       resource: sidebarResource.rentalManagement,
       path: routes.rentalManagementDetail.path,
       title: resources?.rentalManagement?.titleSingular
-    }
+    },
+    {
+      key: 'fieldServiceOrder',
+      resource: sidebarResource.fieldServiceOrder,
+      path: routes.fieldServiceOrderDetail.path,
+      title: resources?.fieldServiceOrder?.titleSingular
+    },
   ];
 
   const columns = [
