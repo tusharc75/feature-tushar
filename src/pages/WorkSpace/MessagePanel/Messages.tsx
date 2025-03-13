@@ -18,34 +18,23 @@ import { formatDateWithTodayYestarday } from 'src/pages/WorkSpace/utils';
 import SendMessage from './SendMessage';
 import { getAvatarColor } from 'src/pages/WorkSpace/utils';
 import Thread from './Thread';
+import { UseWorkSpace } from 'src/pages/WorkSpace/useWorkSpace';
 
 type MessagesProps = {
   channelId: string;
-  socket: Socket;
   threadDialogOpen: { open: boolean; message: Message };
   setThreadDialogOpen: React.Dispatch<React.SetStateAction<{ open: boolean; message: Message }>>;
   channelData: ChannelData;
-  newChat: boolean;
-  toUsers: string[];
-  refreshNewChat: () => void;
   type: 'messages' | 'pins';
+  state: UseWorkSpace;
 };
 
 export const groupByDate = (messages: Message[]) => {
   return groupBy(messages, (message) => displayDate(message.date));
 };
 
-const Messages = ({
-  channelId,
-  socket,
-  threadDialogOpen,
-  setThreadDialogOpen,
-  channelData,
-  newChat,
-  toUsers,
-  refreshNewChat,
-  type
-}: MessagesProps) => {
+const Messages = ({ channelId, threadDialogOpen, setThreadDialogOpen, channelData, type, state }: MessagesProps) => {
+  const { socket, newChatToUser } = state;
   const [messages, setMessages] = useState<{ [key: string]: Message[] }>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [lastMessageSeen, setLastMessageSeen] = useState(null);
@@ -150,13 +139,13 @@ const Messages = ({
   }, [socket, channelId, type]);
 
   useEffect(() => {
-    if (newChat) {
+    if (newChatToUser) {
       setMessages({});
       setIsLoading(false);
     } else {
       fetchMessages();
     }
-  }, [channelId, newChat, type]);
+  }, [channelId, newChatToUser, type]);
 
   const handleMenuClick = (event, message: Message) => {
     setAnchorEl(event.currentTarget);
@@ -221,11 +210,9 @@ const Messages = ({
         channelId={channelId}
         socket={socket}
         channelData={channelData}
-        disabled={isLoading || (newChat && toUsers?.length === 0) || type === 'pins'}
+        disabled={isLoading || type === 'pins'}
         messageId={lastMessageSeen}
-        newChat={newChat}
-        toUsers={toUsers}
-        refreshNewChat={refreshNewChat}
+        state={state}
       />
       <MoreMenuAndDeleteConfirmDialog
         anchorEl={anchorEl}
@@ -236,6 +223,7 @@ const Messages = ({
         socket={socket}
       />
       <Thread
+        state={state}
         message={threadDialogOpen.message}
         open={threadDialogOpen.open}
         onClose={() => setThreadDialogOpen({ open: false, message: null })}

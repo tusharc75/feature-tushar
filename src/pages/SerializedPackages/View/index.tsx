@@ -165,7 +165,11 @@ const SerializedPackagesView = ({ serializedPackagesData }) => {
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
       _subRow.detail =
-        _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageName : _subRow.type === MATERIAL_TYPE.product ? _subRow?.productName : '';
+        _subRow.type === MATERIAL_TYPE.package
+          ? _subRow?.packageDetail?.packageName
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow?.productDetail?.productName
+            : '';
       _subRow.subRows = generateNestedData(material, assets, _subRow);
     });
     if (assets?.length > 0) {
