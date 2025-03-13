@@ -66,7 +66,7 @@ const Header = () => {
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
   const [open, setOpen] = useState(false);
   const anchorRef = useRef(null);
-  const userSocket = useSocket({namespace:"/user"});
+  const userSocket = useSocket({ namespace: "/user" });
 
   const isSupportMenuOpen = Boolean(supportAnchorEl);
   const isArcelorMenuOpen = Boolean(servicesAnchorEl);
@@ -127,8 +127,7 @@ const Header = () => {
       userSocket.on('new', (data) => {
         dispatch({ type: SET_CHATTER, payload: data });
       });
-      userSocket.on("online-users",(data) => {
-        console.log(data)
+      userSocket.on("online-users", (data) => {
       })
     }
     return () => {
@@ -137,7 +136,7 @@ const Header = () => {
         userSocket.off('data');
       }
     };
-  }, [userSocket,user,userSocket?.connected]);
+  }, [userSocket, user, userSocket?.connected]);
 
   const handleMobileMenuClose = () => {
     setMobileMoreAnchorEl(null);
