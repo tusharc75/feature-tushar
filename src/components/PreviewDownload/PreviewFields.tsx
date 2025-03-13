@@ -75,7 +75,7 @@ export const PreviewFields = ({
         data.columns
           ?.map((e) => {
             const temp = allColumn.find((col) => col.fieldName === e.name);
-            if (temp) return { ...temp, width: e.width, customLabel: e?.customLabel };
+            if (temp) return { ...temp, width: e.width, customLabel: e?.customLabel, showBelowRow: e?.showBelowRow };
           })
           .filter((col) => col !== undefined)
       );

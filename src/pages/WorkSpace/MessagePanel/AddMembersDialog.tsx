@@ -11,7 +11,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const AddMemberDialog = ({ onClose, channelId = null, onSuccess, ignoreIds = [], newChat = false, users= [] }) => {
+const AddMemberDialog = ({ onClose, channelId = null, onSuccess, ignoreIds = [], newChat = false, users = [] }) => {
   const [selectedUsers, setSelectedUsers] = useState(users?.length > 0 ? users : []);
   const toastConfig = useContext(CustomToastContext);
 
@@ -36,7 +36,8 @@ const AddMemberDialog = ({ onClose, channelId = null, onSuccess, ignoreIds = [],
       }));
 
       setOptions((currentOptions) => {
-        let alreadySelectedOptions: any = currentOptions?.filter((option) => selectedUsers?.map(s => s?.optionValue)?.includes(option?.optionValue)) || [];
+        let alreadySelectedOptions: any =
+          currentOptions?.filter((option) => selectedUsers?.map((s) => s?.optionValue)?.includes(option?.optionValue)) || [];
         optionsData = uniqBy([...alreadySelectedOptions, ...optionsData], 'optionValue');
         return page === 0 ? optionsData : [...currentOptions, ...optionsData];
       });
@@ -52,7 +53,7 @@ const AddMemberDialog = ({ onClose, channelId = null, onSuccess, ignoreIds = [],
 
   const handleAddMembers = async () => {
     try {
-      const { data } = await axiosInstance().put(`/work-space/channel/${channelId}`, { userIds: selectedUsers?.map(s => s?.optionValue) });
+      const { data } = await axiosInstance().put(`/work-space/channel/${channelId}`, { userIds: selectedUsers?.map((s) => s?.optionValue) });
       onSuccess();
       toastConfig.setToastConfig({
         open: true,
@@ -68,104 +69,109 @@ const AddMemberDialog = ({ onClose, channelId = null, onSuccess, ignoreIds = [],
     fetchOptions();
   }, []);
 
-  return (<>
-    <Dialog
-      maxWidth="sm"
-      fullScreen={fullScreen || isMobile || isTablet}
-      TransitionComponent={CustomDialogTransition}
-      aria-labelledby="customized-dialog-title"
-      open={true}
-      fullWidth
-      onClose={onClose}
-    >
-      <CustomDialogHeader
+  console.log(selectedUsers);
+
+  return (
+    <>
+      <Dialog
+        maxWidth="sm"
+        fullScreen={fullScreen || isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
+        aria-labelledby="customized-dialog-title"
+        open={true}
+        fullWidth
         onClose={onClose}
-        title={'Add Members'}
-        isMinimized={!fullScreen}
-        onMinimizeMaximize={() => {
-          setFullScreen((prevState) => !prevState);
-        }}
-        showManimizeMaximize={true}
-        showRequiredLabel={false}
-      />
-      <CustomDialogContent >
-        <Autocomplete
-          multiple={true}
-          fullWidth
-          onOpen={() => {
-            fetchOptions('', 0);
+      >
+        <CustomDialogHeader
+          onClose={onClose}
+          title={'Add Members'}
+          isMinimized={!fullScreen}
+          onMinimizeMaximize={() => {
+            setFullScreen((prevState) => !prevState);
           }}
-          inputValue={inputValue}
-          onInputChange={(event, value, reason) => {
-            if (reason === 'input') {
-              setInputValue(value);
-              fetchOptions(value);
-            }
-          }}
-          loading={loading || !options}
-          options={options}
-          autoHighlight
-          value={selectedUsers?.map((user) => options?.find((option) => option?.optionValue === user?.optionValue) || { optionLabel: '', optionValue: user?.optionValue })}
-          getOptionLabel={(option) => option.optionLabel || ''}
-          isOptionEqualToValue={(option, val) => option.optionValue === val.optionValue}
-          onChange={(event, newValue) => { setSelectedUsers(newValue) }}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label={'Select Users'}
-              name={'users'}
-              autoFocus
-              required={true}
-              slotProps={{
-                input: {
-                  ...params.InputProps,
-                  endAdornment: (
-                    <>
-                      {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                      {params.InputProps.endAdornment}
-                    </>
-                  )
-                }
-              }}
-              margin="none"
-              size={'small'}
-              variant="outlined"
-            />
-          )}
-          ListboxProps={{
-            onScroll: (e: any) => {
-              if (e.target.scrollTop + e.target.clientHeight >= e.target.scrollHeight - 1) {
-                fetchOptions('', currentPage + 1);
-              }
-            }
-          }}
+          showManimizeMaximize={true}
+          showRequiredLabel={false}
         />
-      </CustomDialogContent>
-      <CustomDialogFooter>
-        <ThemeButton
-          buttonType="transparent"
-          onClick={onClose}
-        >
-          Cancel
-        </ThemeButton>
-        <ThemeButton
-          buttonType="theme"
-          disabled={selectedUsers?.length === 0}
-          onClick={(e) => {
-            e.preventDefault();
-            if (newChat) {
-              onSuccess(selectedUsers);
-            } else {
-              handleAddMembers();
-            }
-            onClose();
-          }}
-        >
-          Add
-        </ThemeButton>
-      </CustomDialogFooter>
-    </Dialog>
-  </>);
+        <CustomDialogContent>
+          <Autocomplete
+            multiple={true}
+            fullWidth
+            onOpen={() => {
+              fetchOptions('', 0);
+            }}
+            inputValue={inputValue}
+            onInputChange={(event, value, reason) => {
+              if (reason === 'input') {
+                setInputValue(value);
+                fetchOptions(value);
+              }
+            }}
+            loading={loading || !options}
+            options={options}
+            autoHighlight
+            value={selectedUsers?.map(
+              (user) => options?.find((option) => option?.optionValue === user?.optionValue) || { optionLabel: '', optionValue: user?.optionValue }
+            )}
+            getOptionLabel={(option) => option.optionLabel || ''}
+            isOptionEqualToValue={(option, val) => option.optionValue === val.optionValue}
+            onChange={(event, newValue) => {
+              setSelectedUsers(newValue);
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label={'Select Users'}
+                name={'users'}
+                autoFocus
+                required={true}
+                slotProps={{
+                  input: {
+                    ...params.InputProps,
+                    endAdornment: (
+                      <>
+                        {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                        {params.InputProps.endAdornment}
+                      </>
+                    )
+                  }
+                }}
+                margin="none"
+                size={'small'}
+                variant="outlined"
+              />
+            )}
+            ListboxProps={{
+              onScroll: (e: any) => {
+                if (e.target.scrollTop + e.target.clientHeight >= e.target.scrollHeight - 1) {
+                  fetchOptions('', currentPage + 1);
+                }
+              }
+            }}
+          />
+        </CustomDialogContent>
+        <CustomDialogFooter>
+          <ThemeButton buttonType="transparent" onClick={onClose}>
+            Cancel
+          </ThemeButton>
+          <ThemeButton
+            buttonType="theme"
+            disabled={selectedUsers?.length === 0}
+            onClick={(e) => {
+              e.preventDefault();
+              if (newChat) {
+                onSuccess(selectedUsers);
+              } else {
+                handleAddMembers();
+              }
+              onClose();
+            }}
+          >
+            Add
+          </ThemeButton>
+        </CustomDialogFooter>
+      </Dialog>
+    </>
+  );
 };
 
 export default AddMemberDialog;
