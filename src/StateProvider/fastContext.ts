@@ -14,6 +14,7 @@ export const WALK_ME_INSTANCE = 'walkMeInstance';
 export const GRID_METADATA = 'gridMetaData';
 export const USER_FAVOURITES = 'userFavorites';
 export const TEMP_USER_FILTER = 'tempUserFilter';
+export const ONLINE_USERS = 'onlineUsers';
 
 const initialState: {
   searchQuery: string;
@@ -29,6 +30,7 @@ const initialState: {
   gridMetaData: { [key: string]: { hide: string[]; order: string[]; name?: string; id?: string } | null };
   userFavorites: { [key: string]: boolean } | null;
   tempUserFilter: { [key: string]: any };
+  onlineUsers: string[];
 } = {
   searchQuery: '',
   themeColor: 'light',
@@ -42,7 +44,8 @@ const initialState: {
   walkMeInstance: null,
   gridMetaData: {},
   userFavorites: null,
-  tempUserFilter: {}
+  tempUserFilter: {},
+  onlineUsers: []
 };
 
 const { Provider, useStore } = createFastContext(initialState);

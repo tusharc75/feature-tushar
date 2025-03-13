@@ -9,7 +9,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import { GoChevronLeft, GoChevronRight } from 'react-icons/go';
 import { HiOutlineMenuAlt1 } from 'react-icons/hi';
 import { useHistory } from 'react-router-dom';
-import { SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON, useStore } from 'src/StateProvider/fastContext';
+import { SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON, useStore, ONLINE_USERS } from 'src/StateProvider/fastContext';
 import { SVG } from 'src/assets';
 import { MoonIcon, SunIcon } from 'src/assets/svg/svgIcons';
 import NewSearchbar from 'src/components/Header/SearchBar';
@@ -37,6 +37,7 @@ import { useSocket } from 'src/hooks/useSocket';
 const Header = () => {
   const [themeColor, toggleThemeColor] = useAppTheme();
   const [isSidebarOpen, setIsSidebarOpen] = useStore((store) => store[SIDEBAR_OPEN]);
+  const [_onlineUsers, setOnlineUsers] = useStore((state) => state.onlineUsers);
   const [sidebarOpenedByButton, setSidebarOpenedByButton] = useStore((store) => store[SIDEBAR_OPENED_BY_BUTTON]);
   const isMobile = useMediaQuery('(max-width:960px)');
   const is768 = useMediaQuery('(max-width: 768px)');
@@ -66,7 +67,7 @@ const Header = () => {
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
   const [open, setOpen] = useState(false);
   const anchorRef = useRef(null);
-  const userSocket = useSocket({namespace:"/user"});
+  const userSocket = useSocket({ namespace: '/user' });
 
   const isSupportMenuOpen = Boolean(supportAnchorEl);
   const isArcelorMenuOpen = Boolean(servicesAnchorEl);
@@ -127,9 +128,9 @@ const Header = () => {
       userSocket.on('new', (data) => {
         dispatch({ type: SET_CHATTER, payload: data });
       });
-      userSocket.on("online-users",(data) => {
-        console.log(data)
-      })
+      userSocket.on('online-users', (data) => {
+        setOnlineUsers({ [ONLINE_USERS]: data.onlineUsers });
+      });
     }
     return () => {
       if (userSocket) {
@@ -137,7 +138,7 @@ const Header = () => {
         userSocket.off('data');
       }
     };
-  }, [userSocket,user,userSocket?.connected]);
+  }, [userSocket, user, userSocket?.connected]);
 
   const handleMobileMenuClose = () => {
     setMobileMoreAnchorEl(null);
@@ -296,21 +297,21 @@ const Header = () => {
     >
       {user?.entity && user.entity.length
         ? user.entity.map((curEntity) => (
-          <MenuItem
-            title={curEntity.entityName}
-            key={curEntity._id}
-            selected={selectedEntity === curEntity._id}
-            onClick={() => {
-              handleSelectedEnity(curEntity._id);
-              closeEntitiesMenu();
-              window.location.reload();
-            }}
-          >
-            <Typography className={`line-clamp-1 max-w-[200px]`}>{curEntity.entityName}</Typography>
-            <Box component="span" marginX={1} />
-            {selectedEntity === curEntity._id && <Chip size="small" label="Current" color="primary" />}
-          </MenuItem>
-        ))
+            <MenuItem
+              title={curEntity.entityName}
+              key={curEntity._id}
+              selected={selectedEntity === curEntity._id}
+              onClick={() => {
+                handleSelectedEnity(curEntity._id);
+                closeEntitiesMenu();
+                window.location.reload();
+              }}
+            >
+              <Typography className={`line-clamp-1 max-w-[200px]`}>{curEntity.entityName}</Typography>
+              <Box component="span" marginX={1} />
+              {selectedEntity === curEntity._id && <Chip size="small" label="Current" color="primary" />}
+            </MenuItem>
+          ))
         : null}
     </Menu>
   );
@@ -451,8 +452,9 @@ const Header = () => {
         <Toolbar className={`bg-[--dark-primary,white] ${styles.mainConainer}`} style={{ color: themeColor === 'light' ? '#3d3d3d' : '#fff' }}>
           <Box
             component="div"
-            className={`${isSidebarOpen && sidebarOpenedByButton ? styles.drawerOpen : styles.drawerClosed} ${styles.leftContent} ${styles.flexAlignCenter
-              } flex-grow`}
+            className={`${isSidebarOpen && sidebarOpenedByButton ? styles.drawerOpen : styles.drawerClosed} ${styles.leftContent} ${
+              styles.flexAlignCenter
+            } flex-grow`}
           >
             <div className={` ${styles.toggleButton}`}>
               <IconButton
@@ -540,8 +542,8 @@ const Header = () => {
               <div>
                 <ChatNotification />
               </div>
-              <HtmlTooltip title='User Manual'>
-                <IconButton id="helpButton" aria-label="help" color="inherit" onClick={openHelperModal} className={styles.showIconLayout} >
+              <HtmlTooltip title="User Manual">
+                <IconButton id="helpButton" aria-label="help" color="inherit" onClick={openHelperModal} className={styles.showIconLayout}>
                   <HelpOutlineIcon className="setIcon" />
                 </IconButton>
               </HtmlTooltip>

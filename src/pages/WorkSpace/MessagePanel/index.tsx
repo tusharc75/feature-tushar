@@ -1,62 +1,25 @@
 import { Avatar, Chip, IconButton } from '@mui/material';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { VscLayoutSidebarLeft } from 'react-icons/vsc';
-import { Socket } from 'socket.io-client';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { cn } from 'src/constants/helpers';
 import Messages from 'src/pages/WorkSpace/MessagePanel/Messages';
-import { getAvatarColor } from 'src/pages/WorkSpace/utils';
 import ViewMembers from 'src/pages/WorkSpace/MessagePanel/ViewMembers';
-import { ChannelData, Message, TChannel } from 'src/pages/WorkSpace/types';
+import { ChannelData, Message } from 'src/pages/WorkSpace/types';
+import { UseWorkSpace } from 'src/pages/WorkSpace/useWorkSpace';
+import { getAvatarColor } from 'src/pages/WorkSpace/utils';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import AddMemberDialog from './AddMembersDialog';
-import { useData } from 'src/StateProvider/Provider';
 
-type MessagePanelProps = {
-  selectedChannel: TChannel | null;
-  toggleSidebar: () => void;
-  isSidebarCollapsed: boolean;
-  socket: Socket;
-  newChat: boolean;
-  setNewChat: React.Dispatch<React.SetStateAction<boolean>>;
-  newChatUsers: string[];
-  setNewChatUsers: React.Dispatch<React.SetStateAction<string[]>>;
-  newChatAddMemberDialog: boolean;
-  setNewChatAddMemberDialog: React.Dispatch<React.SetStateAction<boolean>>;
-};
-
-// const avaterPette = ['!bg-[#eeba6c] !dark:bg-[#a17e49]', '!bg-[#3772ff] !dark:bg-[#264fb2]', '!bg-[#0ed290] dark:!bg-[#08855b]'];
-
-// const getAavaterColor = (index: number = 0) => {
-//   return avaterPette[index % avaterPette.length];
-// };
-
-const MessagePanel = ({
-  selectedChannel,
-  toggleSidebar,
-  isSidebarCollapsed,
-  socket,
-  newChat,
-  setNewChat,
-  newChatUsers,
-  setNewChatUsers,
-  newChatAddMemberDialog,
-  setNewChatAddMemberDialog
-}: MessagePanelProps) => {
+const MessagePanel = ({ state }: { state: UseWorkSpace }) => {
+  const { selectedChannel, isSidebarCollapsed, newChatToUser, toggleSidebar } = state;
   const toastConfig = useContext(CustomToastContext);
   const [channelData, setChannelData] = useState<ChannelData>(null);
   const [isMemberDialogOpen, setIsMemberDialogOpen] = useState(false);
   const [threadDialogOpen, setThreadDialogOpen] = useState<{ open: boolean; message: Message }>({ open: false, message: null });
   const [themeColor] = useAppTheme();
   const [msgType, setMsgType] = useState<'messages' | 'pins'>('messages');
-
-  const {
-    state: {
-      user: { user }
-    }
-  } = useData();
 
   const fetchChannelData = useCallback(async () => {
     try {
@@ -73,11 +36,6 @@ const MessagePanel = ({
     }
     return () => setChannelData(null);
   }, [selectedChannel, fetchChannelData]);
-
-  const refreshNewChat = () => {
-    setNewChat(false);
-    setNewChatUsers([]);
-  };
 
   return (
     <>
@@ -97,15 +55,14 @@ const MessagePanel = ({
             </HtmlTooltip>
           </div>
         )}
-        {selectedChannel || newChat ? (
+        {selectedChannel || newChatToUser ? (
           <div className="flex h-[var(--h)] flex-col">
             <div className={cn('p-[7px_15px] [border-bottom:1px_solid_var(--common-border-color)]')}>
               <div className="mb-1 flex items-center justify-between gap-2">
                 <h5 className={cn('line-clamp-1 text-[18px] font-bold transition-all', isSidebarCollapsed && 'pl-[30px] ')}>
-                  {newChat ? 'New Chat' : selectedChannel?.title}
-                  {newChat && <span className="text-sm text-gray-500"> To: {newChatUsers?.map((s: any) => s?.optionLabel)?.join(', ')}</span>}
+                  {newChatToUser ? newChatToUser.concatedName : selectedChannel?.title}
                 </h5>
-                {!newChat && (
+                {!newChatToUser && (
                   <HtmlTooltip title={'View all members'}>
                     <IconButton
                       size={'small'}
@@ -149,32 +106,19 @@ const MessagePanel = ({
                   </HtmlTooltip>
                 )}
               </div>
-              <p className="line-clamp-2 text-sm text-gray-500">{selectedChannel?.description}</p>
+              <p className="line-clamp-2 text-sm text-gray-500">{selectedChannel ? selectedChannel?.description : 'Direct Messaging'}</p>
               <div className="flex gap-2 p-2">
-                <Chip
-                  label="Messages"
-                  clickable
-                  color={msgType === 'messages' ? 'primary' : 'default'}
-                  onClick={() => setMsgType('messages')}
-                />
-                <Chip
-                  label="Pins"
-                  clickable
-                  color={msgType === 'pins' ? 'primary' : 'default'}
-                  onClick={() => setMsgType('pins')}
-                />
+                <Chip label="Messages" clickable color={msgType === 'messages' ? 'primary' : 'default'} onClick={() => setMsgType('messages')} />
+                <Chip label="Pins" clickable color={msgType === 'pins' ? 'primary' : 'default'} onClick={() => setMsgType('pins')} />
               </div>
             </div>
 
             <Messages
+              state={state}
               channelId={selectedChannel?._id}
-              socket={socket}
               threadDialogOpen={threadDialogOpen}
               setThreadDialogOpen={setThreadDialogOpen}
               channelData={channelData}
-              newChat={newChat}
-              toUsers={newChatUsers}
-              refreshNewChat={refreshNewChat}
               type={msgType}
             />
           </div>
@@ -191,19 +135,6 @@ const MessagePanel = ({
           fetchChannelData={fetchChannelData}
           selectedChannel={selectedChannel}
           handleClose={() => setIsMemberDialogOpen(false)}
-        />
-      )}
-      {newChatAddMemberDialog && (
-        <AddMemberDialog
-          onClose={() => {
-            setNewChatAddMemberDialog(false);
-          }}
-          onSuccess={(users) => {
-            setNewChatUsers(users);
-          }}
-          ignoreIds={[user?._id]}
-          newChat={newChat}
-          users={newChatUsers}
         />
       )}
     </>
