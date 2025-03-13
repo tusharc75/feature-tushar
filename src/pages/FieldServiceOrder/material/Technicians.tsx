@@ -12,14 +12,15 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { fieldServiceOrder, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { fieldServiceOrder, prepareDataForGrid, SERVICE_ORDER_STATUS, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
 import { FiExternalLink } from 'react-icons/fi';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
+import Consumables from 'src/pages/FieldServiceOrder/material/Consumables';
 
-const Technicians = ({ allowedToEdit, serviceOrderData, selectedService, stepFullScreen, setNextStep }) => {
+const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceOrderData, resourcePolicy, stepFullScreen, setNextStep, handleChangeStatus }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_Technicians`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -27,6 +28,7 @@ const Technicians = ({ allowedToEdit, serviceOrderData, selectedService, stepFul
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [technicianDialog, setTechnicianDialog] = useState(false);
+  const [refreshChild, setRefreshChild] = useState(false);
 
   const {
     state: { permissions }
@@ -40,7 +42,7 @@ const Technicians = ({ allowedToEdit, serviceOrderData, selectedService, stepFul
 
   useEffect(() => {
     fetchData();
-  }, [selectedService]);
+  }, []);
 
   const fetchColumns = async () => {
     const column: any = [
@@ -74,29 +76,6 @@ const Technicians = ({ allowedToEdit, serviceOrderData, selectedService, stepFul
             </IconButton>
           </div>
         )
-      },
-      {
-        accessor: 'service',
-        Header: 'Service',
-        width: 250,
-        Cell: ({ row }) =>
-          row.original?.service ? (
-            <div className="flex items-center gap-2">
-              <p className="text-truncate" title={row.original.service}>
-                {row.original.service}
-              </p>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(`${routes.serviceMasterDetail.path}/${row.original.serviceId}`);
-                }}
-              >
-                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-              </IconButton>
-            </div>
-          ) : (
-            <NoDataCell />
-          )
       },
       {
         accessor: 'status',
@@ -148,11 +127,12 @@ const Technicians = ({ allowedToEdit, serviceOrderData, selectedService, stepFul
                 <IconButton
                   size="small"
                   aria-label="Details"
+                  disabled={!row?.original?.canDelete}
                   onClick={() => {
                     setDeleteData([row.original._id]);
                   }}
                 >
-                  <DeleteIcon fontSize="small" color={'error'} />
+                  <DeleteIcon fontSize="small" color={row.original?.canDelete ? 'error' : 'disabled'} />
                 </IconButton>
               </span>
             </HtmlTooltip>
@@ -169,9 +149,6 @@ const Technicians = ({ allowedToEdit, serviceOrderData, selectedService, stepFul
     dispatch({ type: 'selection', selectedRecords: [] });
 
     let api = `${fieldServiceOrder.api}/technician?fieldServiceOrder=${serviceOrderData?._id}`;
-    if (selectedService && selectedService?.optionValue !== 'All') {
-      api = `${api}&serviceId=${selectedService?.optionValue}&uniqueId=${selectedService?._id}`;
-    }
     axiosInstance()
       .get(api)
       .then(({ data: { data } }) => {
@@ -191,6 +168,7 @@ const Technicians = ({ allowedToEdit, serviceOrderData, selectedService, stepFul
         }
         dispatch({ type: 'initialize', data: rows, count: rows?.length });
         dispatch({ type: 'loading', loading: false });
+        setRefreshChild(!refreshChild);
       })
       .catch((error) => {
         setNextStep(false);
@@ -225,8 +203,6 @@ const Technicians = ({ allowedToEdit, serviceOrderData, selectedService, stepFul
       const element: any = {};
       element.technician = d?._id;
       element.fieldServiceOrder = serviceOrderData?._id;
-      element.uniqueId = selectedService?._id;
-      element.service = selectedService?.optionValue !== 'All' ? selectedService?.optionValue : null;
       element.warehouse = serviceOrderData?.warehouse?.optionValue;
       technician.push(element);
     });
@@ -238,8 +214,12 @@ const Technicians = ({ allowedToEdit, serviceOrderData, selectedService, stepFul
           type: 'success',
           message: data?.message
         });
+        if (serviceOrderData?.status === SERVICE_ORDER_STATUS.new) {
+          handleChangeStatus(SERVICE_ORDER_STATUS.inProgress);
+        }
         setTechnicianDialog(false);
         fetchData();
+        fetchserviceOrderData();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -265,42 +245,53 @@ const Technicians = ({ allowedToEdit, serviceOrderData, selectedService, stepFul
 
   return (
     <>
-      <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
-        {allowedToEdit && (
-          <>
-            <DetailsPageHeader
-              isAddButtonVisible={true}
-              addButtonProps={{ onClick: () => setTechnicianDialog(true), id: 'add-technician' }}
-              addButtonText='Assign'
-              isActionButtonVisible={true}
-              actionButtonMenuItems={actionButtonMenuItems()}
-              actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
-              hasXpadding
+      {allowedToEdit && (
+        <>
+          <DetailsPageHeader
+            isAddButtonVisible={true}
+            addButtonProps={{ onClick: () => setTechnicianDialog(true), id: 'add-technician' }}
+            addButtonText='Assign'
+            isActionButtonVisible={true}
+            actionButtonMenuItems={actionButtonMenuItems()}
+            actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
+            hasXpadding
+          />
+        </>
+      )}
+      <Grid container spacing={2}>
+        <Grid size={{ xs: 12, md: 12, sm: 12 }}>
+          {columns ? (
+            <CustomReactTable
+              height={stepFullScreen ? 'calc(100vh - 300px)' : '300px'}
+              columns={columns}
+              state={state}
+              dispatch={dispatch}
+              renderedFrom={renderedFrom}
+              isClientSideGrid={true}
+              hideSelection={!allowedToEdit}
+              hideAction={!allowedToEdit}
+              refreshGrid={fetchData}
             />
-          </>
-        )}
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12, md: 12, sm: 12 }}>
-            {columns ? (
-              <CustomReactTable
-                height={stepFullScreen ? 'calc(100vh - 300px)' : '300px'}
-                columns={columns}
-                state={state}
-                dispatch={dispatch}
-                renderedFrom={renderedFrom}
-                isClientSideGrid={true}
-                hideSelection={!allowedToEdit}
-                hideAction={!allowedToEdit}
-                refreshGrid={fetchData}
-              />
-            ) : (
-              <Box p={2} height={300}>
-                <CommonSkeleton lenArray={[...Array(10).keys()]} />
-              </Box>
-            )}
-          </Grid>
+          ) : (
+            <Box p={2} height={300}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+          )}
         </Grid>
-      </Box>
+      </Grid>
+      {resourcePolicy?.addConsumables && dataRows?.length > 0 ?
+        <Box mt={3}>
+          <Consumables
+            allowedToEdit={allowedToEdit}
+            serviceOrderData={serviceOrderData}
+            stepFullScreen={stepFullScreen}
+            fetchData={fetchserviceOrderData}
+            technicians={dataRows}
+            refreshChild={refreshChild}
+            fetchConsumablesData={fetchData}
+          />
+        </Box>
+        : null}
 
       {technicianDialog && (
         <AssignEmployeeDialog
