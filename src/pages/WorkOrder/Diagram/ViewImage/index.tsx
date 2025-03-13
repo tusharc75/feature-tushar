@@ -462,6 +462,7 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
               disabled={loading}
               onClick={handleUndo}
               size='small'
+              color={loading ? "default" : "primary"}
             > <UndoIcon/></IconButton>
           )}
           {(isDrawingMode || isHighlighterMode) && (
@@ -469,6 +470,7 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
               disabled={isHighlighterMode ? highlighterRedoPaths.length === 0 : brushRedoPaths.length === 0 || loading}
               onClick={handleRedo}
               size='small'
+              color={(isHighlighterMode ? highlighterRedoPaths.length === 0 : brushRedoPaths.length === 0 || loading) ? "default" : "primary"}
             > <RedoIcon /></IconButton>
           )}
           <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*" onChange={handleImageUpload} />
