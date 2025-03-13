@@ -8,7 +8,7 @@ import { Message } from 'src/pages/WorkSpace/types';
 import { formatDateWithTodayYestarday } from 'src/pages/WorkSpace/utils';
 import { DisplaySingleMessage, MoreMenuAndDeleteConfirmDialog } from './Messages';
 
-const Thread = ({ message, onClose, socket, channelId, open, channelData }) => {
+const Thread = ({ message, onClose, socket, channelId, open, channelData, state }) => {
   const [messages, setMessages] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedMessage, setSelectedMessage] = useState<Message>(null);
@@ -102,7 +102,14 @@ const Thread = ({ message, onClose, socket, channelId, open, channelData }) => {
           )}
         </div>
         <div className="footer">
-          <SendMessage channelId={channelId} socket={socket} parentMessageId={message?._id} editorId={'from-thread'} channelData={channelData} />
+          <SendMessage
+            channelId={channelId}
+            socket={socket}
+            parentMessageId={message?._id}
+            editorId={'from-thread'}
+            channelData={channelData}
+            state={state}
+          />
         </div>
 
         <MoreMenuAndDeleteConfirmDialog
