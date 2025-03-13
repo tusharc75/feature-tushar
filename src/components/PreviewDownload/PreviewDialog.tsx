@@ -75,6 +75,8 @@ export const PreviewDialog = ({
         setViews(data);
         if (!selectedPdfView && data?.length === 1) {
           handleSelectView(data[0]);
+        } else if (!selectedPdfView && data?.length > 1) {
+          handleSelectView(data?.find((e) => e.default));
         }
         if (selectedPdfView && data?.length && data?.find((e) => e._id === selectedPdfView?._id)) {
           handleSelectView(data?.find((e) => e._id === selectedPdfView?._id));
@@ -92,7 +94,7 @@ export const PreviewDialog = ({
         data.columns
           ?.map((e) => {
             const col = allColumn.find((col) => col.fieldName === e.name);
-            if (col) return { ...col, ...(e?.width ? { width: e.width } : {}), ...(e?.customLabel ? { customLabel: e.customLabel } : {}) };
+            if (col) return { ...col, ...(e?.width ? { width: e.width } : {}), ...(e?.customLabel ? { customLabel: e.customLabel } : {}), ...(e?.showBelowRow ? { showBelowRow: e.showBelowRow } : {}) };
           })
           .filter((col) => col !== undefined)
       );
