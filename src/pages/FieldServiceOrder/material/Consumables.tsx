@@ -17,18 +17,17 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { flattenArray } from 'src/constants/columns';
 import Autocomplete from '@mui/material/Autocomplete';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import Technicians from './Technicians';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import MaterialQtyDialog from './MaterialQtyDialog';
 import EditIcon from '@mui/icons-material/Edit';
-import { camelCase } from 'lodash';
+import { camelCase, isEmpty } from 'lodash';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
 
-const Consumables = ({ allowedToEdit, services, serviceOrderData, stepFullScreen, fetchData: fetchserviceOrderData, refreshChild, resourcePolicy, setNextStep }) => {
+const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchData: fetchserviceOrderData, technicians, refreshChild, fetchConsumablesData }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_Consumables`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -37,45 +36,23 @@ const Consumables = ({ allowedToEdit, services, serviceOrderData, stepFullScreen
   const [consumablesDialog, setConsumablesDialog] = useState(false);
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
-  const [tabValue, setTabValue] = useState(resourcePolicy?.addTechnicians ? 0 : 1);
-  const [serviceOption, setServiceOption] = useState(null);
-  const [selectedServiceOption, setSelectedServiceOption] = useState({ optionLabel: 'All', optionValue: 'All', _id: null });
+  const [tabValue, setTabValue] = useState(0);
   const [isConsumableEdit, setIsConsumableEdit] = useState({ open: false, data: null, showSaveAndNext: false });
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
-
+  const [selectedTechnician, setSelectedTechnician] = useState(null);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
 
   useEffect(() => {
-    setServiceOption([
-      { optionLabel: 'All', optionValue: 'All' },
-      ...services?.map((s) => {
-        return {
-          optionLabel: s?.detail,
-          optionValue: s?.materialId,
-          _id: s?._id
-        };
-      })
-    ]);
-    if (selectedServiceOption?.optionValue !== 'All' && !services?.some((s) => s?._id === selectedServiceOption?._id)) {
-      setSelectedServiceOption({ optionLabel: 'All', optionValue: 'All', _id: null });
-    }
-  }, [services]);
-
-  useEffect(() => {
-    if (resourcePolicy?.addConsumables) {
-      fetchColumns();
-    }
+    fetchColumns();
   }, [serviceOrderData]);
 
   useEffect(() => {
-    if (resourcePolicy?.addConsumables) {
-      fetchData();
-    }
-  }, [selectedServiceOption, tabValue, refreshChild]);
+    fetchData();
+  }, [tabValue, selectedTechnician, refreshChild]);
 
   const fetchColumns = async () => {
     let fields = await fetch_child_resource_fields_perm(
@@ -155,17 +132,17 @@ const Consumables = ({ allowedToEdit, services, serviceOrderData, stepFullScreen
 
     const extracolumns: any = [
       {
-        accessor: 'service',
-        Header: 'Service',
+        accessor: 'technician',
+        Header: 'Technician',
         width: 200,
         cell: ({ row }) =>
-          row?.original?.service ? (
+          row?.original?.technician ? (
             <div className="flex items-center gap-2">
-              <p> {row.original?.service}</p>
+              <p> {row.original?.technician}</p>
               <IconButton
                 size="small"
                 onClick={() => {
-                  window.open(`${routes.serviceMasterDetail.path}/${row.original?.serviceId}`);
+                  window.open(`${routes.employeeMasterDetail.path}/${row.original?.technicianId}`);
                 }}
               >
                 <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
@@ -227,8 +204,8 @@ const Consumables = ({ allowedToEdit, services, serviceOrderData, stepFullScreen
       dispatch({ type: 'selection', selectedRecords: [] });
       let consumables;
       let api = `${fieldServiceOrder.api}/${serviceOrderData?._id}/material?type=${MATERIAL_TYPE.product}`;
-      if (selectedServiceOption && selectedServiceOption?.optionValue !== 'All') {
-        api = `${api}&uniqueId=${selectedServiceOption?._id}`;
+      if (selectedTechnician?.technicianId) {
+        api = `${api}&technician=${selectedTechnician?.technicianId}`;
       }
       const response = await axiosInstance().get(api);
       consumables = response?.data?.data?.material;
@@ -238,8 +215,8 @@ const Consumables = ({ allowedToEdit, services, serviceOrderData, stepFullScreen
         parent.productName = parent?.productDetail?.productName;
         parent.productDescription = parent?.productDetail?.productDescription;
         parent.productNumber = parent?.productDetail?.productNumber;
-        parent.serviceId = parent?.service?.optionValue;
-        parent.service = parent?.service?.optionLabel;
+        parent.technicianId = parent?.technician?.optionValue;
+        parent.technician = parent?.technician?.optionLabel;
       });
       dispatch({ type: 'initialize', data: consumables || [], count: consumables?.length || 0 });
       dispatch({ type: 'loading', loading: false });
@@ -267,8 +244,7 @@ const Consumables = ({ allowedToEdit, services, serviceOrderData, stepFullScreen
       const element: any = {};
       element.materialId = d._id;
       element.type = MATERIAL_TYPE.product;
-      element.service = selectedServiceOption?.optionValue !== 'All' ? selectedServiceOption?.optionValue : null;
-      element.uniqueId = selectedServiceOption?.optionValue !== 'All' ? selectedServiceOption?._id : null;
+      element.technician = selectedTechnician?.technicianId;
       element.qty = d.qty ? parseFloat(d.qty) : 1;
       element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
       element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
@@ -317,6 +293,7 @@ const Consumables = ({ allowedToEdit, services, serviceOrderData, stepFullScreen
         setConsumablesDialog(false);
         fetchData();
         fetchserviceOrderData();
+        fetchConsumablesData();
         setSubmitting(false);
       })
       .catch((error) => {
@@ -337,6 +314,7 @@ const Consumables = ({ allowedToEdit, services, serviceOrderData, stepFullScreen
       setDeleting(false);
       fetchData();
       fetchserviceOrderData();
+      fetchConsumablesData();
       setDeleteData(null);
     } catch (error) {
       setDeleting(false);
@@ -432,81 +410,63 @@ const Consumables = ({ allowedToEdit, services, serviceOrderData, stepFullScreen
 
   return (
     <>
-      {allowedToEdit && serviceOption?.length > 0 && resourcePolicy?.addServices &&(
-        <Box style={{ maxWidth: '400px' }} mb={3}>
-          <Autocomplete
-            id={'select-service'}
-            size="small"
-            style={{ minWidth: '300px' }}
-            fullWidth
-            options={serviceOption ? serviceOption : []}
-            autoHighlight
-            value={selectedServiceOption}
-            getOptionLabel={(option: any) => option?.optionLabel || ''}
-            isOptionEqualToValue={(option, val) => (option ? option?.optionLabel === val?.optionLabel : false)}
-            onChange={(_, val) => {
-              let value = val;
-              if (!val) {
-                value = { optionLabel: 'All', optionValue: 'All' };
-              }
-              dispatch({ type: 'update', data: [] });
-              setSelectedServiceOption(value);
-            }}
-            renderInput={(params) => <TextField {...params} label={'Select Service'} variant="outlined" />}
-          />
-        </Box>
-      )}
+      <Box style={{ maxWidth: '400px' }} mb={3}>
+        <Autocomplete
+          id={'select-technician'}
+          size="small"
+          style={{ minWidth: '300px' }}
+          fullWidth
+          options={technicians || []}
+          autoHighlight
+          value={selectedTechnician}
+          getOptionLabel={(option: any) => option?.technicianName || ''}
+          isOptionEqualToValue={(option, val) => (option ? option?.technicianId === val?.technicianId : false)}
+          onChange={(_, val) => {
+            dispatch({ type: 'update', data: [] });
+            setSelectedTechnician(val);
+          }}
+          renderInput={(params) => <TextField {...params} label={'Select Technician'} variant="outlined" />}
+        />
+      </Box>
       <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
-        {resourcePolicy?.addTechnicians && <CustomTab value={0} label={'Technicians'} id={'technicians-tab'} />}
-        {resourcePolicy?.addConsumables && <CustomTab value={1} label={'Products/Consumables'} id={'products-consumables-tab'} />}
+        <CustomTab value={0} label={'Products/Consumables'} id={'products-consumables-tab'} />
       </CustomTabs>
       <TabPanel value={tabValue} index={0}>
-        <Technicians
-          allowedToEdit={allowedToEdit}
-          serviceOrderData={serviceOrderData}
-          selectedService={selectedServiceOption}
-          stepFullScreen={stepFullScreen}
-          setNextStep={setNextStep}
-        />
-      </TabPanel>
-      <TabPanel value={tabValue} index={1}>
-        <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
-          {allowedToEdit && (
-            <>
-              <DetailsPageHeader
-                isAddButtonVisible={true}
-                addButtonProps={{ onClick: () => setConsumablesDialog(true), id: 'add-product-consumable' }}
-                isActionButtonVisible={true}
-                actionButtonMenuItems={actionButtonMenuItems()}
-                actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
-                hasXpadding
-              />
-            </>
-          )}
-          <Grid container spacing={2}>
-            <Grid size={{ xs: 12, md: 12, sm: 12 }}>
-              {columns ? (
-                <CustomReactTable
-                  height={stepFullScreen ? 'calc(100vh - 300px)' : '300px'}
-                  columns={columns}
-                  state={state}
-                  dispatch={dispatch}
-                  onSaveEdit={onSaveInlineEdit}
-                  renderedFrom={renderedFrom}
-                  isClientSideGrid={true}
-                  hideSelection={allowedToEdit ? false : true}
-                  hideAction={allowedToEdit ? false : true}
-                  refreshGrid={fetchData}
-                />
-              ) : (
-                <Box p={2} height={300}>
-                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                </Box>
-              )}
+        {allowedToEdit && (
+          <>
+            <DetailsPageHeader
+              isAddButtonVisible={!isEmpty(selectedTechnician)}
+              addButtonProps={{ onClick: () => setConsumablesDialog(true), id: 'add-product-consumable' }}
+              isActionButtonVisible={true}
+              actionButtonMenuItems={actionButtonMenuItems()}
+              actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
+              hasXpadding
+            />
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, md: 12, sm: 12 }}>
+                {columns ? (
+                  <CustomReactTable
+                    height={stepFullScreen ? 'calc(100vh - 300px)' : '300px'}
+                    columns={columns}
+                    state={state}
+                    dispatch={dispatch}
+                    onSaveEdit={onSaveInlineEdit}
+                    renderedFrom={renderedFrom}
+                    isClientSideGrid={true}
+                    hideSelection={allowedToEdit ? false : true}
+                    hideAction={allowedToEdit ? false : true}
+                    refreshGrid={fetchData}
+                  />
+                ) : (
+                  <Box p={2} height={300}>
+                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                  </Box>
+                )}
+              </Grid>
             </Grid>
-          </Grid>
-        </Box>
-      </TabPanel>  
+          </>
+        )}
+      </TabPanel>
       {consumablesDialog && (
         <AssignProductDialog
           handleCloseDialog={() => setConsumablesDialog(false)}

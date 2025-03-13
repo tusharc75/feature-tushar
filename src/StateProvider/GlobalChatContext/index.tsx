@@ -1,6 +1,7 @@
 import { createContext, useState, useEffect } from 'react';
 import io, { Socket } from 'socket.io-client';
 import { backendApi } from '../../config';
+import { useSocket } from 'src/hooks/useSocket';
 
 export const GlobalChatContext = createContext(null);
 
@@ -9,22 +10,8 @@ export const GlobalChatProvider = ({ children }) => {
   const [chatList, setChatList] = useState([]);
   const [chatterIds, setChatterIds] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
-  const [socket, setSocket] = useState<Socket>(null);
   const [open, setOpen] = useState(false);
-
-  const token = localStorage.getItem('token');
-
-  useEffect(() => {
-    if (!token) return;
-    const s = io(`${backendApi?.replace('/api', '')}/users/room`, {
-      path: backendApi?.includes('/api') ? '/api/socket.io/' : '/socket.io/',
-      auth: { token },
-      reconnectionAttempts: 5,
-      reconnectionDelay: 5000,
-      transports: ['websocket', 'pooling']
-    });
-    setSocket(s);
-  }, [token]);
+  const usersSocket = useSocket({namespace:"/users/room"})
 
   return (
     <GlobalChatContext.Provider
@@ -33,7 +20,7 @@ export const GlobalChatProvider = ({ children }) => {
         setChatList,
         chatterIds,
         setChatterIds,
-        socket,
+        socket:usersSocket,
         selectedChat,
         setSelectedChat,
         open,

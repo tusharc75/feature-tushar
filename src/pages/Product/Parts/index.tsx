@@ -3,7 +3,7 @@ import { Delete } from '@mui/icons-material';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
@@ -16,7 +16,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import AssignProductDialog from '../../../components/AssignRolesDialog/AssignProductDialog';
 import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
-import { product, sidebarResource } from '../../../constants/helpers';
+import { prepareDataForGrid, product, sidebarResource } from '../../../constants/helpers';
 import { FiExternalLink } from 'react-icons/fi';
 
 function Parts({ id }) {
@@ -49,12 +49,14 @@ function Parts({ id }) {
     const response = await axiosInstance().get(`/product/${id}/bom`);
     data = response?.data?.data;
     setParts([...data]);
-    let rows = data?.map((i, index) => {
-      return {
-        index: index + 1,
-        ...i,
-        ...i?.childProductDetail
-      };
+    let rows = data?.map((u, index) => {
+      const productData = { ...u?.childProductDetail };
+      delete productData?.childProductDetail;
+      delete productData?.createdBy;
+      delete productData?.updatedBy;
+      const finalObject = prepareDataForGrid({ ...u, ...productData });
+      finalObject['index'] = index + 1;
+      return finalObject;
     });
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
@@ -100,7 +102,7 @@ function Parts({ id }) {
       });
     const newColumns = generateColumns(
       renderedFrom,
-      fields?.filter((e) => ['productDescription', 'productNumber', 'productCategory', 'productCategory']?.includes(e?.fieldName)),
+      fields?.filter((e) => ['productDescription', 'productNumber', 'productCategory']?.includes(e?.fieldName)),
       null,
       false,
       'USD'
@@ -115,7 +117,8 @@ function Parts({ id }) {
         width: 150,
         editable: permissions?.product?.isUpdate ? true : false,
         Cell: ({ row }) => (row.original?.qty ? <p>{row.original?.qty}</p> : <NoDataCell />)
-      }
+      },
+      ...getStaticFields()
     ];
     coloum.push({
       accessor: 'action',

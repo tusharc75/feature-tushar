@@ -46,7 +46,6 @@ const SerializedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrde
             package: m?.materialId,
             serializedPackageNumber: '',
             uniqueId: m?._id,
-            isSubPackage: m?.parentId ? true : false
           }))
         });
       })
