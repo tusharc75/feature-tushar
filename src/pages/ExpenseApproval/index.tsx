@@ -142,7 +142,7 @@ const ExpenseApproval = () => {
       </Box>
       <Box className="detail-container-v1">
         {reportData ? (
-          reportData?.length > 0 ? (
+          reportData?.length > 0 && (
             <div className="grid grid-cols-1 gap-8 md:grid-cols-[400px_1fr]">
               <div className="container-with-border p-[20px] md:min-h-[calc(100vh-200px)]">
                 <CustomReactTable
@@ -173,17 +173,6 @@ const ExpenseApproval = () => {
                 )}
               </div>
             </div>
-          ) : (
-            <Box
-              style={{
-                minHeight: 'calc(100vh - 349px)',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center'
-              }}
-            >
-              <Typography>No Request !</Typography>
-            </Box>
           )
         ) : (
           <Box p={2} height={500}>

@@ -67,7 +67,8 @@ function PreviewDownload({
         return {
           name: e?.fieldName,
           width: e?.width,
-          customLabel: e?.customLabel
+          customLabel: e?.customLabel,
+          showBelowRow: e?.showBelowRow
         };
       })
     );

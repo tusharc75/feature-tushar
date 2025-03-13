@@ -12,6 +12,8 @@ import { ChannelData } from 'src/pages/WorkSpace/types';
 import { fileToBase64, isImageFile } from 'src/pages/WorkSpace/utils';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { useSearchParams } from 'react-router-dom';
+import { UseWorkSpace } from 'src/pages/WorkSpace/useWorkSpace';
 
 type SendMessageProps = {
   channelId: string;
@@ -23,9 +25,7 @@ type SendMessageProps = {
   channelData?: ChannelData;
   disabled?: boolean;
   parentMessageId?: string | null;
-  newChat?: boolean;
-  toUsers?: any[];
-  refreshNewChat?: () => void;
+  state: UseWorkSpace;
 };
 
 const SendMessage = ({
@@ -33,15 +33,14 @@ const SendMessage = ({
   socket,
   messageId = null,
   initialMessage = '',
-  onEditComplete = () => { },
+  onEditComplete = () => {},
   editorId = '',
   channelData,
   disabled = false,
   parentMessageId = null,
-  newChat = false,
-  toUsers = [],
-  refreshNewChat = () => { },
+  state
 }: SendMessageProps) => {
+  const { setNewDirectMessageChannelId, newChatToUser } = state;
   const toastConfig = useContext(CustomToastContext);
   const [themeColor] = useAppTheme();
   const numberOfMentions = useRef(0);
@@ -79,9 +78,11 @@ const SendMessage = ({
     setIsLoading(true);
     try {
       if (initialMessage) {
-        await axiosInstance().put(`/work-space/channel/message`, { message, messageId }).then(() => {
-          socket.emit('messageUpdated', { channelId, messageId });
-        });
+        await axiosInstance()
+          .put(`/work-space/channel/message`, { message, messageId })
+          .then(() => {
+            socket.emit('messageUpdated', { channelId, messageId });
+          });
         onEditComplete();
       } else {
         let formData = new FormData();
@@ -92,18 +93,22 @@ const SendMessage = ({
         audioBlobs?.forEach((audioBlob, index) => {
           formData.append('files', new File([audioBlob], `recording-${index}.webm`, { type: 'audio/webm' }));
         });
-        if (newChat && toUsers.length > 0) {
-          formData.append('toUsers', JSON.stringify(toUsers?.map((user) => user?.optionValue)));
-          await axiosInstance().post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(() => {
-            socket.emit('newChat', { channelId: 'directMessaging' });
-            refreshNewChat();
-          });
+        if (newChatToUser) {
+          formData.append('toUsers', JSON.stringify([newChatToUser._id]));
+          await axiosInstance()
+            .post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+            .then(({ data: { data } }) => {
+              setNewDirectMessageChannelId(data?.ops?.[0]?.channel);
+              socket.emit('newChat', { channelId: 'directMessaging' });
+            });
         } else {
           formData.append('channelId', channelId);
           if (parentMessageId) formData.append('parentId', parentMessageId);
-          await axiosInstance().post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(() => {
-            socket.emit('newMessagePosted', { channelId, messageId });
-          });
+          await axiosInstance()
+            .post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+            .then(({ data }) => {
+              socket.emit('newMessagePosted', { channelId, messageId });
+            });
         }
       }
       setMessage('');
@@ -170,7 +175,7 @@ const SendMessage = ({
           top: elementRect.top + frameRect.top,
           x: elementRect.x + frameRect.x,
           y: elementRect.y + frameRect.y,
-          toJSON: () => { }
+          toJSON: () => {}
         })
       });
     }
@@ -276,10 +281,9 @@ const SendMessage = ({
         )}
         <div className="flex flex-wrap gap-1">
           {audioBlobs?.map((audioBlob, index) => (
-            <div key={index} className='relative'>
-                <audio controls src={URL.createObjectURL(audioBlob)} style={{ width: '200px' }}>
-                </audio>
-              <HtmlTooltip title="Remove" placement="top" className='absolute top-0 right-0'>
+            <div key={index} className="relative">
+              <audio controls src={URL.createObjectURL(audioBlob)} style={{ width: '200px' }}></audio>
+              <HtmlTooltip title="Remove" placement="top" className="absolute right-0 top-0">
                 <IconButton
                   size="small"
                   onClick={() => {
@@ -311,7 +315,7 @@ const SendMessage = ({
               }
             }}
             initialValue=""
-            disabled={!(channelId || newChat) || disabled}
+            disabled={!(channelId || newChatToUser) || disabled}
             init={{
               skin: themeColor === 'dark' ? 'oxide-dark' : 'oxide',
               content_css: themeColor === 'dark' ? 'dark' : 'default',
@@ -337,7 +341,7 @@ const SendMessage = ({
                 'code',
                 'wordcount',
                 'help',
-                'emoticons',
+                'emoticons'
               ],
               toolbar: `undo redo | blocks | bold italic link | bullist numlist| removeformat | emoticons | help`,
               content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
@@ -345,13 +349,10 @@ const SendMessage = ({
                 editor.on('BeforeSetContent', (e) => {
                   // Adding 'link' class to <a> tags
                   if (e?.content) {
-                    e.content = e.content.replace(
-                      /<a(?![^>]*\bclass\b)([^>]*)>/g,
-                      '<a class="link"$1>'
-                    );
+                    e.content = e.content.replace(/<a(?![^>]*\bclass\b)([^>]*)>/g, '<a class="link"$1>');
                   }
                 });
-              },
+              }
             }}
           />
         </div>
@@ -373,8 +374,15 @@ const SendMessage = ({
                   </IconButton>
                 </HtmlTooltip>
               </label>
-              <HtmlTooltip title={isRecording ? "Stop Recording Audio" : "Record Audio"} placement="top">
-                <IconButton color="primary" aria-label="upload-audio" component="span" style={{ padding: 5, borderRadius: 0 }} disabled={disabled} onClick={getAudio}>
+              <HtmlTooltip title={isRecording ? 'Stop Recording Audio' : 'Record Audio'} placement="top">
+                <IconButton
+                  color="primary"
+                  aria-label="upload-audio"
+                  component="span"
+                  style={{ padding: 5, borderRadius: 0 }}
+                  disabled={disabled}
+                  onClick={getAudio}
+                >
                   {isRecording ? <MicOff /> : <Mic />}
                 </IconButton>
               </HtmlTooltip>
@@ -405,7 +413,7 @@ const SendMessage = ({
           )}
         </div>
       </div>
-      {mentionInitialPosition && !newChat && (
+      {mentionInitialPosition && !newChatToUser && (
         <Mention
           editor={editorRef.current}
           mentionInitialPosition={mentionInitialPosition}
