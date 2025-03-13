@@ -3,7 +3,7 @@ import { fabric } from 'fabric';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { b64toBlob } from 'src/constants/helpers';
-import { Box, FormControl, Typography } from '@mui/material';
+import { Box, FormControl, IconButton, Typography } from '@mui/material';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
@@ -458,16 +458,18 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
             {isDrawingMode ? 'Exit Drawing Mode' : 'Enter Drawing Mode'}
           </ThemeButton>
           {(isDrawingMode || isHighlighterMode) && (
-            <ThemeButton
+            <IconButton
               disabled={loading}
               onClick={handleUndo}
-            > <UndoIcon/></ThemeButton>
+              size='small'
+            > <UndoIcon/></IconButton>
           )}
           {(isDrawingMode || isHighlighterMode) && (
-            <ThemeButton
+            <IconButton
               disabled={isHighlighterMode ? highlighterRedoPaths.length === 0 : brushRedoPaths.length === 0 || loading}
               onClick={handleRedo}
-            > <RedoIcon /></ThemeButton>
+              size='small'
+            > <RedoIcon /></IconButton>
           )}
           <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*" onChange={handleImageUpload} />
           <ThemeButton
