@@ -1,4 +1,4 @@
-import { Dialog, IconButton, ListItemIcon, ListItemText, TextField } from '@mui/material';
+import { Checkbox, Dialog, FormControlLabel, IconButton, ListItemIcon, ListItemText, TextField } from '@mui/material';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { DragIndicator, Info } from '@mui/icons-material';
 import SwapVertIcon from '@mui/icons-material/SwapVert';
@@ -19,7 +19,7 @@ import { CustomDialogTransition } from 'src/constants/helpers';
 
 export default function ArrangeView({ columns, setColumns }) {
   const [open, setOpen] = useState(false);
-  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [fullScreen, setFullScreen] = useState(true);
   const [isSubmitting, setSubmitting] = useState(false);
   const [activeItem, setActiveItem] = useState(null);
 
@@ -62,6 +62,14 @@ export default function ArrangeView({ columns, setColumns }) {
     );
   };
 
+  const setColumnShowBelowRow = (id, value) => {
+    setColumn(
+      column.map((c) => {
+        return c.id === id ? { ...c, showBelowRow: value } : c;
+      })
+    );
+  };
+
   const onDragStart = (event: DragStartEvent) => {
     if (!event?.active) return;
     setActiveItem(event.active.data.current?.props);
@@ -71,7 +79,7 @@ export default function ArrangeView({ columns, setColumns }) {
     setSubmitting(true);
     setColumns(
       column.map((e) => {
-        return { fieldName: e.fieldName, fieldLabel: e.fieldLabel, width: e.width, customLabel: e?.customLabel };
+        return { fieldName: e.fieldName, fieldLabel: e.fieldLabel, width: e.width, customLabel: e?.customLabel, showBelowRow: e?.showBelowRow };
       })
     );
     setSubmitting(false);
@@ -142,6 +150,10 @@ export default function ArrangeView({ columns, setColumns }) {
                       setCustomLabel={(l) => {
                         setColumnLabel(col.id, l);
                       }}
+                      showBelowRow={col.showBelowRow}
+                      setShowBelowRow={(v) => {
+                        setColumnShowBelowRow(col.id, v);
+                      }}
                     />
                   ))}
                 </ul>
@@ -173,9 +185,11 @@ interface ItemProps {
   setWidth: (width: string) => void;
   customLabel: string;
   setCustomLabel: (label: string) => void;
+  showBelowRow: boolean;
+  setShowBelowRow: (value: boolean) => void;
 }
 
-const RenderListItem = ({ index, id, fieldLabel, width, setWidth, customLabel, setCustomLabel }: ItemProps) => {
+const RenderListItem = ({ index, id, fieldLabel, width, setWidth, customLabel, setCustomLabel, showBelowRow = false, setShowBelowRow }: ItemProps) => {
   const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
     id,
     data: {
@@ -199,7 +213,7 @@ const RenderListItem = ({ index, id, fieldLabel, width, setWidth, customLabel, s
     >
       <div
         key={id}
-        className={`grid grid-cols-[20px_1fr_400px] items-center gap-2 p-[8px_0px]  [border-bottom:1px_solid_var(--common-border-color)] max-sm:grid-cols-[20px_1fr] ${
+        className={`grid grid-cols-[20px_1fr_500px] items-center gap-2 p-[8px_0px]  [border-bottom:1px_solid_var(--common-border-color)] max-sm:grid-cols-[20px_1fr] ${
           index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
         } `}
       >
@@ -235,6 +249,22 @@ const RenderListItem = ({ index, id, fieldLabel, width, setWidth, customLabel, s
               setCustomLabel(e?.target?.value);
             }}
           />
+          <div className='min-w-[200px]'>
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                name={'showBelowRow'}
+                checked={showBelowRow}
+                onChange={(e) => {
+                  setShowBelowRow(e?.target?.checked);
+                }}
+              />
+            }
+            label="Show Below Row"
+            className="ml-2"
+          />
+          </div>
         </div>
       </div>
     </li>

@@ -4,11 +4,14 @@ export type TChannel = {
   title: string;
   description: string;
   access: string;
-  members: string[];
+  members: Member[];
   createdBy: CreatedBy;
   notifications?: number;
   isOwner?: boolean;
+  type?: 'chat';
 };
+
+export type TChat = { to: Member } & TChannel;
 
 export type CreatedBy = {
   user: string;
@@ -31,6 +34,7 @@ export type User = {
   firstName: string;
   lastName: string;
   concatedName: string;
+  avatar: string;
 };
 
 export type Member = {
