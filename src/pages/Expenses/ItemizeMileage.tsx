@@ -38,9 +38,9 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
     const dLon = toRad(lon2 - lon1);
     const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    if(policyData?.distanceUnit === 'mile'){
+    if (policyData?.distanceUnit === 'mile') {
       return R_MILE * c;
-    }else{
+    } else {
       return R_KM * c;
     }
   };
@@ -80,7 +80,7 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
   const handleSelectLocation = (index, prediction, isFrom) => {
     if (!prediction?.place_id || !window.google) return;
     const placesService = new window.google.maps.places.PlacesService(document.createElement('div'));
-  
+
     placesService.getDetails({ placeId: prediction.place_id }, (placeResult) => {
       if (placeResult && placeResult.geometry) {
         const lat = placeResult.geometry.location.lat();
@@ -128,7 +128,21 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
   };
 
   const addLineItem = () => {
-    setLineItems([...lineItems, { id: lineItems.length, fromLocation: null, toLocation: null, rate: policyData?.perUnitRate, distance: '', amount: '' }]);
+    const lastItem = lineItems[lineItems.length - 1];
+    if (lastItem && (!lastItem.fromLocation || !lastItem.toLocation || !lastItem.rate)) {
+      return;
+    }
+
+    setLineItems([
+      ...lineItems,
+      { id: lineItems.length, fromLocation: null, toLocation: null, rate: policyData?.perUnitRate, distance: '', amount: '' }
+    ]);
+  };
+
+  const handleClose = () => {
+    const filteredLineItems = lineItems.filter((item) => item.fromLocation && item.toLocation);
+    setLineItems(filteredLineItems);
+    onClose();
   };
 
   const removeLineItem = (id) => {
@@ -155,14 +169,14 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
       aria-labelledby="customized-dialog-title"
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {
-          onClose();
+          handleClose();
         }
       }}
       open={true}
     >
       <CustomDialogHeader
         title="Mileage"
-        onClose={onClose}
+        onClose={handleClose}
         isMinimized={!fullScreen}
         onMinimizeMaximize={() => setFullScreen((prevState) => !prevState)}
         showManimizeMaximize={true}
@@ -310,10 +324,16 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
         </div>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <ThemeButton buttonType="transparent" id="dialog-cancel-button" onClick={onClose}>
+        <ThemeButton buttonType="transparent" id="dialog-cancel-button" onClick={handleClose}>
           Cancel
         </ThemeButton>
-        <ThemeButton isLoading={isSubmitting} buttonType="theme" id="dialog-save-button" disabled={!isFormValid() || isSubmitting} onClick={onClose}>
+        <ThemeButton
+          isLoading={isSubmitting}
+          buttonType="theme"
+          id="dialog-save-button"
+          disabled={!isFormValid() || isSubmitting}
+          onClick={handleClose}
+        >
           Save
         </ThemeButton>
       </CustomDialogFooter>

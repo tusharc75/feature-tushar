@@ -141,6 +141,13 @@ const ExpenseReport = () => {
       const response: any = await axiosInstance().get(`${expenseReport.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
       data = response?.data?.data;
       count = response?.data?.count;
+      const statusesToClear = ['Awaiting Approval', 'Approved', 'Recalled', 'Reimbursed'];
+      data = data.map((item) => {
+        if (statusesToClear.includes(item.status)) {
+          item.rejectReason = '';
+        }
+        return item;
+      });
       setExpenseReportData(data);
       let rows = data.map((u) => {
         let finalObject: any = prepareDataForGrid(u, user);
