@@ -44,9 +44,9 @@ const ExpenseApproval = () => {
     setColumns(newColumns);
   };
 
-  useEffect(() => {
-    dispatch({ type: 'filter', filters: { status: { filter: [EXPENSE_STATUS.awaitingApproval] } } });
-  }, []);
+  // useEffect(() => {
+  //   dispatch({ type: 'filter', filters: { status: { filter: [EXPENSE_STATUS.awaitingApproval] } } });
+  // }, []);
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -99,7 +99,7 @@ const ExpenseApproval = () => {
       const response: any = await axiosInstance().get(`${expenseApproval.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
       data = response?.data?.data;
       count = response?.data?.count;
-      data = data.filter((item) => item.status === EXPENSE_STATUS.awaitingApproval || item.status === EXPENSE_STATUS.approved);
+      data = data.filter((item) => item.status === EXPENSE_STATUS.awaitingApproval || item.status === EXPENSE_STATUS.approved || item.status === EXPENSE_STATUS.reimbursed);
       if (data?.length) {
         setSelectedExpenseReport(data[0]);
       }

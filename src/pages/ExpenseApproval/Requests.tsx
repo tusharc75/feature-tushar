@@ -109,7 +109,7 @@ const Requests = ({ referenceId, fetchDataMaster }) => {
     <>
       <Box className="main-container-v1">
         <Box display="flex" marginBottom="0.5rem" gap="1rem" justifyContent="flex-end">
-          <Fragment>
+          {rowsData?.status !== EXPENSE_STATUS.reimbursed && <Fragment>
             {rowsData?.status !== EXPENSE_STATUS.approved ? (
               <>
                 <ThemeButton
@@ -136,7 +136,7 @@ const Requests = ({ referenceId, fetchDataMaster }) => {
                 </ThemeButton>
               </>
             )}
-          </Fragment>
+          </Fragment>}
         </Box>
         <Box className="detail-container-v1">
           <Box>
