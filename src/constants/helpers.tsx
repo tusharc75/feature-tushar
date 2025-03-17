@@ -175,8 +175,15 @@ export const serviceOrderSteps: stepInterface[] = [
 export const serviceOrderSteps2: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
   { name: 'Technician Dispatch', title: 'Dispatch', icon: 'dispatch' },
-  { name: 'Receive', title: 'Receive', icon: 'receiveProduct' }
+  { name: 'Field Ticket', title: 'Field Tickets', icon: 'receivingTicket' },
+  { name: 'Return', title: 'Return', icon: 'receiveProduct' }
 ];
+
+export const FIELD_SERVICE_ORDER_TECHNICIAN_STATUS = {
+  reserved: 'Reserved',
+  dispatched: 'Dispatched',
+  completed: 'Completed',
+};
 
 export const subcontractAssemblySteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },

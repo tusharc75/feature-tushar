@@ -20,9 +20,9 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { Send } from '@mui/icons-material';
 import ReplayIcon from '@mui/icons-material/Replay';
 
-const TechnicianDispatchReceive = ({ allowedToEdit, serviceOrderId, stepFullScreen, setNextStep, isReceive = false }) => {
+const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScreen, setNextStep, isReturn = false }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_TechnicianDispatch`;
-  if (isReceive) renderedFrom.replace('Dispatch', 'Receive');
+  if (isReturn) renderedFrom.replace('Dispatch', 'Return');
 
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
@@ -38,7 +38,7 @@ const TechnicianDispatchReceive = ({ allowedToEdit, serviceOrderId, stepFullScre
   useEffect(() => {
     fetchColumns();
     fetchData();
-  }, [isReceive]);
+  }, [isReturn]);
 
   const fetchColumns = async () => {
     setColumns(null);
@@ -140,19 +140,19 @@ const TechnicianDispatchReceive = ({ allowedToEdit, serviceOrderId, stepFullScre
           )
       }
     ];
-    if (isReceive) {
+    if (isReturn) {
       column.push(
         {
-          accessor: 'receivedDate',
-          Header: 'Received Date',
+          accessor: 'returnedDate',
+          Header: 'Returned Date',
           disableFilters: true,
           disableSortBy: true,
           width: 250,
           Cell: ({ row }) => (row.original?.endDate ? <p>{displayDate(row.original?.endDate)}</p> : <NoDataCell />)
         },
         {
-          accessor: 'receivedBy',
-          Header: 'Received By',
+          accessor: 'returnedBy',
+          Header: 'Returned By',
           disableFilters: true,
           disableSortBy: true,
           Cell: ({ row }) =>
@@ -181,17 +181,18 @@ const TechnicianDispatchReceive = ({ allowedToEdit, serviceOrderId, stepFullScre
       disableSortBy: true,
       canDrag: false,
       Cell: ({ row }) => {
+        const isDisabled = (isReturn && !row?.original?.startDate) || row?.original?.endDate || (!isReturn && row?.original?.startDate);
         return allowedToEdit ? (
-          <HtmlTooltip title={`${isReceive ? 'Receive' : 'Dispatch'}`}>
+          <HtmlTooltip title={isDisabled ? (isReturn ? !row?.original?.startDate ? 'Not Dispatched Yet' : 'Already Returned' : 'Already Dispatched') : (isReturn ? 'Return' : 'Dispatch')}>
             <span>
               <IconButton
                 size="small"
-                disabled={(isReceive && !row?.original?.startDate) || row?.original?.endDate || (!isReceive && row?.original?.startDate)}
+                disabled={isDisabled}
                 onClick={() => {
                   setConfirmationDialog({ open: true, data: [row?.original?._id] });
                 }}
               >
-                {isReceive ? <ReplayIcon fontSize="small" color='primary' /> : <Send fontSize="small" color='primary' />}
+                {isReturn ? <ReplayIcon fontSize="small" color={isDisabled ? 'disabled' : 'primary'} /> : <Send fontSize="small" color={isDisabled ? 'disabled' : 'primary'} />}
               </IconButton>
             </span>
           </HtmlTooltip>
@@ -233,9 +234,9 @@ const TechnicianDispatchReceive = ({ allowedToEdit, serviceOrderId, stepFullScre
       });
   };
 
-  const handleDispatchReceive = (ids) => {
+  const handleDispatchReturn = (ids) => {
     setSubmitting(true);
-    let api = `${fieldServiceOrder.api}/technician/${isReceive ? 'receive' : 'dispatch'}`;
+    let api = `${fieldServiceOrder.api}/technician/${isReturn ? 'return' : 'dispatch'}`;
     axiosInstance()
       .post(api, { _ids: ids, fieldServiceOrder: serviceOrderId })
       .then(({ data }) => {
@@ -257,19 +258,19 @@ const TechnicianDispatchReceive = ({ allowedToEdit, serviceOrderId, stepFullScre
   const actionButtonMenuItems = () => {
     return (
       <>
-        <HtmlTooltip title={`${isReceive ? 'Receive' : 'Dispatch'} Technicians`}>
+        <HtmlTooltip title={`${isReturn ? 'Return' : 'Dispatch'} Technicians`}>
           <MenuItem
             disabled={
               submitting ||
-              (isReceive && selectedRecords?.some((d) => !d?.startDate)) ||
-              (!isReceive && selectedRecords?.some((d) => d?.startDate)) ||
+              (isReturn && selectedRecords?.some((d) => !d?.startDate)) ||
+              (!isReturn && selectedRecords?.some((d) => d?.startDate)) ||
               selectedRecords?.some((d) => d?.endDate)
             }
             onClick={() => {
               setConfirmationDialog({ open: true, data: selectedRecords?.map((d) => d?._id) });
             }}
           >
-            {isReceive ? 'Receive' : 'Dispatch'}
+            {isReturn ? 'Return' : 'Dispatch'}
           </MenuItem>
         </HtmlTooltip>
       </>
@@ -313,11 +314,11 @@ const TechnicianDispatchReceive = ({ allowedToEdit, serviceOrderId, stepFullScre
       {confirmationDialog.open && (
         <ConfirmationDialog
           open={confirmationDialog.open}
-          message={`Are you sure you want to ${isReceive ? 'receive' : 'dispatch'} selected techncian(s)?`}
+          message={`Are you sure you want to ${isReturn ? 'return' : 'dispatch'} selected techncian(s)?`}
           onClose={() => {
             setConfirmationDialog({ open: false, data: null });
           }}
-          onOk={() => handleDispatchReceive(confirmationDialog.data)}
+          onOk={() => handleDispatchReturn(confirmationDialog.data)}
           okBtnLoading={submitting}
         />
       )}
@@ -325,4 +326,4 @@ const TechnicianDispatchReceive = ({ allowedToEdit, serviceOrderId, stepFullScre
   );
 };
 
-export default TechnicianDispatchReceive;
+export default TechnicianDispatchReturn;

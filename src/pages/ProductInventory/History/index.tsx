@@ -59,6 +59,8 @@ export const ReferenceRenderer = (row) => {
               window.open(`${routes.subcontractAssemblyDetail.path}/${row?.original?.referenceId}`);
             } else if (row?.original?.referenceType === sidebarResource.productInventory) {
               <h5 className="text-truncate">Manual Entry</h5>;
+            } else if (row?.original?.referenceType === sidebarResource.fieldServiceOrder) {
+              window.open(`${routes.fieldServiceOrderDetail.path}/${row?.original?.referenceId}`);
             }
           }}
         >
@@ -126,6 +128,7 @@ const History = ({ product, warehouse, storageLocation }) => {
       finalObject.serialNumber = u.serialNumber || [];
       return finalObject;
     });
+    console.log(rows);
     dispatch({ type: 'initialize', data: rows, count: response?.data?.count });
     setTimeout(() => {
       dispatch({ type: 'loading', loading: false });
