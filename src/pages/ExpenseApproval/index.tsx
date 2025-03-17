@@ -99,7 +99,7 @@ const ExpenseApproval = () => {
       const response: any = await axiosInstance().get(`${expenseApproval.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
       data = response?.data?.data;
       count = response?.data?.count;
-      data = data.filter((item) => item.status === EXPENSE_STATUS.awaitingApproval || item.status === EXPENSE_STATUS.approved);
+      data = data.filter((item) => item.status === EXPENSE_STATUS.awaitingApproval || item.status === EXPENSE_STATUS.approved || item.status === EXPENSE_STATUS.reimbursed);
       if (data?.length) {
         setSelectedExpenseReport(data[0]);
       }
