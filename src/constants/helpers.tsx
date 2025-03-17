@@ -274,7 +274,7 @@ export const sidebarResource = {
   productCategory: 'Product Category',
   productInventory: 'Product Inventory',
   serializedAsset: 'Serialized Asset',
-  serializedAssetInspection: 'Serialized Asset Inspection',
+  serializedAssetsInspection: 'Serialized Assets Inspection',
   priceTemplate: 'Price Template',
   product: 'Product',
   productTemplate: 'Product Template',
