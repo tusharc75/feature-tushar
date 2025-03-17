@@ -4,6 +4,7 @@ import { CustomDialogTransition } from 'src/constants/helpers';
 import DashboardModal from '../DashboardModal';
 import { Button, Collapse } from '@mui/material';
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { isString } from 'lodash';
 
 interface ErrorMessages {
   index?: number;
@@ -14,23 +15,28 @@ export default function CustomMessageDialog({
   open,
   errorMessages,
   onClose,
-  forwardText
+  title
 }: {
   open: boolean;
   errorMessages: ErrorMessages[];
   onClose: () => void;
-  forwardText?: string;
+  title?: string;
 }) {
-  const [expanded, setExpanded] = useState({});
+
   const getMessageList = (message) => {
     const errorMessages: any = [];
     message?.forEach((m) => {
-      const { index, message } = m;
-      const existingMessage = errorMessages.find((m) => m?.message === message);
-      if (existingMessage) {
-        existingMessage.indexes.push(index);
-      } else {
-        errorMessages.push({ message, indexes: [index] });
+      if (isString(m)) {
+        errorMessages.push(m);
+      }
+      else {
+        const { index, message } = m;
+        const existingMessage = errorMessages.find((m) => m?.message === message);
+        if (existingMessage) {
+          existingMessage.indexes.push(index);
+        } else {
+          errorMessages.push({ message, indexes: [index] });
+        }
       }
     });
     return errorMessages;
@@ -52,7 +58,7 @@ export default function CustomMessageDialog({
       }}
       modalHead={{
         icon: <Error color={'error'} />,
-        title: 'Message',
+        title: title || 'Message',
         fullScreenOption: true
       }}
       handleClose={() => onClose()}
@@ -61,7 +67,9 @@ export default function CustomMessageDialog({
       id="confirmation-dialog"
     >
       <div className="grid gap-2">
-        {getMessageList(errorMessages)?.map((d, index) => <RenderSingleMessage key={`${d?.indexes?.toString()}${d.message}`} index={index} d={d} />)}
+        {getMessageList(errorMessages)?.map((d, index) =>
+          isString(d) ? < RenderStringMessage index={index} d={d} />
+            : < RenderSingleMessage key={`${d?.indexes?.toString()}${d.message}`} index={index} d={d} />)}
       </div>
     </DashboardModal>
   );
@@ -104,6 +112,20 @@ const RenderSingleMessage = ({ d, index }) => {
       <div title={d?.message} className=" cursor-help">
         <p className="mb-[8px] text-[13px]">Message</p>
         <p className="text-[16px]">{d?.message}</p>
+      </div>
+    </div>
+  );
+};
+
+const RenderStringMessage = ({ d, index }) => {
+  return (
+    <div
+      key={`${index}`}
+      className=" gap-[20px]  rounded-lg px-[15px] py-[12px] shadow-[0px_5.44444px_27.22222px_0px_rgba(0,_0,_0,_0.06)] md:px-[20px]"
+      style={{ border: '1px solid var(--common-border-color)' }}
+    >
+      <div title={d} className=" cursor-help">
+        <p className="text-[16px]">{d}</p>
       </div>
     </div>
   );

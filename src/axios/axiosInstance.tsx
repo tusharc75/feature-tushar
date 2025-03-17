@@ -66,7 +66,17 @@ export default (history = null, passedHeaders = null) => {
                     //@ts-ignore
                     window.location = "/";
                 }
-            } else if (error.response.status === 511) {
+            } else if (error.response.status === 402 && error.response?.data?.data?.products?.length) {
+                return new Promise((resolve, reject) => {
+                    reject({
+                        open: true,
+                        type: "productInventoryAlert",
+                        message: error.response.data.error || error.response.data.message,
+                        data: error.response?.data?.data?.products
+                    });
+                });
+            }
+            else if (error.response.status === 511) {
                 localStorage.clear();
                 //@ts-ignore
                 window.location = "/";
