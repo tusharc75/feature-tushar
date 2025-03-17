@@ -59,6 +59,8 @@ export const ReferenceRenderer = (row) => {
               window.open(`${routes.subcontractAssemblyDetail.path}/${row?.original?.referenceId}`);
             } else if (row?.original?.referenceType === sidebarResource.productInventory) {
               <h5 className="text-truncate">Manual Entry</h5>;
+            } else if (row?.original?.referenceType === sidebarResource.fieldServiceOrder) {
+              window.open(`${routes.fieldServiceOrderDetail.path}/${row?.original?.referenceId}`);
             }
           }}
         >

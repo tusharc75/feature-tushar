@@ -40,7 +40,7 @@ import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { generateAddFieldTicket } from 'src/pages/FieldServiceOrder/walkmeSteps';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import Technicians from './material/Technicians';
-import TechnicianDispatchReceive from './TechnicianDispatchReceive';
+import TechnicianDispatchReturn from './TechnicianDispatchReturn';
 
 const ServiceOrderDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -321,7 +321,7 @@ const ServiceOrderDetailsPage = () => {
               />
             )}
             {steps[currentStep]?.name === steps[1]?.name && serviceOrderData && (
-              <TechnicianDispatchReceive
+              <TechnicianDispatchReturn
                 serviceOrderId={id}
                 setNextStep={setNextStep}
                 stepFullScreen={stepFullScreen}
@@ -329,12 +329,22 @@ const ServiceOrderDetailsPage = () => {
               />
             )}
             {steps[currentStep]?.name === steps[2]?.name && serviceOrderData && (
-              <TechnicianDispatchReceive
+              <FieldTicket
+                serviceOrderData={serviceOrderData}
+                serviceOrderFields={serviceOrderFields}
+                allowedToEdit={allowedToEdit}
+                handleChangeStatus={handleChangeStatus}
+                resource={sidebarResource.fieldServiceOrder}
+                fetchServiceOrderData={fetchServiceOrderData}
+              />
+            )}
+            {steps[currentStep]?.name === steps[3]?.name && serviceOrderData && (
+              <TechnicianDispatchReturn
                 serviceOrderId={id}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={allowedToEdit}
                 setNextStep={setNextStep}
-                isReceive={true}
+                isReturn={true}
               />
             )}
           </TabPanel>

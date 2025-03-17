@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@mui/material/Grid2';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, fieldServiceOrder, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, FIELD_SERVICE_ORDER_TECHNICIAN_STATUS, MATERIAL_TYPE, PRICING_SETUP_TYPE, fieldServiceOrder, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { IconButton, MenuItem, TextField } from '@mui/material';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -164,29 +164,29 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
         canDrag: false,
         Cell: ({ row, table }: any) => (
           <>
-            <HtmlTooltip title={allowedToEdit ? 'Edit' : ''}>
+            <HtmlTooltip title={allowedToEdit && row?.original?.canDelete ? 'Edit' : 'Technician for this product/consumable is already dispatched or returned'}>
               <IconButton
                 size="small"
                 aria-label="Delete"
-                disabled={!allowedToEdit}
+                disabled={!allowedToEdit || !row?.original?.canDelete}
                 onClick={() => {
                   openMaterial(row, table.getRowModel().rows);
                 }}
               >
-                <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+                <EditIcon fontSize="small" color={row.original?.canDelete && allowedToEdit ? 'primary' : 'disabled'} />
               </IconButton>
             </HtmlTooltip>
-            <HtmlTooltip title={'Delete'}>
+            <HtmlTooltip title={allowedToEdit && row?.original?.canDelete ? 'Delete' : 'Technician for this product/consumable is already dispatched or returned'}>
               <span>
                 <IconButton
                   size="small"
                   aria-label="Delete"
-                  disabled={!allowedToEdit}
+                  disabled={!allowedToEdit || !row?.original?.canDelete}
                   onClick={() => {
                     setDeleteData([{ id: row.original._id }]);
                   }}
                 >
-                  <DeleteIcon fontSize="small" color={allowedToEdit ? 'error' : 'disabled'} />
+                  <DeleteIcon fontSize="small" color={row.original?.canDelete && allowedToEdit ? 'error' : 'disabled'} />
                 </IconButton>
               </span>
             </HtmlTooltip>
@@ -348,6 +348,14 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
+    if (!inputField.canDelete) {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'error',
+        message: 'Technician for this product/consumable is already dispatched or returned'
+      });
+      return;
+    }
     const dataRow = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     if (inputField.hasOwnProperty('qty')) {
       if (parseInt(inputField.qty) === 0) {
@@ -382,6 +390,7 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
     return (
       <>
         <MenuItem
+          disabled={selectedRecords?.some((e) => !e?.canDelete)}
           onClick={() => {
             setIsConsumableEdit({ open: true, data: null, showSaveAndNext: false });
             setIsBulkEdit(true);
@@ -391,7 +400,7 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
         </MenuItem>
 
         <MenuItem
-          disabled={isDeleting || selectedRecords?.some((e) => e?.requestedQty || e?.consumedQty)}
+          disabled={isDeleting || selectedRecords?.some((e) => !e?.canDelete)}
           onClick={() => {
             setDeleteData(
               selectedRecords?.map((d) => {
@@ -435,7 +444,7 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
         {allowedToEdit && (
           <>
             <DetailsPageHeader
-              isAddButtonVisible={!isEmpty(selectedTechnician)}
+              isAddButtonVisible={!isEmpty(selectedTechnician) && selectedTechnician?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.reserved}
               addButtonProps={{ onClick: () => setConsumablesDialog(true), id: 'add-product-consumable' }}
               isActionButtonVisible={true}
               actionButtonMenuItems={actionButtonMenuItems()}
