@@ -165,7 +165,7 @@ const ExpenseReportDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <Fragment>
-              {expenseReportData?.status !== EXPENSE_STATUS.approved && expenseReportData?.status !== EXPENSE_STATUS.reimbursed &&(
+              {expenseReportData?.status !== EXPENSE_STATUS.approved && expenseReportData?.status !== EXPENSE_STATUS.reimbursed && (
                 <>
                   <ThemeButton
                     buttonType="theme"
@@ -220,7 +220,7 @@ const ExpenseReportDetail = () => {
             {!loadingDetails && expenseReportData && fields ? (
               <div className="mt-2">
                 <Expenses
-                  expenseIds={expenseReportData?.expenses?.map((expense) => expense._id)}
+                  expenseIds={expenseReportData?.expenses}
                   showAddButton={true}
                   reportData={expenseReportData}
                   removeRow={handleDeleteExpense}

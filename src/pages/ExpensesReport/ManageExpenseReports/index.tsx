@@ -30,6 +30,7 @@ import Expenses from 'src/pages/ExpensesReport/Expenses';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { useTableReducer } from 'src/components/CustomReactTable';
 import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
+import dayjs from 'dayjs';
 
 const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose, onSuccess, expenseReportData = null }) => {
   const history = useHistory();
@@ -73,45 +74,30 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
               toastConfig.setToastConfig(error);
             });
         } else {
-          axiosInstance()
-            .get(`${expenseReport.api}/last-expense-report-date`)
-            .then(({ data }) => {
-              if (data?.latestReport?.toDate && data?.latestReport?.fromDate) {
-                const lastFromDate = new Date(data?.latestReport?.fromDate);
-                const lastToDate = new Date(data?.latestReport?.toDate);
+          axiosInstance().get(`${expenseReport.api}/last-expense-report-date`).then(({ data }) => {
 
-                const now = new Date();
-                const currentYear = now.getFullYear();
-                const currentMonth = now.getMonth();
+            let fromDate: any = dayjs.tz().subtract(1, 'month').startOf('month')?.toDate();
+            let toDate: any = dayjs.tz().subtract(1, 'month').endOf('month')?.toDate();
 
-                const lastFromMonth = lastFromDate.getMonth();
-                const lastFromYear = lastFromDate.getFullYear();
+            if (data?.data) {
+              const endDate = dayjs(data?.data?.toDate);
+              fromDate = endDate.tz().add(1, 'month').startOf('month')?.toDate();
+              toDate = endDate.tz().add(1, 'month').endOf('month')?.toDate();
+            }
 
-                let fromDate, toDate;
-
-                if (lastFromYear === currentYear && lastFromMonth === currentMonth) {
-                  fromDate = new Date(currentYear, currentMonth + 1, 2);
-                  toDate = new Date(currentYear, currentMonth + 2, 1);
-                } else {
-                  fromDate = new Date(currentYear, currentMonth, 2);
-                  toDate = new Date(currentYear, currentMonth + 1, 1);
-                }
-
-                setTitle(`Create ${resources?.expenseReport?.titleSingular}`);
-                let initialData = getObjKeys('', fieldsDataForCreate);
-                initialData['status'] = EXPENSE_STATUS.draft;
-                initialData['users'] = [user?.user?._id];
-                initialData['fromDate'] = fromDate;
-                initialData['toDate'] = toDate;
-                setInitialData({
-                  fields: fieldsDataForCreate,
-                  values: initialData
-                });
-              }
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
+            setTitle(`Create ${resources?.expenseReport?.titleSingular}`);
+            let initialData = getObjKeys('', fieldsDataForCreate);
+            initialData['status'] = EXPENSE_STATUS.draft;
+            initialData['users'] = [user?.user?._id];
+            initialData['fromDate'] = fromDate;
+            initialData['toDate'] = toDate;
+            setInitialData({
+              fields: fieldsDataForCreate,
+              values: initialData
             });
+          }).catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
         }
       })
       .catch((error) => {
@@ -122,55 +108,35 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
   const handleSubmit = (value) => {
     setIsSubmitting(true);
     const { fields, values, ...data } = value;
-    data.expenses = selectedExpense;
-
-    const status = EXPENSE_STATUS.unSubmitted;
-
     if (expenseReportId) {
       data._id = expenseReportId;
-
-      axiosInstance()
-        .put(`${expenseReport.api}`, data)
-        .then(({ data }) => {
-          axiosInstance()
-            .patch(`${expenseReport.api}/status/${expenseReportId}`, { status })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
-            });
-          setIsSubmitting(false);
-          onSuccess();
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-        })
-        .catch((error) => {
-          setIsSubmitting(false);
-          toastConfig.setToastConfig(error);
+      axiosInstance().put(`${expenseReport.api}`, data).then(({ data }) => {
+        setIsSubmitting(false);
+        onSuccess();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
         });
+      }).catch((error) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
     } else {
-      axiosInstance()
-        .post(`${expenseReport.api}`, data)
-        .then(({ data: { data, message } }) => {
-          axiosInstance()
-            .patch(`${expenseReport.api}/status/${data._id}`, { status })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
-            });
-          history.push(`${routes?.expenseReportDetail?.path}/${data._id}`);
-          setIsSubmitting(false);
-          onSuccess(data);
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: message
-          });
-        })
-        .catch((error) => {
-          setIsSubmitting(false);
-          toastConfig.setToastConfig(error);
+      data.expenses = selectedExpense?.map((e) => e._id);
+      axiosInstance().post(`${expenseReport.api}`, data).then(({ data: { data, message } }) => {
+        history.push(`${routes?.expenseReportDetail?.path}/${data._id}`);
+        setIsSubmitting(false);
+        onSuccess(data);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: message
         });
+      }).catch((error) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
     }
   };
 

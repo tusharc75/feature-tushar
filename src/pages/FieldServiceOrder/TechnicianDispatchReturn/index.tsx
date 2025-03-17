@@ -183,7 +183,19 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
       Cell: ({ row }) => {
         const isDisabled = (isReturn && !row?.original?.startDate) || row?.original?.endDate || (!isReturn && row?.original?.startDate);
         return allowedToEdit ? (
-          <HtmlTooltip title={isDisabled ? (isReturn ? !row?.original?.startDate ? 'Not Dispatched Yet' : 'Already Returned' : 'Already Dispatched') : (isReturn ? 'Return' : 'Dispatch')}>
+          <HtmlTooltip
+            title={
+              isDisabled
+                ? isReturn
+                  ? !row?.original?.startDate
+                    ? 'Not Dispatched Yet'
+                    : 'Already Returned'
+                  : 'Already Dispatched'
+                : isReturn
+                  ? 'Return'
+                  : 'Dispatch'
+            }
+          >
             <span>
               <IconButton
                 size="small"
@@ -192,7 +204,11 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
                   setConfirmationDialog({ open: true, data: [row?.original?._id] });
                 }}
               >
-                {isReturn ? <ReplayIcon fontSize="small" color={isDisabled ? 'disabled' : 'primary'} /> : <Send fontSize="small" color={isDisabled ? 'disabled' : 'primary'} />}
+                {isReturn ? (
+                  <ReplayIcon fontSize="small" color={isDisabled ? 'disabled' : 'primary'} />
+                ) : (
+                  <Send fontSize="small" color={isDisabled ? 'disabled' : 'primary'} />
+                )}
               </IconButton>
             </span>
           </HtmlTooltip>

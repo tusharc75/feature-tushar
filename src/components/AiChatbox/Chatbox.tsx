@@ -82,15 +82,24 @@ const Chatbox = (props: ChatboxProps) => {
               {
                 primary: false,
                 field: 'User Input',
-                label: d.ask_user_input,
+                label: "Input",
                 type: 'singleLine',
                 order: 1
               }
             ];
+            d.reply.content = d.ask_user_input
           }
+
 
           setState({ type: 'setMessage', payload: d });
         });
+
+        socket.current.on('end',(d) => {
+          setState({ type: 'setMessage', payload: d });
+          socket.current.disconnect()
+          socket.current = null
+        })
+
       } catch (error) {
         toastConfig.setToastConfig(error);
         setState({ type: 'setError', error: error.message || '' });
@@ -107,16 +116,8 @@ const Chatbox = (props: ChatboxProps) => {
           topicIds: selectedTopics.map((d) => d._id)
         };
 
-        if (chatId) {
-          payload = { ...payload, _id: chatId };
-        }
-
         socket.current.emit('message', payload);
 
-        socket.current.on('data', (d) => {
-          if (d.error) setState({ type: 'setError', error: d.error || '' });
-          else setState({ type: 'setMessage', payload: d });
-        });
       } catch (error) {
         toastConfig.setToastConfig(error);
         setState({ type: 'setError', error: error.message || '' });
@@ -140,7 +141,8 @@ const Chatbox = (props: ChatboxProps) => {
     (obj: FormValueStateObj) => {
       let query = '';
       for (let i = 0; i < Object.keys(obj).length; i++) {
-        query += `${Object.keys(obj)[i]}: ${Object.values(obj)[i]}\n`;
+        const value = `${(Object.values(obj)[i] || "")}`.replace("_cur","")
+        query += `${Object.keys(obj)[i]}: ${value}\n`;
       }
       submitForm(query);
     },
@@ -226,15 +228,6 @@ const Chatbox = (props: ChatboxProps) => {
               </>
             )}
           </div>
-          {aiStatus && (
-            <Typography
-              component={'pre'}
-              variant="body2"
-              className="!ml-[46px] whitespace-pre-wrap rounded-3xl bg-[#f4f4f4] px-[20px] py-[10px] text-[black] dark:bg-[#1e4358] dark:text-[white]"
-            >
-              <CircularProgress /> {aiStatus}
-            </Typography>
-          )}
         </div>
         <div
           className={cn(

@@ -44,9 +44,9 @@ const ExpenseApproval = () => {
     setColumns(newColumns);
   };
 
-  // useEffect(() => {
-  //   dispatch({ type: 'filter', filters: { status: { filter: [EXPENSE_STATUS.awaitingApproval] } } });
-  // }, []);
+  useEffect(() => {
+    dispatch({ type: 'filter', filters: { status: { filter: [EXPENSE_STATUS.awaitingApproval, EXPENSE_STATUS.approved] } } });
+  }, []);
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -143,8 +143,8 @@ const ExpenseApproval = () => {
       <Box className="detail-container-v1">
         {reportData ? (
           reportData?.length > 0 && (
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-[400px_1fr]">
-              <div className="container-with-border p-[20px] md:min-h-[calc(100vh-200px)]">
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-[400px_1fr]">
+              <div className="container-with-border p-[20px] ">
                 <CustomReactTable
                   showOnlyMobileView={true}
                   height="calc(100vh - 200px)"
@@ -167,9 +167,9 @@ const ExpenseApproval = () => {
               </div>
               <div className="container-with-border p-[20px]">
                 {selectedExpenseReport && (
-                  <Box p={3}>
-                    <Requests referenceId={selectedExpenseReport?._id} fetchDataMaster={fetchData} />
-                  </Box>
+                  <Requests
+                    referenceId={selectedExpenseReport?._id}
+                    fetchDataMaster={fetchData} />
                 )}
               </div>
             </div>

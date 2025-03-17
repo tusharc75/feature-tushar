@@ -16,6 +16,7 @@ import { LuCopy } from 'react-icons/lu';
 import { copyTextToClipboard } from 'src/constants/helpers';
 import { Speak } from 'src/components/AiChatbox/Speak';
 import FeedbackDialog from 'src/components/AiChatbox/FeedbackDialog';
+import remarkGfm from "remark-gfm";
 
 const RenderSingleChat = ({
   message,
@@ -99,7 +100,7 @@ const RenderSingleChat = ({
           </Typography>
         ) : (
           <div className="group prose relative rounded-lg pt-[8px] text-sm text-[var(--primary)] dark:text-white [&_pre]:whitespace-pre-wrap">
-            <Markdown>{message.content}</Markdown>
+            <Markdown remarkPlugins={[remarkGfm]}>{message.content}</Markdown>
             <div
               className={cn(
                 'mt-1 flex max-w-fit items-center gap-2 rounded-xl p-[3px] opacity-0 transition-opacity [border:1px_solid_var(--common-border-color)] group-hover:opacity-100'
