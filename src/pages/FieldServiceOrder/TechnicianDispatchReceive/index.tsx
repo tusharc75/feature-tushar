@@ -17,7 +17,8 @@ import { FiExternalLink } from 'react-icons/fi';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import { Link } from 'react-router-dom';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { Send, CallReceived } from '@mui/icons-material';
+import { Send } from '@mui/icons-material';
+import ReplayIcon from '@mui/icons-material/Replay';
 
 const TechnicianDispatchReceive = ({ allowedToEdit, serviceOrderId, stepFullScreen, setNextStep, isReceive = false }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_TechnicianDispatch`;
@@ -190,7 +191,7 @@ const TechnicianDispatchReceive = ({ allowedToEdit, serviceOrderId, stepFullScre
                   setConfirmationDialog({ open: true, data: [row?.original?._id] });
                 }}
               >
-                {isReceive ? <CallReceived fontSize="small" /> : <Send fontSize="small" />}
+                {isReceive ? <ReplayIcon fontSize="small" color='primary' /> : <Send fontSize="small" color='primary' />}
               </IconButton>
             </span>
           </HtmlTooltip>
@@ -312,7 +313,7 @@ const TechnicianDispatchReceive = ({ allowedToEdit, serviceOrderId, stepFullScre
       {confirmationDialog.open && (
         <ConfirmationDialog
           open={confirmationDialog.open}
-          message={`Are you sure you want to ${isReceive ? 'Receive' : 'Dispatch'} selected techncian(s)?`}
+          message={`Are you sure you want to ${isReceive ? 'receive' : 'dispatch'} selected techncian(s)?`}
           onClose={() => {
             setConfirmationDialog({ open: false, data: null });
           }}
