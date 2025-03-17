@@ -1,4 +1,4 @@
-import { Box, Dialog, FormControlLabel, Radio, RadioGroup, TextField } from '@mui/material';
+import { Box, Checkbox, Dialog, FormControlLabel, Radio, RadioGroup, TextField } from '@mui/material';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
@@ -25,7 +25,8 @@ export const ViewDialog = ({ columns, resource, handleSucess, handleClose, viewD
 
   const [initialValue] = useState({
     name: viewData?.name || '',
-    access: viewData?.access || ACCESS_OPTIONS.private
+    access: viewData?.access || ACCESS_OPTIONS.private,
+    default: viewData?.default || false
   });
 
   const [loading, setLoading] = useState(false);
@@ -34,6 +35,7 @@ export const ViewDialog = ({ columns, resource, handleSucess, handleClose, viewD
     const data = {
       name: values?.name,
       access: values?.access,
+      default: values?.default,
       columns: columns?.map((c: any) => ({ name: c.fieldName, width: c.width, customLabel: c.customLabel, showBelowRow: c?.showBelowRow })) || [],
       ...(sortBy && orderBy ? { sortBy: sortBy?.fieldName, orderBy } : { sortBy: '', orderBy: '' })
     };
@@ -115,29 +117,46 @@ export const ViewDialog = ({ columns, resource, handleSucess, handleClose, viewD
                   error={touched['name'] && Boolean(errors['name'])}
                   helperText={touched['name'] && errors['name']}
                 />
-                <Box pt={1}>
-                  <RadioGroup row>
+                <Box pt={1} display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
+                  <div>
+                    <RadioGroup row>
+                      <FormControlLabel
+                        control={
+                          <Radio
+                            checked={values['access'] === ACCESS_OPTIONS.private}
+                            onChange={() => setFieldValue('access', ACCESS_OPTIONS.private)}
+                            name="private"
+                          />
+                        }
+                        label="Private"
+                      />
+                      <FormControlLabel
+                        control={
+                          <Radio
+                            checked={values['access'] === ACCESS_OPTIONS.everyone}
+                            onChange={() => setFieldValue('access', ACCESS_OPTIONS.everyone)}
+                            name="everyone"
+                          />
+                        }
+                        label="Everyone"
+                      />
+                    </RadioGroup>
+                  </div>
+                  <div>
                     <FormControlLabel
                       control={
-                        <Radio
-                          checked={values['access'] === ACCESS_OPTIONS.private}
-                          onChange={() => setFieldValue('access', ACCESS_OPTIONS.private)}
-                          name="private"
+                        <Checkbox
+                          size="small"
+                          checked={values['default']}
+                          onChange={(e) => {
+                            setFieldValue('default', e.target.checked);
+                          }}
+                          name="default"
                         />
                       }
-                      label="Private"
+                      label="Set as default"
                     />
-                    <FormControlLabel
-                      control={
-                        <Radio
-                          checked={values['access'] === ACCESS_OPTIONS.everyone}
-                          onChange={() => setFieldValue('access', ACCESS_OPTIONS.everyone)}
-                          name="everyone"
-                        />
-                      }
-                      label="Everyone"
-                    />
-                  </RadioGroup>
+                  </div>
                 </Box>
               </Form>
             </CustomDialogContent>

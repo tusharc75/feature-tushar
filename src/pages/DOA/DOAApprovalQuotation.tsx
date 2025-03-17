@@ -22,11 +22,7 @@ import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 const DoaQuotationApproval = () => {
   const renderedFrom = 'quotation_product_package';
 
-  const {
-    state: {
-      user: { user: currentUser }
-    }
-  } = useData();
+  const { state: { user } } = useData();
 
   const { setToastConfig } = useContext(CustomToastContext);
 
@@ -178,18 +174,19 @@ const DoaQuotationApproval = () => {
           </div>
         )
       },
-      {
-        accessor: 'leadTime',
-        Header: 'Lead Time (Days)',
-        Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
-        Footer: (info) => {
-          let rows = info.table.getExpandedRowModel().rows;
-          const total = rows
-            ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
-            .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
-          return <>{total}</>;
-        }
-      }
+      ...(user?.user?.brandPolicy?.leadTime ?
+        [{
+          accessor: 'leadTime',
+          Header: 'Lead Time (Days)',
+          Cell: ({ row }) => <div>{row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0}</div>,
+          Footer: (info) => {
+            let rows = info.table.getExpandedRowModel().rows;
+            const total = rows
+              ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+              .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
+            return <>{total}</>;
+          }
+        }] : [])
     ];
     column = [...column, ...newColumns];
     setColumns(column);
@@ -246,7 +243,7 @@ const DoaQuotationApproval = () => {
             <Button onClick={() => ViewQuote()} variant="outlined" size="small" startIcon={<AiOutlineEye />} color="primary">
               View
             </Button>
-            {DOAData?.DOARequestThrough?.some((u) => u.user.includes(currentUser._id)) &&
+            {DOAData?.DOARequestThrough?.some((u) => u.user.includes(user?.user?._id)) &&
               DOAData?.status !== 'Accepted' &&
               DOAData?.status !== 'Rejected' ? (
               <>

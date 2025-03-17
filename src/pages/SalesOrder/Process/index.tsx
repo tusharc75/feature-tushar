@@ -130,18 +130,19 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
             <NoDataCell />
           )
       },
-      {
-        accessor: 'leadTime',
-        Header: 'Lead Time (Days)',
-        Cell: ({ row }) => <div>{<p>{row.original['leadTime'] || 0}</p>}</div>,
-        Footer: (info) => {
-          let rows = info.table.getExpandedRowModel().rows;
-          const total = rows
-            ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
-            .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
-          return <>{total}</>;
-        }
-      }
+      ...(user?.user?.brandPolicy?.leadTime ?
+        [{
+          accessor: 'leadTime',
+          Header: 'Lead Time (Days)',
+          Cell: ({ row }) => <div>{row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0}</div>,
+          Footer: (info) => {
+            let rows = info.table.getExpandedRowModel().rows;
+            const total = rows
+              ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+              .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
+            return <>{total}</>;
+          }
+        }] : [])
     ];
     coloum = [...coloum, ...newColumns];
     setColumns(coloum);
@@ -163,13 +164,12 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
     const rows = material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.service
-            ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
-      }`;
+      parent.detail = `${parent.type === MATERIAL_TYPE.product
+        ? parent.productDetail?.productName
+        : parent.type === MATERIAL_TYPE.service
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+        }`;
       parent.description =
         parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription
@@ -198,13 +198,12 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
-      _subRow.detail = `${
-        _subRow.type === MATERIAL_TYPE.product
-          ? _subRow.productDetail?.productName
-          : _subRow.type === MATERIAL_TYPE.service
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
-      }`;
+      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.product
+        ? _subRow.productDetail?.productName
+        : _subRow.type === MATERIAL_TYPE.service
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription

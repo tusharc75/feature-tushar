@@ -69,7 +69,6 @@ const AddMemberDialog = ({ onClose, channelId = null, onSuccess, ignoreIds = [],
     fetchOptions();
   }, []);
 
-  console.log(selectedUsers);
 
   return (
     <>
