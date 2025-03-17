@@ -135,6 +135,7 @@
     "react-webcam": "^7.1.1",
     "react-window": "^1.8.6",
     "react-window-infinite-loader": "^1.0.9",
+    "remark-gfm": "^4.0.1",
     "resolve": "1.18.1",
     "resolve-url-loader": "^3.1.2",
     "sass-migrator": "^1.7.3",
