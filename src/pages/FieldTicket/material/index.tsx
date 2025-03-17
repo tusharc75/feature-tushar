@@ -75,7 +75,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
   const [showCostDialog, setShowCostDialog] = useState({ open: false, data: null, showSaveAndNext: false });
   const [costFields, setCostFields] = useState([]);
   const [assignRentalDataDialog, setAssignRentalDataDialog] = useState({ open: false, type: '' });
-  const [assignQuotationDataDialog, setQuotationRentalDataDialog] = useState({ open: false, type: '' });
+  const [assignQuotationDataDialog, setAssignQuotationDataDialog] = useState(false);
 
   const [refreshChild, setRefreshChild] = useState(false);
 
@@ -427,7 +427,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
         fetchMaterial();
         setMaterialDialog({ open: false, type: '', parentId: null });
         setAssignRentalDataDialog({ open: false, type: '' });
-        setQuotationRentalDataDialog({ open: false, type: '' });
+        setAssignQuotationDataDialog(false);
         setIsSubmitting(false);
       }
       if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) {
@@ -549,7 +549,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
         fetchData();
         setMaterialDialog({ open: false, type: '', parentId: null });
         setAssignRentalDataDialog({ open: false, type: '' });
-        setQuotationRentalDataDialog({ open: false, type: '' });
+        setAssignQuotationDataDialog(false);
         setIsSubmitting(false);
       })
       .catch((error) => {
@@ -890,17 +890,10 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           <>
             <MenuItem
               onClick={() => {
-                setQuotationRentalDataDialog({ open: true, type: MATERIAL_TYPE.service });
+                setAssignQuotationDataDialog(true);
               }}
             >
               Add Quotation Services
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                setQuotationRentalDataDialog({ open: true, type: MATERIAL_TYPE.product });
-              }}
-            >
-              Add Quotation Consumables
             </MenuItem>
           </>
         )}
@@ -989,6 +982,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           stepFullScreen={stepFullScreen}
           fetchData={fetchData}
           refreshChild={refreshChild}
+          resourcePolicy={resourcePolicy}
         />
       </Box>
       {materialDialog?.open && materialDialog?.type === MATERIAL_TYPE.service && (
@@ -1088,14 +1082,14 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           ids={dataRows?.map((row) => (assignRentalDataDialog?.type === MATERIAL_TYPE.package ? row?.uniqueId : row?.materialId))}
         />
       )}
-      {assignQuotationDataDialog?.open && (
+      {assignQuotationDataDialog && (
         <AddQuotationDataDialog
-          type={assignQuotationDataDialog?.type}
+          type={MATERIAL_TYPE.service}
           onClose={() => {
-            setQuotationRentalDataDialog({ open: false, type: '' });
+            setAssignQuotationDataDialog(false);
           }}
           onSuccess={(rows) => {
-            handleAdd(rows, assignQuotationDataDialog?.type);
+            handleAdd(rows, MATERIAL_TYPE.service);
           }}
           fieldTicketData={fieldTicketData}
           isSubmitting={isSubmitting}

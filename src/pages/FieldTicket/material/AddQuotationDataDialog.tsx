@@ -161,7 +161,7 @@ const AddQuotationDataDialog = ({ onSuccess, onClose, fieldTicketData, type, isS
         parent._id = parent?.productDetail?._id;
       });
     } else if (type === MATERIAL_TYPE.service) {
-      rows = data?.material?.filter((e) => e.type === MATERIAL_TYPE.service && !ids?.some((ele) => ele === e._id));
+      rows = data?.material?.filter((e) => e.type === MATERIAL_TYPE.service && !ids?.some((ele) => ele === e.materialId));
       rows.forEach((parent, i) => {
         parent.index = i + 1;
         parent.type = MATERIAL_TYPE.service;
