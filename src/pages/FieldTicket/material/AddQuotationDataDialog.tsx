@@ -15,7 +15,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import { useData } from 'src/StateProvider/Provider';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 
-const AddQuotationDataDialog = ({ onSuccess, onClose, fieldTicketData, type, isSubmitting = false, ids = [] }) => {
+const AddQuotationDataDialog = ({ onSuccess, onClose, fieldTicketData, isSubmitting = false, ids = [] }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Quotation_Material`;
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -43,15 +43,7 @@ const AddQuotationDataDialog = ({ onSuccess, onClose, fieldTicketData, type, isS
     var data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.quotationProduct, fieldTicketData?.currency, false);
     setAllFields(JSON.parse(JSON.stringify(data)));
     data = data?.filter((f) => f?.isRead);
-    const newColumns = generateColumns(
-      renderedFrom,
-      data?.map((e) => {
-        return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName };
-      }),
-      null,
-      false,
-      fieldTicketData?.currency
-    );
+    const newColumns = generateColumns(renderedFrom, data, null, false, fieldTicketData?.currency);
     let column: any = [
       {
         accessor: 'index',
@@ -109,19 +101,6 @@ const AddQuotationDataDialog = ({ onSuccess, onClose, fieldTicketData, type, isS
           </div>
         )
       },
-      ...(user?.user?.brandPolicy?.leadTime ?
-        [{
-          accessor: 'leadTime',
-          Header: 'Lead Time (Days)',
-          Cell: ({ row }) => <div>{row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0}</div>,
-          Footer: (info) => {
-            let rows = info.table.getExpandedRowModel().rows;
-            const total = rows
-              ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
-              .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
-            return <>{total}</>;
-          }
-        }] : []),
       {
         accessor: 'description',
         Header: 'Description',
@@ -139,42 +118,20 @@ const AddQuotationDataDialog = ({ onSuccess, onClose, fieldTicketData, type, isS
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
     var data: any = [];
-    let rows = [];
     const response = await axiosInstance().get(`${quotation.api}/productpackage/${fieldTicketData?.quotation?.optionValue}/${fieldTicketData?.quotationVersion?.optionValue}`);
-    data = response?.data?.data;
-    if (type === MATERIAL_TYPE.product) {
-      rows = data?.material?.filter(
-        (e) =>
-          e.type === MATERIAL_TYPE.product &&
-          !e?.productDetail?.serializedProduct &&
-          !ids?.some((ele) => ele === e.materialId)
-      );
-      rows.forEach((parent, i) => {
-        parent.index = i + 1;
-        parent.type = MATERIAL_TYPE.product;
-        parent.detail = parent?.productDetail?.productName;
-        parent.description = parent?.productDetail?.productDescription;
-        parent.qtyDisplay = parent.qty;
-        parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
-        parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
-        parent.materialId = parent?.productDetail?._id;
-        parent._id = parent?.productDetail?._id;
-      });
-    } else if (type === MATERIAL_TYPE.service) {
-      rows = data?.material?.filter((e) => e.type === MATERIAL_TYPE.service && !ids?.some((ele) => ele === e.materialId));
-      rows.forEach((parent, i) => {
-        parent.index = i + 1;
-        parent.type = MATERIAL_TYPE.service;
-        parent.detail = parent?.serviceDetail?.serviceName;
-        parent.description = parent?.serviceDetail?.serviceDescription;
-        parent.qtyDisplay = parent.qty;
-        parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
-        parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
-        parent.materialId = parent?.serviceDetail?._id;
-        parent._id = parent?.serviceDetail?._id;
-      });
-    }
-    dispatch({ type: 'initialize', data: rows, count: rows?.length });
+    data = response?.data?.data?.material;
+    data.forEach((parent, i) => {
+      parent.index = i + 1;
+      parent.type = parent.type;
+      parent.detail = parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productName :
+        parent.type === MATERIAL_TYPE.service ? parent?.serviceDetail?.serviceName : parent?.pacakgeDetail?.packageName;
+      parent.description = parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productDescription :
+        parent.type === MATERIAL_TYPE.service ? parent?.serviceDetail?.serviceDescription : parent?.pacakgeDetail?.pacakgeDescription;
+      parent.qty = parent.qty;
+      parent.materialId = parent.materialId;
+      parent._id = parent._id;
+    });
+    dispatch({ type: 'initialize', data: data, count: data?.length });
     dispatch({ type: 'loading', loading: false });
   };
 
@@ -193,7 +150,7 @@ const AddQuotationDataDialog = ({ onSuccess, onClose, fieldTicketData, type, isS
       aria-labelledby="assign-roles-dialog"
     >
       <CustomDialogHeader
-        title={type === MATERIAL_TYPE.product ? `Add Quotation Consumables` : `Add Quotation Services`}
+        title={`Add From Quotation`}
         showManimizeMaximize={false}
         showRequiredLabel={false}
         onClose={onClose}
@@ -206,6 +163,7 @@ const AddQuotationDataDialog = ({ onSuccess, onClose, fieldTicketData, type, isS
             isActionButtonVisible={false}
             addButtonProps={{
               iconsEnabled: false,
+              textAddShow: true,
               disabled: isSubmitting || selectedRecords?.length === 0,
               loading: isSubmitting,
               text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : ''
@@ -213,7 +171,7 @@ const AddQuotationDataDialog = ({ onSuccess, onClose, fieldTicketData, type, isS
             addButtonOnclick={() => {
               onSuccess(selectedRecords);
             }}
-            isAddButtonVisible
+            isAddButtonVisible={true}
             setQueryString={false}
           />
           {columns ? (
