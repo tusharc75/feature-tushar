@@ -7,7 +7,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, EXPENSE_STATUS, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, dateFormatToSend, EXPENSE_STATUS, sidebarResource } from 'src/constants/helpers';
 import { camelCase } from 'lodash';
 import axios, { CancelTokenSource } from 'axios';
 import { useData } from '../../StateProvider/Provider';
@@ -54,7 +54,7 @@ function AddExpenses({ open, onClose, fullScreen, setFullScreen, isSubmitting = 
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}&deepFilter=[{"field":"expenseDate", "term":{"from":"${`${dayjs.utc(expenseReportData?.fromDate).tz().format('MM/DD/YYYY')}`}", "to":"${`${dayjs.utc(expenseReportData?.toDate).tz().format('MM/DD/YYYY')}`}"}}]`;
+    let deepFilter = `?page=${page}&limit=${limit}`;
 
     if (isExport) {
       deepFilter = `?`;
@@ -62,11 +62,17 @@ function AddExpenses({ open, onClose, fullScreen, setFullScreen, isSubmitting = 
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    const updatedDeepFilters = [...deepFilters];
+    updatedDeepFilters.push({
+      field: 'expenseDate',
+      term: { 'from': dateFormatToSend(expenseReportData?.fromDate), 'to': dateFormatToSend(expenseReportData?.toDate) }
+    });
+
+    if (updatedDeepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedDeepFilters))}`;
     }
 
-    if (filterByIds?.length || deepFilters?.length) {
+    if (filterByIds?.length || updatedDeepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
 
