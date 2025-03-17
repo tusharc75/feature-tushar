@@ -336,6 +336,7 @@ const ServiceOrderDetailsPage = () => {
                 handleChangeStatus={handleChangeStatus}
                 resource={sidebarResource.fieldServiceOrder}
                 fetchServiceOrderData={fetchServiceOrderData}
+                noQuotationCheck={true}
               />
             )}
             {steps[currentStep]?.name === steps[3]?.name && serviceOrderData && (

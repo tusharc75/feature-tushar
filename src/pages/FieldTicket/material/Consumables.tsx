@@ -643,7 +643,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
 
   return (
     <>
-      {allowedToEdit && !fieldTicketData?.quotation && serviceOption?.length > 0 && (
+      {allowedToEdit && serviceOption?.length > 0 && (
         <Box style={{ maxWidth: '400px' }} mb={3}>
           <Autocomplete
             id={'select-service'}
@@ -674,7 +674,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
 
       <TabPanel value={tabValue} index={0}>
         <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
-          {allowedToEdit && !fieldTicketData?.quotation && (
+          {allowedToEdit && (
             <>
               <DetailsPageHeader
                 isAddButtonVisible={true}
@@ -698,8 +698,8 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
                   onSaveEdit={onSaveInlineEdit}
                   renderedFrom={renderedFrom}
                   isClientSideGrid={true}
-                  hideSelection={allowedToEdit && !fieldTicketData?.quotation ? false : true}
-                  hideAction={allowedToEdit && !fieldTicketData?.quotation ? false : true}
+                  hideSelection={allowedToEdit ? false : true}
+                  hideAction={allowedToEdit ? false : true}
                   refreshGrid={fetchData}
                 />
               ) : (
