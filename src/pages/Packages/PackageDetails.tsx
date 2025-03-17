@@ -27,7 +27,7 @@ const PackageDetails = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { permissions, resources }
+    state: { permissions, resources, user }
   }: any = useData();
   const [headingLabel, setHeadingLabel] = useState('');
   const [packagesLoading, setPackagesLoading] = useState(false);
@@ -135,13 +135,15 @@ const PackageDetails = () => {
           <Grid size={{ xs: 12, sm: 12, md: 12 }}>
             <TabPanel value={tabValue} index={0}>
               <DetailsPage data={packageData} fields={packageFields} />
-              <Box mb={2} mt={2}>
-                <Grid container spacing={2}>
-                  <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-                    <LeadTime referenceType={MATERIAL_TYPE.package} referenceId={id} referenceLabel={packageData?.packageName} />
+              {user?.user?.brandPolicy?.leadTime &&
+                <Box mb={2} mt={2}>
+                  <Grid container spacing={2}>
+                    <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+                      <LeadTime referenceType={MATERIAL_TYPE.package} referenceId={id} referenceLabel={packageData?.packageName} />
+                    </Grid>
                   </Grid>
-                </Grid>
-              </Box>
+                </Box>
+              }
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
               {tabValue === 1 && <Services packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} />}

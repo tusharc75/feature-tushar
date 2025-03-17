@@ -527,9 +527,11 @@ const ProductDetailsPage = () => {
                           <CostDetails product={id} productData={productData} minHeight={minHeight} />
                         </Grid>
                       )}
-                      <Grid size={{ xs: 12, sm: 6, md: 4, xl: 3 }}>
-                        <LeadTime referenceType={MATERIAL_TYPE.product} referenceId={id} referenceLabel={productData?.productName} />
-                      </Grid>
+                      {user?.user?.brandPolicy?.leadTime &&
+                        <Grid size={{ xs: 12, sm: 6, md: 4, xl: 3 }}>
+                          <LeadTime referenceType={MATERIAL_TYPE.product} referenceId={id} referenceLabel={productData?.productName} />
+                        </Grid>
+                      }
                     </Grid>
                   </Grid>
                 </Box>

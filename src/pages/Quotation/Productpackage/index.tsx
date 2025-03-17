@@ -207,18 +207,19 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           </div>
         )
       },
-      {
-        accessor: 'leadTime',
-        Header: 'Lead Time (Days)',
-        Cell: ({ row }) => <div> {row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0} </div>,
-        Footer: (info) => {
-          let rows = info.table.getExpandedRowModel().rows;
-          const total = rows
-            ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
-            .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
-          return <div>{total}</div>;
-        }
-      },
+      ...(user?.user?.brandPolicy?.leadTime ?
+        [{
+          accessor: 'leadTime',
+          Header: 'Lead Time (Days)',
+          Cell: ({ row }) => <div>{row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0}</div>,
+          Footer: (info) => {
+            let rows = info.table.getExpandedRowModel().rows;
+            const total = rows
+              ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+              .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
+            return <>{total}</>;
+          }
+        }] : []),
       {
         accessor: 'description',
         Header: 'Description',
@@ -234,8 +235,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     column.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 100,
-      width: 150,
+      width: user?.user?.brandPolicy?.leadTime ? 140 : 100,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -258,7 +258,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           )}
           {!row.original.hideSelection && (
             <>
-              {row.original.type !== MATERIAL_TYPE.serializedAsset && (
+              {user?.user?.brandPolicy?.leadTime && row.original.type !== MATERIAL_TYPE.serializedAsset && (
                 <IconButton
                   size="small"
                   aria-label="Details"

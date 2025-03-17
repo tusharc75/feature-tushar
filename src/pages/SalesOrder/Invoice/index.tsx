@@ -19,7 +19,7 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, stepFullScreen 
   const renderedFrom = `${camelCase(sidebarResource.salesOrder)}_Invoice`;
 
   const {
-    state: { resources }
+    state: { resources, user }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -106,18 +106,19 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, stepFullScreen 
           return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
         }
       },
-      {
-        accessor: 'leadTime',
-        Header: 'Lead Time (Days)',
-        Cell: ({ row }) => <div>{row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0}</div>,
-        Footer: (info) => {
-          let rows = info.table.getExpandedRowModel().rows;
-          const total = rows
-            ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
-            .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
-          return <>{total}</>;
-        }
-      }
+      ...(user?.user?.brandPolicy?.leadTime ?
+        [{
+          accessor: 'leadTime',
+          Header: 'Lead Time (Days)',
+          Cell: ({ row }) => <div>{row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0}</div>,
+          Footer: (info) => {
+            let rows = info.table.getExpandedRowModel().rows;
+            const total = rows
+              ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+              .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
+            return <>{total}</>;
+          }
+        }] : [])
     ];
     coloum = [...coloum, ...newColumns];
     setColumns(coloum);
@@ -208,7 +209,7 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, stepFullScreen 
     <Fragment>
       <DetailsPageHeader isAddButtonVisible={false} isActionButtonVisible={false} previewDownloadProps={previewDownloadProps} hasXpadding />
 
-      <Grid size={{xs:12, md:12, sm:12}}>
+      <Grid size={{ xs: 12, md: 12, sm: 12 }}>
         {columns ? (
           <Box zIndex={5} width={'100%'}>
             <CustomReactTable
