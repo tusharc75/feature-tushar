@@ -165,13 +165,15 @@ const ServiceMasterDetailsPage = () => {
             ) : (
               <>
                 <DetailsPage data={serviceMasterDetailData} fields={fields} />
-                <Box mb={2} mt={2}>
-                  <Grid container spacing={2}>
-                    <Grid size={{ xs: 6, sm: 12, md: 6, lg: 6 }}>
-                      <LeadTime referenceType={MATERIAL_TYPE.service} referenceId={id} referenceLabel={serviceMasterDetailData?.serviceName} />
+                {user?.user?.brandPolicy?.leadTime &&
+                  <Box mb={2} mt={2}>
+                    <Grid container spacing={2}>
+                      <Grid size={{ xs: 6, sm: 12, md: 6, lg: 6 }}>
+                        <LeadTime referenceType={MATERIAL_TYPE.service} referenceId={id} referenceLabel={serviceMasterDetailData?.serviceName} />
+                      </Grid>
                     </Grid>
-                  </Grid>
-                </Box>
+                  </Box>
+                }
               </>
             )}
           </Box>

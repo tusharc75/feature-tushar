@@ -42,7 +42,7 @@ const renderedFrom = `${camelCase(sidebarResource.salesOrder)}_Material`;
 const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrderData, updateJobStatus, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { resources, permissions }
+    state: { resources, permissions, user }
   }: any = useData();
   const [isUpdating, setUpdating] = useState(false);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false, showSaveAndNext: false });
@@ -178,25 +178,25 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
           );
         }
       },
-      {
-        accessor: 'leadTime',
-        Header: 'Lead Time (Days)',
-        Cell: ({ row }) => <div>{<p>{row.original['leadTime'] || 0}</p>}</div>,
-        Footer: (info) => {
-          let rows = info.table.getExpandedRowModel().rows;
-          const total = rows
-            ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
-            .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
-          return <>{total}</>;
-        }
-      }
+      ...(user?.user?.brandPolicy?.leadTime ?
+        [{
+          accessor: 'leadTime',
+          Header: 'Lead Time (Days)',
+          Cell: ({ row }) => <div>{row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0}</div>,
+          Footer: (info) => {
+            let rows = info.table.getExpandedRowModel().rows;
+            const total = rows
+              ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+              .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
+            return <>{total}</>;
+          }
+        }] : [])
     ];
     coloum = [...coloum, ...newColumns];
     coloum.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 140,
-      width: 140,
+      width: user?.user?.brandPolicy?.leadTime ? 140 : 100,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -214,7 +214,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
               <EditIcon fontSize="small" color="primary" />
             </IconButton>
           </HtmlTooltip>
-          {row.original.type !== MATERIAL_TYPE.manualEntry && (
+          {user?.user?.brandPolicy?.leadTime && row.original.type !== MATERIAL_TYPE.manualEntry && (
             <HtmlTooltip title={'Lead Time'} placement="top" enterTouchDelay={0} arrow>
               <IconButton
                 size="small"
