@@ -27,6 +27,7 @@ const ItemizeMileage = ({
   const [localLineItems, setLocalLineItems] = useState([...lineItems]);
   const fromAutocompleteServiceRef = useRef(null);
   const toAutocompleteServiceRef = useRef(null);
+  const [computedTotal, setComputedTotal] = useState(0);
 
   useEffect(() => {
     if (window.google && window.google.maps && window.google.maps.places) {
@@ -40,8 +41,9 @@ const ItemizeMileage = ({
   }, []);
 
   useEffect(() => {
-    setLocalLineItems([...lineItems]);
-  }, [lineItems]);
+    const total = localLineItems.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+    setComputedTotal(total);
+  }, [localLineItems]);
 
   const haversineDistance = (lat1, lon1, lat2, lon2) => {
     const toRad = (x) => (x * Math.PI) / 180;
@@ -164,17 +166,10 @@ const ItemizeMileage = ({
     setLocalLineItems(newFields);
   };
 
-  const computeTotal = () =>
-    localLineItems.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
 
   const handleSave = () => {
     const validItems = localLineItems.filter((item) => item.fromLocation && item.toLocation);
-    const total = computeTotal();
-    onSave(validItems, total);
-    onClose();
-  };
-
-  const handleCancel = () => {
+    onSave(validItems, computedTotal);
     onClose();
   };
 
@@ -187,14 +182,14 @@ const ItemizeMileage = ({
       aria-labelledby="customized-dialog-title"
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {
-          handleCancel();
+          onClose();
         }
       }}
       open={true}
     >
       <CustomDialogHeader
         title="Mileage"
-        onClose={handleCancel}
+        onClose={onClose}
         isMinimized={!fullScreen}
         onMinimizeMaximize={() => setFullScreen((prevState) => !prevState)}
         showManimizeMaximize={true}
@@ -346,13 +341,13 @@ const ItemizeMileage = ({
           ))}
           <div className="grid justify-end pt-3">
             <span className="font-medium">
-              Total Amount: {formatAmountWithCurrency(currency, computeTotal())?.fullFormatAmountWithoutSpace}
+              Total Amount: {formatAmountWithCurrency(currency, computedTotal)?.fullFormatAmountWithoutSpace}
             </span>
           </div>
         </div>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <ThemeButton buttonType="transparent" id="dialog-cancel-button" onClick={handleCancel}>
+        <ThemeButton buttonType="transparent" id="dialog-cancel-button" onClick={onClose}>
           Cancel
         </ThemeButton>
         <ThemeButton

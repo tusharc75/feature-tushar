@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Dialog, IconButton, TextField, InputAdornment, Box } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -15,6 +15,12 @@ const ItemizeExpenses = ({ onClose, onSave, lineItems, currency, currencySymbol,
   const [localLineItems, setLocalLineItems] = useState([...lineItems]);
   const [touchedFields, setTouchedFields] = useState({});
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [computedTotal, setComputedTotal] = useState(0);
+
+  useEffect(() => {
+    const total = localLineItems.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+    setComputedTotal(total);
+  }, [localLineItems]);
 
   const handleBlur = (index, field) => {
     setTouchedFields((prev) => ({
@@ -41,12 +47,9 @@ const ItemizeExpenses = ({ onClose, onSave, lineItems, currency, currencySymbol,
     setLocalLineItems(newFields);
   };
 
-  const computeTotal = () => localLineItems.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
-
   const handleSave = () => {
     const validItems = localLineItems.filter((field) => field.description.trim() !== '' && Number(field.amount) > 0);
-    const total = computeTotal();
-    onSave(validItems, total);
+    onSave(validItems, computedTotal);
     onClose();
   };
 
@@ -126,7 +129,7 @@ const ItemizeExpenses = ({ onClose, onSave, lineItems, currency, currencySymbol,
           </Grid>
         ))}
         <div className="grid justify-end pt-3">
-          <span className="font-medium">Total Amount: {formatAmountWithCurrency(currency, computeTotal())?.fullFormatAmountWithoutSpace}</span>
+          <span className="font-medium">Total Amount: {formatAmountWithCurrency(currency, computedTotal)?.fullFormatAmountWithoutSpace}</span>
         </div>
       </CustomDialogContent>
       <CustomDialogFooter>
