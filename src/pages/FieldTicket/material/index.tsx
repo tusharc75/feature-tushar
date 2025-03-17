@@ -444,7 +444,6 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
         await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { ...result, data: updatedData });
       }
     } else {
-      const isRental = assignRentalDataDialog.open;
       var taxCodeData: any = null;
       if (fieldTicketData?.taxCode) {
         const {
@@ -455,12 +454,12 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
         }
       }
       const material: any = [];
-      if (isRental) {
+      if (assignRentalDataDialog.open || assignQuotationDataDialog) {
         const currency = fieldTicketData?.currency?.toLowerCase();
         rows?.forEach((d: any) => {
           const element: any = {};
           element.materialId = d.materialId;
-          element.type = type;
+          element.type = d?.type || type;
           element.unit = d.unit ? d.unit : '';
           element.pricingMethod = d.pricingMethod ? d.pricingMethod : '';
           element.qty = d.qty ? parseFloat(d.qty) : 1;
@@ -494,7 +493,12 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           }
           element['totalPrice_' + currency] = d['totalPrice_' + currency] || 0;
           element['finalPrice_' + currency] = d['finalPrice_' + currency] || 0;
-          element.isRental = true;
+          if (assignRentalDataDialog.open) {
+            element.isRental = true;
+          }
+          // if (assignQuotationDataDialog) {
+          //   element.isQuotation = true;
+          // }
           material.push(element);
         });
         AddMaterial(material, null);
@@ -893,7 +897,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
                 setAssignQuotationDataDialog(true);
               }}
             >
-              Add Quotation Services
+              {`Add From ${resources?.quotation?.titleSingular}`}
             </MenuItem>
           </>
         )}
@@ -939,7 +943,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
 
   return (
     <>
-      {allowedToEdit  && (
+      {allowedToEdit && (
         <>
           <DetailsPageHeader
             isAddButtonVisible={true}
@@ -1084,12 +1088,11 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
       )}
       {assignQuotationDataDialog && (
         <AddQuotationDataDialog
-          type={MATERIAL_TYPE.service}
           onClose={() => {
             setAssignQuotationDataDialog(false);
           }}
           onSuccess={(rows) => {
-            handleAdd(rows, MATERIAL_TYPE.service);
+            handleAdd(rows, null);
           }}
           fieldTicketData={fieldTicketData}
           isSubmitting={isSubmitting}
