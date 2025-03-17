@@ -58,11 +58,7 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.expenses}`);
     data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes?.expensesDetail?.path, true);
-    let staticFields = getStaticFields();
-    staticFields.forEach((field) => {
-      newColumns.push(checkStaticField(renderedFrom, field));
-    });
+    const newColumns = generateColumns(renderedFrom, data, routes?.expensesDetail?.path);
     const extracolumns: any = [
       ...newColumns,
       {
@@ -86,7 +82,7 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
         }
       }
     ];
-    setColumns([...extracolumns, ...(allowedToEdit ? [ActionsRenderer] : [])]);
+    setColumns([...extracolumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   useEffect(() => {
@@ -98,24 +94,17 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     try {
-      const response: any = await axiosInstance().get(`${expenses.api}`, { cancelToken: cancelTokenSource?.token });
-      const filteredExpenses = response?.data?.data.filter((expense) => expenseIds?.includes(expense._id));
-
-      let fetchedRows = [];
-      filteredExpenses.map((expense) => {
-        const finalObject = prepareDataForGrid(expense, user);
+      const response: any = await axiosInstance().get(`${expenses.api}?getById=${JSON.stringify(expenseIds)}`, { cancelToken: cancelTokenSource?.token });
+      let rows = response?.data?.data;
+      rows = rows?.map((e) => {
+        const finalObject = prepareDataForGrid(e, user);
         finalObject['isChecked'] = false;
         finalObject['canDelete'] = permissions?.expenses?.isDelete;
-        fetchedRows.push(finalObject);
+        return finalObject
       });
-
-      const duplicatedFetchedRows = Array.from(new Map(fetchedRows.map((item) => [item._id, item])).values());
-
-      const sum = duplicatedFetchedRows.reduce((acc, row) => acc + (Number(row.totalAmount) || 0), 0).toFixed(2);
+      const sum = rows?.reduce((acc, row) => acc + (Number(row.totalAmount) || 0), 0).toFixed(2);
       setSubtotal(sum);
-
-      dispatch({ type: 'initialize', data: duplicatedFetchedRows, count: duplicatedFetchedRows.length });
-
+      dispatch({ type: 'initialize', data: rows, count: rows.length });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
@@ -261,6 +250,7 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
             pagination={false}
             refreshGrid={fetchData}
             hideSelection={!allowedToEdit}
+            hideAction={!allowedToEdit}
           />
         ) : (
           <Box p={2} height={500}>
