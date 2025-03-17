@@ -43,7 +43,7 @@ import PreviewDownload from 'src/components/PreviewDownload';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
-const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScreen, allowedToEdit, setCurrentStep, nextStep }) => {
+const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScreen, allowedToEdit, setCurrentStep, nextStep, fetchAssembleOrderData }) => {
   const {
     state: { user, permissions, resources }
   }: any = useData();
@@ -547,6 +547,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
           setOpenSerializedPackageDialog({ open: false, ids: [] });
           fetchData();
           checkAllWorkOrderComplete();
+          fetchAssembleOrderData()
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
