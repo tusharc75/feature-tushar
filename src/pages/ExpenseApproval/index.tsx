@@ -44,9 +44,9 @@ const ExpenseApproval = () => {
     setColumns(newColumns);
   };
 
-  // useEffect(() => {
-  //   dispatch({ type: 'filter', filters: { status: { filter: [EXPENSE_STATUS.awaitingApproval] } } });
-  // }, []);
+  useEffect(() => {
+    dispatch({ type: 'filter', filters: { status: { filter: [EXPENSE_STATUS.awaitingApproval, EXPENSE_STATUS.approved] } } });
+  }, []);
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
