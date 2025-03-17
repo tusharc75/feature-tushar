@@ -353,5 +353,16 @@ export const resourcePolicy = [
         defaultValue: []
       }
     ]
+  },
+  {
+    resource: sidebarResource.serializedAssetsInspection,
+    policy: [
+      {
+        fieldName: 'canCreateRepairOrder',
+        fieldLabel: 'Can Create Repair Order',
+        type: 'checkBox',
+        defaultValue: false,
+      }
+    ]
   }
 ];

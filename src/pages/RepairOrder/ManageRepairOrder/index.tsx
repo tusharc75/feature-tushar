@@ -141,8 +141,7 @@ const ManageRepairOrder = ({
               }
             });
           });
-        }
-        if (referenceType === sidebarResource.workOrderPlanning) {
+        } else if (referenceType === sidebarResource.workOrderPlanning) {
           if (referenceData) {
             for (const key in referenceData) {
               if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
@@ -156,6 +155,19 @@ const ManageRepairOrder = ({
               }
             });
           }
+        } else if (referenceType === 'serializedAssetsInspection') {
+          fieldsDataForCreate?.forEach((e) => {
+            if (e.fieldName === 'warehouse' && referenceData?.warehouse) {
+              initialData['warehouse'] = referenceData?.warehouse;
+              e.disableOnEdit = true;
+              e.isUneditable = true;
+            }
+            if (e.fieldName === 'type') {
+              initialData['type'] = REPAIR_ORDER_TYPE.internal;
+              e.disableOnEdit = true;
+              e.isUneditable = true;
+            }
+          });
         }
         setInitialData({
           fields: fieldsDataForCreate,
