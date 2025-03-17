@@ -76,6 +76,12 @@ export const resourcePolicy = [
         defaultValue: false
       },
       {
+        fieldName: 'showQuotationAddMaterial',
+        fieldLabel: 'Show Quotation Add Material',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
         fieldName: 'packageMaterialAdd',
         fieldLabel: 'Package Material Add',
         type: 'multiSelect',

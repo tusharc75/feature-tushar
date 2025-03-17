@@ -37,8 +37,9 @@ import HideWhenOffline from 'src/components/HideWhenOffline';
 import { FiExternalLink } from 'react-icons/fi';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
+import AddQuotationDataDialog from './AddQuotationDataDialog';
 
-const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, stepFullScreen, fetchData: fetchFieldTicketData, refreshChild }) => {
+const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, stepFullScreen, fetchData: fetchFieldTicketData, refreshChild, resourcePolicy }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Consumables`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -58,7 +59,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
   const [openLogDialog, setOpenLogDialog] = useState({ open: false, product: '', uniqueId: null, data: null });
   const [historyDialog, setHistoryDialog] = useState({ open: false, _id: '', product: '', productName: '' });
   const [isSubmitting, setSubmitting] = useState(false);
-
+  const [assignQuotationDataDialog, setAssignQuotationDataDialog] = useState(false);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
@@ -378,6 +379,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
         await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { ...result, data: updatedData });
       }
       setConsumablesDialog(false);
+      setAssignQuotationDataDialog(false);
       fetchData();
       setSubmitting(false);
     } else {
@@ -445,6 +447,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
           message: data?.message
         });
         setConsumablesDialog(false);
+        setAssignQuotationDataDialog(false);
         fetchData();
         fetchFieldTicketData();
         setSubmitting(false);
@@ -641,9 +644,35 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
     );
   };
 
+  const AddButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setConsumablesDialog(true);
+          }}
+          id={'add-product-consumable'}
+        >
+          {`Add Product(s)/Consumable(s)`}
+        </MenuItem>
+        {resourcePolicy?.showQuotationAddMaterial && fieldTicketData?.quotation?.optionValue && fieldTicketData?.quotationVersion?.optionValue && !isOffline && (
+          <>
+            <MenuItem
+              onClick={() => {
+                setAssignQuotationDataDialog(true);
+              }}
+            >
+              Add Quotation Consumables
+            </MenuItem>
+          </>
+        )}
+      </>
+    );
+  };
+
   return (
     <>
-      {allowedToEdit && !fieldTicketData?.quotation && serviceOption?.length > 0 && (
+      {allowedToEdit && serviceOption?.length > 0 && (
         <Box style={{ maxWidth: '400px' }} mb={3}>
           <Autocomplete
             id={'select-service'}
@@ -674,11 +703,11 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
 
       <TabPanel value={tabValue} index={0}>
         <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
-          {allowedToEdit && !fieldTicketData?.quotation && (
+          {allowedToEdit && (
             <>
               <DetailsPageHeader
                 isAddButtonVisible={true}
-                addButtonProps={{ onClick: () => setConsumablesDialog(true), id: 'add-product-consumable' }}
+                addButtonMenuItems={<AddButtonMenuItems />}
                 isActionButtonVisible={!isOffline}
                 actionButtonMenuItems={actionButtonMenuItems()}
                 actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
@@ -698,8 +727,8 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
                   onSaveEdit={onSaveInlineEdit}
                   renderedFrom={renderedFrom}
                   isClientSideGrid={true}
-                  hideSelection={allowedToEdit && !fieldTicketData?.quotation ? false : true}
-                  hideAction={allowedToEdit && !fieldTicketData?.quotation ? false : true}
+                  hideSelection={allowedToEdit ? false : true}
+                  hideAction={allowedToEdit ? false : true}
                   refreshGrid={fetchData}
                 />
               ) : (
@@ -802,6 +831,20 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
           onClose={() => setDeleteData(null)}
           onOk={() => handleDelete(deleteData)}
           okBtnLoading={isDeleting}
+        />
+      )}
+      {assignQuotationDataDialog && (
+        <AddQuotationDataDialog
+          type={MATERIAL_TYPE.product}
+          onClose={() => {
+            setAssignQuotationDataDialog(false);
+          }}
+          onSuccess={(rows) => {
+            handleSubmit(rows);
+          }}
+          fieldTicketData={fieldTicketData}
+          isSubmitting={isSubmitting}
+          ids={dataRows?.map((row) => row?.materialId)}
         />
       )}
     </>
