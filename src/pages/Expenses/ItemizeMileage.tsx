@@ -11,11 +11,20 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { CustomDialogTransition, formatAmountWithCurrency } from 'src/constants/helpers';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
-const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySymbol, isSubmitting, totalAmount, policyData }) => {
+const ItemizeMileage = ({
+  onClose,
+  onSave,         
+  lineItems,            
+  currency,
+  currencySymbol,
+  isSubmitting,
+  policyData
+}) => {
   const [touchedFields, setTouchedFields] = useState({});
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [fromSuggestions, setFromSuggestions] = useState([]);
   const [toSuggestions, setToSuggestions] = useState([]);
+  const [localLineItems, setLocalLineItems] = useState([...lineItems]);
   const fromAutocompleteServiceRef = useRef(null);
   const toAutocompleteServiceRef = useRef(null);
 
@@ -30,19 +39,21 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
     }
   }, []);
 
+  useEffect(() => {
+    setLocalLineItems([...lineItems]);
+  }, [lineItems]);
+
   const haversineDistance = (lat1, lon1, lat2, lon2) => {
     const toRad = (x) => (x * Math.PI) / 180;
     const R_KM = 6371;
     const R_MILE = 3958.8;
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    if (policyData?.distanceUnit === 'mile') {
-      return R_MILE * c;
-    } else {
-      return R_KM * c;
-    }
+    return policyData?.distanceUnit === 'mile' ? R_MILE * c : R_KM * c;
   };
 
   const handleFromInputChange = (event, value, reason) => {
@@ -86,7 +97,7 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
         const lat = placeResult.geometry.location.lat();
         const lng = placeResult.geometry.location.lng();
 
-        const newFields = [...lineItems];
+        const newFields = [...localLineItems];
         const newLocation = {
           lat,
           lng,
@@ -102,7 +113,6 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
         if (newFields[index].fromLocation && newFields[index].toLocation) {
           const { lat: lat1, lng: lon1 } = newFields[index].fromLocation;
           const { lat: lat2, lng: lon2 } = newFields[index].toLocation;
-
           const distance = haversineDistance(lat1, lon1, lat2, lon2);
           newFields[index].distance = distance.toFixed(2);
 
@@ -110,8 +120,7 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
             newFields[index].amount = (distance * newFields[index].rate).toFixed(2);
           }
         }
-
-        setLineItems(newFields);
+        setLocalLineItems(newFields);
       }
     });
   };
@@ -124,40 +133,49 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
   };
 
   const isFormValid = () => {
-    return lineItems.every((item) => item.fromLocation && item.toLocation && item.rate > 0);
+    return localLineItems.every((item) => item.fromLocation && item.toLocation && Number(item.rate) > 0);
   };
 
   const addLineItem = () => {
-    const lastItem = lineItems[lineItems.length - 1];
-    if (lastItem && (!lastItem.fromLocation || !lastItem.toLocation || !lastItem.rate)) {
-      return;
-    }
-
-    setLineItems([
-      ...lineItems,
-      { id: lineItems.length, fromLocation: null, toLocation: null, rate: policyData?.perUnitRate, distance: '', amount: '' }
+    setLocalLineItems([
+      ...localLineItems,
+      {
+        id: localLineItems.length,
+        fromLocation: null,
+        toLocation: null,
+        rate: policyData?.perUnitRate,
+        distance: '',
+        amount: ''
+      }
     ]);
   };
 
-  const handleClose = () => {
-    const filteredLineItems = lineItems.filter((item) => item.fromLocation && item.toLocation);
-    setLineItems(filteredLineItems);
-    onClose();
-  };
-
   const removeLineItem = (id) => {
-    setLineItems(lineItems.filter((item) => item.id !== id));
+    setLocalLineItems(localLineItems.filter((item) => item.id !== id));
   };
 
   const handleInputChange = (index, field, event) => {
-    const newFields = [...lineItems];
+    const newFields = [...localLineItems];
     newFields[index][field] = event.target.value;
 
     if (field === 'rate' && newFields[index].distance) {
       newFields[index].amount = (newFields[index].distance * newFields[index].rate).toFixed(2);
     }
+    setLocalLineItems(newFields);
+  };
 
-    setLineItems(newFields);
+  const computeTotal = () =>
+    localLineItems.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+
+  const handleSave = () => {
+    const validItems = localLineItems.filter((item) => item.fromLocation && item.toLocation);
+    const total = computeTotal();
+    onSave(validItems, total);
+    onClose();
+  };
+
+  const handleCancel = () => {
+    onClose();
   };
 
   return (
@@ -169,14 +187,14 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
       aria-labelledby="customized-dialog-title"
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {
-          handleClose();
+          handleCancel();
         }
       }}
       open={true}
     >
       <CustomDialogHeader
         title="Mileage"
-        onClose={handleClose}
+        onClose={handleCancel}
         isMinimized={!fullScreen}
         onMinimizeMaximize={() => setFullScreen((prevState) => !prevState)}
         showManimizeMaximize={true}
@@ -188,7 +206,7 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
               Add
             </ThemeButton>
           </Box>
-          {lineItems.map((item, index) => (
+          {localLineItems.map((item, index) => (
             <Grid container spacing={2} key={item.id} alignItems="center" sx={{ marginBottom: 2 }}>
               <Grid size={{ xs: 6 }}>
                 <Autocomplete
@@ -201,9 +219,9 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
                     if (newValue) {
                       handleSelectLocation(index, newValue, true);
                     } else {
-                      const newFields = [...lineItems];
+                      const newFields = [...localLineItems];
                       newFields[index].fromLocation = null;
-                      setLineItems(newFields);
+                      setLocalLineItems(newFields);
                     }
                   }}
                   renderInput={(params) => (
@@ -213,7 +231,11 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
                       size="small"
                       onBlur={() => handleBlur(index, 'fromLocation')}
                       error={touchedFields[index]?.fromLocation && !item.fromLocation}
-                      helperText={touchedFields[index]?.fromLocation && !item.fromLocation ? 'Location is required' : ''}
+                      helperText={
+                        touchedFields[index]?.fromLocation && !item.fromLocation
+                          ? 'Location is required'
+                          : ''
+                      }
                       required
                     />
                   )}
@@ -230,9 +252,9 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
                     if (newValue) {
                       handleSelectLocation(index, newValue, false);
                     } else {
-                      const newFields = [...lineItems];
+                      const newFields = [...localLineItems];
                       newFields[index].toLocation = null;
-                      setLineItems(newFields);
+                      setLocalLineItems(newFields);
                     }
                   }}
                   renderInput={(params) => (
@@ -242,7 +264,11 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
                       size="small"
                       onBlur={() => handleBlur(index, 'toLocation')}
                       error={touchedFields[index]?.toLocation && !item.toLocation}
-                      helperText={touchedFields[index]?.toLocation && !item.toLocation ? 'Location is required' : ''}
+                      helperText={
+                        touchedFields[index]?.toLocation && !item.toLocation
+                          ? 'Location is required'
+                          : ''
+                      }
                       required
                     />
                   )}
@@ -263,8 +289,8 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
                   onBlur={() => handleBlur(index, 'distance')}
                   fullWidth
                   required
-                  error={touchedFields[index]?.distance && item.distance <= 0}
-                  helperText={touchedFields[index]?.distance && item.distance <= 0 ? 'Distance is required' : ''}
+                  error={touchedFields[index]?.distance && Number(item.distance) <= 0}
+                  helperText={touchedFields[index]?.distance && Number(item.distance) <= 0 ? 'Distance is required' : ''}
                 />
               </Grid>
               <Grid size={{ xs: 6 }}>
@@ -282,8 +308,8 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
                   onBlur={() => handleBlur(index, 'rate')}
                   fullWidth
                   required
-                  error={touchedFields[index]?.rate && item.rate <= 0}
-                  helperText={touchedFields[index]?.rate && item.rate <= 0 ? 'Rate is required' : ''}
+                  error={touchedFields[index]?.rate && Number(item.rate) <= 0}
+                  helperText={touchedFields[index]?.rate && Number(item.rate) <= 0 ? 'Rate is required' : ''}
                 />
               </Grid>
               <Grid size={{ xs: 6 }}>
@@ -319,12 +345,14 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
             </Grid>
           ))}
           <div className="grid justify-end pt-3">
-            <span className="font-medium">Total Amount: {formatAmountWithCurrency(currency, totalAmount)?.fullFormatAmountWithoutSpace}</span>
+            <span className="font-medium">
+              Total Amount: {formatAmountWithCurrency(currency, computeTotal())?.fullFormatAmountWithoutSpace}
+            </span>
           </div>
         </div>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <ThemeButton buttonType="transparent" id="dialog-cancel-button" onClick={handleClose}>
+        <ThemeButton buttonType="transparent" id="dialog-cancel-button" onClick={handleCancel}>
           Cancel
         </ThemeButton>
         <ThemeButton
@@ -332,7 +360,7 @@ const ItemizeMileage = ({ onClose, setLineItems, lineItems, currency, currencySy
           buttonType="theme"
           id="dialog-save-button"
           disabled={!isFormValid() || isSubmitting}
-          onClick={handleClose}
+          onClick={handleSave}
         >
           Save
         </ThemeButton>
