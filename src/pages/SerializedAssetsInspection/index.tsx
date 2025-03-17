@@ -21,9 +21,11 @@ import {
   ASSET_STATUS,
   COLOUR_MASTER,
   INVENTORY_HISTORY_TYPE,
+  MATERIAL_TYPE,
   SYSTEM_ASSET_STATUS,
   gridLoadingTimeout,
   prepareDataForGrid,
+  repairOrder,
   serializedAsset,
   sidebarResource
 } from '../../constants/helpers';
@@ -32,11 +34,12 @@ import ReasonDialog from '../SerializedAsset/ReasonDialog';
 import { ExpandMore } from '@mui/icons-material';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { RiExchange2Line } from 'react-icons/ri';
+import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
 
 
 const SerializedAssetInspection = () => {
 
-  const renderedFrom = camelCase(sidebarResource?.serializedAssetInspection);
+  const renderedFrom = camelCase(sidebarResource.serializedAssetsInspection);
 
   const toastConfig = useContext(CustomToastContext);
 
@@ -56,6 +59,8 @@ const SerializedAssetInspection = () => {
   const [showReasonDialog, setShowReasonDialog] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [status, setStatus] = useState('');
+  const [resourceData, setResourceData] = useState(null);
+  const [showRepairOrderDialog, setShowRepairOrderDialog] = useState(false);
 
   useEffect(() => {
     fetchGridColumns()
@@ -182,9 +187,54 @@ const SerializedAssetInspection = () => {
           )
         });
         setColumns([...newColumns, ...getStaticFields()]);
+        fetchPolicy();
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+        fetchPolicy();
       });
   };
 
+  const checkUniqWarehouse = () => {
+    let warehouses = new Set(selectedRecords?.map((d) => d?.warehouseId));
+    return warehouses?.size === 1;
+  }
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAssetsInspection}`);
+      if (data) {
+        if (data?.policy?.canCreateRepairOrder) {
+          setStatusOptions((prev) => {
+            let newOptions = prev?.filter((e) => e.optionValue !== ASSET_STATUS.inRepair);
+            return newOptions;
+          })
+        }
+        setResourceData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const handleAddAssetsToRepairOrder = async (repairOrderData: any) => {
+    let rows = selectedRecords?.map((record: any) => ({
+      materialId: record._id,
+      type: MATERIAL_TYPE.serializedAsset,
+      qty: 1,
+      parentId: null
+    }));
+    axiosInstance()
+      .post(`${repairOrder.api}/${repairOrderData}/product-package`, { material: rows })
+      .then(() => {
+        setShowRepairOrderDialog(false);
+        fetchData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
 
   const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
@@ -293,17 +343,30 @@ const SerializedAssetInspection = () => {
   };
 
   const ActionMenuItems = () => {
-    return (statusOptions ?
+    return (
       <>
-        {Object.entries(statusOptions).map(([key, status]: any) => {
-          const isDisabled = selectedRecords.some((record) => record.status === status?.optionLabel);
-          return (
-            <MenuItem key={key} onClick={() => handleStatusChange(status?.optionLabel)} disabled={isDisabled}>
-              {status?.optionLabel}
+        {resourceData?.policy?.canCreateRepairOrder ? (
+          <>
+            <MenuItem
+              onClick={() => setShowRepairOrderDialog(true)}
+              disabled={checkUniqWarehouse() && permissions?.repairOrder?.isCreate ? false : true}
+            >
+              {`Create ${resources?.repairOrder?.titleSingular}`}
             </MenuItem>
-          );
-        })}
-      </> : null
+          </>
+        ) : null}
+        {statusOptions ?
+          <>
+            {Object.entries(statusOptions).map(([key, status]: any) => {
+              const isDisabled = selectedRecords.some((record) => record.status === status?.optionLabel);
+              return (
+                <MenuItem key={key} onClick={() => handleStatusChange(status?.optionLabel)} disabled={isDisabled}>
+                  Status Change - {status?.optionLabel}
+                </MenuItem>
+              );
+            })}
+          </> : null}
+      </>
     );
   };
 
@@ -367,6 +430,19 @@ const SerializedAssetInspection = () => {
             handleStatusUpdate({ status: status, reason: reason });
             setShowReasonDialog(false);
           }}
+        />
+      )}
+      {showRepairOrderDialog && (
+        <ManageRepairOrder
+          referenceType="serializedAssetsInspection"
+          referenceData={{
+            warehouse: selectedRecords[0]?.warehouseId,
+          }}
+          onClose={() => setShowRepairOrderDialog(false)}
+          onSuccess={(obj) => {
+            handleAddAssetsToRepairOrder(obj?._id);
+          }}
+          isClone={false}
         />
       )}
     </section>
@@ -439,10 +515,10 @@ const RightSideContents = ({
         endIcon={<ExpandMore />}
         buttonType="yellow"
         disabled={selectedRecords?.length ? false : true}
-        mobileTooltip="Change Status"
+        mobileTooltip="Actions"
         iconForMobile={<RiExchange2Line size={24} />}
       >
-        {'Change Status'}
+        Actions
       </ThemeButton>
       <Menu
         anchorEl={anchorEl}
