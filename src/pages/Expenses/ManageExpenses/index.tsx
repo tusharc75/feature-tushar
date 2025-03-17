@@ -52,37 +52,32 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
   const [totalAmount, setTotalAmount] = useState(0);
   const [totalFare, setTotalFare] = useState(0);
   const [totalDistance, setTotalDistance] = useState(0);
-  const [mileageItems, setMileageItems] = useState([])
+  const [mileageItems, setMileageItems] = useState([]);
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [isDisabled, setIsDisabled] = useState(false);
 
   const handleChange = (event) => {
-    if(isMileage){
-      setTotalFare(parseFloat(event.target.value))
-    }else{
-    setTotalAmount(parseFloat(event.target.value));
+    if (isMileage) {
+      setTotalFare(parseFloat(event.target.value));
+    } else {
+      setTotalAmount(parseFloat(event.target.value));
     }
   };
 
   useEffect(() => {
     fetchPolicy();
-  }, [])
+  }, []);
 
   useEffect(() => {
     let total;
     let tDistance = 0;
-    
+
     if (isMileage) {
       total = mileageItems
         .reduce((acc, item) => {
           if (item.fromLocation && item.toLocation && item.rate > 0) {
-            const distance = haversineDistance(
-              item.fromLocation.lat,
-              item.fromLocation.lng,
-              item.toLocation.lat,
-              item.toLocation.lng
-            );
-            tDistance += parseFloat(distance.toFixed(2)); 
+            const distance = haversineDistance(item.fromLocation.lat, item.fromLocation.lng, item.toLocation.lat, item.toLocation.lng);
+            tDistance += parseFloat(distance.toFixed(2));
             return acc + distance * parseFloat(item.rate);
           }
           return acc;
@@ -97,7 +92,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
           return total + amount;
         }, 0)
         .toFixed(2);
-        setTotalAmount(parseFloat(total));
+      setTotalAmount(parseFloat(total));
     }
   }, [lineItems, mileageItems]);
 
@@ -109,9 +104,9 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
     const dLon = toRad(lon2 - lon1);
     const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    if(resourceData?.policy?.distanceUnit === 'mile'){
+    if (resourceData?.policy?.distanceUnit === 'mile') {
       return R_MILE * c;
-    }else{
+    } else {
       return R_KM * c;
     }
   };
@@ -174,32 +169,32 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
       });
   }, []);
 
-    const fetchPolicy = async () => {
-      try {
-        const {
-          data: { data }
-        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.expenses}`);
-        if (data) {
-          setResourceData(data);
-        }
-      } catch (error) {
-        toastConfig.setToastConfig(error);
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.expenses}`);
+      if (data) {
+        setResourceData(data);
       }
-    };
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   const handleSubmit = (values: any) => {
     setIsSubmitting(true);
-    if(isMileage){
+    if (isMileage) {
       values.totalAmount = totalFare;
       values.totalDistance = totalDistance;
       values.unit = resourceData?.policy?.distanceUnit;
       values.lineItems = mileageItems?.map((e) => {
         return { ...e, amount: parseFloat(e?.amount), distance: parseFloat(e?.distance), rate: parseFloat(e?.rate) };
       });
-    }else{
+    } else {
       values.totalAmount = totalAmount;
       values.lineItems = lineItems?.map((e) => {
-        return { ...e, amount: parseFloat(e?.amount)};
+        return { ...e, amount: parseFloat(e?.amount) };
       });
     }
     if (expenseId && isClone === false) {
@@ -239,6 +234,15 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
           toastConfig.setToastConfig(error);
         });
     }
+  };
+
+  const handleSave = (newLineItems, newTotal) => {
+    if (isMileage) {
+      setMileageItems(newLineItems);
+    } else {
+      setLineItems(newLineItems);
+    }
+    setTotalAmount(newTotal);
   };
 
   const handleScroll = (errors) => {
@@ -318,38 +322,40 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
                       </ThemeButton>
                     </Grid>
                     <Grid container spacing={2}>
-                    <Grid size={{ xs: 6, sm: 6, md: 6, lg: 6 }}>
-                      <TextField
-                        id="outlined-required"
-                        label="Total Amount"
-                        required
-                        type="number"
-                        size="small"
-                        disabled={lineItems.length > 0 || mileageItems.length>0 || isDisabled}
-                        value={values['type'] === 'Mileage' ? totalFare : totalAmount}
-                        onChange={handleChange}
-                        fullWidth
-                        slotProps={{
-                          input: {
-                            startAdornment: <InputAdornment position="start">{currencySymbol}</InputAdornment>
-                          }
-                        }}
-                      />
+                      <Grid size={{ xs: 6, sm: 6, md: 6, lg: 6 }}>
+                        <TextField
+                          id="outlined-required"
+                          label="Total Amount"
+                          required
+                          type="number"
+                          size="small"
+                          disabled={lineItems.length > 0 || mileageItems.length > 0 || isDisabled}
+                          value={values['type'] === 'Mileage' ? totalFare : totalAmount}
+                          onChange={handleChange}
+                          fullWidth
+                          slotProps={{
+                            input: {
+                              startAdornment: <InputAdornment position="start">{currencySymbol}</InputAdornment>
+                            }
+                          }}
+                        />
+                      </Grid>
+                      {values['type'] === 'Mileage' && (
+                        <Grid size={{ xs: 6, sm: 6, md: 6, lg: 6 }}>
+                          <TextField
+                            id="outlined-required"
+                            label="Total Distance"
+                            required
+                            type="number"
+                            size="small"
+                            disabled={mileageItems.length > 0 || isDisabled}
+                            value={totalDistance}
+                            onChange={handleChange}
+                            fullWidth
+                          />
+                        </Grid>
+                      )}
                     </Grid>
-                    {values['type'] === 'Mileage' && <Grid size={{ xs: 6, sm: 6, md: 6, lg: 6 }}>
-                      <TextField
-                        id="outlined-required"
-                        label="Total Distance"
-                        required
-                        type="number"
-                        size="small"
-                        disabled={mileageItems.length>0 || isDisabled}
-                        value={totalDistance}
-                        onChange={handleChange}
-                        fullWidth
-                      />
-                    </Grid>}
-                  </Grid>
                   </Grid>
                 </Form>
               </CustomDialogContent>
@@ -396,23 +402,21 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
               {showItemizeDialog && (
                 <ItemizeExpenses
                   onClose={() => setShowItemizeDialog(false)}
-                  setLineItems={setLineItems}
+                  onSave={handleSave}
                   lineItems={lineItems}
                   currency={values?.currency}
                   currencySymbol={currencySymbol}
                   isSubmitting={isSubmitting}
-                  totalAmount={totalAmount}
                 />
               )}
               {showMileageDialog && (
                 <ItemizeMileage
                   onClose={() => setShowMileageDialog(false)}
-                  setLineItems={setMileageItems}
+                  onSave={handleSave}
                   lineItems={mileageItems}
                   currency={values?.currency}
                   currencySymbol={currencySymbol}
                   isSubmitting={isSubmitting}
-                  totalAmount={totalFare}
                   policyData={resourceData?.policy}
                 />
               )}
