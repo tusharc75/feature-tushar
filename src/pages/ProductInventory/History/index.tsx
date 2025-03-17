@@ -128,7 +128,6 @@ const History = ({ product, warehouse, storageLocation }) => {
       finalObject.serialNumber = u.serialNumber || [];
       return finalObject;
     });
-    console.log(rows);
     dispatch({ type: 'initialize', data: rows, count: response?.data?.count });
     setTimeout(() => {
       dispatch({ type: 'loading', loading: false });
