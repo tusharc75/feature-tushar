@@ -12,11 +12,12 @@ const ArrangeRow = ({ state, arrangeRowField, resource, refreshGrid }) => {
   const [loading, setLoading] = useState(false);
 
   const handleSuccess = async (_data) => {
+    const { key, materialKey, _id, ...rest } = arrangeRowField;
     setLoading(true);
     await axiosInstance()
       .put(
-        `/dynamic-form/${arrangeRowField?._id}/arrange-rows`,
-        { key: arrangeRowField?.key, _ids: _data?.map((r) => r?.[arrangeRowField?.materialKey]) },
+        `/dynamic-form/${_id}/arrange-rows`,
+        { key, _ids: _data?.map((r) => r?.[materialKey]), ...rest },
         {
           headers: {
             Resource: resource
