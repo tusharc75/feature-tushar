@@ -145,7 +145,7 @@ const ExpenseApproval = () => {
                 showFilters={true}
               />
             </div>
-            <div className="container-with-border p-5">
+            <div className="container-with-border py-5">
               {selectedExpenseReport && <ExpenceReport expenceReportId={selectedExpenseReport?._id} fetchExpenceReportData={fetchData} />}
             </div>
           </div>

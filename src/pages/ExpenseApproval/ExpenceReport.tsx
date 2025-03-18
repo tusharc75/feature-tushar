@@ -66,7 +66,7 @@ const Requests = ({ expenceReportId, fetchExpenceReportData }) => {
 
   return (
     <>
-      <Box className="flex justify-end gap-4 pb-5">
+      <Box className="flex justify-end gap-4 px-7 pb-5">
         {expenceReportData?.status !== EXPENSE_STATUS.reimbursed && (
           <Fragment>
             {expenceReportData?.status !== EXPENSE_STATUS.approved ? (
@@ -103,7 +103,7 @@ const Requests = ({ expenceReportId, fetchExpenceReportData }) => {
           </Fragment>
         )}
       </Box>
-      <Box className="detail-container-v1 max-h-[calc(100vh-300px)] !min-h-[660px] overflow-y-auto pt-0">
+      <Box className="detail-container-v1 max-h-[calc(100vh-300px)] !min-h-[660px] overflow-y-auto  px-5">
         <Box>
           {expenceReportData && fields ? (
             <DetailsPage data={expenceReportData} fields={fields} />
