@@ -1,7 +1,7 @@
 import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import { camelCase, isArray, isObject } from 'lodash';
+import { camelCase, isArray, isObject, startCase } from 'lodash';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -154,6 +154,18 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
         Footer: () => {
           return <>Total</>;
         }
+      },
+      {
+        accessor: 'type',
+        Header: 'Type',
+        disabled: true,
+        width: 100,
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        Cell: ({ row }) => (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <p>{`${startCase(row.original?.type)} `}</p>
+          </div>
+        )
       },
       {
         accessor: 'detail',
@@ -496,9 +508,9 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           if (assignRentalDataDialog.open) {
             element.isRental = true;
           }
-          // if (assignQuotationDataDialog) {
-          //   element.isQuotation = true;
-          // }
+          if (assignQuotationDataDialog) {
+            element.isQuotation = true;
+          }
           material.push(element);
         });
         AddMaterial(material, null);
