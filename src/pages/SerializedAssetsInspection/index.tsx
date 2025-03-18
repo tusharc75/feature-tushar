@@ -228,16 +228,17 @@ const SerializedAssetInspection = () => {
     let rows = selectedRecords?.map((record: any) => ({
       _id: record._id,
       currentStatus: record.status
-    }));    axiosInstance()
-    .post(`${repairJob.api}/${repairJobData}/assets`, { assets:rows })
-    .then(() => {
-      dispatch({ type: 'selection', selectedRecords: [] });
-      setShowRepairJobDialog(false);
-      fetchData();
-    })
-    .catch((error) => {
-      toastConfig.setToastConfig(error);
-    });
+    }));
+    axiosInstance()
+      .post(`${repairJob.api}/${repairJobData}/assets`, { assets: rows })
+      .then(() => {
+        dispatch({ type: 'selection', selectedRecords: [] });
+        setShowRepairJobDialog(false);
+        fetchData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const fetchData = (cancelTokenSource?: CancelTokenSource) => {
@@ -569,7 +570,7 @@ const RightSideContents = ({
           disabled={
             checkUniqWarehouse() &&
             selectedRecords?.every((e) =>
-              [ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair]?.includes(e.status)
+              [ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.repair]?.includes(e.status)
             )
               ? false
               : true
