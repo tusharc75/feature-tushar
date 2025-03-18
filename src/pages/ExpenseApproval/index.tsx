@@ -62,7 +62,7 @@ const ExpenseApproval = () => {
   }, [page, limit, filters, sorting, showFilteredRecordsOnly]);
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
+    let deepFilter = `?page=${page}&limit=${limit}&expenseApproval=1`;
     if (isExport) {
       deepFilter = `?`;
     }
