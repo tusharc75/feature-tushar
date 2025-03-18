@@ -17,7 +17,7 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
       setInitialValues({
         startDate: new Date(data.startDate),
         ...(data.endDate && { endDate: new Date(data.endDate) }),
-        ...(data.notes && { notes: data.notes })
+        notes: data.notes || ''
       });
     } else {
       if (minStartDateTime) {
@@ -25,10 +25,10 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
         setInitialValues({
           startDate: date,
           ...(type !== 'startStop' && type !== 'stop' ? {} : { endDate: date.setMinutes(date.getMinutes() + 1) }),
-          ...(type === 'startStop' ? { notes: '' } : {})
+          notes: ''
         });
       } else {
-        setInitialValues({ startDate: new Date(), ...(type !== 'startStop' && type !== 'stop' ? {} : { endDate: new Date() }), ...(type === 'startStop' ? { notes: '' } : {}) });
+        setInitialValues({ startDate: new Date(), ...(type !== 'startStop' && type !== 'stop' ? {} : { endDate: new Date() }), notes: '' });
       }
     }
   }, [data, type]);
@@ -105,24 +105,22 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
                       />
                     </Grid>
                   )}
-                  {(type === 'startStop' || type === 'updateLog') && (
-                    <Grid size={{ xs: 12, sm: 12 }}>
-                      <TextField
-                        id="outlined-multiline-static"
-                        label="Notes"
-                        multiline
-                        fullWidth
-                        rows={4}
-                        value={values.notes}
-                        variant="outlined"
-                        error={touched['notes'] && Boolean(errors['notes'])}
-                        helperText={touched['notes'] && errors['notes']}
-                        onChange={(e) => {
-                          setFieldValue('notes', e.target.value);
-                        }}
-                      />
-                    </Grid>
-                  )}
+                  <Grid size={{ xs: 12, sm: 12 }}>
+                    <TextField
+                      id="outlined-multiline-static"
+                      label="Notes"
+                      multiline
+                      fullWidth
+                      rows={4}
+                      value={values.notes}
+                      variant="outlined"
+                      error={touched['notes'] && Boolean(errors['notes'])}
+                      helperText={touched['notes'] && errors['notes']}
+                      onChange={(e) => {
+                        setFieldValue('notes', e.target.value);
+                      }}
+                    />
+                  </Grid>
                 </Grid>
               </Box>
             </CustomDialogContent>
