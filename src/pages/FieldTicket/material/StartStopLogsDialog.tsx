@@ -19,7 +19,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 export const formatDurationInHrs = (ms) => {
   const hours = (ms / (1000 * 60 * 60)).toFixed(2);
-  return `${hours} hr${hours !== '1.00' ? 's' : ''}`;
+  return `${hours}`;
 };
 
 const StartStopLogsDialog = ({ onClose, referenceId, service, fetchRecords, technician }) => {
