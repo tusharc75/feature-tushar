@@ -17,7 +17,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import StartStopLogsDialog from 'src/pages/FieldTicket/material/StartStopLogsDialog';
+import StartStopLogsDialog, { formatDurationInHrs } from './StartStopLogsDialog';
 import StartStopDate from 'src/pages/FieldTicket/material/StartStopDateDialog';
 import { FiExternalLink } from 'react-icons/fi';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
@@ -178,6 +178,46 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
         Cell: ({ row }) => (row.original?.endDate ? <p>{displayDateTime(row.original?.endDate)}</p> : <NoDataCell />)
       },
       {
+        accessor: 'duration',
+        Header: 'Duration',
+        disableFilters: true,
+        disableSortBy: true,
+        disabled: true,
+        Cell: ({ row }) => {
+          return (
+            <>
+              {row?.original?.duration ? (
+                <>
+                  <h5 className="text-truncate">{formatDurationInHrs(row?.original?.duration)}</h5>
+                </>
+              ) : (
+                <NoDataCell />
+              )}
+            </>
+          );
+        }
+      },
+      {
+        accessor: 'notes',
+        Header: 'Notes',
+        disableFilters: true,
+        disableSortBy: true,
+        disabled: true,
+        Cell: ({ row }) => {
+          return (
+            <>
+              {row?.original?.notes ? (
+                <>
+                  <h5 className="text-truncate">{row.original?.notes}</h5>
+                </>
+              ) : (
+                <NoDataCell />
+              )}
+            </>
+          );
+        }
+      },
+      {
         accessor: 'action',
         Header: 'Actions',
         minWidth: 100,
@@ -320,9 +360,11 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
     setStartEndDateConfermationDialog({ ...startEndDateConfermationDialog, loading: true });
     if (type !== 'stop') {
       value.startDate = values?.startDate;
+      if (values?.notes) value.notes = values?.notes;
     }
     if (type === 'stop' || type === 'startStop') {
       value.endDate = values?.endDate;
+      if (values?.notes) value.notes = values?.notes;
     }
     axiosInstance()
       .put(`${fieldTicket.api}/technician/${type === 'updateLog' ? 'update-log' : 'start-end-date'}`, value)
