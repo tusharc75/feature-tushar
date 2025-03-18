@@ -13,10 +13,11 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { EXPENSE_STATUS, expenses, formatAmountWithCurrency, sidebarResource } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, EXPENSE_STATUS, expenses, formatAmountWithCurrency, sidebarResource } from '../../constants/helpers';
 import Step from '../DynamicForm/Step';
 import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
 import Grid from '@mui/material/Grid2';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const ExpenseDetail = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -148,6 +149,11 @@ const ExpenseDetail = () => {
               )}
             </Fragment>
             {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+            <ActivityButton
+              referenceId={expensesData?._id}
+              resource={ACTIVITY_RESOURCE.expenses}
+              resourceLabel={expensesData?.expenseNumber}
+            />
           </Box>
         </Box>
       </Box>
