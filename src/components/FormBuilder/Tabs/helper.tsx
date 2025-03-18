@@ -368,6 +368,12 @@ export const resourcePolicy = [
         fieldLabel: 'Can Create Repair Order',
         type: 'checkBox',
         defaultValue: false,
+      },
+      {
+        fieldName: 'canCreateRepairJob',
+        fieldLabel: 'Can Create Repair Job',
+        type: 'checkBox',
+        defaultValue: false,
       }
     ]
   }
