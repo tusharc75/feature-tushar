@@ -194,10 +194,6 @@ const SerializedAssetInspection = () => {
       });
   };
 
-  const checkUniqWarehouse = () => {
-    let warehouses = new Set(selectedRecords?.map((d) => d?.warehouseId));
-    return warehouses?.size === 1;
-  }
 
   const fetchPolicy = async () => {
     try {
@@ -346,26 +342,13 @@ const SerializedAssetInspection = () => {
   const ActionMenuItems = () => {
     return (
       <>
-        {resourceData?.policy?.canCreateRepairOrder ? (
-          <>
-            <MenuItem
-              onClick={() => setShowRepairOrderDialog(true)}
-              disabled={checkUniqWarehouse()
-                && selectedRecords?.every((e) => [ASSET_STATUS.new, ASSET_STATUS.available,
-                ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair, ASSET_STATUS.underReview]?.includes(e.status))
-                && permissions?.repairOrder?.isCreate ? false : true}
-            >
-              {`Create ${resources?.repairOrder?.titleSingular}`}
-            </MenuItem>
-          </>
-        ) : null}
         {statusOptions ?
           <>
             {Object.entries(statusOptions).map(([key, status]: any) => {
               const isDisabled = selectedRecords.some((record) => record.status === status?.optionLabel);
               return (
                 <MenuItem key={key} onClick={() => handleStatusChange(status?.optionLabel)} disabled={isDisabled}>
-                  Status Change - {status?.optionLabel}
+                  {status?.optionLabel}
                 </MenuItem>
               );
             })}
@@ -400,7 +383,11 @@ const SerializedAssetInspection = () => {
               anchorEl,
               closeActions,
               ActionMenuItems,
-              selectedRecords
+              selectedRecords,
+              resourceData,
+              permissions,
+              setShowRepairOrderDialog,
+              resources
             }}
           />}
           searchValue={search}
@@ -510,10 +497,32 @@ const RightSideContents = ({
   anchorEl,
   closeActions,
   ActionMenuItems,
-  selectedRecords
+  selectedRecords,
+  resourceData,
+  permissions,
+  setShowRepairOrderDialog,
+  resources
 }) => {
+
+  const checkUniqWarehouse = () => {
+    let warehouses = new Set(selectedRecords?.map((d) => d?.warehouseId));
+    return warehouses?.size === 1;
+  }
+
+
   return (
     <>
+      {resourceData?.policy?.canCreateRepairOrder && permissions?.repairOrder?.isCreate &&
+        <ThemeButton
+          buttonType="themeBorder"
+          onClick={() => setShowRepairOrderDialog(true)}
+          disabled={checkUniqWarehouse()
+            && selectedRecords?.every((e) => [ASSET_STATUS.new, ASSET_STATUS.available,
+            ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair, ASSET_STATUS.underReview]?.includes(e.status))
+            ? false : true}
+        >
+          {`Create ${resources?.repairOrder?.titleSingular}`}
+        </ThemeButton>}
       <ThemeButton
         onClick={openActions}
         endIcon={<ExpandMore />}
@@ -522,7 +531,7 @@ const RightSideContents = ({
         mobileTooltip="Actions"
         iconForMobile={<RiExchange2Line size={24} />}
       >
-        Actions
+        Change Status
       </ThemeButton>
       <Menu
         anchorEl={anchorEl}
