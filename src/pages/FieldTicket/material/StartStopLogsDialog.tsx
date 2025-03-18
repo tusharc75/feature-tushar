@@ -18,8 +18,12 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 
 export const formatDurationInHrs = (ms) => {
-  const hours = (ms / (1000 * 60 * 60)).toFixed(2);
-  return `${hours}`;
+  const totalSeconds = Math.floor(ms / 1000);
+  const totalMinutes = Math.floor(totalSeconds / 60);
+  const hours = Math.floor(totalMinutes / 60);
+  const remainingMinutes = totalMinutes % 60;
+
+  return `${hours}:${remainingMinutes.toString().padStart(2, '0')}`;
 };
 
 const StartStopLogsDialog = ({ onClose, referenceId, service, fetchRecords, technician }) => {
@@ -115,26 +119,6 @@ const StartStopLogsDialog = ({ onClose, referenceId, service, fetchRecords, tech
       }
     },
     {
-      accessor: 'notes',
-      Header: 'Notes',
-      disableFilters: true,
-      disableSortBy: true,
-      disabled: true,
-      Cell: ({ row }) => {
-        return (
-          <>
-            {row?.original?.notes ? (
-              <>
-                <h5 className="text-truncate">{row.original?.notes}</h5>
-              </>
-            ) : (
-              <NoDataCell />
-            )}
-          </>
-        );
-      }
-    },
-    {
       accessor: 'startedBy',
       Header: 'Started By',
       disabled: true,
@@ -173,6 +157,26 @@ const StartStopLogsDialog = ({ onClose, referenceId, service, fetchRecords, tech
         ) : (
           <NoDataCell />
         )
+    },
+    {
+      accessor: 'notes',
+      Header: 'Notes',
+      disableFilters: true,
+      disableSortBy: true,
+      disabled: true,
+      Cell: ({ row }) => {
+        return (
+          <>
+            {row?.original?.notes ? (
+              <>
+                <h5 className="text-truncate">{row.original?.notes}</h5>
+              </>
+            ) : (
+              <NoDataCell />
+            )}
+          </>
+        );
+      }
     },
     {
       accessor: 'action',
