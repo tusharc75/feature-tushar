@@ -10,7 +10,6 @@ import Expenses from 'src/pages/ExpensesReport/Expenses';
 import CommentDialog from 'src/components/CommentDialog';
 
 const Requests = ({ expenceReportId, fetchExpenceReportData }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const [fields, setFields] = useState(null);
   const [expenceReportData, setExpenceReportData] = useState(null);
@@ -28,11 +27,14 @@ const Requests = ({ expenceReportId, fetchExpenceReportData }) => {
 
   const fetchData = () => {
     setExpenceReportData(null);
-    axiosInstance().get(`${expenseReport.api}/${expenceReportId}`).then(({ data: { data } }) => {
-      setExpenceReportData(data);
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-    });
+    axiosInstance()
+      .get(`${expenseReport.api}/${expenceReportId}`)
+      .then(({ data: { data } }) => {
+        setExpenceReportData(data);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const fetchFields = async () => {
@@ -47,7 +49,8 @@ const Requests = ({ expenceReportId, fetchExpenceReportData }) => {
   };
 
   const handleStatusChange = (status, comment = '') => {
-    axiosInstance().patch(`${expenseReport.api}/status/${expenceReportData._id}`, { status, comment })
+    axiosInstance()
+      .patch(`${expenseReport.api}/status/${expenceReportData._id}`, { status, comment })
       .then(({ data }) => {
         fetchExpenceReportData();
         toastConfig.setToastConfig({
@@ -63,42 +66,44 @@ const Requests = ({ expenceReportId, fetchExpenceReportData }) => {
 
   return (
     <>
-      <Box display="flex" marginBottom="0.5rem" gap="1rem" justifyContent="flex-end">
-        {expenceReportData?.status !== EXPENSE_STATUS.reimbursed && <Fragment>
-          {expenceReportData?.status !== EXPENSE_STATUS.approved ? (
-            <>
-              <ThemeButton
-                buttonType="themeBorder"
-                onClick={() => {
-                  handleStatusChange(EXPENSE_STATUS.approved);
-                }}
-              >
-                Approve
-              </ThemeButton>
-              <ThemeButton
-                buttonType="red"
-                onClick={() => {
-                  setCommentDialog(true)
-                }}
-              >
-                Reject
-              </ThemeButton>
-            </>
-          ) : (
-            <>
-              <ThemeButton
-                buttonType="themeBorder"
-                onClick={() => {
-                  handleStatusChange(EXPENSE_STATUS.reimbursed);
-                }}
-              >
-                Reimbursed
-              </ThemeButton>
-            </>
-          )}
-        </Fragment>}
+      <Box className="flex justify-end gap-4 pb-5">
+        {expenceReportData?.status !== EXPENSE_STATUS.reimbursed && (
+          <Fragment>
+            {expenceReportData?.status !== EXPENSE_STATUS.approved ? (
+              <>
+                <ThemeButton
+                  buttonType="themeBorder"
+                  onClick={() => {
+                    handleStatusChange(EXPENSE_STATUS.approved);
+                  }}
+                >
+                  Approve
+                </ThemeButton>
+                <ThemeButton
+                  buttonType="red"
+                  onClick={() => {
+                    setCommentDialog(true);
+                  }}
+                >
+                  Reject
+                </ThemeButton>
+              </>
+            ) : (
+              <>
+                <ThemeButton
+                  buttonType="themeBorder"
+                  onClick={() => {
+                    handleStatusChange(EXPENSE_STATUS.reimbursed);
+                  }}
+                >
+                  Reimbursed
+                </ThemeButton>
+              </>
+            )}
+          </Fragment>
+        )}
       </Box>
-      <Box className="detail-container-v1">
+      <Box className="detail-container-v1 max-h-[calc(100vh-300px)] !min-h-[660px] overflow-y-auto pt-0">
         <Box>
           {expenceReportData && fields ? (
             <DetailsPage data={expenceReportData} fields={fields} />
@@ -110,10 +115,7 @@ const Requests = ({ expenceReportId, fetchExpenceReportData }) => {
         </Box>
         <Box>
           {expenceReportData && fields ? (
-            <Expenses
-              expenseIds={expenceReportData?.expenses}
-              allowedToEdit={false}
-            />
+            <Expenses expenseIds={expenceReportData?.expenses} allowedToEdit={false} />
           ) : (
             <div className="p-2">
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
