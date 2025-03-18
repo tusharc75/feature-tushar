@@ -43,7 +43,7 @@ import ManageLeadTime from 'src/components/LeadTime/ManageLeadTime';
 import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
 import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 
-const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, renderedFrom, stepFullScreen, version, allowedToEdit, updateDOASetup }) => {
+const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, renderedFrom, stepFullScreen, version, allowedToEdit, updateDOASetup, fieldTicketPolicyData }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, resources }
@@ -190,14 +190,13 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
                 size="small"
                 onClick={() => {
                   window.open(
-                    `${
-                      row.original.type === MATERIAL_TYPE.serializedAsset
-                        ? routes.serializedAssetDetail.path
-                        : row.original.type === MATERIAL_TYPE.product
-                          ? routes.productDetail.path
-                          : row.original.type === MATERIAL_TYPE.package
-                            ? routes.packagesDetail.path
-                            : routes.serviceMasterDetail.path
+                    `${row.original.type === MATERIAL_TYPE.serializedAsset
+                      ? routes.serializedAssetDetail.path
+                      : row.original.type === MATERIAL_TYPE.product
+                        ? routes.productDetail.path
+                        : row.original.type === MATERIAL_TYPE.package
+                          ? routes.packagesDetail.path
+                          : routes.serviceMasterDetail.path
                     }/${row.original.materialId}`
                   );
                 }}
@@ -210,19 +209,19 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       },
       ...(user?.user?.brandPolicy?.leadTime
         ? [
-            {
-              accessor: 'leadTime',
-              Header: 'Lead Time (Days)',
-              Cell: ({ row }) => <div>{row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0}</div>,
-              Footer: (info) => {
-                let rows = info.table.getExpandedRowModel().rows;
-                const total = rows
-                  ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
-                  .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
-                return <>{total}</>;
-              }
+          {
+            accessor: 'leadTime',
+            Header: 'Lead Time (Days)',
+            Cell: ({ row }) => <div>{row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0}</div>,
+            Footer: (info) => {
+              let rows = info.table.getExpandedRowModel().rows;
+              const total = rows
+                ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+                .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
+              return <>{total}</>;
             }
-          ]
+          }
+        ]
         : []),
       {
         accessor: 'description',
@@ -312,17 +311,16 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     rows = [...rows, ...updatedAdditionalData];
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === MATERIAL_TYPE.serializedAsset
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === MATERIAL_TYPE.product
-            ? parent.productDetail?.productName
-            : parent.type === MATERIAL_TYPE.service
-              ? parent.serviceDetail?.serviceName
-              : parent.type === MATERIAL_TYPE.package
-                ? parent.packageDetail?.packageName
-                : parent.detail
-      }`;
+      parent.detail = `${parent.type === MATERIAL_TYPE.serializedAsset
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.service
+            ? parent.serviceDetail?.serviceName
+            : parent.type === MATERIAL_TYPE.package
+              ? parent.packageDetail?.packageName
+              : parent.detail
+        }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -352,15 +350,14 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = `${
-        _subRow.type === MATERIAL_TYPE.serializedAsset
-          ? _subRow.serializedAssetDetail?.assetNumber
-          : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow.productDetail?.productName
-            : _subRow.type === MATERIAL_TYPE.service
-              ? _subRow.serviceDetail?.serviceName
-              : _subRow.packageDetail?.packageName
-      }`;
+      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.serializedAsset
+        ? _subRow.serializedAssetDetail?.assetNumber
+        : _subRow.type === MATERIAL_TYPE.product
+          ? _subRow.productDetail?.productName
+          : _subRow.type === MATERIAL_TYPE.service
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
@@ -693,7 +690,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
             Add Existing Products
           </MenuItem>
         )}
-        {quotationData?.type !== QUOTATION_TYPE.fieldJob && (
+        {quotationData?.type === QUOTATION_TYPE.fieldJob && !fieldTicketPolicyData?.policy?.showAddPackages ? null : (
           <MenuItem
             onClick={() => {
               setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
@@ -703,7 +700,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           </MenuItem>
         )}
         {(quotationData?.type === QUOTATION_TYPE.rentalJob && !user?.user?.brandPolicy?.rentalService) ||
-        quotationData?.type === QUOTATION_TYPE.assemblyOrder ? null : (
+          quotationData?.type === QUOTATION_TYPE.assemblyOrder ? null : (
           <MenuItem
             onClick={() => {
               setAddDialog({ open: true, type: MATERIAL_TYPE.service, parentId: null });
@@ -786,8 +783,8 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           disabled={
             !Boolean(
               selectedRecords &&
-                selectedRecords.filter((e) => !e.hideSelection).length &&
-                !selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)
+              selectedRecords.filter((e) => !e.hideSelection).length &&
+              !selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)
             )
           }
           onClick={() => {
@@ -1060,7 +1057,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
             >
               Add Existing Products
             </MenuItem>
-            {quotationData?.type !== QUOTATION_TYPE.fieldJob && (
+            {quotationData?.type === QUOTATION_TYPE.fieldJob && !fieldTicketPolicyData?.policy?.showAddPackages ? null : (
               <MenuItem
                 onClick={() => {
                   setAddDialog({ open: true, type: 'package', parentId: addchildDialog.parentId });
