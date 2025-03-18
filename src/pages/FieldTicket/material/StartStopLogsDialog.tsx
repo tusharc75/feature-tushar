@@ -21,9 +21,9 @@ export const formatDurationInHrs = (ms) => {
   const totalSeconds = Math.floor(ms / 1000);
   const totalMinutes = Math.floor(totalSeconds / 60);
   const hours = Math.floor(totalMinutes / 60);
-  const RemainingMinutes = totalMinutes % 60;
+  const remainingMinutes = totalMinutes % 60;
 
-  return `${hours}:${RemainingMinutes.toString().padStart(2, '0')}`;
+  return `${hours}:${remainingMinutes.toString().padStart(2, '0')}`;
 };
 
 const StartStopLogsDialog = ({ onClose, referenceId, service, fetchRecords, technician }) => {
