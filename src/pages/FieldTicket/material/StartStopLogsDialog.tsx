@@ -161,16 +161,13 @@ const StartStopLogsDialog = ({ onClose, referenceId, service, fetchRecords, tech
     {
       accessor: 'notes',
       Header: 'Notes',
-      disableFilters: true,
-      disableSortBy: true,
-      disabled: true,
       Cell: ({ row }) => {
         return (
           <>
             {row?.original?.notes ? (
-              <>
-                <h5 className="text-truncate">{row.original?.notes}</h5>
-              </>
+              <div>
+                <p className="text-truncate">{row.original?.notes}</p>
+              </div>
             ) : (
               <NoDataCell />
             )}
