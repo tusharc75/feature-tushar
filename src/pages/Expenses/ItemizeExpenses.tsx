@@ -34,11 +34,11 @@ const ItemizeExpenses = ({ onClose, onSave, lineItems, currency, currencySymbol,
   };
 
   const addLineItem = () => {
-    setLocalLineItems([...localLineItems, { id: localLineItems.length, description: '', amount: '' }]);
+    setLocalLineItems([...localLineItems, { _id: localLineItems.length, description: '', amount: '' }]);
   };
 
-  const removeLineItem = (id) => {
-    setLocalLineItems(localLineItems.filter((field) => field.id !== id));
+  const removeLineItem = (_id) => {
+    setLocalLineItems(localLineItems.filter((field) => field._id !== _id));
   };
 
   const handleInputChange = (index, field, event) => {
@@ -49,7 +49,7 @@ const ItemizeExpenses = ({ onClose, onSave, lineItems, currency, currencySymbol,
 
   const handleSave = () => {
     const validItems = localLineItems.filter((field) => field.description.trim() !== '' && Number(field.amount) > 0);
-    onSave(validItems, computedTotal);
+    onSave(validItems);
     onClose();
   };
 
@@ -81,7 +81,7 @@ const ItemizeExpenses = ({ onClose, onSave, lineItems, currency, currencySymbol,
           </ThemeButton>
         </Box>
         {localLineItems.map((field, index) => (
-          <Grid container spacing={2} key={field.id} sx={{ alignItems: 'center', marginBottom: 2 }}>
+          <Grid container spacing={2} key={field._id} sx={{ alignItems: 'center', marginBottom: 2 }}>
             <Grid size={{ xs: 8 }}>
               <TextField
                 label="Description"
@@ -121,7 +121,7 @@ const ItemizeExpenses = ({ onClose, onSave, lineItems, currency, currencySymbol,
             </Grid>
             <Grid size={{ xs: 1 }}>
               <HtmlTooltip title="Remove">
-                <IconButton onClick={() => removeLineItem(field.id)} aria-label="delete">
+                <IconButton onClick={() => removeLineItem(field._id)} aria-label="delete">
                   <DeleteIcon color="error" fontSize="small" />
                 </IconButton>
               </HtmlTooltip>

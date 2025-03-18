@@ -228,6 +228,7 @@ const SerializedAssetInspection = () => {
     axiosInstance()
       .post(`${repairOrder.api}/${repairOrderData}/product-package`, { material: rows })
       .then(() => {
+        dispatch({ type: 'selection', selectedRecords: [] });
         setShowRepairOrderDialog(false);
         fetchData();
       })
@@ -349,7 +350,10 @@ const SerializedAssetInspection = () => {
           <>
             <MenuItem
               onClick={() => setShowRepairOrderDialog(true)}
-              disabled={checkUniqWarehouse() && permissions?.repairOrder?.isCreate ? false : true}
+              disabled={checkUniqWarehouse()
+                && selectedRecords?.every((e) => [ASSET_STATUS.new, ASSET_STATUS.available,
+                ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair, ASSET_STATUS.underReview]?.includes(e.status))
+                && permissions?.repairOrder?.isCreate ? false : true}
             >
               {`Create ${resources?.repairOrder?.titleSingular}`}
             </MenuItem>

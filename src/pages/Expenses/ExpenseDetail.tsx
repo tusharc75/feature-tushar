@@ -134,7 +134,7 @@ const ExpenseDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <Fragment>
-              {expensesData?.status !== EXPENSE_STATUS.approved && expensesData?.status !== EXPENSE_STATUS.awaitingApproval && expensesData?.status !== EXPENSE_STATUS.reimbursed &&(
+              {expensesData?.status !== EXPENSE_STATUS.approved && expensesData?.status !== EXPENSE_STATUS.awaitingApproval && expensesData?.status !== EXPENSE_STATUS.reimbursed && (
                 <ThemeButton
                   iconForMobile={<Edit />}
                   disabled={!allowedToEdit}
@@ -180,24 +180,19 @@ const ExpenseDetail = () => {
                       }}
                     >
                       <Grid container direction="row">
-                        <Grid size={{ xs: 2 }}>
+                        <Grid size={{ xs: 3 }}>
                           <Typography className="table-head-v1  br-0 text-truncate" style={{ width: '100%' }} variant="body1">
                             From
                           </Typography>
                         </Grid>
-                        <Grid size={{ xs: 2 }}>
+                        <Grid size={{ xs: 3 }}>
                           <Typography className="table-head-v1  br-0 text-truncate" style={{ width: '100%' }} variant="body1">
                             To
                           </Typography>
                         </Grid>
                         <Grid size={{ xs: 2 }} sx={{ textAlign: 'right' }}>
                           <Typography className="table-head-v1  br-0 text-truncate" style={{ width: '100%' }} variant="body1">
-                            Distance
-                          </Typography>
-                        </Grid>
-                        <Grid size={{ xs: 2 }} sx={{ textAlign: 'right' }}>
-                          <Typography className="table-head-v1  br-0 text-truncate" style={{ width: '100%' }} variant="body1">
-                            Unit
+                            {`Distance (${expensesData?.distanceUnit})`}
                           </Typography>
                         </Grid>
                         <Grid size={{ xs: 2 }} sx={{ textAlign: 'right' }}>
@@ -213,24 +208,19 @@ const ExpenseDetail = () => {
                       </Grid>
                       {expensesData?.lineItems?.map((row) => (
                         <Grid container direction="row" key={row.id}>
-                          <Grid size={{ xs: 2 }}>
+                          <Grid size={{ xs: 3 }}>
                             <Typography className="table-body-v1 bt-0 br-0 text-truncate" style={{ width: '100%' }} variant="body2">
-                              {row.fromLocation?.description || '-'}
+                              {row.fromLocation?.description}
                             </Typography>
                           </Grid>
-                          <Grid size={{ xs: 2 }}>
+                          <Grid size={{ xs: 3 }}>
                             <Typography className="table-body-v1 bt-0 br-0 text-truncate" style={{ width: '100%' }} variant="body2">
-                              {row.toLocation?.description || '-'}
+                              {row.toLocation?.description}
                             </Typography>
                           </Grid>
                           <Grid size={{ xs: 2 }} sx={{ textAlign: 'right' }}>
                             <Typography className="table-body-v1 bt-0 br-0" style={{ width: '100%' }} variant="body2">
-                              {row.distance || '-'}
-                            </Typography>
-                          </Grid>
-                          <Grid size={{ xs: 2 }} sx={{ textAlign: 'right' }}>
-                            <Typography className="table-body-v1 bt-0 br-0" style={{ width: '100%' }} variant="body2">
-                              {resourceData?.policy?.distanceUnit || '-'}
+                              {row.distance}
                             </Typography>
                           </Grid>
                           <Grid size={{ xs: 2 }} sx={{ textAlign: 'right' }}>
@@ -246,21 +236,15 @@ const ExpenseDetail = () => {
                         </Grid>
                       ))}
                       <Grid container direction="row">
-                        <Grid size={{ xs: 2 }}>
+                        <Grid size={{ xs: 6 }}>
                           <Typography className="table-head-v1  bt-0 br-0" style={{ width: '100%' }}>
                             Total
                           </Typography>
-                        </Grid>
-                        <Grid size={{ xs: 2 }}>
-                          <Typography className="table-head-v1  bt-0 br-0" style={{ width: '100%', height: '100%' }}></Typography>
                         </Grid>
                         <Grid size={{ xs: 2 }} sx={{ textAlign: 'right' }}>
                           <Typography className="table-head-v1  bt-0 br-0" style={{ width: '100%' }}>
                             {expensesData?.totalDistance || '-'}
                           </Typography>
-                        </Grid>
-                        <Grid size={{ xs: 2 }}>
-                          <Typography className="table-head-v1  bt-0 br-0" style={{ width: '100%', height: '100%' }}></Typography>
                         </Grid>
                         <Grid size={{ xs: 2 }}>
                           <Typography className="table-head-v1  bt-0 br-0" style={{ width: '100%', height: '100%' }}></Typography>
