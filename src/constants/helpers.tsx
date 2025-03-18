@@ -2278,7 +2278,9 @@ export const ACTIVITY_RESOURCE = {
   irtTicket: 'irtTicket',
   subcontractAssembly: 'subcontractAssembly',
   assemblyOrder: 'assemblyOrder',
-  serializedPackages: 'serializedPackages'
+  serializedPackages: 'serializedPackages',
+  expenses: 'expenses',
+  expenseReport: 'expenseReport'
 };
 
 export const LOG_RESOURCE = {

@@ -14,10 +14,11 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { EXPENSE_STATUS, expenseReport, sidebarResource } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, EXPENSE_STATUS, expenseReport, sidebarResource } from '../../constants/helpers';
 import Step from '../DynamicForm/Step';
 import ManageExpenseReports from 'src/pages/ExpensesReport/ManageExpenseReports';
 import Expenses from 'src/pages/ExpensesReport/Expenses';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const ExpenseReportDetail = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -120,10 +121,13 @@ const ExpenseReportDetail = () => {
   };
 
   const handleStatusChange = (status) => {
-    axiosInstance().patch(`${expenseReport.api}/status/${expenseReportData._id}`, {
-      status
-    })
-      .then(() => {
+    axiosInstance().patch(`${expenseReport.api}/status/${expenseReportData._id}`, { status })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
         fetchData();
       })
       .catch((error) => {
@@ -149,14 +153,10 @@ const ExpenseReportDetail = () => {
                 <>
                   {expenseReportData?.expenses?.length > 0 &&
                     <ThemeButton
-                      buttonType="theme"
-                      iconForMobile={<SendIcon />}
+                      buttonType="themeBorder"
                       onClick={() => {
-                        handleStatusChange(
-                          expenseReportData?.status === EXPENSE_STATUS.awaitingApproval ? EXPENSE_STATUS.recalled : EXPENSE_STATUS.awaitingApproval
-                        );
+                        handleStatusChange(expenseReportData?.status === EXPENSE_STATUS.awaitingApproval ? EXPENSE_STATUS.recalled : EXPENSE_STATUS.awaitingApproval);
                       }}
-                      mobileTooltip={expenseReportData?.status === EXPENSE_STATUS.awaitingApproval ? 'Recall' : 'Send For Approval'}
                     >
                       {expenseReportData?.status === EXPENSE_STATUS.awaitingApproval ? 'Recall' : 'Send For Approval'}
                     </ThemeButton>
@@ -177,6 +177,11 @@ const ExpenseReportDetail = () => {
               )}
             </Fragment>
             {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+            <ActivityButton
+              referenceId={expenseReportData?._id}
+              resource={ACTIVITY_RESOURCE.expenseReport}
+              resourceLabel={expenseReportData?.reportTitle}
+            />
           </Box>
         </Box>
       </Box>

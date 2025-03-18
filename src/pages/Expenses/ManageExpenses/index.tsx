@@ -85,6 +85,11 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
               if (data.status !== EXPENSE_STATUS.unreported) {
                 setIsDisabled(true);
               }
+              fieldsDataForUpdate?.forEach((e) => {
+                if (['expenseDate', 'type', 'currency']?.includes(e?.fieldName)) {
+                  e.isUneditable = true;
+                }
+              })
               setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data.currency)?.symbolNative);
               setTitle(`Edit - ${data.expenseNumber}`);
               setInitialData({
