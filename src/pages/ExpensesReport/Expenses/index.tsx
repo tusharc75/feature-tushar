@@ -7,7 +7,6 @@ import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from '
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import {
-  EXPENSE_STATUS,
   expenseReport,
   expenses,
   formatAmountWithCurrency,
@@ -23,26 +22,24 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import AddExpenses from 'src/pages/ExpensesReport/AddExpenses';
+import AddExistingExpenses from 'src/pages/ExpensesReport/AddExistingExpenses';
 import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
-import { isMobile, isTablet } from 'react-device-detect';
 
-const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, allowedToEdit, fetchDataMaster = null }) => {
+const Expenses = ({ expenseIds, allowedToEdit, expenseReportData = null, expenceReportId = null, setExpences = null, fetchexpenseReportData = null }) => {
+
   const renderedFrom = camelCase(sidebarResource?.expenses);
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions, selectedEntity, resources }
+    state: { user, permissions, resources }
   }: any = useData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const [columns, setColumns] = useState(null);
-  const { generateColumns, checkStaticField } = useColumns();
+  const { generateColumns } = useColumns();
   const { selectedRecords } = state;
   const [deleteData, setDeleteData] = useState(null);
   const [subtotal, setSubtotal] = useState(0);
-  const [selectedExpense, setSelectedExpense] = useState([]);
   const [showAddExistingExpenseModal, setShowAddExistingExpenseModal] = useState(false);
   const [showManageExpensesDialog, setShowManageExpensesDialog] = useState(false);
-  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteconfirmBox, setDeleteConfirmBox] = useState(false);
 
@@ -52,7 +49,7 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
 
   useEffect(() => {
     fetchData();
-  }, [selectedEntity, expenseIds]);
+  }, [expenseIds]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -89,13 +86,16 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
-  }, [selectedEntity]);
+  }, []);
 
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     try {
-      const response: any = await axiosInstance().get(`${expenses.api}?getById=${JSON.stringify(expenseIds)}`, { cancelToken: cancelTokenSource?.token });
-      let rows = response?.data?.data;
+      let rows = []
+      if (expenseIds?.length) {
+        const response: any = await axiosInstance().get(`${expenses.api}?getById=${JSON.stringify(expenseIds)}`, { cancelToken: cancelTokenSource?.token });
+        rows = response?.data?.data;
+      }
       rows = rows?.map((e) => {
         const finalObject = prepareDataForGrid(e, user);
         finalObject['isChecked'] = false;
@@ -114,47 +114,53 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
     }
   };
 
-  const updateExpensesStatus = () => {
-    axiosInstance()
-      .patch(`${expenseReport.api}/status/${reportData._id}`, { status: EXPENSE_STATUS.unSubmitted })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+  const handleAdd = async (rows) => {
+    if (expenceReportId) {
+      setIsSubmitting(true);
+      await axiosInstance().post(`${expenseReport.api}/${expenceReportId}/expenses/add`, { expenseIds: rows?.map((e) => e._id) })
+        .then(({ data }) => {
+          setShowAddExistingExpenseModal(false)
+          setIsSubmitting(false);
+          fetchexpenseReportData()
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+          setIsSubmitting(false);
+        });
+    }
+    else {
+      setExpences([...expenseIds, ...rows?.map((e) => e._id)])
+      setShowAddExistingExpenseModal(false)
+    }
   };
 
-  const handleSaveAndSubmit = async (newExpenses) => {
-    setIsSubmitting(true);
-
-    const newExpensesArr = Array.isArray(newExpenses) ? newExpenses : [newExpenses];
-
-    const updatedExpenses = [...newExpensesArr, ...selectedExpense];
-    setSelectedExpense(updatedExpenses);
-
-    const expense = [...reportData.expenses, ...updatedExpenses];
-    const payload = {
-      _id: reportData._id,
-      reportTitle: reportData.reportTitle,
-      status: reportData.status,
-      expenses: expense,
-      users: [...reportData.users.map((user) => user.optionValue)]
-    };
-
-    await axiosInstance()
-      .put(`${expenseReport.api}`, payload)
-      .then(({ data }) => {
-        updateExpensesStatus();
-        setIsSubmitting(false);
-        fetchDataMaster();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
+  const handleRemove = async () => {
+    if (expenceReportId) {
+      await axiosInstance().put(`${expenseReport.api}/${expenceReportId}/expenses/remove`, { expenseIds: deleteData })
+        .then(({ data }) => {
+          fetchexpenseReportData()
+          setDeleteConfirmBox(false);
+          setDeleteData(null);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
         });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setIsSubmitting(false);
-      });
+    }
+    else {
+      setExpences(expenseIds?.filter((e) => !deleteData?.includes(e)))
+      setDeleteConfirmBox(false);
+      setDeleteData(null);
+    }
   };
 
   const ActionsRenderer = {
@@ -216,8 +222,7 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
           disabled={selectedRecords.length === 0}
           onClick={() => {
             setDeleteConfirmBox(true);
-            const dataToDelete = selectedRecords.map((record) => record._id);
-            setDeleteData(dataToDelete);
+            setDeleteData(selectedRecords.map((record) => record._id));
           }}
         >
           {`Delete (${selectedRecords.length})`}
@@ -231,7 +236,7 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
       <>
         {allowedToEdit && (
           <DetailsPageHeader
-            isAddButtonVisible={showAddButton}
+            isAddButtonVisible={true}
             isActionButtonVisible={true}
             actionButtonMenuItems={actionButtonMenuItems()}
             addButtonMenuItems={addButtonMenuItems()}
@@ -279,23 +284,18 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
         {deleteData && deleteconfirmBox && (
           <ConfirmationDialog
             open={true}
-            message={`Are you sure you want to delete the record(s)?`}
+            message={`Are you sure you want to remove the record(s)?`}
             onClose={() => setDeleteData(null)}
-            onOk={() => {
-              removeRow(deleteData);
-              setDeleteConfirmBox(false);
-            }}
+            onOk={handleRemove}
           />
         )}
         {showAddExistingExpenseModal && (
-          <AddExpenses
-            open={showAddExistingExpenseModal}
+          <AddExistingExpenses
+            expenseReportData={expenseReportData}
             onClose={() => setShowAddExistingExpenseModal(false)}
-            fullScreen
-            setFullScreen={setFullScreen}
-            onSave={handleSaveAndSubmit}
-            fetchReportData={fetchData}
+            onSuccess={handleAdd}
             isSubmitting={isSubmitting}
+            ids={expenseIds || []}
           />
         )}
         {showManageExpensesDialog && (
@@ -304,8 +304,7 @@ const Expenses = ({ expenseIds, showAddButton, reportData = null, removeRow, all
             onClose={() => setShowManageExpensesDialog(false)}
             onSuccess={async (data) => {
               setShowManageExpensesDialog(false);
-              handleSaveAndSubmit(data);
-              fetchData();
+              handleAdd([data]);
             }}
             isRedirectToDetailPage={false}
           />

@@ -22,6 +22,7 @@ import ManageExpenseReports from 'src/pages/ExpensesReport/ManageExpenseReports'
 let expenseReportTimeout;
 
 const ExpenseReport = () => {
+
   const renderedFrom = camelCase(sidebarResource?.expenseReport);
 
   const toastConfig = useContext(CustomToastContext);
@@ -33,12 +34,11 @@ const ExpenseReport = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [showManageExpenseReportDialog, setShowManageExpenseReportDialog] = useState({ open: false, idToClone: null });
+  const [showManageExpenseReportDialog, setShowManageExpenseReportDialog] = useState({ open: false });
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
-  const [expenseReportData, setExpenseReportData] = useState(null);
-  const { generateColumns, checkStaticField } = useColumns();
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchGridColumns();
@@ -49,11 +49,7 @@ const ExpenseReport = () => {
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.expenseReport}`);
     data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, routes?.expenseReportDetail?.path, true);
-    let staticFields = getStaticFields();
-    staticFields.forEach((field) => {
-      newColumns.push(checkStaticField(renderedFrom, field));
-    });
-    setColumns([...newColumns, ActionsRenderer]);
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   useEffect(() => {
@@ -136,26 +132,16 @@ const ExpenseReport = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     try {
-      let data: any = [],
-        count;
+      let data: any = [];
       const response: any = await axiosInstance().get(`${expenseReport.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
       data = response?.data?.data;
-      count = response?.data?.count;
-      const statusesToClear = ['Awaiting Approval', 'Approved', 'Recalled', 'Reimbursed'];
-      data = data.map((item) => {
-        if (statusesToClear.includes(item.status)) {
-          item.rejectReason = '';
-        }
-        return item;
-      });
-      setExpenseReportData(data);
       let rows = data.map((u) => {
         let finalObject: any = prepareDataForGrid(u, user);
         finalObject['isChecked'] = false;
         finalObject['canDelete'] = permissions?.expenseReport?.isDelete && u.canDelete;
         return finalObject;
       });
-      dispatch({ type: 'initialize', data: rows, count: count });
+      dispatch({ type: 'initialize', data: rows, count: response?.data?.count });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
@@ -176,25 +162,20 @@ const ExpenseReport = () => {
     } else {
       recordsToDelete = selectedRecords.map((o) => o._id);
     }
-
     if (recordsToDelete.length > 0) {
       setDeleteLoading(true);
-
       try {
         const { data } = await axiosInstance().put(`${expenseReport.api}/remove`, {
           ids: recordsToDelete
         });
-
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data.message
         });
-
         dispatch({ type: 'selection', selectedRecords: [] });
         setShowDeleteConfirmBox(false);
         setDeleteLoading(false);
-
         if (deleteRecord) setDeleteRecord({});
         fetchData();
       } catch (error) {
@@ -236,7 +217,7 @@ const ExpenseReport = () => {
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
           addButtonOnclick={() => {
-            setShowManageExpenseReportDialog({ open: true, idToClone: null });
+            setShowManageExpenseReportDialog({ open: true });
           }}
           isAddButtonVisible={permissions?.expenseReport?.isCreate}
         />
@@ -260,12 +241,11 @@ const ExpenseReport = () => {
         {showDeleteConfirmBox ? (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${
-              deleteRecord
-                ? `${resources?.expenseReport?.titleSingular?.toLowerCase()} :
+            message={`Are you sure you want to delete ${deleteRecord
+              ? `${resources?.expenseReport?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.reportTitle}`
-                : `selected ${resources?.expenseReport?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.expenseReport?.titlePlural?.toLowerCase()}`
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
@@ -277,13 +257,10 @@ const ExpenseReport = () => {
       </CustomContainer>
       {showManageExpenseReportDialog.open && (
         <ManageExpenseReports
-          expenseReportId={showManageExpenseReportDialog.idToClone}
-          fetchReportData={fetchData}
-          expenseReportData={expenseReportData}
-          onClose={() => setShowManageExpenseReportDialog({ open: false, idToClone: null })}
+          onClose={() => setShowManageExpenseReportDialog({ open: false })}
           onSuccess={(data) => {
             history.push(`${routes?.expenseReportDetail?.path}/${data._id}`);
-            setShowManageExpenseReportDialog({ open: false, idToClone: null });
+            setShowManageExpenseReportDialog({ open: false });
           }}
         />
       )}

@@ -28,7 +28,6 @@ const ExpenseReportDetail = () => {
   const {
     state: { permissions, resources }
   }: any = useData();
-  const [loadingDetails, setLoadingDetails] = useState(true);
   const [expenseReportData, setExpenseReportData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -82,21 +81,14 @@ const ExpenseReportDetail = () => {
   };
 
   const fetchData = async () => {
-    setLoadingDetails(true);
     axiosInstance()
       .get(`${expenseReport.api}/${id}`)
       .then(({ data: { data } }) => {
-        setLoadingDetails(false);
         setAllowedToDelete(permissions?.expenseReport?.isDelete && data?.canDelete);
+        setAllowedToEdit(permissions?.expenseReport?.isUpdate && ![EXPENSE_STATUS.awaitingApproval, EXPENSE_STATUS.approved, EXPENSE_STATUS.reimbursed]?.includes(data?.status));
         setExpenseReportData(data);
-        if (data.status === EXPENSE_STATUS.awaitingApproval || data.status === EXPENSE_STATUS.approved || data?.status === EXPENSE_STATUS.reimbursed) {
-          setAllowedToEdit(false);
-        } else {
-          setAllowedToEdit(permissions?.expenseReport?.isUpdate);
-        }
       })
       .catch((err) => {
-        setLoadingDetails(false);
         toastConfig.setToastConfig(err);
       });
   };
@@ -127,22 +119,10 @@ const ExpenseReportDetail = () => {
       });
   };
 
-  const handleDeleteExpense = (expenseIds: string[]) => {
-    axiosInstance()
-      .put(`${routes.expenseReport.path}/${expenseReportData._id}/expenses/remove`, { expenseIds })
-      .then(() => {
-        fetchData();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
-
   const handleStatusChange = (status) => {
-    axiosInstance()
-      .patch(`${expenseReport.api}/status/${expenseReportData._id}`, {
-        status
-      })
+    axiosInstance().patch(`${expenseReport.api}/status/${expenseReportData._id}`, {
+      status
+    })
       .then(() => {
         fetchData();
       })
@@ -167,18 +147,20 @@ const ExpenseReportDetail = () => {
             <Fragment>
               {expenseReportData?.status !== EXPENSE_STATUS.approved && expenseReportData?.status !== EXPENSE_STATUS.reimbursed && (
                 <>
-                  <ThemeButton
-                    buttonType="theme"
-                    iconForMobile={<SendIcon />}
-                    onClick={() => {
-                      handleStatusChange(
-                        expenseReportData?.status === EXPENSE_STATUS.awaitingApproval ? EXPENSE_STATUS.recalled : EXPENSE_STATUS.awaitingApproval
-                      );
-                    }}
-                    mobileTooltip={expenseReportData?.status === EXPENSE_STATUS.awaitingApproval ? 'Recall' : 'Send For Approval'}
-                  >
-                    {expenseReportData?.status === EXPENSE_STATUS.awaitingApproval ? 'Recall' : 'Send For Approval'}
-                  </ThemeButton>
+                  {expenseReportData?.expenses?.length > 0 &&
+                    <ThemeButton
+                      buttonType="theme"
+                      iconForMobile={<SendIcon />}
+                      onClick={() => {
+                        handleStatusChange(
+                          expenseReportData?.status === EXPENSE_STATUS.awaitingApproval ? EXPENSE_STATUS.recalled : EXPENSE_STATUS.awaitingApproval
+                        );
+                      }}
+                      mobileTooltip={expenseReportData?.status === EXPENSE_STATUS.awaitingApproval ? 'Recall' : 'Send For Approval'}
+                    >
+                      {expenseReportData?.status === EXPENSE_STATUS.awaitingApproval ? 'Recall' : 'Send For Approval'}
+                    </ThemeButton>
+                  }
                   {allowedToEdit && (
                     <ThemeButton
                       iconForMobile={<Edit />}
@@ -206,7 +188,7 @@ const ExpenseReportDetail = () => {
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
-            {!loadingDetails && expenseReportData && fields ? (
+            {expenseReportData && fields ? (
               <DetailsPage data={expenseReportData} fields={fields} />
             ) : (
               <div className="p-2">
@@ -217,15 +199,14 @@ const ExpenseReportDetail = () => {
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
           <Box>
-            {!loadingDetails && expenseReportData && fields ? (
+            {expenseReportData && fields ? (
               <div className="mt-2">
                 <Expenses
                   expenseIds={expenseReportData?.expenses}
-                  showAddButton={true}
-                  reportData={expenseReportData}
-                  removeRow={handleDeleteExpense}
+                  expenseReportData={expenseReportData}
+                  expenceReportId={id}
                   allowedToEdit={allowedToEdit}
-                  fetchDataMaster={fetchData}
+                  fetchexpenseReportData={fetchData}
                 />
               </div>
             ) : (
@@ -265,7 +246,6 @@ const ExpenseReportDetail = () => {
       {openUpdateDialog && (
         <ManageExpenseReports
           expenseReportId={id}
-          fetchReportData={fetchData}
           onClose={() => setOpenUpdateDialog(false)}
           onSuccess={() => {
             setOpenUpdateDialog(false);

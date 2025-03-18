@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { Formik, Form } from 'formik';
-import { Box, MenuItem } from '@mui/material';
+import { Box } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import { useHistory } from 'react-router-dom';
 import { isEqual } from 'lodash';
@@ -25,14 +25,10 @@ import {
 } from '../../../constants/helpers';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import AddExpenses from 'src/pages/ExpensesReport/AddExpenses';
 import Expenses from 'src/pages/ExpensesReport/Expenses';
-import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { useTableReducer } from 'src/components/CustomReactTable';
-import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
 import dayjs from 'dayjs';
 
-const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose, onSuccess, expenseReportData = null }) => {
+const ManageExpenseReports = ({ expenseReportId = null, onClose, onSuccess }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -43,63 +39,54 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [title, setTitle] = useState('');
-  const [selectedExpense, setSelectedExpense] = useState([]);
-  const { state } = useTableReducer();
-  const { selectedRecords } = state;
-  const [showAddExistingExpenseModal, setShowAddExistingExpenseModal] = useState(false);
-  const [showManageExpensesDialog, setShowManageExpensesDialog] = useState({ open: false, idToClone: null });
-  const [isAllowedToEdit, setIsAllowedToEdit] = useState(true);
+  const [expenses, setExpences] = useState([]);
   const [editing, setEditing] = useState(false);
 
   useEffect(() => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.expenseReport}`)
-      .then(({ data: { data } }) => {
-        const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-        var fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-        if (expenseReportId) {
-          axiosInstance()
-            .get(`${expenseReport.api}/` + expenseReportId)
-            .then(({ data: { data } }) => {
-              setTitle(`Edit - ${data.reportTitle}`);
-              setSelectedExpense(data.expenses);
-              setIsAllowedToEdit(false);
-              setEditing(true);
-              setInitialData({
-                fields: fieldsDataForUpdate,
-                values: { ...getObjKeysWithValues(data, fieldsDataForUpdate) }
-              });
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
-            });
-        } else {
-          axiosInstance().get(`${expenseReport.api}/last-expense-report-date`).then(({ data }) => {
-
-            let fromDate: any = dayjs.tz().subtract(1, 'month').startOf('month')?.toDate();
-            let toDate: any = dayjs.tz().subtract(1, 'month').endOf('month')?.toDate();
-
-            if (data?.data) {
-              const endDate = dayjs(data?.data?.toDate);
-              fromDate = endDate.tz().add(1, 'month').startOf('month')?.toDate();
-              toDate = endDate.tz().add(1, 'month').endOf('month')?.toDate();
-            }
-
-            setTitle(`Create ${resources?.expenseReport?.titleSingular}`);
-            let initialData = getObjKeys('', fieldsDataForCreate);
-            initialData['status'] = EXPENSE_STATUS.draft;
-            initialData['users'] = [user?.user?._id];
-            initialData['fromDate'] = fromDate;
-            initialData['toDate'] = toDate;
+    axiosInstance().get(`/field?resource=${sidebarResource.expenseReport}`).then(({ data: { data } }) => {
+      const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+      if (expenseReportId) {
+        axiosInstance()
+          .get(`${expenseReport.api}/` + expenseReportId)
+          .then(({ data: { data } }) => {
+            setTitle(`Edit - ${data.reportTitle}`);
+            setEditing(true);
             setInitialData({
-              fields: fieldsDataForCreate,
-              values: initialData
+              fields: fieldsDataForUpdate,
+              values: { ...getObjKeysWithValues(data, fieldsDataForUpdate) }
             });
-          }).catch((error) => {
+          })
+          .catch((error) => {
             toastConfig.setToastConfig(error);
           });
-        }
-      })
+      } else {
+        axiosInstance().get(`${expenseReport.api}/last-expense-report-date`).then(({ data }) => {
+
+          let fromDate: any = dayjs.tz().subtract(1, 'month').startOf('month')?.toDate();
+          let toDate: any = dayjs.tz().subtract(1, 'month').endOf('month')?.toDate();
+
+          if (data?.data) {
+            const endDate = dayjs(data?.data?.toDate);
+            fromDate = endDate.tz().add(1, 'month').startOf('month')?.toDate();
+            toDate = endDate.tz().add(1, 'month').endOf('month')?.toDate();
+          }
+
+          setTitle(`Create ${resources?.expenseReport?.titleSingular}`);
+          let initialData = getObjKeys('', fieldsDataForCreate);
+          initialData['status'] = EXPENSE_STATUS.draft;
+          initialData['users'] = [user?.user?._id];
+          initialData['fromDate'] = fromDate;
+          initialData['toDate'] = toDate;
+          setInitialData({
+            fields: fieldsDataForCreate,
+            values: initialData
+          });
+        }).catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+      }
+    })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -123,7 +110,7 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
         toastConfig.setToastConfig(error);
       });
     } else {
-      data.expenses = selectedExpense?.map((e) => e._id);
+      data.expenses = expenses;
       axiosInstance().post(`${expenseReport.api}`, data).then(({ data: { data, message } }) => {
         history.push(`${routes?.expenseReportDetail?.path}/${data._id}`);
         setIsSubmitting(false);
@@ -152,42 +139,11 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
     }
   };
 
-  const handleSaveExpenses = async (newExpenses) => {
-    const updatedExpenses = [...newExpenses, ...selectedExpense];
-    setSelectedExpense(updatedExpenses);
-  };
-
-  const handleDeleteRows = (rowIds) => {
-    setSelectedExpense((prevExpenses) => prevExpenses.filter((expense) => !rowIds.includes(expense._id)));
-  };
-
-  const addButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          onClick={() => {
-            setShowAddExistingExpenseModal(true);
-          }}
-        >
-          {`Add Existing ${resources?.expenses?.titlePlural}`}
-        </MenuItem>
-        {/* <MenuItem
-          onClick={() => {
-            setShowManageExpensesDialog({ open: true, idToClone: null });
-          }}
-        >
-          {`Create New ${resources?.expenses?.titlePlural}`}
-        </MenuItem> */}
-      </>
-    );
-  };
-
   return (
     <Dialog
       maxWidth="md"
       fullWidth
       fullScreen={editing ? fullScreen || isMobile || isTablet : true}
-      TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {
@@ -224,27 +180,16 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
                     fieldsData={initialData.fields}
                     size="small"
                     fullWidth
-                    resource={sidebarResource.expenseReport}
-                    referenceId={expenseReportId || null}
                   />
-                  {isAllowedToEdit && (
-                    <DetailsPageHeader
-                      isAddButtonVisible={true}
-                      addButtonMenuItems={addButtonMenuItems()}
-                      isActionButtonVisible={false}
-                      actionButtonProps={{ disabled: selectedRecords.length === 0 }}
-                      hasXpadding
+                  {!expenseReportId && (
+                    <Expenses
+                      expenseIds={expenses}
+                      expenseReportData={values}
+                      allowedToEdit={true}
+                      setExpences={(rows) => {
+                        setExpences(rows)
+                      }}
                     />
-                  )}
-                  {selectedExpense.length > 0 && isAllowedToEdit && (
-                    <div className="mt-2">
-                      <Expenses
-                        expenseIds={selectedExpense?.map((expense) => expense._id)}
-                        showAddButton={false}
-                        removeRow={handleDeleteRows}
-                        allowedToEdit={isAllowedToEdit}
-                      />
-                    </div>
                   )}
                 </Form>
               </CustomDialogContent>
@@ -266,7 +211,7 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
                   isLoading={isSubmitting}
                   buttonType="theme"
                   id="dialog-save-button"
-                  disabled={isSubmitting || selectedExpense.length === 0}
+                  disabled={isSubmitting}
                   onClick={(e) => {
                     submitForm();
                   }}
@@ -286,33 +231,6 @@ const ManageExpenseReports = ({ fetchReportData, expenseReportId = null, onClose
                     setShowConfirmDialog(false);
                     onClose();
                   }}
-                />
-              )}
-              {showAddExistingExpenseModal && (
-                <AddExpenses
-                  open={showAddExistingExpenseModal}
-                  onClose={() => setShowAddExistingExpenseModal(false)}
-                  fullScreen
-                  expenseReportData={values}
-                  setFullScreen={setFullScreen}
-                  isSubmitting={isSubmitting}
-                  onSave={handleSaveExpenses}
-                  fetchReportData={fetchReportData}
-                />
-              )}
-              {showManageExpensesDialog.open && (
-                <ManageExpenses
-                  expenseId={showManageExpensesDialog.idToClone}
-                  onClose={() => setShowManageExpensesDialog({ open: false, idToClone: null })}
-                  onSuccess={(data) => {
-                    setShowManageExpensesDialog({ open: false, idToClone: null });
-                    setSelectedExpense((prevExpenses) => {
-                      const updatedExpenses = prevExpenses.filter((exp) => exp._id !== data._id);
-                      return [...updatedExpenses, data];
-                    });
-                    fetchReportData();
-                  }}
-                  isRedirectToDetailPage={false}
                 />
               )}
             </>

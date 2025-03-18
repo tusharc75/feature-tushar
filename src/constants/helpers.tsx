@@ -544,11 +544,6 @@ export const expenseReport = {
   api: '/expense-report'
 };
 
-export const expenseApproval = {
-  resource: 'expenseApproval',
-  api: '/expense-approval'
-};
-
 export const repairOrder = {
   resource: 'repairOrder',
   api: '/repair-order'
