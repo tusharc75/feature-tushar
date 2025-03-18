@@ -38,7 +38,6 @@ import {
 import ManageSerializedAsset from './ManageSerializedAsset';
 import ReasonDialog from './ReasonDialog';
 import axios, { CancelTokenSource } from 'axios';
-import { AnyObject } from 'yup/lib/types';
 
 const renderedFrom = camelCase(sidebarResource?.serializedAsset);
 
