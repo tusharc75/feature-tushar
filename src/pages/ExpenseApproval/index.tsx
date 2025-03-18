@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -6,27 +6,28 @@ import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTab
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, EXPENSE_STATUS, expenseApproval } from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, EXPENSE_STATUS, expenseReport } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import Requests from 'src/pages/ExpenseApproval/Requests';
+import ExpenceReport from 'src/pages/ExpenseApproval/ExpenceReport';
 
 let expenseApprovalTimeout;
 
 const ExpenseApproval = () => {
   const renderedFrom = camelCase(sidebarResource?.expenseApproval);
+
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions, selectedEntity, resources }
+    state: { user, resources }
   }: any = useData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const [reportData, setReportData] = useState(null);
+  const { page, limit, search, filters, sorting, showFilteredRecordsOnly } = state;
+
   const [selectedExpenseReport, setSelectedExpenseReport] = useState(null);
   const [columns, setColumns] = useState(null);
 
-  const { generateColumns, checkStaticField } = useColumns();
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchGridColumns();
@@ -36,12 +37,8 @@ const ExpenseApproval = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.expenseReport}`);
     data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes?.expenseReportDetail?.path, true);
-    let staticFields = getStaticFields();
-    staticFields.forEach((field) => {
-      newColumns.push(checkStaticField(renderedFrom, field));
-    });
-    setColumns(newColumns);
+    const newColumns = generateColumns(renderedFrom, data, routes?.expenseReportDetail?.path);
+    setColumns([...newColumns, ...getStaticFields()]);
   };
 
   useEffect(() => {
@@ -62,7 +59,7 @@ const ExpenseApproval = () => {
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
-  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, showFilteredRecordsOnly]);
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -92,25 +89,16 @@ const ExpenseApproval = () => {
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     setSelectedExpenseReport(null);
     dispatch({ type: 'loading', loading: true });
-    const queryString = getQueryString();
     try {
-      let data: any = [],
-        count;
-      const response: any = await axiosInstance().get(`${expenseApproval.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
+      let data: any = []
+      const queryString = getQueryString();
+      const response: any = await axiosInstance().get(`${expenseReport.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
       data = response?.data?.data;
-      count = response?.data?.count;
-      data = data.filter((item) => item.status === EXPENSE_STATUS.awaitingApproval || item.status === EXPENSE_STATUS.approved || item.status === EXPENSE_STATUS.reimbursed);
-      if (data?.length) {
-        setSelectedExpenseReport(data[0]);
-      }
-      setReportData(data);
       let rows = data?.map((u) => {
         let finalObject: any = prepareDataForGrid(u, user);
-        finalObject['isChecked'] = false;
-        finalObject['canDelete'] = permissions?.expenseReport?.isDelete && u.canDelete;
         return finalObject;
       });
-      dispatch({ type: 'initialize', data: rows, count: count });
+      dispatch({ type: 'initialize', data: rows, count: response?.data?.count });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
@@ -130,50 +118,42 @@ const ExpenseApproval = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs
-            routes={[
-              {
-                ...routes.expenseApproval,
-                title: resources?.expenseApproval?.titlePlural
-              }
-            ]}
-          />
+          <CustomBreadCrumbs routes={[{ ...routes.expenseApproval, title: resources?.expenseApproval?.titlePlural }]} />
         </Box>
       </Box>
       <Box className="detail-container-v1">
-        {reportData ? (
-          reportData?.length > 0 && (
-            <div className="grid grid-cols-1 gap-2 md:grid-cols-[400px_1fr]">
-              <div className="container-with-border p-[20px] ">
-                <CustomReactTable
-                  showOnlyMobileView={true}
-                  height="calc(100vh - 200px)"
-                  columns={columns}
-                  state={state}
-                  dispatch={dispatch}
-                  renderedFrom={renderedFrom}
-                  refreshGrid={fetchData}
-                  resource={sidebarResource.expenseReport}
-                  showOnlyShowFilteredRecordSwitch={false}
-                  hideSelection={true}
-                  setWholeRowsCellColor={(row) =>
-                    row._id === selectedExpenseReport?._id
-                      ? ' [box-shadow:inset_0px_0px_0px_3px_var(--new-theme-color)_!important] transition-bg duration-300'
-                      : ' transition-bg duration-300'
-                  }
-                  onRowClick={onRowClick}
-                  showFilters={true}
-                />
-              </div>
-              <div className="container-with-border p-[20px]">
-                {selectedExpenseReport && (
-                  <Requests
-                    referenceId={selectedExpenseReport?._id}
-                    fetchDataMaster={fetchData} />
-                )}
-              </div>
+        {columns ? (
+          <div className="grid grid-cols-1 gap-2 md:grid-cols-[400px_1fr]">
+            <div className="container-with-border p-[20px] ">
+              <CustomReactTable
+                showOnlyMobileView={true}
+                height="calc(100vh - 200px)"
+                columns={columns}
+                state={state}
+                dispatch={dispatch}
+                renderedFrom={renderedFrom}
+                refreshGrid={fetchData}
+                resource={sidebarResource.expenseReport}
+                showOnlyShowFilteredRecordSwitch={false}
+                hideSelection={true}
+                setWholeRowsCellColor={(row) =>
+                  row._id === selectedExpenseReport?._id
+                    ? ' [box-shadow:inset_0px_0px_0px_3px_var(--new-theme-color)_!important] transition-bg duration-300'
+                    : ' transition-bg duration-300'
+                }
+                onRowClick={onRowClick}
+                showFilters={true}
+              />
             </div>
-          )
+            <div className="container-with-border p-[20px]">
+              {selectedExpenseReport && (
+                <ExpenceReport
+                  expenceReportId={selectedExpenseReport?._id}
+                  fetchExpenceReportData={fetchData}
+                />
+              )}
+            </div>
+          </div>
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -183,4 +163,5 @@ const ExpenseApproval = () => {
     </Box>
   );
 };
+
 export default ExpenseApproval;

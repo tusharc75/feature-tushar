@@ -13,12 +13,13 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const ItemizeMileage = ({
   onClose,
-  onSave,         
-  lineItems,            
+  onSave,
+  lineItems,
   currency,
   currencySymbol,
   isSubmitting,
-  policyData
+  policyData,
+  distanceUnit
 }) => {
   const [touchedFields, setTouchedFields] = useState({});
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -55,7 +56,7 @@ const ItemizeMileage = ({
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return policyData?.distanceUnit === 'mile' ? R_MILE * c : R_KM * c;
+    return distanceUnit === 'mile' ? R_MILE * c : R_KM * c;
   };
 
   const handleFromInputChange = (event, value, reason) => {
@@ -142,18 +143,18 @@ const ItemizeMileage = ({
     setLocalLineItems([
       ...localLineItems,
       {
-        id: localLineItems.length,
+        _id: localLineItems.length,
         fromLocation: null,
         toLocation: null,
-        rate: policyData?.perUnitRate,
+        rate: policyData?.perUnitRate || 0,
         distance: '',
         amount: ''
       }
     ]);
   };
 
-  const removeLineItem = (id) => {
-    setLocalLineItems(localLineItems.filter((item) => item.id !== id));
+  const removeLineItem = (_id) => {
+    setLocalLineItems(localLineItems.filter((item) => item._id !== _id));
   };
 
   const handleInputChange = (index, field, event) => {
@@ -169,7 +170,7 @@ const ItemizeMileage = ({
 
   const handleSave = () => {
     const validItems = localLineItems.filter((item) => item.fromLocation && item.toLocation);
-    onSave(validItems, computedTotal);
+    onSave(validItems);
     onClose();
   };
 
@@ -202,7 +203,7 @@ const ItemizeMileage = ({
             </ThemeButton>
           </Box>
           {localLineItems.map((item, index) => (
-            <Grid container spacing={2} key={item.id} alignItems="center" sx={{ marginBottom: 2 }}>
+            <Grid container spacing={2} key={item._id} alignItems="center" sx={{ marginBottom: 2 }}>
               <Grid size={{ xs: 6 }}>
                 <Autocomplete
                   options={fromSuggestions}
@@ -271,7 +272,7 @@ const ItemizeMileage = ({
               </Grid>
               <Grid size={{ xs: 6 }}>
                 <TextField
-                  label={`Distance (${policyData?.distanceUnit})`}
+                  label={`Distance (${distanceUnit})`}
                   type="number"
                   size="small"
                   value={item.distance}
@@ -332,7 +333,7 @@ const ItemizeMileage = ({
               </Grid>
               <Grid size={{ xs: 2 }}>
                 <HtmlTooltip title="Remove">
-                  <IconButton onClick={() => removeLineItem(item.id)} aria-label="delete">
+                  <IconButton onClick={() => removeLineItem(item._id)} aria-label="delete">
                     <DeleteIcon color="error" fontSize="small" />
                   </IconButton>
                 </HtmlTooltip>

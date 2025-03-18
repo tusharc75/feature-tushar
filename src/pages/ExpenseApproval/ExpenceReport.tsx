@@ -9,33 +9,30 @@ import { EXPENSE_STATUS, expenseReport, sidebarResource } from '../../constants/
 import Expenses from 'src/pages/ExpensesReport/Expenses';
 import CommentDialog from 'src/components/CommentDialog';
 
-const Requests = ({ referenceId, fetchDataMaster }) => {
+const Requests = ({ expenceReportId, fetchExpenceReportData }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const [fields, setFields] = useState(null);
-  const [loadingDetails, setLoadingDetails] = useState(true);
-  const [rowsData, setRowsData] = useState(null);
+  const [expenceReportData, setExpenceReportData] = useState(null);
   const [commentDialog, setCommentDialog] = useState(false);
 
   useEffect(() => {
-    if (referenceId) {
+    fetchFields();
+  }, []);
+
+  useEffect(() => {
+    if (expenceReportId) {
       fetchData();
-      fetchFields();
     }
-  }, [referenceId]);
+  }, [expenceReportId]);
 
   const fetchData = () => {
-    setRowsData(null);
-    axiosInstance()
-      .get(`${expenseReport.api}/${referenceId}`)
-      .then(({ data: { data } }) => {
-        setRowsData(data);
-        setLoadingDetails(false);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setLoadingDetails(false);
-      });
+    setExpenceReportData(null);
+    axiosInstance().get(`${expenseReport.api}/${expenceReportId}`).then(({ data: { data } }) => {
+      setExpenceReportData(data);
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
   };
 
   const fetchFields = async () => {
@@ -50,9 +47,9 @@ const Requests = ({ referenceId, fetchDataMaster }) => {
   };
 
   const handleStatusChange = (status, comment = '') => {
-    axiosInstance().patch(`${expenseReport.api}/status/${rowsData._id}`, { status, comment })
+    axiosInstance().patch(`${expenseReport.api}/status/${expenceReportData._id}`, { status, comment })
       .then(({ data }) => {
-        fetchDataMaster();
+        fetchExpenceReportData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -67,8 +64,8 @@ const Requests = ({ referenceId, fetchDataMaster }) => {
   return (
     <>
       <Box display="flex" marginBottom="0.5rem" gap="1rem" justifyContent="flex-end">
-        {rowsData?.status !== EXPENSE_STATUS.reimbursed && <Fragment>
-          {rowsData?.status !== EXPENSE_STATUS.approved ? (
+        {expenceReportData?.status !== EXPENSE_STATUS.reimbursed && <Fragment>
+          {expenceReportData?.status !== EXPENSE_STATUS.approved ? (
             <>
               <ThemeButton
                 buttonType="themeBorder"
@@ -103,8 +100,8 @@ const Requests = ({ referenceId, fetchDataMaster }) => {
       </Box>
       <Box className="detail-container-v1">
         <Box>
-          {!loadingDetails && rowsData && fields ? (
-            <DetailsPage data={rowsData} fields={fields} />
+          {expenceReportData && fields ? (
+            <DetailsPage data={expenceReportData} fields={fields} />
           ) : (
             <div className="p-2">
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -112,12 +109,9 @@ const Requests = ({ referenceId, fetchDataMaster }) => {
           )}
         </Box>
         <Box>
-          {!loadingDetails && rowsData && fields ? (
+          {expenceReportData && fields ? (
             <Expenses
-              expenseIds={rowsData?.expenses}
-              showAddButton={true}
-              reportData={rowsData}
-              removeRow={null}
+              expenseIds={expenceReportData?.expenses}
               allowedToEdit={false}
             />
           ) : (
