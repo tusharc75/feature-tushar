@@ -36,8 +36,9 @@ const ManageScheduleMaintenance = ({ data = null, handleClose, handleSave, loadi
           setScheduledMaintenanceTypeOptions(data?.map((d) => ({ optionLabel: d?.name, optionValue: d?._id })));
         }
       })
-      .catch((error) => {});
+      .catch((error) => { });
   }, []);
+
 
   useEffect(() => {
     if (data) {
@@ -109,11 +110,13 @@ const ManageScheduleMaintenance = ({ data = null, handleClose, handleSave, loadi
                         )}
                       />
                     </div>
-                    <HtmlTooltip title={`Add `}>
-                      <IconButton onClick={() => setOpenScheduledMaintenanceType(true)} size="small" color="primary">
-                        <AddCircleIcon />
-                      </IconButton>
-                    </HtmlTooltip>
+                    {!data &&
+                      <HtmlTooltip title={`Add`}>
+                        <IconButton onClick={() => setOpenScheduledMaintenanceType(true)} size="small" color="primary">
+                          <AddCircleIcon />
+                        </IconButton>
+                      </HtmlTooltip>
+                    }
                   </div>
                   <Box mt={1}></Box>
                   <CustomDatePicker
@@ -161,7 +164,6 @@ const ManageScheduleMaintenance = ({ data = null, handleClose, handleSave, loadi
                 Cancel
               </ThemeButton>
               <ThemeButton isLoading={loading} buttonType="theme" onClick={submitForm}>
-                {' '}
                 Save
               </ThemeButton>
             </CustomDialogFooter>

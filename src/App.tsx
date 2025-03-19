@@ -1243,7 +1243,7 @@ function App() {
             <PrivateRoute exact path={`${routes.packageCategoryDetail.path}/:id`}>
               <PackageCategoryDetail />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.scheduleMaintenance.path}`}>
+            <PrivateRoute exact path={`${routes.schedulingMaintenance.path}`}>
               <ScheduleMaintenance />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>

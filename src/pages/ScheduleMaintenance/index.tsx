@@ -54,14 +54,14 @@ const ScheduleMaintenance = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, data: null });
   const [isDeleting, setIsDeleting] = useState(false);
-  const [selectedType, setSelectedType] = useState(type || 1);
+  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [scheduleMaintenanceTypeDialog, setScheduleMaintenanceTypeDialog] = useState(false);
   const [scheduledMaintenanceTypeOptions, setScheduledMaintenanceTypeOptions] = useState([]);
   const [selectedScheduledMaintenanceType, setSelectedScheduledMaintenanceType] = useState(null);
 
-  const renderedFrom = `${camelCase(sidebarResource.scheduleMaintenance)}_${selectedType}`;
+  const renderedFrom = `${camelCase(sidebarResource.schedulingMaintenance)}_${type || 1}`;
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -71,6 +71,7 @@ const ScheduleMaintenance = () => {
   useEffect(() => {
     fetchGridColumns();
     setSelectedProduct(null);
+    setSelectedScheduledMaintenanceType(null);
   }, [selectedType]);
 
   useEffect(() => {
@@ -85,7 +86,7 @@ const ScheduleMaintenance = () => {
           setScheduledMaintenanceTypeOptions(data?.map((d) => ({ optionLabel: d?.name, optionValue: d?._id })));
         }
       })
-      .catch((error) => {});
+      .catch((error) => { });
   };
 
   const fetchGridColumns = async () => {
@@ -182,7 +183,7 @@ const ScheduleMaintenance = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await axiosInstance().get(`${product.api}/scheduledMaintenance/product`);
+      const response = await axiosInstance().get(`${product.api}/scheduling-maintenance/product`);
       setProducts(uniqBy(response?.data?.data || [], 'optionValue'));
     } catch (e) {
       setToastConfig(e);
@@ -202,7 +203,7 @@ const ScheduleMaintenance = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${product.api}/scheduledMaintenance${queryString}`, { cancelToken: cancelTokenSource?.token })
+      .get(`${product.api}/scheduling-maintenance${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(
         ({
           data: {
@@ -270,7 +271,7 @@ const ScheduleMaintenance = () => {
     if (rowsToAdd?.length && _data) {
       setIsSubmitting(true);
       axiosInstance()
-        .post(`${product.api}/scheduledMaintenance`, {
+        .post(`${product.api}/scheduling-maintenance`, {
           materials: rowsToAdd?.map((r) => r?._id),
           materialType: MATERIAL_TYPE.product,
           effectiveDate: _data?.effectiveDate,
@@ -278,6 +279,11 @@ const ScheduleMaintenance = () => {
           maintenanceType: _data?.maintenanceType
         })
         .then(({ data }) => {
+          setToastConfig({
+            open: true,
+            type: 'success',
+            message: data?.message
+          });
           fetchData();
           setIsSubmitting(false);
           setOpenCustomDataDialog({ open: false, data: null });
@@ -291,34 +297,41 @@ const ScheduleMaintenance = () => {
         });
     } else if (_data && openCustomDataDialog?.data?.uniqueId) {
       setIsSubmitting(true);
-      axiosInstance()
-        .put(`${product.api}/scheduledMaintenance`, {
-          _id: openCustomDataDialog?.data?.uniqueId,
-          effectiveDate: _data?.effectiveDate,
-          duration: _data?.duration,
-          maintenanceType: _data?.maintenanceType
-        })
-        .then(({ data }) => {
-          fetchData();
-          setIsSubmitting(false);
-          setOpenCustomDataDialog({ open: false, data: null });
-          setOpenAssignProductDialog(false);
-          setOpenAssignSerializedAssetDialog(false);
-        })
-        .catch((error) => {
-          setIsSubmitting(false);
-          setToastConfig(error);
+      axiosInstance().put(`${product.api}/scheduling-maintenance`, {
+        _id: openCustomDataDialog?.data?.uniqueId,
+        effectiveDate: _data?.effectiveDate,
+        duration: _data?.duration,
+      }).then(({ data }) => {
+        setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
         });
+        fetchData();
+        setIsSubmitting(false);
+        setOpenCustomDataDialog({ open: false, data: null });
+        setOpenAssignProductDialog(false);
+        setOpenAssignSerializedAssetDialog(false);
+      }).catch((error) => {
+        setIsSubmitting(false);
+        setToastConfig(error);
+      });
     } else if (_data && !openCustomDataDialog?.data?.uniqueId) {
       setIsSubmitting(true);
       axiosInstance()
-        .post(`${product.api}/scheduledMaintenance`, {
+        .post(`${product.api}/scheduling-maintenance`, {
           materials: [openCustomDataDialog?.data?._id],
           effectiveDate: _data?.effectiveDate,
           duration: _data?.duration,
-          materialType: MATERIAL_TYPE.serializedAsset
+          materialType: MATERIAL_TYPE.serializedAsset,
+          maintenanceType: _data?.maintenanceType
         })
         .then(({ data }) => {
+          setToastConfig({
+            open: true,
+            type: 'success',
+            message: data?.message
+          });
           fetchData();
           setIsSubmitting(false);
           setOpenCustomDataDialog({ open: false, data: null });
@@ -336,10 +349,15 @@ const ScheduleMaintenance = () => {
     setIsDeleting(true);
     const { data } = showConfirmBox;
     axiosInstance()
-      .put(`${product.api}/scheduledMaintenance/remove`, {
+      .put(`${product.api}/scheduling-maintenance/remove`, {
         ids: data?.map((d) => d?.uniqueId)
       })
-      .then(() => {
+      .then(({ data }) => {
+        setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
         dispatch({ type: 'selection', selectedRecords: [] });
         setIsDeleting(false);
         setShowConfirmBox({ open: false, data: null });
@@ -358,10 +376,10 @@ const ScheduleMaintenance = () => {
           id="maintenanceType"
           fullWidth
           options={scheduledMaintenanceTypeOptions}
-          renderInput={(params) => <TextField {...params} size="small" variant="outlined" label="Select Maintenance Type" margin="none" />}
+          renderInput={(params) => <TextField {...params} size="small" variant="outlined" label="Maintenance Type" margin="none" />}
           getOptionLabel={(option) => option?.optionLabel || ''}
           isOptionEqualToValue={(option: any, val) => (option ? option?.optionValue === val?.optionValue : false)}
-          style={{ width: '300px' }}
+          style={{ width: '250px' }}
           onChange={(e, val) => {
             setSelectedScheduledMaintenanceType(val);
           }}
@@ -372,13 +390,13 @@ const ScheduleMaintenance = () => {
             id="products"
             fullWidth
             options={products}
-            renderInput={(params) => <TextField {...params} size="small" variant="outlined" label="Select Product" margin="none" />}
+            renderInput={(params) => <TextField {...params} size="small" variant="outlined" label={resources?.product?.titleSingular} margin="none" />}
             getOptionLabel={(option) => option?.optionLabel || ''}
             isOptionEqualToValue={(option: any, val) => (option ? option?.optionValue === val?.optionValue : false)}
             onChange={(e, val) => {
               setSelectedProduct(val);
             }}
-            style={{ width: '300px' }}
+            style={{ width: '250px' }}
             value={selectedProduct}
           />
         )}
@@ -455,11 +473,11 @@ const ScheduleMaintenance = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: 'Schedule Maintenances' }]} />
+        <CustomBreadCrumbs routes={[{ title: resources?.schedulingMaintenance?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions.product}
-          module={sidebarResource.scheduleMaintenance}
-          api={`${product.api}/scheduledMaintenance`}
+          module={sidebarResource.schedulingMaintenance}
+          api={`${product.api}/scheduling-maintenance`}
           afterImportCompleted={() => {
             fetchData();
           }}
@@ -467,7 +485,7 @@ const ScheduleMaintenance = () => {
           total={rowCount}
           recordsToExport={selectedRecords?.length}
           ids={selectedRecords?.map((obj) => obj._id)}
-          resource={sidebarResource.scheduleMaintenance}
+          resource={sidebarResource.schedulingMaintenance}
           onExportToExcelSuccess={() => {
             fetchData();
           }}
@@ -525,7 +543,6 @@ const ScheduleMaintenance = () => {
             handleClose={() => {
               setOpenAssignProductDialog(false);
             }}
-            // fromResource={sidebarResource.scheduleMaintenance}
             isSubmitting={isSubmitting}
           />
         )}
@@ -539,7 +556,6 @@ const ScheduleMaintenance = () => {
             handleClose={() => {
               setOpenAssignSerializedAssetDialog(false);
             }}
-            fromResource={sidebarResource.scheduleMaintenance}
             isSubmitting={isSubmitting}
           />
         )}
