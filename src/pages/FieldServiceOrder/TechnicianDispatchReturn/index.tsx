@@ -26,10 +26,12 @@ import { Link } from 'react-router-dom';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { Send } from '@mui/icons-material';
 import ReplayIcon from '@mui/icons-material/Replay';
-import ProductQtyToReturnDialog from './ProductQtyToReturnDialog';
+import ReturnQtyDialog from './ReturnQtyDialog';
 
 const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScreen, setNextStep, isReturn = false }) => {
+
   const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_TechnicianDispatch`;
+
   if (isReturn) renderedFrom.replace('Dispatch', 'Return');
 
   const toastConfig = useContext(CustomToastContext);
@@ -65,7 +67,7 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
       {
         accessor: 'type',
         Header: 'Type',
-        width: 200,
+        width: 100,
         Cell: ({ row }) => (row.original['type'] ? <p>{startCase(row.original?.type)}</p> : <NoDataCell />)
       },
       {
@@ -93,6 +95,12 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
             </div>
           );
         }
+      },
+      {
+        accessor: 'qty',
+        Header: 'Qty',
+        width: 250,
+        Cell: ({ row }) => row?.original?.qty ? <h5 className="text-truncate">{row?.original?.qty}</h5> : <NoDataCell />
       },
       {
         accessor: 'status',
@@ -131,12 +139,6 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
             original={row?.original}
           />
         )
-      },
-      {
-        accessor: 'qty',
-        Header: 'Qty',
-        width: 250,
-        Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.qty}</h5>
       },
       {
         accessor: 'dispatchedDate',
@@ -254,134 +256,112 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
     dispatch({ type: 'selection', selectedRecords: [] });
 
     let products = [];
+    const productResponce = await axiosInstance().get(`${fieldServiceOrder.api}/${serviceOrderId}/material?type=${MATERIAL_TYPE.product}`)
+    products = productResponce?.data?.data?.material?.map((u, i) => {
+      let res: any = {
+        ...prepareDataForGrid(u)
+      };
+      res.productName = u?.productDetail?.productName;
+      res.productId = u?.productDetail?._id;
+      return res;
+    });
 
-    await axiosInstance()
-      .get(`${fieldServiceOrder.api}/${serviceOrderId}/material?type=${MATERIAL_TYPE.product}`)
-      .then(({ data: { data } }) => {
-        products = data?.material?.map((u, i) => {
-          let res: any = {
-            ...prepareDataForGrid(u)
-          };
-          res.productName = u?.productDetail?.productName;
-          res.productId = u?.productDetail?._id;
-          return res;
-        });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
+    const technicianResponce = await axiosInstance().get(`${fieldServiceOrder.api}/technician?fieldServiceOrder=${serviceOrderId}`)
+    let rows = technicianResponce?.data?.data?.technician?.map((u, i) => {
+      let res: any = {
+        ...prepareDataForGrid(u)
+      };
+      res.index = i + 1;
+      res.type = 'technician';
+      res.technicianName = u?.technician['firstName'] + ' ' + u?.technician['lastName'];
+      res.technicianId = u?.technician['_id'];
+      res.competencyType = u?.technician?.competencyType;
+      res.competencies = u?.technician?.competencies;
+      res.subRows = products?.filter((p) => p?.technicianId === u?.technician['_id'])?.map((p, j) => {
+        return {
+          index: `${i + 1}.${j + 1}`,
+          parentId: u?._id,
+          ...p
+        };
       });
-
-    let api = `${fieldServiceOrder.api}/technician?fieldServiceOrder=${serviceOrderId}`;
-    axiosInstance()
-      .get(api)
-      .then(({ data: { data } }) => {
-        let rows = data?.technician?.map((u, i) => {
-          let res: any = {
-            ...prepareDataForGrid(u)
-          };
-          res.index = i + 1;
-          res.type = 'technician';
-          res.technicianName = u?.technician['firstName'] + ' ' + u?.technician['lastName'];
-          res.technicianId = u?.technician['_id'];
-          res.competencyType = u?.technician?.competencyType;
-          res.competencies = u?.technician?.competencies;
-          res.subRows = products
-            ?.filter((p) => p?.technicianId === u?.technician['_id'])
-            ?.map((p, j) => {
-              return {
-                index: `${i + 1}.${j + 1}`,
-                parentId: u?._id,
-                ...p
-              };
-            });
-          return res;
-        });
-
-        products
-          ?.filter((p) => !p?.technician)
-          ?.forEach((p, i) => {
-            rows?.push({
-              index: rows?.length + i,
-              ...p
-            });
-          });
-
-        if (rows?.some((r) => r?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.dispatched)) {
-          setNextStep(true);
-        }
-
-        dispatch({ type: 'initialize', data: rows, count: rows?.length });
-        dispatch({ type: 'loading', loading: false });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
+      return res;
+    });
+    const startCount = rows?.length + 1;
+    products?.filter((p) => !p?.technician)?.forEach((p, i) => {
+      rows?.push({
+        index: startCount + i,
+        ...p
       });
+    });
+
+    if (rows?.some((r) => r?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.dispatched)) {
+      setNextStep(true);
+    }
+
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const handleDispatch = (data) => {
     setSubmitting(true);
-    let _ids = new Set();
-    let productUniqueIds = [];
+    let technicians = new Set();
+    let products = [];
     data?.forEach((d: any) => {
       if (d?.parentId && d?.type === MATERIAL_TYPE.product) {
-        _ids.add(d?.parentId);
+        technicians.add(d?.parentId);
       } else if (d?.type === 'technician') {
-        _ids.add(d?._id);
+        technicians.add(d?._id);
       } else {
-        productUniqueIds.push(d?._id);
+        products.push(d?._id);
       }
     });
-    axiosInstance()
-      .post(`${fieldServiceOrder.api}/technician/dispatch`, {
-        _ids: Array.from(_ids),
-        productUniqueIds,
-        fieldServiceOrder: serviceOrderId
-      }).then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data?.message
-        });
-        setSubmitting(false);
-        setConfirmationDialog({ open: false, data: null });
-        fetchData();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setSubmitting(false);
+    axiosInstance().post(`${fieldServiceOrder.api}/technician/dispatch`, {
+      technicians: Array.from(technicians),
+      products: products,
+      fieldServiceOrder: serviceOrderId
+    }).then(({ data }) => {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data?.message
       });
+      setSubmitting(false);
+      setConfirmationDialog({ open: false, data: null });
+      fetchData();
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+      setSubmitting(false);
+    });
   };
 
   const handleReturn = (data, products) => {
     setSubmitting(true);
-    let _ids = [];
+    let technicians = [];
     data?.forEach((d: any) => {
       if (d?.type === 'technician') {
-        _ids.push(d?._id);
+        technicians.push(d?._id);
       }
     });
-    axiosInstance()
-      .post(`${fieldServiceOrder.api}/technician/return`, {
-        _ids,
-        products: products?.map((p) => ({
-          uniqueId: p?._id,
-          returnQty: p?.returnQty
-        })),
-        fieldServiceOrder: serviceOrderId
-      }).then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data?.message
-        });
-        setSubmitting(false);
-        setProductQtyToReturnDialog({ open: false, data: null })
-        fetchData();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setSubmitting(false);
+    axiosInstance().post(`${fieldServiceOrder.api}/technician/return`, {
+      technicians: technicians,
+      products: products?.map((p) => ({
+        _id: p?._id,
+        returnQty: p?.returnQty
+      })),
+      fieldServiceOrder: serviceOrderId
+    }).then(({ data }) => {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data?.message
       });
+      setSubmitting(false);
+      setProductQtyToReturnDialog({ open: false, data: null })
+      fetchData();
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+      setSubmitting(false);
+    });
   };
 
   const actionButtonMenuItems = () => {
@@ -448,7 +428,7 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
       {confirmationDialog.open && (
         <ConfirmationDialog
           open={confirmationDialog.open}
-          message={`Are you sure you want to ${isReturn ? 'return' : 'dispatch'} selected techncian(s)/product(s)?`}
+          message={`Are you sure you want to ${isReturn ? 'return' : 'dispatch'} selected records?`}
           onClose={() => {
             setConfirmationDialog({ open: false, data: null });
           }}
@@ -459,7 +439,7 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
         />
       )}
       {productQtyToReturnDialog.open && (
-        <ProductQtyToReturnDialog
+        <ReturnQtyDialog
           products={productQtyToReturnDialog.data?.filter((d) => d?.type === MATERIAL_TYPE.product)}
           loading={submitting}
           handleClose={() => setProductQtyToReturnDialog({ open: false, data: null })}

@@ -21,6 +21,7 @@ import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import Consumables from 'src/pages/FieldServiceOrder/material/Consumables';
 
 const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceOrderData, resourcePolicy, stepFullScreen, setNextStep, handleChangeStatus }) => {
+
   const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_Technicians`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -29,6 +30,7 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
   const [isDeleting, setIsDeleting] = useState(false);
   const [technicianDialog, setTechnicianDialog] = useState(false);
   const [refreshChild, setRefreshChild] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     state: { permissions }
@@ -149,31 +151,28 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
     dispatch({ type: 'selection', selectedRecords: [] });
 
     let api = `${fieldServiceOrder.api}/technician?fieldServiceOrder=${serviceOrderData?._id}`;
-    axiosInstance()
-      .get(api)
-      .then(({ data: { data } }) => {
-        let rows = data?.technician?.map((u, i) => {
-          let res: any = {
-            ...prepareDataForGrid(u)
-          };
-          res.index = i + 1;
-          res.technicianName = u?.technician['firstName'] + ' ' + u?.technician['lastName'];
-          res.technicianId = u?.technician['_id'];
-          res.competencyType = u?.technician?.competencyType;
-          res.competencies = u?.technician?.competencies;
-          return res;
-        });
-        if (rows?.length > 0) {
-          setNextStep(true);
-        }
-        dispatch({ type: 'initialize', data: rows, count: rows?.length });
-        dispatch({ type: 'loading', loading: false });
-        setRefreshChild(!refreshChild);
-      })
-      .catch((error) => {
-        setNextStep(false);
-        toastConfig.setToastConfig(error);
+    axiosInstance().get(api).then(({ data: { data } }) => {
+      let rows = data?.technician?.map((u, i) => {
+        let res: any = {
+          ...prepareDataForGrid(u)
+        };
+        res.index = i + 1;
+        res.technicianName = u?.technician['firstName'] + ' ' + u?.technician['lastName'];
+        res.technicianId = u?.technician['_id'];
+        res.competencyType = u?.technician?.competencyType;
+        res.competencies = u?.technician?.competencies;
+        return res;
       });
+      if (rows?.length > 0) {
+        setNextStep(true);
+      }
+      dispatch({ type: 'initialize', data: rows, count: rows?.length });
+      dispatch({ type: 'loading', loading: false });
+      setRefreshChild(!refreshChild);
+    }).catch((error) => {
+      setNextStep(false);
+      toastConfig.setToastConfig(error);
+    });
   };
 
   const handleDelete = async (rows) => {
@@ -198,6 +197,7 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
   };
 
   const handleAssign = (rows) => {
+    setIsSubmitting(true);
     const technician: any = [];
     rows.forEach((d) => {
       const element: any = {};
@@ -220,9 +220,11 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
         setTechnicianDialog(false);
         fetchData();
         fetchserviceOrderData();
+        setIsSubmitting(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+        setIsSubmitting(false);
       });
   };
 
@@ -280,7 +282,7 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
         </Grid>
       </Grid>
       {resourcePolicy?.addConsumables ?
-        <Box mt={3}>
+        <Box mt={2}>
           <Consumables
             allowedToEdit={allowedToEdit}
             serviceOrderData={serviceOrderData}
@@ -292,7 +294,6 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
           />
         </Box>
         : null}
-
       {technicianDialog && (
         <AssignEmployeeDialog
           reference={camelCase(sidebarResource.fieldServiceOrder)}
@@ -302,11 +303,11 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
           handleClose={() => {
             setTechnicianDialog(false);
           }}
+          isSubmitting={isSubmitting}
           warehouse={serviceOrderData?.warehouse?.optionValue}
           ids={dataRows?.map((d) => d?.technicianId)}
         />
       )}
-
       {deleteData && (
         <ConfirmationDialog
           open={true}
