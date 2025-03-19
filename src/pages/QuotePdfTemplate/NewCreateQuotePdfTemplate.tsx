@@ -176,6 +176,7 @@ export default function NewCreateQuotePdfTemplate() {
     const initialValues = {
       landscape: false,
       hideAmountTotalSection: false,
+      customFontSizeAcrossPdf: '',
       productColumns: defaultProductColumns,
       name: '',
       pageNumberInFooter: false,
@@ -231,6 +232,7 @@ export default function NewCreateQuotePdfTemplate() {
         setIsLandscapChecked(tempPdfTemplate.landscape);
         initialValues.landscape = tempPdfTemplate.landscape;
         initialValues.hideAmountTotalSection = tempPdfTemplate.hideAmountTotalSection;
+        initialValues.customFontSizeAcrossPdf = tempPdfTemplate.customFontSizeAcrossPdf;
         initialValues.productColumns = tempPdfTemplate.productColumns;
         initialValues.name = tempPdfTemplate.name;
         initialValues.pageNumberInFooter = tempPdfTemplate.pageNumberInFooter;
@@ -260,6 +262,7 @@ export default function NewCreateQuotePdfTemplate() {
           setIsLandscapChecked(data?.landscape);
           initialValues.landscape = data?.landscape;
           initialValues.hideAmountTotalSection = data?.hideAmountTotalSection;
+          initialValues.customFontSizeAcrossPdf = data?.customFontSizeAcrossPdf;
           initialValues.productColumns = data?.productColumns;
           initialValues.name = !isClone ? data?.name : '';
           initialValues.pageNumberInFooter = data?.pageNumberInFooter;
@@ -380,6 +383,7 @@ export default function NewCreateQuotePdfTemplate() {
           collaborator: values?.collaborator,
           landscape: values?.landscape,
           hideAmountTotalSection: values?.hideAmountTotalSection,
+          customFontSizeAcrossPdf: parseInt(values?.customFontSizeAcrossPdf),
           productColumns: parseInt(values?.productColumns)
         })
         .then(({ data: { data, message } }) => {
@@ -428,6 +432,7 @@ export default function NewCreateQuotePdfTemplate() {
           collaborator: values?.collaborator,
           landscape: values?.landscape,
           hideAmountTotalSection: values?.hideAmountTotalSection,
+          customFontSizeAcrossPdf: parseInt(values?.customFontSizeAcrossPdf),
           productColumns: parseInt(values?.productColumns)
         })
         .then(({ data: { data, message } }) => {
@@ -735,7 +740,7 @@ export default function NewCreateQuotePdfTemplate() {
                     />
                   </div>
 
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center mt-1">
                     <div className="flex gap-2">
                       <FormControlLabel
                         disabled={!isClone && !hasPermissionToUpdate}
@@ -782,6 +787,25 @@ export default function NewCreateQuotePdfTemplate() {
                           />
                         }
                         label="Hide Amount Total Section"
+                      />
+                      <TextField
+                        variant="outlined"
+                        label={'Fixed Font Size Across PDF'}
+                        name="customFontSizeAcrossPdf"
+                        type="number"
+                        margin="none"
+                        size={'small'}
+                        value={values['customFontSizeAcrossPdf']}
+                        error={touched['customFontSizeAcrossPdf'] && Boolean(errors['customFontSizeAcrossPdf'])}
+                        helperText={touched['customFontSizeAcrossPdf'] && errors['customFontSizeAcrossPdf']}
+                        onChange={(e) => {
+                          setFieldValue('customFontSizeAcrossPdf', e.target.value.trimStart());
+                        }}
+                        slotProps={{
+                          input: {
+                            endAdornment: 'pts'
+                          }
+                        }}
                       />
                     </div>
                     {allFields?.length && id && id !== '0' && !isClone && (
