@@ -1,7 +1,7 @@
 import { IconButton, MenuItem } from '@mui/material';
 import Box from '@mui/material/Box/Box';
 import Grid from '@mui/material/Grid2';
-import { camelCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -10,7 +10,14 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { displayDate, fieldServiceOrder, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import {
+  displayDate,
+  FIELD_SERVICE_ORDER_TECHNICIAN_STATUS,
+  fieldServiceOrder,
+  MATERIAL_TYPE,
+  prepareDataForGrid,
+  sidebarResource
+} from 'src/constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import { FiExternalLink } from 'react-icons/fi';
@@ -19,6 +26,7 @@ import { Link } from 'react-router-dom';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { Send } from '@mui/icons-material';
 import ReplayIcon from '@mui/icons-material/Replay';
+import ProductQtyToReturnDialog from './ProductQtyToReturnDialog';
 
 const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScreen, setNextStep, isReturn = false }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_TechnicianDispatch`;
@@ -28,7 +36,7 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
   const [columns, setColumns] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [confirmationDialog, setConfirmationDialog] = useState({ open: false, data: null });
-
+  const [productQtyToReturnDialog, setProductQtyToReturnDialog] = useState({ open: false, data: null });
   const {
     state: { permissions }
   }: any = useData();
@@ -55,24 +63,36 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
         )
       },
       {
-        accessor: 'technicianName',
-        Header: 'Name',
+        accessor: 'type',
+        Header: 'Type',
+        width: 200,
+        Cell: ({ row }) => (row.original['type'] ? <p>{startCase(row.original?.type)}</p> : <NoDataCell />)
+      },
+      {
+        accessor: 'details',
+        Header: 'Details',
         width: 250,
-        Cell: ({ row }) => (
-          <div className="flex items-center gap-2">
-            <p className="text-truncate" title={row.original.technicianName}>
-              {row.original.technicianName}
-            </p>
-            <IconButton
-              size="small"
-              onClick={() => {
-                window.open(`${routes.employeeMasterDetail.path}/${row.original.technicianId}`);
-              }}
-            >
-              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-            </IconButton>
-          </div>
-        )
+        Cell: ({ row }) => {
+          return (
+            <div className="flex items-center gap-2">
+              <p className="text-truncate" title={row.original.type === 'technician' ? row.original.technicianName : row.original.productName}>
+                {row.original.type === 'technician' ? row.original.technicianName : row.original.productName}
+              </p>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === 'technician') {
+                    window.open(`${routes.employeeMasterDetail.path}/${row.original.technicianId}`);
+                  } else {
+                    window.open(`${routes.productDetail.path}/${row.original.productId}`);
+                  }
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            </div>
+          );
+        }
       },
       {
         accessor: 'status',
@@ -111,6 +131,12 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
             original={row?.original}
           />
         )
+      },
+      {
+        accessor: 'qty',
+        Header: 'Qty',
+        width: 250,
+        Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.qty}</h5>
       },
       {
         accessor: 'dispatchedDate',
@@ -201,7 +227,11 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
                 size="small"
                 disabled={isDisabled}
                 onClick={() => {
-                  setConfirmationDialog({ open: true, data: [row?.original?._id] });
+                  if (isReturn) {
+                    setProductQtyToReturnDialog({ open: true, data: [row?.original] });
+                  } else {
+                    setConfirmationDialog({ open: true, data: [row?.original] });
+                  }
                 }}
               >
                 {isReturn ? (
@@ -223,6 +253,24 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
 
+    let products = [];
+
+    await axiosInstance()
+      .get(`${fieldServiceOrder.api}/${serviceOrderId}/material?type=${MATERIAL_TYPE.product}`)
+      .then(({ data: { data } }) => {
+        products = data?.material?.map((u, i) => {
+          let res: any = {
+            ...prepareDataForGrid(u)
+          };
+          res.productName = u?.productDetail?.productName;
+          res.productId = u?.productDetail?._id;
+          return res;
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+
     let api = `${fieldServiceOrder.api}/technician?fieldServiceOrder=${serviceOrderId}`;
     axiosInstance()
       .get(api)
@@ -232,13 +280,33 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
             ...prepareDataForGrid(u)
           };
           res.index = i + 1;
+          res.type = 'technician';
           res.technicianName = u?.technician['firstName'] + ' ' + u?.technician['lastName'];
           res.technicianId = u?.technician['_id'];
           res.competencyType = u?.technician?.competencyType;
           res.competencies = u?.technician?.competencies;
+          res.subRows = products
+            ?.filter((p) => p?.technicianId === u?.technician['_id'])
+            ?.map((p, j) => {
+              return {
+                index: `${i + 1}.${j + 1}`,
+                parentId: u?._id,
+                ...p
+              };
+            });
           return res;
         });
-        if (rows?.some((r) => r?.startDate)) {
+
+        products
+          ?.filter((p) => !p?.technician)
+          ?.forEach((p, i) => {
+            rows?.push({
+              index: rows?.length + i,
+              ...p
+            });
+          });
+
+        if (rows?.some((r) => r?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.dispatched)) {
           setNextStep(true);
         }
 
@@ -250,12 +318,25 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
       });
   };
 
-  const handleDispatchReturn = (ids) => {
+  const handleDispatch = (data) => {
     setSubmitting(true);
-    let api = `${fieldServiceOrder.api}/technician/${isReturn ? 'return' : 'dispatch'}`;
+    let _ids = new Set();
+    let productUniqueIds = [];
+    data?.forEach((d: any) => {
+      if (d?.parentId && d?.type === MATERIAL_TYPE.product) {
+        _ids.add(d?.parentId);
+      } else if (d?.type === 'technician') {
+        _ids.add(d?._id);
+      } else {
+        productUniqueIds.push(d?._id);
+      }
+    });
     axiosInstance()
-      .post(api, { _ids: ids, fieldServiceOrder: serviceOrderId })
-      .then(({ data }) => {
+      .post(`${fieldServiceOrder.api}/technician/dispatch`, {
+        _ids: Array.from(_ids),
+        productUniqueIds,
+        fieldServiceOrder: serviceOrderId
+      }).then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -263,6 +344,38 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
         });
         setSubmitting(false);
         setConfirmationDialog({ open: false, data: null });
+        fetchData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setSubmitting(false);
+      });
+  };
+
+  const handleReturn = (data, products) => {
+    setSubmitting(true);
+    let _ids = [];
+    data?.forEach((d: any) => {
+      if (d?.type === 'technician') {
+        _ids.push(d?._id);
+      }
+    });
+    axiosInstance()
+      .post(`${fieldServiceOrder.api}/technician/return`, {
+        _ids: Array.from(_ids),
+        products: products?.map((p) => ({
+          uniqueId: p?._id,
+          returnQty: p?.returnQty
+        })),
+        fieldServiceOrder: serviceOrderId
+      }).then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+        setSubmitting(false);
+        setProductQtyToReturnDialog({ open: false, data: null })
         fetchData();
       })
       .catch((error) => {
@@ -283,7 +396,11 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
               selectedRecords?.some((d) => d?.endDate)
             }
             onClick={() => {
-              setConfirmationDialog({ open: true, data: selectedRecords?.map((d) => d?._id) });
+              if (isReturn) {
+                setProductQtyToReturnDialog({ open: true, data: selectedRecords });
+              } else {
+                setConfirmationDialog({ open: true, data: selectedRecords });
+              }
             }}
           >
             {isReturn ? 'Return' : 'Dispatch'}
@@ -319,6 +436,7 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
               hideSelection={!allowedToEdit}
               hideAction={!allowedToEdit}
               refreshGrid={fetchData}
+              expander={true}
             />
           ) : (
             <Box p={2} height={300}>
@@ -330,12 +448,22 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
       {confirmationDialog.open && (
         <ConfirmationDialog
           open={confirmationDialog.open}
-          message={`Are you sure you want to ${isReturn ? 'return' : 'dispatch'} selected techncian(s)?`}
+          message={`Are you sure you want to ${isReturn ? 'return' : 'dispatch'} selected techncian(s) & product(s)?`}
           onClose={() => {
             setConfirmationDialog({ open: false, data: null });
           }}
-          onOk={() => handleDispatchReturn(confirmationDialog.data)}
+          onOk={() => {
+            handleDispatch(confirmationDialog.data);
+          }}
           okBtnLoading={submitting}
+        />
+      )}
+      {productQtyToReturnDialog.open && (
+        <ProductQtyToReturnDialog
+          products={productQtyToReturnDialog.data?.filter((d) => d?.type === MATERIAL_TYPE.product)}
+          loading={submitting}
+          handleClose={() => setProductQtyToReturnDialog({ open: false, data: null })}
+          handleSuccess={(products) => handleReturn(productQtyToReturnDialog.data, products)}
         />
       )}
     </>
