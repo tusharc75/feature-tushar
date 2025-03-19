@@ -3,11 +3,10 @@ import { Box, Dialog, IconButton, MenuItem } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomReactTable, { getStaticFields, gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
@@ -19,7 +18,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 
 const ScheduleMaintenanceTypeDialog = ({ handleClose }) => {
   const { setToastConfig } = useContext(CustomToastContext);
-  const renderedFrom = `${camelCase(sidebarResource.scheduleMaintenance)}_Type`;
+  const renderedFrom = `${camelCase(sidebarResource.schedulingMaintenance)}_Type`;
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
@@ -111,7 +110,12 @@ const ScheduleMaintenanceTypeDialog = ({ handleClose }) => {
       .put(`/scheduled-maintenance-type/remove`, {
         ids: data?.map((d) => d?._id)
       })
-      .then(() => {
+      .then(({ data }) => {
+        setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
         dispatch({ type: 'selection', selectedRecords: [] });
         setIsDeleting(false);
         setShowConfirmBox({ open: false, data: null });

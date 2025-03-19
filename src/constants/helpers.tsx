@@ -417,7 +417,7 @@ export const sidebarResource = {
   equiptAi: 'Equipt Ai',
   productTypes: 'Product Types',
   packageCategory: 'Package Category',
-  scheduleMaintenance: 'Schedule Maintenance',
+  schedulingMaintenance: 'Scheduling Maintenance',
   serializedAssetsCertification: 'Serialized Assets Certification'
 };
 

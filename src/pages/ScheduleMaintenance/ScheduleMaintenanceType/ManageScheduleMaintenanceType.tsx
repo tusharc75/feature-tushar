@@ -17,6 +17,7 @@ const Schema = object().shape({
 });
 
 const ManageScheduleMaintenanceType = ({ handleClose, data = null, handleSuccess }) => {
+
   const { setToastConfig } = useContext(CustomToastContext);
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -32,27 +33,32 @@ const ManageScheduleMaintenanceType = ({ handleClose, data = null, handleSuccess
   const handleSubmit = (values) => {
     setLoading(true);
     if (data) {
-      axiosInstance()
-        .put('/scheduled-maintenance-type', { ...values, _id: data?._id })
-        .then((res) => {
-          setLoading(false);
-          handleSuccess();
-        })
+      axiosInstance().put('/scheduled-maintenance-type', { ...values, _id: data?._id }).then(({ data }) => {
+        setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+        setLoading(false);
+        handleSuccess();
+      })
         .catch((err) => {
           setLoading(false);
           setToastConfig(err);
         });
     } else {
-      axiosInstance()
-        .post('/scheduled-maintenance-type', values)
-        .then(({ data: { data } }) => {
-          setLoading(false);
-          handleSuccess(data);
-        })
-        .catch((err) => {
-          setLoading(false);
-          setToastConfig(err);
+      axiosInstance().post('/scheduled-maintenance-type', values).then(({ data }) => {
+        setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
         });
+        setLoading(false);
+        handleSuccess(data?.data);
+      }).catch((err) => {
+        setLoading(false);
+        setToastConfig(err);
+      });
     }
   };
 
