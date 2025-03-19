@@ -570,7 +570,7 @@ const RightSideContents = ({
           disabled={
             checkUniqWarehouse() &&
             selectedRecords?.every((e) =>
-              [ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.repair]?.includes(e.status)
+              [ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair, ASSET_STATUS.underReview]?.includes(e.status)
             )
               ? false
               : true
