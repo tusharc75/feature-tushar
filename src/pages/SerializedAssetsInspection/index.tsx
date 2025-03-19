@@ -563,7 +563,7 @@ const RightSideContents = ({
           {`Create ${resources?.repairOrder?.titleSingular}`}
         </ThemeButton>
       )}
-      {resourceData?.policy?.canCreateRepairJob && permissions?.repairJob?.isCreate && (
+      {resourceData?.policy?.canCreateRepairOrder && permissions?.repairJob?.isCreate && (
         <ThemeButton
           buttonType="themeBorder"
           onClick={() => setShowRepairJobDialog(true)}
