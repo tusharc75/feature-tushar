@@ -217,6 +217,7 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
         parent.productNumber = parent?.productDetail?.productNumber;
         parent.technicianId = parent?.technician?.optionValue;
         parent.technician = parent?.technician?.optionLabel;
+        parent.canDelete = parent?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.reserved;
       });
       dispatch({ type: 'initialize', data: consumables || [], count: consumables?.length || 0 });
       dispatch({ type: 'loading', loading: false });
@@ -444,7 +445,7 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
         {allowedToEdit && (
           <>
             <DetailsPageHeader
-              isAddButtonVisible={!isEmpty(selectedTechnician) && selectedTechnician?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.reserved}
+              isAddButtonVisible={isEmpty(selectedTechnician) || selectedTechnician?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.reserved}
               addButtonProps={{ onClick: () => setConsumablesDialog(true), id: 'add-product-consumable' }}
               isActionButtonVisible={true}
               actionButtonMenuItems={actionButtonMenuItems()}
