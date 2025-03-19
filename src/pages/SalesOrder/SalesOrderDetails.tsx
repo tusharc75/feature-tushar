@@ -183,7 +183,7 @@ const SalesOrderDetails = () => {
           <Box className="control-buttons-v1">
             {salesOrderData ? (
               <>
-                {permissions?.salesOrder?.isUpdate && [SALES_ORDER_STATUS.invoiced].includes(salesOrderData?.status) && (
+                {permissions?.salesOrder?.isUpdate && [SALES_ORDER_STATUS.invoiced, SALES_ORDER_STATUS.readyToInvoice].includes(salesOrderData?.status) && (
                   <ButtonWithPulse
                     onClick={() => {
                       setShowClosedConfirmBox(true);
