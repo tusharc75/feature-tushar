@@ -381,6 +381,14 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                     checked={values['systemGeneratedAutoIncrement']}
                     onChange={(e) => {
                       setFieldValue('systemGeneratedAutoIncrement', e.target.checked);
+                      if (e.target.checked) {
+                        setFieldValue('isDefaultValue', true);
+                        setFieldValue('defaultValue', 'Auto Generated');
+                      }
+                      else {
+                        setFieldValue('isDefaultValue', false);
+                        setFieldValue('defaultValue', '');
+                      }
                     }}
                     color="primary"
                   />
