@@ -62,7 +62,7 @@ const ExpenseApproval = () => {
   }, [page, limit, filters, sorting, showFilteredRecordsOnly]);
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
+    let deepFilter = `?page=${page}&limit=${limit}&expenseApproval=1`;
     if (isExport) {
       deepFilter = `?`;
     }
@@ -90,7 +90,7 @@ const ExpenseApproval = () => {
     setSelectedExpenseReport(null);
     dispatch({ type: 'loading', loading: true });
     try {
-      let data: any = []
+      let data: any = [];
       const queryString = getQueryString();
       const response: any = await axiosInstance().get(`${expenseReport.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
       data = response?.data?.data;
@@ -145,17 +145,12 @@ const ExpenseApproval = () => {
                 showFilters={true}
               />
             </div>
-            <div className="container-with-border p-[20px]">
-              {selectedExpenseReport && (
-                <ExpenceReport
-                  expenceReportId={selectedExpenseReport?._id}
-                  fetchExpenceReportData={fetchData}
-                />
-              )}
+            <div className="container-with-border py-5">
+              {selectedExpenseReport && <ExpenceReport expenceReportId={selectedExpenseReport?._id} fetchExpenceReportData={fetchData} />}
             </div>
           </div>
         ) : (
-          <Box p={2} height={500}>
+          <Box className="max-h-[600px]">
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}

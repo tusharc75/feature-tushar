@@ -1,5 +1,5 @@
 import { Box, Dialog, IconButton } from '@mui/material';
-import { camelCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import { useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -58,19 +58,12 @@ const AddQuotationDataDialog = ({ onSuccess, onClose, fieldTicketData, isSubmitt
       {
         accessor: 'type',
         Header: 'Type',
-        sticky: isMobile || isTablet ? 'none' : 'left',
+        disabled: true,
         width: 100,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
-          <div>
-            <p className="text-truncate">
-              {row.original['type'] === MATERIAL_TYPE.product
-                ? row.original?.productDetail?.serializedProduct
-                  ? '(Serialized)'
-                  : '(Non-Serialized)'
-                : row.original.type === MATERIAL_TYPE.service
-                  ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                  : ''}
-            </p>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <p>{`${startCase(row.original?.type)} `}</p>
           </div>
         )
       },
@@ -124,9 +117,9 @@ const AddQuotationDataDialog = ({ onSuccess, onClose, fieldTicketData, isSubmitt
       parent.index = i + 1;
       parent.type = parent.type;
       parent.detail = parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productName :
-        parent.type === MATERIAL_TYPE.service ? parent?.serviceDetail?.serviceName : parent?.pacakgeDetail?.packageName;
+        parent.type === MATERIAL_TYPE.service ? parent?.serviceDetail?.serviceName : parent?.packageDetail?.packageName;
       parent.description = parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productDescription :
-        parent.type === MATERIAL_TYPE.service ? parent?.serviceDetail?.serviceDescription : parent?.pacakgeDetail?.pacakgeDescription;
+        parent.type === MATERIAL_TYPE.service ? parent?.serviceDetail?.serviceDescription : parent?.packageDetail?.pacakgeDescription;
       parent.qty = parent.qty;
       parent.materialId = parent.materialId;
       parent._id = parent._id;

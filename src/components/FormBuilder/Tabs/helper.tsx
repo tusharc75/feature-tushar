@@ -64,12 +64,6 @@ export const resourcePolicy = [
     resource: sidebarResource.fieldTicket,
     policy: [
       {
-        fieldName: 'showAddPackages',
-        fieldLabel: 'Show Add Packages',
-        type: 'checkBox',
-        defaultValue: false
-      },
-      {
         fieldName: 'showRentalAddMaterial',
         fieldLabel: 'Show Rental Add Material',
         type: 'checkBox',
@@ -78,6 +72,12 @@ export const resourcePolicy = [
       {
         fieldName: 'showQuotationAddMaterial',
         fieldLabel: 'Show Quotation Add Material',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
+        fieldName: 'showAddPackages',
+        fieldLabel: 'Show Add Packages',
         type: 'checkBox',
         defaultValue: false
       },

@@ -111,7 +111,7 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
                       label="Notes"
                       multiline
                       fullWidth
-                      rows={4}
+                      rows={2}
                       value={values.notes}
                       variant="outlined"
                       error={touched['notes'] && Boolean(errors['notes'])}

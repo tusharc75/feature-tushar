@@ -92,6 +92,7 @@ const QuotationDetails = () => {
   const [canConvert, setCanConvert] = useState(false);
   const [reserveAssetWarning, setReserveAssetWarning] = useState(false);
   const [resourceData, setResourceData] = useState(null);
+  const [fieldTicketPolicyData, setFieldTicketPolicyData] = useState(null);
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -280,9 +281,12 @@ const QuotationDetails = () => {
     try {
       const {
         data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.quotation}`);
-      if (data) {
-        setResourceData(data);
+      } = await axiosInstance().get(`/dynamic-form/multiple-resource-policy?resources=${sidebarResource.quotation},${sidebarResource.fieldTicket}`);
+      if (data?.find((e) => e.resource === sidebarResource.quotation)) {
+        setResourceData(data?.find((e) => e.resource === sidebarResource.quotation));
+      }
+      if (data?.find((e) => e.resource === sidebarResource.fieldTicket)) {
+        setFieldTicketPolicyData(data?.find((e) => e.resource === sidebarResource.fieldTicket));
       }
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -573,10 +577,10 @@ const QuotationDetails = () => {
             {[QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(
               quotationData?.versions[currentVersion]?.status
             ) && (
-              <Box className={`ml-auto max-w-max md:static md:-mt-[15px] `}>
-                <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
-              </Box>
-            )}
+                <Box className={`ml-auto max-w-max md:static md:-mt-[15px] `}>
+                  <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
+                </Box>
+              )}
             <div>
               <Steps
                 isNextStep={false}
@@ -594,10 +598,10 @@ const QuotationDetails = () => {
                 handleNext={
                   stepNames[currentStep] === 'Quote Approval'
                     ? () => {
-                        if (allowedToEdit) {
-                          setCustomerAcceptable(true);
-                        }
+                      if (allowedToEdit) {
+                        setCustomerAcceptable(true);
                       }
+                    }
                     : null
                 }
               />
@@ -611,6 +615,7 @@ const QuotationDetails = () => {
                   version={currentVersion}
                   allowedToEdit={allowedToEdit}
                   updateDOASetup={updateDOASetup}
+                  fieldTicketPolicyData={fieldTicketPolicyData}
                 />
               )}
               {stepNames[currentStep] === 'Quote Builder' && quotationData && (
