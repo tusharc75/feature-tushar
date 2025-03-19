@@ -1,4 +1,4 @@
-import { Add, Delete, Edit, ExpandMore } from '@mui/icons-material';
+import { Add, Delete, Edit, ExpandMore, Schedule } from '@mui/icons-material';
 import { Autocomplete, Box, IconButton, Menu, MenuItem, TextField } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
@@ -22,6 +22,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import queryString from 'query-string';
 import { useHistory } from 'react-router-dom';
+import ScheduleMaintenanceTypeDialog from 'src/pages/ScheduleMaintenance/ScheduleMaintenanceType';
 
 const ScheduleMaintenance = () => {
   const { setToastConfig } = useContext(CustomToastContext);
@@ -56,6 +57,7 @@ const ScheduleMaintenance = () => {
   const [selectedType, setSelectedType] = useState(type || 1);
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [scheduleMaintenanceTypeDialog, setScheduleMaintenanceTypeDialog] = useState(false);
 
   const renderedFrom = `${camelCase(sidebarResource.scheduleMaintenance)}_${selectedType}`;
 
@@ -108,6 +110,14 @@ const ScheduleMaintenance = () => {
         Header: 'Duration',
         width: 200,
         Cell: ({ row }) => (row.original?.duration ? <p>{row.original?.duration}</p> : <NoDataCell />)
+      },
+      {
+        accessor: 'maintenanceType',
+        Header: 'Maintenance Type',
+        disableFilters: true,
+        disableSortBy: true,
+        width: 200,
+        Cell: ({ row }) => (row.original?.maintenanceType ? <p>{row.original?.maintenanceType}</p> : <NoDataCell />)
       }
     ];
     coloum.push({
@@ -160,7 +170,7 @@ const ScheduleMaintenance = () => {
     } catch (e) {
       setToastConfig(e);
     }
-  }
+  };
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
@@ -208,7 +218,7 @@ const ScheduleMaintenance = () => {
       filterByIds.push({
         field: 'product',
         term: selectedProduct?.optionValue
-      })
+      });
     }
 
     if (filterByIds?.length) {
@@ -244,7 +254,8 @@ const ScheduleMaintenance = () => {
           materials: rowsToAdd?.map((r) => r?._id),
           materialType: MATERIAL_TYPE.product,
           effectiveDate: _data?.effectiveDate,
-          duration: _data?.duration
+          duration: _data?.duration,
+          maintenanceType: _data?.maintenanceType
         })
         .then(({ data }) => {
           fetchData();
@@ -264,7 +275,8 @@ const ScheduleMaintenance = () => {
         .put(`${product.api}/scheduledMaintenance`, {
           _id: openCustomDataDialog?.data?.uniqueId,
           effectiveDate: _data?.effectiveDate,
-          duration: _data?.duration
+          duration: _data?.duration,
+          maintenanceType: _data?.maintenanceType
         })
         .then(({ data }) => {
           fetchData();
@@ -421,6 +433,18 @@ const ScheduleMaintenance = () => {
           additionalParams={getQueryString(true)}
           hideDownloadTemplate={selectedType === 2}
         />
+        <HtmlTooltip title="Scheduled Maintenance Type">
+          <span>
+            <IconButton
+              size="small"
+              onClick={() => {
+                setScheduleMaintenanceTypeDialog(true);
+              }}
+            >
+              <Schedule fontSize="small" color="primary" />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
       </div>
       <CustomContainer>
         <ListingPageHeader
@@ -461,7 +485,7 @@ const ScheduleMaintenance = () => {
             handleClose={() => {
               setOpenAssignProductDialog(false);
             }}
-            fromResource={sidebarResource.scheduleMaintenance}
+            // fromResource={sidebarResource.scheduleMaintenance}
             isSubmitting={isSubmitting}
           />
         )}
@@ -500,6 +524,13 @@ const ScheduleMaintenance = () => {
               setShowConfirmBox({ open: false, data: null });
             }}
             onOk={handleRemove}
+          />
+        )}
+        {scheduleMaintenanceTypeDialog && (
+          <ScheduleMaintenanceTypeDialog
+            handleClose={() => {
+              setScheduleMaintenanceTypeDialog(false);
+            }}
           />
         )}
       </CustomContainer>
