@@ -8,7 +8,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const ProductQtyToReturnDialog = ({ products, loading, handleClose, handleSuccess }) => {
+const ReturnQtyDialog = ({ products, loading, handleClose, handleSuccess }) => {
   const [fullScreen, setFullScreen] = useState(true);
 
   const initialProducts = products.map(product => ({
@@ -22,7 +22,6 @@ const ProductQtyToReturnDialog = ({ products, loading, handleClose, handleSucces
 
   const validate = (values) => {
     let errors = {};
-
     if (values?.products?.length > 0) {
       values.products.forEach((product, index) => {
         if (isNaN(product.returnQty) || product.returnQty === '') {
@@ -32,7 +31,6 @@ const ProductQtyToReturnDialog = ({ products, loading, handleClose, handleSucces
         }
       });
     }
-
     return errors;
   };
 
@@ -59,7 +57,6 @@ const ProductQtyToReturnDialog = ({ products, loading, handleClose, handleSucces
         showManimizeMaximize={true}
         showRequiredLabel={false}
       />
-
       {products ? (
         <Formik
           initialValues={{ products: initialProducts }}
@@ -76,13 +73,13 @@ const ProductQtyToReturnDialog = ({ products, loading, handleClose, handleSucces
                       <Table aria-label="products return table">
                         <TableHead>
                           <TableRow>
-                            <TableCell width="40%" align="left" className="min-w-[200px]">
-                              Product Name
+                            <TableCell width="60%" align="left" className="min-w-[200px]">
+                              Product
                             </TableCell>
-                            <TableCell width="30%" align="center" className="min-w-[100px]">
+                            <TableCell width="20%" align="left" className="min-w-[100px]">
                               Qty
                             </TableCell>
-                            <TableCell width="30%" align="center" className="min-w-[150px]">
+                            <TableCell width="20%" align="left" className="min-w-[150px]">
                               Return Qty
                             </TableCell>
                           </TableRow>
@@ -94,8 +91,8 @@ const ProductQtyToReturnDialog = ({ products, loading, handleClose, handleSucces
                               values.products.map((product, index) => (
                                 <TableRow key={index}>
                                   <TableCell align="left">{product.productName}</TableCell>
-                                  <TableCell align="center">{product.qty}</TableCell>
-                                  <TableCell align="center">
+                                  <TableCell align="left">{product.qty}</TableCell>
+                                  <TableCell align="left">
                                     <TextField
                                       fullWidth
                                       variant="outlined"
@@ -144,4 +141,4 @@ const ProductQtyToReturnDialog = ({ products, loading, handleClose, handleSucces
   );
 };
 
-export default ProductQtyToReturnDialog;
+export default ReturnQtyDialog;

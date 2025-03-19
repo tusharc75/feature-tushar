@@ -20,7 +20,7 @@ import routes from '../Helpers/Routes';
 import { ListingPageHeader } from '../PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
-const AssignEmployeeDialog = ({ reference, onSuccess, handleClose, ids = [], defaultCompetency = [], extraStaticFilter = [], warehouse = null }) => {
+const AssignEmployeeDialog = ({ reference, isSubmitting = false, onSuccess, handleClose, ids = [], defaultCompetency = [], extraStaticFilter = [], warehouse = null }) => {
   const renderedFrom = `${sidebarResource.employeeMaster}`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -32,7 +32,6 @@ const AssignEmployeeDialog = ({ reference, onSuccess, handleClose, ids = [], def
     state: { permissions, selectedEntity, resources }
   }: any = useData();
 
-  const [isAssigning, setAssigning] = useState(false);
   const [disableSaveButton, setDisableSaveButton] = useState(false);
   const [columns, setColumns] = useState(null);
   const [competencyOptions, setCompetencyOptions] = useState(null);
@@ -191,22 +190,24 @@ const AssignEmployeeDialog = ({ reference, onSuccess, handleClose, ids = [], def
   const leftSideContents = () => {
     return (
       <>
-        <Autocomplete
-          fullWidth
-          className="max-w-[300px]"
-          options={competencyOptions}
-          getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
-          onChange={(e, val) => {
-            setSelectedCompetency(val);
-          }}
-          multiple
-          size={'small'}
-          value={selectedCompetency}
-          filterSelectedOptions={true}
-          renderInput={(params) => (
-            <TextField {...params} margin="none" size={'small'} name="competencyType" label="Competency Type" variant="outlined" fullWidth />
-          )}
-        />
+        {permissions?.competencyType?.isRead &&
+          <Autocomplete
+            fullWidth
+            className="max-w-[300px]"
+            options={competencyOptions}
+            getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+            onChange={(e, val) => {
+              setSelectedCompetency(val);
+            }}
+            multiple
+            size={'small'}
+            value={selectedCompetency}
+            filterSelectedOptions={true}
+            renderInput={(params) => (
+              <TextField {...params} margin="none" size={'small'} name="competencyType" label="Competency Type" variant="outlined" fullWidth />
+            )}
+          />
+        }
         <Autocomplete
           fullWidth
           className="max-w-[300px]"
@@ -250,7 +251,7 @@ const AssignEmployeeDialog = ({ reference, onSuccess, handleClose, ids = [], def
       aria-labelledby="assign-roles-dialog"
     >
       <CustomDialogHeader
-        title={`Add ${resources?.employeeMaster?.titlePlural}`}
+        title={`Assign ${resources?.employeeMaster?.titlePlural}`}
         showManimizeMaximize={false}
         showRequiredLabel={false}
         onClose={handleClose}
@@ -266,10 +267,10 @@ const AssignEmployeeDialog = ({ reference, onSuccess, handleClose, ids = [], def
               leftSideContents={leftSideContents()}
               addButtonProps={{
                 iconsEnabled: false,
-                disabled: isAssigning || disableSaveButton || selectedRecords?.length === 0,
-                loading: isAssigning,
+                disabled: isSubmitting || disableSaveButton || selectedRecords?.length === 0,
+                loading: isSubmitting,
                 text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : '',
-                textAddShow: true
+                customTextAdd: 'Assign'
               }}
               addButtonOnclick={handleSubmit}
               isAddButtonVisible
