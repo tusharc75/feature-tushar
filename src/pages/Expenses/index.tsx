@@ -14,10 +14,10 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { gridLoadingTimeout, prepareDataForGrid, expenses, sidebarResource, EXPENSE_STATUS, formatAmountWithCurrency, getDefaultMyRecordType } from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, expenses, sidebarResource, EXPENSE_STATUS, formatAmountWithCurrency } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import { cloneDisable } from 'src/constants/messageHelpers';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -93,26 +93,6 @@ const Expenses = () => {
           );
         }
       },
-      {
-        accessor: 'distanceUnit',
-        Header: 'Distance Unit',
-        minWidth: 100,
-        width: 150,
-        disableFilters: true,
-        disableSortBy: false,
-        canDrag: true,
-        Cell: ({ row }) => {
-          return row?.original?.unit ? (
-            <div>
-              <p className="text-truncate">
-                {row?.original?.unit}
-              </p>
-            </div>
-          ) : (
-            <NoDataCell />
-          );
-        }
-      },
       ...getStaticFields()
     ];
     setColumns([...extracolumns, ActionsRenderer]);
@@ -159,12 +139,12 @@ const Expenses = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title={row?.original?.canDelete && row?.original?.status === EXPENSE_STATUS.unreported ? 'Delete' : 'You can not delete it is reported'}    >
+        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}    >
           <span>
             <IconButton
               size="small"
               aria-label="Delete"
-              disabled={row?.original?.canDelete && row?.original?.status !== EXPENSE_STATUS.unreported ? true : false}
+              disabled={row?.original?.canDelete ? false : true}
               onClick={() => {
                 setDeleteRecord(row.original);
                 setShowDeleteConfirmBox(true);
@@ -172,7 +152,7 @@ const Expenses = () => {
             >
               <DeleteIcon
                 fontSize="small"
-                color={row?.original?.canDelete && row?.original?.status !== EXPENSE_STATUS.unreported ? 'disabled' : 'error'}
+                color={row?.original?.canDelete ? 'error' : 'disabled'}
               />
             </IconButton>
           </span>
@@ -213,17 +193,15 @@ const Expenses = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     try {
-      let data: any = [], count;
+      let data: any = [];
       const response: any = await axiosInstance().get(`${expenses.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
       data = response?.data?.data;
-      count = response?.data?.count;
       let rows = data.map((u) => {
         let finalObject: any = prepareDataForGrid(u, user);
-        finalObject['isChecked'] = false;
-        finalObject['canDelete'] = permissions?.expenses?.isDelete;
+        finalObject['canDelete'] = permissions?.expenses?.isDelete && u?.status === EXPENSE_STATUS.unreported;
         return finalObject;
       });
-      dispatch({ type: 'initialize', data: rows, count: count });
+      dispatch({ type: 'initialize', data: rows, count: response?.data?.count });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);

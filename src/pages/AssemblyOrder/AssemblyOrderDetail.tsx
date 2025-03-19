@@ -14,11 +14,8 @@ import {
   assemblyOrderSteps,
   checkIsAllowedToDelete,
   checkIsAllowedToEdit,
-  cloneResourceData,
-  customerAccount,
-  rentalManagement,
+  getResourceNormalizeData,
   sidebarResource,
-  warehouse
 } from 'src/constants/helpers';
 import Steps, { getIndex } from 'src/components/Steps';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -138,9 +135,9 @@ const AssemblyOrderDetail = () => {
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.assemblyOrder, data) && data?.status != ASSEMBLY_ORDER_STATUS.converted);
         setAllowedToDelete(
           permissions?.assemblyOrder?.isDelete &&
-            checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
-            data?.canDelete &&
-            ![ASSEMBLY_ORDER_STATUS.converted, ASSEMBLY_ORDER_STATUS.partiallyConverted]?.includes(data?.status)
+          checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
+          data?.canDelete &&
+          ![ASSEMBLY_ORDER_STATUS.converted, ASSEMBLY_ORDER_STATUS.partiallyConverted]?.includes(data?.status)
         );
         setAssemblyOrderData({ ...data });
       })
@@ -272,6 +269,7 @@ const AssemblyOrderDetail = () => {
                 allowedToEdit={allowedToEdit}
                 setCurrentStep={setCurrentStep}
                 nextStep={nextStep}
+                fetchAssembleOrderData={fetchData}
               />
             )}
             {/* {assemblyOrderProcessStepsNames[currentStep] === 'Loading' && assemblyOrderData && (
@@ -342,7 +340,7 @@ const AssemblyOrderDetail = () => {
           }}
           onSuccess={convertToRental}
           open={true}
-          referenceData={{ warehouse: assemblyOrderData?.warehouse?.optionValue, customerAccount: assemblyOrderData?.customerAccount?.optionValue }}
+          referenceData={getResourceNormalizeData(allFields?.map((e) => e?.fieldData), assemblyOrderData, assemblyOrderData?.currency)}
         />
       )}
     </Box>

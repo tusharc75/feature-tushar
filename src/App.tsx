@@ -287,6 +287,7 @@ import ProductTypesDetail from 'src/pages/ProductTypes/ProductTypesDetail';
 import PackageCategory from 'src/pages/PackageCategory';
 import PackageCategoryDetail from 'src/pages/PackageCategory/PackageCategoryDetail';
 import ScheduleMaintenance from 'src/pages/ScheduleMaintenance';
+import CustomMessageDialog from 'src/components/MessageDialog';
 
 var notificationInterval: any = null;
 
@@ -342,7 +343,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
     return () => {
       clearInterval(notificationInterval);
     };
@@ -1264,7 +1265,7 @@ function App() {
       </AnimatePresence>
       {isUpdateModalOpen.open && <ForceUpdatePopup data={isUpdateModalOpen.data} onClose={handleCloseUpdateModal} />}
       {toast?.toastConfig?.open &&
-        (['notFoundError'].some((s) => s !== toast?.toastConfig?.type) ? (
+        (!['notFoundError', 'productInventoryAlert'].includes(toast?.toastConfig?.type) ? (
           <CustomToaster
             type={toast.toastConfig.type}
             message={toast.toastConfig.message}
@@ -1275,6 +1276,15 @@ function App() {
           />
         ) : toast.toastConfig.type === 'notFoundError' ? (
           <RecordDeletedDialog />
+        ) : toast.toastConfig.type === 'productInventoryAlert' ? (
+          <CustomMessageDialog
+            open={toast.toastConfig.open}
+            errorMessages={toast.toastConfig.data}
+            onClose={() => {
+              toast.setToastConfig((prev) => ({ message: '', type: null, open: false }));
+            }}
+            title={toast.toastConfig.message}
+          />
         ) : (
           ''
         ))}

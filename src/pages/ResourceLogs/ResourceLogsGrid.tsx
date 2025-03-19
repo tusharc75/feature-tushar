@@ -11,6 +11,7 @@ import { displayDate, displayDateTime, gridLoadingTimeout, UnCamelCase } from 's
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ChangesDialog from './ChangesDialog';
 import dayjs from 'dayjs';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const renderedFrom = 'resourceLogs';
 
@@ -51,6 +52,18 @@ const ResourceLogsGrid = ({ selectedResource, selectedOption = '', selectedActio
             </p>
           </div>
         )
+      });
+    }
+    if (hideResourceField) {
+      extraColumns.push({
+        accessor: 'index',
+        Header: 'Index',
+        width: 70,
+        primaryField: true,
+        sticky: 'left',
+        Cell: ({ row }) => {
+          return row.original['index'] ? <p className="text-truncate">{row.original.index}</p> : <NoDataCell />;
+        },
       });
     }
     let columns = [
@@ -163,7 +176,7 @@ const ResourceLogsGrid = ({ selectedResource, selectedOption = '', selectedActio
             data: { data, count }
           }
         }) => {
-          let rows = data?.map((u) => {
+          let rows = data?.map((u, index) => {
             var changeString = [];
             var changes = [];
             var operations = [];
@@ -230,6 +243,7 @@ const ResourceLogsGrid = ({ selectedResource, selectedOption = '', selectedActio
             u.changes = changes;
             u.operations = operations;
             u.key = selectedResource?.key || camelCase(selectedResource);
+            u.index = count - index
             return u;
           });
           rows = rows.filter((e) => e);

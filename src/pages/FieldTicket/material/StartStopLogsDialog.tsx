@@ -16,6 +16,16 @@ import { Delete, Edit } from '@mui/icons-material';
 import StartStopDate from './StartStopDateDialog';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
+
+export const formatDurationInHrs = (ms) => {
+  const totalSeconds = Math.floor(ms / 1000);
+  const totalMinutes = Math.floor(totalSeconds / 60);
+  const hours = Math.floor(totalMinutes / 60);
+  const remainingMinutes = totalMinutes % 60;
+
+  return `${hours}:${remainingMinutes.toString().padStart(2, '0')}`;
+};
+
 const StartStopLogsDialog = ({ onClose, referenceId, service, fetchRecords, technician }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_start_stop_logs`;
   const toastConfig = useContext(CustomToastContext);
@@ -89,6 +99,26 @@ const StartStopLogsDialog = ({ onClose, referenceId, service, fetchRecords, tech
       }
     },
     {
+      accessor: 'duration',
+      Header: 'Duration',
+      disableFilters: true,
+      disableSortBy: true,
+      disabled: true,
+      Cell: ({ row }) => {
+        return (
+          <>
+            {row?.original?.duration ? (
+              <>
+                <h5 className="text-truncate">{formatDurationInHrs(row?.original?.duration)}</h5>
+              </>
+            ) : (
+              <NoDataCell />
+            )}
+          </>
+        );
+      }
+    },
+    {
       accessor: 'startedBy',
       Header: 'Started By',
       disabled: true,
@@ -127,6 +157,23 @@ const StartStopLogsDialog = ({ onClose, referenceId, service, fetchRecords, tech
         ) : (
           <NoDataCell />
         )
+    },
+    {
+      accessor: 'notes',
+      Header: 'Notes',
+      Cell: ({ row }) => {
+        return (
+          <>
+            {row?.original?.notes ? (
+              <div>
+                <p className="text-truncate">{row.original?.notes}</p>
+              </div>
+            ) : (
+              <NoDataCell />
+            )}
+          </>
+        );
+      }
     },
     {
       accessor: 'action',

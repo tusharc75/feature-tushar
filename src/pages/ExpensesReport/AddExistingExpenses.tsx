@@ -1,30 +1,29 @@
 import { Box, Dialog } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, EXPENSE_STATUS, sidebarResource } from 'src/constants/helpers';
+import { dateFormatToSend, EXPENSE_STATUS, sidebarResource } from 'src/constants/helpers';
 import { camelCase } from 'lodash';
 import axios, { CancelTokenSource } from 'axios';
 import { useData } from '../../StateProvider/Provider';
 import { gridLoadingTimeout, prepareDataForGrid, expenses } from '../../constants/helpers';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import dayjs from 'dayjs';
 
-function AddExpenses({ open, onClose, fullScreen, setFullScreen, isSubmitting = null, onSave, fetchReportData, expenseReportData = null }) {
-  const renderedFrom = camelCase(sidebarResource?.expenses);
+function AddExistingExpenses({ onClose, ids, isSubmitting, onSuccess, expenseReportData = null }) {
+
+  const renderedFrom = `${camelCase(sidebarResource?.expenses)}_Add`;
+
   const [columns, setColumns] = useState(null);
-  const { generateColumns, checkStaticField } = useColumns();
+  const { generateColumns } = useColumns();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, filters, search, sorting, showFilteredRecordsOnly } = state;
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   } = useData();
-  const [selectedRows, setSelectedRows] = useState([]);
   const { selectedRecords } = state;
 
   useEffect(() => {
@@ -42,31 +41,34 @@ function AddExpenses({ open, onClose, fullScreen, setFullScreen, isSubmitting = 
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.expenses}`);
     data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, routes?.expensesDetail?.path, true);
-    let staticFields = getStaticFields();
-    staticFields.forEach((field) => {
-      newColumns.push(checkStaticField(renderedFrom, field));
-    });
-    setColumns(newColumns);
+    setColumns([...newColumns, ...getStaticFields()]);
   };
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}&deepFilter=[{"field":"expenseDate", "term":{"from":"${`${dayjs.utc(expenseReportData?.fromDate).tz().format('MM/DD/YYYY')}`}", "to":"${`${dayjs.utc(expenseReportData?.toDate).tz().format('MM/DD/YYYY')}`}"}}]`;
-
-    if (isExport) {
-      deepFilter = `?`;
-    }
+  const getQueryString = () => {
+    const ignoreIds = ids && ids?.length > 0 ? ids : [];
+    let deepFilter = `?page=${page}&limit=${limit}&ignoreIds=${JSON.stringify(ignoreIds)}`;
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    const updatedDeepFilters = [...deepFilters];
+    updatedDeepFilters.push({
+      field: 'expenseDate',
+      term: { 'from': dateFormatToSend(expenseReportData?.fromDate), 'to': dateFormatToSend(expenseReportData?.toDate) }
+    });
+    updatedDeepFilters.push({
+      field: 'status',
+      term: EXPENSE_STATUS.unreported
+    });
+
+    if (updatedDeepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedDeepFilters))}`;
     }
 
-    if (filterByIds?.length || deepFilters?.length) {
+    if (filterByIds?.length || updatedDeepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
 
@@ -86,19 +88,16 @@ function AddExpenses({ open, onClose, fullScreen, setFullScreen, isSubmitting = 
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     try {
-      let data: any = [],
-        count;
+      let data: any = [];
       const response: any = await axiosInstance().get(`${expenses.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
       data = response?.data?.data;
-      count = response?.data?.count;
-      data = data.filter((item) => item.status === EXPENSE_STATUS.unreported);
       let rows = data.map((u) => {
         let finalObject = prepareDataForGrid(u, user);
         finalObject['isChecked'] = false;
         finalObject['canDelete'] = permissions?.expenses?.isDelete;
         return finalObject;
       });
-      dispatch({ type: 'initialize', data: rows, count: count });
+      dispatch({ type: 'initialize', data: rows, count: response?.data?.count });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
@@ -107,38 +106,20 @@ function AddExpenses({ open, onClose, fullScreen, setFullScreen, isSubmitting = 
     }
   };
 
-  const handleSave = (selectedRecords) => {
-    setSelectedRows(selectedRecords);
-    onSave(selectedRows);
-    onClose();
-  };
-
-  const handleRowSelection = (selectedRows) => {
-    setSelectedRows(selectedRows);
-  };
-
   return (
     <Dialog
       maxWidth="md"
       fullWidth
-      fullScreen={fullScreen || isMobile || isTablet}
-      TransitionComponent={CustomDialogTransition}
+      fullScreen
       aria-labelledby="customized-dialog-title"
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {
           onClose();
         }
       }}
-      open={open}
+      open={true}
     >
-      <CustomDialogHeader
-        title="Add Expense to Report"
-        onClose={onClose}
-        isMinimized={!fullScreen}
-        onMinimizeMaximize={() => {
-          setFullScreen((prevState) => !prevState);
-        }}
-      />
+      <CustomDialogHeader title={`Add ${resources?.expenses?.titlePlural}`} onClose={onClose} showRequiredLabel={false} />
       <CustomDialogContent>
         <ListingPageHeader
           showSearchInMobile={true}
@@ -153,21 +134,19 @@ function AddExpenses({ open, onClose, fullScreen, setFullScreen, isSubmitting = 
             textAddShow: true
           }}
           addButtonOnclick={() => {
-            handleSave(selectedRecords);
-            fetchReportData();
+            onSuccess(selectedRecords);
           }}
           isAddButtonVisible={true}
           setQueryString={false}
         />
         {columns ? (
           <CustomReactTable
-            height={'calc(100vh - 200px)'}
+            height={'calc(100vh - 250px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             resource={sidebarResource?.expenses}
-            onSelect={handleRowSelection}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             refreshGrid={fetchData}
@@ -182,4 +161,4 @@ function AddExpenses({ open, onClose, fullScreen, setFullScreen, isSubmitting = 
   );
 }
 
-export default AddExpenses;
+export default AddExistingExpenses;

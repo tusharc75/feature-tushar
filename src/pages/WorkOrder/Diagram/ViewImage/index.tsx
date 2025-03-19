@@ -3,8 +3,11 @@ import { fabric } from 'fabric';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { b64toBlob } from 'src/constants/helpers';
-import { Box, FormControl, Typography } from '@mui/material';
+import { Box, FormControl, IconButton, Typography } from '@mui/material';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
+import UndoIcon from '@mui/icons-material/Undo';
+import RedoIcon from '@mui/icons-material/Redo';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 fabric.IText.prototype.initHiddenTextarea = (function (initHiddenTextarea) {
   return function () {
@@ -28,6 +31,8 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
   const [isHighlighterMode, setHighlighterMode] = useState(false);
   const [brushPaths, setBrushPaths] = useState([]);
   const isSelected = useRef(false);
+  const [highlighterRedoPaths, setHighlighterRedoPaths] = useState([]);
+  const [brushRedoPaths, setBrushRedoPaths] = useState([]);
 
   useEffect(() => {
     // for touchScroll
@@ -265,19 +270,36 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
   };
 
   const handleUndo = () => {
-    if (isHighlighterMode) {
+    if (isHighlighterMode && highlighterPaths.length > 0) {
       const lastHighlighterPath = highlighterPaths.pop();
-      if (lastHighlighterPath) {
-        canvas.remove(lastHighlighterPath);
-        canvas.requestRenderAll();
-      }
-    }
-    if (isDrawingMode) {
+      setHighlighterPaths(highlighterPaths);
+      canvas.remove(lastHighlighterPath);
+      canvas.requestRenderAll();
+      setHighlighterRedoPaths(prev => [...prev, lastHighlighterPath]);
+    } else if (isDrawingMode && brushPaths.length > 0) {
       const lastBrushPath = brushPaths.pop();
-      if (lastBrushPath) {
-        canvas.remove(lastBrushPath);
-        canvas.requestRenderAll();
-      }
+      setBrushPaths(brushPaths);
+      canvas.remove(lastBrushPath);
+      canvas.requestRenderAll();
+      setBrushRedoPaths(prev => [...prev, lastBrushPath]);
+    }
+  };
+
+  const handleRedo = () => {
+    if (isHighlighterMode && highlighterRedoPaths.length > 0) {
+      const path = highlighterRedoPaths.pop();
+      setHighlighterRedoPaths(highlighterRedoPaths);
+      canvas.add(path);
+      path.setCoords();
+      canvas.renderAll();
+      setHighlighterPaths(prev => [...prev, path]);
+    } else if (isDrawingMode && brushRedoPaths.length > 0) {
+      const path = brushRedoPaths.pop();
+      setBrushRedoPaths(brushRedoPaths);
+      canvas.add(path);
+      path.setCoords();
+      canvas.renderAll();
+      setBrushPaths(prev => [...prev, path]);
     }
   };
 
@@ -436,12 +458,6 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
           >
             {isDrawingMode ? 'Exit Drawing Mode' : 'Enter Drawing Mode'}
           </ThemeButton>
-          {(isDrawingMode || isHighlighterMode) && (
-            <ThemeButton
-              disabled={loading}
-              onClick={handleUndo}
-            > Undo</ThemeButton>
-          )}
           <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*" onChange={handleImageUpload} />
           <ThemeButton
             disabled={loading || isDrawingMode || isHighlighterMode}
@@ -451,6 +467,28 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
           >
             Upload Watermark
           </ThemeButton>
+          {(isDrawingMode || isHighlighterMode) && (
+            <>
+              <HtmlTooltip title='Undo'>
+                <IconButton
+                  disabled={loading}
+                  onClick={handleUndo}
+                  size='small'
+                  color={loading ? "default" : "primary"}
+                > <UndoIcon />
+                </IconButton>
+              </HtmlTooltip>
+              <HtmlTooltip title='Redo'>
+                <IconButton
+                  disabled={isHighlighterMode ? highlighterRedoPaths.length === 0 : brushRedoPaths.length === 0 || loading}
+                  onClick={handleRedo}
+                  size='small'
+                  color={(isHighlighterMode ? highlighterRedoPaths.length === 0 : brushRedoPaths.length === 0 || loading) ? "default" : "primary"}
+                > <RedoIcon />
+                </IconButton>
+              </HtmlTooltip>
+            </>
+          )}
         </div>
         {selectedObject && (
           <Box className="flex items-center gap-2">

@@ -1335,6 +1335,7 @@ const LoadingTicket = ({
                   ASSET_STATUS.inTransit,
                   ASSET_STATUS.inRepair,
                   ASSET_STATUS.repair,
+                  ASSET_STATUS.reserved,
                   ASSET_STATUS.scrapRequested
                 ].includes(f.status)
               )

@@ -9,7 +9,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import styles from './logs.module.scss';
 import { BiRefresh } from 'react-icons/bi';
-import { BsCheckLg, BsExclamationLg, BsPlusLg, BsFillSkipEndFill } from 'react-icons/bs';
+import { BsCheckLg, BsExclamationLg, BsPlusLg, BsFillSkipEndFill, BsArrowRepeat } from 'react-icons/bs';
 import { FaUser as UserIcon } from 'react-icons/fa';
 import { MdBolt } from 'react-icons/md';
 import { CustomDialogTransition, displayDate, displayDateTime } from 'src/constants/helpers';
@@ -70,7 +70,7 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
     completed: 'Completed',
     passed: 'Passed',
     skipped: 'Skipped',
-    unSkipped: 'Un-Skipped',
+    reopen: 'Re-Open',
     failed: 'Failed',
     valueAdded: 'valueAdded',
     valueUpdated: 'valueUpdated',
@@ -89,8 +89,8 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
       case operations.skipped:
         icon = <BsCheckLg />;
         break;
-      case operations.unSkipped:
-        icon = <BsCheckLg />;
+      case operations.reopen:
+        icon = <BsArrowRepeat />;
         break;
       case operations.start:
         icon = <BsFillSkipEndFill />;
@@ -132,7 +132,7 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
       case operations.skipped:
         color = { '--icon-color': '#138A86', '--icon-bg-color': '#E2FBEC' } as React.CSSProperties;
         break;
-      case operations.unSkipped:
+      case operations.reopen:
         color = { '--icon-color': '#138A86', '--icon-bg-color': '#E2FBEC' } as React.CSSProperties;
         break;
       case operations.failed:
@@ -172,8 +172,8 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
       case operations.skipped:
         message = `<span>Skipped</span> ${stepName} ${serviceName}`;
         break;
-      case operations.unSkipped:
-        message = `<span>Started</span> ${stepName} ${serviceName}`;
+      case operations.reopen:
+        message = `<span>Re-Open</span> ${stepName} ${serviceName}`;
         break;
       case operations.valueAdded:
         message = `<span>Added value</span> ${stepName} ${serviceName}`;

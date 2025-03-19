@@ -41,7 +41,8 @@ const FieldTicket = ({
   allowedToEdit,
   handleChangeStatus,
   resource,
-  enableGlobalSearch = true
+  enableGlobalSearch = true,
+  noQuotationCheck = false
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const { setWalkmeData } = useSetWalkmeData();
@@ -261,7 +262,7 @@ const FieldTicket = ({
           </span>
         </HtmlTooltip>
         <HideWhenOffline>
-          {!serviceOrderData?.quotation && (
+          {(!serviceOrderData?.quotation || noQuotationCheck) && (
             <HtmlTooltip title={permissions?.fieldTicket?.isCreate ? 'Clone' : cloneDisable}>
               <span>
                 <IconButton
@@ -349,8 +350,8 @@ const FieldTicket = ({
         <DetailsPageHeader
           isAddButtonVisible={true}
           addButtonProps={{
-            disabled: allowedToEdit && !serviceOrderData?.quotation ? false : true,
-            tooltip: !allowedToEdit ? ownerAndColaborator : serviceOrderData?.quotation ? `Converted from ${resources?.quotation?.titleSingular} you can not perform this action` : ''
+            disabled: allowedToEdit && (!serviceOrderData?.quotation || noQuotationCheck) ? false : true,
+            tooltip: !allowedToEdit ? ownerAndColaborator : (serviceOrderData?.quotation && !noQuotationCheck) ? `Converted from ${resources?.quotation?.titleSingular} you can not perform this action` : ''
           }}
           addButtonMenuItems={addButtonMenuItems()}
           isActionButtonVisible={!isOffline}

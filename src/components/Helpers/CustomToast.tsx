@@ -5,12 +5,13 @@ import Snackbar from '@mui/material/Snackbar';
 export type CustomToastProps = {
   open: boolean;
   message: string;
-  type: AlertProps['severity'] | 'notFoundError';
+  type: AlertProps['severity'] | 'notFoundError' | 'productInventoryAlert';
   hideDuration?: number;
   anchorOrigin?: {
     vertical: 'top' | 'bottom';
     horizontal: 'left' | 'center' | 'right';
   };
+  data?: []
 };
 type ExtraAttributes = {
   close: () => void;

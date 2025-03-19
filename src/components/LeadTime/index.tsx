@@ -38,7 +38,7 @@ const LeadTime = ({ referenceType, referenceId, referenceLabel }) => {
               setOpen(true);
             }}
           >
-            <AddCircleOutline fontSize="small" />
+            <AddCircleOutline fontSize="small" color='primary' />
           </IconButton>
         </Box>
         <Box className="formdata-v1" style={{ minHeight: '250px' }}>
