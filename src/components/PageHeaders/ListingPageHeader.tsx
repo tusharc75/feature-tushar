@@ -19,6 +19,7 @@ type ButtonPropsWithExtraData = {
   iconsEnabled?: boolean;
   text?: string;
   textAddShow?: boolean;
+  customTextAdd?: string;
 } & ButtonProps;
 
 type ListingPageHeaderProps = {
@@ -89,6 +90,7 @@ const ListingPageHeader = ({
     iconsEnabled: addButtonIconsEnabled = true,
     text: addButtonText = '',
     textAddShow = false,
+    customTextAdd = null,
     ...restOfAddButtonProps
   } = addButtonProps;
 
@@ -193,9 +195,8 @@ const ListingPageHeader = ({
           </>
         ) : null}
         <div
-          className={`flex flex-grow ${shouldNotFlexWrap ? '' : 'flex-wrap'} items-center justify-end gap-[8px] ${cn(showSearchInMobile ? 'max-[600px]:pt-2' : '')} ${
-            !isLeftSidePresent && isMobile ? '-mt-2' : ''
-          }`}
+          className={`flex flex-grow ${shouldNotFlexWrap ? '' : 'flex-wrap'} items-center justify-end gap-[8px] ${cn(showSearchInMobile ? 'max-[600px]:pt-2' : '')} ${!isLeftSidePresent && isMobile ? '-mt-2' : ''
+            }`}
         >
           {Boolean(leftSideContentsOfSearchFilter) ? leftSideContentsOfSearchFilter : null}
           {onSearch ? (
@@ -234,7 +235,7 @@ const ListingPageHeader = ({
                       startIcon={isMobile ? null : addButtonIconsEnabled ? <AddOutlined /> : null}
                     >
                       {renderButtonText({
-                        text: textAddShow ? 'Add' : `Create`,
+                        text: customTextAdd ? customTextAdd : textAddShow ? 'Add' : `Create`,
                         loading: false,
                         iconText: addButtonText,
                         mobileIcon: <AddOutlined fontSize="small" />
