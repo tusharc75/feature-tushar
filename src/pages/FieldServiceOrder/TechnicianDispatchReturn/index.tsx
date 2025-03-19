@@ -228,7 +228,7 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
                 disabled={isDisabled}
                 onClick={() => {
                   if (isReturn) {
-                    setProductQtyToReturnDialog({ open: true, data: [row?.original] });
+                    setProductQtyToReturnDialog({ open: true, data: [row?.original, ...(row?.original?.subRows || [])] });
                   } else {
                     setConfirmationDialog({ open: true, data: [row?.original] });
                   }
@@ -362,7 +362,7 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
     });
     axiosInstance()
       .post(`${fieldServiceOrder.api}/technician/return`, {
-        _ids: Array.from(_ids),
+        _ids,
         products: products?.map((p) => ({
           uniqueId: p?._id,
           returnQty: p?.returnQty
@@ -448,7 +448,7 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
       {confirmationDialog.open && (
         <ConfirmationDialog
           open={confirmationDialog.open}
-          message={`Are you sure you want to ${isReturn ? 'return' : 'dispatch'} selected techncian(s) & product(s)?`}
+          message={`Are you sure you want to ${isReturn ? 'return' : 'dispatch'} selected techncian(s)/product(s)?`}
           onClose={() => {
             setConfirmationDialog({ open: false, data: null });
           }}
