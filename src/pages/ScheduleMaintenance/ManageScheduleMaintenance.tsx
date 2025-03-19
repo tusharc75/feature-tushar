@@ -1,4 +1,4 @@
-import { Autocomplete, Box, Dialog, TextField } from '@mui/material';
+import { Autocomplete, Box, Dialog, IconButton, TextField } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -7,9 +7,12 @@ import CustomDatePicker from 'src/components/CustomDatePicker';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { date, object, string } from 'yup';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import ManageScheduleMaintenanceType from 'src/pages/ScheduleMaintenance/ScheduleMaintenanceType/ManageScheduleMaintenanceType';
 
 const Schema = object().shape({
   effectiveDate: date().required('please enter Effective Date'),
@@ -23,6 +26,7 @@ const ManageScheduleMaintenance = ({ data = null, handleClose, handleSave, loadi
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialData, setInitialData] = useState({ effectiveDate: '', duration: '', maintenanceType: '' });
   const [scheduledMaintenanceTypeOptions, setScheduledMaintenanceTypeOptions] = useState([]);
+  const [openScheduledMaintenanceType, setOpenScheduledMaintenanceType] = useState(false);
 
   useEffect(() => {
     axiosInstance()
@@ -73,34 +77,44 @@ const ManageScheduleMaintenance = ({ data = null, handleClose, handleSave, loadi
             <CustomDialogContent>
               <Form autoComplete="off" autoCorrect="off" noValidate>
                 <Box p={1}>
-                  <Autocomplete
-                    id="maintenanceType"
-                    options={scheduledMaintenanceTypeOptions}
-                    size="small"
-                    getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                    isOptionEqualToValue={(option: any, val) => option.optionValue === val}
-                    value={
-                      scheduledMaintenanceTypeOptions.filter((data) => data.optionValue === values['maintenanceType']).length
-                        ? scheduledMaintenanceTypeOptions.filter((data) => data.optionValue === values['maintenanceType'])[0]
-                        : ''
-                    }
-                    onChange={(event: any, newValue: any) => {
-                      setFieldValue('maintenanceType', newValue?.optionValue || '');
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        name="maintenanceType"
+                  <div className="flex items-center gap-2">
+                    <div className="w-100">
+                      <Autocomplete
+                        id="maintenanceType"
+                        options={scheduledMaintenanceTypeOptions}
                         size="small"
-                        margin="dense"
-                        label="Maintenance Type"
-                        variant="outlined"
-                        required
-                        error={touched['maintenanceType'] && Boolean(errors['maintenanceType'])}
-                        helperText={touched['maintenanceType'] && errors['maintenanceType']}
+                        getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                        isOptionEqualToValue={(option: any, val) => option.optionValue === val}
+                        value={
+                          scheduledMaintenanceTypeOptions.filter((data) => data.optionValue === values['maintenanceType']).length
+                            ? scheduledMaintenanceTypeOptions.filter((data) => data.optionValue === values['maintenanceType'])[0]
+                            : ''
+                        }
+                        onChange={(event: any, newValue: any) => {
+                          setFieldValue('maintenanceType', newValue?.optionValue || '');
+                        }}
+                        disabled={data ? true : false}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            name="maintenanceType"
+                            size="small"
+                            margin="dense"
+                            label="Maintenance Type"
+                            variant="outlined"
+                            required
+                            error={touched['maintenanceType'] && Boolean(errors['maintenanceType'])}
+                            helperText={touched['maintenanceType'] && errors['maintenanceType']}
+                          />
+                        )}
                       />
-                    )}
-                  />
+                    </div>
+                    <HtmlTooltip title={`Add `}>
+                      <IconButton onClick={() => setOpenScheduledMaintenanceType(true)} size="small" color="primary">
+                        <AddCircleIcon />
+                      </IconButton>
+                    </HtmlTooltip>
+                  </div>
                   <Box mt={1}></Box>
                   <CustomDatePicker
                     fullWidth
@@ -151,6 +165,19 @@ const ManageScheduleMaintenance = ({ data = null, handleClose, handleSave, loadi
                 Save
               </ThemeButton>
             </CustomDialogFooter>
+            {openScheduledMaintenanceType && (
+              <ManageScheduleMaintenanceType
+                handleClose={() => {
+                  setOpenScheduledMaintenanceType(false);
+                }}
+                data={null}
+                handleSuccess={(_data) => {
+                  setScheduledMaintenanceTypeOptions([...scheduledMaintenanceTypeOptions, { optionLabel: _data?.name, optionValue: _data?._id }]);
+                  setFieldValue('maintenanceType', _data?._id);
+                  setOpenScheduledMaintenanceType(false);
+                }}
+              />
+            )}
           </>
         )}
       </Formik>

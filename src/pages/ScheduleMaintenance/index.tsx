@@ -1,7 +1,7 @@
-import { Add, Delete, Edit, ExpandMore, Schedule } from '@mui/icons-material';
+import { Add, Delete, Edit, ExpandMore, Construction } from '@mui/icons-material';
 import { Autocomplete, Box, IconButton, Menu, MenuItem, TextField } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
-import { camelCase } from 'lodash';
+import { camelCase, uniqBy } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
@@ -58,6 +58,8 @@ const ScheduleMaintenance = () => {
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [scheduleMaintenanceTypeDialog, setScheduleMaintenanceTypeDialog] = useState(false);
+  const [scheduledMaintenanceTypeOptions, setScheduledMaintenanceTypeOptions] = useState([]);
+  const [selectedScheduledMaintenanceType, setSelectedScheduledMaintenanceType] = useState(null);
 
   const renderedFrom = `${camelCase(sidebarResource.scheduleMaintenance)}_${selectedType}`;
 
@@ -70,6 +72,21 @@ const ScheduleMaintenance = () => {
     fetchGridColumns();
     setSelectedProduct(null);
   }, [selectedType]);
+
+  useEffect(() => {
+    fetchScheduledMaintenanceOptions();
+  }, []);
+
+  const fetchScheduledMaintenanceOptions = () => {
+    axiosInstance()
+      .get(`/scheduled-maintenance-type`)
+      .then(({ data: { data } }) => {
+        if (data?.length) {
+          setScheduledMaintenanceTypeOptions(data?.map((d) => ({ optionLabel: d?.name, optionValue: d?._id })));
+        }
+      })
+      .catch((error) => {});
+  };
 
   const fetchGridColumns = async () => {
     dispatch({ type: 'loading', loading: true });
@@ -96,6 +113,14 @@ const ScheduleMaintenance = () => {
       );
     }
     coloum = [
+      {
+        accessor: 'maintenanceType',
+        Header: 'Maintenance Type',
+        disableFilters: true,
+        disableSortBy: true,
+        width: 200,
+        Cell: ({ row }) => (row.original?.maintenanceType ? <p>{row.original?.maintenanceType}</p> : <NoDataCell />)
+      },
       ...newColumns,
       {
         accessor: 'effectiveDate',
@@ -110,14 +135,6 @@ const ScheduleMaintenance = () => {
         Header: 'Duration',
         width: 200,
         Cell: ({ row }) => (row.original?.duration ? <p>{row.original?.duration}</p> : <NoDataCell />)
-      },
-      {
-        accessor: 'maintenanceType',
-        Header: 'Maintenance Type',
-        disableFilters: true,
-        disableSortBy: true,
-        width: 200,
-        Cell: ({ row }) => (row.original?.maintenanceType ? <p>{row.original?.maintenanceType}</p> : <NoDataCell />)
       }
     ];
     coloum.push({
@@ -166,7 +183,7 @@ const ScheduleMaintenance = () => {
   const fetchProducts = async () => {
     try {
       const response = await axiosInstance().get(`${product.api}/scheduledMaintenance/product`);
-      setProducts(response?.data?.data || []);
+      setProducts(uniqBy(response?.data?.data || [], 'optionValue'));
     } catch (e) {
       setToastConfig(e);
     }
@@ -179,7 +196,7 @@ const ScheduleMaintenance = () => {
       fetchProducts();
     }
     return () => cancelTokenSource.cancel();
-  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, selectedType, selectedProduct]);
+  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, selectedType, selectedProduct, selectedScheduledMaintenanceType]);
 
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
@@ -212,6 +229,9 @@ const ScheduleMaintenance = () => {
       deepFilter = deepFilter + `&materialType=${MATERIAL_TYPE.serializedAsset}`;
     }
 
+    if (selectedScheduledMaintenanceType?.optionValue) {
+      deepFilter = deepFilter + `&maintenanceType=${selectedScheduledMaintenanceType.optionValue}`;
+    }
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (selectedProduct?.optionValue) {
@@ -332,16 +352,21 @@ const ScheduleMaintenance = () => {
   };
 
   const LeftSideContent = () => {
-    const [anchorEl, setAnchorEl] = useState(null);
-    const handleClick = (event) => {
-      setAnchorEl(event.currentTarget);
-    };
-
-    const handleClose = () => {
-      setAnchorEl(null);
-    };
     return (
-      <>
+      <div className="flex gap-2">
+        <Autocomplete
+          id="maintenanceType"
+          fullWidth
+          options={scheduledMaintenanceTypeOptions}
+          renderInput={(params) => <TextField {...params} size="small" variant="outlined" label="Select Maintenance Type" margin="none" />}
+          getOptionLabel={(option) => option?.optionLabel || ''}
+          isOptionEqualToValue={(option: any, val) => (option ? option?.optionValue === val?.optionValue : false)}
+          style={{ width: '300px' }}
+          onChange={(e, val) => {
+            setSelectedScheduledMaintenanceType(val);
+          }}
+          value={selectedScheduledMaintenanceType}
+        />
         {selectedType === 2 && (
           <Autocomplete
             id="products"
@@ -353,9 +378,25 @@ const ScheduleMaintenance = () => {
             onChange={(e, val) => {
               setSelectedProduct(val);
             }}
+            style={{ width: '300px' }}
             value={selectedProduct}
           />
         )}
+      </div>
+    );
+  };
+
+  const LeftSideContentOfSearchFilter = () => {
+    const [anchorEl, setAnchorEl] = useState(null);
+    const handleClick = (event) => {
+      setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+      setAnchorEl(null);
+    };
+    return (
+      <>
         {selectedType === 1 && (
           <>
             <ThemeButton
@@ -434,16 +475,14 @@ const ScheduleMaintenance = () => {
           hideDownloadTemplate={selectedType === 2}
         />
         <HtmlTooltip title="Scheduled Maintenance Type">
-          <span>
-            <IconButton
-              size="small"
-              onClick={() => {
-                setScheduleMaintenanceTypeDialog(true);
-              }}
-            >
-              <Schedule fontSize="small" color="primary" />
-            </IconButton>
-          </span>
+          <IconButton
+            size="small"
+            onClick={() => {
+              setScheduleMaintenanceTypeDialog(true);
+            }}
+          >
+            <Construction fontSize="small" color="primary" />
+          </IconButton>
         </HtmlTooltip>
       </div>
       <CustomContainer>
@@ -451,7 +490,8 @@ const ScheduleMaintenance = () => {
           toggleButtonList={types}
           selectedType={selectedType}
           setSelectedType={setSelectedType}
-          leftSideContentsOfSearchFilter={<LeftSideContent />}
+          leftSideContents={<LeftSideContent />}
+          leftSideContentsOfSearchFilter={<LeftSideContentOfSearchFilter />}
           searchValue={search}
           onSearch={handleSearch}
           isActionButtonVisible={true}

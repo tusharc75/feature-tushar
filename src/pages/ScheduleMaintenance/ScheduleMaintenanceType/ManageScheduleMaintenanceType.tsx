@@ -13,7 +13,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { object, string } from 'yup';
 
 const Schema = object().shape({
-  name: string().required('please enter Name')
+  name: string().required('please enter Type Name')
 });
 
 const ManageScheduleMaintenanceType = ({ handleClose, data = null, handleSuccess }) => {
@@ -45,9 +45,9 @@ const ManageScheduleMaintenanceType = ({ handleClose, data = null, handleSuccess
     } else {
       axiosInstance()
         .post('/scheduled-maintenance-type', values)
-        .then((res) => {
+        .then(({ data: { data } }) => {
           setLoading(false);
-          handleSuccess();
+          handleSuccess(data);
         })
         .catch((err) => {
           setLoading(false);
@@ -85,13 +85,14 @@ const ManageScheduleMaintenanceType = ({ handleClose, data = null, handleSuccess
                     margin="dense"
                     size="small"
                     type="text"
-                    label="Name"
+                    label="Type Name"
                     name="name"
                     variant="outlined"
                     value={values['name']}
                     onChange={(e) => {
                       setFieldValue('name', e.target.value.trimStart());
                     }}
+                    required
                     error={touched['name'] && Boolean(errors['name'])}
                     helperText={touched['name'] && errors['name']}
                   />
