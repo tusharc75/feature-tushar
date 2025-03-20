@@ -64,7 +64,12 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
     }
     setLoading(true);
     axiosInstance()
-      .get(`/user/pdf?fileName=${data?.url}&attachmentId=${data?.attachmentId}`)
+      .get(`/user/pdf`,{
+        params:{
+          fileName:data?.url,
+          attachmentId:data?.attachmentId
+        }
+      })
       .then(({ data }) => {
         const images = data.map((bufferData) => {
           const buffer = new Uint8Array(bufferData.data);
