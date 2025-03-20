@@ -799,7 +799,7 @@ export default function NewCreateQuotePdfTemplate() {
                         error={touched['tableFontSize'] && Boolean(errors['tableFontSize'])}
                         helperText={touched['tableFontSize'] && errors['tableFontSize']}
                         onChange={(e) => {
-                          setFieldValue('tableFontSize', e.target.value.trimStart());
+                          setFieldValue('tableFontSize', parseInt(e.target.value.trimStart()));
                         }}
                         slotProps={{
                           input: {
