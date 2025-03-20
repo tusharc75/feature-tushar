@@ -49,7 +49,7 @@ const ScheduleMaintenance = () => {
   const [columns, setColumns] = useState(null);
   const [openAssignProductDialog, setOpenAssignProductDialog] = useState(false);
   const [openAssignSerializedAssetDialog, setOpenAssignSerializedAssetDialog] = useState(false);
-  const [openCustomDataDialog, setOpenCustomDataDialog] = useState({ open: false, data: null });
+  const [openCustomDataDialog, setOpenCustomDataDialog] = useState({ open: false, isBulkEdit: false, data: null });
   const [rowsToAdd, setRowsToAdd] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, data: null });
@@ -86,7 +86,7 @@ const ScheduleMaintenance = () => {
           setScheduledMaintenanceTypeOptions(data?.map((d) => ({ optionLabel: d?.name, optionValue: d?._id })));
         }
       })
-      .catch((error) => { });
+      .catch((error) => {});
   };
 
   const fetchGridColumns = async () => {
@@ -154,7 +154,7 @@ const ScheduleMaintenance = () => {
               <IconButton
                 size="small"
                 onClick={() => {
-                  setOpenCustomDataDialog({ open: true, data: row?.original });
+                  setOpenCustomDataDialog({ open: true, isBulkEdit: false, data: row?.original });
                 }}
               >
                 <Edit fontSize="small" color="primary" />
@@ -210,7 +210,11 @@ const ScheduleMaintenance = () => {
             data: { data, count }
           }
         }) => {
-          const rows = data.map((e) => prepareDataForGrid(e));
+          const rows = data.map((e) => {
+            const finalObject: any = prepareDataForGrid(e);
+            finalObject['_id'] = `${e?._id}_${e?.uniqueId}`;
+            return finalObject;
+          });
           dispatch({ type: 'initialize', data: rows, count: count });
           dispatch({ type: 'loading', loading: false });
         }
@@ -261,7 +265,7 @@ const ScheduleMaintenance = () => {
     }
 
     if (showFilteredRecordsOnly) {
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(selectedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(selectedRecords.map((m) => m?._id.split('_')[0]))}`;
     }
 
     return deepFilter;
@@ -286,7 +290,7 @@ const ScheduleMaintenance = () => {
           });
           fetchData();
           setIsSubmitting(false);
-          setOpenCustomDataDialog({ open: false, data: null });
+          setOpenCustomDataDialog({ open: false, isBulkEdit: false, data: null });
           setOpenAssignProductDialog(false);
           setOpenAssignSerializedAssetDialog(false);
           setRowsToAdd([]);
@@ -295,32 +299,35 @@ const ScheduleMaintenance = () => {
           setIsSubmitting(false);
           setToastConfig(error);
         });
-    } else if (_data && openCustomDataDialog?.data?.uniqueId) {
+    } else if (_data && openCustomDataDialog?.data?.uniqueId && !openCustomDataDialog?.isBulkEdit) {
       setIsSubmitting(true);
-      axiosInstance().put(`${product.api}/scheduling-maintenance`, {
-        _id: openCustomDataDialog?.data?.uniqueId,
-        effectiveDate: _data?.effectiveDate,
-        duration: _data?.duration,
-      }).then(({ data }) => {
-        setToastConfig({
-          open: true,
-          type: 'success',
-          message: data?.message
+      axiosInstance()
+        .put(`${product.api}/scheduling-maintenance`, {
+          _id: [openCustomDataDialog?.data?.uniqueId],
+          effectiveDate: _data?.effectiveDate,
+          duration: _data?.duration
+        })
+        .then(({ data }) => {
+          setToastConfig({
+            open: true,
+            type: 'success',
+            message: data?.message
+          });
+          fetchData();
+          setIsSubmitting(false);
+          setOpenCustomDataDialog({ open: false, isBulkEdit: false, data: null });
+          setOpenAssignProductDialog(false);
+          setOpenAssignSerializedAssetDialog(false);
+        })
+        .catch((error) => {
+          setIsSubmitting(false);
+          setToastConfig(error);
         });
-        fetchData();
-        setIsSubmitting(false);
-        setOpenCustomDataDialog({ open: false, data: null });
-        setOpenAssignProductDialog(false);
-        setOpenAssignSerializedAssetDialog(false);
-      }).catch((error) => {
-        setIsSubmitting(false);
-        setToastConfig(error);
-      });
-    } else if (_data && !openCustomDataDialog?.data?.uniqueId) {
+    } else if (_data && !openCustomDataDialog?.data?.uniqueId && !openCustomDataDialog?.isBulkEdit) {
       setIsSubmitting(true);
       axiosInstance()
         .post(`${product.api}/scheduling-maintenance`, {
-          materials: [openCustomDataDialog?.data?._id],
+          materials: [openCustomDataDialog?.data?._id?.split('_')[0]],
           effectiveDate: _data?.effectiveDate,
           duration: _data?.duration,
           materialType: MATERIAL_TYPE.serializedAsset,
@@ -334,7 +341,32 @@ const ScheduleMaintenance = () => {
           });
           fetchData();
           setIsSubmitting(false);
-          setOpenCustomDataDialog({ open: false, data: null });
+          setOpenCustomDataDialog({ open: false, isBulkEdit: false, data: null });
+          setOpenAssignProductDialog(false);
+          setOpenAssignSerializedAssetDialog(false);
+        })
+        .catch((error) => {
+          setIsSubmitting(false);
+          setToastConfig(error);
+        });
+    } else if (_data && !openCustomDataDialog?.data && openCustomDataDialog?.isBulkEdit && selectedRecords?.length) {
+      setIsSubmitting(true);
+      axiosInstance()
+        .put(`${product.api}/scheduling-maintenance`, {
+          _id: selectedRecords?.map((r) => r?.uniqueId),
+          effectiveDate: _data?.effectiveDate,
+          duration: _data?.duration
+        })
+        .then(({ data }) => {
+          setToastConfig({
+            open: true,
+            type: 'success',
+            message: data?.message
+          });
+          fetchData();
+          setIsSubmitting(false);
+          dispatch({ type: 'selection', selectedRecords: [] });
+          setOpenCustomDataDialog({ open: false, isBulkEdit: false, data: null });
           setOpenAssignProductDialog(false);
           setOpenAssignSerializedAssetDialog(false);
         })
@@ -390,7 +422,9 @@ const ScheduleMaintenance = () => {
             id="products"
             fullWidth
             options={products}
-            renderInput={(params) => <TextField {...params} size="small" variant="outlined" label={resources?.product?.titleSingular} margin="none" />}
+            renderInput={(params) => (
+              <TextField {...params} size="small" variant="outlined" label={resources?.product?.titleSingular} margin="none" />
+            )}
             getOptionLabel={(option) => option?.optionLabel || ''}
             isOptionEqualToValue={(option: any, val) => (option ? option?.optionValue === val?.optionValue : false)}
             onChange={(e, val) => {
@@ -457,6 +491,13 @@ const ScheduleMaintenance = () => {
     return (
       <>
         <MenuItem
+          onClick={() => {
+            setOpenCustomDataDialog({ open: true, isBulkEdit: true, data: null });
+          }}
+        >
+          Bulk edit
+        </MenuItem>
+        <MenuItem
           disabled={selectedRecords.length === 0 || selectedRecords?.some((d: any) => !d?.effectiveDate || !d?.duration)}
           onClick={() => setShowConfirmBox({ open: true, data: selectedRecords })}
         >
@@ -484,7 +525,7 @@ const ScheduleMaintenance = () => {
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
-          ids={selectedRecords?.map((obj) => obj._id)}
+          ids={selectedRecords?.map((obj) => obj?._id.split('_')[0])}
           resource={sidebarResource.schedulingMaintenance}
           onExportToExcelSuccess={() => {
             fetchData();
@@ -538,7 +579,7 @@ const ScheduleMaintenance = () => {
             resource={sidebarResource.product}
             onSuccess={(rows) => {
               setRowsToAdd(rows);
-              setOpenCustomDataDialog({ open: true, data: null });
+              setOpenCustomDataDialog({ open: true, isBulkEdit: false, data: null });
             }}
             handleClose={() => {
               setOpenAssignProductDialog(false);
@@ -551,7 +592,7 @@ const ScheduleMaintenance = () => {
             resource={sidebarResource.serializedAsset}
             onSuccess={(rows) => {
               setRowsToAdd(rows);
-              setOpenCustomDataDialog({ open: true, data: null });
+              setOpenCustomDataDialog({ open: true, isBulkEdit: false, data: null });
             }}
             handleClose={() => {
               setOpenAssignSerializedAssetDialog(false);
@@ -562,8 +603,9 @@ const ScheduleMaintenance = () => {
         {openCustomDataDialog.open && (
           <ManageScheduleMaintenance
             data={openCustomDataDialog?.data}
+            isBulkEdit={openCustomDataDialog.isBulkEdit}
             handleClose={() => {
-              setOpenCustomDataDialog({ open: false, data: null });
+              setOpenCustomDataDialog({ open: false, isBulkEdit: false, data: null });
             }}
             handleSave={(_data) => {
               handleAdd(_data);
