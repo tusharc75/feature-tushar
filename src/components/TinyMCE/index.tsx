@@ -614,7 +614,7 @@ export default function TinyMCE(props) {
                         ],
                         onSubmit: function (api) {
                           const data = api.getData();
-                          const hrTag = `<hr style="height: ${data.thickness}px; border: none; border-top: ${data.thickness}px ${data.style} ${data.color}; width: ${data.width}%; margin: 5px 0;" />`;
+                          const hrTag = `<hr style="height: ${data.thickness}px; border: none; border-top: ${data.thickness}px ${data.style} ${data.color}; width: ${data.width}%; margin-block-end: 3px;" />`;
                           editor.insertContent(hrTag);
                           api.close();
                         }
