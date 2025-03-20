@@ -183,6 +183,7 @@ export const FIELD_SERVICE_ORDER_TECHNICIAN_STATUS = {
   reserved: 'Reserved',
   dispatched: 'Dispatched',
   completed: 'Completed',
+  returned: 'Returned'
 };
 
 export const subcontractAssemblySteps: stepInterface[] = [
