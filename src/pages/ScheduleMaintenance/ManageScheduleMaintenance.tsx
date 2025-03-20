@@ -16,12 +16,13 @@ import ManageScheduleMaintenanceType from 'src/pages/ScheduleMaintenance/Schedul
 
 const Schema = object().shape({
   effectiveDate: date().required('please enter Effective Date'),
-  duration: string().required('please select Duration')
+  duration: string().required('please select Duration'),
+  maintenanceType: string().required('please select Maintenance Type')
 });
 
 const DURATION = ['Monthly', 'Quarterly', 'Yearly'];
 
-const ManageScheduleMaintenance = ({ data = null, isBulkEdit = false, handleClose, handleSave, loading }) => {
+const ManageScheduleMaintenance = ({ data = null, handleClose, handleSave, loading }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialData, setInitialData] = useState({ effectiveDate: '', duration: '', maintenanceType: '' });
   const [scheduledMaintenanceTypeOptions, setScheduledMaintenanceTypeOptions] = useState([]);
@@ -41,23 +42,15 @@ const ManageScheduleMaintenance = ({ data = null, isBulkEdit = false, handleClos
   useEffect(() => {
     if (data) {
       setInitialData({
-        effectiveDate: data?.effectiveDate,
-        duration: data?.duration,
-        maintenanceType: data?.maintenanceTypeId
+        effectiveDate: data?.effectiveDate || '',
+        duration: data?.duration || '',
+        maintenanceType: data?.maintenanceTypeId || ''
       });
     }
   }, [data]);
 
   const handleSubmit = (values) => {
     handleSave(values);
-  };
-
-  const validate = (values) => {
-    const error: any = {};
-    if (!isBulkEdit && !values?.maintenanceType) {
-      error['maintenanceType'] = 'please select Maintenance Type';
-    }
-    return error;
   };
 
   return (
@@ -69,14 +62,7 @@ const ManageScheduleMaintenance = ({ data = null, isBulkEdit = false, handleClos
       open={true}
       fullWidth
     >
-      <Formik
-        enableReinitialize={true}
-        initialValues={initialData}
-        validationSchema={Schema}
-        validateOnMount
-        validate={validate}
-        onSubmit={handleSubmit}
-      >
+      <Formik enableReinitialize={true} initialValues={initialData} validationSchema={Schema} validateOnMount onSubmit={handleSubmit}>
         {({ values, errors, touched, setFieldValue, submitForm }) => (
           <>
             <CustomDialogHeader
@@ -91,49 +77,46 @@ const ManageScheduleMaintenance = ({ data = null, isBulkEdit = false, handleClos
             <CustomDialogContent>
               <Form autoComplete="off" autoCorrect="off" noValidate>
                 <Box p={1}>
-                  {!isBulkEdit && (
-                    <div className="flex items-center gap-2">
-                      <div className="w-100">
-                        <Autocomplete
-                          id="maintenanceType"
-                          options={scheduledMaintenanceTypeOptions}
-                          size="small"
-                          getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                          isOptionEqualToValue={(option: any, val) => option.optionValue === val}
-                          value={
-                            scheduledMaintenanceTypeOptions.filter((data) => data.optionValue === values['maintenanceType']).length
-                              ? scheduledMaintenanceTypeOptions.filter((data) => data.optionValue === values['maintenanceType'])[0]
-                              : ''
-                          }
-                          onChange={(event: any, newValue: any) => {
-                            setFieldValue('maintenanceType', newValue?.optionValue || '');
-                          }}
-                          disabled={data ? true : false}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              name="maintenanceType"
-                              size="small"
-                              margin="dense"
-                              label="Maintenance Type"
-                              variant="outlined"
-                              required
-                              error={touched['maintenanceType'] && Boolean(errors['maintenanceType'])}
-                              helperText={touched['maintenanceType'] && errors['maintenanceType']}
-                            />
-                          )}
-                        />
-                      </div>
-                      {!data && (
-                        <HtmlTooltip title={`Add`}>
-                          <IconButton onClick={() => setOpenScheduledMaintenanceType(true)} size="small" color="primary">
-                            <AddCircleIcon />
-                          </IconButton>
-                        </HtmlTooltip>
-                      )}
+                  <div className="flex items-center gap-2">
+                    <div className="w-100">
+                      <Autocomplete
+                        id="maintenanceType"
+                        options={scheduledMaintenanceTypeOptions}
+                        size="small"
+                        getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                        isOptionEqualToValue={(option: any, val) => option.optionValue === val}
+                        value={
+                          scheduledMaintenanceTypeOptions.filter((data) => data.optionValue === values['maintenanceType']).length
+                            ? scheduledMaintenanceTypeOptions.filter((data) => data.optionValue === values['maintenanceType'])[0]
+                            : ''
+                        }
+                        onChange={(event: any, newValue: any) => {
+                          setFieldValue('maintenanceType', newValue?.optionValue || '');
+                        }}
+                        disabled={data ? true : false}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            name="maintenanceType"
+                            size="small"
+                            margin="dense"
+                            label="Maintenance Type"
+                            variant="outlined"
+                            required
+                            error={touched['maintenanceType'] && Boolean(errors['maintenanceType'])}
+                            helperText={touched['maintenanceType'] && errors['maintenanceType']}
+                          />
+                        )}
+                      />
                     </div>
-                  )}
-
+                    {!data && (
+                      <HtmlTooltip title={`Add`}>
+                        <IconButton onClick={() => setOpenScheduledMaintenanceType(true)} size="small" color="primary">
+                          <AddCircleIcon />
+                        </IconButton>
+                      </HtmlTooltip>
+                    )}
+                  </div>
                   <Box mt={1}></Box>
                   <CustomDatePicker
                     fullWidth
