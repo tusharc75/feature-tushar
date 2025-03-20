@@ -30,7 +30,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
   const { dataRows, selectedRecords } = state;
 
   const {
-    state: { resources }
+    state: { resources, permissions }
   }: any = useData();
 
   const [isUpdating, setUpdating] = useState(false);
@@ -408,11 +408,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
     if (!records?.length) {
       return true;
     }
-    if (
-      records?.every(
-        (r) => [WORK_ORDER_TYPE.disassemblyOrder]?.includes(r?.workOrderType) && r?.warehouse?.optionValue === records[0]?.warehouse?.optionValue
-      )
-    ) {
+    if (records?.every((r) => [WORK_ORDER_TYPE.disassemblyOrder]?.includes(r?.workOrderType) && r?.warehouse?.optionValue === records[0]?.warehouse?.optionValue)) {
       return false;
     }
     return true;
@@ -421,12 +417,14 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
   const actionButtonMenuItems = () => {
     return (
       <>
-        <MenuItem
-          disabled={checkUniqueWarehouse(selectedRecords?.filter((r) => r?.type === MATERIAL_TYPE.package))}
-          onClick={() => {
-            setOpenSerializedPackagesDialog(true);
-          }}
-        >{`Assign ${resources?.serializedPackages?.titleSingular}`}</MenuItem>
+        {permissions?.serializedPackages?.isRead && selectedRecords?.filter((e) => e?.workOrderType === WORK_ORDER_TYPE.disassemblyOrder)?.length > 0 &&
+          <MenuItem
+            disabled={checkUniqueWarehouse(selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.package))}
+            onClick={() => {
+              setOpenSerializedPackagesDialog(true);
+            }}
+          >{`Assign ${resources?.serializedPackages?.titleSingular}`}</MenuItem>
+        }
         <MenuItem
           disabled={selectedRecords?.every((e) => !e.hideSelection && e.canDelete) ? false : true}
           onClick={() => {

@@ -112,8 +112,8 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
           obj.service = ele?.service;
           obj.customerAccount = ele?.customerAccount?.optionLabel;
           obj.customerAccountId = ele?.customerAccount?.optionValue;
-          obj.estimateStartDate = ele?.service?.estimateStartDate;
-          obj.estimateEndDate = ele?.service?.estimateEndDate;
+          obj.estimateStartDate = type === sidebarResource?.fieldServiceOrder ? ele?.estimateStartDate : ele?.service?.estimateStartDate;
+          obj.estimateEndDate = type === sidebarResource?.fieldServiceOrder ? ele?.estimateEndDate : ele?.service?.estimateEndDate;
           obj.resourceNumber = ele?.fieldTicketNumber || ele?.fieldServiceOrderNumber || ele?.rentalJobName;
           rows.push(obj);
         });

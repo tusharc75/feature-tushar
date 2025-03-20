@@ -756,7 +756,7 @@ const routes = {
   packageCategoryDetail: {
     path: '/package-category/detail'
   },
-  scheduleMaintenance: {
+  schedulingMaintenance: {
     path: '/scheduling-maintenance'
   }
 };

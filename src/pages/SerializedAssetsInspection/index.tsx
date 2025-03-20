@@ -25,6 +25,7 @@ import {
   SYSTEM_ASSET_STATUS,
   gridLoadingTimeout,
   prepareDataForGrid,
+  repairJob,
   repairOrder,
   serializedAsset,
   sidebarResource
@@ -35,10 +36,9 @@ import { ExpandMore } from '@mui/icons-material';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { RiExchange2Line } from 'react-icons/ri';
 import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
-
+import ManageRepairJob from 'src/pages/RepairJob/ManageRepairJob';
 
 const SerializedAssetInspection = () => {
-
   const renderedFrom = camelCase(sidebarResource.serializedAssetsInspection);
 
   const toastConfig = useContext(CustomToastContext);
@@ -61,9 +61,10 @@ const SerializedAssetInspection = () => {
   const [status, setStatus] = useState('');
   const [resourceData, setResourceData] = useState(null);
   const [showRepairOrderDialog, setShowRepairOrderDialog] = useState(false);
+  const [showRepairJobDialog, setShowRepairJobDialog] = useState(false);
 
   useEffect(() => {
-    fetchGridColumns()
+    fetchGridColumns();
   }, []);
 
   useEffect(() => {
@@ -71,18 +72,7 @@ const SerializedAssetInspection = () => {
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    page,
-    search,
-    limit,
-    filters,
-    sorting,
-    selectedWarehouse,
-    selectedEntity,
-    subleaseAsset,
-    showFilteredRecordsOnly
-  ]);
-
+  }, [page, search, limit, filters, sorting, selectedWarehouse, selectedEntity, subleaseAsset, showFilteredRecordsOnly]);
 
   useEffect(() => {
     axiosInstance()
@@ -91,7 +81,6 @@ const SerializedAssetInspection = () => {
         setWarehouseOptions(data['Warehouse']);
       });
   }, [selectedEntity]);
-
 
   const fetchGridColumns = async () => {
     const resourceDataResponce = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
@@ -109,11 +98,13 @@ const SerializedAssetInspection = () => {
       }
     }
 
-    axiosInstance().get(`/field?resource=${serializedAsset.resource}`)
+    axiosInstance()
+      .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
-
-        let statusFieldOption = data?.find((e) => e?.fieldData?.fieldName === 'status')?.fieldData?.option || []
-        statusFieldOption = statusFieldOption?.filter((e) => !SYSTEM_ASSET_STATUS?.includes(e.optionLabel) || [ASSET_STATUS.inRepair]?.includes(e.optionLabel))
+        let statusFieldOption = data?.find((e) => e?.fieldData?.fieldName === 'status')?.fieldData?.option || [];
+        statusFieldOption = statusFieldOption?.filter(
+          (e) => !SYSTEM_ASSET_STATUS?.includes(e.optionLabel) || [ASSET_STATUS.inRepair]?.includes(e.optionLabel)
+        );
         setStatusOptions(statusFieldOption);
 
         let newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path, true);
@@ -188,12 +179,12 @@ const SerializedAssetInspection = () => {
         });
         setColumns([...newColumns, ...getStaticFields()]);
         fetchPolicy();
-      }).catch((error) => {
+      })
+      .catch((error) => {
         toastConfig.setToastConfig(error);
         fetchPolicy();
       });
   };
-
 
   const fetchPolicy = async () => {
     try {
@@ -205,7 +196,7 @@ const SerializedAssetInspection = () => {
           setStatusOptions((prev) => {
             let newOptions = prev?.filter((e) => e.optionValue !== ASSET_STATUS.inRepair);
             return newOptions;
-          })
+          });
         }
         setResourceData(data);
       }
@@ -233,11 +224,29 @@ const SerializedAssetInspection = () => {
       });
   };
 
+  const handleAddAssetsToRepairJob = async (repairJobData: any) => {
+    let rows = selectedRecords?.map((record: any) => ({
+      _id: record._id,
+      currentStatus: record.status
+    }));
+    axiosInstance()
+      .post(`${repairJob.api}/${repairJobData}/assets`, { assets: rows })
+      .then(() => {
+        dispatch({ type: 'selection', selectedRecords: [] });
+        setShowRepairJobDialog(false);
+        fetchData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
-    axiosInstance().get(`${serializedAsset.api}/serialized-asset-inspection${queryString}`, { cancelToken: cancelTokenSource?.token })
+    axiosInstance()
+      .get(`${serializedAsset.api}/serialized-asset-inspection${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
@@ -342,7 +351,7 @@ const SerializedAssetInspection = () => {
   const ActionMenuItems = () => {
     return (
       <>
-        {statusOptions ?
+        {statusOptions ? (
           <>
             {Object.entries(statusOptions).map(([key, status]: any) => {
               const isDisabled = selectedRecords.some((record) => record.status === status?.optionLabel);
@@ -352,7 +361,8 @@ const SerializedAssetInspection = () => {
                 </MenuItem>
               );
             })}
-          </> : null}
+          </>
+        ) : null}
       </>
     );
   };
@@ -360,36 +370,42 @@ const SerializedAssetInspection = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ ...routes.serializedAssetInspection, title: "Serialize Asset Inspection" }]} />
+        <CustomBreadCrumbs routes={[{ ...routes.serializedAssetInspection, title: 'Serialize Asset Inspection' }]} />
       </div>
       <CustomContainer>
         <ListingPageHeader
-          leftSideContents={<LeftSideContent
-            {...{
-              permissions,
-              warehouseOptions,
-              selectedWarehouse,
-              setSelectedWarehouse,
-              subleaseAsset,
-              setSubleaseAsset,
-              resources,
-              ActionMenuItems,
-              setAnchorEl,
-              anchorEl
-            }} />}
-          rightSideContents={<RightSideContents
-            {...{
-              openActions,
-              anchorEl,
-              closeActions,
-              ActionMenuItems,
-              selectedRecords,
-              resourceData,
-              permissions,
-              setShowRepairOrderDialog,
-              resources
-            }}
-          />}
+          leftSideContents={
+            <LeftSideContent
+              {...{
+                permissions,
+                warehouseOptions,
+                selectedWarehouse,
+                setSelectedWarehouse,
+                subleaseAsset,
+                setSubleaseAsset,
+                resources,
+                ActionMenuItems,
+                setAnchorEl,
+                anchorEl
+              }}
+            />
+          }
+          rightSideContents={
+            <RightSideContents
+              {...{
+                openActions,
+                anchorEl,
+                closeActions,
+                ActionMenuItems,
+                selectedRecords,
+                resourceData,
+                permissions,
+                setShowRepairOrderDialog,
+                setShowRepairJobDialog,
+                resources
+              }}
+            />
+          }
           searchValue={search}
           onSearch={handleSearch}
           isActionButtonVisible={false}
@@ -427,11 +443,24 @@ const SerializedAssetInspection = () => {
         <ManageRepairOrder
           referenceType="serializedAssetsInspection"
           referenceData={{
-            warehouse: selectedRecords[0]?.warehouseId,
+            warehouse: selectedRecords[0]?.warehouseId
           }}
           onClose={() => setShowRepairOrderDialog(false)}
           onSuccess={(obj) => {
             handleAddAssetsToRepairOrder(obj?._id);
+          }}
+          isClone={false}
+        />
+      )}
+      {showRepairJobDialog && (
+        <ManageRepairJob
+          referenceType="serializedAssetsInspection"
+          referenceData={{
+            warehouse: selectedRecords[0]?.warehouseId
+          }}
+          onClose={() => setShowRepairJobDialog(false)}
+          onSuccess={(obj) => {
+            handleAddAssetsToRepairJob(obj?._id);
           }}
           isClone={false}
         />
@@ -442,15 +471,7 @@ const SerializedAssetInspection = () => {
 
 export default SerializedAssetInspection;
 
-const LeftSideContent = ({
-  permissions,
-  warehouseOptions,
-  selectedWarehouse,
-  setSelectedWarehouse,
-  subleaseAsset,
-  setSubleaseAsset,
-  resources
-}) => {
+const LeftSideContent = ({ permissions, warehouseOptions, selectedWarehouse, setSelectedWarehouse, subleaseAsset, setSubleaseAsset, resources }) => {
   return (
     <>
       <Fragment>
@@ -468,7 +489,15 @@ const LeftSideContent = ({
             setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
           }}
           renderInput={(params) => (
-            <TextField {...params} margin="none" size="small" name="warehouse" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
+            <TextField
+              {...params}
+              margin="none"
+              size="small"
+              name="warehouse"
+              label={resources?.warehouse?.titleSingular}
+              variant="outlined"
+              fullWidth
+            />
           )}
         />
         {permissions?.sublease && (
@@ -501,28 +530,55 @@ const RightSideContents = ({
   resourceData,
   permissions,
   setShowRepairOrderDialog,
+  setShowRepairJobDialog,
   resources
 }) => {
-
   const checkUniqWarehouse = () => {
     let warehouses = new Set(selectedRecords?.map((d) => d?.warehouseId));
     return warehouses?.size === 1;
-  }
-
+  };
 
   return (
     <>
-      {resourceData?.policy?.canCreateRepairOrder && permissions?.repairOrder?.isCreate &&
+      {resourceData?.policy?.canCreateRepairOrder && permissions?.repairOrder?.isCreate && (
         <ThemeButton
           buttonType="themeBorder"
           onClick={() => setShowRepairOrderDialog(true)}
-          disabled={checkUniqWarehouse()
-            && selectedRecords?.every((e) => [ASSET_STATUS.new, ASSET_STATUS.available,
-            ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair, ASSET_STATUS.underReview]?.includes(e.status))
-            ? false : true}
+          disabled={
+            checkUniqWarehouse() &&
+            selectedRecords?.every((e) =>
+              [
+                ASSET_STATUS.new,
+                ASSET_STATUS.available,
+                ASSET_STATUS.scrap,
+                ASSET_STATUS.needRecert,
+                ASSET_STATUS.needRepair,
+                ASSET_STATUS.underReview
+              ]?.includes(e.status)
+            )
+              ? false
+              : true
+          }
         >
           {`Create ${resources?.repairOrder?.titleSingular}`}
-        </ThemeButton>}
+        </ThemeButton>
+      )}
+      {resourceData?.policy?.canCreateRepairOrder && permissions?.repairJob?.isCreate && (
+        <ThemeButton
+          buttonType="themeBorder"
+          onClick={() => setShowRepairJobDialog(true)}
+          disabled={
+            checkUniqWarehouse() &&
+            selectedRecords?.every((e) =>
+              [ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair, ASSET_STATUS.underReview]?.includes(e.status)
+            )
+              ? false
+              : true
+          }
+        >
+          {`Create ${resources?.repairJob?.titleSingular}`}
+        </ThemeButton>
+      )}
       <ThemeButton
         onClick={openActions}
         endIcon={<ExpandMore />}
