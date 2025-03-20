@@ -160,19 +160,19 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
         canDrag: false,
         Cell: ({ row, table }: any) => (
           <>
-            <HtmlTooltip title={allowedToEdit && row?.original?.canDelete ? 'Edit' : 'Technician for this product/consumable is already dispatched or returned'}>
+            <HtmlTooltip title={'Edit'}>
               <IconButton
                 size="small"
                 aria-label="Delete"
-                disabled={!allowedToEdit || !row?.original?.canDelete}
+                disabled={!allowedToEdit}
                 onClick={() => {
                   openMaterial(row, table.getRowModel().rows);
                 }}
               >
-                <EditIcon fontSize="small" color={row.original?.canDelete && allowedToEdit ? 'primary' : 'disabled'} />
+                <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
               </IconButton>
             </HtmlTooltip>
-            <HtmlTooltip title={allowedToEdit && row?.original?.canDelete ? 'Delete' : 'Technician for this product/consumable is already dispatched or returned'}>
+            <HtmlTooltip title={allowedToEdit && row?.original?.canDelete ? 'Delete' : 'Already dispatched/returned'}>
               <span>
                 <IconButton
                   size="small"
@@ -212,7 +212,7 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
         parent.productDescription = parent?.productDetail?.productDescription;
         parent.productNumber = parent?.productDetail?.productNumber;
         parent.technicianId = parent?.technician?.optionValue;
-        parent.technician = parent?.technician?.optionLabel;
+        parent.technician = parent?.technician?.optionLabel || '';
         parent.canDelete = parent?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.reserved;
       });
       dispatch({ type: 'initialize', data: consumables || [], count: consumables?.length || 0 });
@@ -348,7 +348,7 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
         toastConfig.setToastConfig({
           open: true,
           type: 'error',
-          message: 'Technician for this product/consumable is already dispatched or returned'
+          message: 'Already dispatched/returned'
         });
         return;
       }
