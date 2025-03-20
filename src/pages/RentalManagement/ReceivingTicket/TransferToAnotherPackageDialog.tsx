@@ -172,6 +172,7 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
       </Dialog>
       {openAssetDataDialog.open && (
         <AssetDetailsChangeDialog
+          stopAutoIncrementIds={openAssetDataDialog._ids}
           ids={openAssetDataDialog._ids}
           statusPolicy={openAssetDataDialog.statusPolicy}
           setAssetsData={() => { }}
