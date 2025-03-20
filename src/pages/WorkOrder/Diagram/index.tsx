@@ -329,11 +329,15 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
             relatedTo={[
               { type: resource, referenceId: referenceId, version: currentVersion, access: true },
               {
-                type: workOrderData?.type === WORK_ORDER_TYPE.repairOrder ? ACTIVITY_RESOURCE.repairOrder : ACTIVITY_RESOURCE.productionOrder,
+                type: workOrderData?.type === WORK_ORDER_TYPE.repairOrder ? ACTIVITY_RESOURCE.repairOrder :
+                  workOrderData?.type === WORK_ORDER_TYPE.productionOrder ? ACTIVITY_RESOURCE.productionOrder :
+                    ACTIVITY_RESOURCE.assemblyOrder,
                 referenceId:
                   workOrderData?.type === WORK_ORDER_TYPE.repairOrder
-                    ? workOrderData?.repairOrder?.optionValue || workOrderData?.repairOrder
-                    : workOrderData?.productionOrder?.optionValue || workOrderData?.productionOrder,
+                    ? workOrderData?.repairOrder?.optionValue || workOrderData?.repairOrder :
+                    workOrderData?.type === WORK_ORDER_TYPE.productionOrder ?
+                      workOrderData?.productionOrder?.optionValue || workOrderData?.productionOrder :
+                      workOrderData?.assemblyOrder?.optionValue || workOrderData?.assemblyOrder,
                 access: true
               }
             ]}
