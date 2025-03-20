@@ -138,7 +138,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
       }
       setPriceMethodListConst(pricingMethodOptions);
       await getAllPricingCondition(rowData, pricingMethodOptions);
-      
+
       data.forEach((element) => {
         if (rowData?.type === MATERIAL_TYPE.serializedAsset) {
           if (element.fieldName === 'qty') {
@@ -172,6 +172,9 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
           if (element.fieldName === 'wellNumber' && isArray(serviceOrderData?.wellNumber)) {
             element.option = element.option?.filter((ele) => serviceOrderData?.wellNumber?.map((e) => e.optionValue)?.includes(ele.optionValue));
           }
+        }
+        if (element.fieldName === 'qty' && !rowData?.canDelete) {
+          element.disabled = true;
         }
       });
       setInitialData({
@@ -255,7 +258,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
       updateRateChangeState(values, priceData, pricingMethodOptions);
     }
   }
-  
+
   const updateRateChangeState = (values: any, priceData: any, pricingMethodOptions: any) => {
     var tempPriceCondition = [...priceData];
     if (values['unit'] && values['unit'] !== '') {
