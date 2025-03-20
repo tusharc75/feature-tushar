@@ -442,7 +442,7 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
       )}
       {productQtyToReturnDialog.open && (
         <ReturnQtyDialog
-          products={productQtyToReturnDialog.data?.filter((d) => d?.type === MATERIAL_TYPE.product)}
+          products={productQtyToReturnDialog.data?.filter((d) => d?.type === MATERIAL_TYPE.product && d?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.dispatched)}
           loading={submitting}
           handleClose={() => setProductQtyToReturnDialog({ open: false, data: null })}
           handleSuccess={(products) => handleReturn(productQtyToReturnDialog.data, products)}
