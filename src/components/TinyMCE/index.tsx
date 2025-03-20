@@ -546,15 +546,82 @@ export default function TinyMCE(props) {
                 plugins: [
                   'advlist autolink lists link charmap print preview anchor',
                   'searchreplace visualblocks code fullscreen',
-                  'insertdatetime media table paste code wordcount hr'
+                  'insertdatetime media table paste code wordcount'
                 ],
                 toolbar:
                   'undo redo | formatselect  | ' +
                   'bold italic backcolor | alignleft aligncenter ' +
-                  'alignright alignjustify | bullist numlist outdent indent ',
+                  'alignright alignjustify | bullist numlist outdent indent | hrStyled',
                 content_style: '* { padding: 0; margin: 0; box-sizing: border-box; } body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
                 skin: themeColor === 'dark' ? 'oxide-dark' : 'oxide',
-                content_css: themeColor === 'dark' ? 'dark' : 'default'
+                content_css: themeColor === 'dark' ? 'dark' : 'default',
+                setup: function (editor) {
+                  editor.ui.registry.addButton('hrStyled', {
+                    icon: 'horizontal-rule',
+                    tooltip: 'Insert styled horizontal line',
+                    onAction: function () {
+                      editor.windowManager.open({
+                        title: 'Insert Styled Horizontal Line',
+                        body: {
+                          type: 'panel',
+                          items: [
+                            {
+                              type: 'selectbox',
+                              name: 'style',
+                              label: 'Line Style',
+                              items: [
+                                { value: 'solid', text: 'Solid' },
+                                { value: 'dashed', text: 'Dashed' },
+                                { value: 'dotted', text: 'Dotted' },
+                                { value: 'double', text: 'Double' }
+                              ]
+                            },
+                            {
+                              type: 'input',
+                              name: 'thickness',
+                              label: 'Thickness (px)',
+                              inputMode: 'numeric'
+                            },
+                            {
+                              type: 'colorinput',
+                              name: 'color',
+                              label: 'Color'
+                            },
+                            {
+                              type: 'input',
+                              name: 'width',
+                              label: 'Width (%)',
+                              inputMode: 'numeric'
+                            }
+                          ]
+                        },
+                        initialData: {
+                          style: 'solid',
+                          thickness: 2,
+                          color: '#000000',
+                          width: 100
+                        },
+                        buttons: [
+                          {
+                            type: 'cancel',
+                            text: 'Cancel'
+                          },
+                          {
+                            type: 'submit',
+                            text: 'Insert',
+                            primary: true
+                          }
+                        ],
+                        onSubmit: function (api) {
+                          const data = api.getData();
+                          const hrTag = `<hr style="height: ${data.thickness}px; border: none; border-top: ${data.thickness}px ${data.style} ${data.color}; width: ${data.width}%; margin: 5px 0;" />`;
+                          editor.insertContent(hrTag);
+                          api.close();
+                        }
+                      });
+                    }
+                  });
+                }
               }}
             />
           </div>
