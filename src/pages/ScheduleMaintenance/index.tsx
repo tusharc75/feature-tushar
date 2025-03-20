@@ -87,7 +87,7 @@ const ScheduleMaintenance = () => {
           setScheduledMaintenanceTypeOptions(data?.map((d) => ({ optionLabel: d?.name, optionValue: d?._id })));
         }
       })
-      .catch((error) => {});
+      .catch((error) => { });
   };
 
   const fetchGridColumns = async () => {
@@ -118,7 +118,7 @@ const ScheduleMaintenance = () => {
     newColumns?.forEach((o) => {
       if (o?.accessor === 'assetNumber') {
         o.cell = ({ row }) => (
-          <div>
+          <div className="flex items-center gap-1">
             <p className="text-truncate" title={row.original.assetNumber}>
               {row.original.assetNumber}
             </p>
@@ -135,7 +135,7 @@ const ScheduleMaintenance = () => {
       }
       if (o?.accessor === 'productName') {
         o.cell = ({ row }) => (
-          <div>
+          <div className="flex items-center gap-1">
             <p className="text-truncate" title={row.original.productName}>
               {row.original.productName}
             </p>
@@ -489,12 +489,12 @@ const ScheduleMaintenance = () => {
     return (
       <>
         <MenuItem
-          disabled={!selectedRecords?.every((r) => selectedRecords[0]?.maintenanceTypeId === r?.maintenanceTypeId)}
+          disabled={selectedRecords.length && selectedRecords?.every((e) => selectedRecords[0]?.maintenanceTypeId === e?.maintenanceTypeId) ? false : true}
           onClick={() => {
             setOpenCustomDataDialog({ open: true, data: { maintenanceTypeId: selectedRecords[0]?.maintenanceTypeId } });
           }}
         >
-          Bulk edit
+          Bulk Edit
         </MenuItem>
         <MenuItem
           disabled={selectedRecords.length === 0 || selectedRecords?.some((d: any) => !d?.effectiveDate || !d?.duration)}
