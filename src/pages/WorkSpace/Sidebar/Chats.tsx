@@ -100,7 +100,6 @@ const Chats = ({ state }: { state: UseWorkSpace }) => {
 export default Chats;
 
 const RenderRow = ({ index, data, initChat, selectedChannel, newChatToUser, onlineUsers }) => {
-  console.log('aaaaaaa', data);
   const title = 'concatedName' in data ? data.concatedName : data.title;
   const notifications = 'notifications' in data ? data.notifications : 0;
   const avatar = 'avatar' in data ? data?.avatar : data?.to?.avatar;
