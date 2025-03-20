@@ -176,7 +176,7 @@ export default function NewCreateQuotePdfTemplate() {
     const initialValues = {
       landscape: false,
       hideAmountTotalSection: false,
-      customFontSizeAcrossPdf: '',
+      tableFontSize: '',
       productColumns: defaultProductColumns,
       name: '',
       pageNumberInFooter: false,
@@ -232,7 +232,7 @@ export default function NewCreateQuotePdfTemplate() {
         setIsLandscapChecked(tempPdfTemplate.landscape);
         initialValues.landscape = tempPdfTemplate.landscape;
         initialValues.hideAmountTotalSection = tempPdfTemplate.hideAmountTotalSection;
-        initialValues.customFontSizeAcrossPdf = tempPdfTemplate.customFontSizeAcrossPdf;
+        initialValues.tableFontSize = tempPdfTemplate.tableFontSize;
         initialValues.productColumns = tempPdfTemplate.productColumns;
         initialValues.name = tempPdfTemplate.name;
         initialValues.pageNumberInFooter = tempPdfTemplate.pageNumberInFooter;
@@ -262,7 +262,7 @@ export default function NewCreateQuotePdfTemplate() {
           setIsLandscapChecked(data?.landscape);
           initialValues.landscape = data?.landscape;
           initialValues.hideAmountTotalSection = data?.hideAmountTotalSection;
-          initialValues.customFontSizeAcrossPdf = data?.customFontSizeAcrossPdf;
+          initialValues.tableFontSize = data?.tableFontSize;
           initialValues.productColumns = data?.productColumns;
           initialValues.name = !isClone ? data?.name : '';
           initialValues.pageNumberInFooter = data?.pageNumberInFooter;
@@ -383,7 +383,7 @@ export default function NewCreateQuotePdfTemplate() {
           collaborator: values?.collaborator,
           landscape: values?.landscape,
           hideAmountTotalSection: values?.hideAmountTotalSection,
-          customFontSizeAcrossPdf: parseInt(values?.customFontSizeAcrossPdf),
+          tableFontSize: parseInt(values?.tableFontSize),
           productColumns: parseInt(values?.productColumns)
         })
         .then(({ data: { data, message } }) => {
@@ -432,7 +432,7 @@ export default function NewCreateQuotePdfTemplate() {
           collaborator: values?.collaborator,
           landscape: values?.landscape,
           hideAmountTotalSection: values?.hideAmountTotalSection,
-          customFontSizeAcrossPdf: parseInt(values?.customFontSizeAcrossPdf),
+          tableFontSize: parseInt(values?.tableFontSize),
           productColumns: parseInt(values?.productColumns)
         })
         .then(({ data: { data, message } }) => {
@@ -790,20 +790,20 @@ export default function NewCreateQuotePdfTemplate() {
                       />
                       <TextField
                         variant="outlined"
-                        label={'Fixed Font Size Across PDF'}
-                        name="customFontSizeAcrossPdf"
+                        label={'Table Font Size'}
+                        name="tableFontSize"
                         type="number"
                         margin="none"
                         size={'small'}
-                        value={values['customFontSizeAcrossPdf']}
-                        error={touched['customFontSizeAcrossPdf'] && Boolean(errors['customFontSizeAcrossPdf'])}
-                        helperText={touched['customFontSizeAcrossPdf'] && errors['customFontSizeAcrossPdf']}
+                        value={values['tableFontSize']}
+                        error={touched['tableFontSize'] && Boolean(errors['tableFontSize'])}
+                        helperText={touched['tableFontSize'] && errors['tableFontSize']}
                         onChange={(e) => {
-                          setFieldValue('customFontSizeAcrossPdf', e.target.value.trimStart());
+                          setFieldValue('tableFontSize', e.target.value.trimStart());
                         }}
                         slotProps={{
                           input: {
-                            endAdornment: 'pts'
+                            endAdornment: 'pt'
                           }
                         }}
                       />
