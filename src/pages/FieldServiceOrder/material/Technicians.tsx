@@ -8,7 +8,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { AccessorFunction, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
@@ -97,7 +97,8 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
             lookupResource: sidebarResource.competencyType
           }}
           original={row?.original}
-        />
+        />,
+        accessorFn: (original) => AccessorFunction(original, 'competencyType'),
       },
       {
         accessor: 'competencies',
@@ -111,7 +112,8 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
             lookupResource: sidebarResource.competencies
           }}
           original={row?.original}
-        />
+        />,
+        accessorFn: (original) => AccessorFunction(original, 'competencies'),
       },
       {
         accessor: 'action',
@@ -231,16 +233,14 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
   const actionButtonMenuItems = () => {
     return (
       <>
-        <HtmlTooltip title={Boolean(selectedRecords.length) ? 'Delete selected records' : 'Select records to delete'}>
-          <MenuItem
-            disabled={isDeleting}
-            onClick={() => {
-              setDeleteData(selectedRecords?.map((d) => d?._id));
-            }}
-          >
-            Delete
-          </MenuItem>
-        </HtmlTooltip>
+        <MenuItem
+          disabled={selectedRecords?.every((e) => e?.canDelete) ? false : true}
+          onClick={() => {
+            setDeleteData(selectedRecords?.map((d) => d?._id));
+          }}
+        >
+          Delete
+        </MenuItem>
       </>
     );
   };

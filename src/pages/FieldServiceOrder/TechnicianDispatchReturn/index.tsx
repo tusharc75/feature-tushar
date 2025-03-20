@@ -6,7 +6,7 @@ import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { AccessorFunction, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
@@ -122,7 +122,8 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
             }}
             original={row?.original}
           />
-        )
+        ),
+        accessorFn: (original) => AccessorFunction(original, 'competencies'),
       },
       {
         accessor: 'competencies',
@@ -138,7 +139,8 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
             }}
             original={row?.original}
           />
-        )
+        ),
+        accessorFn: (original) => AccessorFunction(original, 'competencies'),
       },
       {
         accessor: 'dispatchedDate',
