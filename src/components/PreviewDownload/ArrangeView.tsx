@@ -273,7 +273,7 @@ const RenderListItem = ({
             size="small"
             fullWidth
             disabled={showBelowRow}
-            options={["left", "center", "right", "top", "bottom", "middle"]}
+            options={["left", "center", "right"]}
             getOptionLabel={(option) => startCase(option)}
             value={alignment}
             renderInput={(params) => (
