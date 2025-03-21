@@ -271,15 +271,13 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
               Arrange
             </ThemeButton>
           ) : null}
-          {allowedToEdit && (
-            <DeleteButton
-              text="Delete"
-              disabled={selectedRecords.length === 0 || isRemovingServices}
-              onClick={() => {
-                setShowServiceConfirmBox(true);
-              }}
-            />
-          )}
+          <DeleteButton
+            text="Delete"
+            disabled={selectedRecords.length === 0 || isRemovingServices}
+            onClick={() => {
+              setShowServiceConfirmBox(true);
+            }}
+          />
         </>
       )
     );
@@ -331,6 +329,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
           isClientSideGrid={true}
           refreshGrid={fetchData}
           onSaveEdit={onSaveInlineEdit}
+          hideAction={!allowedToEdit}
           hideSelection={!allowedToEdit}
           hideExportTable={true}
         />

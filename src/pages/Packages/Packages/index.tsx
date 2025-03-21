@@ -209,15 +209,13 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
               Arrange
             </ThemeButton>
           ) : null}
-          {allowedToEdit && (
-            <DeleteButton
-              text="Delete"
-              disabled={selectedRecords.length === 0 || isRemovingProducts}
-              onClick={() => {
-                setShowProductConfirmBox(true);
-              }}
-            />
-          )}
+          <DeleteButton
+            text="Delete"
+            disabled={selectedRecords.length === 0 || isRemovingProducts}
+            onClick={() => {
+              setShowProductConfirmBox(true);
+            }}
+          />
         </>
       )
     );
@@ -266,7 +264,8 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
           isClientSideGrid={true}
           refreshGrid={fetchData}
           onSaveEdit={onSaveInlineEdit}
-          hideSelection={allowedToEdit ? false : true}
+          hideAction={!allowedToEdit}
+          hideSelection={!allowedToEdit}
           hideExportTable={true}
         />
       ) : (

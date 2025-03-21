@@ -210,21 +210,6 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
     );
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          disabled={selectedRecords.length === 0 || isRemovingProducts}
-          onClick={() => {
-            setShowProductConfirmBox({ open: true, data: selectedRecords });
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
-
   const handleArrangeUpdate = (rows: any) => {
     setIsArranging(true);
     rows?.forEach((e: any) => {
@@ -269,15 +254,13 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
               Arrange
             </ThemeButton>
           ) : null}
-          {allowedToEdit && (
-            <DeleteButton
-              text="Delete"
-              disabled={selectedRecords.length === 0 || isRemovingProducts}
-              onClick={() => {
-                setShowProductConfirmBox({ open: true, data: selectedRecords });
-              }}
-            />
-          )}
+          <DeleteButton
+            text="Delete"
+            disabled={selectedRecords.length === 0 || isRemovingProducts}
+            onClick={() => {
+              setShowProductConfirmBox({ open: true, data: selectedRecords });
+            }}
+          />
         </>
       )
     );
