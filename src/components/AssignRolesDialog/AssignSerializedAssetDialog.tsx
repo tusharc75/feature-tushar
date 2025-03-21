@@ -210,11 +210,11 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
           const result = selectedRecords?.filter((f) => f.productId === ele.product && !f.isCounted);
           if (result.length) {
             if (reference === 'serializedPackages') {
-              if (qty - ele?.packages?.length <= 0) {
-                data.push({ product: ele.product, package: ele?.packages[0], asset: result[0]._id });
-                ele.packages.shift();
+              if (qty - ele?._id?.length <= 0) {
+                data.push({ product: ele.product, _id: ele?._id[0], asset: result[0]._id });
+                ele._id.shift();
               } else {
-                data.push({ product: ele.product, package: ele?.packages[0], asset: result[0]._id });
+                data.push({ product: ele.product, _id: ele?._id[0], asset: result[0]._id });
               }
             } else {
               data.push({ ...ele, asset: result[0]._id });
