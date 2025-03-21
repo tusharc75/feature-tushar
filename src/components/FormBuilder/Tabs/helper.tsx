@@ -296,12 +296,12 @@ export const resourcePolicy = [
   {
     resource: sidebarResource.fieldServiceOrder,
     policy: [
-      // {
-      //   fieldName: 'addServices',
-      //   fieldLabel: 'Add Services',
-      //   type: 'checkBox',
-      //   defaultValue: false
-      // },
+      {
+        fieldName: 'addServices',
+        fieldLabel: 'Add Services',
+        type: 'checkBox',
+        defaultValue: false
+      },
       {
         fieldName: 'addTechnicians',
         fieldLabel: 'Add Technicians',

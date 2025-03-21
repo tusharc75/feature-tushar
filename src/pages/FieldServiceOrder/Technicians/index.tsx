@@ -1,4 +1,4 @@
-import { IconButton, MenuItem } from '@mui/material';
+import { Autocomplete, IconButton, MenuItem, TextField } from '@mui/material';
 import Box from '@mui/material/Box/Box';
 import Grid from '@mui/material/Grid2';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -12,13 +12,13 @@ import CustomReactTable, { AccessorFunction, useTableReducer } from 'src/compone
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { fieldServiceOrder, prepareDataForGrid, SERVICE_ORDER_STATUS, sidebarResource } from 'src/constants/helpers';
+import { fieldServiceOrder, MATERIAL_TYPE, prepareDataForGrid, SERVICE_ORDER_STATUS, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
 import { FiExternalLink } from 'react-icons/fi';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
-import Consumables from 'src/pages/FieldServiceOrder/material/Consumables';
+import Consumables from 'src/pages/FieldServiceOrder/Technicians/Consumables';
 
 const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceOrderData, resourcePolicy, stepFullScreen, setNextStep, handleChangeStatus }) => {
 
@@ -31,6 +31,8 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
   const [technicianDialog, setTechnicianDialog] = useState(false);
   const [refreshChild, setRefreshChild] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [serviceOption, setServiceOption] = useState(null);
+  const [selectedService, setSelectedService] = useState(null);
 
   const {
     state: { permissions }
@@ -38,16 +40,24 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
 
+  console.log(dataRows);
+
   useEffect(() => {
     fetchColumns();
   }, []);
 
   useEffect(() => {
+    if (resourcePolicy?.addServices) {
+      fetchServices();
+    }
+  }, [resourcePolicy?.addServices]);
+
+  useEffect(() => {
     fetchData();
-  }, []);
+  }, [selectedService]);
 
   const fetchColumns = async () => {
-    const column: any = [
+    let column: any = [
       {
         accessor: 'index',
         Header: 'Index',
@@ -85,6 +95,30 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
         width: 200,
         Cell: ({ row }) => (row.original['status'] ? <p>{row.original?.status}</p> : <NoDataCell />)
       },
+      (resourcePolicy?.addServices ?
+        {
+          accessor: 'service',
+          Header: 'Service',
+          width: 200,
+          Cell: ({ row }) => {
+            return row?.original?.serviceId ?
+              (
+                <div className="flex items-center gap-2">
+                  <p className="text-truncate" title={row.original.service}>
+                    {row.original.service}
+                  </p>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.serviceMasterDetail.path}/${row.original.serviceId}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                </div>
+              ) : <NoDataCell />
+          }
+        } : {}),
       {
         accessor: 'competencyType',
         Header: 'Competency Type',
@@ -144,6 +178,7 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
         }
       }
     ];
+    column = column?.filter(Boolean);
     setColumns(column);
   };
 
@@ -153,6 +188,9 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
     dispatch({ type: 'selection', selectedRecords: [] });
 
     let api = `${fieldServiceOrder.api}/technician?fieldServiceOrder=${serviceOrderData?._id}`;
+    if (selectedService && selectedService?.optionValue !== 'All') {
+      api = `${api}&uniqueId=${selectedService?._id}`;
+    }
     axiosInstance().get(api).then(({ data: { data } }) => {
       let rows = data?.technician?.map((u, i) => {
         let res: any = {
@@ -175,6 +213,17 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
       setNextStep(false);
       toastConfig.setToastConfig(error);
     });
+  };
+
+  const fetchServices = async () => {
+    let data;
+    const response = await axiosInstance().get(`${fieldServiceOrder.api}/${serviceOrderData?._id}/material?type=${MATERIAL_TYPE.service}`);
+    data = response?.data?.data?.material;
+    const services = [{ optionLabel: 'All', optionValue: 'All', _id: null, competencies: [] }];
+    data?.map((d) => {
+      services.push({ optionLabel: d?.serviceDetail?.serviceName, optionValue: d?.materialId, _id: d?._id, competencies: d?.serviceDetail?.competencies });
+    });
+    setServiceOption(services);
   };
 
   const handleDelete = async (rows) => {
@@ -206,6 +255,8 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
       element.technician = d?._id;
       element.fieldServiceOrder = serviceOrderData?._id;
       element.warehouse = serviceOrderData?.warehouse?.optionValue;
+      element.service = selectedService?.optionValue !== 'All' ? selectedService?.optionValue : null;
+      element.uniqueId = selectedService?.optionValue !== 'All' ? selectedService?._id : null;
       technician.push(element);
     });
     axiosInstance()
@@ -245,6 +296,33 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
     );
   };
 
+  const leftSideContents = () => {
+    return (
+      <Box style={{ maxWidth: '400px' }}>
+        <Autocomplete
+          id={'select-service'}
+          size="small"
+          style={{ minWidth: '300px' }}
+          fullWidth
+          options={serviceOption ? serviceOption : []}
+          autoHighlight
+          value={selectedService}
+          getOptionLabel={(option: any) => option?.optionLabel || ''}
+          isOptionEqualToValue={(option, val) => (option ? option?._id === val?._id : false)}
+          onChange={(_, val) => {
+            let value = val;
+            if (!val) {
+              value = { optionLabel: 'All', optionValue: 'All', _id: null, competencies: [] };
+            }
+            dispatch({ type: 'update', data: [] });
+            setSelectedService(value);
+          }}
+          renderInput={(params) => <TextField {...params} label={'Select Service'} variant="outlined" />}
+        />
+      </Box>
+    );
+  };
+
   return (
     <>
       {allowedToEdit && (
@@ -256,6 +334,7 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
             isActionButtonVisible={true}
             actionButtonMenuItems={actionButtonMenuItems()}
             actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
+            leftSideContents={resourcePolicy?.addServices ? leftSideContents() : null}
             hasXpadding
           />
         </>
@@ -306,6 +385,7 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
           isSubmitting={isSubmitting}
           warehouse={serviceOrderData?.warehouse?.optionValue}
           ids={dataRows?.map((d) => d?.technicianId)}
+          defaultCompetency={selectedService?.competencies || []}
         />
       )}
       {deleteData && (
