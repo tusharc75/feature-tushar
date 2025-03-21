@@ -152,6 +152,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
       .then(() => {
         setRemovingProducts(false);
         setShowProductConfirmBox(false);
+        setDeleteRecord(null);
         fetchData();
       })
       .catch((err) => {

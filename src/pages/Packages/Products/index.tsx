@@ -31,7 +31,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
-  const [showProductConfirmBox, setShowProductConfirmBox] = useState({ open: false, data: null });
+  const [showProductConfirmBox, setShowProductConfirmBox] = useState(false);
   const [showProductAssignDialog, setShowProductAssignDialog] = useState(false);
   const [isRemovingProducts, setRemovingProducts] = useState(false);
   const [arrangeView, setArrangeView] = useState(false);
@@ -118,7 +118,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
                   aria-label="Delete"
                   onClick={() => {
                     setDeleteRecord(row.original);
-                    setShowProductConfirmBox({ open: true, data: row.original });
+                    setShowProductConfirmBox(true);
                   }}
                 >
                   <DeleteIcon color="error" fontSize="small" />
@@ -163,7 +163,8 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
       .put(`${packages.api}/${packageId}/products/remove`, { ids: productIds, type: selectedResource })
       .then(({ data }) => {
         setRemovingProducts(false);
-        setShowProductConfirmBox({ open: false, data: null });
+        setShowProductConfirmBox(false);
+        setDeleteRecord(null);
         fetchData();
         setToastConfig({
           open: true,
@@ -173,7 +174,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
       })
       .catch((err) => {
         setRemovingProducts(false);
-        setShowProductConfirmBox({ open: false, data: null });
+        setShowProductConfirmBox(false);
         setToastConfig(err);
       });
   };
@@ -258,7 +259,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
             text="Delete"
             disabled={selectedRecords.length === 0 || isRemovingProducts}
             onClick={() => {
-              setShowProductConfirmBox({ open: true, data: selectedRecords });
+              setShowProductConfirmBox(true);
             }}
           />
         </>
@@ -332,12 +333,12 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
           isSubmitting={isSubmitting}
         />
       )}
-      {showProductConfirmBox.open && (
+      {showProductConfirmBox && (
         <ConfirmationDialog
           open={true}
           message={`Are you sure you want to delete ?`}
           onClose={() => {
-            setShowProductConfirmBox({ open: false, data: null });
+            setShowProductConfirmBox(false);
           }}
           okBtnLoading={isRemovingProducts}
           onOk={removeProducts}

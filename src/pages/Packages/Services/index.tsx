@@ -156,6 +156,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
       .then(() => {
         setRemovingServices(false);
         setShowServiceConfirmBox(false);
+        setDeleteRecord(null);
         fetchData();
       })
       .catch((err) => {
