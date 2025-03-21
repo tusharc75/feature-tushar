@@ -2,7 +2,6 @@ import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { AccountCircle, Map } from '@mui/icons-material';
 import { Avatar, IconButton, ListItem, ListItemButton, Skeleton, Typography } from '@mui/material';
-import React from 'react';
 import { cn } from 'src/constants/helpers';
 import { HandleSelect } from 'src/pages/TechnicianScheduler/Roadmap';
 import { TActivity } from 'src/pages/TechnicianScheduler/Roadmap/types';

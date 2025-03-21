@@ -28,21 +28,21 @@ function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleCl
         warehouse: ele?.warehouse,
         ...(type === 'fieldTicket'
           ? {
-              fieldTicket: ele?.resourceId,
-              startDate: ele?.service?.estimateStartDate,
-              endDate: ele?.service?.estimateEndDate
-            }
+            fieldTicket: ele?.resourceId,
+            startDate: ele?.service?.estimateStartDate,
+            endDate: ele?.service?.estimateEndDate
+          }
           : type === 'rentalJob'
             ? {
-                rentalJob: ele?.resourceId,
-                startDate: ele?.estimateStartDate,
-                endDate: ele?.estimateEndDate
-              }
+              rentalJob: ele?.resourceId,
+              startDate: ele?.estimateStartDate,
+              endDate: ele?.estimateEndDate
+            }
             : {
-                fieldServiceOrder: ele?.resourceId,
-                startDate: ele?.service?.estimateStartDate,
-                endDate: ele?.service?.estimateEndDate
-              }),
+              fieldServiceOrder: ele?.resourceId,
+              startDate: ele?.service?.estimateStartDate,
+              endDate: ele?.service?.estimateEndDate
+            }),
         status: 'Assigned'
       };
     });
@@ -73,7 +73,7 @@ function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleCl
       <CustomDialogContent>
         <Box p={2}>
           <Typography variant="body1" color="textPrimary">
-            Do You want to assign{' '}
+            Do you want to assign{' '}
             {`${selectedServiceOrder[0]?.service?.serviceName || ''} (${selectedServiceOrder[0]?.fieldTicketNumber || selectedServiceOrder[0]?.rentalJobName || selectedServiceOrder[0]?.fieldServiceOrderNumber})`}{' '}
             to {technicianData?.firstName || ''} {technicianData?.lastName || ''}?
           </Typography>
