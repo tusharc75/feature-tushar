@@ -1,4 +1,4 @@
-import { Box, Dialog } from '@mui/material';
+import { Autocomplete, Box, Dialog, TextField } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';
@@ -36,13 +36,16 @@ const AssignProductDialog = ({
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, selectedEntity, resources }
+    state: { user, selectedEntity, resources, permissions }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
   const [isProductType, setIsProductType] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const { isOffline } = useContext(CustomOfflineContext);
+
+  const [productCategoryList, setProductCategoryList] = useState([]);
+  const [productCategory, setProductCategory] = useState(null);
 
   const defaultColumns = [
     {
@@ -64,10 +67,21 @@ const AssignProductDialog = ({
   }, []);
 
   useEffect(() => {
+    if (permissions?.productCategory?.isRead && !isOffline) {
+      axiosInstance()
+        .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.productCategory}`)
+        .then(({ data: { data: lookupResource } }) => {
+          setProductCategoryList(lookupResource[sidebarResource.productCategory] || []);
+        })
+        .catch((err) => toastConfig.setToastConfig(err));
+    }
+  }, []);
+
+  useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
     fetchProduct(cancelTokenSource);
     return () => cancelTokenSource.cancel();
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, tabValue]);
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, tabValue, productCategory]);
 
   const fetchGridColumns = async () => {
     try {
@@ -154,6 +168,10 @@ const AssignProductDialog = ({
 
     let updatedDeepFilters = [...deepFilters];
     const updatedFilterByIds = [...filterByIds];
+
+    if (productCategory) {
+      updatedFilterByIds.push({ field: "productCategory", term: { $in: [productCategory] } })
+    }
 
     if (extraDeepFilter?.length > 0) {
       extraDeepFilter?.map((e) => {
@@ -296,6 +314,16 @@ const AssignProductDialog = ({
             }}
             isAddButtonVisible
             setQueryString={false}
+            leftSideContents={
+              permissions?.productCategory?.isRead && !isOffline ? <LeftSideContent
+                {...{
+                  productCategoryList,
+                  productCategory,
+                  setProductCategory,
+                  resources
+                }}
+              /> : null
+            }
           />
           {pricingCondition && !isOffline && (
             <Box>
@@ -329,5 +357,43 @@ const AssignProductDialog = ({
     </Dialog>
   );
 };
+
+const LeftSideContent = ({
+  productCategoryList,
+  productCategory,
+  setProductCategory,
+  resources
+}) => {
+  return (
+    <div className="w-full md:w-auto">
+      <Autocomplete
+        className="flex-grow sm:max-w-[250px] md:min-w-[250px] md:flex-grow-0"
+        options={productCategoryList}
+        getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+        size="small"
+        isOptionEqualToValue={(option: any, val) => option.optionValue === val}
+        value={
+          productCategoryList.filter((data) => data.optionValue === productCategory).length
+            ? productCategoryList.filter((data) => data.optionValue === productCategory)[0]
+            : ''
+        }
+        onChange={(e, val) => {
+          setProductCategory(val && val.optionValue ? val.optionValue : '');
+        }}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            margin="none"
+            size="small"
+            name="productCategory"
+            label={resources?.productCategory?.titleSingular}
+            variant="outlined"
+            fullWidth />
+        )}
+      />
+    </div>
+  );
+};
+
 
 export default React.memo(AssignProductDialog);

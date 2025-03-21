@@ -23,6 +23,7 @@ import { useData } from 'src/StateProvider/Provider';
 import queryString from 'query-string';
 import { useHistory } from 'react-router-dom';
 import ScheduleMaintenanceTypeDialog from 'src/pages/ScheduleMaintenance/ScheduleMaintenanceType';
+import { FiExternalLink } from 'react-icons/fi';
 
 const ScheduleMaintenance = () => {
   const { setToastConfig } = useContext(CustomToastContext);
@@ -113,6 +114,43 @@ const ScheduleMaintenance = () => {
         routes.serializedAssetDetail.path
       );
     }
+
+    newColumns?.forEach((o) => {
+      if (o?.accessor === 'assetNumber') {
+        o.cell = ({ row }) => (
+          <div className="flex items-center gap-1">
+            <p className="text-truncate" title={row.original.assetNumber}>
+              {row.original.assetNumber}
+            </p>
+            <IconButton
+              size="small"
+              onClick={() => {
+                window.open(`${routes.serializedAssetDetail.path}/${row.original._id?.split('_')[0]}`);
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
+          </div>
+        );
+      }
+      if (o?.accessor === 'productName') {
+        o.cell = ({ row }) => (
+          <div className="flex items-center gap-1">
+            <p className="text-truncate" title={row.original.productName}>
+              {row.original.productName}
+            </p>
+            <IconButton
+              size="small"
+              onClick={() => {
+                window.open(`${routes.productDetail.path}/${row.original._id?.split('_')[0]}`);
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
+          </div>
+        );
+      }
+    });
     coloum = [
       {
         accessor: 'maintenanceType',
@@ -210,7 +248,11 @@ const ScheduleMaintenance = () => {
             data: { data, count }
           }
         }) => {
-          const rows = data.map((e) => prepareDataForGrid(e));
+          const rows = data.map((e, i) => {
+            const finalObject: any = prepareDataForGrid(e);
+            finalObject['_id'] = `${e?._id}_${e?.uniqueId ? e?.uniqueId : i}`;
+            return finalObject;
+          });
           dispatch({ type: 'initialize', data: rows, count: count });
           dispatch({ type: 'loading', loading: false });
         }
@@ -261,87 +303,75 @@ const ScheduleMaintenance = () => {
     }
 
     if (showFilteredRecordsOnly) {
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(selectedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(selectedRecords.map((m) => m?._id.split('_')[0]))}`;
     }
 
     return deepFilter;
   };
 
-  const handleAdd = (_data) => {
-    if (rowsToAdd?.length && _data) {
+  const handleAdd = async (_data) => {
+    let resPonseData;
+
+    const query = `${product.api}/scheduling-maintenance`;
+
+    try {
       setIsSubmitting(true);
-      axiosInstance()
-        .post(`${product.api}/scheduling-maintenance`, {
+      if (rowsToAdd?.length && _data) {
+        const response = await axiosInstance().post(query, {
           materials: rowsToAdd?.map((r) => r?._id),
           materialType: MATERIAL_TYPE.product,
           effectiveDate: _data?.effectiveDate,
           duration: _data?.duration,
           maintenanceType: _data?.maintenanceType
-        })
-        .then(({ data }) => {
-          setToastConfig({
-            open: true,
-            type: 'success',
-            message: data?.message
-          });
-          fetchData();
-          setIsSubmitting(false);
-          setOpenCustomDataDialog({ open: false, data: null });
-          setOpenAssignProductDialog(false);
-          setOpenAssignSerializedAssetDialog(false);
-          setRowsToAdd([]);
-        })
-        .catch((error) => {
-          setIsSubmitting(false);
-          setToastConfig(error);
         });
-    } else if (_data && openCustomDataDialog?.data?.uniqueId) {
-      setIsSubmitting(true);
-      axiosInstance().put(`${product.api}/scheduling-maintenance`, {
-        _id: openCustomDataDialog?.data?.uniqueId,
-        effectiveDate: _data?.effectiveDate,
-        duration: _data?.duration,
-      }).then(({ data }) => {
-        setToastConfig({
-          open: true,
-          type: 'success',
-          message: data?.message
-        });
-        fetchData();
-        setIsSubmitting(false);
-        setOpenCustomDataDialog({ open: false, data: null });
-        setOpenAssignProductDialog(false);
-        setOpenAssignSerializedAssetDialog(false);
-      }).catch((error) => {
-        setIsSubmitting(false);
-        setToastConfig(error);
-      });
-    } else if (_data && !openCustomDataDialog?.data?.uniqueId) {
-      setIsSubmitting(true);
-      axiosInstance()
-        .post(`${product.api}/scheduling-maintenance`, {
-          materials: [openCustomDataDialog?.data?._id],
+        resPonseData = response?.data;
+      } else if (_data && selectedType === 1 && (openCustomDataDialog?.data?.uniqueId || selectedRecords?.length)) {
+        const response = await axiosInstance().put(query, {
+          _id: openCustomDataDialog?.data?.uniqueId ? [openCustomDataDialog?.data?.uniqueId] : selectedRecords?.map((r) => r?.uniqueId),
           effectiveDate: _data?.effectiveDate,
-          duration: _data?.duration,
-          materialType: MATERIAL_TYPE.serializedAsset,
-          maintenanceType: _data?.maintenanceType
-        })
-        .then(({ data }) => {
-          setToastConfig({
-            open: true,
-            type: 'success',
-            message: data?.message
-          });
-          fetchData();
-          setIsSubmitting(false);
-          setOpenCustomDataDialog({ open: false, data: null });
-          setOpenAssignProductDialog(false);
-          setOpenAssignSerializedAssetDialog(false);
-        })
-        .catch((error) => {
-          setIsSubmitting(false);
-          setToastConfig(error);
+          duration: _data?.duration
         });
+        resPonseData = response?.data;
+      } else if (_data && selectedType === 2) {
+        if (openCustomDataDialog?.data?.uniqueId || selectedRecords?.filter((r) => r?.uniqueId)?.length) {
+          const response = await axiosInstance().put(query, {
+            _id: openCustomDataDialog?.data?.uniqueId
+              ? [openCustomDataDialog?.data?.uniqueId]
+              : selectedRecords?.filter((r) => r?.uniqueId)?.map((r) => r?.uniqueId),
+            effectiveDate: _data?.effectiveDate,
+            duration: _data?.duration
+          });
+          resPonseData = response?.data;
+        }
+        if (!openCustomDataDialog?.data?.uniqueId || selectedRecords?.filter((r) => !r?.uniqueId)?.length) {
+          const response = await axiosInstance().post(query, {
+            materials: openCustomDataDialog?.data?._id
+              ? [openCustomDataDialog?.data?._id?.split('_')[0]]
+              : selectedRecords?.filter((r) => !r?.uniqueId)?.map((r) => r?._id?.split('_')[0]),
+            effectiveDate: _data?.effectiveDate,
+            duration: _data?.duration,
+            materialType: MATERIAL_TYPE.serializedAsset,
+            maintenanceType: _data?.maintenanceType
+          });
+          resPonseData = response?.data;
+        }
+      }
+
+      setToastConfig({
+        open: true,
+        type: 'success',
+        message: resPonseData?.message
+      });
+      fetchData();
+      setIsSubmitting(false);
+      dispatch({ type: 'selection', selectedRecords: [] });
+      setOpenCustomDataDialog({ open: false, data: null });
+      setOpenAssignProductDialog(false);
+      setOpenAssignSerializedAssetDialog(false);
+      setRowsToAdd([]);
+    } catch (error) {
+      setIsSubmitting(false);
+      setToastConfig(error);
     }
   };
 
@@ -390,7 +420,9 @@ const ScheduleMaintenance = () => {
             id="products"
             fullWidth
             options={products}
-            renderInput={(params) => <TextField {...params} size="small" variant="outlined" label={resources?.product?.titleSingular} margin="none" />}
+            renderInput={(params) => (
+              <TextField {...params} size="small" variant="outlined" label={resources?.product?.titleSingular} margin="none" />
+            )}
             getOptionLabel={(option) => option?.optionLabel || ''}
             isOptionEqualToValue={(option: any, val) => (option ? option?.optionValue === val?.optionValue : false)}
             onChange={(e, val) => {
@@ -457,6 +489,14 @@ const ScheduleMaintenance = () => {
     return (
       <>
         <MenuItem
+          disabled={selectedRecords.length && selectedRecords?.every((e) => selectedRecords[0]?.maintenanceTypeId === e?.maintenanceTypeId) ? false : true}
+          onClick={() => {
+            setOpenCustomDataDialog({ open: true, data: { maintenanceTypeId: selectedRecords[0]?.maintenanceTypeId } });
+          }}
+        >
+          Bulk Edit
+        </MenuItem>
+        <MenuItem
           disabled={selectedRecords.length === 0 || selectedRecords?.some((d: any) => !d?.effectiveDate || !d?.duration)}
           onClick={() => setShowConfirmBox({ open: true, data: selectedRecords })}
         >
@@ -484,7 +524,7 @@ const ScheduleMaintenance = () => {
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
-          ids={selectedRecords?.map((obj) => obj._id)}
+          ids={selectedRecords?.map((obj) => obj?._id.split('_')[0])}
           resource={sidebarResource.schedulingMaintenance}
           onExportToExcelSuccess={() => {
             fetchData();

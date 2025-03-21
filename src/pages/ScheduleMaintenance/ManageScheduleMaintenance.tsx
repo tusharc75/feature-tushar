@@ -36,16 +36,15 @@ const ManageScheduleMaintenance = ({ data = null, handleClose, handleSave, loadi
           setScheduledMaintenanceTypeOptions(data?.map((d) => ({ optionLabel: d?.name, optionValue: d?._id })));
         }
       })
-      .catch((error) => { });
+      .catch((error) => {});
   }, []);
-
 
   useEffect(() => {
     if (data) {
       setInitialData({
-        effectiveDate: data?.effectiveDate,
-        duration: data?.duration,
-        maintenanceType: data?.maintenanceTypeId
+        effectiveDate: data?.effectiveDate || '',
+        duration: data?.duration || '',
+        maintenanceType: data?.maintenanceTypeId || ''
       });
     }
   }, [data]);
@@ -110,13 +109,13 @@ const ManageScheduleMaintenance = ({ data = null, handleClose, handleSave, loadi
                         )}
                       />
                     </div>
-                    {!data &&
+                    {!data && (
                       <HtmlTooltip title={`Add`}>
                         <IconButton onClick={() => setOpenScheduledMaintenanceType(true)} size="small" color="primary">
                           <AddCircleIcon />
                         </IconButton>
                       </HtmlTooltip>
-                    }
+                    )}
                   </div>
                   <Box mt={1}></Box>
                   <CustomDatePicker

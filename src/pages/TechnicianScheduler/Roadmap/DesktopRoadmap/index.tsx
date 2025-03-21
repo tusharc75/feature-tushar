@@ -1,8 +1,9 @@
 import dayjs from 'dayjs';
-import { useEffect, useRef, useState } from 'react';
+import { memo, useState } from 'react';
 import { cn } from 'src/constants/helpers';
 import { HandleSelect } from 'src/pages/TechnicianScheduler/Roadmap';
 import Calendar from 'src/pages/TechnicianScheduler/Roadmap/DesktopRoadmap/Calendar';
+import LeftSidebar from 'src/pages/TechnicianScheduler/Roadmap/DesktopRoadmap/LeftSidebar';
 import MapImpl from 'src/pages/TechnicianScheduler/Roadmap/DesktopRoadmap/MapImpl';
 import Sidebar from 'src/pages/TechnicianScheduler/Roadmap/DesktopRoadmap/Sidebar';
 import { TActivity } from 'src/pages/TechnicianScheduler/Roadmap/types';
@@ -13,24 +14,43 @@ const endDate = dayjs('2025-12-31');
 const totalDay = endDate.diff(startDate, 'day');
 
 type DesktopRoadmapProps = {
-  activity: TActivity[];
+  activity: TActivity[] | null;
   selected: string | null;
   handleSelect: HandleSelect;
   setSelected: React.Dispatch<React.SetStateAction<string>>;
+  leftSidebar?: (isMobile: boolean) => React.ReactNode;
+  leftSidebarTitle?: React.ReactNode;
+  setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isSidebarOpen: boolean;
+  loading: boolean;
 };
 
-const DesktopRoadmap = ({ activity, handleSelect, selected, setSelected }: DesktopRoadmapProps) => {
+const DesktopRoadmapImpl = ({
+  activity,
+  handleSelect,
+  selected,
+  setSelected,
+  leftSidebar = null,
+  leftSidebarTitle = null,
+  isSidebarOpen,
+  setIsSidebarOpen,
+  loading
+}: DesktopRoadmapProps) => {
   const [container, setContainer] = useState<HTMLDivElement>(null);
 
   return (
     <div
       ref={setContainer}
       className={cn(
-        'grid h-[--container-h] grid-cols-[300px_1fr] overflow-auto border  [--container-h:50vh] [--data-h:90px] [--header-h:50px] ',
+        'grid h-[--container-h] grid-cols-[auto_1fr_300px] overflow-auto border  [--container-h:calc(100vh-200px)] [--data-h:90px] [--header-h:50px] ',
         selected ? 'overflow-hidden' : 'overflow-auto scroll-smooth'
       )}
     >
-      <Sidebar activity={activity} handleSelect={handleSelect} />
+      {leftSidebar ? (
+        <LeftSidebar isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} title={leftSidebarTitle}>
+          {leftSidebar(false)}
+        </LeftSidebar>
+      ) : null}
       {!selected ? (
         <Calendar
           dayPixel={dayPixel}
@@ -43,12 +63,15 @@ const DesktopRoadmap = ({ activity, handleSelect, selected, setSelected }: Deskt
           container={container}
         />
       ) : (
-        <div className="absolute left-[300px] right-0 top-0">
+        <div className="">
           <MapImpl selected={selected} setSelected={setSelected} />
         </div>
       )}
+      <Sidebar activity={activity} loading={loading} handleSelect={handleSelect} />
     </div>
   );
 };
+
+const DesktopRoadmap = memo(DesktopRoadmapImpl) as typeof DesktopRoadmapImpl;
 
 export default DesktopRoadmap;

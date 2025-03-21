@@ -99,8 +99,14 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
       {
         accessor: 'qty',
         Header: 'Qty',
-        width: 250,
+        width: 150,
         Cell: ({ row }) => row?.original?.qty ? <h5 className="text-truncate">{row?.original?.qty}</h5> : <NoDataCell />
+      },
+      {
+        accessor: 'returnQty',
+        Header: 'Returned Qty',
+        width: 150,
+        Cell: ({ row }) => row?.original?.returnQty ? <h5 className="text-truncate">{row?.original?.returnQty}</h5> : <NoDataCell />
       },
       {
         accessor: 'status',
@@ -231,8 +237,8 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
                 size="small"
                 disabled={isDisabled}
                 onClick={() => {
-                  if (isReturn) {
-                    setProductQtyToReturnDialog({ open: true, data: [row?.original, ...(row?.original?.subRows || [])] });
+                  if (row?.original?.type === MATERIAL_TYPE.product && isReturn) {
+                    setProductQtyToReturnDialog({ open: true, data: [row?.original] });
                   } else {
                     setConfirmationDialog({ open: true, data: [row?.original] });
                   }
@@ -296,7 +302,7 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
       });
     });
 
-    if (rows?.some((r) => r?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.dispatched)) {
+    if (rows?.some((r) => [FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.dispatched, FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.completed, FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.returned].includes(r?.status))) {
       setNextStep(true);
     }
 
@@ -358,7 +364,8 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
         message: data?.message
       });
       setSubmitting(false);
-      setProductQtyToReturnDialog({ open: false, data: null })
+      setProductQtyToReturnDialog({ open: false, data: null });
+      setConfirmationDialog({ open: false, data: null });
       fetchData();
     }).catch((error) => {
       toastConfig.setToastConfig(error);
@@ -379,7 +386,11 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
             }
             onClick={() => {
               if (isReturn) {
-                setProductQtyToReturnDialog({ open: true, data: selectedRecords });
+                if (selectedRecords?.some((d) => d?.type === MATERIAL_TYPE.product)) {
+                  setProductQtyToReturnDialog({ open: true, data: selectedRecords });
+                } else {
+                  setConfirmationDialog({ open: true, data: selectedRecords });
+                }
               } else {
                 setConfirmationDialog({ open: true, data: selectedRecords });
               }
@@ -430,19 +441,23 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
       {confirmationDialog.open && (
         <ConfirmationDialog
           open={confirmationDialog.open}
-          message={`Are you sure you want to ${isReturn ? 'return' : 'dispatch'} selected records?`}
+          message={`Are you sure you want to ${isReturn ? 'return' : 'dispatch'} selected record(s)?`}
           onClose={() => {
             setConfirmationDialog({ open: false, data: null });
           }}
           onOk={() => {
-            handleDispatch(confirmationDialog.data);
+            if (isReturn) {
+              handleReturn(confirmationDialog.data, []);
+            } else {
+              handleDispatch(confirmationDialog.data);
+            }
           }}
           okBtnLoading={submitting}
         />
       )}
       {productQtyToReturnDialog.open && (
         <ReturnQtyDialog
-          products={productQtyToReturnDialog.data?.filter((d) => d?.type === MATERIAL_TYPE.product)}
+          products={productQtyToReturnDialog.data?.filter((d) => d?.type === MATERIAL_TYPE.product && d?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.dispatched)}
           loading={submitting}
           handleClose={() => setProductQtyToReturnDialog({ open: false, data: null })}
           handleSuccess={(products) => handleReturn(productQtyToReturnDialog.data, products)}
