@@ -1,5 +1,5 @@
 import { AccountCircle, CalendarMonth, Close, ExpandLess, ExpandMore, Map } from '@mui/icons-material';
-import { Avatar, Collapse, IconButton, ListItemButton, Typography } from '@mui/material';
+import { Avatar, Collapse, IconButton, ListItemButton, Skeleton, Typography } from '@mui/material';
 import dayjs from 'dayjs';
 import React, { useCallback, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -14,12 +14,13 @@ type TProps = {
   selected: string | null;
   handleToggle: any;
   handleSelect: any;
-  setSelected: (data) => void;
+  loading: boolean;
+  setSelected: React.Dispatch<React.SetStateAction<string>>;
 };
 
 const COLLAPSIBLE_UNIQUE_NAME = '_fieldTicketInvoice';
 
-const MobileRoadmap: React.FC<TProps> = ({ activity, expanded, selected, handleToggle, handleSelect, setSelected }) => {
+const MobileRoadmap: React.FC<TProps> = ({ activity, expanded, selected, handleToggle, handleSelect, loading, setSelected }) => {
   const [open, setOpen] = useState<string | false>(false);
 
   const handleChange = useCallback((index: string | number) => {
@@ -52,62 +53,94 @@ const MobileRoadmap: React.FC<TProps> = ({ activity, expanded, selected, handleT
           Technician
         </Typography>
       </div>
-      <ul>
-        {activity.map((item, index) => {
-          return (
-            <li className="list-none border-b">
-              <ListItemButton
-                className="flex h-[--data-h] items-center !justify-between px-4 "
-                onClick={(event) => {
-                  handleSelect(event, item, 'technician');
-                }}
-              >
-                <div className="flex min-w-0 items-center gap-4">
-                  <Avatar sizes="small" style={{ height: 45, width: 45 }} alt="Remy Sharp" src={item?.photo}>
-                    <AccountCircle style={{ fontSize: 28 }} />
-                  </Avatar>
-                  <div className="">
-                    <Typography style={{ fontWeight: 'bolder', fontSize: '1rem' }}>{`${item?.firstName} ${item?.lastName}`}</Typography>
-                    <p className="line-clamp-1 text-[0.8rem] text-gray-500" title={`${item?.competencyType?.optionLabel || ''}`}>
-                      {`${item?.competencyType?.optionLabel || ''}`}
-                    </p>
-                    <p
-                      className="line-clamp-1 text-[0.6rem] text-gray-500"
-                      title={`${item?.competencies?.map((e) => e?.optionLabel)?.toString() || ''}`}
-                    >
-                      {`${item?.competencies?.map((e) => e?.optionLabel)?.toString() || ''}`}
-                    </p>
+      {!loading ? (
+        <ul>
+          {activity?.map((item, index) => {
+            return (
+              <li className="list-none border-b">
+                <ListItemButton
+                  className="flex h-[--data-h] items-center !justify-between px-4 "
+                  onClick={(event) => {
+                    handleSelect(event, item, 'technician');
+                  }}
+                >
+                  <div className="flex min-w-0 items-center gap-4">
+                    <Avatar sizes="small" style={{ height: 45, width: 45 }} alt="Remy Sharp" src={item?.photo}>
+                      <AccountCircle style={{ fontSize: 28 }} />
+                    </Avatar>
+                    <div className="">
+                      <Typography style={{ fontWeight: 'bolder', fontSize: '1rem' }}>{`${item?.firstName} ${item?.lastName}`}</Typography>
+                      <p className="line-clamp-1 text-[0.8rem] text-gray-500" title={`${item?.competencyType?.optionLabel || ''}`}>
+                        {`${item?.competencyType?.optionLabel || ''}`}
+                      </p>
+                      <p
+                        className="line-clamp-1 text-[0.6rem] text-gray-500"
+                        title={`${item?.competencies?.map((e) => e?.optionLabel)?.toString() || ''}`}
+                      >
+                        {`${item?.competencies?.map((e) => e?.optionLabel)?.toString() || ''}`}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex flex-shrink-0">
-                  <IconButton
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      handleMapClick(index, item);
-                    }}
-                  >
-                    <Map fontSize="medium" />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelected(null);
-                      handleChange(`${index}`);
-                    }}
-                  >
-                    {compareCollapse(index) ? <ExpandLess /> : <ExpandMore />}
-                  </IconButton>
-                </div>
-              </ListItemButton>
+                  <div className="flex flex-shrink-0">
+                    <IconButton
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleMapClick(index, item);
+                      }}
+                    >
+                      <Map fontSize="medium" />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelected(null);
+                        handleChange(`${index}`);
+                      }}
+                    >
+                      {compareCollapse(index) ? <ExpandLess /> : <ExpandMore />}
+                    </IconButton>
+                  </div>
+                </ListItemButton>
 
-              <Collapse in={compareCollapse(index)}>
-                <CalendarData services={item?.fieldTicket || []} handleSelect={handleSelect} selected={selected} setSelected={setSelected} />
-              </Collapse>
-            </li>
-          );
-        })}
-      </ul>
+                <Collapse in={compareCollapse(index)}>
+                  <CalendarData services={item?.fieldTicket || []} handleSelect={handleSelect} selected={selected} setSelected={setSelected} />
+                </Collapse>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <ul>
+          {[...Array(9).keys()].map((item, index) => {
+            return (
+              <li className="list-none border-b">
+                <ListItemButton className="flex h-[--data-h] items-center !justify-between px-4 ">
+                  <div className="flex min-w-0 flex-grow items-center gap-4">
+                    <Skeleton width={'45px'} variant="circular" height={'45px'} sx={{ flexShrink: 0 }} />
+                    <div className="w-full">
+                      <Typography style={{ fontWeight: 'bolder', fontSize: '1rem' }}>
+                        <Skeleton />
+                      </Typography>
+                      <p className="line-clamp-1 text-[0.8rem] text-gray-500">
+                        <Skeleton />
+                      </p>
+                      <p className="line-clamp-1 text-[0.6rem] text-gray-500">
+                        <Skeleton />
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex flex-shrink-0">
+                    <IconButton>
+                      <Map fontSize="medium" />
+                    </IconButton>
+                  </div>
+                </ListItemButton>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 };
@@ -164,7 +197,7 @@ const CalendarData = ({ services, handleSelect, selected, setSelected }) => {
                   className="flex h-[--data-h] flex-col justify-center p-[14px]"
                 >
                   <p className="mb-2 line-clamp-1 text-[13px] font-semibold leading-[16px]">
-                    {service.fieldTicket[0]?.fieldTicketNumber || service.rentalJob[0].rentalJobName}
+                    {service.fieldTicket[0]?.fieldTicketNumber || service.rentalJob[0]?.rentalJobName}
                   </p>
                   <p className="flex items-center gap-1 text-[10px] font-medium leading-[16px] text-[#777575] dark:text-gray-100">
                     <CalendarMonth className="!h-[12px] !w-[12px]" /> {dayjs(service.startDate).format(dateFormat)}-
