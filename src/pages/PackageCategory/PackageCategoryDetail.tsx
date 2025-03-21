@@ -60,7 +60,6 @@ const PackageCategoryDetail = () => {
       });
   };
 
-
   const fetchData = async () => {
     axiosInstance().get(`${packageCategory.api}/${id}`).then(({ data: { data } }) => {
       setAllowedToEdit(permissions?.packageCategory?.isUpdate);
@@ -105,7 +104,7 @@ const PackageCategoryDetail = () => {
           <CustomBreadCrumbs
             routes={[
               { ...routes?.packageCategory, title: resources?.packageCategory?.titlePlural },
-              { title: `${packageCategoryData ? packageCategoryData?.packageCategory : ''}` }
+              { title: `${packageCategoryData ? packageCategoryData?.name : ''}` }
             ]}
           />
         </Box>
@@ -134,14 +133,19 @@ const PackageCategoryDetail = () => {
         </TabPanel>
         {resourceData?.tabs?.map((tab, i) => (
           <TabPanel value={tabValue} index={i + 1} key={i}>
-            <Step tab={tab} resourcePolicyId={resourceData?._id} resourceId={id} resource={sidebarResource.packageCategory} data={packageCategoryData} allowedToEdit={permissions?.packageCategory?.isUpdate} />
+            <Step tab={tab}
+              resourcePolicyId={resourceData?._id}
+              resourceId={id}
+              resource={sidebarResource.packageCategory}
+              data={packageCategoryData}
+              allowedToEdit={permissions?.packageCategory?.isUpdate} />
           </TabPanel>
         ))}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.packageCategory?.titleSingular?.toLowerCase()} : ${packageCategoryData?.packageCategory} ?`}
+          message={`Are you sure you want to delete ${resources?.packageCategory?.titleSingular?.toLowerCase()} : ${packageCategoryData?.name} ?`}
           onClose={() => setShowConfirmBox(false)}
           onOk={handleDelete} />
       )}
