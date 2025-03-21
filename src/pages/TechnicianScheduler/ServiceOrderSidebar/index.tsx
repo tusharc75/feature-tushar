@@ -45,8 +45,7 @@ const ServiceOrderSidebarImpl = ({
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
 
-    axiosInstance()
-      .get(`/technician-scheduler/un-assign-service?type=${selectedResource.resource}`, { cancelToken })
+    axiosInstance().get(`/technician-scheduler/un-assign-service?type=${selectedResource.resource}`, { cancelToken })
       .then(({ data: { data } }) => {
         const rows: any = [];
         data?.forEach((ele, index) => {
@@ -64,8 +63,8 @@ const ServiceOrderSidebarImpl = ({
           obj.service = ele?.service;
           obj.customerAccount = ele?.customerAccount?.optionLabel;
           obj.customerAccountId = ele?.customerAccount?.optionValue;
-          obj.estimateStartDate = ele?.service?.estimateStartDate;
-          obj.estimateEndDate = ele?.service?.estimateEndDate;
+          obj.estimateStartDate = ele?.service?.estimateStartDate || ele?.estimateStartDate;
+          obj.estimateEndDate = ele?.service?.estimateEndDate || ele?.estimateEndDate;
           obj.resourceNumber = ele?.fieldTicketNumber || ele?.fieldServiceOrderNumber || ele?.rentalJobName;
           rows.push(obj);
         });
@@ -85,7 +84,6 @@ const ServiceOrderSidebarImpl = ({
         : selectedServiceOrder[0]?.fieldServiceOrderNumber
           ? 'fieldServiceOrder'
           : '';
-
     if (['fieldTicket', 'rentalJob'].includes(type)) {
       const newData = [...(state.dataRows || [])].filter((f) => {
         const selectedIds = selectedServiceOrder.map((d) => d._id);

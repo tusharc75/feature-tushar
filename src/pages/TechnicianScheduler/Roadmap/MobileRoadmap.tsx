@@ -1,9 +1,8 @@
 import { AccountCircle, CalendarMonth, Close, ExpandLess, ExpandMore, Map } from '@mui/icons-material';
 import { Avatar, Collapse, IconButton, ListItemButton, Skeleton, Typography } from '@mui/material';
-import dayjs from 'dayjs';
 import React, { useCallback, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { cn, dateFormat } from 'src/constants/helpers';
+import { cn, displayDate } from 'src/constants/helpers';
 import MapView from '../Map';
 import { getColorFromPriority, getPriority } from './helperFunctions';
 import type { TActivity } from './types';
@@ -206,9 +205,9 @@ const CalendarData = ({ services, handleSelect, selected, setSelected }) => {
               <HtmlTooltip
                 title={
                   <div>
-                    <p>{service?.fieldTicket[0]?.fieldTicketNumber ?? service?.rentalJob[0]?.rentalJobName}</p>
+                    <p> {service?.fieldTicket[0]?.fieldTicketNumber || service?.rentalJob[0]?.rentalJobName || service?.fieldServiceOrder[0]?.fieldServiceOrderNumber}</p>
                     <p className="text-[12px]">
-                      {dayjs(service.startDate).format(dateFormat)} - {dayjs(service.endDate).format(dateFormat)}
+                      {displayDate(service?.startDate)} - {displayDate(service?.endDate)}
                     </p>
                   </div>
                 }
@@ -222,11 +221,11 @@ const CalendarData = ({ services, handleSelect, selected, setSelected }) => {
                   className="flex h-[--data-h] flex-col justify-center p-[14px]"
                 >
                   <p className="mb-2 line-clamp-1 text-[13px] font-semibold leading-[16px]">
-                    {service.fieldTicket[0]?.fieldTicketNumber || service.rentalJob[0]?.rentalJobName}
+                    {service?.fieldTicket[0]?.fieldTicketNumber || service?.rentalJob[0]?.rentalJobName || service?.fieldServiceOrder[0]?.fieldServiceOrderNumber}
                   </p>
                   <p className="flex items-center gap-1 text-[10px] font-medium leading-[16px] text-[#777575] dark:text-gray-100">
-                    <CalendarMonth className="!h-[12px] !w-[12px]" /> {dayjs(service.startDate).format(dateFormat)}-
-                    <span className="line-clamp-1 ">{dayjs(service.endDate).format(dateFormat)}</span>
+                    <CalendarMonth className="!h-[12px] !w-[12px]" /> {displayDate(service?.startDate)}-
+                    <span className="line-clamp-1 ">{displayDate(service?.endDate)}</span>
                   </p>
                   <p className="{styles.chip} {styles[priority]} text-[10px] font-medium leading-[16px] text-[#777575]">{service.status}</p>
                 </div>
