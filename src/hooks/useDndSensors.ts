@@ -9,7 +9,7 @@ const useDndSensors = () => {
   });
   const touchSensor = useSensor(TouchSensor, {
     activationConstraint: {
-      delay: 50,
+      delay: 100,
       tolerance: 5
     }
   });

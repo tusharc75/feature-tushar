@@ -1,13 +1,13 @@
 import axios, { CancelToken } from 'axios';
 import { memo, useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
+import { useTableReducer } from 'src/components/CustomReactTable';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
+import { cn, rentalManagement } from 'src/constants/helpers';
+import TechnicianList from 'src/pages/TechnicianScheduler/ServiceOrderSidebar/TechnicianList';
 import { TechnicianResource } from 'src/pages/TechnicianScheduler/useTechnicianResources';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AssignTechnicianDialog from '../Roadmap/AssignTechnicianDialog';
-import { useTableReducer } from 'src/components/CustomReactTable';
-import { rentalManagement } from 'src/constants/helpers';
-import TechnicianList from 'src/pages/TechnicianScheduler/ServiceOrderSidebar/TechnicianList';
 
 type ServiceOrderSidebarProps = {
   selectedResource: TechnicianResource;
@@ -17,6 +17,7 @@ type ServiceOrderSidebarProps = {
   handleClose: () => void;
   setSelectedRecords: React.Dispatch<React.SetStateAction<any[]>>;
   setRefresh: React.Dispatch<React.SetStateAction<boolean>>;
+  isMobile: boolean;
 };
 type DialogData = {
   open: boolean;
@@ -32,6 +33,7 @@ const ServiceOrderSidebarImpl = ({
   handleSucess,
   setSelectedRecords,
   setRefresh,
+  isMobile,
   unAssignTechnicianDialog
 }: ServiceOrderSidebarProps) => {
   const toastConfig = useContext(CustomToastContext);
@@ -124,8 +126,14 @@ const ServiceOrderSidebarImpl = ({
 
   return (
     <>
-      <div className="h-full " ref={setContainer}>
+      <div
+        className={cn(isMobile ? 'h-[180px]' : 'h-full', 'max-w-full')}
+        ref={(div) => {
+          setContainer(div);
+        }}
+      >
         <TechnicianList
+          isMobile={isMobile}
           selectedResource={selectedResource}
           container={container}
           dispatch={dispatch}

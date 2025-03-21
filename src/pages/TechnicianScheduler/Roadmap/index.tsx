@@ -11,7 +11,6 @@ export type HandleSelect = (event: React.SyntheticEvent, data: TActivity, type: 
 function Roadmap({ filter, selectedRecords, handleUnAssignTechnician, leftSidebar = null, leftSidebarTitle = '', headerSlot = null, refresh }) {
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [activity, setActivity] = useState(null);
-  const [loadingRoadmap, setLoadingRoadmap] = useState(false);
   const [expanded, setExpanded] = React.useState([]);
   const [selected, setSelected] = React.useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -25,28 +24,18 @@ function Roadmap({ filter, selectedRecords, handleUnAssignTechnician, leftSideba
   }, [filter.fieldTicket]);
 
   const fetchServiceOrders = async (orderId) => {
-    setLoadingRoadmap(true);
     await axiosInstance()
       .get(`/technician-scheduler/service-order?serviceOrders=${orderId}`)
       .then(({ data }) => {
         setActivity(data?.data);
-        setLoadingRoadmap(false);
-      })
-      .catch((err) => {
-        setLoadingRoadmap(false);
       });
   };
 
   const fetchRoadmap = async () => {
-    setLoadingRoadmap(true);
     await axiosInstance()
       .get(`/technician-scheduler/get-schedule`)
       .then(({ data: { data } }) => {
         setActivity(data);
-        setLoadingRoadmap(false);
-      })
-      .catch((err) => {
-        setLoadingRoadmap(false);
       });
   };
 
@@ -81,6 +70,7 @@ function Roadmap({ filter, selectedRecords, handleUnAssignTechnician, leftSideba
                 : activity
             }
             expanded={expanded}
+            leftSidebar={leftSidebar}
             selected={selected}
             handleToggle={handleToggle}
             handleSelect={handleSelect}

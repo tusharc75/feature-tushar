@@ -1,4 +1,5 @@
-import { useDraggable } from '@dnd-kit/core';
+import { useDraggable, useDroppable } from '@dnd-kit/core';
+import { horizontalListSortingStrategy, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { IconButton, Skeleton } from '@mui/material';
 import React, { memo, useCallback, useMemo, useRef } from 'react';
@@ -16,9 +17,10 @@ type TechnicianListProps = {
   dispatch: React.Dispatch<TActios>;
   selectedResource: TechnicianResource;
   container: HTMLDivElement | null;
+  isMobile: boolean;
 };
 
-const TechnicianList = ({ dispatch, setSelectedRecords, state, selectedResource, container }: TechnicianListProps) => {
+const TechnicianList = ({ dispatch, setSelectedRecords, state, selectedResource, container, isMobile }: TechnicianListProps) => {
   const listRef = useRef<List<any>>(null);
   const sizeMap = useRef({});
   const containerSize = useMemo(() => {
@@ -26,9 +28,9 @@ const TechnicianList = ({ dispatch, setSelectedRecords, state, selectedResource,
       const rect = container.getBoundingClientRect();
       return { width: rect.width, height: rect.height };
     } else {
-      return { width: 300 - 16, height: 600 };
+      return { width: 300 - 16, height: isMobile ? 150 : 600 };
     }
-  }, [container]);
+  }, [container, isMobile]);
 
   const setSize = useCallback((index, size) => {
     sizeMap.current = { ...sizeMap.current, [index]: size };
@@ -38,22 +40,30 @@ const TechnicianList = ({ dispatch, setSelectedRecords, state, selectedResource,
   const getSize = useCallback((index) => sizeMap.current[index] || 50, []);
 
   return (
-    <div style={{ height: containerSize.height - 32 }} className={cn('py-4', state.loading ? 'overflow-hidden' : '')}>
+    <div
+      style={{ height: isMobile ? 'auto' : containerSize.height - 32 }}
+      className={cn('py-4', state.loading ? 'overflow-hidden' : '', isMobile ? 'overflow-y-hidden' : '')}
+    >
       {state.loading ? (
-        [...Array(6).keys()].map((i) => <RowSkeleton key={i} />)
+        <div className={cn('flex', isMobile ? 'flex-row' : 'flex-col')}>
+          {[...Array(6).keys()].map((i) => (
+            <RowSkeleton key={i} isMobile={isMobile} />
+          ))}
+        </div>
       ) : (
         <List
           ref={listRef}
-          height={containerSize.height - 32}
+          height={isMobile ? containerSize.height - 32 : containerSize.height - 32}
           width={containerSize.width}
           itemCount={state.dataRows?.length}
-          style={{ overflowX: 'hidden' }}
+          layout={isMobile ? 'horizontal' : 'vertical'}
+          style={isMobile ? { overflowY: 'hidden' } : { overflowX: 'hidden' }}
           itemSize={getSize}
           itemData={state.dataRows}
         >
           {({ data, index, style }) => (
             <div style={style}>
-              <SingleRow row={data[index]} index={index} setSize={setSize} selectedType={selectedResource?.key} />
+              <SingleRow row={data[index]} index={index} setSize={setSize} isMobile={isMobile} selectedType={selectedResource?.key} />
             </div>
           )}
         </List>
@@ -64,9 +74,9 @@ const TechnicianList = ({ dispatch, setSelectedRecords, state, selectedResource,
 
 export default TechnicianList;
 
-const RowSkeleton = () => {
+const RowSkeleton = ({ isMobile }) => {
   return (
-    <div className="px-4 pb-3">
+    <div className={cn('', isMobile ? 'w-[300px] flex-shrink-0 px-1' : 'px-4 pb-3')}>
       <div className="space-y-2 rounded-md border p-3 shadow-lg">
         {[...Array(4).keys()].map((i) => (
           <div className="flex items-center justify-between " key={i}>
@@ -83,20 +93,34 @@ const RowSkeleton = () => {
   );
 };
 
-export const SingleRow = memo(({ row, index, setSize, selectedType, className = '' }: any) => {
+export const SingleRow = memo(({ row, index, setSize, selectedType, className = '', isMobile }: any) => {
   const rowRef = useRef<HTMLDivElement | null>(null);
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: row._id,
     data: {
       index: index,
       row,
-      props: { row, index, setSize, selectedType }
+      props: { row, index, setSize, selectedType, isMobile, type: 'sidebar' },
+      type: 'sidebar'
+    }
+  });
+
+  const {
+    setNodeRef: setDroppableRef,
+    isOver,
+    active
+  } = useDroppable({
+    id: row._id,
+    data: {
+      accepts: ['technician'],
+      row
     }
   });
 
   React.useEffect(() => {
-    setSize(index, rowRef?.current.getBoundingClientRect().height);
-  }, [setSize, index]);
+    const rect = rowRef?.current.getBoundingClientRect();
+    setSize(index, isMobile ? 300 : rect?.height);
+  }, [setSize, index, isMobile]);
 
   const columns = useMemo(() => {
     return [
@@ -105,7 +129,9 @@ export const SingleRow = memo(({ row, index, setSize, selectedType, className = 
         head: selectedType === 'fieldTicket' ? 'Field Ticket' : selectedType === 'fieldServiceOrder' ? 'Field Service Order' : 'Rental Job',
         cell: row['resourceNumber'] ? (
           <div className="flex items-center ">
-            <p title={row.resourceNumber}>{row.resourceNumber}</p>
+            <p title={row.resourceNumber} className="line-clamp-1">
+              {row.resourceNumber}
+            </p>
             <IconButton
               size="small"
               onClick={() => {
@@ -127,7 +153,9 @@ export const SingleRow = memo(({ row, index, setSize, selectedType, className = 
         cell:
           row.serviceName && row.serviceId ? (
             <div className="flex items-center">
-              <p title={row.serviceName}>{row.serviceName}</p>
+              <p title={row.serviceName} className="line-clamp-1">
+                {row.serviceName}
+              </p>
               <IconButton
                 size="small"
                 onClick={() => {
@@ -160,22 +188,35 @@ export const SingleRow = memo(({ row, index, setSize, selectedType, className = 
 
   return (
     <div
-      {...attributes}
-      {...listeners}
       ref={(div) => {
+        setDroppableRef(div);
         rowRef.current = div;
-        setNodeRef(div);
       }}
-      style={styleDnd}
-      className="px-4 pb-3"
+      className={cn(isMobile ? 'w-[300px] px-1' : 'px-4 pb-3', isDragging ? (isMobile ? 'hidden' : '!w-0 overflow-hidden p-0') : '')}
     >
-      <div className={cn('cursor-grab space-y-2 rounded-md border bg-[--dark-secondary,white] p-3 shadow-lg', className)}>
-        {columns.map((col) => (
-          <div key={col.id} className="flex items-center justify-between gap-1">
-            <h6 className="text-[10px] font-medium text-gray-500">{col.head}:</h6>
-            <p className="text-[13px]">{col.cell}</p>
-          </div>
-        ))}
+      <div
+        {...attributes}
+        {...listeners}
+        ref={(div) => {
+          setNodeRef(div);
+        }}
+        style={{ ...styleDnd }}
+        className={cn(isMobile ? '' : 'w-[262px]')}
+      >
+        <div
+          className={cn(
+            'cursor-grab space-y-2 rounded-md border  p-3 shadow-lg',
+            isOver && active.data.current?.type === 'technician' ? 'bg-gray-300 dark:bg-gray-800' : 'bg-[--dark-secondary,white]',
+            className
+          )}
+        >
+          {columns.map((col) => (
+            <div key={col.id} className="flex items-center justify-between gap-1">
+              <h6 className={cn('text-[10px] font-medium text-gray-500', isMobile ? 'line-clamp-1' : '')}>{col.head}:</h6>
+              <p className={cn('text-[13px]', isMobile ? 'line-clamp-1' : '')}>{col.cell}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
