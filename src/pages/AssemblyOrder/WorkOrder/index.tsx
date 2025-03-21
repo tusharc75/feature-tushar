@@ -323,9 +323,11 @@ const WorkOrder = ({
             <HtmlTooltip
               title={
                 !row?.original?.canDelete
-                  ? row?.original?.type === MATERIAL_TYPE.product && row?.original?.consumedQty
+                  ? row?.original?.assetQty
                     ? 'Asset has already assigned'
-                    : 'Delete'
+                    : row?.original?.consumedQty
+                      ? 'Product has already consumed'
+                      : 'Delete'
                   : 'Delete'
               }
             >
@@ -472,7 +474,7 @@ const WorkOrder = ({
       _subRow.canDelete = false;
       if (_subRow?.workOrder?.status !== WORK_ORDER_STATUS.completed) {
         if (_subRow.type === MATERIAL_TYPE.product) {
-          _subRow.canDelete = _subRow?.consumedQty || _subRow?.requestedQty ? false : true;
+          _subRow.canDelete = _subRow?.consumedQty || _subRow?.requestedQty || _subRow?.assetQty ? false : true;
         }
         if (_subRow.type === MATERIAL_TYPE.service && _subRow?.workOrder?.status != WORK_ORDER_STATUS.onHold) {
           _subRow.canDelete = _subRow?.status === WORKORDER_SERVICE_STATUS.pending ? true : false;
@@ -1098,8 +1100,8 @@ const ActionButtonMenuItems = ({
         }}
         disabled={
           selectedRecords?.length &&
-            selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || checkParentProduct([d], d?.parentId)) &&
-            selectedRecords?.every((d) => d.workOrderId === selectedRecords[0]?.workOrderId)
+          selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || checkParentProduct([d], d?.parentId)) &&
+          selectedRecords?.every((d) => d.workOrderId === selectedRecords[0]?.workOrderId)
             ? false
             : true
         }
@@ -1113,8 +1115,8 @@ const ActionButtonMenuItems = ({
         }}
         disabled={
           checkUniqWorkOrderType() &&
-            selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.package)?.length > 0 &&
-            selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.package).every((e) => e?.canAutoCompleteWorkOrder)
+          selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.package)?.length > 0 &&
+          selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.package).every((e) => e?.canAutoCompleteWorkOrder)
             ? false
             : true
         }
@@ -1124,8 +1126,8 @@ const ActionButtonMenuItems = ({
       <MenuItem
         disabled={
           checkUniqWorkOrder() &&
-            (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
-              selectedRecords?.filter((e) => checkParentProduct([e], e?.parentId))?.length === 1)
+          (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
+            selectedRecords?.filter((e) => checkParentProduct([e], e?.parentId))?.length === 1)
             ? false
             : true
         }
