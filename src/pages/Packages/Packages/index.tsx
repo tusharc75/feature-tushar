@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, MenuItem } from '@mui/material';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -14,9 +14,11 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { isMobile } from 'react-device-detect';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import { GrDrag } from 'react-icons/gr';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = false }) => {
   const renderedFrom = `${camelCase(sidebarResource?.packages)}_packages'}`;
@@ -37,6 +39,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
   const [arrangeView, setArrangeView] = useState(false);
   const [isArranging, setIsArranging] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
+  const [deleteRecord, setDeleteRecord] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();
@@ -48,7 +51,8 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
     dispatch({ type: 'selection', selectedRecords: [] });
     let api = `${packages.api}/${packageId}/package`;
     axiosInstance()
-      .get(api).then(({ data: { data } }) => {
+      .get(api)
+      .then(({ data: { data } }) => {
         let rows = data?.map((u, index) => {
           let res: any = {
             ...prepareDataForGrid(u, user)
@@ -87,6 +91,34 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
         disabled: true,
         Cell: ({ row }) => (row.original?.qty ? <div>{row.original?.qty}</div> : <NoDataCell />)
       },
+      {
+        accessor: 'action',
+        Header: 'Actions',
+        minWidth: 100,
+        width: 110,
+        sticky: 'right',
+        disableFilters: true,
+        disableSortBy: true,
+        canDrag: false,
+        Cell: ({ row }) => (
+          <>
+            {allowedToEdit && (
+              <HtmlTooltip title="Delete">
+                <IconButton
+                  size="small"
+                  aria-label="Delete"
+                  onClick={() => {
+                    setDeleteRecord(row.original);
+                    setShowProductConfirmBox(true);
+                  }}
+                >
+                  <DeleteIcon color="error" fontSize="small" />
+                </IconButton>
+              </HtmlTooltip>
+            )}
+          </>
+        )
+      },
       ...newColumns
     ]);
   };
@@ -96,7 +128,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
       axiosInstance()
         .put(`${packages.api}/${packageId}/package`, {
           ids: [row?._id],
-          qty: Number(data?.qty),
+          qty: Number(data?.qty)
         })
         .then(() => {
           fetchData();
@@ -109,7 +141,12 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
 
   const removeProducts = () => {
     setRemovingProducts(true);
-    const Ids = selectedRecords.map((d) => d._id);
+    let Ids = [];
+    if (deleteRecord) {
+      Ids.push(deleteRecord._id);
+    } else {
+      Ids = selectedRecords?.map((d) => d._id);
+    }
     axiosInstance()
       .put(`${packages.api}/${packageId}/package/remove`, { ids: Ids })
       .then(() => {
@@ -129,7 +166,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
     axiosInstance()
       .post(`${packages.api}/${packageId}/package`, {
         ids: [packageId],
-        packages: rows?.map((d: any) => ({ packageId: d?._id, qty: d?.qty ? Number(d?.qty) : Number(1) })),
+        packages: rows?.map((d: any) => ({ packageId: d?._id, qty: d?.qty ? Number(d?.qty) : Number(1) }))
       })
       .then(() => {
         setShowProductAssignDialog(false);
@@ -152,21 +189,6 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
     );
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          disabled={selectedRecords.length === 0 || isRemovingProducts}
-          onClick={() => {
-            setShowProductConfirmBox(true);
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
-
   const rightSideContents = () => {
     return (
       allowedToEdit && (
@@ -183,12 +205,19 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
             additionalParams={`refrenceId=${packageId}`}
           />
           {dataRows?.length > 0 ? (
-            <ThemeButton
-              startIcon={<GrDrag fontSize="small" />}
-              onClick={() => setArrangeView(true)}>
+            <ThemeButton startIcon={<GrDrag fontSize="small" />} onClick={() => setArrangeView(true)}>
               Arrange
             </ThemeButton>
           ) : null}
+          {allowedToEdit && (
+            <DeleteButton
+              text="Delete"
+              disabled={selectedRecords.length === 0 || isRemovingProducts}
+              onClick={() => {
+                setShowProductConfirmBox(true);
+              }}
+            />
+          )}
         </>
       )
     );
@@ -203,7 +232,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
     axiosInstance()
       .put(`${packages.api}/material/${packageId}/order`, {
         packageType: 'Package',
-        data: rows || [],
+        data: rows || []
       })
       .then(() => {
         fetchData();
@@ -222,8 +251,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
       <DetailsPageHeader
         isAddButtonVisible={allowedToEdit}
         addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={allowedToEdit}
-        actionButtonMenuItems={actionButtonMenuItems()}
+        isActionButtonVisible={false}
         actionButtonProps={{ disabled: selectedRecords.length === 0 || isRemovingProducts }}
         rightSideContents={rightSideContents()}
         hasXpadding
