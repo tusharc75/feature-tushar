@@ -36,16 +36,21 @@ export default function CalendarData({ activity, handleSelect, startDate, dayPix
 }
 
 const Services = ({ startDate, services, handleSelect, dayPixel, item, index }) => {
-  const { setNodeRef, isOver } = useDroppable({
+  const { setNodeRef, isOver, active } = useDroppable({
     id: item._id,
     data: {
       index: index,
-      item
+      item,
+      accepts: ['sidebar']
     }
   });
+
   return (
     <>
-      <div ref={setNodeRef} className={cn('relative h-[--data-h] border-b', isOver ? 'bg-gray-100' : '')}>
+      <div
+        ref={setNodeRef}
+        className={cn('relative h-[--data-h] border-b', isOver && active.data.current?.type === 'sidebar' ? 'bg-gray-100 dark:bg-gray-800' : '')}
+      >
         {services?.map((service) => {
           const priority = getPriority(service.status);
           const bgColor = getColorFromPriority(priority);

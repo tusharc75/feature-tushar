@@ -7,6 +7,7 @@ import { cn, dateFormat } from 'src/constants/helpers';
 import MapView from '../Map';
 import { getColorFromPriority, getPriority } from './helperFunctions';
 import type { TActivity } from './types';
+import { useDroppable } from '@dnd-kit/core';
 
 type TProps = {
   activity: TActivity[];
@@ -16,11 +17,12 @@ type TProps = {
   handleSelect: any;
   loading: boolean;
   setSelected: React.Dispatch<React.SetStateAction<string>>;
+  leftSidebar: (isMobile: Boolean) => React.ReactNode;
 };
 
 const COLLAPSIBLE_UNIQUE_NAME = '_fieldTicketInvoice';
 
-const MobileRoadmap: React.FC<TProps> = ({ activity, expanded, selected, handleToggle, handleSelect, loading, setSelected }) => {
+const MobileRoadmap: React.FC<TProps> = ({ activity, expanded, selected, handleToggle, handleSelect, loading, setSelected, leftSidebar }) => {
   const [open, setOpen] = useState<string | false>(false);
 
   const handleChange = useCallback((index: string | number) => {
@@ -46,106 +48,129 @@ const MobileRoadmap: React.FC<TProps> = ({ activity, expanded, selected, handleT
   );
 
   return (
-    <div className="max-h-[600px] overflow-auto border border-[var(--common-border-color)]">
-      <div className="sticky top-0 z-[2] flex items-center gap-2 border-b bg-[--dark-secondary,white] p-4">
-        <Map />
-        <Typography variant="body1" display="block">
-          Technician
-        </Typography>
+    <>
+      {leftSidebar(true)}
+      <div className="max-h-[600px] overflow-auto border border-[var(--common-border-color)]">
+        <div className="sticky top-0 z-[2] flex items-center gap-2 border-b bg-[--dark-secondary,white] p-4">
+          <Map />
+          <Typography variant="body1" display="block">
+            Technician
+          </Typography>
+        </div>
+        {!loading ? (
+          <ul>
+            {activity?.map((item, index) => {
+              return (
+                <SingleMobileTechnician
+                  compareCollapse={compareCollapse}
+                  handleChange={handleChange}
+                  handleMapClick={handleMapClick}
+                  handleSelect={handleSelect}
+                  index={index}
+                  item={item}
+                  selected={selected}
+                  setSelected={setSelected}
+                  key={item._id}
+                />
+              );
+            })}
+          </ul>
+        ) : (
+          <ul>
+            {[...Array(9).keys()].map((item, index) => {
+              return (
+                <li className="list-none border-b">
+                  <ListItemButton className="flex h-[--data-h] items-center !justify-between px-4 ">
+                    <div className="flex min-w-0 flex-grow items-center gap-4">
+                      <Skeleton width={'45px'} variant="circular" height={'45px'} sx={{ flexShrink: 0 }} />
+                      <div className="w-full">
+                        <Typography style={{ fontWeight: 'bolder', fontSize: '1rem' }}>
+                          <Skeleton />
+                        </Typography>
+                        <p className="line-clamp-1 text-[0.8rem] text-gray-500">
+                          <Skeleton />
+                        </p>
+                        <p className="line-clamp-1 text-[0.6rem] text-gray-500">
+                          <Skeleton />
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex flex-shrink-0">
+                      <IconButton>
+                        <Map fontSize="medium" />
+                      </IconButton>
+                    </div>
+                  </ListItemButton>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </div>
-      {!loading ? (
-        <ul>
-          {activity?.map((item, index) => {
-            return (
-              <li className="list-none border-b">
-                <ListItemButton
-                  className="flex h-[--data-h] items-center !justify-between px-4 "
-                  onClick={(event) => {
-                    handleSelect(event, item, 'technician');
-                  }}
-                >
-                  <div className="flex min-w-0 items-center gap-4">
-                    <Avatar sizes="small" style={{ height: 45, width: 45 }} alt="Remy Sharp" src={item?.photo}>
-                      <AccountCircle style={{ fontSize: 28 }} />
-                    </Avatar>
-                    <div className="">
-                      <Typography style={{ fontWeight: 'bolder', fontSize: '1rem' }}>{`${item?.firstName} ${item?.lastName}`}</Typography>
-                      <p className="line-clamp-1 text-[0.8rem] text-gray-500" title={`${item?.competencyType?.optionLabel || ''}`}>
-                        {`${item?.competencyType?.optionLabel || ''}`}
-                      </p>
-                      <p
-                        className="line-clamp-1 text-[0.6rem] text-gray-500"
-                        title={`${item?.competencies?.map((e) => e?.optionLabel)?.toString() || ''}`}
-                      >
-                        {`${item?.competencies?.map((e) => e?.optionLabel)?.toString() || ''}`}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex flex-shrink-0">
-                    <IconButton
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        handleMapClick(index, item);
-                      }}
-                    >
-                      <Map fontSize="medium" />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelected(null);
-                        handleChange(`${index}`);
-                      }}
-                    >
-                      {compareCollapse(index) ? <ExpandLess /> : <ExpandMore />}
-                    </IconButton>
-                  </div>
-                </ListItemButton>
-
-                <Collapse in={compareCollapse(index)}>
-                  <CalendarData services={item?.fieldTicket || []} handleSelect={handleSelect} selected={selected} setSelected={setSelected} />
-                </Collapse>
-              </li>
-            );
-          })}
-        </ul>
-      ) : (
-        <ul>
-          {[...Array(9).keys()].map((item, index) => {
-            return (
-              <li className="list-none border-b">
-                <ListItemButton className="flex h-[--data-h] items-center !justify-between px-4 ">
-                  <div className="flex min-w-0 flex-grow items-center gap-4">
-                    <Skeleton width={'45px'} variant="circular" height={'45px'} sx={{ flexShrink: 0 }} />
-                    <div className="w-full">
-                      <Typography style={{ fontWeight: 'bolder', fontSize: '1rem' }}>
-                        <Skeleton />
-                      </Typography>
-                      <p className="line-clamp-1 text-[0.8rem] text-gray-500">
-                        <Skeleton />
-                      </p>
-                      <p className="line-clamp-1 text-[0.6rem] text-gray-500">
-                        <Skeleton />
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex flex-shrink-0">
-                    <IconButton>
-                      <Map fontSize="medium" />
-                    </IconButton>
-                  </div>
-                </ListItemButton>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </div>
+    </>
   );
 };
 
 export default MobileRoadmap;
+
+const SingleMobileTechnician = ({ handleMapClick, item, index, setSelected, selected, handleChange, compareCollapse, handleSelect }) => {
+  const { setNodeRef, isOver, active } = useDroppable({
+    id: item._id,
+    data: {
+      index: index,
+      item,
+      accepts: ['sidebar']
+    }
+  });
+
+  return (
+    <li
+      className={cn('list-none border-b', isOver && active.data.current?.type === 'sidebar' ? 'bg-gray-100 dark:bg-gray-800' : '')}
+      ref={setNodeRef}
+    >
+      <ListItemButton className="flex h-[--data-h] items-center !justify-between px-4 ">
+        <div className="flex min-w-0 items-center gap-4">
+          <Avatar sizes="small" style={{ height: 45, width: 45 }} alt="Remy Sharp" src={item?.photo}>
+            <AccountCircle style={{ fontSize: 28 }} />
+          </Avatar>
+          <div className="">
+            <Typography style={{ fontWeight: 'bolder', fontSize: '1rem' }}>{`${item?.firstName} ${item?.lastName}`}</Typography>
+            <p className="line-clamp-1 text-[0.8rem] text-gray-500" title={`${item?.competencyType?.optionLabel || ''}`}>
+              {`${item?.competencyType?.optionLabel || ''}`}
+            </p>
+            <p className="line-clamp-1 text-[0.6rem] text-gray-500" title={`${item?.competencies?.map((e) => e?.optionLabel)?.toString() || ''}`}>
+              {`${item?.competencies?.map((e) => e?.optionLabel)?.toString() || ''}`}
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-shrink-0">
+          <IconButton
+            onClick={(event) => {
+              event.stopPropagation();
+              handleMapClick(index, item);
+            }}
+          >
+            <Map fontSize="medium" />
+          </IconButton>
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelected(null);
+              handleChange(`${index}`);
+            }}
+          >
+            {compareCollapse(index) ? <ExpandLess /> : <ExpandMore />}
+          </IconButton>
+        </div>
+      </ListItemButton>
+
+      <Collapse in={compareCollapse(index)}>
+        <CalendarData services={item?.fieldTicket || []} handleSelect={handleSelect} selected={selected} setSelected={setSelected} />
+      </Collapse>
+    </li>
+  );
+};
 
 const CalendarData = ({ services, handleSelect, selected, setSelected }) => {
   if (selected)
