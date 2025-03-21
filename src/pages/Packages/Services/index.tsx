@@ -74,35 +74,6 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
       });
   };
 
-  const ActionsRenderer = {
-    accessor: 'action',
-    Header: 'Actions',
-    minWidth: 100,
-    width: 110,
-    sticky: 'right',
-    disableFilters: true,
-    disableSortBy: true,
-    canDrag: false,
-    Cell: ({ row }) => (
-      <>
-        {permissions?.packages?.isDelete && (
-          <HtmlTooltip title="Delete">
-            <IconButton
-              size="small"
-              aria-label="Delete"
-              // onClick={() => {
-              //   setDeleteRecord(row.original);
-              //   setShowDeleteConfirmBox(true);
-              // }}
-            >
-              <DeleteIcon color="error" fontSize="small" />
-            </IconButton>
-          </HtmlTooltip>
-        )}
-      </>
-    )
-  };
-
   const defaultColumns = [
     {
       accessor: 'order',
