@@ -62,13 +62,7 @@ function Roadmap({ filter, selectedRecords, handleUnAssignTechnician, leftSideba
       <Box bgcolor="var(--dark-secondary, white)">
         {isMobile ? (
           <MobileRoadmap
-            activity={
-              selectedRecords?.length === 1
-                ? activity?.filter(
-                    (item) => !selectedRecords[0]?.competencyType || selectedRecords[0]?.competencyType === item?.competencyType?.optionLabel
-                  )
-                : activity
-            }
+            activity={activity}
             expanded={expanded}
             leftSidebar={leftSidebar}
             selected={selected}

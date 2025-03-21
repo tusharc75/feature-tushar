@@ -4,8 +4,8 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { sidebarResource } from 'src/constants/helpers';
 import { CustomToastContextType } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-
 export type TechnicianResource = { key: string; resource: string; title: string };
+
 export const useTechnicianResources = (
   toastConfig: CustomToastContextType,
   setSelectedResource: React.Dispatch<React.SetStateAction<TechnicianResource>>
@@ -17,18 +17,18 @@ export const useTechnicianResources = (
 
   const allResources = useMemo(() => {
     const data: TechnicianResource[] = [];
-    if (permissions['fieldTicket']?.isRead) {
+    if (permissions?.fieldTicket?.isRead) {
       data.push({
         key: 'fieldTicket',
         resource: sidebarResource.fieldTicket,
-        title: resources?.fieldTicket?.titleSingular
+        title: resources?.fieldTicket?.titlePlural
       });
     }
-    if (permissions['rentalManagement']?.isRead) {
+    if (permissions?.rentalManagement?.isRead) {
       data.push({
         key: 'rentalManagement',
         resource: sidebarResource.rentalManagement,
-        title: resources?.rentalManagement?.titleSingular
+        title: resources?.rentalManagement?.titlePlural
       });
     }
     return data;
@@ -49,7 +49,7 @@ export const useTechnicianResources = (
         newResources.push({
           key: 'fieldServiceOrder',
           resource: sidebarResource.fieldServiceOrder,
-          title: resources?.fieldServiceOrder?.titleSingular
+          title: resources?.fieldServiceOrder?.titlePlural
         });
         setTechnicianResources(newResources);
       }
