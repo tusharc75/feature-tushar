@@ -291,6 +291,8 @@ import CustomMessageDialog from 'src/components/MessageDialog';
 
 var notificationInterval: any = null;
 let watchIdRef: number | null = null;
+let oldLogitude: number | null = null;
+let oldLatitude: number | null = null;
 
 function App() {
   useEffect(() => {
@@ -419,71 +421,43 @@ function App() {
       if (!navigator.geolocation || watchIdRef !== null) return;
       watchIdRef = navigator.geolocation.watchPosition(
         ({ coords: { latitude, longitude } }) => {
-          const currentTime = Date.now();
-          setLastUpdateTime((prev) => {
-            //currently every 5 min
-            if (currentTime - prev >= 5 * 60 * 1000) {
-              axiosInstance().post("user/live-location", { longitude, latitude })
-                .catch(() => {
-                  toast.setToastConfig({
-                    open: true,
-                    type: "error",
-                    message: "Error Sharing Live Location",
-                  });
-                });
-
-              return currentTime;
-            }
-            return prev;
-          });
+          if (oldLatitude !== latitude && oldLogitude !== longitude) {
+            axiosInstance().post("user/live-location", { longitude, latitude });
+            oldLatitude = latitude;
+            oldLogitude = longitude;
+          }
         },
-        () => {
-          toast.setToastConfig({
-            open: true,
-            type: "error",
-            message: "Please allow location permissions from browser",
-          });
+        (e) => {
+          console.log(e);
         },
-        { enableHighAccuracy: false, timeout: 30000, maximumAge: 60000 }
+        { enableHighAccuracy: false }
       );
     };
-
     const stopTracking = () => {
       if (watchIdRef !== null) {
         navigator.geolocation.clearWatch(watchIdRef);
         watchIdRef = null;
       }
     };
-
-    (async () => {
-      try {
-        const status = await navigator.permissions.query({ name: "geolocation" });
-        if (status.state === "prompt") {
-          navigator.geolocation.getCurrentPosition(
-            () => {
-              startTracking();
-              toast.setToastConfig({
-                open: true,
-                type: "success",
-                message: "Sharing Live Location",
-              });
-            },
-            () => stopTracking()
-          );
-        } else if (status.state === "granted") {
-          startTracking();
-          toast.setToastConfig({
-            open: true,
-            type: 'success',
-            message: "Sharing Live Location"
-          });
-        } else {
-          stopTracking();
+    if (oldLatitude === null && oldLatitude === null) {
+      (async () => {
+        try {
+          const status = await navigator.permissions.query({ name: "geolocation" });
+          if (status.state === "prompt") {
+            navigator.geolocation.getCurrentPosition(
+              () => startTracking(),
+              () => stopTracking()
+            );
+          } else if (status.state === "granted") {
+            startTracking();
+          } else {
+            stopTracking();
+          }
+        } catch (error) {
+          console.error("Error checking location permission:", error);
         }
-      } catch (error) {
-        console.error("Error checking location permission:", error);
-      }
-    })();
+      })();
+    }
 
     return () => {
       stopTracking();
