@@ -43,7 +43,16 @@ import PreviewDownload from 'src/components/PreviewDownload';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
-const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScreen, allowedToEdit, setCurrentStep, nextStep, fetchAssembleOrderData }) => {
+const WorkOrder = ({
+  renderedFrom,
+  assemblyOrderData,
+  setNextStep,
+  stepFullScreen,
+  allowedToEdit,
+  setCurrentStep,
+  nextStep,
+  fetchAssembleOrderData
+}) => {
   const {
     state: { user, permissions, resources }
   }: any = useData();
@@ -311,7 +320,15 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
                 </HtmlTooltip>
               </>
             )}
-            <HtmlTooltip title="Delete">
+            <HtmlTooltip
+              title={
+                !row?.original?.canDelete
+                  ? row?.original?.type === MATERIAL_TYPE.product && row?.original?.consumedQty
+                    ? 'Asset has already assigned'
+                    : 'Delete'
+                  : 'Delete'
+              }
+            >
               <span>
                 <IconButton
                   disabled={row?.original?.canDelete ? false : true}
@@ -457,7 +474,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
         if (_subRow.type === MATERIAL_TYPE.product) {
           _subRow.canDelete = _subRow?.consumedQty || _subRow?.requestedQty ? false : true;
         }
-        if (_subRow.type === MATERIAL_TYPE.service) {
+        if (_subRow.type === MATERIAL_TYPE.service && _subRow?.workOrder?.status != WORK_ORDER_STATUS.onHold) {
           _subRow.canDelete = _subRow?.status === WORKORDER_SERVICE_STATUS.pending ? true : false;
         }
         if (_subRow.subRows?.length && _subRow.subRows?.find((e) => !e?.canDelete)) {
@@ -547,7 +564,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
           setOpenSerializedPackageDialog({ open: false, ids: [] });
           fetchData();
           checkAllWorkOrderComplete();
-          fetchAssembleOrderData()
+          fetchAssembleOrderData();
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
