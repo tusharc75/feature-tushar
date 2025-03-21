@@ -244,20 +244,15 @@ const Assign = ({ serializedPackagesData }) => {
       _subRow.productNumber = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productNumber : '';
       _subRow.serializedProduct = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.serializedProduct : false;
       _subRow.assetQty =
-        _subRow.type === MATERIAL_TYPE.product
-          ? assets.filter((e) => {
-              return e.product === _subRow.materialId && (_subRow.package ? _subRow.materialId === e.package : true);
-            })?.length
-          : 0;
+        _subRow.type === MATERIAL_TYPE.product ? assets.filter((e) => e.product === _subRow.materialId && e?._id === _subRow?._id)?.length : 0;
       _subRow.subRows = generateNestedData(material, assets, _subRow);
     });
 
     if (assets?.length > 0) {
-      const assetsSubRows = assets.filter((e) => {
-        return e.product === parent.materialId && (parent.package ? parent.materialId === e.package : true);
-      });
+      const assetsSubRows = assets.filter((e) => e.product === parent.materialId && e?._id === parent?._id);
+      const subRowsLength = subRows?.length || 0;
       assetsSubRows.forEach((_subRow, j) => {
-        _subRow.index = parent.index + '.' + (j + 1 + (subRows?.length || 0));
+        _subRow.index = parent.index + '.' + (j + 1 + subRowsLength);
         _subRow.type = MATERIAL_TYPE.serializedAsset;
         _subRow.detail = _subRow?.assetDetail?.assetNumber;
         _subRow.parentId = _subRow?.product;
@@ -271,10 +266,11 @@ const Assign = ({ serializedPackagesData }) => {
     setIsSubmitting(true);
     let ids = [];
     if (deleteRecord) {
-      ids.push(deleteRecord._id);
+      ids.push({ _id: deleteRecord._id, asset: deleteRecord.asset });
     } else {
-      ids = selectedRecords?.filter((r) => r?.type === MATERIAL_TYPE.serializedAsset)?.map((d) => d._id);
+      ids = selectedRecords?.filter((r) => r?.type === MATERIAL_TYPE.serializedAsset)?.map((d) => ({ _id: d?._id, asset: d?.asset }));
     }
+
     axiosInstance()
       .put(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/assets`, { ids: ids })
       .then(() => {
@@ -327,15 +323,13 @@ const Assign = ({ serializedPackagesData }) => {
                     if (productsMap.has(e.materialId)) {
                       const existingProduct = productsMap.get(e._id);
                       existingProduct.qty += diff;
-                      if (e?.parentId) {
-                        existingProduct.packages = [...existingProduct.packages, e.parentId];
-                      }
+                      existingProduct._id = [...existingProduct._id, e._id];
                     } else {
                       const productDetail = {
                         product: e.materialId,
                         qty: diff,
                         productName: e?.detail,
-                        packages: e?.parentId ? [e?.parentId] : []
+                        _id: [e?._id]
                       };
                       productsMap.set(e.materialId, productDetail);
                     }

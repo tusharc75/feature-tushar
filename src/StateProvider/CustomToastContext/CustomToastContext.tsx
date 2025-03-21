@@ -1,7 +1,7 @@
 import React, { createContext, useState } from 'react';
 import { CustomToastProps } from 'src/components/Helpers/CustomToast';
 
-type CustomToastContextType = {
+export type CustomToastContextType = {
   toastConfig: CustomToastProps;
   setToastConfig: React.Dispatch<React.SetStateAction<CustomToastProps>>;
 };

@@ -174,6 +174,7 @@ export const serviceOrderSteps: stepInterface[] = [
 
 export const serviceOrderSteps2: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
+  { name: 'Technicians', title: 'Technicians', icon: 'add' },
   { name: 'Technician Dispatch', title: 'Dispatch', icon: 'dispatch' },
   { name: 'Field Ticket', title: 'Field Tickets', icon: 'receivingTicket' },
   { name: 'Return', title: 'Return', icon: 'receiveProduct' }

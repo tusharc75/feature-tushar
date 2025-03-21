@@ -29,7 +29,7 @@ import ViewFieldTicketDialog from './ViewFieldTicketDialog';
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { findAll, findOne, insertUpdate, objectStore, setUpindexDB } from 'src/constants/indexdbhelper';
-import { fieldServiceOrderAddOffline, fieldServiceOrderClearOffline } from '../FieldServiceOrder/Services/OfflineHelper';
+import { fieldServiceOrderAddOffline, fieldServiceOrderClearOffline } from '../FieldServiceOrder/helpers/OfflineHelper';
 import axios, { CancelTokenSource } from 'axios';
 import FieldTicket from '../FieldServiceOrder/FieldTicket';
 import { useHistory } from 'react-router-dom';
@@ -391,7 +391,6 @@ const FieldServiceTechnician = () => {
                 {selectedData ? (
                   <FieldTicket
                     serviceOrderData={selectedData?.orignalData}
-                    setNextStep={() => { }}
                     allowedToEdit={allowedToEdit}
                     handleChangeStatus={() => { }}
                     resource={sidebarResource.fieldServiceTechnician}

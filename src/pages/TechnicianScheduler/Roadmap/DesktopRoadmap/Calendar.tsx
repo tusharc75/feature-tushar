@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import React, { useCallback, useEffect } from 'react';
+import React, { memo, useCallback, useEffect } from 'react';
 import { HandleSelect } from 'src/pages/TechnicianScheduler/Roadmap';
 import CalendarData from 'src/pages/TechnicianScheduler/Roadmap/DesktopRoadmap/CalendarData';
 import CalendarHead from 'src/pages/TechnicianScheduler/Roadmap/DesktopRoadmap/CalendarHead';
@@ -18,7 +18,7 @@ type CalendarProps = {
 
 const sidebarWidth = 300;
 
-const Calendar = ({ dayPixel, endDate, startDate, activity, handleSelect, selected, totalDay, container }: CalendarProps) => {
+const CalendarImpl = ({ dayPixel, endDate, startDate, activity, handleSelect, selected, totalDay, container }: CalendarProps) => {
   const lineRef = React.useRef<HTMLDivElement>(null);
 
   const executeScroll = useCallback(() => {
@@ -51,5 +51,5 @@ const Calendar = ({ dayPixel, endDate, startDate, activity, handleSelect, select
     </div>
   );
 };
-
+const Calendar = memo(CalendarImpl) as typeof CalendarImpl;
 export default Calendar;

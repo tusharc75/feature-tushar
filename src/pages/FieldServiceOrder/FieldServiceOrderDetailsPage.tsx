@@ -39,8 +39,9 @@ import ServiceOrderViews from './RoadMapViews';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { generateAddFieldTicket } from 'src/pages/FieldServiceOrder/walkmeSteps';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
-import Technicians from './material/Technicians';
+import Technicians from './Technicians';
 import TechnicianDispatchReturn from './TechnicianDispatchReturn';
+import Services from './Services';
 
 const ServiceOrderDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -163,8 +164,12 @@ const ServiceOrderDetailsPage = () => {
       } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.fieldServiceOrder}`);
       if (data) {
         setResourceData(data);
-        if (data?.policy?.addServices || data?.policy?.addTechnicians || data?.policy?.addConsumables) {
-          setSteps(serviceOrderSteps2);
+        if (data?.policy?.addTechnicians || data?.policy?.addConsumables) {
+          if (!data?.policy?.addServices) {
+            setSteps(serviceOrderSteps2?.filter((e) => e.name !== 'Add'));
+          } else {
+            setSteps(serviceOrderSteps2);
+          }
         } else {
           setSteps(permissions?.invoice?.isRead ? serviceOrderSteps : serviceOrderSteps?.filter((e) => e.name !== 'Field Ticket Invoice'));
         }
@@ -310,36 +315,89 @@ const ServiceOrderDetailsPage = () => {
               }}
             />
             {steps[currentStep]?.name === steps[0]?.name && serviceOrderData && (
-              <Technicians
-                serviceOrderData={serviceOrderData}
-                allowedToEdit={allowedToEdit}
-                setNextStep={setNextStep}
-                handleChangeStatus={handleChangeStatus}
-                resourcePolicy={resourceData?.policy}
-                stepFullScreen={stepFullScreen}
-                fetchData={fetchServiceOrderData}
-              />
+              resourceData?.policy?.addServices ? (
+                <Services
+                  serviceOrderData={serviceOrderData}
+                  allowedToEdit={allowedToEdit}
+                  handleChangeStatus={handleChangeStatus}
+                  stepFullScreen={stepFullScreen}
+                  fetchData={fetchServiceOrderData}
+                  setNextStep={setNextStep}
+                />
+              ) : (
+                <Technicians
+                  serviceOrderData={serviceOrderData}
+                  allowedToEdit={allowedToEdit}
+                  setNextStep={setNextStep}
+                  handleChangeStatus={handleChangeStatus}
+                  resourcePolicy={resourceData?.policy}
+                  stepFullScreen={stepFullScreen}
+                  fetchData={fetchServiceOrderData}
+                />
+              )
             )}
             {steps[currentStep]?.name === steps[1]?.name && serviceOrderData && (
-              <TechnicianDispatchReturn
-                serviceOrderId={id}
-                setNextStep={setNextStep}
-                stepFullScreen={stepFullScreen}
-                allowedToEdit={allowedToEdit}
-              />
+              resourceData?.policy?.addServices ? (
+                <Technicians
+                  serviceOrderData={serviceOrderData}
+                  allowedToEdit={allowedToEdit}
+                  setNextStep={setNextStep}
+                  handleChangeStatus={handleChangeStatus}
+                  resourcePolicy={resourceData?.policy}
+                  stepFullScreen={stepFullScreen}
+                  fetchData={fetchServiceOrderData}
+                />
+              ) : (
+                <TechnicianDispatchReturn
+                  serviceOrderId={id}
+                  setNextStep={setNextStep}
+                  stepFullScreen={stepFullScreen}
+                  allowedToEdit={allowedToEdit}
+                />
+              )
             )}
             {steps[currentStep]?.name === steps[2]?.name && serviceOrderData && (
-              <FieldTicket
-                serviceOrderData={serviceOrderData}
-                serviceOrderFields={serviceOrderFields}
-                allowedToEdit={allowedToEdit}
-                handleChangeStatus={handleChangeStatus}
-                resource={sidebarResource.fieldServiceOrder}
-                fetchServiceOrderData={fetchServiceOrderData}
-                noQuotationCheck={true}
-              />
+              resourceData?.policy?.addServices ? (
+                <TechnicianDispatchReturn
+                  serviceOrderId={id}
+                  setNextStep={setNextStep}
+                  stepFullScreen={stepFullScreen}
+                  allowedToEdit={allowedToEdit}
+                />
+              ) : (
+                <FieldTicket
+                  serviceOrderData={serviceOrderData}
+                  serviceOrderFields={serviceOrderFields}
+                  allowedToEdit={allowedToEdit}
+                  handleChangeStatus={handleChangeStatus}
+                  resource={sidebarResource.fieldServiceOrder}
+                  fetchServiceOrderData={fetchServiceOrderData}
+                  noQuotationCheck={true}
+                />
+              )
             )}
             {steps[currentStep]?.name === steps[3]?.name && serviceOrderData && (
+              resourceData?.policy?.addServices ? (
+                <FieldTicket
+                  serviceOrderData={serviceOrderData}
+                  serviceOrderFields={serviceOrderFields}
+                  allowedToEdit={allowedToEdit}
+                  handleChangeStatus={handleChangeStatus}
+                  resource={sidebarResource.fieldServiceOrder}
+                  fetchServiceOrderData={fetchServiceOrderData}
+                  noQuotationCheck={true}
+                />
+              ) : (
+                <TechnicianDispatchReturn
+                  serviceOrderId={id}
+                  stepFullScreen={stepFullScreen}
+                  allowedToEdit={allowedToEdit}
+                  setNextStep={setNextStep}
+                  isReturn={true}
+                />
+              )
+            )}
+            {steps[currentStep]?.name === steps[4]?.name && serviceOrderData && resourceData?.policy?.addServices && (
               <TechnicianDispatchReturn
                 serviceOrderId={id}
                 stepFullScreen={stepFullScreen}

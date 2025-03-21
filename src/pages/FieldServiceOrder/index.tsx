@@ -29,7 +29,7 @@ import {
 import ManageServiceOrder from './ManageServiceOrder';
 import { findAll, findOne, insertUpdate, objectStore, setUpindexDB } from 'src/constants/indexdbhelper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import { fieldServiceOrderAddOffline, fieldServiceOrderClearOffline } from './Services/OfflineHelper';
+import { fieldServiceOrderAddOffline, fieldServiceOrderClearOffline } from './helpers/OfflineHelper';
 import HideWhenOffline from 'src/components/HideWhenOffline';
 import axios, { CancelTokenSource } from 'axios';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
@@ -145,7 +145,7 @@ const ServiceOrder = () => {
       ids = selectedRecords.map((m) => m._id);
     }
     axiosInstance()
-      .put(`${fieldServiceOrder.api}/remove`, { ids:ids })
+      .put(`${fieldServiceOrder.api}/remove`, { ids: ids })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
