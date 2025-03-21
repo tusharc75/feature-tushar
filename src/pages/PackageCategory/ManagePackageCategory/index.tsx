@@ -4,7 +4,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
-import { sidebarResource, GenerateResourceLineNumber, getObjKeysWithValues, getObjKeys, yupSchema, CustomDialogTransition, packageCategory } from 'src/constants/helpers';
+import { sidebarResource, getObjKeysWithValues, getObjKeys, yupSchema, CustomDialogTransition, packageCategory } from 'src/constants/helpers';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { Box, Dialog } from '@mui/material';
@@ -35,36 +35,29 @@ export const ManagePackageCategory = ({ isClone = false, packageCategoryId = nul
       const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
       if (packageCategoryId) {
-        axiosInstance()
-          .get(`${packageCategory.api}/` + packageCategoryId)
-          .then(({ data: { data } }) => {
-            if (isClone) {
-              const { _id, createdBy, packageCategory, ...rest } = data;
-              setCloneHeading(packageCategory);
-              const tempInitialData = getObjKeysWithValues(rest, fieldsDataForCreate, true, user);
-              const primaryField = fieldsDataForCreate?.find((e) => e?.primaryField && e?.isSystemGenerate);
-              if (primaryField) {
-                tempInitialData[primaryField?.fieldName] = GenerateResourceLineNumber(fieldsDataForCreate);
-              }
-              setInitialData({
-                fields: fieldsDataForCreate,
-                values: tempInitialData
-              });
-            }
-            else {
-              setInitialData({
-                fields: fieldsDataForUpdate,
-                values: getObjKeysWithValues(data, fieldsDataForUpdate)
-              });
-            }
-          })
+        axiosInstance().get(`${packageCategory.api}/${packageCategoryId}`).then(({ data: { data } }) => {
+          if (isClone) {
+            const { _id, createdBy, name, ...rest } = data;
+            setCloneHeading(name);
+            const tempInitialData = getObjKeysWithValues(rest, fieldsDataForCreate, true, user);
+            setInitialData({
+              fields: fieldsDataForCreate,
+              values: tempInitialData
+            });
+          }
+          else {
+            setInitialData({
+              fields: fieldsDataForUpdate,
+              values: getObjKeysWithValues(data, fieldsDataForUpdate)
+            });
+          }
+        })
           .catch((error) => {
             toastConfig.setToastConfig(error);
           });
       }
       else {
         let initialData = getObjKeys('', fieldsDataForCreate);
-        initialData['packageCategory'] = GenerateResourceLineNumber(fieldsDataForCreate);
         setInitialData({
           fields: fieldsDataForCreate,
           values: initialData
@@ -72,7 +65,6 @@ export const ManagePackageCategory = ({ isClone = false, packageCategoryId = nul
       }
     })
   }, []);
-
 
   const handleSubmit = (values) => {
     setIsSubmitting(true);
@@ -91,7 +83,7 @@ export const ManagePackageCategory = ({ isClone = false, packageCategoryId = nul
         toastConfig.setToastConfig(error);
       });
     } else {
-      axiosInstance().post(`${packageCategory.api}/`, values).then(({ data: { data, message } }) => {
+      axiosInstance().post(`${packageCategory.api}`, values).then(({ data: { data, message } }) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -168,8 +160,6 @@ export const ManagePackageCategory = ({ isClone = false, packageCategoryId = nul
                     fieldsData={initialData.fields}
                     size="small"
                     fullWidth
-                    resource={sidebarResource.packageCategory}
-                    referenceId={packageCategoryId || null}
                   />
                 </Form>
               </CustomDialogContent>
