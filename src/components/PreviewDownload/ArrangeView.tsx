@@ -9,6 +9,7 @@ import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import HtmlTooltip from '../CustomTooltipTitle';
+import Autocomplete from '@mui/material/Autocomplete';
 
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
@@ -16,6 +17,7 @@ import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useDndSensors } from 'src/hooks';
 import { CustomDialogTransition } from 'src/constants/helpers';
+import { startCase } from 'lodash';
 
 export default function ArrangeView({ columns, setColumns }) {
   const [open, setOpen] = useState(false);
@@ -62,9 +64,20 @@ export default function ArrangeView({ columns, setColumns }) {
     );
   };
 
+  const setColumnAlignment = (id, alignment) => {
+    setColumn(
+      column.map((c) => {
+        return c.id === id ? { ...c, alignment } : c;
+      })
+    );
+  };
+
   const setColumnShowBelowRow = (id, value) => {
     setColumn(
       column.map((c) => {
+        if (value && !c.showBelowRow) {
+          return c.id === id ? { ...c, showBelowRow: value, alignment: null } : c;
+        }
         return c.id === id ? { ...c, showBelowRow: value } : c;
       })
     );
@@ -79,7 +92,14 @@ export default function ArrangeView({ columns, setColumns }) {
     setSubmitting(true);
     setColumns(
       column.map((e) => {
-        return { fieldName: e.fieldName, fieldLabel: e.fieldLabel, width: e.width, customLabel: e?.customLabel, showBelowRow: e?.showBelowRow };
+        return {
+          fieldName: e.fieldName,
+          fieldLabel: e.fieldLabel,
+          width: e.width,
+          customLabel: e?.customLabel,
+          showBelowRow: e?.showBelowRow,
+          alignment: e?.showBelowRow ? null : e?.alignment
+        };
       })
     );
     setSubmitting(false);
@@ -131,7 +151,7 @@ export default function ArrangeView({ columns, setColumns }) {
               <div className="sticky -top-2 z-10 flex flex-wrap bg-[var(--dark-primary,white)] pb-4 pt-2">
                 <p className=" flex select-none items-center gap-1 text-[12px] font-semibold text-gray-500">
                   <Info fontSize="small" />
-                  Drag and drop to arrange, enter the width as a percentage, custom label for change table header.
+                  Drag and drop to arrange, enter the width as a percentage, custom label for change table header, and alignment for text position.
                 </p>
               </div>
               <SortableContext items={column?.map((c) => c.id) || []}>
@@ -149,6 +169,10 @@ export default function ArrangeView({ columns, setColumns }) {
                       customLabel={col?.customLabel}
                       setCustomLabel={(l) => {
                         setColumnLabel(col.id, l);
+                      }}
+                      alignment={col?.alignment}
+                      setAlignment={(a) => {
+                        setColumnAlignment(col.id, a);
                       }}
                       showBelowRow={col.showBelowRow}
                       setShowBelowRow={(v) => {
@@ -185,11 +209,25 @@ interface ItemProps {
   setWidth: (width: string) => void;
   customLabel: string;
   setCustomLabel: (label: string) => void;
+  alignment: string;
+  setAlignment: (alignment: string) => void;
   showBelowRow: boolean;
   setShowBelowRow: (value: boolean) => void;
 }
 
-const RenderListItem = ({ index, id, fieldLabel, width, setWidth, customLabel, setCustomLabel, showBelowRow = false, setShowBelowRow }: ItemProps) => {
+const RenderListItem = ({
+  index,
+  id,
+  fieldLabel,
+  width,
+  setWidth,
+  customLabel,
+  setCustomLabel,
+  alignment,
+  setAlignment,
+  showBelowRow = false,
+  setShowBelowRow,
+}: ItemProps) => {
   const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
     id,
     data: {
@@ -207,21 +245,44 @@ const RenderListItem = ({ index, id, fieldLabel, width, setWidth, customLabel, s
     <li
       style={style}
       ref={setNodeRef}
-      className={`${
-        isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))] ' : 'bg-[var(--dark-secondary,#fff)]'
-      } list-none transition-colors`}
+      className={`${isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))] ' : 'bg-[var(--dark-secondary,#fff)]'
+        } list-none transition-colors`}
     >
       <div
         key={id}
-        className={`grid grid-cols-[20px_1fr_500px] items-center gap-2 p-[8px_0px]  [border-bottom:1px_solid_var(--common-border-color)] max-sm:grid-cols-[20px_1fr] ${
-          index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
-        } `}
+        className={`grid grid-cols-[20px_1fr_650px] items-center gap-2 p-[8px_0px] [border-bottom:1px_solid_var(--common-border-color)] max-sm:grid-cols-[20px_1fr] ${index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
+          } `}
       >
         <ListItemIcon {...attributes} {...listeners} className="drag-handle !cursor-grab">
           <DragIndicator />
         </ListItemIcon>
         <ListItemText primary={fieldLabel} />
-        <div className="flex items-center gap-4 max-sm:col-span-2 max-sm:ml-[28px]">
+        <div className="grid grid-cols-[1fr_1fr_1fr_1fr] items-center gap-2 max-sm:col-span-2 max-sm:ml-[28px]">
+          <TextField
+            variant="outlined"
+            margin="none"
+            size="small"
+            placeholder="Custom Label"
+            fullWidth
+            value={customLabel}
+            onChange={(e) => {
+              setCustomLabel(e?.target?.value);
+            }}
+          />
+          <Autocomplete
+            size="small"
+            fullWidth
+            disabled={showBelowRow}
+            options={["left", "center", "right"]}
+            getOptionLabel={(option) => startCase(option)}
+            value={alignment}
+            renderInput={(params) => (
+              <TextField {...params} placeholder="Alignment" variant="outlined" margin="none" />
+            )}
+            onChange={(_, newValue) => {
+              setAlignment(newValue);
+            }}
+          />
           <TextField
             variant="outlined"
             margin="none"
@@ -238,32 +299,25 @@ const RenderListItem = ({ index, id, fieldLabel, width, setWidth, customLabel, s
             }}
             placeholder="Width"
           />
-          <TextField
-            variant="outlined"
-            margin="none"
-            size="small"
-            placeholder="Custom Label"
-            fullWidth
-            value={customLabel}
-            onChange={(e) => {
-              setCustomLabel(e?.target?.value);
-            }}
-          />
           <div className='min-w-[200px]'>
-          <FormControlLabel
-            control={
-              <Checkbox
-                size="small"
-                name={'showBelowRow'}
-                checked={showBelowRow}
-                onChange={(e) => {
-                  setShowBelowRow(e?.target?.checked);
-                }}
-              />
-            }
-            label="Show Below Row"
-            className="ml-2"
-          />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  size="small"
+                  name={'showBelowRow'}
+                  checked={showBelowRow}
+                  onChange={(e) => {
+                    if (e.target.checked && alignment) {
+                      // Clearing alignment when showBelowRow is checked as it is illogical then
+                      setAlignment(null);
+                    }
+                    setShowBelowRow(e.target.checked);
+                  }}
+                />
+              }
+              label="Show Below Row"
+              className="ml-2"
+            />
           </div>
         </div>
       </div>

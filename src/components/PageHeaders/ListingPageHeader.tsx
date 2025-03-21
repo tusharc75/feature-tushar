@@ -12,6 +12,7 @@ import HideWhenOffline from '../HideWhenOffline';
 import { cn } from 'src/constants/helpers';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import useSearch from 'src/components/Header/SearchBar/useSearch';
 
 type ButtonPropsWithExtraData = {
   tooltip?: string;
@@ -19,6 +20,7 @@ type ButtonPropsWithExtraData = {
   iconsEnabled?: boolean;
   text?: string;
   textAddShow?: boolean;
+  customTextAdd?: string;
 } & ButtonProps;
 
 type ListingPageHeaderProps = {
@@ -74,6 +76,7 @@ const ListingPageHeader = ({
   const history = useHistory();
   const [anchorEl, setAnchorEl] = useState(null);
   const [locationKeys, setLocationKeys] = useState([]);
+  const { setGlobalSearch } = useSearch();
 
   const {
     tooltip: actionButtonTooltip,
@@ -89,6 +92,7 @@ const ListingPageHeader = ({
     iconsEnabled: addButtonIconsEnabled = true,
     text: addButtonText = '',
     textAddShow = false,
+    customTextAdd = null,
     ...restOfAddButtonProps
   } = addButtonProps;
 
@@ -193,9 +197,8 @@ const ListingPageHeader = ({
           </>
         ) : null}
         <div
-          className={`flex flex-grow ${shouldNotFlexWrap ? '' : 'flex-wrap'} items-center justify-end gap-[8px] ${cn(showSearchInMobile ? 'max-[600px]:pt-2' : '')} ${
-            !isLeftSidePresent && isMobile ? '-mt-2' : ''
-          }`}
+          className={`flex flex-grow ${shouldNotFlexWrap ? '' : 'flex-wrap'} items-center justify-end gap-[8px] ${cn(showSearchInMobile ? 'max-[600px]:pt-2' : '')} ${!isLeftSidePresent && isMobile ? '-mt-2' : ''
+            }`}
         >
           {Boolean(leftSideContentsOfSearchFilter) ? leftSideContentsOfSearchFilter : null}
           {onSearch ? (
@@ -203,7 +206,10 @@ const ListingPageHeader = ({
               <SearchBox
                 className={cn(showSearchInMobile ? '' : 'max-[600px]:hidden')}
                 containerProps={{ className: cn(showSearchInMobile ? '' : 'max-[600px]:hidden') }}
-                onChange={onSearch}
+                onChange={(e) => {
+                  onSearch(e);
+                  if (e?.target?.value === '') setGlobalSearch('');
+                }}
                 value={searchValue}
               />
             </HideWhenOffline>
@@ -234,7 +240,7 @@ const ListingPageHeader = ({
                       startIcon={isMobile ? null : addButtonIconsEnabled ? <AddOutlined /> : null}
                     >
                       {renderButtonText({
-                        text: textAddShow ? 'Add' : `Create`,
+                        text: customTextAdd ? customTextAdd : textAddShow ? 'Add' : `Create`,
                         loading: false,
                         iconText: addButtonText,
                         mobileIcon: <AddOutlined fontSize="small" />

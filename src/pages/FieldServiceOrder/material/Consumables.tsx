@@ -28,6 +28,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
 
 const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchData: fetchserviceOrderData, technicians, refreshChild, fetchConsumablesData }) => {
+
   const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_Consumables`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -55,11 +56,7 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
   }, [tabValue, selectedTechnician, refreshChild]);
 
   const fetchColumns = async () => {
-    let fields = await fetch_child_resource_fields_perm(
-      CHILD_RESOURCE.fieldServiceOrderDetails,
-      serviceOrderData?.currency,
-      allowedToEdit
-    );
+    let fields = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldServiceOrderDetails, serviceOrderData?.currency, allowedToEdit);
     setAllFields(JSON.parse(JSON.stringify(fields)));
     fields = fields?.filter((f) => f?.isRead);
     const newColumns = generateColumns(renderedFrom, fields, null, false, serviceOrderData?.currency);
@@ -78,10 +75,9 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
 
     let data;
     const response = await axiosInstance().put(`/field/find-field-labels`, {
-      fields: [{ resource: 'Product', fieldNames: ['productName', 'productNumber', 'productDescription'] }]
+      fields: [{ resource: sidebarResource.product, fieldNames: ['productName', 'productNumber', 'productDescription'] }]
     });
     data = response?.data?.data;
-
     const productFields = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
     productFields?.forEach((e) => {
       if (e?.fieldName === 'productName') {
@@ -164,19 +160,19 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
         canDrag: false,
         Cell: ({ row, table }: any) => (
           <>
-            <HtmlTooltip title={allowedToEdit && row?.original?.canDelete ? 'Edit' : 'Technician for this product/consumable is already dispatched or returned'}>
+            <HtmlTooltip title={'Edit'}>
               <IconButton
                 size="small"
                 aria-label="Delete"
-                disabled={!allowedToEdit || !row?.original?.canDelete}
+                disabled={!allowedToEdit}
                 onClick={() => {
                   openMaterial(row, table.getRowModel().rows);
                 }}
               >
-                <EditIcon fontSize="small" color={row.original?.canDelete && allowedToEdit ? 'primary' : 'disabled'} />
+                <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
               </IconButton>
             </HtmlTooltip>
-            <HtmlTooltip title={allowedToEdit && row?.original?.canDelete ? 'Delete' : 'Technician for this product/consumable is already dispatched or returned'}>
+            <HtmlTooltip title={allowedToEdit && row?.original?.canDelete ? 'Delete' : 'Already dispatched/returned'}>
               <span>
                 <IconButton
                   size="small"
@@ -216,7 +212,8 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
         parent.productDescription = parent?.productDetail?.productDescription;
         parent.productNumber = parent?.productDetail?.productNumber;
         parent.technicianId = parent?.technician?.optionValue;
-        parent.technician = parent?.technician?.optionLabel;
+        parent.technician = parent?.technician?.optionLabel || '';
+        parent.canDelete = parent?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.reserved;
       });
       dispatch({ type: 'initialize', data: consumables || [], count: consumables?.length || 0 });
       dispatch({ type: 'loading', loading: false });
@@ -282,24 +279,21 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
         }
       });
     }
-    axiosInstance()
-      .post(`${fieldServiceOrder.api}/${serviceOrderData?._id}/material`, { material })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data?.message
-        });
-        setConsumablesDialog(false);
-        fetchData();
-        fetchserviceOrderData();
-        fetchConsumablesData();
-        setSubmitting(false);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setSubmitting(false);
+    axiosInstance().post(`${fieldServiceOrder.api}/${serviceOrderData?._id}/material`, { material }).then(({ data }) => {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data?.message
       });
+      setConsumablesDialog(false);
+      fetchData();
+      fetchserviceOrderData();
+      fetchConsumablesData();
+      setSubmitting(false);
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+      setSubmitting(false);
+    });
   };
 
   const handleDelete = async (rows) => {
@@ -348,21 +342,13 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
-    if (!inputField.canDelete) {
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'error',
-        message: 'Technician for this product/consumable is already dispatched or returned'
-      });
-      return;
-    }
     const dataRow = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     if (inputField.hasOwnProperty('qty')) {
-      if (parseInt(inputField.qty) === 0) {
+      if (!dataRow?.canDelete) {
         toastConfig.setToastConfig({
           open: true,
           type: 'error',
-          message: 'Quantity cannot be zero'
+          message: 'Already dispatched/returned'
         });
         return;
       }
@@ -444,7 +430,7 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
         {allowedToEdit && (
           <>
             <DetailsPageHeader
-              isAddButtonVisible={!isEmpty(selectedTechnician) && selectedTechnician?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.reserved}
+              isAddButtonVisible={isEmpty(selectedTechnician) || selectedTechnician?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.reserved}
               addButtonProps={{ onClick: () => setConsumablesDialog(true), id: 'add-product-consumable' }}
               isActionButtonVisible={true}
               actionButtonMenuItems={actionButtonMenuItems()}

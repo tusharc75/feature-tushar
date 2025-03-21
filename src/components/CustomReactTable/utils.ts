@@ -1,6 +1,6 @@
 import { Column, Header } from '@tanstack/react-table';
 import dayjs from 'dayjs';
-import { flatMapDeep, isEmpty, snakeCase, uniqBy } from 'lodash';
+import { flatMapDeep, isArray, isEmpty, snakeCase, uniqBy } from 'lodash';
 import React from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { dateFormatToSend } from 'src/constants/helpers';
@@ -736,4 +736,9 @@ export function adjustSizes(original: TColType[], visibleColumns: { [key: string
     const size = Math.floor((col.size || 200) * scaleFactor) - scrollerWidth;
     return { ...col, size };
   });
+}
+
+export const AccessorFunction = (data: any, fieldName: any) => {
+  return isArray(data?.[fieldName]) ? data?.[fieldName]?.map((e) => e?.optionLabel)?.toString()
+    : typeof data?.[fieldName] === 'object' ? data[fieldName]?.optionLabel : data?.[fieldName];
 }
