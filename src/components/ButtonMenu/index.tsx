@@ -4,25 +4,28 @@ import { BiChevronDown } from 'react-icons/bi';
 import { ThemeButtonProps, ThemeButton } from 'src/components/Helpers/Buttons';
 import { cn } from 'src/constants/helpers';
 
-export type ButtonMenuProps<D> = {
-  items: Items<D>[];
+export type ButtonMenuProps<D, I> = {
+  items: Items<D, I>[];
   menuProps?: MenuProps;
   iconForMobile?: React.ReactElement | boolean;
-  onItemClick?: (e: React.MouseEvent<HTMLLIElement, MouseEvent>, item: Items<D>) => void;
+  onItemClick?: (e: React.MouseEvent<HTMLLIElement, MouseEvent>, item: Items<D, I>) => void;
+  getLabel?: (item: I) => React.ReactNode;
   slot?: (props: any) => JSX.Element;
   showChevron?: boolean;
   horizontal?: 'left' | 'right' | 'center';
+  getSelectedMenuItem?: (item: I) => boolean;
 } & Omit<ThemeButtonProps, 'iconForMobile'>;
 
-export type Items<D> = {
-  label: React.ReactNode;
+export type Items<D, I> = {
+  label?: React.ReactNode;
   startIcon?: React.ReactNode;
   endIcon?: React.ReactNode;
   value?: D;
   visible?: boolean;
-} & Omit<MenuItemProps, 'children'>;
+} & Omit<MenuItemProps, 'children'> &
+  I;
 
-const ButtonMenu = <D,>({
+const ButtonMenu = <D, I>({
   items,
   iconForMobile = false,
   children,
@@ -31,9 +34,11 @@ const ButtonMenu = <D,>({
   onItemClick = () => {},
   slot = undefined,
   showChevron = false,
+  getLabel,
+  getSelectedMenuItem,
   horizontal = 'left',
   ...rest
-}: ButtonMenuProps<D>) => {
+}: ButtonMenuProps<D, I>) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -84,11 +89,12 @@ const ButtonMenu = <D,>({
                 onItemClick?.(e, item);
                 handleClose();
               }}
+              selected={typeof getSelectedMenuItem === 'function' ? getSelectedMenuItem(item) : undefined}
               {...rest}
             >
               <span className="flex items-center gap-2">
                 {startIcon}
-                {item.label}
+                {typeof getLabel === 'function' ? getLabel(item) : item.label}
                 {endIcon}
               </span>
             </MenuItem>
