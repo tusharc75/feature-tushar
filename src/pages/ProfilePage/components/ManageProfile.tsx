@@ -73,8 +73,6 @@ const useStyles = makeStyles((theme: Theme) => ({
   }
 }));
 
-let watchIdRef = null;
-
 export default function ManageProfile(props) {
   const classes = useStyles();
   const { displayUserDetails, displayUserProfileImage, userFields, userData, loading, userLoading, onFetchUserData, otherDetails, userProxy } = props;
@@ -93,39 +91,10 @@ export default function ManageProfile(props) {
   const [removeMFAConfirmBox, setRemoveMFAConfirmBox] = useState(false);
   const [removingFace, setRemovingFace] = useState(false);
   const [showAddProxyDialog, setShowAddProxyDialog] = useState(false);
-  const [checked, setChecked] = useState(false);
-  const [lastUpdateTime, setLastUpdateTime] = useState(0);
   const [addFaceDialog, setAddFaceDialog] = useState(false);
   const [setUpMfaDialog, setSetUpMfaDialog] = useState(false);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const status = await navigator.permissions.query({ name: "geolocation" });
-        if (status.state === "granted" && !checked) {
-          setChecked(true);
-        } else {
-          stopTracking();
-        }
-      } catch (error) {
-        console.error("Error checking location permission:", error);
-      }
-    })();
-
-    return () => {
-      stopTracking();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (checked) {
-      startTracking();
-    } else {
-      stopTracking();
-    }
-  }, [checked]);
 
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
@@ -157,70 +126,6 @@ export default function ManageProfile(props) {
           toastConfig.setToastConfig(error);
           setUpdating(false);
         });
-    }
-  };
-
-  const startTracking = () => {
-    if (!navigator.geolocation) {
-      return;
-    }
-    if (watchIdRef !== null) {
-      console.log("Tracking already started, skipping duplicate call.");
-      return;
-    }
-    else {
-      const id = navigator.geolocation.watchPosition(
-        (position) => {
-          const currentTime = Date.now();
-          const { latitude, longitude } = position.coords;
-          console.log(longitude)
-          setLastUpdateTime((prev) => {
-            if (currentTime - prev >= 10 * 60 * 1000) {
-              axiosInstance().post('user/live-location', { longitude, latitude })
-                .then(() => {
-                  toastConfig.setToastConfig({
-                    open: true,
-                    type: 'success',
-                    message: "Sharing Location"
-                  });
-                })
-                .catch(() => {
-                  toastConfig.setToastConfig({
-                    open: true,
-                    type: 'error',
-                    message: "Error Sharing Location"
-                  });
-                });
-
-              return currentTime;
-            }
-            return prev;
-          });
-        },
-        (e) => {
-          toastConfig.setToastConfig({
-            open: true,
-            type: "error",
-            message: "Please allow permissions from browser",
-          });
-          setTimeout(() => {
-            setChecked(false);
-          }, 1500);
-        },
-        {
-          enableHighAccuracy: false,
-          timeout: 30000,
-          maximumAge: 60000,
-        }
-      );
-      watchIdRef = id;
-    }
-  };
-
-  const stopTracking = () => {
-    if (watchIdRef !== null) {
-      navigator.geolocation.clearWatch(watchIdRef);
-      watchIdRef = null;
     }
   };
 
@@ -502,13 +407,6 @@ export default function ManageProfile(props) {
                 )}
               </>
             )}
-            <Divider />
-            <FormControlLabel control={
-              <Switch checked={checked} onChange={(e) => {
-                setChecked(e.target.checked);
-              }}
-              />}
-              label="Share Location" />
           </div>
         ) : null}
         <div style={{ borderRadius: 8, minWidth: '300px' }}>
