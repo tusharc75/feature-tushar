@@ -14,12 +14,11 @@ import {
   Theme,
   Typography
 } from '@mui/material';
-import Switch from '@mui/material/Switch';
 import { makeStyles } from '@mui/styles';
-import { Image, ShareLocation } from '@mui/icons-material';
+import { Image } from '@mui/icons-material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { cloneDeep } from 'lodash';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useState } from 'react';
 import { FaDiceOne, FaUserAltSlash, FaUserCheck } from 'react-icons/fa';
 import { HiOutlinePencilAlt, HiPencil } from 'react-icons/hi';
 import { IoMdTrash } from 'react-icons/io';
