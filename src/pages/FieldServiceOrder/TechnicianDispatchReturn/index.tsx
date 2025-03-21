@@ -99,13 +99,13 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
       {
         accessor: 'qty',
         Header: 'Qty',
-        width: 250,
+        width: 150,
         Cell: ({ row }) => row?.original?.qty ? <h5 className="text-truncate">{row?.original?.qty}</h5> : <NoDataCell />
       },
       {
         accessor: 'returnQty',
         Header: 'Returned Qty',
-        width: 250,
+        width: 150,
         Cell: ({ row }) => row?.original?.returnQty ? <h5 className="text-truncate">{row?.original?.returnQty}</h5> : <NoDataCell />
       },
       {

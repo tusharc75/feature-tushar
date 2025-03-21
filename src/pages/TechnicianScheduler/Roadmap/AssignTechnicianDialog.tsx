@@ -28,21 +28,21 @@ function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleCl
         warehouse: ele?.warehouse,
         ...(type === 'fieldTicket'
           ? {
-            fieldTicket: ele?.resourceId,
-            startDate: ele?.service?.estimateStartDate,
-            endDate: ele?.service?.estimateEndDate
-          }
-          : type === 'rentalJob'
-            ? {
-              rentalJob: ele?.resourceId,
-              startDate: ele?.estimateStartDate,
-              endDate: ele?.estimateEndDate
-            }
-            : {
-              fieldServiceOrder: ele?.resourceId,
+              fieldTicket: ele?.resourceId,
               startDate: ele?.service?.estimateStartDate,
               endDate: ele?.service?.estimateEndDate
-            }),
+            }
+          : type === 'rentalJob'
+            ? {
+                rentalJob: ele?.resourceId,
+                startDate: ele?.estimateStartDate,
+                endDate: ele?.estimateEndDate
+              }
+            : {
+                fieldServiceOrder: ele?.resourceId,
+                startDate: ele?.service?.estimateStartDate,
+                endDate: ele?.service?.estimateEndDate
+              }),
         status: 'Assigned'
       };
     });
@@ -58,7 +58,7 @@ function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleCl
     axiosInstance()
       .post(`${baseApi}/technician`, { technician: data })
       .then(() => {
-        handleSucess();
+        handleSucess(selectedServiceOrder);
         setIsSubmitting(false);
       })
       .catch((error) => {

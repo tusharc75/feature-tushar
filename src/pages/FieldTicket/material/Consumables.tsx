@@ -835,7 +835,6 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
       )}
       {assignQuotationDataDialog && (
         <AddQuotationDataDialog
-          type={MATERIAL_TYPE.product}
           onClose={() => {
             setAssignQuotationDataDialog(false);
           }}
