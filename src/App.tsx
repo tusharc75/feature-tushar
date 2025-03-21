@@ -421,6 +421,7 @@ function App() {
         ({ coords: { latitude, longitude } }) => {
           const currentTime = Date.now();
           setLastUpdateTime((prev) => {
+            //currently every 5 min
             if (currentTime - prev >= 5 * 60 * 1000) {
               axiosInstance().post("user/live-location", { longitude, latitude })
                 .catch(() => {
