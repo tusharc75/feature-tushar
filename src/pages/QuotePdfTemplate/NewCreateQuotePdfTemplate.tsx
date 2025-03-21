@@ -231,30 +231,30 @@ export default function NewCreateQuotePdfTemplate() {
         }
       }
       if (tempPdfTemplate) {
-        setIsLandscapChecked(tempPdfTemplate.landscape);
-        initialValues.landscape = tempPdfTemplate.landscape;
-        initialValues.hideAmountTotalSection = tempPdfTemplate.hideAmountTotalSection;
-        initialValues.tableFontSize = tempPdfTemplate.tableFontSize;
-        initialValues.belowTableTotalFontSize = tempPdfTemplate.belowTableTotalFontSize;
-        initialValues.pdfFontSize = tempPdfTemplate.pdfFontSize;
-        initialValues.productColumns = tempPdfTemplate.productColumns;
-        initialValues.name = tempPdfTemplate.name;
-        initialValues.pageNumberInFooter = tempPdfTemplate.pageNumberInFooter;
-        initialValues.header = tempPdfTemplate.header;
-        initialValues.footer = tempPdfTemplate.footer;
-        initialValues.aboveTable = tempPdfTemplate.aboveTable;
-        initialValues.belowTable = tempPdfTemplate.belowTable;
-        initialValues.tabelSummaryLeftSide = tempPdfTemplate.tabelSummaryLeftSide;
-        initialValues.entity = tempPdfTemplate.entity ? tempPdfTemplate.entity : [];
-        initialValues.type = tempPdfTemplate.type;
-        initialValues.owner = tempPdfTemplate.owner && tempPdfTemplate.owner !== undefined ? tempPdfTemplate.owner : user.user._id;
-        initialValues.collaborator = tempPdfTemplate.collaborator ? tempPdfTemplate.collaborator : [];
+        setIsLandscapChecked(tempPdfTemplate?.landscape);
+        initialValues.landscape = tempPdfTemplate?.landscape;
+        initialValues.hideAmountTotalSection = tempPdfTemplate?.hideAmountTotalSection;
+        initialValues.tableFontSize = tempPdfTemplate?.tableFontSize;
+        initialValues.belowTableTotalFontSize = tempPdfTemplate?.belowTableTotalFontSize;
+        initialValues.pdfFontSize = tempPdfTemplate?.pdfFontSize;
+        initialValues.productColumns = tempPdfTemplate?.productColumns;
+        initialValues.name = tempPdfTemplate?.name;
+        initialValues.pageNumberInFooter = tempPdfTemplate?.pageNumberInFooter;
+        initialValues.header = tempPdfTemplate?.header;
+        initialValues.footer = tempPdfTemplate?.footer;
+        initialValues.aboveTable = tempPdfTemplate?.aboveTable;
+        initialValues.belowTable = tempPdfTemplate?.belowTable;
+        initialValues.tabelSummaryLeftSide = tempPdfTemplate?.tabelSummaryLeftSide;
+        initialValues.entity = tempPdfTemplate?.entity ? tempPdfTemplate?.entity : [];
+        initialValues.type = tempPdfTemplate?.type;
+        initialValues.owner = tempPdfTemplate?.owner && tempPdfTemplate?.owner !== undefined ? tempPdfTemplate?.owner : user.user._id;
+        initialValues.collaborator = tempPdfTemplate?.collaborator ? tempPdfTemplate?.collaborator : [];
 
         setDetails({
-          header: tempPdfTemplate.header,
-          footer: tempPdfTemplate.footer,
-          aboveTable: tempPdfTemplate.aboveTable,
-          belowTable: tempPdfTemplate.belowTable,
+          header: tempPdfTemplate?.header,
+          footer: tempPdfTemplate?.footer,
+          aboveTable: tempPdfTemplate?.aboveTable,
+          belowTable: tempPdfTemplate?.belowTable,
           tabelSummaryLeftSide: tempPdfTemplate?.tabelSummaryLeftSide
         });
       } else {
@@ -279,7 +279,7 @@ export default function NewCreateQuotePdfTemplate() {
           initialValues.tabelSummaryLeftSide = data?.tabelSummaryLeftSide;
           initialValues.entity = data?.entity ? data?.entity : [];
           initialValues.type = data?.type;
-          initialValues.owner = data?.owner && data.owner !== undefined ? data?.owner : user.user._id;
+          initialValues.owner = data?.owner && data?.owner !== undefined ? data?.owner : user.user._id;
           initialValues.collaborator = data?.collaborator ? data?.collaborator : [];
           setDetails({
             header: data?.header,
