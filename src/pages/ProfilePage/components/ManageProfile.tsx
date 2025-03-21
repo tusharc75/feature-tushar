@@ -3,7 +3,6 @@ import {
   Box,
   CircularProgress,
   Divider,
-  FormControlLabel,
   IconButton,
   Table,
   TableBody,
