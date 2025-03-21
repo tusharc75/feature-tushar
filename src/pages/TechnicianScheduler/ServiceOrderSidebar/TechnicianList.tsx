@@ -76,7 +76,7 @@ export default TechnicianList;
 
 const RowSkeleton = ({ isMobile }) => {
   return (
-    <div className={cn('', isMobile ? 'w-[300px] px-1' : 'px-4 pb-3')}>
+    <div className={cn('', isMobile ? 'w-[300px] flex-shrink-0 px-1' : 'px-4 pb-3')}>
       <div className="space-y-2 rounded-md border p-3 shadow-lg">
         {[...Array(4).keys()].map((i) => (
           <div className="flex items-center justify-between " key={i}>
