@@ -1,6 +1,9 @@
+import { useDraggable } from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
 import { AccountCircle, Map } from '@mui/icons-material';
-import { Avatar, IconButton, ListItemButton, Skeleton, Typography } from '@mui/material';
+import { Avatar, IconButton, ListItem, ListItemButton, Skeleton, Typography } from '@mui/material';
 import React from 'react';
+import { cn } from 'src/constants/helpers';
 import { HandleSelect } from 'src/pages/TechnicianScheduler/Roadmap';
 import { TActivity } from 'src/pages/TechnicianScheduler/Roadmap/types';
 
@@ -22,44 +25,7 @@ const Sidebar = ({ activity, handleSelect, loading }: SidebarProps) => {
       {!loading ? (
         <ul className="list-none">
           {activity?.map((data, index) => {
-            return (
-              <li className="border-b">
-                <ListItemButton
-                  className="flex !h-[calc(var(--data-h)-1px)] items-center !justify-between  px-4"
-                  onClick={(event) => {
-                    handleSelect(event, data, 'technician');
-                  }}
-                >
-                  <div className="flex min-w-0 items-center gap-4">
-                    <Avatar sizes="small" style={{ height: 45, width: 45 }} alt="Remy Sharp" src={data?.photo}>
-                      <AccountCircle style={{ fontSize: 28 }} />
-                    </Avatar>
-                    <div className="">
-                      <Typography style={{ fontWeight: 'bolder', fontSize: '1rem' }}>{`${data?.firstName} ${data?.lastName}`}</Typography>
-                      <p className="line-clamp-1 text-[0.8rem] text-gray-500" title={`${data?.competencyType?.optionLabel || ''}`}>
-                        {`${data?.competencyType?.optionLabel || ''}`}
-                      </p>
-                      <p
-                        className="line-clamp-1 text-[0.6rem] text-gray-500"
-                        title={`${data?.competencies?.map((e) => e?.optionLabel)?.toString() || ''}`}
-                      >
-                        {`${data?.competencies?.map((e) => e?.optionLabel)?.toString() || ''}`}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex-shrink-0">
-                    <IconButton
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        handleSelect(event, data, 'map');
-                      }}
-                    >
-                      <Map fontSize="medium" />
-                    </IconButton>
-                  </div>
-                </ListItemButton>
-              </li>
-            );
+            return <SingleTechnician data={data} index={index} handleSelect={handleSelect} key={data._id} />;
           })}
         </ul>
       ) : (
@@ -69,7 +35,7 @@ const Sidebar = ({ activity, handleSelect, loading }: SidebarProps) => {
               <li className="border-b">
                 <ListItemButton className="flex !h-[calc(var(--data-h)-1px)] items-center !justify-between  px-4">
                   <div className="flex min-w-0 items-center gap-4">
-                    <Avatar sizes="small" style={{ height: 45, width: 45 }} alt="Remy Sharp" src={data?.photo}>
+                    <Avatar sizes="small" style={{ height: 45, width: 45 }} alt="Remy Sharp">
                       <AccountCircle style={{ fontSize: 28 }} />
                     </Avatar>
                     <div className="">
@@ -100,3 +66,56 @@ const Sidebar = ({ activity, handleSelect, loading }: SidebarProps) => {
 };
 
 export default Sidebar;
+
+export const SingleTechnician = ({ data, handleSelect, index, className = '' }) => {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: data._id,
+    data: {
+      index: index,
+      item: data,
+      props: { data, type: 'technician' },
+      type: 'technician'
+    }
+  });
+
+  const styleDnd = {
+    transform: CSS.Translate.toString(transform)
+  };
+
+  return (
+    <li
+      className={cn('cursor-grab list-none border-b bg-[--dark-primary,white] p-0', isDragging ? 'h-[90px]' : '', className)}
+      {...attributes}
+      {...listeners}
+      ref={setNodeRef}
+      style={{ ...styleDnd }}
+    >
+      <ListItem className="flex !h-[calc(var(--data-h)-1px)] items-center !justify-between  px-4">
+        <div className="flex min-w-0 items-center gap-4">
+          <Avatar sizes="small" style={{ height: 45, width: 45 }} alt="Remy Sharp" src={data?.photo}>
+            <AccountCircle style={{ fontSize: 28 }} />
+          </Avatar>
+          <div className="">
+            <Typography style={{ fontWeight: 'bolder', fontSize: '1rem' }}>{`${data?.firstName} ${data?.lastName}`}</Typography>
+            <p className="line-clamp-1 text-[0.8rem] text-gray-500" title={`${data?.competencyType?.optionLabel || ''}`}>
+              {`${data?.competencyType?.optionLabel || ''}`}
+            </p>
+            <p className="line-clamp-1 text-[0.6rem] text-gray-500" title={`${data?.competencies?.map((e) => e?.optionLabel)?.toString() || ''}`}>
+              {`${data?.competencies?.map((e) => e?.optionLabel)?.toString() || ''}`}
+            </p>
+          </div>
+        </div>
+        <div className="flex-shrink-0">
+          <IconButton
+            onClick={(event) => {
+              event.stopPropagation();
+              handleSelect(event, data, 'map');
+            }}
+          >
+            <Map fontSize="medium" />
+          </IconButton>
+        </div>
+      </ListItem>
+    </li>
+  );
+};

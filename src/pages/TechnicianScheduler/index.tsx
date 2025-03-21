@@ -10,6 +10,7 @@ import ServiceOrderSidebar from 'src/pages/TechnicianScheduler/ServiceOrderSideb
 import { SingleRow } from 'src/pages/TechnicianScheduler/ServiceOrderSidebar/TechnicianList';
 import { TechnicianResource, useTechnicianResources } from 'src/pages/TechnicianScheduler/useTechnicianResources';
 import Roadmap from './Roadmap';
+import { SingleTechnician } from 'src/pages/TechnicianScheduler/Roadmap/DesktopRoadmap/Sidebar';
 
 const filter = { view: 'Technician View', resource: '', fieldTicket: '' };
 
@@ -31,13 +32,23 @@ function TechnicianScheduler() {
 
   const onDragEnd = (event: DragEndEvent) => {
     setActiveItem(null);
-    if (!event.over || !event.over.data.current.item || !event.active.data.current.row) return;
+
     const { active, over } = event;
+    if (over && over.data.current.accepts.includes(active.data.current.type)) {
+      const activeType = active.data.current.type;
+      const isFromTechnician = activeType === 'technician';
+      let technicianData, service;
 
-    const technicianData = over.data.current.item;
-    const service = active.data.current.row;
+      if (isFromTechnician) {
+        technicianData = active.data.current.item;
+        service = over.data.current.row;
+      } else {
+        technicianData = over.data.current.item;
+        service = active.data.current.row;
+      }
 
-    setAssignTechnicianDialogData({ open: true, service, technicianData });
+      setAssignTechnicianDialogData({ open: true, service, technicianData });
+    }
   };
 
   const {
@@ -78,9 +89,10 @@ function TechnicianScheduler() {
             handleUnAssignTechnician={(data) => {
               setUnAssignTechnicianDialog({ open: true, data: data });
             }}
-            leftSidebarTitle={`Unscheduled ${selectedResource?.title}`}
-            leftSidebar={
+            leftSidebarTitle={`${selectedResource?.title}`}
+            leftSidebar={(isMobile) => (
               <ServiceOrderSidebar
+                isMobile={isMobile}
                 setRefresh={setRefresh}
                 selectedResource={selectedResource}
                 assignTechnicianDialog={assignTechnicianDialogData}
@@ -96,10 +108,16 @@ function TechnicianScheduler() {
                 }}
                 setSelectedRecords={setSelectedRecords}
               />
-            }
+            )}
             headerSlot={headerSLot}
           />
-          <DragOverlay>{activeItem && <SingleRow {...activeItem} className="cursor-grabbing" />}</DragOverlay>
+          <DragOverlay>
+            {activeItem?.type === 'technician' ? (
+              <SingleTechnician {...activeItem} className="flex h-[90px] cursor-grabbing items-center justify-center border" />
+            ) : (
+              <SingleRow {...activeItem} className="cursor-grabbing" />
+            )}
+          </DragOverlay>
         </DndContext>
       </Box>
     </Box>
