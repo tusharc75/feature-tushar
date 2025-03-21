@@ -40,8 +40,6 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
 
-  console.log(dataRows);
-
   useEffect(() => {
     fetchColumns();
   }, []);
@@ -95,30 +93,6 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
         width: 200,
         Cell: ({ row }) => (row.original['status'] ? <p>{row.original?.status}</p> : <NoDataCell />)
       },
-      (resourcePolicy?.addServices ?
-        {
-          accessor: 'service',
-          Header: 'Service',
-          width: 200,
-          Cell: ({ row }) => {
-            return row?.original?.serviceId ?
-              (
-                <div className="flex items-center gap-2">
-                  <p className="text-truncate" title={row.original.service}>
-                    {row.original.service}
-                  </p>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      window.open(`${routes.serviceMasterDetail.path}/${row.original.serviceId}`);
-                    }}
-                  >
-                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                  </IconButton>
-                </div>
-              ) : <NoDataCell />
-          }
-        } : {}),
       {
         accessor: 'competencyType',
         Header: 'Competency Type',
@@ -178,7 +152,31 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
         }
       }
     ];
-    column = column?.filter(Boolean);
+    if (resourcePolicy?.addServices) {
+      column.splice(3, 0, {
+        accessor: 'service',
+        Header: 'Service',
+        width: 200,
+        Cell: ({ row }) =>
+          row?.original?.serviceId ? (
+            <div className="flex items-center gap-2">
+              <p className="text-truncate" title={row.original.service}>
+                {row.original.service}
+              </p>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.serviceMasterDetail.path}/${row.original.serviceId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            </div>
+          ) : (
+            <NoDataCell />
+          )
+      });
+    }
     setColumns(column);
   };
 
