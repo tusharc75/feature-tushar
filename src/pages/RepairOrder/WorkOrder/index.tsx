@@ -670,18 +670,10 @@ const WorkOrder = ({
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qty = parent.qty;
-      parent.status = `${parent.type === MATERIAL_TYPE.service
-        ? parent.serviceDetail?.status
-        : parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.status
-          : parent.type === MATERIAL_TYPE.serializedAsset
-            ? parent.serializedAssetDetail.status
-            : parent.packageDetail?.status
-        }`;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
-
-      parent.hideSelection = false;
+      parent.status = parent?.workOrder?.status;
       parent.workOrderStatus = parent?.workOrder?.status;
+      parent.hideSelection = false;
       if (parent.workOrderStatus === WORK_ORDER_STATUS.completed) {
         parent.serviceStatus = parent.workOrderStatus;
       }
@@ -769,7 +761,6 @@ const WorkOrder = ({
       _subRow.subRows = generateNestedData(material, _subRow);
       _subRow.type === MATERIAL_TYPE.service ? serviceIndex++ : productIndex++;
       _subRow.isValid = true;
-
       _subRow.canDelete = false;
       if (_subRow.type === MATERIAL_TYPE.product) {
         _subRow.canDelete = _subRow?.consumedQty || _subRow?.requestedQty ? false : true;

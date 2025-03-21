@@ -1,4 +1,4 @@
-import { Box, Dialog, IconButton } from '@mui/material';
+import { Autocomplete, Box, Dialog, IconButton, TextField } from '@mui/material';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -43,8 +43,11 @@ const AssignPackageDialog = ({
   const [tabValue, setTabValue] = useState(0);
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
 
+  const [packageCategoryList, setPackageCategoryList] = useState([]);
+  const [packageCategory, setPackageCategory] = useState(null);
+
   const {
-    state: { selectedEntity, resources }
+    state: { selectedEntity, resources, permissions }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -52,6 +55,19 @@ const AssignPackageDialog = ({
   useEffect(() => {
     fetchGridColumns();
   }, []);
+
+
+  useEffect(() => {
+    if (permissions?.packageCategory?.isRead) {
+      axiosInstance()
+        .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.packageCategory}`)
+        .then(({ data: { data: lookupResource } }) => {
+          setPackageCategoryList(lookupResource[sidebarResource.packageCategory] || []);
+        })
+        .catch((err) => toastConfig.setToastConfig(err));
+    }
+  }, []);
+
 
   const defaultColumns = [
     {
@@ -72,7 +88,7 @@ const AssignPackageDialog = ({
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, packageCategory]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -80,7 +96,6 @@ const AssignPackageDialog = ({
       .then(({ data: { data } }) => {
         let columns = [];
         let newColumns = generateColumns(renderedFrom, data, routes.packagesDetail.path);
-
         newColumns?.forEach((o) => {
           if (o?.accessor === 'packageName') {
             o.cell = ({ row }) => {
@@ -167,6 +182,9 @@ const AssignPackageDialog = ({
         field: 'packageType',
         term: packageType
       });
+    }
+    if (packageCategory) {
+      updatedFilterByIds.push({ field: "packageCategory", term: { $in: [packageCategory] } })
     }
     if (updatedDeepFilters?.length) {
       deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedDeepFilters))}`;
@@ -272,6 +290,16 @@ const AssignPackageDialog = ({
           }}
           isAddButtonVisible={true}
           setQueryString={false}
+          leftSideContents={
+            permissions?.packageCategory?.isRead ? <LeftSideContent
+              {...{
+                packageCategoryList,
+                packageCategory,
+                setPackageCategory,
+                resources
+              }}
+            /> : null
+          }
         />
         {columns ? (
           <CustomReactTable
@@ -364,5 +392,45 @@ const AssignPackageDialog = ({
     </Dialog>
   );
 };
+
+
+const LeftSideContent = ({
+  packageCategoryList,
+  packageCategory,
+  setPackageCategory,
+  resources
+}) => {
+  return (
+    <div className="w-full md:w-auto">
+      <Autocomplete
+        className="flex-grow sm:max-w-[250px] md:min-w-[250px] md:flex-grow-0"
+        options={packageCategoryList}
+        getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+        size="small"
+        isOptionEqualToValue={(option: any, val) => option.optionValue === val}
+        value={
+          packageCategoryList.filter((data) => data.optionValue === packageCategory).length
+            ? packageCategoryList.filter((data) => data.optionValue === packageCategory)[0]
+            : ''
+        }
+        onChange={(e, val) => {
+          setPackageCategory(val && val.optionValue ? val.optionValue : '');
+        }}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            margin="none"
+            size="small"
+            name="packageCategory"
+            label={resources?.packageCategory?.titleSingular}
+            variant="outlined"
+            fullWidth />
+        )}
+      />
+    </div>
+  );
+};
+
+
 
 export default AssignPackageDialog;
