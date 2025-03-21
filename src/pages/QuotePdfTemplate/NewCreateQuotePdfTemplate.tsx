@@ -177,6 +177,8 @@ export default function NewCreateQuotePdfTemplate() {
       landscape: false,
       hideAmountTotalSection: false,
       tableFontSize: '',
+      belowTableTotalFontSize: '',
+      pdfFontSize: '',
       productColumns: defaultProductColumns,
       name: '',
       pageNumberInFooter: false,
@@ -233,6 +235,8 @@ export default function NewCreateQuotePdfTemplate() {
         initialValues.landscape = tempPdfTemplate.landscape;
         initialValues.hideAmountTotalSection = tempPdfTemplate.hideAmountTotalSection;
         initialValues.tableFontSize = tempPdfTemplate.tableFontSize;
+        initialValues.belowTableTotalFontSize = tempPdfTemplate.belowTableTotalFontSize;
+        initialValues.pdfFontSize = tempPdfTemplate.pdfFontSize;
         initialValues.productColumns = tempPdfTemplate.productColumns;
         initialValues.name = tempPdfTemplate.name;
         initialValues.pageNumberInFooter = tempPdfTemplate.pageNumberInFooter;
@@ -263,6 +267,8 @@ export default function NewCreateQuotePdfTemplate() {
           initialValues.landscape = data?.landscape;
           initialValues.hideAmountTotalSection = data?.hideAmountTotalSection;
           initialValues.tableFontSize = data?.tableFontSize;
+          initialValues.belowTableTotalFontSize = data?.belowTableTotalFontSize;
+          initialValues.pdfFontSize = data?.pdfFontSize;
           initialValues.productColumns = data?.productColumns;
           initialValues.name = !isClone ? data?.name : '';
           initialValues.pageNumberInFooter = data?.pageNumberInFooter;
@@ -384,6 +390,8 @@ export default function NewCreateQuotePdfTemplate() {
           landscape: values?.landscape,
           hideAmountTotalSection: values?.hideAmountTotalSection,
           tableFontSize: parseInt(values?.tableFontSize),
+          belowTableTotalFontSize: parseInt(values?.belowTableTotalFontSize),
+          pdfFontSize: parseInt(values?.pdfFontSize),
           productColumns: parseInt(values?.productColumns)
         })
         .then(({ data: { data, message } }) => {
@@ -433,6 +441,8 @@ export default function NewCreateQuotePdfTemplate() {
           landscape: values?.landscape,
           hideAmountTotalSection: values?.hideAmountTotalSection,
           tableFontSize: parseInt(values?.tableFontSize),
+          belowTableTotalFontSize: parseInt(values?.belowTableTotalFontSize),
+          pdfFontSize: parseInt(values?.pdfFontSize),
           productColumns: parseInt(values?.productColumns)
         })
         .then(({ data: { data, message } }) => {
@@ -800,6 +810,48 @@ export default function NewCreateQuotePdfTemplate() {
                         helperText={touched['tableFontSize'] && errors['tableFontSize']}
                         onChange={(e) => {
                           setFieldValue('tableFontSize', parseInt(e.target.value.trimStart()));
+                        }}
+                        slotProps={{
+                          input: {
+                            endAdornment: 'pt'
+                          }
+                        }}
+                      />
+                      <TextField
+                        variant="outlined"
+                        label={'Below Table Total Font Size'}
+                        name="belowTableTotalFontSize"
+                        type="number"
+                        margin="none"
+                        size={'small'}
+                        value={values['belowTableTotalFontSize']}
+                        error={touched['belowTableTotalFontSize'] && Boolean(errors['belowTableTotalFontSize'])}
+                        helperText={touched['belowTableTotalFontSize'] && errors['belowTableTotalFontSize']}
+                        onChange={(e) => {
+                          setFieldValue('belowTableTotalFontSize', parseInt(e.target.value.trimStart()));
+                        }}
+                        slotProps={{
+                          input: {
+                            endAdornment: 'pt'
+                          }
+                        }}
+                      />
+                      <TextField
+                        variant="outlined"
+                        label={'Pdf Font Size'}
+                        name="pdfFontSize"
+                        type="number"
+                        margin="none"
+                        size={'small'}
+                        value={values['pdfFontSize']}
+                        error={touched['pdfFontSize'] && Boolean(errors['pdfFontSize'])}
+                        helperText={touched['pdfFontSize'] && errors['pdfFontSize']}
+                        onChange={(e) => {
+                          setFieldValue('pdfFontSize', parseInt(e.target.value.trimStart()));
+                          if (parseInt(e.target.value.trimStart())) {
+                            setFieldValue('tableFontSize', parseInt(e.target.value.trimStart()));
+                            setFieldValue('belowTableTotalFontSize', parseInt(e.target.value.trimStart()));
+                          }                          
                         }}
                         slotProps={{
                           input: {
