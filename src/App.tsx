@@ -305,7 +305,6 @@ function App() {
 
   const notification = useContext(CustomNotificationCountContext);
   const chatNotification = useContext(CustomChatNotificationCountContext);
-  const [lastUpdateTime, setLastUpdateTime] = useState(0);
 
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState({ open: false, data: null });
 
