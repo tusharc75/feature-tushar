@@ -13,6 +13,8 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import {
+  ACTIVITY_RESOURCE,
+  ATTACHMENT_TYPE,
   CHILD_RESOURCE,
   MATERIAL_SUB_TYPE,
   MATERIAL_TYPE,
@@ -968,6 +970,8 @@ const WorkOrder = ({
           handleClose={() => {
             setShowDrawingDialog({ open: false, workOrder: null });
           }}
+          resource={ACTIVITY_RESOURCE.workOrder}
+          defaultAttachmentType={ATTACHMENT_TYPE.drawing}
         />
       )}
     </>

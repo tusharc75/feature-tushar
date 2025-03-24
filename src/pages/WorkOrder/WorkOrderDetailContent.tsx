@@ -23,6 +23,7 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import {
   ACTIVITY_RESOURCE,
   ASSET_STATUS,
+  ATTACHMENT_TYPE,
   CHILD_RESOURCE,
   MATERIAL_SUB_TYPE,
   WORK_ORDER_STATUS,
@@ -191,7 +192,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
         setCompleted(data?.status === WORK_ORDER_STATUS.completed || data?.status === WORK_ORDER_STATUS.onHold || data?.deleted ? true : false);
         setWorkOrderData({ ...data });
         if (sendWorkOrderData) {
-          sendWorkOrderData(data)
+          sendWorkOrderData(data);
         }
       })
       .catch((err) => {
@@ -395,12 +396,12 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       type: 'menuItem',
       isVisible:
         permissions?.repairJob?.isCreate &&
-          workOrderData?.serializedAsset &&
-          workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
-          allowedToEdit &&
-          workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
-          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-          !workOrderData?.currentRepairJob
+        workOrderData?.serializedAsset &&
+        workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
+        allowedToEdit &&
+        workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+        !workOrderData?.currentRepairJob
           ? true
           : false,
       children: `Create ${resources?.repairJob?.titleSingular}`,
@@ -411,10 +412,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       type: 'menuItem',
       id: `Repair Job Receive`,
       isVisible:
-        permissions?.repairJob?.isUpdate &&
-          allowedToEdit &&
-          workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
-          workOrderData?.currentRepairJob
+        permissions?.repairJob?.isUpdate && allowedToEdit && workOrderData?.type === WORK_ORDER_TYPE.repairOrder && workOrderData?.currentRepairJob
           ? true
           : false,
       children: `Receive Asset From Supplier`,
@@ -426,10 +424,10 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       type: 'menuItem',
       isVisible: Boolean(
         workOrderData?.serializedAsset &&
-        workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
-        allowedToEdit &&
-        !workOrderData?.currentRepairJob &&
-        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)
+          workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
+          allowedToEdit &&
+          !workOrderData?.currentRepairJob &&
+          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)
       ),
       children: `${ASSET_STATUS.scrap} Asset`,
       tooltip: `${ASSET_STATUS.scrap} Asset`,
@@ -499,9 +497,9 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       children: 'Create Version Without Existing Data',
       isVisible: Boolean(
         allowedToEdit &&
-        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-        !workOrderData?.currentRepairJob &&
-        workOrderData?.canCreateWorkOrderVersion
+          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+          !workOrderData?.currentRepairJob &&
+          workOrderData?.canCreateWorkOrderVersion
       )
     },
     {
@@ -514,9 +512,9 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       },
       isVisible: Boolean(
         allowedToEdit &&
-        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-        !workOrderData?.currentRepairJob &&
-        workOrderData?.canCreateWorkOrderVersion
+          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+          !workOrderData?.currentRepairJob &&
+          workOrderData?.canCreateWorkOrderVersion
       ),
       disabled: false
     },
@@ -566,7 +564,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
 
   return (
     <Box className="main-container-v1">
-      <Box className={resource === sidebarResource.workOrderTechnician ? "" : "headerbox-v1"}>
+      <Box className={resource === sidebarResource.workOrderTechnician ? '' : 'headerbox-v1'}>
         {resource === sidebarResource.workOrder && (
           <Box className="nav-v1">
             <CustomBreadCrumbs
@@ -574,7 +572,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
             />
           </Box>
         )}
-        {[sidebarResource.workOrder, sidebarResource.workOrderSupervisor]?.includes(resource) &&
+        {[sidebarResource.workOrder, sidebarResource.workOrderSupervisor]?.includes(resource) && (
           <Box className="controls-v1 ml-auto">
             <Box className="control-buttons-v1 items-center">
               {workOrderData ? (
@@ -593,7 +591,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
               />
             </Box>
           </Box>
-        }
+        )}
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
@@ -675,11 +673,21 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
         <TabPanel value={tabValue} index={2}>
           {workOrderData && (
             <Consumables
-              allowedToEdit={workOrderData.type === WORK_ORDER_TYPE.repairOrder ?
-                allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.onHold && !workOrderData?.deleted ? true : false :
-                [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) && !workOrderData?.deleted ? false : allowedToEdit}
-              isCreate={workOrderData.type === WORK_ORDER_TYPE.repairOrder ? allowedToEdit :
-                [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) ? false : allowedToEdit
+              allowedToEdit={
+                workOrderData.type === WORK_ORDER_TYPE.repairOrder
+                  ? allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.onHold && !workOrderData?.deleted
+                    ? true
+                    : false
+                  : [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) && !workOrderData?.deleted
+                    ? false
+                    : allowedToEdit
+              }
+              isCreate={
+                workOrderData.type === WORK_ORDER_TYPE.repairOrder
+                  ? allowedToEdit
+                  : [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)
+                    ? false
+                    : allowedToEdit
               }
               service={null}
               uniqueId={null}
@@ -694,11 +702,21 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
         <TabPanel value={tabValue} index={3}>
           {workOrderData && (
             <Consumables
-              allowedToEdit={workOrderData.type === WORK_ORDER_TYPE.repairOrder ?
-                allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.onHold && !workOrderData?.deleted ? true : false :
-                [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) && !workOrderData?.deleted ? false : allowedToEdit}
-              isCreate={workOrderData.type === WORK_ORDER_TYPE.repairOrder ? allowedToEdit :
-                [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) ? false : allowedToEdit
+              allowedToEdit={
+                workOrderData.type === WORK_ORDER_TYPE.repairOrder
+                  ? allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.onHold && !workOrderData?.deleted
+                    ? true
+                    : false
+                  : [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) && !workOrderData?.deleted
+                    ? false
+                    : allowedToEdit
+              }
+              isCreate={
+                workOrderData.type === WORK_ORDER_TYPE.repairOrder
+                  ? allowedToEdit
+                  : [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)
+                    ? false
+                    : allowedToEdit
               }
               service={null}
               uniqueId={null}
@@ -716,7 +734,8 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
               resource={ACTIVITY_RESOURCE.workOrder}
               referenceId={id}
               currentVersion={workOrderData?.versions?.length + 1 || 1}
-              workOrderData={workOrderData}
+              resourceData={workOrderData}
+              defaultAttachmentType={ATTACHMENT_TYPE.drawing}
             />
           )}
         </TabPanel>
