@@ -49,7 +49,7 @@ const Dispatch = ({ jobData, renderedFrom, setNextStep }) => {
               onClick={() => {
                 row.original.type === MATERIAL_TYPE.serializedAsset
                   ? window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`)
-                  : window.open(`${routes.truckMaster.path}/${row.original.materialId}`);
+                  : window.open(`${routes.truckMasterDetail.path}/${row.original.materialId}`);
               }}
             >
               <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />

@@ -1078,7 +1078,7 @@ const LoadingTicket = ({
 
   const handelProcessTickets = (date = new Date(), status = null) => {
     let data = {};
-    const loadingTicketIds = uniq(map(selectedRecords, 'loadingTicketId'));
+    const loadingTicketIds = uniq(map(selectedRecords?.filter((e) => e?.loadingTicketId), 'loadingTicketId'));
     if (loadingTicketIds.length) {
       data['_ids'] = loadingTicketIds?.map((e) => e);
       data['status'] = DELIVERY_TICKET_STATUS.delivered;
