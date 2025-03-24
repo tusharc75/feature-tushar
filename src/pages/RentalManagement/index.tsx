@@ -174,7 +174,7 @@ const RentalManagement = () => {
                 </IconButton>
               </span>
             </HtmlTooltip>
-            <HtmlTooltip title="Attachment">
+            <HtmlTooltip title="Attachments">
               <IconButton
                 size="small"
                 aria-label="Attachment"

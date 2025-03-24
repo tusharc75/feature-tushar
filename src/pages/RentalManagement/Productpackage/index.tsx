@@ -332,7 +332,7 @@ const Productpackage = ({
                 <EditIcon fontSize="small" color={isOffline || !allowedToEdit || quotationApproved ? 'disabled' : 'primary'} />
               </IconButton>
             </HtmlTooltip>
-            <HtmlTooltip title="Attachment">
+            <HtmlTooltip title="Attachments">
               <IconButton
                 size="small"
                 aria-label="Attachment"
