@@ -149,7 +149,7 @@ const CardView = (props, ref) => {
         dispatch({ type: 'setData', setData: (prev) => setData(prev, appendData), setCount: (prevCount) => ({ ...prevCount, [column]: count }) });
         dispatch({ type: 'page', setPage: (prev) => ({ ...prev, [column]: page }) });
       })
-      .catch((err) => {})
+      .catch((err) => { })
       .finally(() => {
         dispatch({ type: 'loading', loading: (prev) => ({ ...prev, [column]: false }) });
       });
@@ -208,7 +208,7 @@ const CardView = (props, ref) => {
             setShowDrawingDialog({ open: false, workOrder: null });
           }}
           resource={ACTIVITY_RESOURCE.workOrder}
-          defaultAttachmentType={ATTACHMENT_TYPE.drawing}
+          attachmentType={ATTACHMENT_TYPE.drawing}
         />
       )}
     </>

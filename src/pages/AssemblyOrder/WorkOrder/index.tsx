@@ -971,7 +971,7 @@ const WorkOrder = ({
             setShowDrawingDialog({ open: false, workOrder: null });
           }}
           resource={ACTIVITY_RESOURCE.workOrder}
-          defaultAttachmentType={ATTACHMENT_TYPE.drawing}
+          attachmentType={ATTACHMENT_TYPE.drawing}
         />
       )}
     </>
@@ -1104,8 +1104,8 @@ const ActionButtonMenuItems = ({
         }}
         disabled={
           selectedRecords?.length &&
-          selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || checkParentProduct([d], d?.parentId)) &&
-          selectedRecords?.every((d) => d.workOrderId === selectedRecords[0]?.workOrderId)
+            selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || checkParentProduct([d], d?.parentId)) &&
+            selectedRecords?.every((d) => d.workOrderId === selectedRecords[0]?.workOrderId)
             ? false
             : true
         }
@@ -1119,8 +1119,8 @@ const ActionButtonMenuItems = ({
         }}
         disabled={
           checkUniqWorkOrderType() &&
-          selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.package)?.length > 0 &&
-          selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.package).every((e) => e?.canAutoCompleteWorkOrder)
+            selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.package)?.length > 0 &&
+            selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.package).every((e) => e?.canAutoCompleteWorkOrder)
             ? false
             : true
         }
@@ -1130,8 +1130,8 @@ const ActionButtonMenuItems = ({
       <MenuItem
         disabled={
           checkUniqWorkOrder() &&
-          (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
-            selectedRecords?.filter((e) => checkParentProduct([e], e?.parentId))?.length === 1)
+            (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
+              selectedRecords?.filter((e) => checkParentProduct([e], e?.parentId))?.length === 1)
             ? false
             : true
         }
