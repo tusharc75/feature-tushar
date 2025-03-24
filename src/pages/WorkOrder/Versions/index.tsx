@@ -350,7 +350,7 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
                 currentVersion={selectedVersionNumber}
                 disableEdit={true}
                 resourceData={workOrderData}
-                defaultAttachmentType={ATTACHMENT_TYPE.drawing}
+                attachmentType={ATTACHMENT_TYPE.drawing}
               />
             </TabPanel>
           </Box>

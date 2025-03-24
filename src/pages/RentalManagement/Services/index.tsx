@@ -27,6 +27,7 @@ import routes from '../../../components/Helpers/Routes';
 import { fetch_rental_product_fields, getNestedSubRows } from '../../../components/RentalManagment/helper';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import {
+  ACTIVITY_RESOURCE,
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_TYPE,
   deliveryTicket,
@@ -44,6 +45,9 @@ import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
 import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
 import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+
 
 const Services = ({
   rentalManagementData,
@@ -88,6 +92,7 @@ const Services = ({
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
   const [submitState, setSubmitState] = useState({ open: false, values: null, rowData: null });
+  const [showAttachmentDialog, setShowAttachmentDialog] = useState({ open: false, _id: null, label: '' });
 
   useEffect(() => {
     fetchFields();
@@ -244,6 +249,19 @@ const Services = ({
                 <EditIcon fontSize="small" color={isOffline || !allowedToEdit || quotationApproved ? 'disabled' : 'primary'} />
               </IconButton>
             </HtmlTooltip>
+            {row?.original?.type === MATERIAL_TYPE.package &&
+              <HtmlTooltip title="Attachments">
+                <IconButton
+                  size="small"
+                  aria-label="Attachment"
+                  onClick={(e) => {
+                    setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.detail });
+                  }}
+                >
+                  <AttachFileIcon fontSize="small" color='primary' />
+                </IconButton>
+              </HtmlTooltip>
+            }
             {allowedToEdit || !quotationApproved ? (
               !row.original.canDelete ? (
                 <HtmlTooltip
@@ -929,6 +947,17 @@ const Services = ({
           needCalculate={true}
         />
       }
+      {showAttachmentDialog.open && (
+        <DiagramDialog
+          referenceId={rentalManagementData?._id}
+          uniqueId={showAttachmentDialog?._id}
+          referenceLabel={showAttachmentDialog.label}
+          resource={ACTIVITY_RESOURCE.rentalManagement}
+          handleClose={() => {
+            setShowAttachmentDialog({ open: false, _id: null, label: '' });
+          }}
+        />
+      )}
     </Fragment>
   );
 };
