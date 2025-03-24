@@ -334,7 +334,7 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
             isActionButtonVisible={true}
             actionButtonMenuItems={actionButtonMenuItems()}
             actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
-            leftSideContents={resourcePolicy?.addServices ? leftSideContents() : null}
+            leftSideContents={resourcePolicy?.addServices && serviceOption?.length > 1 ? leftSideContents() : null}
             hasXpadding
           />
         </>
