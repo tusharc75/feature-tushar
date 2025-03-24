@@ -11,7 +11,7 @@ import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import DeleteIcon from '@mui/icons-material/Delete';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
-import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
@@ -79,6 +79,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
       accessor: 'order',
       Header: 'Sequence',
       show: true,
+      width: 150,
       filter: false,
       sortable: false,
       Cell: ({ row }) => (row.original?.order ? <div>{row?.original?.order}</div> : <NoDataCell />)
@@ -86,6 +87,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
     {
       accessor: 'qty',
       Header: 'Qty',
+      width: 150,
       editable: allowedToEdit,
       disableFilters: true,
       disableSortBy: true,
@@ -95,28 +97,25 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
     {
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 100,
-      width: 110,
+      width: 100,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
       canDrag: false,
       Cell: ({ row }) => (
         <>
-          {allowedToEdit && (
-            <HtmlTooltip title="Delete">
-              <IconButton
-                size="small"
-                aria-label="Delete"
-                onClick={() => {
-                  setDeleteRecord(row.original);
-                  setShowServiceConfirmBox(true);
-                }}
-              >
-                <DeleteIcon color="error" fontSize="small" />
-              </IconButton>
-            </HtmlTooltip>
-          )}
+          <HtmlTooltip title="Delete">
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              onClick={() => {
+                setDeleteRecord([row.original]);
+                setShowServiceConfirmBox(true);
+              }}
+            >
+              <DeleteIcon color="error" fontSize="small" />
+            </IconButton>
+          </HtmlTooltip>
         </>
       )
     }
@@ -145,14 +144,8 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
 
   const removeServices = () => {
     setRemovingServices(true);
-    let Ids = [];
-    if (deleteRecord) {
-      Ids.push(deleteRecord._id);
-    } else {
-      Ids = selectedRecords?.map((d) => d._id);
-    }
-    axiosInstance()
-      .put(`${packages.api}/${packageId}/services/remove`, { ids: Ids, type: selectedResource })
+    let ids = deleteRecord?.map((d) => d._id);
+    axiosInstance().put(`${packages.api}/${packageId}/services/remove`, { ids: ids, type: selectedResource })
       .then(() => {
         setRemovingServices(false);
         setShowServiceConfirmBox(false);
@@ -243,13 +236,6 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
               Arrange
             </ThemeButton>
           ) : null}
-          <DeleteButton
-            text="Delete"
-            disabled={selectedRecords.length === 0 || isRemovingServices}
-            onClick={() => {
-              setShowServiceConfirmBox(true);
-            }}
-          />
         </>
       )
     );
@@ -270,6 +256,20 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
     setTabValue(newValue);
   };
 
+  const actionButtonMenuItems = () => {
+    return (
+      <MenuItem
+        disabled={selectedRecords.length === 0}
+        onClick={() => {
+          setDeleteRecord(selectedRecords);
+          setShowServiceConfirmBox(true);
+        }}
+      >
+        {`Delete (${selectedRecords?.length})`}
+      </MenuItem>
+    );
+  };
+
   return (
     <Box>
       {permissions?.assemblyOrder?.isRead && (
@@ -286,8 +286,9 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
       <DetailsPageHeader
         isAddButtonVisible={allowedToEdit}
         addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={false}
-        actionButtonProps={{ disabled: selectedRecords.length === 0 || isRemovingServices }}
+        isActionButtonVisible={allowedToEdit}
+        actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+        actionButtonMenuItems={actionButtonMenuItems()}
         rightSideContents={rightSideContents()}
         hasXpadding
       />
