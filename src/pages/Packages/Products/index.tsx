@@ -12,7 +12,7 @@ import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
-import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
@@ -93,6 +93,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
       {
         accessor: 'qty',
         Header: 'Qty',
+        width: 150,
         editable: allowedToEdit,
         disableFilters: true,
         disableSortBy: true,
@@ -103,29 +104,24 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
       {
         accessor: 'action',
         Header: 'Actions',
-        minWidth: 100,
-        width: 110,
+        width: 100,
         sticky: 'right',
         disableFilters: true,
         disableSortBy: true,
         canDrag: false,
         Cell: ({ row }) => (
-          <>
-            {allowedToEdit && (
-              <HtmlTooltip title="Delete">
-                <IconButton
-                  size="small"
-                  aria-label="Delete"
-                  onClick={() => {
-                    setDeleteRecord(row.original);
-                    setShowProductConfirmBox(true);
-                  }}
-                >
-                  <DeleteIcon color="error" fontSize="small" />
-                </IconButton>
-              </HtmlTooltip>
-            )}
-          </>
+          <HtmlTooltip title="Delete">
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              onClick={() => {
+                setDeleteRecord([row.original]);
+                setShowProductConfirmBox(true);
+              }}
+            >
+              <DeleteIcon color="error" fontSize="small" />
+            </IconButton>
+          </HtmlTooltip>
         )
       }
     ];
@@ -153,14 +149,9 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
 
   const removeProducts = () => {
     setRemovingProducts(true);
-    let productIds = [];
-    if (deleteRecord) {
-      productIds.push(deleteRecord._id);
-    } else {
-      productIds = selectedRecords?.map((d) => d._id);
-    }
+    let ids = deleteRecord?.map((d) => d._id);
     axiosInstance()
-      .put(`${packages.api}/${packageId}/products/remove`, { ids: productIds, type: selectedResource })
+      .put(`${packages.api}/${packageId}/products/remove`, { ids: ids, type: selectedResource })
       .then(({ data }) => {
         setRemovingProducts(false);
         setShowProductConfirmBox(false);
@@ -235,6 +226,20 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
       });
   };
 
+  const actionButtonMenuItems = () => {
+    return (
+      <MenuItem
+        disabled={selectedRecords.length === 0}
+        onClick={() => {
+          setDeleteRecord(selectedRecords);
+          setShowProductConfirmBox(true);
+        }}
+      >
+        {`Delete (${selectedRecords?.length})`}
+      </MenuItem>
+    );
+  };
+
   const rightSideContents = () => {
     return (
       allowedToEdit && (
@@ -255,13 +260,6 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
               Arrange
             </ThemeButton>
           ) : null}
-          <DeleteButton
-            text="Delete"
-            disabled={selectedRecords.length === 0 || isRemovingProducts}
-            onClick={() => {
-              setShowProductConfirmBox(true);
-            }}
-          />
         </>
       )
     );
@@ -298,9 +296,10 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
       <DetailsPageHeader
         isAddButtonVisible={allowedToEdit}
         addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={false}
-        actionButtonProps={{ disabled: !Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length) }}
         rightSideContents={rightSideContents()}
+        actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+        actionButtonMenuItems={actionButtonMenuItems()}
+        isActionButtonVisible={allowedToEdit}
         hasXpadding
       />
       {columns ? (

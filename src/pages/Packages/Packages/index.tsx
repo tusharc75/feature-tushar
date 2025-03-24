@@ -4,7 +4,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { prepareDataForGrid, packages, sidebarResource, WORK_ORDER_TYPE_LABEL, WORK_ORDER_TYPE } from 'src/constants/helpers';
+import { prepareDataForGrid, packages, sidebarResource } from 'src/constants/helpers';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -14,7 +14,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { isMobile } from 'react-device-detect';
-import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { GrDrag } from 'react-icons/gr';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -85,6 +85,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
       {
         accessor: 'qty',
         Header: 'Qty',
+        width: 150,
         editable: allowedToEdit,
         disableFilters: true,
         disableSortBy: true,
@@ -94,29 +95,24 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
       {
         accessor: 'action',
         Header: 'Actions',
-        minWidth: 100,
-        width: 110,
+        width: 100,
         sticky: 'right',
         disableFilters: true,
         disableSortBy: true,
         canDrag: false,
         Cell: ({ row }) => (
-          <>
-            {allowedToEdit && (
-              <HtmlTooltip title="Delete">
-                <IconButton
-                  size="small"
-                  aria-label="Delete"
-                  onClick={() => {
-                    setDeleteRecord(row.original);
-                    setShowProductConfirmBox(true);
-                  }}
-                >
-                  <DeleteIcon color="error" fontSize="small" />
-                </IconButton>
-              </HtmlTooltip>
-            )}
-          </>
+          <HtmlTooltip title="Delete">
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              onClick={() => {
+                setDeleteRecord([row.original]);
+                setShowProductConfirmBox(true);
+              }}
+            >
+              <DeleteIcon color="error" fontSize="small" />
+            </IconButton>
+          </HtmlTooltip>
         )
       },
       ...newColumns
@@ -141,14 +137,9 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
 
   const removeProducts = () => {
     setRemovingProducts(true);
-    let Ids = [];
-    if (deleteRecord) {
-      Ids.push(deleteRecord._id);
-    } else {
-      Ids = selectedRecords?.map((d) => d._id);
-    }
+    let ids = deleteRecord?.map((d) => d._id);
     axiosInstance()
-      .put(`${packages.api}/${packageId}/package/remove`, { ids: Ids })
+      .put(`${packages.api}/${packageId}/package/remove`, { ids: ids })
       .then(() => {
         setRemovingProducts(false);
         setShowProductConfirmBox(false);
@@ -210,13 +201,6 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
               Arrange
             </ThemeButton>
           ) : null}
-          <DeleteButton
-            text="Delete"
-            disabled={selectedRecords.length === 0 || isRemovingProducts}
-            onClick={() => {
-              setShowProductConfirmBox(true);
-            }}
-          />
         </>
       )
     );
@@ -245,15 +229,30 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
       });
   };
 
+  const actionButtonMenuItems = () => {
+    return (
+      <MenuItem
+        disabled={selectedRecords.length === 0}
+        onClick={() => {
+          setDeleteRecord(selectedRecords);
+          setShowProductConfirmBox(true);
+        }}
+      >
+        {`Delete (${selectedRecords?.length})`}
+      </MenuItem>
+    );
+  };
+
   return (
     <>
       <DetailsPageHeader
         isAddButtonVisible={allowedToEdit}
         addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={false}
-        actionButtonProps={{ disabled: selectedRecords.length === 0 || isRemovingProducts }}
+        isActionButtonVisible={allowedToEdit}
+        actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
         rightSideContents={rightSideContents()}
         hasXpadding
+        actionButtonMenuItems={actionButtonMenuItems()}
       />
       {columns ? (
         <CustomReactTable

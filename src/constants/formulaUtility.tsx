@@ -1,4 +1,4 @@
-import { isArray, isEmpty, uniq } from 'lodash';
+import { isArray, isEmpty, round, uniq } from 'lodash';
 import { camelCase } from 'lodash';
 import { checkValue, fieldLabelToFieldName, getObjKeys } from './helpers';
 import { LOGIC } from 'src/components/FormBuilder/helper';
@@ -192,11 +192,11 @@ export const handleAutoCalculation = (fieldData, fields, values, name, currency,
             decimalPlaces = fieldResult[0].decimalPlaces;
           }
         }
-        resultValues[x] = parseFloat(resultValues[x].toFixed(decimalPlaces));
+        resultValues[x] = round(resultValues[x], decimalPlaces);
       }
     }
     resultValues[name] = value;
-  } catch (e) {}
+  } catch (e) { }
   return resultValues;
 };
 
@@ -732,7 +732,7 @@ export const checkFormulaLoop = (fields) => {
     var duplicateList = [];
     fields.forEach((_f) => {
       const fFieldName = _f?.fieldName || _f?.fieldLabel;
-      if (fields.filter((_d) => { 
+      if (fields.filter((_d) => {
         const dFieldName = _d?.fieldName || _d?.fieldLabel;
         if (dFieldName === fFieldName) {
           if (!_d?.fieldEntity?.length || !_f?.fieldEntity?.length) {
@@ -1088,4 +1088,4 @@ export const CURReplaceByCurrencySingle = (fields: any, currency: any) => {
 //     return value
 // }
 
-export const validateFields = (fields) => {};
+export const validateFields = (fields) => { };
