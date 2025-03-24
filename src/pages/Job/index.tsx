@@ -253,7 +253,6 @@ const Job = () => {
             <span>{resources?.fleetDispatch?.titlePlural}</span>
           </Button>
         )}
-
         <IconButton
           size="small"
           aria-label="Clone"

@@ -7,7 +7,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import { FiExternalLink } from 'react-icons/fi';
-import { displayDateTime, sidebarResource } from 'src/constants/helpers';
+import { displayDateTime, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { useData } from 'src/StateProvider/Provider';
 
@@ -47,7 +47,7 @@ const Dispatch = ({ jobData, renderedFrom, setNextStep }) => {
             <IconButton
               size="small"
               onClick={() => {
-                row.original.type === 'asset'
+                row.original.type === MATERIAL_TYPE.serializedAsset
                   ? window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`)
                   : window.open(`${routes.truckMaster.path}/${row.original.materialId}`);
               }}
@@ -60,8 +60,14 @@ const Dispatch = ({ jobData, renderedFrom, setNextStep }) => {
       {
         accessor: 'status',
         Header: 'Status',
-        width: 100,
+        width: 150,
         Cell: ({ row }) => (row.original.status ? <p>{row.original.status}</p> : <NoDataCell />)
+      },
+      {
+        accessor: 'gas',
+        Header: 'Gas Level (MMcf)',
+        width: 200,
+        Cell: ({ row }) => (row.original.gas ? <p>{row.original.gas}</p> : <NoDataCell />)
       },
       {
         accessor: 'dispatchBy',
@@ -139,6 +145,7 @@ const Dispatch = ({ jobData, renderedFrom, setNextStep }) => {
       _subRow.materialId = _subRow?.fleet?.optionValue;
       _subRow.dispatchBy = _subRow?.dispatchBy?.optionLabel;
       _subRow.receivedBy = _subRow?.receivedBy?.optionLabel;
+      _subRow.gas = parseInt((Math.random() * 100)?.toFixed(0))
       _subRow.hideSelection = false;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
