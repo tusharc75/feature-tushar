@@ -54,6 +54,8 @@ const Services = ({ startDate, services, handleSelect, dayPixel, item, index }) 
         {services?.map((service) => {
           const priority = getPriority(service.status);
           const bgColor = getColorFromPriority(priority);
+          service.startDate = service.startDate || service.estimateStartDate;
+          service.endDate = service.endDate || service.estimateEndDate;
           const pos = getPositionOfDate(service.startDate, service.endDate, startDate, dayPixel);
 
           return (

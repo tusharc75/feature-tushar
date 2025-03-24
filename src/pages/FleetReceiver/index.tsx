@@ -119,7 +119,7 @@ const FleetReceiver = () => {
                       <Box className="basis-[calc(100%-calc(30px+16px))]">
                         <Typography className={classes.primaryText}>Name : {data?.fleet?.fleetNumber}</Typography>
                         <Typography className={classes.secondaryText}>
-                          <strong>Unit :</strong> {data?.asset?.assetNumber}
+                          <strong>{resources?.serializedAsset?.titleSingular}  :</strong> {data?.asset?.assetNumber}
                         </Typography>
                         <Typography className={classes.secondaryText}>
                           <strong>Job :</strong> {data?.job?.jobNumber}

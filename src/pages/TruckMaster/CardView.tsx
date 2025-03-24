@@ -115,11 +115,11 @@ const CardView = ({ data, fields, setShowManageDialog, setDeleteRecord, setShowD
                   <Typography className={classes.text}>
                     <strong>Current Location :</strong> {truckMaster?.currentLocation?.optionLabel}
                   </Typography>
-                  {/* <Box className={classes.gaugeContainer}>
+                  <Box className={classes.gaugeContainer}>
                     <MetricsWithIcon value={truckMaster?.temperature} type="temperature" suffixText={'°F'} />
                     <MetricsWithIcon value={truckMaster?.pressure} type="pressure" suffixText={'PSI'} />
                     <MetricsWithIcon value={truckMaster?.volume} type="volume" suffixText={'MMcf'} />
-                  </Box> */}
+                  </Box>
                 </Box>
                 <Box className={classes.icons}>
                   <HtmlTooltip title="Attachment">
