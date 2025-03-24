@@ -61,8 +61,8 @@ import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHel
 import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
 import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 import AssignSerializedPackagesDialog from 'src/components/AssignRolesDialog/AssignSerializedPackagesDialog';
-import { ImAttachment } from 'react-icons/im';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 
 const Productpackage = ({
   rentalManagementData,
@@ -110,7 +110,7 @@ const Productpackage = ({
 
   const { isOffline } = useContext(CustomOfflineContext);
   const [submitState, setSubmitState] = useState({ open: false, values: null, rowData: null });
-  const [showAttachmentDialog, setShowAttachmentDialog] = useState({ open: false, _id: null });
+  const [showAttachmentDialog, setShowAttachmentDialog] = useState({ open: false, _id: null, label: '' });
 
   useEffect(() => {
     fetchFields();
@@ -332,17 +332,19 @@ const Productpackage = ({
                 <EditIcon fontSize="small" color={isOffline || !allowedToEdit || quotationApproved ? 'disabled' : 'primary'} />
               </IconButton>
             </HtmlTooltip>
-            <HtmlTooltip title="Attachments">
-              <IconButton
-                size="small"
-                aria-label="Attachment"
-                onClick={(e) => {
-                  setShowAttachmentDialog({ open: true, _id: row?.original?._id });
-                }}
-              >
-                <ImAttachment size={16} />
-              </IconButton>
-            </HtmlTooltip>
+            {row?.original?.type === MATERIAL_TYPE.package &&
+              <HtmlTooltip title="Attachments">
+                <IconButton
+                  size="small"
+                  aria-label="Attachment"
+                  onClick={(e) => {
+                    setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.detail });
+                  }}
+                >
+                  <AttachFileIcon fontSize="small" color='primary' />
+                </IconButton>
+              </HtmlTooltip>
+            }
             {allowedToEdit || !quotationApproved ? (
               !row.original.canDelete ? (
                 <HtmlTooltip
@@ -452,17 +454,16 @@ const Productpackage = ({
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === MATERIAL_TYPE.service
-          ? parent.serviceDetail
-            ? parent.serviceDetail?.serviceName
+      parent.detail = `${parent.type === MATERIAL_TYPE.service
+        ? parent.serviceDetail
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+        : parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.manualEntry
+            ? parent.detail
             : parent.packageDetail?.packageName
-          : parent.type === MATERIAL_TYPE.product
-            ? parent.productDetail?.productName
-            : parent.type === MATERIAL_TYPE.manualEntry
-              ? parent.detail
-              : parent.packageDetail?.packageName
-      }`;
+        }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -490,7 +491,7 @@ const Productpackage = ({
       parent.assetQty = parent.serializedProduct
         ? inventory?.filter((e) => e._id === parent._id).length + productSerialNumbers?.filter((e) => e._id === parent._id).length
         : nonSerializeAsset?.filter((e) => e._id === parent._id).length +
-          nonSerializedInventory?.filter((d) => d?._id === parent?._id)?.reduce((sum, row) => sum + row?.qty || 0, 0);
+        nonSerializedInventory?.filter((d) => d?._id === parent?._id)?.reduce((sum, row) => sum + row?.qty || 0, 0);
       parent.canDelete =
         parent.type === MATERIAL_TYPE.service && parent?.serviceLog?.length
           ? false
@@ -503,17 +504,17 @@ const Productpackage = ({
                 : true;
       parent.nonSerializedQty =
         parent.type === MATERIAL_TYPE.product &&
-        !parent.serializedProduct &&
-        parent.assetQty === 0 &&
-        parent?.status &&
-        loadingTicketProducts?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)?.length > 0
+          !parent.serializedProduct &&
+          parent.assetQty === 0 &&
+          parent?.status &&
+          loadingTicketProducts?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)?.length > 0
           ? loadingTicketProducts
-              ?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)
-              ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+            ?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)
+            ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
           : nonSerializedInventory?.filter((e) => e?._id === parent?._id && e?.product?.optionValue === parent?.materialId)?.length > 0
             ? nonSerializedInventory
-                ?.filter((e) => e?._id === parent?._id && e?.product?.optionValue === parent?.materialId)
-                ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+              ?.filter((e) => e?._id === parent?._id && e?.product?.optionValue === parent?.materialId)
+              ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
             : 0;
       parent.subRows = generateNestedData(
         data.material,
@@ -573,15 +574,14 @@ const Productpackage = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow.type === MATERIAL_TYPE.service
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.type === MATERIAL_TYPE.package
-            ? _subRow.packageDetail?.packageName
-            : _subRow.type === MATERIAL_TYPE.product
-              ? _subRow.productDetail?.productName
-              : ''
-      } `;
+      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.service
+        ? _subRow.serviceDetail?.serviceName
+        : _subRow.type === MATERIAL_TYPE.package
+          ? _subRow.packageDetail?.packageName
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow.productDetail?.productName
+            : ''
+        } `;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
@@ -598,7 +598,7 @@ const Productpackage = ({
       _subRow.assetQty = _subRow.serializedProduct
         ? inventory?.filter((e) => e._id === _subRow._id).length + productSerialNumbers?.filter((e) => e._id === _subRow._id).length
         : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length +
-          nonSerializedInventory?.filter((d) => d?._id === _subRow?._id)?.reduce((sum, row) => sum + row?.qty || 0, 0);
+        nonSerializedInventory?.filter((d) => d?._id === _subRow?._id)?.reduce((sum, row) => sum + row?.qty || 0, 0);
       _subRow.canDelete =
         _subRow.type === MATERIAL_TYPE.service && _subRow?.serviceLog?.length
           ? false
@@ -609,13 +609,13 @@ const Productpackage = ({
               : true;
       _subRow.nonSerializedQty =
         _subRow.type === MATERIAL_TYPE.product &&
-        !_subRow.serializedProduct &&
-        _subRow.assetQty === 0 &&
-        _subRow?.status &&
-        loadingTicketProducts?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)?.length > 0
+          !_subRow.serializedProduct &&
+          _subRow.assetQty === 0 &&
+          _subRow?.status &&
+          loadingTicketProducts?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)?.length > 0
           ? loadingTicketProducts
-              ?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)
-              ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+            ?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)
+            ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
           : 0;
       _subRow.subRows = generateNestedData(
         material,
@@ -1269,9 +1269,10 @@ const Productpackage = ({
         <DiagramDialog
           referenceId={rentalManagementData?._id}
           uniqueId={showAttachmentDialog?._id}
+          referenceLabel={showAttachmentDialog.label}
           resource={ACTIVITY_RESOURCE.rentalManagement}
           handleClose={() => {
-            setShowAttachmentDialog({ open: false, _id: null });
+            setShowAttachmentDialog({ open: false, _id: null, label: '' });
           }}
         />
       )}

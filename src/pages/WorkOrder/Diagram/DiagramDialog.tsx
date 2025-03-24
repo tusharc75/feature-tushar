@@ -9,7 +9,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-const DiagramDialog = ({ handleClose, referenceId, uniqueId = null, resource, defaultAttachmentType = '' }) => {
+const DiagramDialog = ({ handleClose, referenceId, referenceLabel = '', uniqueId = null, resource, attachmentType = null }) => {
   const toastConfig = useContext(CustomToastContext);
   const [resourceData, setResourceData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -47,7 +47,7 @@ const DiagramDialog = ({ handleClose, referenceId, uniqueId = null, resource, de
           handleClose();
         }}
         showRequiredLabel={false}
-        title={`Drawings`}
+        title={attachmentType ? attachmentType : `Attachments - ${referenceLabel}`}
       ></CustomDialogHeader>
       <CustomDialogContent isFooterPresent={false}>
         {!loading ? (
@@ -57,7 +57,7 @@ const DiagramDialog = ({ handleClose, referenceId, uniqueId = null, resource, de
             uniqueId={uniqueId}
             currentVersion={resource === ACTIVITY_RESOURCE.workOrder ? resourceData?.currentVersion : null}
             resourceData={resourceData}
-            defaultAttachmentType={defaultAttachmentType}
+            attachmentType={attachmentType}
           />
         ) : (
           <Grid container spacing={2}>

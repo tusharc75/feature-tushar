@@ -260,7 +260,7 @@ const GridView = React.forwardRef<GridViewRef, any>(({ renderedFrom, state, disp
             setShowDrawingDialog({ open: false, workOrder: null });
           }}
           resource={ACTIVITY_RESOURCE.workOrder}
-          defaultAttachmentType={ATTACHMENT_TYPE.drawing}
+          attachmentType={ATTACHMENT_TYPE.drawing}
         />
       )}
 

@@ -5,7 +5,7 @@ import { Box, IconButton, Theme, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
 import { Fragment, useState } from 'react';
-import { ImAttachment } from 'react-icons/im';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { useHistory } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import routes from 'src/components/Helpers/Routes';
@@ -132,7 +132,7 @@ const CardView = ({ data, fields, setShowManageDialog, setDeleteRecord, setShowD
                       }}
                       className={classes.buttons}
                     >
-                      <ImAttachment size={16} />
+                      <AttachFileIcon fontSize='small' color='primary' />
                     </IconButton>
                   </HtmlTooltip>
                   <HtmlTooltip title="Map">
