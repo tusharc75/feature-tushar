@@ -1025,13 +1025,12 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         <ConfirmationDialog
           okBtnLoading={isSubmitting}
           open={showServiceActionConfirmBox.open}
-          message={`Are you sure you want to ${
-            showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed
-              ? 'complete'
-              : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
-                ? 'skip'
-                : 'revert'
-          } this Service(s)`}
+          message={`Are you sure you want to ${showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed
+            ? 'complete'
+            : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
+              ? 'skip'
+              : 'revert'
+            } this Service(s)`}
           onClose={() => {
             setShowServiceActionConfirmBox({ open: false, action: '' });
           }}
@@ -1122,7 +1121,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
             setShowDrawingDialog({ open: false, workOrder: null });
           }}
           resource={ACTIVITY_RESOURCE.workOrder}
-          defaultAttachmentType={ATTACHMENT_TYPE.drawing}
+          attachmentType={ATTACHMENT_TYPE.drawing}
         />
       )}
     </Fragment>

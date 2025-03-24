@@ -37,7 +37,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageRentalManagementDialog from './ManageRental';
 import { rentalJobClearOffline, rentalJobOfflineUpdate } from './rentalOfflineHelper';
 import queryString from 'query-string';
-import { ImAttachment } from 'react-icons/im';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 
 const RentalManagement = () => {
@@ -77,7 +77,7 @@ const RentalManagement = () => {
 
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [showAttachmentDialog, setShowAttachmentDialog] = useState({ open: false, _id: null });
+  const [showAttachmentDialog, setShowAttachmentDialog] = useState({ open: false, _id: null, label: '' });
 
   useEffect(() => {
     setUpindexDB();
@@ -179,10 +179,10 @@ const RentalManagement = () => {
                 size="small"
                 aria-label="Attachment"
                 onClick={(e) => {
-                  setShowAttachmentDialog({ open: true, _id: row?.original?._id });
+                  setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.rentalJobName });
                 }}
               >
-                <ImAttachment size={16} />
+                <AttachFileIcon fontSize="small" color='primary' />
               </IconButton>
             </HtmlTooltip>
             <HtmlTooltip title={row?.original.canDelete ? 'Delete' : deleteDisable} placement="top" arrow enterTouchDelay={0}>
@@ -546,12 +546,11 @@ const RentalManagement = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${
-              deleteRecord
-                ? `${resources?.rentalManagement?.titleSingular?.toLowerCase()} :
+            message={`Are you sure you want to delete ${deleteRecord
+              ? `${resources?.rentalManagement?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.rentalJobName}`
-                : `selected ${resources?.rentalManagement?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.rentalManagement?.titlePlural?.toLowerCase()}`
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
@@ -577,9 +576,10 @@ const RentalManagement = () => {
         {showAttachmentDialog.open && (
           <DiagramDialog
             referenceId={showAttachmentDialog?._id}
+            referenceLabel={showAttachmentDialog.label}
             resource={ACTIVITY_RESOURCE.rentalManagement}
             handleClose={() => {
-              setShowAttachmentDialog({ open: false, _id: null });
+              setShowAttachmentDialog({ open: false, _id: null, label: '' });
             }}
           />
         )}
