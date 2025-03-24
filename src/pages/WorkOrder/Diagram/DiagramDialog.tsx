@@ -9,19 +9,25 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-const DiagramDialog = ({ handleClose, referenceId }) => {
+const DiagramDialog = ({ handleClose, referenceId, uniqueId = null, resource, defaultAttachmentType = '' }) => {
   const toastConfig = useContext(CustomToastContext);
-  const [workOrderData, setWorkOrderData] = useState(null);
+  const [resourceData, setResourceData] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    axiosInstance()
-      .get(`${workOrder.api}/current-version/${referenceId}`)
-      .then(({ data: { data } }) => {
-        setWorkOrderData(data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+    if (resource === ACTIVITY_RESOURCE.workOrder) {
+      setLoading(true);
+      axiosInstance()
+        .get(`${workOrder.api}/current-version/${referenceId}`)
+        .then(({ data: { data } }) => {
+          setResourceData(data);
+          setLoading(false);
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+          setLoading(false);
+        });
+    }
   }, [referenceId]);
 
   return (
@@ -44,12 +50,14 @@ const DiagramDialog = ({ handleClose, referenceId }) => {
         title={`Drawings`}
       ></CustomDialogHeader>
       <CustomDialogContent isFooterPresent={false}>
-        {workOrderData ? (
+        {!loading ? (
           <Diagram
-            resource={ACTIVITY_RESOURCE.workOrder}
+            resource={resource}
             referenceId={referenceId}
-            currentVersion={workOrderData?.currentVersion}
-            workOrderData={workOrderData}
+            uniqueId={uniqueId}
+            currentVersion={resource === ACTIVITY_RESOURCE.workOrder ? resourceData?.currentVersion : null}
+            resourceData={resourceData}
+            defaultAttachmentType={defaultAttachmentType}
           />
         ) : (
           <Grid container spacing={2}>

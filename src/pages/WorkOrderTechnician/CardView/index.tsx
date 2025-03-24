@@ -8,7 +8,13 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CardColTimeline from 'src/components/CardColTimeline';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import routes from 'src/components/Helpers/Routes';
-import { WORKORDER_SERVICE_STATUS, WORKORDER_TECHNICIAN_SERVICE_STATUS, workOrderColormap } from 'src/constants/helpers';
+import {
+  ACTIVITY_RESOURCE,
+  ATTACHMENT_TYPE,
+  WORKORDER_SERVICE_STATUS,
+  WORKORDER_TECHNICIAN_SERVICE_STATUS,
+  workOrderColormap
+} from 'src/constants/helpers';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import { useData } from 'src/StateProvider/Provider';
 import TechnicianDialog from '../TechnicianDialog';
@@ -143,7 +149,7 @@ const CardView = (props, ref) => {
         dispatch({ type: 'setData', setData: (prev) => setData(prev, appendData), setCount: (prevCount) => ({ ...prevCount, [column]: count }) });
         dispatch({ type: 'page', setPage: (prev) => ({ ...prev, [column]: page }) });
       })
-      .catch((err) => { })
+      .catch((err) => {})
       .finally(() => {
         dispatch({ type: 'loading', loading: (prev) => ({ ...prev, [column]: false }) });
       });
@@ -201,6 +207,8 @@ const CardView = (props, ref) => {
           handleClose={() => {
             setShowDrawingDialog({ open: false, workOrder: null });
           }}
+          resource={ACTIVITY_RESOURCE.workOrder}
+          defaultAttachmentType={ATTACHMENT_TYPE.drawing}
         />
       )}
     </>

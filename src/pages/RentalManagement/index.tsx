@@ -21,6 +21,7 @@ import routes from 'src/components/Helpers/Routes';
 import HideWhenOffline from 'src/components/HideWhenOffline';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import {
+  ACTIVITY_RESOURCE,
   CHILD_RESOURCE,
   checkIsAllowedToDelete,
   getDefaultMyRecordType,
@@ -36,6 +37,8 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageRentalManagementDialog from './ManageRental';
 import { rentalJobClearOffline, rentalJobOfflineUpdate } from './rentalOfflineHelper';
 import queryString from 'query-string';
+import { ImAttachment } from 'react-icons/im';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 
 const RentalManagement = () => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -74,6 +77,7 @@ const RentalManagement = () => {
 
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
+  const [showAttachmentDialog, setShowAttachmentDialog] = useState({ open: false, _id: null });
 
   useEffect(() => {
     setUpindexDB();
@@ -132,8 +136,8 @@ const RentalManagement = () => {
     () => ({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 100,
-      width: 100,
+      minWidth: 130,
+      width: 130,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -169,6 +173,17 @@ const RentalManagement = () => {
                   <FileCopyIcon fontSize="small" color={permissions?.rentalManagement?.isCreate ? 'primary' : 'disabled'} />
                 </IconButton>
               </span>
+            </HtmlTooltip>
+            <HtmlTooltip title="Attachments">
+              <IconButton
+                size="small"
+                aria-label="Attachment"
+                onClick={(e) => {
+                  setShowAttachmentDialog({ open: true, _id: row?.original?._id });
+                }}
+              >
+                <ImAttachment size={16} />
+              </IconButton>
             </HtmlTooltip>
             <HtmlTooltip title={row?.original.canDelete ? 'Delete' : deleteDisable} placement="top" arrow enterTouchDelay={0}>
               <span>
@@ -556,6 +571,15 @@ const RentalManagement = () => {
                 fetchData();
               }
               setShowManageRentalManagementDialog({ open: false, isClone: false, idToClone: null });
+            }}
+          />
+        )}
+        {showAttachmentDialog.open && (
+          <DiagramDialog
+            referenceId={showAttachmentDialog?._id}
+            resource={ACTIVITY_RESOURCE.rentalManagement}
+            handleClose={() => {
+              setShowAttachmentDialog({ open: false, _id: null });
             }}
           />
         )}

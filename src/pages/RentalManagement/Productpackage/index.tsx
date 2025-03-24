@@ -28,6 +28,8 @@ import {
 } from '../../../components/RentalManagment/helper';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import {
+  ACTIVITY_RESOURCE,
+  ATTACHMENT_TYPE,
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_TYPE,
   deliveryTicket,
@@ -59,6 +61,8 @@ import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHel
 import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
 import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 import AssignSerializedPackagesDialog from 'src/components/AssignRolesDialog/AssignSerializedPackagesDialog';
+import { ImAttachment } from 'react-icons/im';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 
 const Productpackage = ({
   rentalManagementData,
@@ -106,6 +110,7 @@ const Productpackage = ({
 
   const { isOffline } = useContext(CustomOfflineContext);
   const [submitState, setSubmitState] = useState({ open: false, values: null, rowData: null });
+  const [showAttachmentDialog, setShowAttachmentDialog] = useState({ open: false, _id: null });
 
   useEffect(() => {
     fetchFields();
@@ -327,6 +332,17 @@ const Productpackage = ({
                 <EditIcon fontSize="small" color={isOffline || !allowedToEdit || quotationApproved ? 'disabled' : 'primary'} />
               </IconButton>
             </HtmlTooltip>
+            <HtmlTooltip title="Attachments">
+              <IconButton
+                size="small"
+                aria-label="Attachment"
+                onClick={(e) => {
+                  setShowAttachmentDialog({ open: true, _id: row?.original?._id });
+                }}
+              >
+                <ImAttachment size={16} />
+              </IconButton>
+            </HtmlTooltip>
             {allowedToEdit || !quotationApproved ? (
               !row.original.canDelete ? (
                 <HtmlTooltip
@@ -345,7 +361,7 @@ const Productpackage = ({
                   }
                 >
                   <span>
-                    <IconButton size="small" aria-label="Details" disabled={true}>
+                    <IconButton size="small" aria-label="Delete" disabled={true}>
                       <DeleteIcon fontSize="small" color={'disabled'} />
                     </IconButton>
                   </span>
@@ -355,7 +371,7 @@ const Productpackage = ({
                   <span>
                     <IconButton
                       size="small"
-                      aria-label="Details"
+                      aria-label="Delete"
                       onClick={() => {
                         const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
                         getNestedSubRows(obj, row.original);
@@ -1247,6 +1263,16 @@ const Productpackage = ({
           costData={showCostDialog.data}
           loadingEdit={isUpdating}
           showSaveAndNext={showCostDialog.showSaveAndNext}
+        />
+      )}
+      {showAttachmentDialog.open && (
+        <DiagramDialog
+          referenceId={rentalManagementData?._id}
+          uniqueId={showAttachmentDialog?._id}
+          resource={ACTIVITY_RESOURCE.rentalManagement}
+          handleClose={() => {
+            setShowAttachmentDialog({ open: false, _id: null });
+          }}
         />
       )}
     </Fragment>
