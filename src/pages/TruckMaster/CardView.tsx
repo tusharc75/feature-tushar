@@ -5,7 +5,7 @@ import { Box, IconButton, Theme, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
 import { Fragment, useState } from 'react';
-import { ImAttachment } from 'react-icons/im';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { useHistory } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import routes from 'src/components/Helpers/Routes';
@@ -115,11 +115,11 @@ const CardView = ({ data, fields, setShowManageDialog, setDeleteRecord, setShowD
                   <Typography className={classes.text}>
                     <strong>Current Location :</strong> {truckMaster?.currentLocation?.optionLabel}
                   </Typography>
-                  {/* <Box className={classes.gaugeContainer}>
+                  <Box className={classes.gaugeContainer}>
                     <MetricsWithIcon value={truckMaster?.temperature} type="temperature" suffixText={'°F'} />
                     <MetricsWithIcon value={truckMaster?.pressure} type="pressure" suffixText={'PSI'} />
                     <MetricsWithIcon value={truckMaster?.volume} type="volume" suffixText={'MMcf'} />
-                  </Box> */}
+                  </Box>
                 </Box>
                 <Box className={classes.icons}>
                   <HtmlTooltip title="Attachment">
@@ -132,7 +132,7 @@ const CardView = ({ data, fields, setShowManageDialog, setDeleteRecord, setShowD
                       }}
                       className={classes.buttons}
                     >
-                      <ImAttachment size={16} />
+                      <AttachFileIcon fontSize='small' color='primary' />
                     </IconButton>
                   </HtmlTooltip>
                   <HtmlTooltip title="Map">

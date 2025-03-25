@@ -13,7 +13,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, ATTACHMENT_TYPE, gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from 'src/constants/helpers';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import TechnicianDialog from '../TechnicianDialog';
 import { FiExternalLink } from 'react-icons/fi';
@@ -259,6 +259,8 @@ const GridView = React.forwardRef<GridViewRef, any>(({ renderedFrom, state, disp
           handleClose={() => {
             setShowDrawingDialog({ open: false, workOrder: null });
           }}
+          resource={ACTIVITY_RESOURCE.workOrder}
+          attachmentType={ATTACHMENT_TYPE.drawing}
         />
       )}
 

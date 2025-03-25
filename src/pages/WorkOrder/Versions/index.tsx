@@ -12,7 +12,15 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { ACTIVITY_RESOURCE, CHILD_RESOURCE, CustomDialogTransition, MATERIAL_TYPE, sidebarResource, workOrder } from 'src/constants/helpers';
+import {
+  ACTIVITY_RESOURCE,
+  ATTACHMENT_TYPE,
+  CHILD_RESOURCE,
+  CustomDialogTransition,
+  MATERIAL_TYPE,
+  sidebarResource,
+  workOrder
+} from 'src/constants/helpers';
 import Diagram from '../Diagram';
 import ServiceStepsData from './ServiceStepsData';
 import { FiExternalLink } from 'react-icons/fi';
@@ -340,8 +348,9 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
                 resource={ACTIVITY_RESOURCE.workOrder}
                 referenceId={workOrderId}
                 currentVersion={selectedVersionNumber}
-                fromVersions={true}
-                workOrderData={workOrderData}
+                disableEdit={true}
+                resourceData={workOrderData}
+                attachmentType={ATTACHMENT_TYPE.drawing}
               />
             </TabPanel>
           </Box>

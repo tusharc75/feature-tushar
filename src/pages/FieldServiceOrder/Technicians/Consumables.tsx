@@ -42,7 +42,7 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
-  const [selectedTechnician, setSelectedTechnician] = useState(null);
+  const [selectedTechnician, setSelectedTechnician] = useState<any>({ technicianName: 'All', technicianId: 'All' });
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
@@ -200,7 +200,7 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
       dispatch({ type: 'selection', selectedRecords: [] });
       let consumables;
       let api = `${fieldServiceOrder.api}/${serviceOrderData?._id}/material?type=${MATERIAL_TYPE.product}`;
-      if (selectedTechnician?.technicianId) {
+      if (selectedTechnician?.technicianId && selectedTechnician?.technicianId !== 'All') {
         api = `${api}&technician=${selectedTechnician?.technicianId}`;
       }
       const response = await axiosInstance().get(api);
@@ -241,7 +241,7 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
       const element: any = {};
       element.materialId = d._id;
       element.type = MATERIAL_TYPE.product;
-      element.technician = selectedTechnician?.technicianId;
+      element.technician = selectedTechnician?.technicianId === 'All' ? null : selectedTechnician?.technicianId;
       element.qty = d.qty ? parseFloat(d.qty) : 1;
       element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
       element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
@@ -411,14 +411,18 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
           size="small"
           style={{ minWidth: '300px' }}
           fullWidth
-          options={technicians || []}
+          options={[{ technicianName: 'All', technicianId: 'All' }, ...(technicians || [])]}
           autoHighlight
           value={selectedTechnician}
           getOptionLabel={(option: any) => option?.technicianName || ''}
           isOptionEqualToValue={(option, val) => (option ? option?.technicianId === val?.technicianId : false)}
           onChange={(_, val) => {
+            let value = val;
+            if (!val) {
+              value = { technicianName: 'All', technicianId: 'All' };
+            }
             dispatch({ type: 'update', data: [] });
-            setSelectedTechnician(val);
+            setSelectedTechnician(value);
           }}
           renderInput={(params) => <TextField {...params} label={'Select Technician'} variant="outlined" />}
         />
@@ -430,7 +434,7 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
         {allowedToEdit && (
           <>
             <DetailsPageHeader
-              isAddButtonVisible={isEmpty(selectedTechnician) || selectedTechnician?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.reserved}
+              isAddButtonVisible={isEmpty(selectedTechnician) || selectedTechnician?.technicianId === 'All' || selectedTechnician?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.reserved}
               addButtonProps={{ onClick: () => setConsumablesDialog(true), id: 'add-product-consumable' }}
               isActionButtonVisible={true}
               actionButtonMenuItems={actionButtonMenuItems()}

@@ -47,7 +47,7 @@ const FleetDispatch = () => {
   };
 
   const handleDispatch = (fleet, job) => {
-    setDispatchDialogOpen({ open: true, fleet: fleet, job: job });
+    setDispatchDialogOpen({ open: true, fleet: fleet, job: { ...job, _id: job.jobId } });
   };
 
   const onDragEnd = (event: DragEndEvent) => {
@@ -102,7 +102,7 @@ const FleetDispatch = () => {
                   <DispatchList activity={fleets} cardType="fleet" />
                 </div>
                 <div>
-                  <DispatchList activity={jobs} cardType="job" />
+                  <DispatchList activity={jobs?.map((e) => { return { ...e, jobId: e._id, _id: e?.asset?._id } })} cardType="job" />
                 </div>
               </ul>
               <DragOverlay dropAnimation={null}>{activeItem && <FleetDispatchBox {...activeItem} />}</DragOverlay>

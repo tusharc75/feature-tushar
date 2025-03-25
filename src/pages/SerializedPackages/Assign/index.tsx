@@ -12,7 +12,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
+import { MATERIAL_TYPE, SERIALIZED_PACKAGES_STATUS, sidebarResource } from 'src/constants/helpers';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Delete } from '@mui/icons-material';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -89,20 +89,22 @@ const Assign = ({ serializedPackagesData }) => {
           row?.original?.type ? (
             <div className="flex items-center gap-2">
               <p className="text-truncate">{row.original.detail}</p>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  if (row?.original?.type === MATERIAL_TYPE.product) {
-                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else if (row?.original?.type === MATERIAL_TYPE.package) {
-                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                  } else {
-                    window.open(`${routes.serializedAssetDetail.path}/${row.original.asset}`);
-                  }
-                }}
-              >
-                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-              </IconButton>
+              {row?.original?.type != 'serialNumber' && (
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    if (row?.original?.type === MATERIAL_TYPE.product) {
+                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                    } else if (row?.original?.type === MATERIAL_TYPE.package) {
+                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                    } else {
+                      window.open(`${routes.serializedAssetDetail.path}/${row.original.asset}`);
+                    }
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
+              )}
             </div>
           ) : (
             <NoDataCell />
@@ -167,7 +169,7 @@ const Assign = ({ serializedPackagesData }) => {
         canDrag: false,
         Cell: ({ row }) => (
           <>
-            {permissions?.serializedPackages?.isUpdate && row?.original?.type === MATERIAL_TYPE.serializedAsset && (
+            {permissions?.serializedPackages?.isUpdate && [MATERIAL_TYPE.serializedAsset, 'serialNumber']?.includes(row?.original?.type) && (
               <HtmlTooltip title="Delete">
                 <IconButton
                   size="small"
@@ -176,8 +178,9 @@ const Assign = ({ serializedPackagesData }) => {
                     setDeleteRecord(row.original);
                     setShowDeleteConfirmBox(true);
                   }}
+                  disabled={!row?.original?.canDelete}
                 >
-                  <Delete color="error" fontSize="small" />
+                  <Delete color={row?.original?.canDelete ? 'error' : 'disabled'} fontSize="small" />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -214,7 +217,8 @@ const Assign = ({ serializedPackagesData }) => {
                 : '';
           parent.productNumber = parent?.type === MATERIAL_TYPE.product ? parent?.productDetail?.productNumber : '';
           parent.serializedProduct = parent?.type === MATERIAL_TYPE.product ? parent?.productDetail?.serializedProduct : false;
-          parent.assetQty = parent?.type === MATERIAL_TYPE.product ? assets.filter((e) => e.product === parent?.materialId)?.length : 0;
+          parent.assetQty =
+            parent?.type === MATERIAL_TYPE.product ? assets.filter((e) => e?._id === parent?._id && e.product === parent?.materialId)?.length : 0;
           parent.subRows = generateNestedData(data, assets, parent);
         });
         dispatch({ type: 'initialize', data: rows, count: rows?.length });
@@ -253,9 +257,10 @@ const Assign = ({ serializedPackagesData }) => {
       const subRowsLength = subRows?.length || 0;
       assetsSubRows.forEach((_subRow, j) => {
         _subRow.index = parent.index + '.' + (j + 1 + subRowsLength);
-        _subRow.type = MATERIAL_TYPE.serializedAsset;
-        _subRow.detail = _subRow?.assetDetail?.assetNumber;
+        _subRow.type = _subRow?.assetDetail ? MATERIAL_TYPE.serializedAsset : 'serialNumber';
+        _subRow.detail = _subRow?.assetDetail?.assetNumber || _subRow?.serialNumberDetail?.serialNumber;
         _subRow.parentId = _subRow?.product;
+        _subRow.canDelete = serializedPackagesData?.status === SERIALIZED_PACKAGES_STATUS.available;
         subRows.push(_subRow);
       });
     }
@@ -266,9 +271,20 @@ const Assign = ({ serializedPackagesData }) => {
     setIsSubmitting(true);
     let ids = [];
     if (deleteRecord) {
-      ids.push({ _id: deleteRecord._id, asset: deleteRecord.asset });
+      if (deleteRecord?.asset) {
+        ids.push({ _id: deleteRecord._id, asset: deleteRecord.asset });
+      } else if (deleteRecord?.serialNumber) {
+        ids.push({ _id: deleteRecord._id, serialNumber: deleteRecord.serialNumber });
+      }
     } else {
-      ids = selectedRecords?.filter((r) => r?.type === MATERIAL_TYPE.serializedAsset)?.map((d) => ({ _id: d?._id, asset: d?.asset }));
+      ids = selectedRecords
+        ?.filter((r) => [MATERIAL_TYPE.serializedAsset, 'serialNumber']?.includes(r?.type))
+        ?.map((d) => {
+          if (d?.type === 'serialNumber') {
+            return { _id: d?._id, serialNumber: d?.serialNumber };
+          }
+          return { _id: d?._id, asset: d?.asset };
+        });
     }
 
     axiosInstance()
