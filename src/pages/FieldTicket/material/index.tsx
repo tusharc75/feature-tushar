@@ -56,6 +56,7 @@ import { nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
 import AddQuotationDataDialog from './AddQuotationDataDialog';
+import AddFieldServiceOrderDataDialog from 'src/pages/FieldTicket/material/AddFieldServiceOrderDataDialog';
 
 const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep, handleChangeStatus, resourcePolicy, fetchData }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Material`;
@@ -76,6 +77,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
   const [costFields, setCostFields] = useState([]);
   const [assignRentalDataDialog, setAssignRentalDataDialog] = useState({ open: false, type: '' });
   const [assignQuotationDataDialog, setAssignQuotationDataDialog] = useState(false);
+  const [assignFieldServiceOrderDataDialog, setAssignFieldServiceOrderDataDialog] = useState(false);
 
   const [refreshChild, setRefreshChild] = useState(false);
 
@@ -132,12 +134,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
   }, [dataRows]);
 
   const fetchFields = async () => {
-    let data = await fetch_child_resource_fields_perm(
-      CHILD_RESOURCE.fieldTicketMateial,
-      fieldTicketData?.currency,
-      allowedToEdit,
-      isOffline
-    );
+    let data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, allowedToEdit, isOffline);
     setAllFields(JSON.parse(JSON.stringify(data)));
     data = data?.filter((f) => f?.isRead);
     let costField: any = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketCost, fieldTicketData?.currency, true, isOffline);
@@ -243,21 +240,23 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
         accessor: 'competencyType',
         Header: 'Competency Type',
         width: 250,
-        Cell: ({ row }) => <DropdownCell
-          permissions={permissions}
-          permissionForLinks={{}}
-          field={{
-            fieldName: 'competencyType',
-            lookupResource: sidebarResource.competencyType
-          }}
-          original={row?.original}
-        />
+        Cell: ({ row }) => (
+          <DropdownCell
+            permissions={permissions}
+            permissionForLinks={{}}
+            field={{
+              fieldName: 'competencyType',
+              lookupResource: sidebarResource.competencyType
+            }}
+            original={row?.original}
+          />
+        )
       },
       {
         accessor: 'competencies',
         Header: 'Competencies',
         width: 250,
-        Cell: ({ row }) =>
+        Cell: ({ row }) => (
           <DropdownCell
             permissions={permissions}
             permissionForLinks={{}}
@@ -267,6 +266,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
             }}
             original={row?.original}
           />
+        )
       }
     ];
     column = [...column, ...newColumns];
@@ -383,8 +383,18 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageName : _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceName : '';
-      _subRow.description = _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageDescription || '' : _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceDescription : '';
+      _subRow.detail =
+        _subRow.type === MATERIAL_TYPE.package
+          ? _subRow?.packageDetail?.packageName
+          : _subRow.type === MATERIAL_TYPE.service
+            ? _subRow?.serviceDetail?.serviceName
+            : '';
+      _subRow.description =
+        _subRow.type === MATERIAL_TYPE.package
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : _subRow.type === MATERIAL_TYPE.service
+            ? _subRow?.serviceDetail?.serviceDescription
+            : '';
       _subRow.competencyType = _subRow?.serviceDetail?.competencyType;
       _subRow.competencies = _subRow?.serviceDetail?.competencies;
       _subRow.qty = _subRow.qty * parent.qty;
@@ -466,7 +476,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
         }
       }
       const material: any = [];
-      if (assignRentalDataDialog.open || assignQuotationDataDialog) {
+      if (assignRentalDataDialog.open || assignQuotationDataDialog || assignFieldServiceOrderDataDialog) {
         const currency = fieldTicketData?.currency?.toLowerCase();
         rows?.forEach((d: any) => {
           const element: any = {};
@@ -566,6 +576,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
         setMaterialDialog({ open: false, type: '', parentId: null });
         setAssignRentalDataDialog({ open: false, type: '' });
         setAssignQuotationDataDialog(false);
+        setAssignFieldServiceOrderDataDialog(false);
         setIsSubmitting(false);
       })
       .catch((error) => {
@@ -902,14 +913,28 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
             </MenuItem>
           </>
         )}
-        {resourcePolicy?.showQuotationAddMaterial && fieldTicketData?.quotation?.optionValue && fieldTicketData?.quotationVersion?.optionValue && !isOffline && (
+        {resourcePolicy?.showQuotationAddMaterial &&
+          fieldTicketData?.quotation?.optionValue &&
+          fieldTicketData?.quotationVersion?.optionValue &&
+          !isOffline && (
+            <>
+              <MenuItem
+                onClick={() => {
+                  setAssignQuotationDataDialog(true);
+                }}
+              >
+                {`Add From ${resources?.quotation?.titleSingular}`}
+              </MenuItem>
+            </>
+          )}
+        {fieldTicketData?.isAddServiceFromFieldServiceOrder && (
           <>
             <MenuItem
               onClick={() => {
-                setAssignQuotationDataDialog(true);
+                setAssignFieldServiceOrderDataDialog(true);
               }}
             >
-              {`Add From ${resources?.quotation?.titleSingular}`}
+              {`Add From ${resources?.fieldServiceOrder?.titleSingular}`}
             </MenuItem>
           </>
         )}
@@ -1109,6 +1134,18 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           fieldTicketData={fieldTicketData}
           isSubmitting={isSubmitting}
           ids={dataRows?.map((row) => row?.materialId)}
+        />
+      )}
+      {assignFieldServiceOrderDataDialog && (
+        <AddFieldServiceOrderDataDialog
+          onClose={() => {
+            setAssignFieldServiceOrderDataDialog(false);
+          }}
+          fieldTicketData={fieldTicketData}
+          isSubmitting={isSubmitting}
+          onSuccess={(rows) => {
+            handleAdd(rows, null);
+          }}
         />
       )}
     </>
