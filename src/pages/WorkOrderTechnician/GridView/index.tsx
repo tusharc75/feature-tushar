@@ -1,184 +1,76 @@
-import { Box, IconButton } from '@mui/material';
-import { Info } from '@mui/icons-material';
-import DescriptionIcon from '@mui/icons-material/Description';
+import { Box } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
-import React, { useContext, useEffect, useImperativeHandle, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import React, { useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { gridFilterParser, useColumns } from 'src/components/CustomReactTable';
-import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import ButtonMenu from 'src/components/ButtonMenu';
+import CustomReactTable, { gridFilterParser } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
-import routes from 'src/components/Helpers/Routes';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from 'src/constants/helpers';
-import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
-import TechnicianDialog from '../TechnicianDialog';
-import { FiExternalLink } from 'react-icons/fi';
+import { gridLoadingTimeout, prepareDataForGrid, WORKORDER_SERVICE_STATUS, workOrderIconMap } from 'src/constants/helpers';
 
 export type GridViewRef = {
   refreshGrid: () => void;
 };
 
-const GridView = React.forwardRef<GridViewRef, any>(({ renderedFrom, state, dispatch, status, filterQuery, permissions, tableHead = null }, ref) => {
-  const toastConfig = useContext(CustomToastContext);
-  const history = useHistory();
+type TableViewStatus =
+  | typeof WORKORDER_SERVICE_STATUS.pending
+  | typeof WORKORDER_SERVICE_STATUS.inProgress
+  | typeof WORKORDER_SERVICE_STATUS.completed
+  | typeof WORKORDER_SERVICE_STATUS.inProgressByOther;
 
-  const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, workOrder: null });
-  const { generateColumns } = useColumns();
+const GridView = React.forwardRef<GridViewRef, any>(({ renderedFrom, state, dispatch, filterQuery, permissions, tableHead = null, columns }, ref) => {
+  const toastConfig = useContext(CustomToastContext);
+  const [tableViewStatus, setTableViewStatus] = useState<TableViewStatus>('Pending');
+
+  const statusMenuItems = useMemo(() => {
+    return [
+      {
+        label: WORKORDER_SERVICE_STATUS.pending,
+        selected: tableViewStatus === WORKORDER_SERVICE_STATUS.pending,
+        value: WORKORDER_SERVICE_STATUS.pending,
+        startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.pending]
+      },
+      {
+        label: WORKORDER_SERVICE_STATUS.inProgress,
+        selected: tableViewStatus === WORKORDER_SERVICE_STATUS.inProgress,
+        value: WORKORDER_SERVICE_STATUS.inProgress,
+        startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.inProgress]
+      },
+      {
+        label: WORKORDER_SERVICE_STATUS.completed,
+        selected: tableViewStatus === WORKORDER_SERVICE_STATUS.completed,
+        value: WORKORDER_SERVICE_STATUS.completed,
+        startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.completed]
+      },
+      {
+        label: WORKORDER_SERVICE_STATUS.inProgressByOther,
+        selected: tableViewStatus === WORKORDER_SERVICE_STATUS.inProgressByOther,
+        value: WORKORDER_SERVICE_STATUS.inProgressByOther,
+        startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.inProgressByOther]
+      }
+    ];
+  }, [tableViewStatus]);
   const {
     state: { user }
   }: any = useData();
 
   const { page, limit, sorting, filters } = state;
-  const [columns, setColumns] = useState(null);
-  const [serviceOpen, setServiceOpen] = useState(false);
-  const [selectedService, setSelectedService] = useState(null);
 
   useEffect(() => {
     const cancelToken = axios.CancelToken.source();
-    fetchGridColumns(cancelToken);
-    return () => cancelToken.cancel();
-  }, []);
-
-  const fetchGridColumns = async (cancelToken?: CancelTokenSource) => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource['workOrder']}&view=true`, { cancelToken: cancelToken?.token });
-    data = response?.data?.data;
-
-    const newColumns = generateColumns(renderedFrom, data, routes?.workOrderDetail?.path);
-    const columns = newColumns.filter((ele) => ele.accessor != 'workOrderNumber');
-
-    const extraColumns = [
-      {
-        accessor: 'serviceName',
-        Header: 'Service',
-        disableFilters: true,
-        disableSortBy: true,
-        Cell: ({ row }) => (
-          <>
-            {row?.original?.serviceName ? (
-              <div>
-                <h5
-                  className="link text-truncate"
-                  onClick={() => {
-                    setSelectedService({
-                      uniqueId: row?.original?._id,
-                      workOrderId: row?.original?.workOrderId,
-                      canPerform: row?.original?.canPerform
-                    });
-                    setServiceOpen(true);
-                  }}
-                >
-                  {row.original.serviceName}
-                </h5>
-                <Box ml={1}>
-                  {row?.original?.canPerformInfo ? (
-                    <HtmlTooltip title={row?.original?.canPerformInfo} arrow placement="top" enterTouchDelay={0}>
-                      <Info className="text-red-500 [font-size:20px_!important]" />
-                    </HtmlTooltip>
-                  ) : null}
-                </Box>
-              </div>
-            ) : (
-              <NoDataCell />
-            )}
-          </>
-        )
-      },
-      {
-        accessor: 'workOrderNumber',
-        Header: 'Work Order Number',
-        disableFilters: true,
-        disableSortBy: true,
-        Cell: ({ row }) => (
-          <div className="flex items-center gap-1">
-            <p title={row?.original?.workOrderNumber}>{row?.original?.workOrderNumber}</p>
-            {row.original['workOrderNumber'] ? (
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(`${routes.workOrderDetail.path}/${row?.original?.workOrderId}`);
-                }}
-              >
-                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-              </IconButton>
-            ) : (
-              <NoDataCell />
-            )}
-          </div>
-        )
-      },
-      {
-        accessor: 'assignedWorkStations',
-        Header: 'Work Stations',
-        disableFilters: true,
-        disableSortBy: true,
-        Cell: ({ row }) =>
-          row.original['assignedWorkStations'] ? (
-            <DropdownCell
-              permissions={permissions}
-              permissionForLinks={{}}
-              field={{
-                fieldName: 'assignedWorkStations',
-                lookupResource: sidebarResource.workStations
-              }}
-              original={row?.original}
-            />
-          ) : (
-            <NoDataCell />
-          )
-      }
-    ];
-    const finalColumns = [...extraColumns.slice(0, 2), ...columns, ...extraColumns.slice(2), ActionsRenderer];
-    setColumns(finalColumns);
-  };
-
-  const ActionsRenderer = {
-    accessor: 'action',
-    Header: 'Actions',
-    minWidth: 100,
-    width: 100,
-    sticky: 'right',
-    disableFilters: true,
-    disableSortBy: true,
-    canDrag: false,
-    Cell: ({ row }) => (
-      <>
-        {row?.original?.productionOrderId && (
-          <HtmlTooltip title="Drawings">
-            <IconButton
-              size="small"
-              aria-label="Details"
-              color="primary"
-              onClick={(e) => {
-                setShowDrawingDialog({ open: true, workOrder: row?.original?.workOrderId });
-              }}
-            >
-              <DescriptionIcon fontSize="small" color={'primary'} />
-            </IconButton>
-          </HtmlTooltip>
-        )}
-      </>
-    )
-  };
-
-  useEffect(() => {
-    const cancelToken = axios.CancelToken.source();
-    if (status) {
+    if (tableViewStatus) {
       fetchData(cancelToken);
     }
     return () => cancelToken.cancel();
-  }, [page, limit, sorting, status, filterQuery, filters]);
+  }, [page, limit, sorting, tableViewStatus, filterQuery, filters]);
 
   useEffect(() => {
     dispatch({ type: 'selection', selectedRecords: [] });
-  }, [status]);
+  }, [tableViewStatus]);
 
   const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}&status=${status}`;
+    let deepFilter = `?page=${page}&limit=${limit}&status=${tableViewStatus}`;
     const { filterByIds, deepFilters } = gridFilterParser(filters);
     if (filterQuery?.length) {
       filterQuery?.forEach((e) => {
@@ -228,6 +120,8 @@ const GridView = React.forwardRef<GridViewRef, any>(({ renderedFrom, state, disp
       });
   };
 
+  console.log(state.dataRows);
+
   useImperativeHandle(ref, () => ({
     refreshGrid() {
       fetchData();
@@ -241,7 +135,23 @@ const GridView = React.forwardRef<GridViewRef, any>(({ renderedFrom, state, disp
           <CustomReactTable
             height={'calc(100vh - 270px)'}
             columns={columns}
-            topLeftSlot={tableHead}
+            topLeftSlot={
+              <div className="flex items-center gap-2">
+                <ButtonMenu
+                  showChevron={true}
+                  items={statusMenuItems}
+                  onItemClick={(e, item) => {
+                    setTableViewStatus(item.value);
+                  }}
+                >
+                  <span className="flex items-center gap-2  [&_svg]:text-[18px]">
+                    {workOrderIconMap[tableViewStatus]}
+                    Status: {tableViewStatus}
+                  </span>
+                </ButtonMenu>
+                {tableHead}
+              </div>
+            }
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -252,30 +162,6 @@ const GridView = React.forwardRef<GridViewRef, any>(({ renderedFrom, state, disp
           </Box>
         )}
       </div>
-
-      {showDrawingDialog.open && (
-        <DiagramDialog
-          referenceId={showDrawingDialog.workOrder}
-          handleClose={() => {
-            setShowDrawingDialog({ open: false, workOrder: null });
-          }}
-        />
-      )}
-
-      {serviceOpen && (
-        <TechnicianDialog
-          handleClose={() => {
-            setServiceOpen(false);
-            setSelectedService(null);
-            if (workOrder) {
-              history.push(`${routes.workOrderTechnician.path}`);
-            }
-          }}
-          workOrderId={selectedService?.workOrderId}
-          uniqueId={selectedService?.uniqueId}
-          canPerform={selectedService?.canPerform}
-        />
-      )}
     </>
   );
 });
