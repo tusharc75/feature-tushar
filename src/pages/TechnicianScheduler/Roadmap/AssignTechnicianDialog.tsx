@@ -40,10 +40,9 @@ function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleCl
             }
             : {
               fieldServiceOrder: ele?.resourceId,
-              startDate: ele?.service?.estimateStartDate,
-              endDate: ele?.service?.estimateEndDate
+              estimateStartDate: ele?.estimateStartDate,
+              estimateEndDate: ele?.estimateEndDate
             }),
-        status: 'Assigned'
       };
     });
     const baseApi =

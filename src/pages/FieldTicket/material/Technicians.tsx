@@ -321,7 +321,6 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
       element.technician = d?._id;
       element.uniqueId = selectedService?._id;
       element.service = selectedService?.optionValue !== 'All' ? selectedService?.optionValue : null;
-      element.status = 'Assigned';
       element.warehouse = fieldTicketData?.warehouse?.optionValue;
       element.startDate = fieldTicketData?.estimateStartDate || dayjs.tz().toDate();
       element.endDate = fieldTicketData?.estimateEndDate || dayjs.tz().toDate();
