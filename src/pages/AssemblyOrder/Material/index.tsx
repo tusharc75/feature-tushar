@@ -107,18 +107,20 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
                     <span>({row.original?.subRows?.length})</span>
                   </Box>
                 )}
-                <Box>
-                  <HtmlTooltip title={`Add Existing ${resources?.packages?.titlePlural}`}>
-                    <IconButton
-                      onClick={() => {
-                        setAddDialog({ open: true, parentId: row.original?._id });
-                      }}
-                      size="small"
-                    >
-                      <Add fontSize="small" color="primary" />
-                    </IconButton>
-                  </HtmlTooltip>
-                </Box>
+                {!row?.original?.workOrder && (
+                  <Box>
+                    <HtmlTooltip title={`Add Existing ${resources?.packages?.titlePlural}`}>
+                      <IconButton
+                        onClick={() => {
+                          setAddDialog({ open: true, parentId: row.original?._id });
+                        }}
+                        size="small"
+                      >
+                        <Add fontSize="small" color="primary" />
+                      </IconButton>
+                    </HtmlTooltip>
+                  </Box>
+                )}
               </>
             )}
             <Box>
