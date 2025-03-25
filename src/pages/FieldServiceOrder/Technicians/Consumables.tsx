@@ -25,7 +25,7 @@ import { camelCase, isEmpty } from 'lodash';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
-import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
+import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
 
 const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchData: fetchserviceOrderData, technicians, refreshChild, fetchConsumablesData }) => {
 
@@ -226,15 +226,9 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
   const handleSubmit = async (rows) => {
     setSubmitting(true);
     var taxCodeData: any = null;
-    if (serviceOrderData?.taxCode) {
-      const {
-        data: { data }
-      } = await axiosInstance().get(
-        `${routes?.taxMaster.path}/by-zipcode?taxCode=${serviceOrderData?.taxCode?.optionValue}&materialType=${MATERIAL_TYPE.product}`
-      );
-      if (data?.length) {
-        taxCodeData = data[0];
-      }
+    const taxCodeOptions = await getTaxList(serviceOrderData, MATERIAL_TYPE.product);
+    if (taxCodeOptions?.length) {
+      taxCodeData = taxCodeOptions[0];
     }
     const material: any = [];
     rows.forEach((d) => {
