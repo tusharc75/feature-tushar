@@ -57,7 +57,7 @@ function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleCl
     axiosInstance()
       .post(`${baseApi}/technician`, { technician: data })
       .then(() => {
-        handleSucess(selectedServiceOrder);
+        handleSucess();
         setIsSubmitting(false);
       })
       .catch((error) => {
