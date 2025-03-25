@@ -1146,6 +1146,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           onSuccess={(rows) => {
             handleAdd(rows, null);
           }}
+          ignoreIds={dataRows?.filter((d) => d?.type === MATERIAL_TYPE.service)?.map((d) => d?.uniqueId)}
         />
       )}
     </>
