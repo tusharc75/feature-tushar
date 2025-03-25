@@ -1,11 +1,11 @@
 import React from 'react';
 import SingleColumn from 'src/components/CardColTimeline1/SingleColumn';
-import { CardColTimelineProps } from 'src/components/CardColTimeline1/types';
+import { CardColTimelineProps, InitProps } from 'src/components/CardColTimeline1/types';
 
 export * from 'src/components/CardColTimeline1/useCardColTimeline';
 export * from 'src/components/CardColTimeline1/types';
 
-const CardColTimeline = <D, C extends string[]>({ state, keyGetter, getColor, cardOnClick }: CardColTimelineProps<D, C>) => {
+const CardColTimeline = <D, C extends string[]>({ state, keyGetter, getColor, cardOnClick }: CardColTimelineProps<D, C> & InitProps<D, C>) => {
   const { columns, visibleColumns } = state;
   return (
     <div className="overflow-x-auto">
