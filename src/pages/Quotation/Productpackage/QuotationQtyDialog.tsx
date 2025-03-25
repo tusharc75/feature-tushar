@@ -1,10 +1,9 @@
-import { FC, useEffect, useState, Fragment, useRef, useContext } from 'react';
+import { FC, useEffect, useState, Fragment, useRef } from 'react';
 import { Dialog, Box } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import {
   getObjKeysWithValues,
   getObjKeys,
@@ -23,14 +22,10 @@ import FormTypes from '../../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { uniq, map, orderBy, isEqual, uniqBy } from 'lodash';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import { bulkUpdate, calculateRowsField } from 'src/components/RentalManagment/helper';
-import routes from 'src/components/Helpers/Routes';
-import axiosInstance from '../../../axios/axiosInstance';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import dayjs from 'dayjs';
-import { getPricingConditions } from 'src/components/PricingCondition';
+import { getPricingConditions, getTaxList } from 'src/components/PricingCondition';
 import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 
 interface EditDialogProps {
@@ -67,8 +62,6 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [saveAndNext, setSaveAndNext] = useState(false);
   const ref = useRef(null);
-
-  const toastConfig = useContext(CustomToastContext);
 
   const [priceConditionListConst, setPriceConditionListConst] = useState([]);
   const [priceMethodListConst, setPriceMethodListConst] = useState([]);
@@ -202,23 +195,6 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
     EvaluteproductFields(data);
   };
 
-  const fetchTaxRate = async (billingAddress: any, taxCode = null) => {
-    const zipCode = billingAddress?.zipCode;
-    const state = billingAddress?.state;
-    const county = billingAddress?.county;
-    let materialType;
-    if (isBulkedit) materialType = rowData[0]?.type;
-    else materialType = rowData?.type;
-    try {
-      const response = await axiosInstance().get(
-        `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&county=${county}&materialType=${materialType}${taxCode && `&taxCode=${taxCode}`}`
-      );
-      return response?.data?.data || [];
-    } catch (e) {
-      toastConfig.setToastConfig(e);
-    }
-  };
-
   async function getAllPricingCondition(values: any, pricingMethodOptions: any) {
     if (rowData) {
       let conditionType = [QUOTATION_TYPE.salesOrder, QUOTATION_TYPE.repairOrder].includes(quotationData.type)
@@ -284,17 +260,13 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
       sectionFields = orderBy(sectionFields, 'order', 'asc');
       return { name, sectionFields };
     });
-    if (
-      quotationData?.taxCode ||
-      (quotationData?.billingAddress && (quotationData?.billingAddress?.zipCode || quotationData?.billingAddress?.state))
-    ) {
-      const taxCodeOptions = await fetchTaxRate(quotationData?.billingAddress, quotationData?.taxCode?.optionValue || null);
-      fields?.forEach((e: any) => {
-        if (e?.fieldName === 'taxCode') {
-          e.option = taxCodeOptions;
-        }
-      });
-    }
+
+    const taxCodeOptions = await getTaxList(quotationData, isBulkedit ? rowData[0]?.type : rowData?.type);
+    fields?.forEach((e: any) => {
+      if (e?.fieldName === 'taxCode') {
+        e.option = taxCodeOptions;
+      }
+    });
     setFields(customData);
   };
 
