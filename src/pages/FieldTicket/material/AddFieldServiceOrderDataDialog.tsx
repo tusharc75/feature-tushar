@@ -16,7 +16,7 @@ import { ListingPageHeader } from 'src/components/PageHeaders';
 import { CHILD_RESOURCE, CustomDialogTransition, fieldServiceOrder, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 
-const AddFieldServiceOrderDataDialog = ({ onClose, fieldTicketData, isSubmitting = false, onSuccess }) => {
+const AddFieldServiceOrderDataDialog = ({ onClose, fieldTicketData, isSubmitting = false, onSuccess, ignoreIds = [] }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_FieldServiceOrder_Material`;
   const {
     state: { permissions, resources }
@@ -129,7 +129,7 @@ const AddFieldServiceOrderDataDialog = ({ onClose, fieldTicketData, isSubmitting
     const response = await axiosInstance().get(`${fieldServiceOrder.api}/${fieldTicketData?.fieldServiceOrder?.optionValue}/material`);
     data = response?.data?.data?.material;
 
-    let rows = data?.filter((d: any) => !d.parentId);
+    let rows = data?.filter((d: any) => !d.parentId && !ignoreIds?.includes(d?._id));
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = parent.type === MATERIAL_TYPE.service ? parent.serviceDetail?.serviceName : '';
