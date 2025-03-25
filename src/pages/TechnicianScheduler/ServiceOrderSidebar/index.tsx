@@ -76,31 +76,12 @@ const ServiceOrderSidebarImpl = ({
       });
   };
 
-  const removeAddedData = (selectedServiceOrder: any[]) => {
-    const type = selectedServiceOrder[0]?.fieldTicketNumber
-      ? 'fieldTicket'
-      : selectedServiceOrder[0]?.rentalJobName
-        ? 'rentalJob'
-        : selectedServiceOrder[0]?.fieldServiceOrderNumber
-          ? 'fieldServiceOrder'
-          : '';
-    if (['fieldTicket', 'rentalJob'].includes(type)) {
-      const newData = [...(state.dataRows || [])].filter((f) => {
-        const selectedIds = selectedServiceOrder.map((d) => d._id);
-        if (selectedIds.includes(f._id)) {
-          return false;
-        }
-        return true;
-      });
-      dispatch({ type: 'update', data: newData });
-    }
-  };
-
   const handleUnAssign = () => {
     setIsSubmitting(true);
     axiosInstance()
       .put(`${rentalManagement.api}/technician`, { ids: [{ id: unAssignTechnicianDialog?.data?.technicianHistoryId }] })
       .then(() => {
+        fetchData(selectedResource)
         handleSucess();
         setIsSubmitting(false);
         setRefresh((prev) => !prev);
@@ -143,8 +124,8 @@ const ServiceOrderSidebarImpl = ({
         <AssignTechnicianDialog
           technicianData={assignTechnicianDialog.technicianData}
           selectedServiceOrder={[assignTechnicianDialog.service]}
-          handleSucess={(selectedServiceOrders) => {
-            removeAddedData(selectedServiceOrders);
+          handleSucess={() => {
+            fetchData(selectedResource)
             handleSucess();
           }}
           handleClose={() => {
