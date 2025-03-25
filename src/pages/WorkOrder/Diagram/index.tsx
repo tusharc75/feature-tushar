@@ -177,7 +177,6 @@ const Diagram = ({
     return relatedTo;
   };
 
-  console.log(selectedAttachment)
 
   return (
     <Box>
