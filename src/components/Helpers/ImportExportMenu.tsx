@@ -23,6 +23,7 @@ const ImportExportMenu = ({
   isDownloadExcel = true,
   title = '',
   disabled = false,
+  headers = {},
   ...others
 }) => {
 
@@ -59,7 +60,7 @@ const ImportExportMenu = ({
       axiosInstance()
         .post(importApi, formData, {
           responseType: 'blob',
-          headers: { 'Content-Type': 'multipart/form-data' }
+          headers: { 'Content-Type': 'multipart/form-data', ...headers }
         })
         .then((response) => {
           if (!response.headers['content-disposition']) {
@@ -109,7 +110,8 @@ const ImportExportMenu = ({
     }
     axiosInstance()
       .get(exportApi, {
-        responseType: 'arraybuffer'
+        responseType: 'arraybuffer',
+        headers: { ...headers }
       })
       .then((response) => {
         const fileName = response.headers['content-disposition'].split('filename=')[1];
@@ -137,7 +139,7 @@ const ImportExportMenu = ({
     }
 
     axiosInstance()
-      .get(exportApi, { responseType: 'arraybuffer' })
+      .get(exportApi, { responseType: 'arraybuffer', headers: { ...headers } })
       .then((response) => {
         const fileName = response.headers['content-disposition'].split('filename=')[1];
 
