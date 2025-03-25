@@ -63,12 +63,12 @@ export const getPricingValue = (row: any, priceData: any, currency: any, fields:
   return row;
 };
 
-export const getTaxList = async (referenceData: any, materialType: any) => {
+export const getTaxList = async (referenceData: any, materialType: any, taxApplicableField = 'billingAddress') => {
   let data = []
   if (referenceData?.customerAccount?.taxApplicable) {
-    const zipCode = referenceData?.billingAddress?.zipCode;
-    const state = referenceData?.billingAddress?.state;
-    const county = referenceData?.billingAddress?.county;
+    const zipCode = referenceData?.[taxApplicableField]?.zipCode;
+    const state = referenceData?.[taxApplicableField]?.state;
+    const county = referenceData?.[taxApplicableField]?.county;
     let taxCode = null;
     if (referenceData?.taxCode?.optionValue) {
       taxCode = referenceData?.taxCode?.optionValue;

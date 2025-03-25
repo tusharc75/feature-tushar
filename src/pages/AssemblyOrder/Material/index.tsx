@@ -23,7 +23,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import MaterialQtyDialog from 'src/pages/AssemblyOrder/Material/MaterialQtyDialog';
 import AssignSerializedPackagesDialog from 'src/components/AssignRolesDialog/AssignSerializedPackagesDialog';
 
-const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }) => {
+const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, fetchAssembleOrderData }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -107,18 +107,20 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
                     <span>({row.original?.subRows?.length})</span>
                   </Box>
                 )}
-                <Box>
-                  <HtmlTooltip title={`Add Existing ${resources?.packages?.titlePlural}`}>
-                    <IconButton
-                      onClick={() => {
-                        setAddDialog({ open: true, parentId: row.original?._id });
-                      }}
-                      size="small"
-                    >
-                      <Add fontSize="small" color="primary" />
-                    </IconButton>
-                  </HtmlTooltip>
-                </Box>
+                {!row?.original?.workOrder && (
+                  <Box>
+                    <HtmlTooltip title={`Add Existing ${resources?.packages?.titlePlural}`}>
+                      <IconButton
+                        onClick={() => {
+                          setAddDialog({ open: true, parentId: row.original?._id });
+                        }}
+                        size="small"
+                      >
+                        <Add fontSize="small" color="primary" />
+                      </IconButton>
+                    </HtmlTooltip>
+                  </Box>
+                )}
               </>
             )}
             <Box>
@@ -297,6 +299,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
           type: 'success',
           message: data.message
         });
+        fetchAssembleOrderData();
         fetchData();
         setSubmitting(false);
       })
@@ -319,6 +322,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
           type: 'success',
           message: data.message
         });
+        fetchAssembleOrderData();
         fetchData();
         setDeleteData(null);
       })
@@ -408,7 +412,11 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
     if (!records?.length) {
       return true;
     }
-    if (records?.every((r) => [WORK_ORDER_TYPE.disassemblyOrder]?.includes(r?.workOrderType) && r?.warehouse?.optionValue === records[0]?.warehouse?.optionValue)) {
+    if (
+      records?.every(
+        (r) => [WORK_ORDER_TYPE.disassemblyOrder]?.includes(r?.workOrderType) && r?.warehouse?.optionValue === records[0]?.warehouse?.optionValue
+      )
+    ) {
       return false;
     }
     return true;
@@ -417,14 +425,15 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
   const actionButtonMenuItems = () => {
     return (
       <>
-        {permissions?.serializedPackages?.isRead && selectedRecords?.filter((e) => e?.workOrderType === WORK_ORDER_TYPE.disassemblyOrder)?.length > 0 &&
-          <MenuItem
-            disabled={checkUniqueWarehouse(selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.package))}
-            onClick={() => {
-              setOpenSerializedPackagesDialog(true);
-            }}
-          >{`Assign ${resources?.serializedPackages?.titleSingular}`}</MenuItem>
-        }
+        {permissions?.serializedPackages?.isRead &&
+          selectedRecords?.filter((e) => e?.workOrderType === WORK_ORDER_TYPE.disassemblyOrder)?.length > 0 && (
+            <MenuItem
+              disabled={checkUniqueWarehouse(selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.package))}
+              onClick={() => {
+                setOpenSerializedPackagesDialog(true);
+              }}
+            >{`Assign ${resources?.serializedPackages?.titleSingular}`}</MenuItem>
+          )}
         <MenuItem
           disabled={selectedRecords?.every((e) => !e.hideSelection && e.canDelete) ? false : true}
           onClick={() => {
