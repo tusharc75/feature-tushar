@@ -681,6 +681,20 @@ const Steps = ({
           setAddNewStep({ open: true, clone: false, cloneStepData: null });
         } else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isAddStepsOnFail) {
           setAddNewStep({ open: true, clone: false, cloneStepData: null });
+        } else if (type === WORKORDER_SERVICE_STEP_STATUS.passed && result?.isReperformServicesOnPass && !isEmpty(result?.reperformServicesOnPass)) {
+          setAddServiceConfirmation((s) => ({
+            ...s,
+            open: true,
+            type: 'reperformServices',
+            services: result?.reperformServicesOnPass
+          }));
+        } else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isReperformServicesOnFail && !isEmpty(result?.reperformServicesOnFail)) {
+          setAddServiceConfirmation((s) => ({
+            ...s,
+            open: true,
+            type: 'reperformServices',
+            services: result?.reperformServicesOnFail
+          }));
         }
         toastConfig.setToastConfig({
           open: true,
@@ -1671,6 +1685,10 @@ const Steps = ({
                   addServiceConfirmation.type === 'skipServices'
                     ? `As per the logic applied on this step, service${addServiceConfirmation?.services?.length > 1 ? 's' : ''
                     }  ${addServiceConfirmation?.services?.map((e) => e?.serviceName || '')?.toString()} has been skipped. Do you want to Skip ? `
+                    : addServiceConfirmation.type === 'reperformServices'
+                      ? `As per the logic applied on this step, service${
+                          addServiceConfirmation?.services?.length > 1 ? 's' : ''
+                        }  ${addServiceConfirmation?.services?.map((e) => e?.serviceName || '')?.toString()} has been re-performed. Do you want to re-perform ? `
                     : addServiceConfirmation.type === 'returnToStepOnFail'
                       ? `As per the logic applied on this step, we need to return to step ${addServiceConfirmation.step?.stepName || ''
                       }. Do you want to continue ?`
