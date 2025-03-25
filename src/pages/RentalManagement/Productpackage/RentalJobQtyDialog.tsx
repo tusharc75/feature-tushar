@@ -184,7 +184,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       ? fieldLabelToFieldName(user?.user?.brandPolicy?.rentalTaxAppliedOn)
       : 'billingAddress';
 
-    const taxCodeOptions = await getTaxList(rentalManagementData, isBulkedit ? rowData[0]?.type : rowData?.type, taxApplicableField);
+    const taxCodeOptions = await getTaxList(user, rentalManagementData, isBulkedit ? rowData[0]?.type : rowData?.type, taxApplicableField);
     fields?.forEach((e: any) => {
       if (e?.fieldName === 'taxCode') {
         e.option = taxCodeOptions;

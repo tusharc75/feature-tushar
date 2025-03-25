@@ -52,7 +52,7 @@ const Services = ({ serviceOrderData, stepFullScreen, allowedToEdit, handleChang
   const [refreshChild, setRefreshChild] = useState(false);
 
   const {
-    state: { permissions, resources }
+    state: { permissions, user }
   }: any = useData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
@@ -294,7 +294,7 @@ const Services = ({ serviceOrderData, stepFullScreen, allowedToEdit, handleChang
   const handleAdd = async (rows: any, type: string) => {
     setIsSubmitting(true);
     var taxCodeData: any = null;
-    const taxCodeOptions = await getTaxList(serviceOrderData, type);
+    const taxCodeOptions = await getTaxList(user, serviceOrderData, type);
     if (taxCodeOptions?.length) {
       taxCodeData = taxCodeOptions[0];
     }

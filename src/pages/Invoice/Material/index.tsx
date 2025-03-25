@@ -34,7 +34,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
 
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { resources, permissions }
+    state: { resources, permissions, user }
   }: any = useData();
   const [isUpdating, setUpdating] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
@@ -330,7 +330,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
     setIsAdding(true);
     const material: any = [];
     var taxCodeData: any = null;
-    const taxCodeOptions = await getTaxList(invoiceData, addDialog.type);
+    const taxCodeOptions = await getTaxList(user, invoiceData, addDialog.type);
     if (taxCodeOptions?.length) {
       taxCodeData = taxCodeOptions[0];
     }

@@ -1,11 +1,8 @@
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import axiosInstance from 'src/axios/axiosInstance';
-import routes from 'src/components/Helpers/Routes';
 import { Box, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { CHILD_RESOURCE, CustomDialogTransition, MATERIAL_TYPE, getObjKeys, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { isEqual } from 'lodash';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -19,6 +16,8 @@ import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components
 import InputField from 'src/components/Helpers/InputField';
 import dayjs from 'dayjs';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { getTaxList } from 'src/components/PricingCondition';
+import { useData } from 'src/StateProvider/Provider';
 
 const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, handleUpdateCost, showSaveAndNext, loadingEdit }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -27,27 +26,16 @@ const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, hand
   const [allFields, setAllFields] = useState([]);
   const [saveAndNext, setSaveAndNext] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const toastConfig = useContext(CustomToastContext);
   const { isOffline } = useContext(CustomOfflineContext);
   const isStepDataSet = useRef(false);
+
+  const {
+    state: { user }
+  }: any = useData();
 
   useEffect(() => {
     fetchFields();
   }, [costData]);
-
-  const fetchTaxRate = async (billingAddress: any, taxCode = null) => {
-    const zipCode = billingAddress?.zipCode;
-    const state = billingAddress?.state;
-    const county = billingAddress?.county;
-    try {
-      const response = await axiosInstance().get(
-        `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&county=${county}&materialType=${MATERIAL_TYPE.manualEntry}${taxCode && `&taxCode=${taxCode}`}`
-      );
-      return response?.data?.data || [];
-    } catch (e) {
-      toastConfig.setToastConfig(e);
-    }
-  };
 
   useEffect(() => {
     if (walkmeInstance && !isStepDataSet.current && initialData?.fields?.length > 0) {
@@ -67,7 +55,7 @@ const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, hand
           (fieldTicketData?.billingAddress?.zipCode || fieldTicketData?.billingAddress?.state || fieldTicketData?.billingAddress?.county))) &&
       !isOffline
     ) {
-      const taxCodeOptions = await fetchTaxRate(fieldTicketData?.billingAddress, fieldTicketData?.taxCode?.optionValue || null);
+      const taxCodeOptions = await getTaxList(user, fieldTicketData, MATERIAL_TYPE.manualEntry);
       data?.forEach((e: any) => {
         if (e?.fieldName === 'taxCode') {
           e.option = taxCodeOptions;
