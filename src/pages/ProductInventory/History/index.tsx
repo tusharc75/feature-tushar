@@ -141,9 +141,9 @@ const History = ({ product, warehouse, storageLocation }) => {
       let tempWarehouse =
         selectedWarehouse === 'All'
           ? warehouseOptions
-            ?.filter((d) => d.optionValue !== 'All')
-            .map((d) => d.optionValue)
-            .toString()
+              ?.filter((d) => d.optionValue !== 'All')
+              .map((d) => d.optionValue)
+              .toString()
           : selectedWarehouse;
 
       deepFilter = `${deepFilter}&warehouse=${tempWarehouse}`;
@@ -280,24 +280,24 @@ const History = ({ product, warehouse, storageLocation }) => {
     },
     ...(!user?.user?.brandPolicy?.hideInventoryCount
       ? [
-        {
-          accessor: 'finalInventory',
-          Header: 'Final Quantity',
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) => (
-            <div>
-              {row?.original?.finalInventory ? (
-                <h5 className="text-truncate" title={row?.original?.finalInventory}>
-                  {row?.original?.finalInventory}
-                </h5>
-              ) : (
-                <NoDataCell />
-              )}
-            </div>
-          )
-        }
-      ]
+          {
+            accessor: 'finalInventory',
+            Header: 'Final Quantity',
+            disableFilters: true,
+            disableSortBy: true,
+            Cell: ({ row }) => (
+              <div>
+                {row?.original?.finalInventory ? (
+                  <h5 className="text-truncate" title={row?.original?.finalInventory}>
+                    {row?.original?.finalInventory}
+                  </h5>
+                ) : (
+                  <NoDataCell />
+                )}
+              </div>
+            )
+          }
+        ]
       : []),
     {
       accessor: 'price',
@@ -333,24 +333,24 @@ const History = ({ product, warehouse, storageLocation }) => {
     },
     ...(selectedWarehouse && selectedWarehouse !== 'All'
       ? [
-        {
-          accessor: 'finalAvgPrice',
-          Header: `Final Average Cost ${curr}`,
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) => (
-            <div>
-              {row?.original?.finalAvgPrice ? (
-                <h5 className="text-truncate" title={row?.original?.finalAvgPrice}>
-                  {row?.original?.finalAvgPrice}
-                </h5>
-              ) : (
-                <NoDataCell />
-              )}
-            </div>
-          )
-        }
-      ]
+          {
+            accessor: 'finalAvgPrice',
+            Header: `Final Average Cost ${curr}`,
+            disableFilters: true,
+            disableSortBy: true,
+            Cell: ({ row }) => (
+              <div>
+                {row?.original?.finalAvgPrice ? (
+                  <h5 className="text-truncate" title={row?.original?.finalAvgPrice}>
+                    {row?.original?.finalAvgPrice}
+                  </h5>
+                ) : (
+                  <NoDataCell />
+                )}
+              </div>
+            )
+          }
+        ]
       : []),
     {
       accessor: 'warehouse',
@@ -375,28 +375,32 @@ const History = ({ product, warehouse, storageLocation }) => {
     },
     ...(user?.user?.brandPolicy?.storageLocation
       ? [
-        {
-          accessor: 'storageLocation',
-          Header: 'Storage Location',
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) => (
-            <div className="flex items-center gap-1">
-              <p title={row.original.storageLocation}>{row.original.storageLocation}</p>
-              {
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes?.storageLocationDetail?.path}/${row?.original?.storageLocationId}`);
-                  }}
-                >
-                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                </IconButton>
-              }
-            </div>
-          )
-        }
-      ]
+          {
+            accessor: 'storageLocation',
+            Header: 'Storage Location',
+            disableFilters: true,
+            disableSortBy: true,
+            Cell: ({ row }) => (
+              <>
+                {row?.original?.storageLocation ? (
+                  <div className="flex items-center gap-1">
+                    <p title={row.original.storageLocation}>{row.original.storageLocation}</p>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes?.storageLocationDetail?.path}/${row?.original?.storageLocationId}`);
+                      }}
+                    >
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                    </IconButton>
+                  </div>
+                ) : (
+                  <NoDataCell />
+                )}
+              </>
+            )
+          }
+        ]
       : []),
     {
       accessor: 'supplierPartNumber',
@@ -493,9 +497,9 @@ const History = ({ product, warehouse, storageLocation }) => {
       Cell: ({ row }) => (
         <div>
           {(['Product Inventory', 'Reverted'].includes(row?.original?.referenceType) && !row?.original?.reverted) ||
-            ([sidebarResource.workOrder, sidebarResource.fieldTicket].includes(row?.original?.referenceType) &&
-              row?.original?.type?.toLowerCase() === 'debit' &&
-              row?.original?.qty - (row?.original?.revertedQty || 0) > 0) ? (
+          ([sidebarResource.workOrder, sidebarResource.fieldTicket].includes(row?.original?.referenceType) &&
+            row?.original?.type?.toLowerCase() === 'debit' &&
+            row?.original?.qty - (row?.original?.revertedQty || 0) > 0) ? (
             <Box pl={1}>
               <HtmlTooltip title="Revert">
                 <span>
@@ -569,7 +573,15 @@ const History = ({ product, warehouse, storageLocation }) => {
                   }
                 }}
                 renderInput={(params) => (
-                  <TextField {...params} margin="dense" size="small" name="plant" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
+                  <TextField
+                    {...params}
+                    margin="dense"
+                    size="small"
+                    name="plant"
+                    label={resources?.warehouse?.titleSingular}
+                    variant="outlined"
+                    fullWidth
+                  />
                 )}
               />
             </Grid>

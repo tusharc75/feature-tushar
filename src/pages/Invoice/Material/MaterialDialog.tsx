@@ -18,11 +18,10 @@ import { uniq, map, orderBy, isEqual, uniqBy } from 'lodash';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { bulkUpdate, calculateRowsField } from 'src/components/RentalManagment/helper';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
-import axiosInstance from 'src/axios/axiosInstance';
-import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import dayjs from 'dayjs';
-import { getPricingConditions } from 'src/components/PricingCondition';
+import { getPricingConditions, getTaxList } from 'src/components/PricingCondition';
+
 interface EditDialogProps {
   onClose: VoidFunction | any;
   handleSaveData: VoidFunction | any;
@@ -65,27 +64,6 @@ const MaterialDialog: FC<EditDialogProps> = ({
   useEffect(() => {
     fetchFields();
   }, [rowData]);
-
-  const fetchTaxRate = async (billingAddress: any, taxCode = null) => {
-    const zipCode = billingAddress?.zipCode;
-    const state = billingAddress?.state;
-    const county = billingAddress?.county;
-
-    let materialType;
-    if (isBulkedit) {
-      materialType = rowData[0]?.type;
-    } else {
-      materialType = rowData?.type;
-    }
-    try {
-      const response = await axiosInstance().get(
-        `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&county=${county}&materialType=${materialType}${taxCode && `&taxCode=${taxCode}`}`
-      );
-      return response?.data?.data || [];
-    } catch (e) {
-      toastConfig.setToastConfig(e);
-    }
-  };
 
   const fetchFields = async () => {
     setLoading(true);
@@ -191,18 +169,13 @@ const MaterialDialog: FC<EditDialogProps> = ({
       sectionFields = orderBy(sectionFields, 'order', 'asc');
       return { name, sectionFields };
     });
-    if (
-      invoiceData?.taxCode ||
-      (invoiceData?.billingAddress &&
-        (invoiceData?.billingAddress?.zipCode || invoiceData?.billingAddress?.state || invoiceData?.billingAddress?.county))
-    ) {
-      const taxCodeOptions = await fetchTaxRate(invoiceData?.billingAddress, invoiceData?.taxCode?.optionValue || null);
-      fields?.forEach((e: any) => {
-        if (e?.fieldName === 'taxCode') {
-          e.option = taxCodeOptions;
-        }
-      });
-    }
+
+    const taxCodeOptions = await getTaxList(invoiceData, isBulkedit ? rowData[0]?.type : rowData?.type);
+    fields?.forEach((e: any) => {
+      if (e?.fieldName === 'taxCode') {
+        e.option = taxCodeOptions;
+      }
+    });
     setFields(customData);
   };
 

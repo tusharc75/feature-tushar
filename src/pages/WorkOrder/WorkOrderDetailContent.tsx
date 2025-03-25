@@ -675,12 +675,12 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
             <Consumables
               allowedToEdit={
                 workOrderData.type === WORK_ORDER_TYPE.repairOrder
-                  ? allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.onHold && !workOrderData?.deleted
-                    ? true
+                  ? workOrderData?.status !== WORK_ORDER_STATUS.onHold && !workOrderData?.deleted
+                    ? resource === sidebarResource?.workOrderTechnician ? true : allowedToEdit
                     : false
                   : [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) && !workOrderData?.deleted
                     ? false
-                    : allowedToEdit
+                    : resource === sidebarResource?.workOrderTechnician ? true : allowedToEdit
               }
               isCreate={
                 workOrderData.type === WORK_ORDER_TYPE.repairOrder
@@ -704,12 +704,12 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
             <Consumables
               allowedToEdit={
                 workOrderData.type === WORK_ORDER_TYPE.repairOrder
-                  ? allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.onHold && !workOrderData?.deleted
-                    ? true
+                  ? workOrderData?.status !== WORK_ORDER_STATUS.onHold && !workOrderData?.deleted
+                    ? resource === sidebarResource?.workOrderTechnician ? true : allowedToEdit
                     : false
                   : [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) && !workOrderData?.deleted
                     ? false
-                    : allowedToEdit
+                    : resource === sidebarResource?.workOrderTechnician ? true : allowedToEdit
               }
               isCreate={
                 workOrderData.type === WORK_ORDER_TYPE.repairOrder
