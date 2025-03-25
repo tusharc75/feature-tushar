@@ -17,8 +17,9 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Delete } from '@mui/icons-material';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
-const Assign = ({ serializedPackagesData }) => {
-  const renderedFrom = `${camelCase(sidebarResource?.serializedPackages)}_${serializedPackagesData?.package?.optionLabel}`;
+const Assign = ({ serializedPackagesData, fetchSerializedPackagesData }) => {
+
+  const renderedFrom = `${camelCase(sidebarResource?.serializedPackages)}_Assign`;
   const { setToastConfig } = useContext(CustomToastContext);
 
   const {
@@ -132,21 +133,21 @@ const Assign = ({ serializedPackagesData }) => {
       },
       ...(productFields?.find((e) => e.fieldName === 'position')
         ? [
-            {
-              accessor: 'position',
-              Header: productFields?.find((e) => e.fieldName === 'position')?.fieldLabel,
-              width: 200,
-              Cell: ({ row }) => {
-                return row.original['position'] ? (
-                  <div>
-                    <p className="text-truncate">{row.original.position}</p>
-                  </div>
-                ) : (
-                  <NoDataCell />
-                );
-              }
+          {
+            accessor: 'position',
+            Header: productFields?.find((e) => e.fieldName === 'position')?.fieldLabel,
+            width: 200,
+            Cell: ({ row }) => {
+              return row.original['position'] ? (
+                <div>
+                  <p className="text-truncate">{row.original.position}</p>
+                </div>
+              ) : (
+                <NoDataCell />
+              );
             }
-          ]
+          }
+        ]
         : []),
       {
         accessor: 'qty',
@@ -271,13 +272,13 @@ const Assign = ({ serializedPackagesData }) => {
     if (deleteRecord) {
       ids.push({ _id: deleteRecord._id, asset: deleteRecord.asset });
     } else {
-      ids = selectedRecords?.filter((r) => r?.type === MATERIAL_TYPE.serializedAsset)?.map((d) => ({ _id: d?._id, asset: d?.asset }));
+      ids = selectedRecords?.filter((r) => r?.canDelete && r?.type === MATERIAL_TYPE.serializedAsset)?.map((d) => ({ _id: d?._id, asset: d?.asset }));
     }
-
     axiosInstance()
       .put(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/assets`, { ids: ids })
       .then(() => {
         dispatch({ type: 'selection', selectedRecords: [] });
+        fetchSerializedPackagesData()
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
@@ -294,6 +295,7 @@ const Assign = ({ serializedPackagesData }) => {
     axiosInstance()
       .post(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/assets`, { assets: data })
       .then(() => {
+        fetchSerializedPackagesData()
         setAssignAssetDialog({ open: false, products: [] });
         setIsAssetAdding(false);
         fetchData();
@@ -347,7 +349,7 @@ const Assign = ({ serializedPackagesData }) => {
         )}
         {permissions?.serializedPackages?.isUpdate && (
           <MenuItem
-            disabled={!selectedRecords?.some((e) => e.type === MATERIAL_TYPE.serializedAsset)}
+            disabled={selectedRecords?.some((e) => e?.canDelete && e.type === MATERIAL_TYPE.serializedAsset) ? false : true}
             onClick={() => {
               setShowDeleteConfirmBox(true);
             }}
