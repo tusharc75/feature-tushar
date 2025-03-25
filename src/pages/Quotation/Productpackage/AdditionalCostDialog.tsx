@@ -13,10 +13,9 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { isEqual } from 'lodash';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import InputField from 'src/components/Helpers/InputField';
-import axiosInstance from 'src/axios/axiosInstance';
-import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
+import { getTaxList } from 'src/components/PricingCondition';
 
 interface AdditionalCostDialogProps {
   onClose: VoidFunction | any;
@@ -54,18 +53,12 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({
     setInitialData({ fields: [], values: {} });
     var poFields = await fetch_child_resource_fields_perm(CHILD_RESOURCE.quotationCost, currency, true);
     poFields = poFields?.filter((f) => f?.isRead);
-    if (
-      quotationData?.taxCode ||
-      (quotationData?.billingAddress &&
-        (quotationData?.billingAddress?.zipCode || quotationData?.billingAddress?.state || quotationData?.billingAddress?.county))
-    ) {
-      const taxCodeOptions = await fetchTaxRate(quotationData?.billingAddress, quotationData?.taxCode?.optionValue || null);
-      poFields?.forEach((e: any) => {
-        if (e?.fieldName === 'taxCode') {
-          e.option = taxCodeOptions;
-        }
-      });
-    }
+    const taxCodeOptions = await getTaxList(quotationData, MATERIAL_TYPE.manualEntry);
+    poFields?.forEach((e: any) => {
+      if (e?.fieldName === 'taxCode') {
+        e.option = taxCodeOptions;
+      }
+    });
     if (costData) {
       setInitialData({
         fields: poFields,
@@ -76,20 +69,6 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({
         fields: poFields,
         values: getObjKeys('', poFields)
       });
-    }
-  };
-
-  const fetchTaxRate = async (billingAddress: any, taxCode = null) => {
-    const zipCode = billingAddress?.zipCode;
-    const state = billingAddress?.state;
-    const county = billingAddress?.county;
-    try {
-      const response = await axiosInstance().get(
-        `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&county=${county}&materialType=${MATERIAL_TYPE.manualEntry}${taxCode && `&taxCode=${taxCode}`}`
-      );
-      return response?.data?.data || [];
-    } catch (e) {
-      toastConfig.setToastConfig(e);
     }
   };
 

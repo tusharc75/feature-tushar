@@ -40,7 +40,7 @@ import AdditionalCostDialog from './AdditionalCostDialog';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import ManageLeadTime from 'src/components/LeadTime/ManageLeadTime';
-import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
+import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
 import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 
 const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, renderedFrom, stepFullScreen, version, allowedToEdit, updateDOASetup, fieldTicketPolicyData }) => {
@@ -387,15 +387,9 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     setSubmitting(true);
     const material: any = [];
     var taxCodeData: any = null;
-    if (quotationData?.taxCode) {
-      const {
-        data: { data }
-      } = await axiosInstance().get(
-        `${routes?.taxMaster.path}/by-zipcode?taxCode=${quotationData?.taxCode?.optionValue}&materialType=${addDialog.type}`
-      );
-      if (data?.length) {
-        taxCodeData = data[0];
-      }
+    const taxCodeOptions = await getTaxList(quotationData, addDialog.type);
+    if (taxCodeOptions?.length) {
+      taxCodeData = taxCodeOptions[0];
     }
     rows.forEach((d) => {
       const element: any = {};
