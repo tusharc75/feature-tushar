@@ -1,4 +1,4 @@
-import { FC, useEffect, useState, Fragment, useRef, useContext } from 'react';
+import { FC, useEffect, useState, Fragment, useRef } from 'react';
 import { Dialog, Box } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
@@ -18,9 +18,9 @@ import { uniq, map, orderBy, isEqual, uniqBy } from 'lodash';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { bulkUpdate, calculateRowsField } from 'src/components/RentalManagment/helper';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import dayjs from 'dayjs';
 import { getPricingConditions, getTaxList } from 'src/components/PricingCondition';
+import { useData } from 'src/StateProvider/Provider';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -46,7 +46,6 @@ const MaterialDialog: FC<EditDialogProps> = ({
   showSaveAndNext,
   loadingEdit
 }) => {
-  const toastConfig = useContext(CustomToastContext);
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [allFields, setAllFields] = useState([]);
@@ -60,6 +59,10 @@ const MaterialDialog: FC<EditDialogProps> = ({
   const [priceConditionList, setPriceConditionList] = useState([]);
   const [pricingMethodList, setPricingMethodList] = useState([]);
   const ref = useRef(null);
+
+  const {
+    state: { user }
+  }: any = useData();
 
   useEffect(() => {
     fetchFields();
@@ -170,7 +173,7 @@ const MaterialDialog: FC<EditDialogProps> = ({
       return { name, sectionFields };
     });
 
-    const taxCodeOptions = await getTaxList(invoiceData, isBulkedit ? rowData[0]?.type : rowData?.type);
+    const taxCodeOptions = await getTaxList(user, invoiceData, isBulkedit ? rowData[0]?.type : rowData?.type);
     fields?.forEach((e: any) => {
       if (e?.fieldName === 'taxCode') {
         e.option = taxCodeOptions;

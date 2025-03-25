@@ -27,6 +27,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import dayjs from 'dayjs';
 import { getPricingConditions, getTaxList } from 'src/components/PricingCondition';
 import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
+import { useData } from 'src/StateProvider/Provider';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -68,6 +69,10 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
   const [priceConditionList, setPriceConditionList] = useState([]);
   const [pricingMethodList, setPricingMethodList] = useState([]);
   const [submitState, setSubmitState] = useState({ open: false, values: null });
+
+  const {
+    state: { user }
+  }: any = useData();
 
   useEffect(() => {
     fetchFields();
@@ -261,7 +266,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
       return { name, sectionFields };
     });
 
-    const taxCodeOptions = await getTaxList(quotationData, isBulkedit ? rowData[0]?.type : rowData?.type);
+    const taxCodeOptions = await getTaxList(user, quotationData, isBulkedit ? rowData[0]?.type : rowData?.type);
     fields?.forEach((e: any) => {
       if (e?.fieldName === 'taxCode') {
         e.option = taxCodeOptions;

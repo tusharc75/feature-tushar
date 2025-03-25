@@ -54,7 +54,7 @@ import {
 } from '../walkmeSteps';
 import { nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
-import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
+import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
 import AddQuotationDataDialog from './AddQuotationDataDialog';
 import AddFieldServiceOrderDataDialog from 'src/pages/FieldTicket/material/AddFieldServiceOrderDataDialog';
 
@@ -468,11 +468,9 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
     } else {
       var taxCodeData: any = null;
       if (fieldTicketData?.taxCode) {
-        const {
-          data: { data }
-        } = await axiosInstance().get(`${routes?.taxMaster.path}/by-zipcode?taxCode=${fieldTicketData?.taxCode?.optionValue}&materialType=${type}`);
-        if (data?.length) {
-          taxCodeData = data[0];
+        const taxCodeOptions = await getTaxList(user, fieldTicketData, type);
+        if (taxCodeOptions?.length) {
+          taxCodeData = taxCodeOptions[0];
         }
       }
       const material: any = [];
