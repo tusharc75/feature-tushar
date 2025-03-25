@@ -154,7 +154,9 @@ const SerializedPackagesDetail = () => {
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          <Assign serializedPackagesData={serializedPackagesData} />
+          <Assign
+            serializedPackagesData={serializedPackagesData}
+            fetchSerializedPackagesData={fetchData} />
         </TabPanel>
         <TabPanel value={tabValue} index={2}>
           <History id={serializedPackagesData?._id} />
