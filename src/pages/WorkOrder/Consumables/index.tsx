@@ -570,17 +570,19 @@ const Consumables = ({
           )}
           <Box display="flex" ml={'auto'}>
             <Box ml={1}></Box>
-            <ImportExportMenu
-              permissions={permissions?.workOrder}
-              module="consumables"
-              api={`${workOrder.api}/${workOrderId}/consumable`}
-              afterImportCompleted={() => {
-                fetchData();
-              }}
-              isExportAllOrSomeFeature={true}
-              ids={[]}
-              additionalParams={`workOrderIds=${JSON.stringify([workOrderId])}`}
-            />
+            {isCreate &&
+              <ImportExportMenu
+                permissions={permissions?.workOrder}
+                module="consumables"
+                api={`${workOrder.api}/${workOrderId}/consumable`}
+                afterImportCompleted={() => {
+                  fetchData();
+                }}
+                isExportAllOrSomeFeature={true}
+                ids={[]}
+                additionalParams={`workOrderIds=${JSON.stringify([workOrderId])}`}
+              />
+            }
             <Box ml={1}></Box>
             {!user?.user?.brandPolicy?.workOrderConsumableConsumeHide && (
               <ThemeButton
