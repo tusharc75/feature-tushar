@@ -71,7 +71,7 @@ const Service = ({
   const [commentsDialog, setCommentsDialog] = useState(false);
   const [viewServiceStepDataDialog, setViewServiceStepDataDialog] = useState({ open: false, selectedService: null });
   const [showManagePurchaseOrder, setShowManagePurchaseOrder] = useState(false);
-  const [isColapsed, setIsColapsed] = useState(resource === sidebarResource.workOrder ? false : true);
+  const [isColapsed, setIsColapsed] = useState(false);
   const mobScreen = useMediaQuery('(max-width:768px)');
   const [openCompleteDialog, setOpenCompleteDialog] = useState(false);
   const [comment, setComment] = useState('');
