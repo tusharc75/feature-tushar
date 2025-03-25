@@ -177,9 +177,9 @@ const SerializedPackagesView = ({ serializedPackagesData }) => {
       const subRowsLength = subRows?.length || 0;
       assetsSubRows.forEach((_subRow, j) => {
         _subRow.index = parent.index + '.' + (j + 1 + subRowsLength);
-        _subRow.type = MATERIAL_TYPE.serializedAsset;
-        _subRow._id = _subRow?.asset;
-        _subRow.detail = _subRow?.assetDetail?.assetNumber;
+        _subRow.type = _subRow?.assetDetail ? MATERIAL_TYPE.serializedAsset : 'serialNumber';
+        _subRow._id = _subRow?.asset ? _subRow?.asset : _subRow?.serialNumber;
+        _subRow.detail = _subRow?.assetDetail?.assetNumber || _subRow?.serialNumberDetail?.serialNumber;
         _subRow.parentId = _subRow?.product;
         subRows.push(_subRow);
       });

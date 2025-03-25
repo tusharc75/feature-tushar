@@ -131,13 +131,15 @@ const Consumables = ({
       ]
     });
     const productFields = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
-    const column: any = [{
-      accessor: 'index',
-      Header: 'Index',
-      width: 70,
-      sticky: 'left',
-      Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
-    }]
+    const column: any = [
+      {
+        accessor: 'index',
+        Header: 'Index',
+        width: 70,
+        sticky: 'left',
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
+      }
+    ];
     productFields?.forEach((e) => {
       if (e?.fieldName === 'productName') {
         column.push({
@@ -150,8 +152,8 @@ const Consumables = ({
             return row.original[e?.fieldName] ? (
               <div className="flex items-center gap-2">
                 {hasChildFields &&
-                  allowedToEdit &&
-                  ![MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(row?.original?.type) ? (
+                allowedToEdit &&
+                ![MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(row?.original?.type) ? (
                   <p
                     className={'link text-truncate'}
                     onClick={() => {
@@ -215,7 +217,7 @@ const Consumables = ({
         ),
         accessorFn: (original) => {
           return original?.serializedProduct ? 'Yes' : 'No';
-        },
+        }
       }
     ];
     const extracolumns: any = [
@@ -256,24 +258,24 @@ const Consumables = ({
       },
       ...(user?.user?.brandPolicy?.workOrderConsumableRequest && !user?.user?.brandPolicy?.workOrderConsumableConsumeHide
         ? [
-          {
-            accessor: 'requestedQty',
-            Header: 'Requested Qty',
-            width: 150,
-            Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
-          }
-        ]
+            {
+              accessor: 'requestedQty',
+              Header: 'Requested Qty',
+              width: 150,
+              Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
+            }
+          ]
         : []),
       ...(!user?.user?.brandPolicy?.workOrderConsumableConsumeHide
         ? [
-          {
-            accessor: 'consumedQty',
-            Header: 'Consumed Qty',
-            primaryField: true,
-            width: 150,
-            Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
-          }
-        ]
+            {
+              accessor: 'consumedQty',
+              Header: 'Consumed Qty',
+              primaryField: true,
+              width: 150,
+              Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
+            }
+          ]
         : [])
     ];
     extracolumns.push({
@@ -347,15 +349,12 @@ const Consumables = ({
               <IconButton
                 size="small"
                 aria-label="Delete"
-                disabled={row?.original?.consumedQty || row?.original?.requestedQty || row?.original?.assignedAssetQty ? true : false}
+                disabled={!row?.original?.canDelete}
                 onClick={() => {
                   handleDelete([row.original]);
                 }}
               >
-                <DeleteIcon
-                  color={row?.original?.consumedQty || row?.original?.requestedQty || row?.original?.assignedAssetQty ? 'disabled' : 'error'}
-                  fontSize="small"
-                />
+                <DeleteIcon color={row?.original?.canDelete ? 'error' : 'disabled'} fontSize="small" />
               </IconButton>
             </HtmlTooltip>
           )}
@@ -405,7 +404,7 @@ const Consumables = ({
             let res: any = {
               ...prepareDataForGrid(u)
             };
-            res.index = i + 1
+            res.index = i + 1;
             res.productName = u?.product?.optionLabel;
             res.productDescription = u?.product?.productDescription;
             res.productNumber = u?.product?.productNumber;
@@ -417,6 +416,7 @@ const Consumables = ({
             // if (!consumeRequest) {
             //   res.hideSelection = u?.qty - ((u?.consumedQty || 0) + (u?.requestedQty || 0)) === 0 ? true : false;
             // }
+            res.canDelete = u?.consumedQty || u?.requestedQty || res.assignedAssetQty ? false : true;
             return res;
           });
 
@@ -438,6 +438,7 @@ const Consumables = ({
         res.index = parentIndex + '.' + (j + 1);
         res.productName = u?.type === MATERIAL_TYPE.serializedAsset ? u?.serializedAssetDetail?.optionLabel : u?.serialNumberDetail?.optionLabel;
         res.serializedAssetId = u?.serializedAssetDetail?.optionValue;
+        res.canDelete = true;
         return res;
       });
     return subRows;
@@ -476,7 +477,7 @@ const Consumables = ({
   const createNewVersionQuote = async (quoteId, quoteVersionId) => {
     axiosInstance()
       .post(`/quotation/clone-version/${quoteId}/${quoteVersionId}`)
-      .then(() => { })
+      .then(() => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -586,7 +587,7 @@ const Consumables = ({
               <ThemeButton
                 disabled={
                   selectedRecords?.length &&
-                    selectedRecords?.every((r) => !r?.serializedProduct && !r?.hideSelection && r?.type === MATERIAL_TYPE.product)
+                  selectedRecords?.every((r) => !r?.serializedProduct && !r?.hideSelection && r?.type === MATERIAL_TYPE.product)
                     ? false
                     : true
                 }
@@ -648,9 +649,9 @@ const Consumables = ({
                 Assign Serial Numbers
               </MenuItem>
               <MenuItem
-                disabled={selectedRecords?.find((s) => s?.consumedQty || s?.requestedQty || s?.assignedAssetQty) ? true : false}
+                disabled={!selectedRecords?.some((s) => s?.canDelete)}
                 onClick={() => {
-                  handleDelete(selectedRecords?.filter((s) => !s?.consumedQty && !s?.requestedQty && !s?.assignedAssetQty));
+                  handleDelete(selectedRecords?.filter((s) => s?.canDelete));
                   handleCloseAction();
                 }}
               >
