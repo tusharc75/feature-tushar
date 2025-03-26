@@ -255,16 +255,16 @@ const handleFormula = (fieldData, fields, values, name, value, resultValues, isO
     fields &&
     fields.filter(
       (_f) =>
-        (_f.type === 'formula' || _f.isFormula === true) &&
+        (_f?.type === 'formula' || _f?.isFormula === true) &&
         (_f?.inputFields?.includes(name)?.length || _f?.counterFieldInputFields?.includes(name)?.length)
     )
   ) {
     fields
       .filter(
-        (_f) => (_f.type === 'formula' || _f.isFormula === true) && (_f.inputFields.includes(name) || _f.counterFieldInputFields.includes(name))
+        (_f) => (_f?.type === 'formula' || _f?.isFormula === true) && (_f?.inputFields?.includes(name) || _f?.counterFieldInputFields?.includes(name))
       )
       .forEach((_data) => {
-        if (_data.inputFields.includes(name) || _data.counterFieldInputFields.includes(name)) {
+        if (_data?.inputFields?.includes(name) || _data?.counterFieldInputFields?.includes(name)) {
           loop_count++;
           if (loop_count > 300) {
             console.warn('Loop in formula');
@@ -276,17 +276,17 @@ const handleFormula = (fieldData, fields, values, name, value, resultValues, isO
           if (_data?.counterFieldInputFields?.length > 0) {
             const counterSubFields = [];
 
-            for (const subFieldName of _data.counterFieldInputFields) {
-              for (const inputField of _data.inputFields) {
+            for (const subFieldName of _data?.counterFieldInputFields) {
+              for (const inputField of _data?.inputFields) {
                 let breakFlag = false;
-                const counterFieldData = fields.find((f) => f.fieldName === inputField && f.type === 'counter');
-                for (const subField of counterFieldData.subFields) {
-                  if (subField.fieldName === subFieldName) {
+                const counterFieldData = fields.find((f) => f?.fieldName === inputField && f?.type === 'counter');
+                for (const subField of counterFieldData?.subFields) {
+                  if (subField?.fieldName === subFieldName) {
                     counterSubFields.push({
-                      counterFieldName: counterFieldData.fieldName,
+                      counterFieldName: counterFieldData?.fieldName,
                       subFieldName: subFieldName,
-                      subFieldType: subField.type,
-                      values: values[counterFieldData.fieldName]
+                      subFieldType: subField?.type,
+                      values: values[counterFieldData?.fieldName]
                     });
                     breakFlag = true;
                     break;
@@ -301,7 +301,7 @@ const handleFormula = (fieldData, fields, values, name, value, resultValues, isO
                 if (subField?.values && Array.isArray(subField?.values)) {
                   let sum = 0;
                   subField?.values?.forEach((item) => {
-                    if (item[subField?.subFieldName] && !isNaN(parseFloat(item[subField?.subFieldName]))) {
+                    if (item[subField?.subFieldName] && !isNaN(parseFloat(item?.[subField?.subFieldName]))) {
                       sum += parseFloat(item[subField?.subFieldName]);
                     }
                   });

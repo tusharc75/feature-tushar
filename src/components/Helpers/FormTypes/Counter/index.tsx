@@ -36,7 +36,7 @@ const Counter = ({ label, values, name, setFieldValue, fieldData, touched, error
         if (!counterFieldInputFields?.length) continue;
 
         for (const counterField of counterFieldInputFields) {
-          const hasMatchingSubField = fieldData?.subFields?.some((f) => f.fieldName === counterField);
+          const hasMatchingSubField = fieldData?.subFields?.some((f) => f?.fieldName === counterField);
           if (hasMatchingSubField) {
             const result = handleAutoCalculation(
               fieldData,
@@ -45,7 +45,7 @@ const Counter = ({ label, values, name, setFieldValue, fieldData, touched, error
               counterField,
               '',
               '',
-              values[counterField]
+              ''
             );
             Object.entries(result).forEach(([key, value]) => {
               setFieldValue(key, value);
