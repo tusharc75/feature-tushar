@@ -17,7 +17,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { CHILD_RESOURCE, MATERIAL_TYPE, SERIALIZED_PACKAGES_STATUS, sidebarResource, WORK_ORDER_TYPE } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, PACKAGE_TYPE, SERIALIZED_PACKAGES_STATUS, sidebarResource, WORK_ORDER_TYPE } from '../../../constants/helpers';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import MaterialQtyDialog from 'src/pages/AssemblyOrder/Material/MaterialQtyDialog';
@@ -495,7 +495,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
         <AssignPackageDialog
           handleClose={() => setAddDialog({ open: false, parentId: null })}
           onSuccess={(rows) => {
-            if (rows?.find((e) => e?.packages?.length)) {
+            if (rows?.find((e) => e?.packages?.filter((e) => e.packageType === PACKAGE_TYPE.product)?.length)) {
               setChildPackageWithoutParentDialog({ open: true, data: rows });
             } else {
               handleAdd(rows);

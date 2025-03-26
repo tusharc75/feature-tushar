@@ -13,7 +13,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { MATERIAL_TYPE, QUOTATION_STATUS, quotation, sidebarResource } from '../../../constants/helpers';
+import { MATERIAL_TYPE, PACKAGE_TYPE, QUOTATION_STATUS, quotation, sidebarResource } from '../../../constants/helpers';
 import { GiReceiveMoney } from 'react-icons/gi';
 import { VscVersions } from 'react-icons/vsc';
 import { fetch_rental_quotation_fields } from 'src/components/RentalManagment/helper';
@@ -123,7 +123,7 @@ const Quotation = ({
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === MATERIAL_TYPE.package
-                  ? row.original?.packageDetail.packageType === 'Product'
+                  ? row.original?.packageDetail.packageType === PACKAGE_TYPE.product
                     ? '(Product)'
                     : '(Service)'
                   : row.original.type === MATERIAL_TYPE.service
@@ -187,12 +187,12 @@ const Quotation = ({
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
       _subRow.detail = `${_subRow.type === MATERIAL_TYPE.serializedAsset
-          ? _subRow?.serializedAssetDetail?.assetNumber
-          : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow?.productDetail?.productName
-            : _subRow.type === MATERIAL_TYPE.service
-              ? _subRow?.serviceDetail?.serviceName
-              : _subRow?.packageDetail?.packageName
+        ? _subRow?.serializedAssetDetail?.assetNumber
+        : _subRow.type === MATERIAL_TYPE.product
+          ? _subRow?.productDetail?.productName
+          : _subRow.type === MATERIAL_TYPE.service
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow?.packageDetail?.packageName
         }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
@@ -245,14 +245,14 @@ const Quotation = ({
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = `${parent.type === MATERIAL_TYPE.serializedAsset
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === MATERIAL_TYPE.product
-            ? parent.productDetail?.productName
-            : parent.type === MATERIAL_TYPE.service
-              ? parent.serviceDetail?.serviceName
-              : parent.type === MATERIAL_TYPE.package
-                ? parent.packageDetail?.packageName
-                : parent.detail
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.service
+            ? parent.serviceDetail?.serviceName
+            : parent.type === MATERIAL_TYPE.package
+              ? parent.packageDetail?.packageName
+              : parent.detail
         }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service

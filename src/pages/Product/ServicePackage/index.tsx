@@ -14,7 +14,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { gridLoadingTimeout, packages, prepareDataForGrid, product } from 'src/constants/helpers';
+import { gridLoadingTimeout, PACKAGE_TYPE, packages, prepareDataForGrid, product } from 'src/constants/helpers';
 import { deleteDisable } from 'src/constants/messageHelpers';
 
 const ServicePackage = ({ renderedFrom, productId }) => {
@@ -264,7 +264,7 @@ const ServicePackage = ({ renderedFrom, productId }) => {
           onSuccess={(rows) => {
             handleSubmit(rows);
           }}
-          packageType={'Service'}
+          packageType={PACKAGE_TYPE.service}
           isSubmitting={isSubmitting}
         />
       )}

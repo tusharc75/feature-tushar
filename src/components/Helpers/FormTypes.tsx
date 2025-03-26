@@ -722,6 +722,10 @@ const FormTypes = (props) => {
   };
 
   const handleChange = (name, value) => {
+    if (fieldData?.isCounterSubField) {
+      setFieldValue(name, value);
+      return;
+    }
     const result = handleAutoCalculation(fieldData, fields, values, name, '', '', value);
     if (setValues && Object.keys(result).length > 1) {
       setValues({ ...values, ...result });
@@ -2768,6 +2772,7 @@ const FormTypes = (props) => {
         fieldData={fieldData}
         touched={touched}
         errors={errors}
+        fields={fields}
       />
     ) : type === 'description' ? (
       <Description fieldData={fieldData} />

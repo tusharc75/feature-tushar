@@ -30,7 +30,6 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
     const response = await fetch_child_resource_fields(CHILD_RESOURCE.assemblyOrderMaterial, assemblyOrderData?.currency || 'USD', false);
     const data = response;
     let newColumns = generateColumns(renderedFrom, data, null, false, assemblyOrderData?.currency || 'USD');
-
     let coloum: any = [
       {
         accessor: 'index',
@@ -58,7 +57,7 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
         minWidth: 200,
         width: 200,
         sticky: isMobile || isTablet ? 'none' : 'left',
-        Cell: ({ row, table }) => (
+        Cell: ({ row }) => (
           <div className="flex items-center gap-2">
             <h5 className="text-truncate">{row.original?.detail}</h5>{' '}
             <Box>
@@ -69,8 +68,8 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
                     window.open(`${routes.productDetail.path}/${row.original.materialId}`);
                   } else if (row.original.type === MATERIAL_TYPE.package) {
                     window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
-                    window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === MATERIAL_TYPE.service) {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
                   }
                 }}
               >
@@ -89,41 +88,58 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
           return row.original['description'] ? <h5 className="text-truncate">{row.original.description}</h5> : <NoDataCell />;
         }
       },
-      {
-        accessor: 'serializedPackageNumber',
-        Header: 'Serialized Package Number',
-        width: 200,
-        show: false,
-        Cell: ({ row }) => {
-          return row.original?.serializedPackageNumber ? (
-            <div className="flex items-center gap-2">
-              <h5 className="text-truncate">{row.original?.serializedPackageNumber}</h5>{' '}
-              <Box>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes.serializedPackagesDetail.path}/${row.original.serializedPackageId}`);
-                  }}
-                >
-                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                </IconButton>
-              </Box>
-            </div>
-          ) : (
-            <NoDataCell />
-          );
-        }
-      }
     ];
     coloum = [...coloum, ...newColumns];
     coloum.push({
-      accessor: 'action',
-      Header: 'Actions',
-      minWidth: 100,
-      width: 100,
-      sticky: 'right',
-      Cell: ({ row, table }) => <></>
-    });
+      accessor: 'workOrder',
+      Header: 'Work Order',
+      width: 200,
+      show: false,
+      Cell: ({ row }) => {
+        return row.original?.workOrder ? (
+          <div className="flex items-center gap-2">
+            <h5 className="text-truncate">{row.original?.workOrder}</h5>{' '}
+            <Box>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.workOrderDetail.path}/${row.original.workOrderId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            </Box>
+          </div>
+        ) : (
+          <NoDataCell />
+        );
+      }
+    })
+    coloum.push({
+      accessor: 'serializedPackage',
+      Header: 'Serialized Package Number',
+      width: 200,
+      show: false,
+      Cell: ({ row }) => {
+        return row.original?.serializedPackage ? (
+          <div className="flex items-center gap-2">
+            <h5 className="text-truncate">{row.original?.serializedPackage}</h5>{' '}
+            <Box>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.serializedPackagesDetail.path}/${row.original.serializedPackageId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            </Box>
+          </div>
+        ) : (
+          <NoDataCell />
+        );
+      }
+    })
     setColumns(coloum);
   };
 
@@ -136,22 +152,19 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
 
     const {
       data: { data }
-    } = await axiosInstance().get(`${routes.assemblyOrder.path}/loading/${assemblyOrderData?._id}`);
+    } = await axiosInstance().get(`${routes.assemblyOrder.path}/work-order/${assemblyOrderData._id}`);
 
     const rows = data?.filter((e) => e.parentId === null);
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail =
-        parent?.type === MATERIAL_TYPE.package
-          ? parent.packageDetail?.packageName
-          : parent?.type === MATERIAL_TYPE.serializedAsset
-            ? parent?.assetDetail?.assetNumber
-            : '';
+      parent.detail = parent.packageDetail?.packageName;
       parent.description = parent?.packageDetail?.packageDescription || '';
-      parent.qtyDisplay = parent.qty;
-      parent.serializedPackageId = parent?.serializedPackageDetail?._id;
-      parent.serializedPackageNumber = parent?.serializedPackageDetail?.serializedPackageNumber;
+      parent.qty = parent.qty;
+      parent.serializedPackageId = parent?.serializedPackage?.optionValue;
+      parent.serializedPackage = parent?.serializedPackage?.optionLabel;
+      parent.workOrderId = parent?.workOrder?._id;
+      parent.workOrder = parent?.workOrder?.workOrderNumber;
       parent.subRows = generateNestedData(data, parent);
     });
 
@@ -164,23 +177,19 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
       _subRow.detail =
-        _subRow.type === MATERIAL_TYPE.product
-          ? _subRow.productDetail?.productName
-          : _subRow?.type === MATERIAL_TYPE.serializedAsset
-            ? _subRow?.assetDetail?.assetNumber
-            : _subRow?.type === MATERIAL_TYPE.package
-              ? _subRow?.packageDetail?.packageName
+        _subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName
+          : _subRow?.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceName
+            : _subRow?.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageName
               : '';
-      _subRow.description =
-        _subRow.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productDescription
-          : _subRow?.type === MATERIAL_TYPE.package
-            ? _subRow?.packageDetail?.packageDescription
+      _subRow.description = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription :
+        _subRow?.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageDescription :
+          _subRow?.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceDescription
             : '';
       _subRow.qty = _subRow.qty || 1;
-      _subRow.qtyDisplay = _subRow.qty || 1;
-      _subRow.serializedPackageId = _subRow?.serializedPackageDetail?._id;
-      _subRow.serializedPackageNumber = _subRow?.serializedPackageDetail?.serializedPackageNumber;
+      _subRow.serializedPackageId = _subRow?.serializedPackage?.optionValue;
+      _subRow.serializedPackage = _subRow?.serializedPackage?.optionLabel;
+      _subRow.workOrderId = _subRow?.workOrder?._id;
+      _subRow.workOrder = _subRow?.workOrder?.workOrderNumber;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
@@ -198,7 +207,6 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
             columns={columns}
             isSendEmail={true}
             isAsyncDownload={true}
-            defaultColumns={['index', `detail`, `description`, `qty`]}
           />
         </Box>
       </Box>

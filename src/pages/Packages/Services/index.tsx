@@ -18,7 +18,7 @@ import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { packages, prepareDataForGrid, sidebarResource, WORK_ORDER_TYPE, WORK_ORDER_TYPE_LABEL } from 'src/constants/helpers';
+import { PACKAGE_TYPE, packages, prepareDataForGrid, sidebarResource, WORK_ORDER_TYPE, WORK_ORDER_TYPE_LABEL } from 'src/constants/helpers';
 
 const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = false }) => {
   const renderedFrom = `${camelCase(sidebarResource?.packages)}_service'}`;
@@ -167,7 +167,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
     });
     axiosInstance()
       .put(`${packages.api}/material/${packageId}/order`, {
-        packageType: 'Service',
+        packageType: PACKAGE_TYPE.service,
         data: rows || [],
         type: selectedResource
       })
