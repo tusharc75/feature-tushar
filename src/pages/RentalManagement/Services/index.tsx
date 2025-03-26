@@ -32,6 +32,7 @@ import {
   DELIVERY_TICKET_TYPE,
   deliveryTicket,
   MATERIAL_TYPE,
+  PACKAGE_TYPE,
   PRICING_SETUP_TYPE,
   RENTAL_STATUS,
   rentalManagement,
@@ -142,15 +143,15 @@ const Services = ({
           row.original['type'] ? (
             <p>
               {`${startCase(row.original?.type)} `}
-              {row.original['type'] === 'product'
+              {row.original['type'] === MATERIAL_TYPE.product
                 ? row.original?.productDetail?.serializedProduct
                   ? '(Serialized)'
                   : '(Non-Serialized)'
-                : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
+                : row.original?.type === MATERIAL_TYPE.package
+                  ? row.original?.packageDetail.packageType === PACKAGE_TYPE.product
                     ? '(Product)'
                     : '(Service)'
-                  : row.original.type === 'service'
+                  : row.original.type === MATERIAL_TYPE.service
                     ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
                     : ''}
             </p>
@@ -352,7 +353,7 @@ const Services = ({
         });
       }
       let rows = data.material.filter((e) => e.parentId === null);
-      rows = rows.filter((e) => e.type === MATERIAL_TYPE.service || (e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType === 'Service'));
+      rows = rows.filter((e) => e.type === MATERIAL_TYPE.service || (e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType === PACKAGE_TYPE.service));
 
       const isPriceRequired = allFields?.filter((el) => el.fieldName === 'price' && el.required).length > 0;
 
@@ -438,7 +439,7 @@ const Services = ({
         if (
           data?.material
             ?.filter((e) => e.parentId === null)
-            .filter((e) => e.type === MATERIAL_TYPE.product || (e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType !== 'Service'))
+            .filter((e) => e.type === MATERIAL_TYPE.product || (e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType !== PACKAGE_TYPE.service))
             ?.length
         ) {
           setNextStep(true);
@@ -859,7 +860,7 @@ const Services = ({
           handleClose={() => {
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
           }}
-          packageType="service"
+          packageType={PACKAGE_TYPE.service}
           customerAccount={rentalPolicyData?.customerAccountWisePackages ? rentalManagementData?.customerAccount?.optionValue : null}
           isSubmitting={isSubmitting}
         />
@@ -899,7 +900,7 @@ const Services = ({
       {addExistingProductDialog.open && addExistingProductDialog.type === 'newPackage' && (
         <ManagePackageDialog
           isClone={false}
-          referenceData={{ packageType: 'Service', customerAccount: rentalManagementData?.customerAccount?.optionValue }}
+          referenceData={{ packageType: PACKAGE_TYPE.service, customerAccount: rentalManagementData?.customerAccount?.optionValue }}
           open={addExistingProductDialog.open}
           packageId={null}
           onClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}

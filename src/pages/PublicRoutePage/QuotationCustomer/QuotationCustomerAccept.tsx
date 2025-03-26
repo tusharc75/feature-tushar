@@ -11,7 +11,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import { displayDate, formatAmountWithCurrency, getUniqueCurrencies, MATERIAL_TYPE, quotation } from '../../../constants/helpers';
+import { displayDate, formatAmountWithCurrency, getUniqueCurrencies, MATERIAL_TYPE, PACKAGE_TYPE, quotation } from '../../../constants/helpers';
 import QCcomment from './QCcomment';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import axios from 'axios';
@@ -63,7 +63,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
+                  ? row.original?.packageDetail.packageType === PACKAGE_TYPE.product
                     ? '(Product)'
                     : '(Service)'
                   : row.original.type === 'service'
