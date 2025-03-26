@@ -10,6 +10,7 @@ import {
   CHILD_RESOURCE,
   CustomDialogTransition,
   MATERIAL_TYPE,
+  PACKAGE_TYPE,
   checkIsAllowedToDelete,
   checkIsAllowedToEdit,
   invoice,
@@ -136,7 +137,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
                     ? '(Serialized)'
                     : '(Non-Serialized)'
                   : row.original?.type === MATERIAL_TYPE.package
-                    ? row.original?.packageDetail.packageType === 'Product'
+                    ? row.original?.packageDetail.packageType === PACKAGE_TYPE.product
                       ? '(Product)'
                       : '(Service)'
                     : row.original.type === MATERIAL_TYPE.service
