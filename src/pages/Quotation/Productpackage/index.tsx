@@ -387,7 +387,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     setSubmitting(true);
     const material: any = [];
     var taxCodeData: any = null;
-    const taxCodeOptions = await getTaxList(quotationData, addDialog.type);
+    const taxCodeOptions = await getTaxList(user, quotationData, addDialog.type);
     if (taxCodeOptions?.length) {
       taxCodeData = taxCodeOptions[0];
     }

@@ -26,6 +26,7 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
+import { useData } from 'src/StateProvider/Provider';
 
 const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchData: fetchserviceOrderData, technicians, refreshChild, fetchConsumablesData }) => {
 
@@ -46,6 +47,10 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
+
+  const {
+    state: { user }
+  }: any = useData();
 
   useEffect(() => {
     fetchColumns();
@@ -226,7 +231,7 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
   const handleSubmit = async (rows) => {
     setSubmitting(true);
     var taxCodeData: any = null;
-    const taxCodeOptions = await getTaxList(serviceOrderData, MATERIAL_TYPE.product);
+    const taxCodeOptions = await getTaxList(user, serviceOrderData, MATERIAL_TYPE.product);
     if (taxCodeOptions?.length) {
       taxCodeData = taxCodeOptions[0];
     }

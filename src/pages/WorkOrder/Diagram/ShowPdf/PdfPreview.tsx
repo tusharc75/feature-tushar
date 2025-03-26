@@ -472,7 +472,7 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
             {isHighlighterMode ? 'Exit highlighter Mode' : 'Enter highlighter Mode'}
           </ThemeButton>
           <ThemeButton
-            disabled={loading || isDrawingMode}
+            disabled={loading || isHighlighterMode}
             onClick={toggleDrawingMode}
           >
             {isDrawingMode ? 'Exit Drawing Mode' : 'Enter Drawing Mode'}

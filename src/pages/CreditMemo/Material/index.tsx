@@ -324,7 +324,7 @@ const Material = ({ creditMemoData, allowedToEdit, fetchCreditMemoData }) => {
     setIsAdding(true);
     const material: any = [];
     var taxCodeData: any = null;
-    const taxCodeOptions = await getTaxList(creditMemoData, addDialog.type);
+    const taxCodeOptions = await getTaxList(user, creditMemoData, addDialog.type);
     if (taxCodeOptions?.length) {
       taxCodeData = taxCodeOptions[0];
     }

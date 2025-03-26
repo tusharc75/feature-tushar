@@ -36,7 +36,7 @@ import { deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/cons
 import HideWhenOffline from 'src/components/HideWhenOffline';
 import { FiExternalLink } from 'react-icons/fi';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
+import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
 import AddQuotationDataDialog from './AddQuotationDataDialog';
 
 const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, stepFullScreen, fetchData: fetchFieldTicketData, refreshChild, resourcePolicy }) => {
@@ -385,13 +385,9 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
     } else {
       var taxCodeData: any = null;
       if (fieldTicketData?.taxCode) {
-        const {
-          data: { data }
-        } = await axiosInstance().get(
-          `${routes?.taxMaster.path}/by-zipcode?taxCode=${fieldTicketData?.taxCode?.optionValue}&materialType=${MATERIAL_TYPE.product}`
-        );
-        if (data?.length) {
-          taxCodeData = data[0];
+        const taxCodeOptions = await getTaxList(user, fieldTicketData, MATERIAL_TYPE.product);
+        if (taxCodeOptions?.length) {
+          taxCodeData = taxCodeOptions[0];
         }
       }
       const material: any = [];
