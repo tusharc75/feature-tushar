@@ -349,6 +349,7 @@ const Product = () => {
         <div className="flex items-center gap-2">
           <ImportExportLinks
             module={resources?.product?.titlePlural}
+            resource={sidebarResource?.product}
             permission={permissions.product}
             api={product.api}
             refrenceId={null}

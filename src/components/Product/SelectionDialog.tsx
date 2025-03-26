@@ -21,10 +21,10 @@ import { CustomDialogTransition } from './../../constants/helpers';
 
 const SelectionDialog = (props) => {
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
-  const { handleClose, api, refrenceId, isUpload, uploadData } = props;
+  const { handleClose, api, refrenceId, isUpload, uploadData, module, resource } = props;
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ productCategory: '', productTemplate: '', priceTemplate: '' });
   const [productCategory, setProductCategory] = useState([]);
@@ -131,34 +131,43 @@ const SelectionDialog = (props) => {
   };
 
   const handleSubmit = (values) => {
-    if (isUpload) {
-      if (!selectedFile) setFileError('Please Select File');
-      else
-        uploadData(selectedFile, {
-          productCategory: values.productCategory,
-          productTemplate: values.productTemplate,
-          priceTemplate: values.priceTemplate
-        });
-    } else
-      axiosInstance()
-        .get(
-          `${api}/template?productCategory=` +
-          values.productCategory +
-          '&productTemplate=' +
-          values.productTemplate +
-          '&priceTemplate=' +
-          values.priceTemplate +
-          '&refrenceId=' +
-          refrenceId,
-          { responseType: 'arraybuffer' }
-        )
-        .then((response) => {
-          const fileName = response.headers['content-disposition'].split('filename=')[1];
-          downloadExcel(response.data, fileName);
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
+    if (module === resources?.product?.titlePlural && resource && isUpload) {
+      uploadData(null, {
+        productCategory: values.productCategory,
+        productTemplate: values.productTemplate,
+        priceTemplate: values.priceTemplate
+      });
+    } else {
+      if (isUpload) {
+        if (!selectedFile) setFileError('Please Select File');
+        else
+          uploadData(selectedFile, {
+            productCategory: values.productCategory,
+            productTemplate: values.productTemplate,
+            priceTemplate: values.priceTemplate
+          });
+      } else {
+        axiosInstance()
+          .get(
+            `${api}/template?productCategory=` +
+              values.productCategory +
+              '&productTemplate=' +
+              values.productTemplate +
+              '&priceTemplate=' +
+              values.priceTemplate +
+              '&refrenceId=' +
+              refrenceId,
+            { responseType: 'arraybuffer' }
+          )
+          .then((response) => {
+            const fileName = response.headers['content-disposition'].split('filename=')[1];
+            downloadExcel(response.data, fileName);
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
+      }
+    }
   };
 
   const initializeProductCategoryDropdown = (values, productCategorySource) => {
@@ -179,7 +188,7 @@ const SelectionDialog = (props) => {
         errors['productTemplate'] = 'please select product template';
       }
     }
-    if (isProductTemplate && api !== 'product') {
+    if (isProductTemplate) {
       if (!values.priceTemplate) {
         errors['priceTemplate'] = 'please select price template';
       }
@@ -202,7 +211,7 @@ const SelectionDialog = (props) => {
             <CustomDialogHeader title="Select Category & Template" onClose={handleClose}></CustomDialogHeader>
             <CustomDialogContent>
               <Form autoComplete="off" autoCorrect="off" noValidate>
-                <div className='p-1'>
+                <div className="p-1">
                   <Grid container spacing={1}>
                     <Grid
                       size={{
@@ -268,7 +277,7 @@ const SelectionDialog = (props) => {
                       />
                     </Box>
                   )}
-                  {isProductTemplate && api !== 'product' && (
+                  {isProductTemplate && (
                     <Box mt={2}>
                       <FormTypes
                         values={values}
@@ -288,30 +297,32 @@ const SelectionDialog = (props) => {
                       />
                     </Box>
                   )}
-                  {isUpload && (
-                    <Box mt={2}>
-                      <label htmlFor="btn-upload">
-                        <input
-                          id="btn-upload"
-                          name="btn-upload"
-                          style={{ display: 'none' }}
-                          accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                          type="file"
-                          onChange={(e) => {
-                            setFileError(null);
-                            setSelectedFile(e);
-                          }}
-                        />
-                        <ThemeButton className={`btn-choose`} component="span">
-                          Choose Files
-                        </ThemeButton>
-                        {fileError && <p className="MuiFormHelperText-root Mui-error MuiFormHelperText-contained">{fileError}</p>}
-                        <span style={{ marginLeft: '5px' }}>
-                          {selectedFile && selectedFile.target.files.length > 0 ? selectedFile.target.files[0].name : null}
-                        </span>
-                      </label>
-                    </Box>
-                  )}
+                  {module === resources?.product?.titlePlural && resource
+                    ? null
+                    : isUpload && (
+                        <Box mt={2}>
+                          <label htmlFor="btn-upload">
+                            <input
+                              id="btn-upload"
+                              name="btn-upload"
+                              style={{ display: 'none' }}
+                              accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                              type="file"
+                              onChange={(e) => {
+                                setFileError(null);
+                                setSelectedFile(e);
+                              }}
+                            />
+                            <ThemeButton className={`btn-choose`} component="span">
+                              Choose Files
+                            </ThemeButton>
+                            {fileError && <p className="MuiFormHelperText-root Mui-error MuiFormHelperText-contained">{fileError}</p>}
+                            <span style={{ marginLeft: '5px' }}>
+                              {selectedFile && selectedFile.target.files.length > 0 ? selectedFile.target.files[0].name : null}
+                            </span>
+                          </label>
+                        </Box>
+                      )}
                 </div>
               </Form>
             </CustomDialogContent>
@@ -321,7 +332,7 @@ const SelectionDialog = (props) => {
               </ThemeButton>
               <ThemeButton isLoading={loading} buttonType="theme" onClick={submitForm}>
                 {' '}
-                {isUpload ? 'Upload' : 'Download'}{' '}
+                {module === resources?.product?.titlePlural && resource && isUpload ? 'Next' : isUpload ? 'Upload' : 'Download'}{' '}
               </ThemeButton>
             </CustomDialogFooter>
           </Fragment>
