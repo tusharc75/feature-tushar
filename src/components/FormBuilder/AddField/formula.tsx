@@ -25,8 +25,8 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
   useEffect(() => {
     const counterFields = [];
     values['inputFields']?.forEach((_v) => {
-      if (fields?.filter((data) => data?.fieldName === _v).length) {
-        const field = fields?.filter((data) => data?.fieldLabel === _v || data?.fieldName === _v)[0];
+      if (fields?.filter((data) => data?.fieldName === _v)?.length) {
+        const field = fields?.filter((data) => data?.fieldLabel === _v || data?.fieldName === _v)?.[0];
         if (field?.subFields?.length > 0) {
           counterFields.push(...field?.subFields);
         }
@@ -47,7 +47,7 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
           inputValues[_input] = 1;
         });
       values['counterFieldInputFields'] &&
-        values['counterFieldInputFields'].forEach((_input) => {
+        values['counterFieldInputFields']?.forEach((_input) => {
           inputValues[_input] = 1;
         });
       if (checkFormula(values['formula'], inputValues)) {
@@ -105,7 +105,7 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
     let counterFields = [];
     fields?.forEach((field) => {
       if (values['inputFields']?.includes(field?.fieldName) && field?.type === 'counter' && field?.subFields?.length > 0) {
-        field?.subFields.forEach((subField) => {
+        field?.subFields?.forEach((subField) => {
           if (values['counterFieldInputFields']?.includes(subField?.fieldName)) {
             counterFields.push(subField);
           }
@@ -165,9 +165,9 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
                 />
               )}
             />
-            {values['inputFields'] && values['inputFields'].length > 0 && (
+            {values['inputFields'] && values['inputFields']?.length > 0 && (
               <Box pt={0.5} pb={0.5}>
-                {values['inputFields'].map((_field) => (
+                {values['inputFields']?.map((_field) => (
                   <Chip className="mb-1 ml-1 cursor-pointer" key={_field} label={generateLabel(_field)} onClick={() => handleAddInputField(_field)} />
                 ))}
               </Box>
@@ -199,9 +199,9 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
                 )}
               />
             )}
-            {values['counterFieldInputFields'] && values['counterFieldInputFields'].length > 0 && (
+            {values['counterFieldInputFields'] && values['counterFieldInputFields']?.length > 0 && (
               <Box pt={0.5} pb={0.5}>
-                {values['counterFieldInputFields'].map((_field) => (
+                {values['counterFieldInputFields']?.map((_field) => (
                   <Chip className="mb-1 ml-1 cursor-pointer" key={_field} label={generateLabel(_field)} onClick={() => handleAddInputField(_field)} />
                 ))}
               </Box>

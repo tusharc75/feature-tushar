@@ -295,7 +295,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             if (fieldData.type === 'formula' || values.isFormula) {
               ele.formula = values.formula;
               ele.inputFields = values.inputFields;
-              ele.counterFieldInputFields = values.counterFieldInputFields;
+              ele.counterFieldInputFields = values?.counterFieldInputFields;
               ele.returnType = values.returnType ? values.returnType : 'decimal';
               ele.decimalPlaces = values.decimalPlaces ? values.decimalPlaces : 2;
             } else {
@@ -374,84 +374,84 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
 
   function validate(values, fieldData) {
     const errors = {};
-    if (values.type === 'formula' || values.isFormula === true) {
-      if (!values.inputFields || values.inputFields.length === 0) {
+    if (values?.type === 'formula' || values?.isFormula === true) {
+      if (!values?.inputFields || values?.inputFields?.length === 0) {
         errors['inputFields'] = 'Please select input parameters';
       }
       let inputValues = {};
-      values.inputFields &&
-        values.inputFields.forEach((_input) => {
+      values?.inputFields &&
+        values?.inputFields?.forEach((_input) => {
           inputValues[_input] = 1;
         });
-      values.counterFieldInputFields &&
-        values.counterFieldInputFields.forEach((_input) => {
+      values?.counterFieldInputFields &&
+        values?.counterFieldInputFields?.forEach((_input) => {
           inputValues[_input] = 1;
         });
       if (!checkFormula(values.formula, inputValues)) {
         errors['formula'] = 'Please enter valid formula';
       }
     }
-    if (values.type === 'currencyAmount') {
-      if (!values.displayCurrency || values.displayCurrency.length === 0) {
+    if (values?.type === 'currencyAmount') {
+      if (!values?.displayCurrency || values?.displayCurrency?.length === 0) {
         errors['displayCurrency'] = 'Please select currency';
       }
     }
-    if (values.type === 'converter' || values.isConverter === true) {
-      if (!values.units || values.units.length === 0) {
+    if (values?.type === 'converter' || values?.isConverter === true) {
+      if (!values?.units || values?.units?.length === 0) {
         errors['units'] = 'Please enter units';
       }
-      if (!values.displayUnits || values.displayUnits.length === 0) {
+      if (!values?.displayUnits || values?.displayUnits?.length === 0) {
         errors['displayUnits'] = 'Please select display unit';
       }
     }
-    if (values.isMulitFormula) {
-      if (!values.formulaFields || values.formulaFields.length === 0) {
+    if (values?.isMulitFormula) {
+      if (!values?.formulaFields || values?.formulaFields?.length === 0) {
         errors['formulaFields'] = 'Please select formul fields';
       }
-      if (!values.formulainputFields || values.formulainputFields.length === 0) {
+      if (!values?.formulainputFields || values?.formulainputFields?.length === 0) {
         errors['formulainputFields'] = 'Please select input parameters';
       }
-      if (values.formulaFields && values.formulaFields.length) {
+      if (values?.formulaFields && values?.formulaFields?.length) {
         let inputValues = {};
-        values.formulainputFields &&
-          values.formulainputFields.forEach((_input) => {
+        values?.formulainputFields &&
+          values?.formulainputFields?.forEach((_input) => {
             inputValues[_input] = 1;
           });
-        Object.keys(values.formulaoption).forEach((_formula) => {
-          if (!checkFormula(values.formulaoption[_formula] ? values.formulaoption[_formula] : '', inputValues))
+        Object.keys(values?.formulaoption).forEach((_formula) => {
+          if (!checkFormula(values?.formulaoption[_formula] ? values?.formulaoption[_formula] : '', inputValues))
             errors['formulaoption_' + _formula] = 'Please enter valid formula';
         });
       }
     }
-    if (values.type === 'vlookupDropdown' || values.isVlookup) {
-      if (!values.vlookupInputFields || values.vlookupInputFields.length === 0) {
+    if (values?.type === 'vlookupDropdown' || values?.isVlookup) {
+      if (!values?.vlookupInputFields || values?.vlookupInputFields?.length === 0) {
         errors['vlookupInputFields'] = 'Please select input parameters';
       }
     }
 
-    if (fieldData.type !== 'checkBox') {
-      if (values.isDefaultValue && !values.defaultValue) {
+    if (fieldData?.type !== 'checkBox') {
+      if (values?.isDefaultValue && !values?.defaultValue) {
         errors['defaultValue'] = 'Please enter default value.';
       }
     }
 
-    if (values.isTooltip && !values.tooltipMessage) {
+    if (values?.isTooltip && !values?.tooltipMessage) {
       errors['tooltipMessage'] = 'Please enter tooltip message.';
     }
 
-    if (values.isWarningTooltip && !values.warningTooltipMessage) {
+    if (values?.isWarningTooltip && !values?.warningTooltipMessage) {
       errors['warningTooltipMessage'] = 'Please enter warning message.';
     }
 
-    if (values.isFieldEntityWise && !values.fieldEntity?.length) {
+    if (values?.isFieldEntityWise && !values?.fieldEntity?.length) {
       errors['fieldEntity'] = 'Please select Entity.';
     }
 
-    if (values.lookup && !values.lookupResource) {
+    if (values?.lookup && !values?.lookupResource) {
       errors['lookupResource'] = 'Please select Lopkup Resource.';
     }
 
-    if (values.dataList && !values.dataListId) {
+    if (values?.dataList && !values?.dataListId) {
       errors['dataListId'] = 'Please select Data List.';
     }
 
@@ -467,11 +467,11 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       }
     }
 
-    if (values.type === 'lookUpDisplay') {
-      if (!values.lookUpField) {
+    if (values?.type === 'lookUpDisplay') {
+      if (!values?.lookUpField) {
         errors['lookUpField'] = 'Please enter look up field';
       }
-      if (!values.lookUpFieldDisplay) {
+      if (!values?.lookUpFieldDisplay) {
         errors['lookUpFieldDisplay'] = 'Please enter look up field display';
       }
     }
