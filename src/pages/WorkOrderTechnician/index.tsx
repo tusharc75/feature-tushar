@@ -4,7 +4,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import { Box, Checkbox, FormControlLabel, FormGroup, IconButton, Popover } from '@mui/material';
 import axios, { CancelToken } from 'axios';
 import { camelCase } from 'lodash';
-import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { BiFilterAlt } from 'react-icons/bi';
 import { FiExternalLink } from 'react-icons/fi';
 import { MdViewWeek } from 'react-icons/md';
@@ -13,7 +13,7 @@ import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import { useCardReducer } from 'src/components/CardColTimeline';
+import { FetchSingleColumnProps, useCardColTimeline } from 'src/components/CardColTimeline1';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
@@ -26,12 +26,21 @@ import routes from 'src/components/Helpers/Routes';
 import IconButtonTabs from 'src/components/IconButtonTabs';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHeader/NewActionButton';
-import { WORKORDER_SERVICE_STATUS, WORKORDER_TECHNICIAN_SERVICE_STATUS, sidebarResource, workOrder } from 'src/constants/helpers';
+import {
+  ACTIVITY_RESOURCE,
+  ATTACHMENT_TYPE,
+  WORKORDER_SERVICE_STATUS,
+  WORKORDER_TECHNICIAN_SERVICE_STATUS,
+  sidebarResource,
+  workOrder
+} from 'src/constants/helpers';
 import DisplayFilterChip from 'src/pages/Reports/tables/DisplayFilterChip';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import TechnicianDialog from 'src/pages/WorkOrderTechnician/TechnicianDialog';
 import CardView from './CardView';
 import GridView, { GridViewRef } from './GridView';
+
+type Columns = typeof WORKORDER_TECHNICIAN_SERVICE_STATUS;
 
 type ViewType = 'card-view' | 'table-view';
 
@@ -40,8 +49,7 @@ const renderedFrom = camelCase(sidebarResource?.workOrderTechnician);
 const WorkOrderTechnician = () => {
   const { generateColumns } = useColumns();
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useCardReducer();
-  const { selectedRecords: cardSelectedRecords } = state;
+
   const { state: tableState, dispatch: tableDispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords: tableSelectedRecords } = tableState;
   const gridViewRef = useRef<GridViewRef>();
@@ -50,13 +58,69 @@ const WorkOrderTechnician = () => {
   const [columnsDef, setColumnsDef] = useState(null);
   const history = useHistory();
   const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, workOrder: null });
-
-  const selectedRecords = useMemo(() => [...cardSelectedRecords, ...tableSelectedRecords], [cardSelectedRecords, tableSelectedRecords]);
+  const [selectedServiceStatus, setSelectedServiceStatus] = useState<any[]>([
+    WORKORDER_SERVICE_STATUS.pending,
+    WORKORDER_SERVICE_STATUS.inProgress,
+    WORKORDER_SERVICE_STATUS.completed
+  ]);
+  const [showFilter, setShowFilter] = useState(false);
+  const [filterByIds, setFilterByIds] = useState([]);
+  const [filterTerm, setFilterTerm] = useState({});
+  const [filterQuery, setFilterQuery] = useState([]);
+  const [showServiceCompleteConfirmBox, setShowServiceCompleteConfirmBox] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const resetSelectedRecords = () => {
-    dispatch({ type: 'selection', selectedRecords: [] });
+    state.resetSelection();
     tableDispatch({ type: 'selection', selectedRecords: [] });
   };
+
+  const fetchSingleColumnData = useCallback(async ({ column, filterQuery, limit, page, cancelToken }: FetchSingleColumnProps<any, Columns>) => {
+    const api = `/work-order-technician?page=${page}&status=${column}&limit=${limit}${filterQuery}`;
+    try {
+      const response = await axiosInstance().get(api, { cancelToken });
+      const {
+        data: { data, count }
+      } = response;
+      const rows = data.map((item) => {
+        const newObj = { ...item };
+        newObj['serviceName'] = item.service?.serviceName;
+        newObj['customServiceStatus'] = item.status;
+        newObj['workOrderNumber'] = item.workOrderDetail?.workOrderNumber;
+        newObj['repairOrderNumber'] = item.workOrderDetail?.repairOrder?.optionLabel;
+        newObj['productionOrderNumber'] = item.workOrderDetail?.productionOrder?.optionLabel;
+        newObj['assemblyOrderNumber'] = item.workOrderDetail?.assemblyOrder?.optionLabel;
+        newObj['serializedAsset'] = item.workOrderDetail?.serializedAsset?.optionLabel;
+        newObj['package'] = item.workOrderDetail?.package?.optionLabel;
+        newObj['assignedWorkStations'] = item?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString();
+        if (column !== WORKORDER_SERVICE_STATUS.completed) {
+          newObj['estimateCompleteDate'] = item.workOrderDetail?.estimateCompleteDate;
+        }
+        return newObj;
+      });
+      return { data: rows, count } as { data: any; count: number };
+    } catch (error) {
+      throw error;
+    }
+  }, []);
+
+  const state = useCardColTimeline({
+    fetchSingleColumn: fetchSingleColumnData,
+    columns: WORKORDER_TECHNICIAN_SERVICE_STATUS,
+    initialVisibleColumns: selectedServiceStatus,
+    columnDef: columnsDef,
+    keyGetter: (d) => d['_id'] as string
+  });
+
+  useEffect(() => {
+    state.setColumnDef(columnsDef);
+  }, [columnsDef]);
+
+  useEffect(() => {
+    state.setVisibleColumns(selectedServiceStatus);
+  }, [selectedServiceStatus]);
+
+  const selectedRecords = useMemo(() => [...tableSelectedRecords, ...state.selectedRecords], [tableSelectedRecords, state.selectedRecords]);
 
   const {
     state: {
@@ -81,6 +145,7 @@ const WorkOrderTechnician = () => {
         {
           accessor: 'serviceName',
           Header: 'Service',
+          disabled: true,
           disableFilters: true,
           disableSortBy: true,
           Cell: ({ row }) => (
@@ -125,7 +190,8 @@ const WorkOrderTechnician = () => {
               {row.original['workOrderNumber'] ? (
                 <IconButton
                   size="small"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     window.open(`${routes.workOrderDetail.path}/${row?.original?.workOrderId}`);
                   }}
                 >
@@ -311,21 +377,9 @@ const WorkOrderTechnician = () => {
     return (localStorage.getItem(`${renderedFrom}_view`) as ViewType) || 'card-view';
   });
 
-  const [selectedServiceStatus, setSelectedServiceStatus] = useState([
-    WORKORDER_SERVICE_STATUS.pending,
-    WORKORDER_SERVICE_STATUS.inProgress,
-    WORKORDER_SERVICE_STATUS.completed
-  ]);
-  const [showFilter, setShowFilter] = useState(false);
-  const [filterByIds, setFilterByIds] = useState([]);
-  const [filterTerm, setFilterTerm] = useState({});
-  const [filterQuery, setFilterQuery] = useState([]);
-  const [showServiceCompleteConfirmBox, setShowServiceCompleteConfirmBox] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   const onClickRefreshIcon = () => {
     if (viewType === 'card-view') {
-      ref?.current?.refreshData();
+      state.refreshAllColumns();
     }
     if (viewType === 'table-view') {
       gridViewRef?.current?.refreshGrid();
@@ -488,7 +542,13 @@ const WorkOrderTechnician = () => {
 
         {viewType === 'card-view' && (
           <div className="pt-2">
-            <CardView columnsDef={columnsDef} serviceStatus={selectedServiceStatus} filterQuery={filterQuery} ref={ref} />
+            <CardView
+              state={state}
+              setSelectedService={setSelectedService}
+              setServiceOpen={setServiceOpen}
+              columnsDef={columnsDef}
+              filterQuery={filterQuery}
+            />
           </div>
         )}
         {viewType === 'table-view' && (
@@ -578,6 +638,8 @@ const WorkOrderTechnician = () => {
           handleClose={() => {
             setShowDrawingDialog({ open: false, workOrder: null });
           }}
+          resource={ACTIVITY_RESOURCE.workOrder}
+          attachmentType={ATTACHMENT_TYPE.drawing}
         />
       )}
 

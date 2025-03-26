@@ -1,11 +1,11 @@
-import { useCardColTimeline } from 'src/components/CardColTimeline1/useCardColTimeline';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
+import { CancelToken } from 'axios';
 
 export type UseCardColState<D, C extends readonly string[]> = {
   data: Partial<Record<C[number], D[]>>;
   columns: C;
   visibleColumns: C[number][];
-  selectedRecordsObj: Record<string, boolean>;
+  selectedRecordsObj: Record<C[number], Record<string, boolean>>;
   count: Record<C[number], number>;
   loading: Record<C[number], boolean>;
   page: Record<C[number], number>;
@@ -40,11 +40,12 @@ export type ColumnColor = {
   indicatorColor: string;
 };
 
-export type InitProps<D, C extends readonly string[]> = {
+export type UseCardColTimelineProps<D, C extends readonly string[]> = {
   columns: UseCardColState<D, C>['columns'];
   initialVisibleColumns: UseCardColState<D, C>['visibleColumns'];
   columnDef?: UseCardColState<D, C>['visibleColumns'];
   fetchSingleColumn: (props: FetchSingleColumnProps<D, C>) => Promise<FetchSingleColumnReturnType<D>>;
+  keyGetter: (data: D) => string;
 };
 
 export type FetchSingleColumnProps<D, C extends readonly string[]> = {
@@ -52,15 +53,16 @@ export type FetchSingleColumnProps<D, C extends readonly string[]> = {
   page: number;
   filterQuery: UseCardColState<D, C>['filterQuery'];
   limit: number;
+  cancelToken?: CancelToken;
 };
 
 export type UseCardColTimeline<D, C extends readonly string[]> = {
   selectedRecords: string[];
   handleFetchSingleColumnWrapper: (column: UseCardColState<D, C>['columns'][number], page?: number) => Promise<void>;
   setData: (props: { column: UseCardColState<D, C>['columns'][number]; data: D[]; page: number; count?: number; pushData?: boolean }) => void;
-  setColumns: (payload: UseCardColState<D, C>['columns']) => void;
+  setColumns: (payload: C) => void;
   setVisibleColumns: (payload: UseCardColState<D, C>['visibleColumns']) => void;
-  handleSelect: (id: string) => void;
+  handleSelect: (id: string, column: UseCardColState<D, C>['columns'][number]) => void;
   setLoading: ({ column, loading }: { column: UseCardColState<D, C>['columns'][number]; loading: boolean }) => void;
   setLimit: (payload: UseCardColState<D, C>['limit']) => void;
   setColumnDef: (payload: UseCardColState<D, C>['columnDef']) => void;
@@ -68,12 +70,17 @@ export type UseCardColTimeline<D, C extends readonly string[]> = {
   setState: React.Dispatch<UseCardColActions<D, C>>;
   setDefaultVisibleRows: (num: UseCardColState<D, C>['defaultVisibleRows']) => void;
   refreshAllColumns: () => void;
+  handleSelectAll: (column: UseCardColState<D, C>['columns'][number]) => void;
+  isAllSelected: (column: UseCardColState<D, C>['columns'][number]) => boolean;
+  fetchSingleColumn: (props: FetchSingleColumnProps<D, C>) => Promise<FetchSingleColumnReturnType<D>>;
+  keyGetter: (data: D) => string;
+  resetSelection: () => void;
 } & UseCardColState<D, C>;
 
-export type CardColTimelineProps<D, C extends string[]> = {
+export type CardColTimelineProps<D, C extends readonly string[]> = {
   state: UseCardColTimeline<D, C>;
-  keyGetter: (data: D) => string;
-  getColor: (col: C[number]) => ColumnColor;
+
+  getColColors: (col: C[number]) => ColumnColor;
   cardOnClick?: (data: D) => void;
   passFailStatus?: boolean;
   passFailAccessor?: string;

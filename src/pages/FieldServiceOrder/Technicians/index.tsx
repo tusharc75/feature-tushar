@@ -255,6 +255,8 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
       element.warehouse = serviceOrderData?.warehouse?.optionValue;
       element.service = selectedService?.optionValue !== 'All' ? selectedService?.optionValue : null;
       element.uniqueId = selectedService?.optionValue !== 'All' ? selectedService?._id : null;
+      element.estimateStartDate = serviceOrderData?.estimateStartDate;
+      element.estimateEndDate = serviceOrderData?.estimateEndDate;
       technician.push(element);
     });
     axiosInstance()
@@ -332,7 +334,7 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
             isActionButtonVisible={true}
             actionButtonMenuItems={actionButtonMenuItems()}
             actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
-            leftSideContents={resourcePolicy?.addServices ? leftSideContents() : null}
+            leftSideContents={resourcePolicy?.addServices && serviceOption?.length > 1 ? leftSideContents() : null}
             hasXpadding
           />
         </>

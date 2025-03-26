@@ -16,7 +16,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { ACTIVITY_RESOURCE, ATTACHMENT_TYPE, CustomDialogTransition, WORK_ORDER_TYPE } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, CustomDialogTransition, WORK_ORDER_TYPE } from 'src/constants/helpers';
 import PdfPreview from './ShowPdf/PdfPreview';
 import ViewImage from './ViewImage';
 import { getFileIcon, getFileNameWithExtension } from './utils';
@@ -24,7 +24,15 @@ import ImageZoomPan from 'src/components/ImageZoomPan';
 
 const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
 
-const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVersions = false }) => {
+const Diagram = ({
+  resource,
+  referenceId,
+  uniqueId = null,
+  currentVersion = null,
+  resourceData = null,
+  disableEdit = false,
+  attachmentType = null
+}) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [rowData, setRowData] = useState(null);
@@ -40,10 +48,18 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
   }, [resource, referenceId, currentVersion]);
 
   const fetchData = async () => {
+    let query = `/attachment/resource-attachment-type?resource=${resource}&referenceId=${referenceId}`;
+    if (attachmentType) {
+      query = `${query}&attachmentType=${attachmentType}`;
+    }
+    if (uniqueId) {
+      query = `${query}&uniqueId=${uniqueId}`;
+    }
+    if (currentVersion) {
+      query = `${query}&version=${currentVersion}`;
+    }
     axiosInstance()
-      .get(
-        `/attachment/resource-attachment-type?resource=${resource}&referenceId=${referenceId}&attachmentType=${ATTACHMENT_TYPE.drawing}&version=${currentVersion}`
-      )
+      .get(query)
       .then(({ data: { data } }) => {
         const expend: any = {};
         setRowData(data);
@@ -129,10 +145,44 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
     );
   };
 
+  const getRelatedTo = () => {
+    const relatedTo: any = [
+      {
+        type: resource,
+        referenceId: referenceId,
+        ...(uniqueId ? { uniqueId: uniqueId } : {}),
+        ...(currentVersion ? { version: currentVersion } : {}),
+        access: true
+      }
+    ];
+
+    if (resource === ACTIVITY_RESOURCE.workOrder && resourceData) {
+      relatedTo.push({
+        type:
+          resourceData?.type === WORK_ORDER_TYPE.repairOrder
+            ? ACTIVITY_RESOURCE.repairOrder
+            : resourceData?.type === WORK_ORDER_TYPE.productionOrder
+              ? ACTIVITY_RESOURCE.productionOrder
+              : ACTIVITY_RESOURCE.assemblyOrder,
+        referenceId:
+          resourceData?.type === WORK_ORDER_TYPE.repairOrder
+            ? resourceData?.repairOrder?.optionValue || resourceData?.repairOrder
+            : resourceData?.type === WORK_ORDER_TYPE.productionOrder
+              ? resourceData?.productionOrder?.optionValue || resourceData?.productionOrder
+              : resourceData?.assemblyOrder?.optionValue || resourceData?.assemblyOrder,
+        access: true
+      });
+    }
+
+    return relatedTo;
+  };
+
+  console.log(selectedAttachment)
+
   return (
     <Box>
       <Box className="container-with-border" p={'20px'}>
-        {!fromVersions && (
+        {!disableEdit && (
           <Box className="mb-2 flex flex-wrap items-center justify-between gap-2 min-[600px]:justify-end">
             <h6 className="text-[16px] font-semibold min-[600px]:hidden">Attachments</h6>
             <ThemeButton
@@ -173,7 +223,7 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
                             </Typography>
                           </Box>
                         </div>
-                        {!fromVersions && (
+                        {!disableEdit && (
                           <div className="flex gap-2">
                             <HtmlTooltip title="Edit" placement="top" arrow>
                               <IconButton
@@ -278,7 +328,7 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
           fullWidth
         >
           <CustomDialogHeader
-            title={'Show Drawing'}
+            title={selectedAttachment?.name}
             showManimizeMaximize={false}
             showRequiredLabel={false}
             onClose={() => {
@@ -287,13 +337,13 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
           />
           <CustomDialogContent isFooterPresent={false}>
             {checkImageType(selectedAttachment?.url?.split('.')[1]) ? (
-              fromVersions ? (
+              disableEdit ? (
                 <ShowPdf data={selectedAttachment} />
               ) : (
                 <ViewImage data={selectedAttachment} fetchData={fetchData} setSelectedAttachment={setSelectedAttachment} />
               )
             ) : checkpdfType(selectedAttachment?.url?.split('.')[1]) ? (
-              fromVersions ? (
+              disableEdit ? (
                 <ShowPdf data={selectedAttachment} />
               ) : (
                 <PdfPreview data={selectedAttachment} fetchData={fetchData} setSelectedAttachment={setSelectedAttachment} />
@@ -326,28 +376,14 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
               setAttachemntDialog({ open: false, id: null, isClone: false });
               setFullScreen(false);
             }}
-            relatedTo={[
-              { type: resource, referenceId: referenceId, version: currentVersion, access: true },
-              {
-                type: workOrderData?.type === WORK_ORDER_TYPE.repairOrder ? ACTIVITY_RESOURCE.repairOrder :
-                  workOrderData?.type === WORK_ORDER_TYPE.productionOrder ? ACTIVITY_RESOURCE.productionOrder :
-                    ACTIVITY_RESOURCE.assemblyOrder,
-                referenceId:
-                  workOrderData?.type === WORK_ORDER_TYPE.repairOrder
-                    ? workOrderData?.repairOrder?.optionValue || workOrderData?.repairOrder :
-                    workOrderData?.type === WORK_ORDER_TYPE.productionOrder ?
-                      workOrderData?.productionOrder?.optionValue || workOrderData?.productionOrder :
-                      workOrderData?.assemblyOrder?.optionValue || workOrderData?.assemblyOrder,
-                access: true
-              }
-            ]}
+            relatedTo={getRelatedTo()}
             isMinimized={!fullScreen}
             onMinimizeMaximize={() => {
               setFullScreen((prevState) => !prevState);
             }}
             showManimizeMaximize={true}
             fetchData={fetchData}
-            defaultAttachmentType={ATTACHMENT_TYPE.drawing}
+            attachmentType={attachmentType}
           />
         </Dialog>
       )}
@@ -406,11 +442,7 @@ const ImagePreview = ({ name, url }: ImagePreviewProps) => {
 
   return (
     <div className="mb-[--py] flex h-[500px]  max-w-fit items-center justify-center overflow-hidden px-[--px]">
-      {src ? (
-        <img src={src} alt={name} className="mr-auto max-h-full max-w-full" />
-      ) : (
-        <p>Loading...{progress >= 0 ? progress : 0}%</p>
-      )}
+      {src ? <img src={src} alt={name} className="mr-auto max-h-full max-w-full" /> : <p>Loading...{progress >= 0 ? progress : 0}%</p>}
     </div>
   );
 };
