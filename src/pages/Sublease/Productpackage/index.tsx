@@ -18,7 +18,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, pricingCondition, sidebarResource, sublease } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, PACKAGE_TYPE, PRICING_SETUP_TYPE, pricingCondition, sidebarResource, sublease } from '../../../constants/helpers';
 import QtyDialog from './QtyDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
@@ -535,7 +535,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
-          packageType={'product'}
+          packageType={PACKAGE_TYPE.product}
           isSubmitting={isSubmitting}
         />
       )}

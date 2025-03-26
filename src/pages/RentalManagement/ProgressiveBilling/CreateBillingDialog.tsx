@@ -19,7 +19,8 @@ import {
   sidebarResource,
   getObjKeysWithValues,
   displayDate,
-  dateFormatToSend
+  dateFormatToSend,
+  PACKAGE_TYPE
 } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -176,7 +177,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === MATERIAL_TYPE.package
-                  ? row.original?.packageDetail?.packageType === 'Product'
+                  ? row.original?.packageDetail?.packageType === PACKAGE_TYPE.product
                     ? '(Product)'
                     : '(Service)'
                   : row.original.type === MATERIAL_TYPE.service

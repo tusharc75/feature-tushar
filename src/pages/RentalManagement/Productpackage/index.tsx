@@ -34,6 +34,7 @@ import {
   DELIVERY_TICKET_TYPE,
   deliveryTicket,
   MATERIAL_TYPE,
+  PACKAGE_TYPE,
   PRICING_SETUP_TYPE,
   RENTAL_STATUS,
   rentalManagement,
@@ -215,7 +216,7 @@ const Productpackage = ({
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === MATERIAL_TYPE.package
-                  ? row.original?.packageDetail.packageType === 'Product'
+                  ? row.original?.packageDetail.packageType === PACKAGE_TYPE.product
                     ? '(Product)'
                     : '(Service)'
                   : row.original.type === MATERIAL_TYPE.service
@@ -444,7 +445,7 @@ const Productpackage = ({
     let rows = data.material.filter((e) => e.parentId === null).filter((e) => e.type !== MATERIAL_TYPE.service);
 
     let products = rows.filter((e) => e.type === MATERIAL_TYPE.product && !e?.isConsumbale);
-    let packages = rows.filter((e) => e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType !== 'Service');
+    let packages = rows.filter((e) => e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType !== PACKAGE_TYPE.service);
 
     rows = [...products, ...packages, ...additionalCosts];
 
@@ -1100,7 +1101,7 @@ const Productpackage = ({
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'newPackage' && (
         <ManagePackageDialog
-          referenceData={{ packageType: 'Product', customerAccount: rentalManagementData?.customerAccount?.optionValue }}
+          referenceData={{ packageType: PACKAGE_TYPE.product, customerAccount: rentalManagementData?.customerAccount?.optionValue }}
           isClone={false}
           open={addExistingProductDialog.open}
           packageId={null}
