@@ -13,6 +13,7 @@ import {
   ASSET_STATUS,
   CHILD_RESOURCE,
   MATERIAL_TYPE,
+  PACKAGE_TYPE,
   QUOTATION_STATUS,
   QUOTATION_TYPE,
   fieldServiceOrder,
@@ -112,7 +113,7 @@ const QuoteBuilder = ({
                     ? '(Serialized)'
                     : '(Non-Serialized)'
                   : row.original?.type === 'package'
-                    ? row.original?.packageDetail.packageType === 'Product'
+                    ? row.original?.packageDetail.packageType === PACKAGE_TYPE.product
                       ? '(Product)'
                       : '(Service)'
                     : row.original.type === 'service'

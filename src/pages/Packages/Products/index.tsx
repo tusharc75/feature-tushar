@@ -19,7 +19,7 @@ import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { packages, sidebarResource, prepareDataForGrid, WORK_ORDER_TYPE_LABEL, WORK_ORDER_TYPE } from 'src/constants/helpers';
+import { packages, sidebarResource, prepareDataForGrid, WORK_ORDER_TYPE_LABEL, WORK_ORDER_TYPE, PACKAGE_TYPE } from 'src/constants/helpers';
 
 const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false }) => {
   const renderedFrom = `${camelCase(sidebarResource?.packages)}_product`;
@@ -210,7 +210,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
     });
     axiosInstance()
       .put(`${packages.api}/material/${packageId}/order`, {
-        packageType: 'Product',
+        packageType: PACKAGE_TYPE.product,
         data: rows || [],
         type: selectedResource
       })
@@ -323,7 +323,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
       )}
       {showProductAssignDialog && (
         <AssignProductDialog
-          serialized={packageData?.packageType === 'Service' ? false : null}
+          serialized={packageData?.packageType === PACKAGE_TYPE.service ? false : null}
           handleCloseDialog={() => setShowProductAssignDialog(false)}
           ids={[...dataRows?.map((e) => e._id)]}
           onSuccess={(rows) => {

@@ -4,7 +4,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { prepareDataForGrid, packages, sidebarResource } from 'src/constants/helpers';
+import { prepareDataForGrid, packages, sidebarResource, PACKAGE_TYPE } from 'src/constants/helpers';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -280,7 +280,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
           onSuccess={(rows) => {
             handleAssignPackage(rows);
           }}
-          packageType={'Product'}
+          packageType={PACKAGE_TYPE.product}
           isSubmitting={isSubmitting}
         />
       )}
@@ -291,7 +291,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
           onSuccess={(rows) => {
             handleAssignPackage(rows);
           }}
-          packageType={'Service'}
+          packageType={PACKAGE_TYPE.product}
           isSubmitting={isSubmitting}
         />
       )}

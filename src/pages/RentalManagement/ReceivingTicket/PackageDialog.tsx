@@ -7,7 +7,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { CustomDialogTransition, MATERIAL_TYPE, rentalManagement } from 'src/constants/helpers';
+import { CustomDialogTransition, MATERIAL_TYPE, PACKAGE_TYPE, rentalManagement } from 'src/constants/helpers';
 
 const PackageDialog = ({ onClose, rentalManagementData, onSuccess }) => {
   const [packageOptions, setPackageOptions] = useState([]);
@@ -23,7 +23,7 @@ const PackageDialog = ({ onClose, rentalManagementData, onSuccess }) => {
       .then(({ data: { data } }) => {
         setPackageOptions(
           data?.material
-            ?.filter((m) => m?.type === MATERIAL_TYPE.package && m?.packageDetail?.packageType === 'Product')
+            ?.filter((m) => m?.type === MATERIAL_TYPE.package && m?.packageDetail?.packageType === PACKAGE_TYPE.product)
             ?.map((m) => ({ optionLabel: m?.packageDetail?.packageName, optionValue: m?._id }))
         );
       })
