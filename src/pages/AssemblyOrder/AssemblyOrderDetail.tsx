@@ -124,11 +124,13 @@ const AssemblyOrderDetail = () => {
       });
   };
 
-  const fetchData = (isSerializedPackageCreated = false) => {
+  const fetchData = () => {
     axiosInstance()
       .get(`${routes.assemblyOrder.path}/${id}`)
       .then(({ data: { data } }) => {
-        if (!isSerializedPackageCreated) {
+        if ([ASSEMBLY_ORDER_STATUS.converted]?.includes(data?.status)) {
+          setCurrentStep(assemblyOrderSteps?.length - 1);
+        } else {
           setCurrentStep(getIndex(data?.processStatus, assemblyOrderSteps));
         }
 
