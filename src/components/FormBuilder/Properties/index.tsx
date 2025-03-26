@@ -295,11 +295,13 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             if (fieldData.type === 'formula' || values.isFormula) {
               ele.formula = values.formula;
               ele.inputFields = values.inputFields;
+              ele.counterFieldInputFields = values.counterFieldInputFields;
               ele.returnType = values.returnType ? values.returnType : 'decimal';
               ele.decimalPlaces = values.decimalPlaces ? values.decimalPlaces : 2;
             } else {
               ele.formula = '';
               ele.inputFields = [];
+              ele.counterFieldInputFields = [];
             }
             if (fieldData.type === 'vlookupDropdown' || fieldData.isVlookup) {
               values.option.forEach((ele) => {
@@ -379,6 +381,10 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       let inputValues = {};
       values.inputFields &&
         values.inputFields.forEach((_input) => {
+          inputValues[_input] = 1;
+        });
+      values.counterFieldInputFields &&
+        values.counterFieldInputFields.forEach((_input) => {
           inputValues[_input] = 1;
         });
       if (!checkFormula(values.formula, inputValues)) {
@@ -604,7 +610,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
 
             {showConfirmDialog ? (
               <ConfirmCancelDialog
-                close={() => setShowConfirmDialog(false)}
                 open={showConfirmDialog}
                 onSave={() => {
                   setShowConfirmDialog(false);

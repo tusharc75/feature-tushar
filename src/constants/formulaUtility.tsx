@@ -251,17 +251,68 @@ const handleMulitFormula = (fieldData, fields, values, resultValues) => {
 };
 
 const handleFormula = (fieldData, fields, values, name, value, resultValues, isOverride) => {
-  if (fields && fields.filter((_f) => (_f.type === 'formula' || _f.isFormula === true) && _f.inputFields.includes(name)).length) {
+  if (
+    fields &&
+    fields.filter(
+      (_f) =>
+        (_f.type === 'formula' || _f.isFormula === true) &&
+        (_f?.inputFields?.includes(name)?.length || _f?.counterFieldInputFields?.includes(name)?.length)
+    )
+  ) {
     fields
-      .filter((_f) => (_f.type === 'formula' || _f.isFormula === true) && _f.inputFields.includes(name))
+      .filter(
+        (_f) => (_f.type === 'formula' || _f.isFormula === true) && (_f.inputFields.includes(name) || _f.counterFieldInputFields.includes(name))
+      )
       .forEach((_data) => {
-        if (_data.inputFields.includes(name)) {
+        if (_data.inputFields.includes(name) || _data.counterFieldInputFields.includes(name)) {
           loop_count++;
           if (loop_count > 300) {
             console.warn('Loop in formula');
             return resultValues;
           }
           let inputFields = {};
+
+          // Handling counter field subfields if present in formula
+          if (_data?.counterFieldInputFields?.length > 0) {
+            const counterSubFields = [];
+
+            for (const subFieldName of _data.counterFieldInputFields) {
+              for (const inputField of _data.inputFields) {
+                let breakFlag = false;
+                const counterFieldData = fields.find((f) => f.fieldName === inputField && f.type === 'counter');
+                for (const subField of counterFieldData.subFields) {
+                  if (subField.fieldName === subFieldName) {
+                    counterSubFields.push({
+                      counterFieldName: counterFieldData.fieldName,
+                      subFieldName: subFieldName,
+                      subFieldType: subField.type,
+                      values: values[counterFieldData.fieldName]
+                    });
+                    breakFlag = true;
+                    break;
+                  }
+                }
+                if (breakFlag) break;
+              }
+            }
+
+            for (const subField of counterSubFields) {
+              if (subField?.subFieldType === 'decimal') {
+                if (subField?.values && Array.isArray(subField?.values)) {
+                  let sum = 0;
+                  subField?.values?.forEach((item) => {
+                    if (item[subField?.subFieldName] && !isNaN(parseFloat(item[subField?.subFieldName]))) {
+                      sum += parseFloat(item[subField?.subFieldName]);
+                    }
+                  });
+
+                  inputFields[subField?.subFieldName] = sum;
+                }
+              }
+              // Future type handlers can be added here
+            }
+          }
+
           _data.inputFields.forEach((_input) => {
             if (name === _input) {
               inputFields[_input] = value;
@@ -732,18 +783,20 @@ export const checkFormulaLoop = (fields) => {
     var duplicateList = [];
     fields.forEach((_f) => {
       const fFieldName = _f?.fieldName || _f?.fieldLabel;
-      if (fields.filter((_d) => {
-        const dFieldName = _d?.fieldName || _d?.fieldLabel;
-        if (dFieldName === fFieldName) {
-          if (!_d?.fieldEntity?.length || !_f?.fieldEntity?.length) {
-            return true;
-          } else if (_f?.fieldEntity?.some((entity) => _d?.fieldEntity?.includes(entity))) {
-            return true;
-          } else {
-            return false;
+      if (
+        fields.filter((_d) => {
+          const dFieldName = _d?.fieldName || _d?.fieldLabel;
+          if (dFieldName === fFieldName) {
+            if (!_d?.fieldEntity?.length || !_f?.fieldEntity?.length) {
+              return true;
+            } else if (_f?.fieldEntity?.some((entity) => _d?.fieldEntity?.includes(entity))) {
+              return true;
+            } else {
+              return false;
+            }
           }
-        }
-      }).length > 1) {
+        }).length > 1
+      ) {
         duplicateList.push(_f.fieldLabel);
       }
     });

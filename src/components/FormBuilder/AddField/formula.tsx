@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
@@ -15,10 +15,27 @@ import { IconButton } from '@mui/material';
 import { FiMaximize2 } from 'react-icons/fi';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { isEmpty } from 'lodash';
 
 export const Formula = ({ fields, values, setFieldValue, _id, touched, errors }) => {
   const [formulaError, setFormulaError] = useState(null);
   const [stepFullScreen, setStepFullScreen] = useState(false);
+  const [counterSubFieldInputFields, setCounterSubFieldInputFields] = useState(null);
+
+  useEffect(() => {
+    const counterFields = [];
+    values['inputFields']?.forEach((_v) => {
+      if (fields?.filter((data) => data?.fieldName === _v).length) {
+        const field = fields?.filter((data) => data?.fieldLabel === _v || data?.fieldName === _v)[0];
+        if (field?.subFields?.length > 0) {
+          counterFields.push(...field?.subFields);
+        }
+      }
+    });
+    setCounterSubFieldInputFields(counterFields);
+    if (isEmpty(values['inputFields'])) setFieldValue('counterFieldInputFields', []);
+  }, [values['inputFields'], fields]);
+
 
   const inputRef = useRef<any>();
 
@@ -27,6 +44,10 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
       let inputValues = {};
       values['inputFields'] &&
         values['inputFields'].forEach((_input) => {
+          inputValues[_input] = 1;
+        });
+      values['counterFieldInputFields'] &&
+        values['counterFieldInputFields'].forEach((_input) => {
           inputValues[_input] = 1;
         });
       if (checkFormula(values['formula'], inputValues)) {
@@ -80,6 +101,20 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
     }
   };
 
+  const getSelectedCounterFieldSubFields = () => {
+    let counterFields = [];
+    fields?.forEach((field) => {
+      if (values['inputFields']?.includes(field?.fieldName) && field?.type === 'counter' && field?.subFields?.length > 0) {
+        field?.subFields.forEach((subField) => {
+          if (values['counterFieldInputFields']?.includes(subField?.fieldName)) {
+            counterFields.push(subField);
+          }
+        });
+      }
+    });
+    return counterFields || [];
+  }
+
   return (
     <Box>
       <Grid container justifyContent="flex-end">
@@ -130,14 +165,48 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
                 />
               )}
             />
+            {values['inputFields'] && values['inputFields'].length > 0 && (
+              <Box pt={0.5} pb={0.5}>
+                {values['inputFields'].map((_field) => (
+                  <Chip className="mb-1 ml-1 cursor-pointer" key={_field} label={generateLabel(_field)} onClick={() => handleAddInputField(_field)} />
+                ))}
+              </Box>
+            )}
+            {counterSubFieldInputFields?.length > 0 && (
+              <Autocomplete
+                multiple
+                disableCloseOnSelect={true}
+                id="counter-tags-filled"
+                options={counterSubFieldInputFields}
+                getOptionLabel={(option) => option?.fieldLabel || ''}
+                value={getSelectedCounterFieldSubFields()}
+                renderTags={(value: any[], getTagProps) =>
+                  value?.map((option: any, index: number) => <Chip variant="outlined" label={option?.fieldLabel} {...getTagProps({ index })} />)
+                }
+                onChange={(e, value) => setFieldValue('counterFieldInputFields', value?.map((_v) => _v?.fieldName))}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    margin="dense"
+                    size="small"
+                    variant="outlined"
+                    label="Counter Field Parameters"
+                    placeholder="Counter Field Parameters"
+                    name="counterFieldInputFields"
+                    error={touched['counterFieldInputFields'] && Boolean(errors['counterFieldInputFields'])}
+                    helperText={touched['counterFieldInputFields'] && errors['counterFieldInputFields']}
+                  />
+                )}
+              />
+            )}
+            {values['counterFieldInputFields'] && values['counterFieldInputFields'].length > 0 && (
+              <Box pt={0.5} pb={0.5}>
+                {values['counterFieldInputFields'].map((_field) => (
+                  <Chip className="mb-1 ml-1 cursor-pointer" key={_field} label={generateLabel(_field)} onClick={() => handleAddInputField(_field)} />
+                ))}
+              </Box>
+            )}
           </FormControl>
-          {values['inputFields'] && values['inputFields'].length > 0 && (
-            <Box pt={0.5} pb={0.5}>
-              {values['inputFields'].map((_field) => (
-                <Chip className="mb-1 ml-1 cursor-pointer" key={_field} label={generateLabel(_field)} onClick={() => handleAddInputField(_field)} />
-              ))}
-            </Box>
-          )}
           <Box pt={0.5}>
             <TextField
               id="standard-basic"
@@ -163,7 +232,7 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
               }}
             />
             <Grid container>
-              <Grid size={{xs:6}}>
+              <Grid size={{ xs: 6 }}>
                 {formulaError && (
                   <Typography variant="caption" display="block">
                     {formulaError}{' '}
@@ -173,7 +242,7 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
                   Check Syntax
                 </ThemeButton>
               </Grid>
-              <Grid size={{xs:6}}>
+              <Grid size={{ xs: 6 }}>
                 {values['type'] === 'currencyAmount' && (
                   <FormControl fullWidth margin="dense" variant="outlined" size="small">
                     <InputLabel id="demo-simple-select-outlined-label">Formula applied on Currency</InputLabel>

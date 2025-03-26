@@ -1,11 +1,13 @@
-import { Box, Grid, IconButton, Typography } from '@mui/material';
+import { Box, IconButton, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useCallback, useEffect, useState } from 'react';
 import { getObjKeys, gridSize, setFieldsInAscendingOrder } from 'src/constants/helpers';
 import FormTypes from '../../FormTypes';
+import { handleAutoCalculation } from 'src/constants/formulaUtility';
 
 let timeout: NodeJS.Timeout;
 
-const Counter = ({ label, values, name, setFieldValue, fieldData, touched, errors, defaultValue, ...rest }) => {
+const Counter = ({ label, values, name, setFieldValue, fieldData, touched, errors, defaultValue, fields, ...rest }) => {
   const [error, setError] = useState({});
   const [touch, setTouch] = useState({});
   const [formsData, setFormsData] = useState([]);
@@ -26,6 +28,36 @@ const Counter = ({ label, values, name, setFieldValue, fieldData, touched, error
         newData = [...newData].splice(0, count);
       }
       setFieldValue(name, newData);
+
+      // for resetting fields which are dependent on counter sub fields for their values
+      for (const field of fields) {
+        let breakFlag = false;
+        const { counterFieldInputFields } = field || {};
+        if (!counterFieldInputFields?.length) continue;
+
+        for (const counterField of counterFieldInputFields) {
+          const hasMatchingSubField = fieldData?.subFields?.some((f) => f.fieldName === counterField);
+          if (hasMatchingSubField) {
+            const result = handleAutoCalculation(
+              fieldData,
+              fields,
+              newData,
+              counterField,
+              '',
+              '',
+              values[counterField]
+            );
+            Object.entries(result).forEach(([key, value]) => {
+              setFieldValue(key, value);
+            });
+            breakFlag = true;
+            break;
+          }
+        }
+        if (breakFlag) {
+          break;
+        }
+      }
     },
     [fieldData?.subFields, name, setFieldValue, values]
   );
@@ -57,6 +89,38 @@ const Counter = ({ label, values, name, setFieldValue, fieldData, touched, error
     },
     [handleAddRemoveMulti]
   );
+
+  const handleCounterSubFieldChange = (index, fieldName, value) => {
+
+    const result = handleAutoCalculation(fieldData?.subFields?.find(f => f.fieldName === fieldName), fieldData.subFields, values[name][index], fieldName, '', '', value);
+
+    const updatedValues = values[name]?.map((_v, i) => {
+      if (index === i) {
+        return {
+          ..._v,
+          ...result
+        };
+      }
+      return _v;
+    }) || [];
+
+    setFieldValue(name, updatedValues);
+
+    const result2 = handleAutoCalculation(
+      fieldData,
+      fields,
+      { ...values, [name]: updatedValues },
+      fieldName,
+      '',
+      '',
+      value,
+    );
+
+    for (var x in result2) {
+      setFieldValue(x, result2[x]);
+    }
+  };
+
 
   useEffect(() => {
     if (defaultValue && !isNaN(+defaultValue)) {
@@ -140,23 +204,24 @@ const Counter = ({ label, values, name, setFieldValue, fieldData, touched, error
                     {formsData.length > 0 &&
                       formsData?.map((form, index1) => {
                         return form?.name ? (
-                          <Grid key={index1} item xs={12} sm={12} md={12} lg={12} xl={12}>
+                          <Grid key={index1} size={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}>
                             <Typography variant="body2">{form.name}</Typography>
                             <Box marginY={2}>
                               <Grid container spacing={1}>
                                 {form?.sectionFields?.map((field, index2) => (
                                   <Grid
                                     key={index2}
-                                    item
-                                    xs={12}
-                                    sm={field?.columnSize ? field?.columnSize : gridSize(field.type)}
-                                    md={field?.columnSize ? field?.columnSize : gridSize(field.type)}
-                                    lg={field?.columnSize ? field?.columnSize : gridSize(field.type)}
-                                    xl={field?.columnSize ? field?.columnSize : gridSize(field.type)}
+                                    size={{
+                                      xs: 12,
+                                      sm: field?.columnSize ? field?.columnSize : gridSize(field.type),
+                                      md: field?.columnSize ? field?.columnSize : gridSize(field.type),
+                                      lg: field?.columnSize ? field?.columnSize : gridSize(field.type),
+                                      xl: field?.columnSize ? field?.columnSize : gridSize(field.type)
+                                    }}
                                   >
                                     <FormTypes
                                       {...field}
-                                      fieldData={field}
+                                      fieldData={{ ...field, isCounterSubField: true }}
                                       values={value}
                                       errors={error[`${index}`] || {}}
                                       touched={touch[`${index}`] || {}}
@@ -165,24 +230,14 @@ const Counter = ({ label, values, name, setFieldValue, fieldData, touched, error
                                       type={field.type}
                                       options={field.option}
                                       setFieldValue={(n, v) => {
-                                        setFieldValue(
-                                          name,
-                                          values[name]?.map((_v, i) => {
-                                            if (index === i) {
-                                              return {
-                                                ..._v,
-                                                [n]: v
-                                              };
-                                            }
-                                            return _v;
-                                          })
-                                        );
+                                        handleCounterSubFieldChange(index, n, v);
                                       }}
                                       required={field.required}
                                       fullWidth
                                       isTooltip={field?.isTooltip || false}
                                       tooltipMessage={field?.tooltipMessage}
                                       size="small"
+                                      fields={fieldData.subFields}
                                     />
                                   </Grid>
                                 ))}
