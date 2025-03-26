@@ -15,7 +15,7 @@ import {
   checkIsAllowedToDelete,
   checkIsAllowedToEdit,
   getResourceNormalizeData,
-  sidebarResource,
+  sidebarResource
 } from 'src/constants/helpers';
 import Steps, { getIndex } from 'src/components/Steps';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -135,9 +135,9 @@ const AssemblyOrderDetail = () => {
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.assemblyOrder, data) && data?.status != ASSEMBLY_ORDER_STATUS.converted);
         setAllowedToDelete(
           permissions?.assemblyOrder?.isDelete &&
-          checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
-          data?.canDelete &&
-          ![ASSEMBLY_ORDER_STATUS.converted, ASSEMBLY_ORDER_STATUS.partiallyConverted]?.includes(data?.status)
+            checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
+            data?.canDelete &&
+            ![ASSEMBLY_ORDER_STATUS.converted, ASSEMBLY_ORDER_STATUS.partiallyConverted]?.includes(data?.status)
         );
         setAssemblyOrderData({ ...data });
       })
@@ -258,6 +258,7 @@ const AssemblyOrderDetail = () => {
                 renderedFrom={`${renderedFrom}_grid-1`}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={allowedToEdit}
+                fetchAssembleOrderData={fetchData}
               />
             )}
             {assemblyOrderProcessStepsNames[currentStep] === 'Work Order' && assemblyOrderData && (
@@ -340,7 +341,11 @@ const AssemblyOrderDetail = () => {
           }}
           onSuccess={convertToRental}
           open={true}
-          referenceData={getResourceNormalizeData(allFields?.map((e) => e?.fieldData), assemblyOrderData, assemblyOrderData?.currency)}
+          referenceData={getResourceNormalizeData(
+            allFields?.map((e) => e?.fieldData),
+            assemblyOrderData,
+            assemblyOrderData?.currency
+          )}
         />
       )}
     </Box>

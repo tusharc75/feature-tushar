@@ -25,6 +25,7 @@ import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { FiExternalLink } from 'react-icons/fi';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 
 const View = ({
   step,
@@ -353,6 +354,24 @@ const View = ({
       : null;
   };
 
+  const rightSideContents = () => {
+    return (
+      <>
+        <ImportExportMenu
+          permissions={{ isCreate: true, isRead: true }}
+          module={resource}
+          api={`/dynamic-form/step/${resourceId}/${step?._id}`}
+          afterImportCompleted={() => {
+            fetchData();
+          }}
+          isExportAllOrSomeFeature={true}
+          ids={[]}
+          headers={{ Resource: resource }}
+        />
+      </>
+    );
+  };
+
   return (
     <>
       {step?.linkWithResource ? (
@@ -382,6 +401,7 @@ const View = ({
                         </ThemeButton>
                       ) : null
                     }
+                    rightSideContents={step?.fields?.length > 0 && step?.multipleStepData ? rightSideContents() : null}
                   />
                 )}
                 <Box zIndex={5} width={'100%'}>

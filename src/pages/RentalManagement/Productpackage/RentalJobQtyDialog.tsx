@@ -4,7 +4,6 @@ import Grid from '@mui/material/Grid2';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import axiosInstance from '../../../axios/axiosInstance';
 import { isArray, uniqBy } from 'lodash';
 import { getObjKeysWithValues, getObjKeys, yupSchema, fieldLabelToFieldName, PRICING_SETUP_TYPE, sidebarResource } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -18,13 +17,11 @@ import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
-import routes from 'src/components/Helpers/Routes';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import dayjs from 'dayjs';
 import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
-import { getPricingConditions } from 'src/components/PricingCondition';
+import { getPricingConditions, getTaxList } from 'src/components/PricingCondition';
 import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 
 interface EditDialogProps {
@@ -60,8 +57,6 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
 }) => {
   const ref = useRef(null);
 
-  const toastConfig = useContext(CustomToastContext);
-
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [allFields, setAllFields] = useState([]);
   const [fields, setFields] = useState([]);
@@ -85,26 +80,6 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
   useEffect(() => {
     fetchData();
   }, [rowData]);
-
-  const fetchTaxRate = async (address: any, taxCode: any) => {
-    const zipCode = address?.zipCode;
-    const state = address?.state;
-    const county = address?.county;
-    let api = `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&county=${county}`
-    if (!isBulkedit) {
-      api += `&materialType=${rowData?.type}`
-    }
-    if (taxCode) {
-      api += `&taxCode=${taxCode}`
-    }
-    try {
-      const response = await axiosInstance().get(api);
-      return response?.data?.data || [];
-    } catch (e) {
-      toastConfig.setToastConfig(e);
-    }
-  };
-
 
   const fetchData = async () => {
     setFetchingData(true);
@@ -205,32 +180,17 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       fields = fields.filter((d) => d.fieldName !== 'pricingCondition' && d.fieldName !== 'pricingMethod');
     }
 
-    if (!rentalManagementData?.taxCode?.optionValue) {
-      const taxApplicableField =
-        user?.user?.brandPolicy?.rentalTaxAppliedOn && user?.user?.brandPolicy?.rentalTaxAppliedOn !== ''
-          ? fieldLabelToFieldName(user?.user?.brandPolicy?.rentalTaxAppliedOn)
-          : 'billingAddress';
+    const taxApplicableField = user?.user?.brandPolicy?.rentalTaxAppliedOn && user?.user?.brandPolicy?.rentalTaxAppliedOn !== ''
+      ? fieldLabelToFieldName(user?.user?.brandPolicy?.rentalTaxAppliedOn)
+      : 'billingAddress';
 
-      if (rentalManagementData?.customerAccount?.taxApplicable &&
-        (rentalManagementData?.[taxApplicableField]?.zipCode ||
-          rentalManagementData?.[taxApplicableField]?.state ||
-          rentalManagementData?.[taxApplicableField]?.county)
-      ) {
-        const taxCodeOptions = await fetchTaxRate(rentalManagementData?.[taxApplicableField], rentalManagementData?.taxCode?.optionValue);
-        fields?.forEach((e: any) => {
-          if (e?.fieldName === 'taxCode') {
-            e.option = taxCodeOptions;
-          }
-        });
+    const taxCodeOptions = await getTaxList(user, rentalManagementData, isBulkedit ? rowData[0]?.type : rowData?.type, taxApplicableField);
+    fields?.forEach((e: any) => {
+      if (e?.fieldName === 'taxCode') {
+        e.option = taxCodeOptions;
       }
-    }
-
-    const sections = uniq(
-      map(
-        fields?.filter((f) => f?.isRead),
-        'sectionName'
-      )
-    );
+    });
+    const sections = uniq(map(fields?.filter((f) => f?.isRead), 'sectionName'));
     const customData = sections.map((name) => {
       let sectionFields = fields.filter((field) => field.sectionName === name && field?.isRead);
       sectionFields = orderBy(sectionFields, 'order', 'asc');

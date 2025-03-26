@@ -216,6 +216,14 @@ const ScheduleMaintenance = () => {
         </>
       )
     });
+    if(selectedType === 2) {
+      coloum.push({
+        accessor: 'status',
+        Header: 'Status',
+        width: 200,
+        Cell: ({ row }) => (row.original?.status ? <p>{row.original?.status}</p> : <NoDataCell />)
+      })
+    }
     setColumns([...coloum, ...getStaticFields()]);
   };
 

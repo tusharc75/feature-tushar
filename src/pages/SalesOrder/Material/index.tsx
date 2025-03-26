@@ -330,7 +330,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
   const handleAdd = async (rows) => {
     setSubmitting(true);
     var taxCodeData: any = null;
-    const taxCodeOptions = await getTaxList(salesOrderData, addDialog.type);
+    const taxCodeOptions = await getTaxList(user, salesOrderData, addDialog.type);
     if (taxCodeOptions?.length) {
       taxCodeData = taxCodeOptions[0];
     }

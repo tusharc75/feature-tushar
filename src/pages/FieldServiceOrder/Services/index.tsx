@@ -31,7 +31,7 @@ import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceFi
 import { ownerAndColaborator } from 'src/constants/messageHelpers';
 import { FiExternalLink } from 'react-icons/fi';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
-import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
+import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
 import MaterialQtyDialog from 'src/pages/FieldServiceOrder/Technicians/MaterialQtyDialog';
 
 
@@ -52,7 +52,7 @@ const Services = ({ serviceOrderData, stepFullScreen, allowedToEdit, handleChang
   const [refreshChild, setRefreshChild] = useState(false);
 
   const {
-    state: { permissions, resources }
+    state: { permissions, user }
   }: any = useData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
@@ -294,16 +294,11 @@ const Services = ({ serviceOrderData, stepFullScreen, allowedToEdit, handleChang
   const handleAdd = async (rows: any, type: string) => {
     setIsSubmitting(true);
     var taxCodeData: any = null;
-    if (serviceOrderData?.taxCode) {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`${routes?.taxMaster.path}/by-zipcode?taxCode=${serviceOrderData?.taxCode?.optionValue}&materialType=${type}`);
-      if (data?.length) {
-        taxCodeData = data[0];
-      }
+    const taxCodeOptions = await getTaxList(user, serviceOrderData, type);
+    if (taxCodeOptions?.length) {
+      taxCodeData = taxCodeOptions[0];
     }
     const material: any = [];
-
     rows.forEach((d) => {
       const element: any = {};
       element.materialId = d._id;

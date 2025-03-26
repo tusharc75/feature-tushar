@@ -14,10 +14,10 @@ import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
-import { fetchTaxRate } from './helper';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { bulkUpdate } from 'src/components/RentalManagment/helper';
 import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
+import { getTaxById } from 'src/components/PricingCondition';
 
 const CostDialog = ({ onClose, purchaseOrderData, handleAddCost, handleUpdateCost, costData, bulkEdit, showSaveAndNext, loadingEdit }) => {
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -80,14 +80,13 @@ const CostDialog = ({ onClose, purchaseOrderData, handleAddCost, handleUpdateCos
     });
 
     if (purchaseOrderData?.taxCode) {
-      const taxCodeOptions = await fetchTaxRate(purchaseOrderData?.taxCode?.optionValue);
+      const taxCodeOptions = await getTaxById(purchaseOrderData?.taxCode?.optionValue);
       fields?.forEach((e: any) => {
         if (e?.fieldName === 'taxCode') {
           e.option = taxCodeOptions;
         }
       });
     }
-
     setFields(customData);
   };
 

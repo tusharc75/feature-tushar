@@ -21,6 +21,7 @@ import { bulkUpdate, calculateRowsField } from '../../../components/RentalManagm
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import dayjs from 'dayjs';
 import { getPricingConditions, getTaxList } from 'src/components/PricingCondition';
+import { useData } from 'src/StateProvider/Provider';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -65,6 +66,10 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [saveAndNext, setSaveAndNext] = useState(false);
   const [fetchingData, setFetchingData] = useState(false);
+
+  const {
+    state: { user }
+  }: any = useData();
 
   useEffect(() => {
     fetchData();
@@ -219,7 +224,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
         (serviceOrderData?.billingAddress &&
           (serviceOrderData?.billingAddress?.zipCode || serviceOrderData?.billingAddress?.state || serviceOrderData?.billingAddress?.county)))
     ) {
-      const taxCodeOptions = await getTaxList(serviceOrderData?.billingAddress, isBulkedit ? rowData[0]?.type : rowData?.type);
+      const taxCodeOptions = await getTaxList(user, serviceOrderData?.billingAddress, isBulkedit ? rowData[0]?.type : rowData?.type);
       fields?.forEach((e: any) => {
         if (e?.fieldName === 'taxCode') {
           e.option = taxCodeOptions;

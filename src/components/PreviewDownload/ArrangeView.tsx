@@ -75,9 +75,6 @@ export default function ArrangeView({ columns, setColumns }) {
   const setColumnShowBelowRow = (id, value) => {
     setColumn(
       column.map((c) => {
-        if (value && !c.showBelowRow) {
-          return c.id === id ? { ...c, showBelowRow: value, alignment: null } : c;
-        }
         return c.id === id ? { ...c, showBelowRow: value } : c;
       })
     );
@@ -98,7 +95,7 @@ export default function ArrangeView({ columns, setColumns }) {
           width: e.width,
           customLabel: e?.customLabel,
           showBelowRow: e?.showBelowRow,
-          alignment: e?.showBelowRow ? null : e?.alignment
+          alignment: e?.alignment
         };
       })
     );
@@ -272,7 +269,6 @@ const RenderListItem = ({
           <Autocomplete
             size="small"
             fullWidth
-            disabled={showBelowRow}
             options={["left", "center", "right"]}
             getOptionLabel={(option) => startCase(option)}
             value={alignment}
@@ -307,10 +303,6 @@ const RenderListItem = ({
                   name={'showBelowRow'}
                   checked={showBelowRow}
                   onChange={(e) => {
-                    if (e.target.checked && alignment) {
-                      // Clearing alignment when showBelowRow is checked as it is illogical then
-                      setAlignment(null);
-                    }
                     setShowBelowRow(e.target.checked);
                   }}
                 />

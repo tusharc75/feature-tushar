@@ -22,7 +22,6 @@ import CostDialog from './CostDialog';
 import InventoryStatesDialog from './InventoryStatesDialog';
 import PurchaseOrderQtyDialog from './PurchaseOrderQtyDialog';
 import ServiceDialog from './ServiceDialog';
-import { fetchTaxRate } from './helper';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { FiExternalLink } from 'react-icons/fi';
@@ -37,6 +36,7 @@ import {
   generateEditService,
   generateDeleteStep
 } from '../walkmeSteps';
+import { getTaxById } from 'src/components/PricingCondition';
 
 const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit: hasPermission, checkReceivedProduct }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -404,7 +404,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
     setAddingProducts(true);
     const tax: any = {};
     if (purchaseOrderData?.taxCode) {
-      const taxRate = await fetchTaxRate(purchaseOrderData?.taxCode?.optionValue);
+      const taxRate = await getTaxById(purchaseOrderData?.taxCode?.optionValue);
       tax.taxCode = purchaseOrderData?.taxCode?.optionValue;
       tax.taxPercentage = taxRate?.length ? taxRate[0]?.taxRate : 0;
     }
@@ -536,7 +536,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
     setSubmitting(true);
     const tax: any = {};
     if (purchaseOrderData?.taxCode) {
-      const taxRate = await fetchTaxRate(purchaseOrderData?.taxCode?.optionValue);
+      const taxRate = await getTaxById(purchaseOrderData?.taxCode?.optionValue);
       tax.taxCode = purchaseOrderData?.taxCode?.optionValue;
       tax.taxPercentage = taxRate?.length ? taxRate[0]?.taxRate : 0;
     }
