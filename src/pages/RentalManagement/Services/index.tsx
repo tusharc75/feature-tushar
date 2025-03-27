@@ -563,7 +563,7 @@ const Services = ({
     if (material.filter((d) => d.listPrice === null || d.listPrice === undefined || d.listPrice === 0).length === 0) {
       AddMaterial(material, []);
     } else {
-      let priceData: any = await getPricingConditions(rentalManagementData, material, PRICING_SETUP_TYPE.rent);
+      let priceData: any = await getPricingConditions(sidebarResource.rentalManagement, rentalManagementData, material, PRICING_SETUP_TYPE.rent);
       AddMaterial(material, priceData);
     }
   };

@@ -365,7 +365,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
       });
     }
     const conditionType = invoiceData?.salesOrder ? PRICING_SETUP_TYPE.price : PRICING_SETUP_TYPE.rent;
-    let priceData: any = await getPricingConditions(invoiceData, material, conditionType);
+    let priceData: any = await getPricingConditions(sidebarResource.invoice, invoiceData, material, conditionType);
     if (priceData) {
       material.forEach((element) => {
         const calValues = getPricingValue(element, priceData, invoiceData?.currency, allFields);

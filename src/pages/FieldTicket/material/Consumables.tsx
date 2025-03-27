@@ -411,7 +411,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
         material.push(element);
       });
       if (fieldTicketData?.pricingCondition?.optionValue) {
-        const priceData: any = await getPricingConditions(fieldTicketData, material, PRICING_SETUP_TYPE.rent);
+        const priceData: any = await getPricingConditions(sidebarResource.fieldTicket, fieldTicketData, material, PRICING_SETUP_TYPE.rent);
         AddMaterial(material, priceData);
       } else {
         AddMaterial(material, null);

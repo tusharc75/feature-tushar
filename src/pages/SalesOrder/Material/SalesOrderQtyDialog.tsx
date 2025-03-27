@@ -5,7 +5,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE, PRICING_SETUP_TYPE } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE, PRICING_SETUP_TYPE, sidebarResource } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -186,7 +186,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
 
   async function getAllPricingCondition(values: any, pricingMethodOptions: any) {
     if (rowData) {
-      let priceData: any = await getPricingConditions(salesOrderData, [
+      let priceData: any = await getPricingConditions(sidebarResource.salesOrder, salesOrderData, [
         {
           materialId: rowData.materialId,
           type: rowData.type,

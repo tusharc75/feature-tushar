@@ -255,7 +255,7 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
       material.push(element);
     });
     if (serviceOrderData?.pricingCondition?.optionValue) {
-      const priceData: any = await getPricingConditions(serviceOrderData, material, PRICING_SETUP_TYPE.rent);
+      const priceData: any = await getPricingConditions(sidebarResource.fieldServiceOrder, serviceOrderData, material, PRICING_SETUP_TYPE.rent);
       AddMaterial(material, priceData);
     } else {
       AddMaterial(material, null);

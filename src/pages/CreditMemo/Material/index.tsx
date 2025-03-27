@@ -359,7 +359,7 @@ const Material = ({ creditMemoData, allowedToEdit, fetchCreditMemoData }) => {
       });
     }
     const conditionType = creditMemoData?.salesOrder ? PRICING_SETUP_TYPE.price : PRICING_SETUP_TYPE.rent;
-    let priceData: any = await getPricingConditions(creditMemoData, material, conditionType);
+    let priceData: any = await getPricingConditions(sidebarResource.creditMemo, creditMemoData, material, conditionType);
     if (priceData) {
       material.forEach((element) => {
         const calValues = getPricingValue(element, priceData, creditMemoData?.currency, allFields);

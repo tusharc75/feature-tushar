@@ -316,7 +316,7 @@ const Services = ({ serviceOrderData, stepFullScreen, allowedToEdit, handleChang
       Object.assign(element, calValues);
       material.push(element);
     });
-    let priceData: any = await getPricingConditions(serviceOrderData, material, PRICING_SETUP_TYPE.rent);
+    let priceData: any = await getPricingConditions(sidebarResource.fieldServiceOrder, serviceOrderData, material, PRICING_SETUP_TYPE.rent);
     AddMaterial(material, priceData);
   };
 
