@@ -1,13 +1,12 @@
 import { CheckCircle, CheckCircleOutline, RadioButtonUnchecked } from '@mui/icons-material';
 import { Box, Checkbox } from '@mui/material';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
 import { VariableSizeList as List, ListChildComponentProps } from 'react-window';
 import InfiniteLoader from 'react-window-infinite-loader';
 import CardColTimelineLoader from 'src/components/CardColTimeline1/CardColTimelineLoader';
 import { CardColTimelineProps, ColumnColor } from 'src/components/CardColTimeline1/types';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import NoDataCell, { NoDataCellImpl } from 'src/components/Helpers/NoDataCell';
 import { cn, WORKORDER_SERVICE_STEP_STATUS } from 'src/constants/helpers';
 
 type CommonProps<D, C extends readonly string[]> = {
@@ -236,33 +235,6 @@ const RenderStatusIcon = ({ stepStatus }: { stepStatus: string }) => {
     </>
   );
 };
-
-type NodeTree = {
-  type: string;
-  children?: NodeTree[];
-};
-
-function findOriginalComponent(nodeTree: NodeTree, originalComponent: string): boolean {
-  if (!nodeTree) {
-    return false;
-  }
-
-  // Check if the current node is the original component
-  if (nodeTree.type === originalComponent) {
-    return true;
-  }
-
-  // Check the children of the current node
-  if (nodeTree.children && nodeTree.children.length > 0) {
-    for (const child of nodeTree.children) {
-      if (findOriginalComponent(child, originalComponent)) {
-        return true;
-      }
-    }
-  }
-
-  return false;
-}
 
 const renderCell = (col, data) => {
   switch (true) {
