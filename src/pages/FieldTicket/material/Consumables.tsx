@@ -693,7 +693,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
           />
         </Box>
       )}
-      <ContainedTabs value={tabValue} onChange={handleMainTabChange}className="mb-4">
+      <ContainedTabs value={tabValue} onChange={handleMainTabChange} className="mb-4">
         <ContainedTab value={0} label={'Products/Consumables'} id={'products-consumables-tab'} />
         {!isOffline && <ContainedTab value={1} label={'Technicians'} id={'technicians-tab'} />}
       </ContainedTabs>
