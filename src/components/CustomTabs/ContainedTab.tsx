@@ -19,8 +19,8 @@ const ContainedTabs = <D,>({
 } & Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'>) => {
   return (
     <TabContext.Provider value={{ value, onChange }}>
-      <div className={cn('overflow-hidden rounded-[8px] bg-gray-200 p-1 dark:bg-[--dark-secondary]', className)}>
-        <div role="tablist" className={cn('hide-scrollbar flex max-w-full snap-x snap-mandatory scroll-m-2 gap-1 overflow-x-auto ')}>
+      <div className={cn('flex max-w-fit items-start overflow-hidden rounded-[8px] bg-gray-200 p-1 dark:bg-[--dark-secondary]', className)}>
+        <div role="tablist" className={cn('hide-scrollbar flex max-w-fit snap-x snap-mandatory scroll-m-2 gap-1 overflow-x-auto')}>
           {children}
         </div>
       </div>
@@ -52,7 +52,7 @@ export const ContainedTab = <D,>({
       aria-selected={isActive}
       onClick={handleClick}
       className={cn(
-        ' block min-w-fit flex-grow rounded-md px-4 py-1 text-sm font-medium',
+        ' block min-w-fit flex-grow rounded-md px-5 py-1 text-sm font-medium',
         '',
         isActive ? 'bg-[--dark-primary,white]' : '',
         className
