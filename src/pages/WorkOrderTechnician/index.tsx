@@ -619,7 +619,7 @@ const WorkOrderTechnician = () => {
           onClose={() => {
             setShowFilter(false);
             tableDispatch({ type: 'onlyFilter', filters: {} });
-            dispatch({ type: 'setFilterQuery', filterQuery: '' });
+            cardState.setFilterQuery('');
           }}
           loading={false}
           filterTitle={resources?.workOrderTechnician?.titleSingular}
