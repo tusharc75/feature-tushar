@@ -9,7 +9,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { TabPanel } from 'src/components/CustomTabs';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { flattenArray } from 'src/constants/columns';
 import { ownerAndColaborator, rentalManagementMessage } from 'src/constants/messageHelpers';
@@ -48,7 +48,7 @@ import { getPricingConditions, getPricingValue } from 'src/components/PricingCon
 import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
-
+import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
 
 const Services = ({
   rentalManagementData,
@@ -829,9 +829,9 @@ const Services = ({
             />
           </Box>
           <Box mt={3}>
-            <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
-              <CustomTab value={0} label={'Technicians'} />
-            </CustomTabs>
+            <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
+              <ContainedTab value={0} label={'Technicians'} />
+            </ContainedTabs>
             <TabPanel value={tabValue} index={0}>
               <Technicians
                 allowedToEdit={allowedToEdit}

@@ -16,7 +16,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { flattenArray } from 'src/constants/columns';
 import Autocomplete from '@mui/material/Autocomplete';
-import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { TabPanel } from 'src/components/CustomTabs';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import MaterialQtyDialog from './MaterialQtyDialog';
@@ -27,6 +27,7 @@ import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceFi
 import { FiExternalLink } from 'react-icons/fi';
 import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
 import { useData } from 'src/StateProvider/Provider';
+import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
 
 const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchData: fetchserviceOrderData, technicians, refreshChild, fetchConsumablesData }) => {
 
@@ -426,9 +427,9 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
           renderInput={(params) => <TextField {...params} label={'Select Technician'} variant="outlined" />}
         />
       </Box>
-      <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
-        <CustomTab value={0} label={'Products/Consumables'} id={'products-consumables-tab'} />
-      </CustomTabs>
+      <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
+        <ContainedTab value={0} label={'Products/Consumables'} id={'products-consumables-tab'} />
+      </ContainedTabs>
       <TabPanel value={tabValue} index={0}>
         {allowedToEdit && (
           <>
