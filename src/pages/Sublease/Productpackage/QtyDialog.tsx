@@ -164,7 +164,7 @@ const QtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, subleaseData,
 
   async function getAllPricingCondition(values: any, pricingMethodOptions: any) {
     if (rowData) {
-      let priceData: any = await getPricingConditions(
+      let priceData: any = await getPricingConditions(sidebarResource.sublease,
         subleaseData,
         [
           {

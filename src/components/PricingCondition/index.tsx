@@ -1,9 +1,9 @@
 import axiosInstance from "src/axios/axiosInstance";
 import routes from "src/components/Helpers/Routes";
 import { autoCalculateSpecificFields } from "src/constants/formulaUtility";
-import { pricingCondition } from "src/constants/helpers";
+import { pricingCondition, sidebarResource } from "src/constants/helpers";
 
-export const getPricingConditions = (referenceData: any, material: any[], conditionType: any) => {
+export const getPricingConditions = (resource: any, referenceData: any, material: any[], conditionType: any) => {
   if (referenceData) {
     const data: any = {};
     data.conditionType = [conditionType];
@@ -22,6 +22,18 @@ export const getPricingConditions = (referenceData: any, material: any[], condit
     data.customer = referenceData?.customerAccount?.optionValue ? [referenceData?.customerAccount?.optionValue] : [];
     data.warehouse = referenceData?.warehouse?.optionValue ? [referenceData?.warehouse?.optionValue] : [];
     data.address = referenceData?.shippingAddress?.optionValue ? [referenceData?.shippingAddress?.optionValue] : [];
+    if ([sidebarResource.invoice, sidebarResource.salesOrder]?.includes(resource)) {
+      if (referenceData?.creationDate) {
+        data.date = referenceData?.creationDate;
+      }
+    }
+    else if (resource === sidebarResource.quotation) {
+      if (referenceData?.quotationDate) {
+        data.date = referenceData?.quotationDate;
+      }
+    } else {
+      data.date = referenceData?.estimateStartDate;
+    }
     return new Promise((resolve, reject) => {
       axiosInstance()
         .post(pricingCondition.api + `/material-pricing-data`, data)

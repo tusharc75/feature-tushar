@@ -220,7 +220,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
 
   async function getAllPricingCondition(values: any, pricingMethodOptions: any) {
     if (rowData) {
-      let priceData: any = await getPricingConditions(rentalManagementData, [
+      let priceData: any = await getPricingConditions(sidebarResource.rentalManagement, rentalManagementData, [
         {
           materialId: rowData.materialId,
           type: rowData.type,

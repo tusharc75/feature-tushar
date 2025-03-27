@@ -278,7 +278,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       material.push(element);
     });
 
-    let priceData: any = await getPricingConditions(subleaseData, material, PRICING_SETUP_TYPE.rent);
+    let priceData: any = await getPricingConditions(sidebarResource.sublease, subleaseData, material, PRICING_SETUP_TYPE.rent);
     if (priceData) {
       material.forEach((element) => {
         const calValues = getPricingValue(element, priceData, subleaseData?.currency, allFields);

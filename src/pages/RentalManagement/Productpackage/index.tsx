@@ -672,7 +672,7 @@ const Productpackage = ({
       element.listPrice = d.listPrice ? d.listPrice : null;
       material.push(element);
     });
-    let priceData: any = await getPricingConditions(rentalManagementData, material, PRICING_SETUP_TYPE.rent);
+    let priceData: any = await getPricingConditions(sidebarResource.rentalManagement, rentalManagementData, material, PRICING_SETUP_TYPE.rent);
     AddMaterial(material, priceData);
   };
 

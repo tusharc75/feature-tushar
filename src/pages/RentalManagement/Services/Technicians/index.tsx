@@ -320,7 +320,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
       technician.push(element);
     });
 
-    let priceData: any = await getPricingConditions(rentalManagementData, technician, PRICING_SETUP_TYPE.rent);
+    let priceData: any = await getPricingConditions(sidebarResource.rentalManagement, rentalManagementData, technician, PRICING_SETUP_TYPE.rent);
     AddMaterial(technician, priceData);
   };
 
