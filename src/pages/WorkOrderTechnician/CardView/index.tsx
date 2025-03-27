@@ -29,8 +29,8 @@ const CardView = ({ filterQuery, setSelectedService, setServiceOpen, state, head
         passFailAccessor="serviceStatus"
         cardOnClick={(data: any) => {
           let tempServiceData = {};
-          tempServiceData['uniqueId'] = data?._id;
-          tempServiceData['workOrderId'] = data?.workOrderDetail?._id;
+          tempServiceData['uniqueId'] = data?.uniqueId;
+          tempServiceData['workOrderId'] = data?.workOrderId;
           tempServiceData['canPerform'] = data?.canPerform;
           setSelectedService(tempServiceData);
           setServiceOpen(true);
