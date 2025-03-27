@@ -23,6 +23,7 @@ import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import { Visibility } from '@mui/icons-material';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import RentalAssetHistoryDialog from 'src/pages/SerializedAsset/AssetHistory/RentalAssetHistoryDialog';
+import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
 
 const AssetHistory = ({ id, refresh, resourceData, fields }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -168,9 +169,9 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
             <div>
               {row.original.reference ? (
                 row.original.type === 'Loading Ticket' ||
-                  row.original.type === 'Receiving Ticket' ||
-                  row.original.type === 'Return Ticket' ||
-                  row.original.type === 'Delivery Ticket' ? (
+                row.original.type === 'Receiving Ticket' ||
+                row.original.type === 'Return Ticket' ||
+                row.original.type === 'Delivery Ticket' ? (
                   <Link
                     className="link"
                     title={row.original.reference}
@@ -453,14 +454,11 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
           Cell: ({ row }) => (
             <div>
               {reservedStatusField?.length &&
-                row?.original?.referenceData?.rentalJob &&
-                row?.original?.referenceData?.status !== DELIVERY_TICKET_STATUS.cancelled &&
-                row?.original?.status === ASSET_STATUS.inUse ? (
+              row?.original?.referenceData?.rentalJob &&
+              row?.original?.referenceData?.status !== DELIVERY_TICKET_STATUS.cancelled &&
+              row?.original?.status === ASSET_STATUS.inUse ? (
                 <HtmlTooltip title="Rental Asset Data History">
-                  <IconButton
-                    size="small"
-                    onClick={() => setRentalAssetHistory({ open: true, rentalJob: row?.original?.referenceData?.rentalJob })}
-                  >
+                  <IconButton size="small" onClick={() => setRentalAssetHistory({ open: true, rentalJob: row?.original?.referenceData?.rentalJob })}>
                     <Visibility color="primary" fontSize="small" />
                   </IconButton>
                 </HtmlTooltip>
@@ -568,11 +566,11 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
 
   return (
     <Box>
-      <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
+      <ContainedTabs value={tabValue} className="mb-4" onChange={(e, value) => handleMainTabChange(e, value)}>
         {ASSET_HISTORY_RESOURCE?.filter((f) => permissions[camelCase(f.resource)]?.isRead || f.key === 'all')?.map((res, idx) => (
-          <CustomTab value={idx} id={res.key} label={`${res.title}`} />
+          <ContainedTab value={idx} id={res.key} label={`${res.title}`} />
         ))}
-      </CustomTabs>
+      </ContainedTabs>
       <Box className="flex flex-wrap items-center justify-between gap-3">
         <Box className="max-w-[800px]">
           <DurationFilter label={''} defaultTimeFrame="all" duration={duration} setDuration={setDuration} showAll={true} />
@@ -581,8 +579,8 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
           permissions={permissions?.history}
           module={'Asset History'}
           api={`/history/inventory/${id}`}
-          afterImportCompleted={() => { }}
-          onExportToExcelSuccess={() => { }}
+          afterImportCompleted={() => {}}
+          onExportToExcelSuccess={() => {}}
           additionalParams={getQueryString()}
           onlyExport={true}
         />

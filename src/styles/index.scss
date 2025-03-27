@@ -6,6 +6,23 @@
 
 @layer muiReset;
 
+@layer utilities {
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background-color: var(--button-ripple-color, rgba(0, 0, 0, 0.3));
+    transform: scale(0);
+    animation: ripple-animation 0.6s linear;
+  }
+
+  @keyframes ripple-animation {
+    to {
+      transform: scale(4);
+      opacity: 0;
+    }
+  }
+}
+
 @layer components {
   .hide-scrollbar {
     -ms-overflow-style: none;

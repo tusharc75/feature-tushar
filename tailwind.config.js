@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+
   theme: {
     extend: {
       colors: {
@@ -19,6 +20,12 @@ module.exports = {
         }
       },
       keyframes: {
+        'ripple-animation': {
+          to: {
+            transform: 'scale(4)',
+            opacity: '0'
+          }
+        },
         shake: {
           '0%': { transform: 'translateX(0rem)' },
           '25%': { transform: 'translateX(0.5rem)' },
