@@ -31,6 +31,7 @@ import {
   ATTACHMENT_TYPE,
   WORKORDER_SERVICE_STATUS,
   WORKORDER_TECHNICIAN_SERVICE_STATUS,
+  prepareDataForGrid,
   sidebarResource,
   workOrder
 } from 'src/constants/helpers';
@@ -82,21 +83,18 @@ const WorkOrderTechnician = () => {
       const {
         data: { data, count }
       } = response;
-      const rows = data.map((item) => {
-        const newObj = { ...item };
-        newObj['serviceName'] = item.service?.serviceName;
-        newObj['customServiceStatus'] = item.status;
-        newObj['workOrderNumber'] = item.workOrderDetail?.workOrderNumber;
-        newObj['repairOrderNumber'] = item.workOrderDetail?.repairOrder?.optionLabel;
-        newObj['productionOrderNumber'] = item.workOrderDetail?.productionOrder?.optionLabel;
-        newObj['assemblyOrderNumber'] = item.workOrderDetail?.assemblyOrder?.optionLabel;
-        newObj['serializedAsset'] = item.workOrderDetail?.serializedAsset?.optionLabel;
-        newObj['package'] = item.workOrderDetail?.package?.optionLabel;
-        newObj['assignedWorkStations'] = item?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString();
-        if (column !== WORKORDER_SERVICE_STATUS.completed) {
-          newObj['estimateCompleteDate'] = item.workOrderDetail?.estimateCompleteDate;
-        }
-        return newObj;
+      let rows = data.map((u) => {
+        let finalObject: any = prepareDataForGrid(u, user);
+        let workOrderDetailData: any = prepareDataForGrid(u?.workOrderDetail, user);
+        finalObject['serviceName'] = u?.service?.serviceName;
+        finalObject['serviceId'] = u?.service?._id;
+        finalObject['customServiceStatus'] = u?.status;
+        finalObject['workOrderId'] = u?.workOrderDetail?._id;
+        const matchedTempMaterial = workOrderDetailData?.tempMaterial?.find((t) => t?.materialId === u?.service?._id);
+        finalObject['uniqueId'] = matchedTempMaterial?._id;
+        delete workOrderDetailData?._id;
+        delete workOrderDetailData?.id;
+        return { ...finalObject, ...workOrderDetailData };
       });
       return { data: rows, count } as { data: any; count: number };
     } catch (error) {
@@ -420,7 +418,7 @@ const WorkOrderTechnician = () => {
         {
           disabled:
             selectedRecords?.length &&
-            selectedRecords?.filter((s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length ===
+              selectedRecords?.filter((s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length ===
               selectedRecords?.length
               ? false
               : true,
