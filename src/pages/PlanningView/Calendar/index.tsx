@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import dayjs from 'dayjs';
-import { camelCase, groupBy } from 'lodash';
+import { camelCase, groupBy, isEmpty } from 'lodash';
 import { forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { View, dayjsLocalizer } from 'react-big-calendar';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
@@ -397,15 +397,14 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 }
               }
             }
-            let title =
-              selectedResource.resource === sidebarResource.employeeMaster
-                ? d[selectedResource.fieldName]?.optionLabel
-                : d[selectedResource.fieldName];
+            let title = d[selectedResource.fieldName];
             let start = new Date(d[selectedResource.start]);
             let end = new Date(d[selectedResource.end]);
             let fulfillStatus = d?.fulfillStatus;
             let startDraggable = true;
             let endDraggable = true;
+
+            const extraData: any = {};
 
             if (selectedResource.resource === sidebarResource.rentalManagement) {
               if (d?.parentAccount?.optionLabel) {
@@ -427,11 +426,31 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 fulfillStatus = 'ERROR';
               }
             }
+            if (selectedResource.resource === sidebarResource.employeeMaster) {
+              if (d?.referenceType === sidebarResource.fieldTicket) {
+                title = `${d?.fieldTicket?.optionLabel} ${d?.service ? `(${d?.service?.optionLabel})` : ''} - ${d?.technician?.optionLabel}`;
+                extraData.referenceType = d?.referenceType;
+                extraData.referenceId = d?.fieldTicket?.optionValue;
+              } else if (d?.referenceType === sidebarResource.fieldServiceOrder) {
+                title = `${d?.fieldServiceOrder?.optionLabel} ${d?.service ? `(${d?.service?.optionLabel})` : ''} - ${d?.technician?.optionLabel}`;
+                extraData.referenceType = d?.referenceType;
+                extraData.referenceId = d?.fieldServiceOrder?.optionValue;
+              } else if (d?.referenceType === sidebarResource.rentalManagement) {
+                title = `${d?.rentalManagement?.optionLabel} ${d?.service ? `(${d?.service?.optionLabel})` : ''} - ${d?.technician?.optionLabel}`;
+                extraData.referenceType = d?.referenceType;
+                extraData.referenceId = d?.rentalManagement?.optionValue;
+              } else if (d?.referenceType === sidebarResource.workOrder) {
+                title = `${d?.workOrder?.optionLabel} ${d?.service ? `(${d?.service?.optionLabel})` : ''} - ${d?.technician?.optionLabel}`;
+                extraData.referenceType = d?.referenceType;
+                extraData.referenceId = d?.workOrder?.optionValue;
+              }
+            }
             return {
-              id: d._id,
+              id: d?._id,
               title: title,
               start: start,
               end: end,
+              ...(!isEmpty(extraData) ? extraData : {}),
               allDay: true,
               resource: selectedResource.resource,
               fulfillStatus: fulfillStatus,
@@ -543,6 +562,16 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         setAnchor(target);
         const newData: OnSelectDataType[] = data.data;
         setOpen({ open: true, data: mapObjectToList(groupBy(newData, 'resource')), eventData: data });
+      }
+    } else if (selectedResource.resource === sidebarResource.employeeMaster) {
+      if (data?.referenceType === sidebarResource.fieldTicket) {
+        window.open(`${routes.fieldTicketDetail.path}/${data?.referenceId}`);
+      } else if (data?.referenceType === sidebarResource.fieldServiceOrder) {
+        window.open(`${routes.fieldServiceOrderDetail.path}/${data?.referenceId}`);
+      } else if (data?.referenceType === sidebarResource.rentalManagement) {
+        window.open(`${routes.rentalManagementDetail.path}/${data?.referenceId}`);
+      } else if (data?.referenceType === sidebarResource.workOrder) {
+        window.open(`${routes.workOrderDetail.path}/${data?.referenceId}`);
       }
     } else {
       if (data.resource) {

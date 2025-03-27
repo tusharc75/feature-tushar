@@ -32,8 +32,9 @@ export const ContainedTab = <D,>({
   value: tabValue,
   label,
   className,
+  children,
   ...rest
-}: { value: D; label: string } & React.ButtonHTMLAttributes<HTMLButtonElement>) => {
+}: { value: D; label?: React.ReactNode } & React.ButtonHTMLAttributes<HTMLButtonElement>) => {
   const context = React.useContext(TabContext);
   if (!context) {
     throw new Error('ContainedTab must be used within a ContainedTabs component.');
@@ -59,7 +60,7 @@ export const ContainedTab = <D,>({
       )}
       {...rest}
     >
-      {label}
+      {label || children}
     </RippleButton>
   );
 };
