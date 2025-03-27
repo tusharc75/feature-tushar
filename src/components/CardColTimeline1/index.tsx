@@ -6,23 +6,29 @@ import { TColType } from 'src/components/CustomReactTable/TableComponents/TableH
 export * from 'src/components/CardColTimeline1/types';
 export * from 'src/components/CardColTimeline1/useCardColTimeline';
 
-const DEFAULT_DATA_ROWS_VISIBLE = 3;
+export const DEFAULT_DATA_ROWS_VISIBLE = 3;
 
 const CardColTimeline = <D, C extends readonly string[]>({ state, getColColors, cardOnClick, ...rest }: CardColTimelineProps<D, C>) => {
-  const { columns, visibleColumns, columnDef } = state;
+  const { columns, visibleColumns, columnDef, visible, order } = state;
+
+  const sortedHidedColumnDef = useMemo(() => {
+    return columnDef
+      ?.filter((c) => visible[c.id || c.accessor])
+      .sort((a, b) => order.findIndex((c) => c === a.id) - order.findIndex((c) => c === b.id));
+  }, [columnDef, order, visible]);
 
   const primaryField: TColType | null = useMemo(
-    () => columnDef?.find((item) => item.primaryField || item.lockPosition || item.disabled) || columnDef?.[2],
-    [columnDef]
+    () => sortedHidedColumnDef?.find((item) => item.primaryField || item.lockPosition || item.disabled) || sortedHidedColumnDef?.[2],
+    [sortedHidedColumnDef]
   );
   const actionField: TColType | null = useMemo(
-    () => columnDef?.find((item) => item.id === 'action' && item.isVisible !== false) || null,
-    [columnDef]
+    () => sortedHidedColumnDef?.find((item) => item.id === 'action' && item.isVisible !== false) || null,
+    [sortedHidedColumnDef]
   );
 
   const otherFields: TColType[] | null = useMemo(
     () =>
-      columnDef?.filter((item) => {
+      sortedHidedColumnDef?.filter((item) => {
         const itemId = item.id || item.accessor;
         const primaryFieldId = primaryField.id || primaryField.accessor;
         if (itemId === primaryFieldId || ['selection', 'action', 'expander'].includes(itemId) || item.isVisible === false) {
@@ -30,7 +36,7 @@ const CardColTimeline = <D, C extends readonly string[]>({ state, getColColors, 
         }
         return true;
       }) || [],
-    [columnDef, primaryField]
+    [sortedHidedColumnDef, primaryField]
   );
   const defaultDisplay: TColType[] = useMemo(() => {
     return otherFields?.slice(0, DEFAULT_DATA_ROWS_VISIBLE) || [];

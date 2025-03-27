@@ -120,8 +120,6 @@ const GridView = React.forwardRef<GridViewRef, any>(({ renderedFrom, state, disp
       });
   };
 
-  console.log(state.dataRows);
-
   useImperativeHandle(ref, () => ({
     refreshGrid() {
       fetchData();

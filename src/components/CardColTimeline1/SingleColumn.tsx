@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
 import { VariableSizeList as List, ListChildComponentProps } from 'react-window';
 import InfiniteLoader from 'react-window-infinite-loader';
+import CardColTimelineLoader from 'src/components/CardColTimeline1/CardColTimelineLoader';
 import { CardColTimelineProps, ColumnColor } from 'src/components/CardColTimeline1/types';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { cn, WORKORDER_SERVICE_STEP_STATUS } from 'src/constants/helpers';
@@ -15,9 +16,10 @@ type CommonProps<D, C extends readonly string[]> = {
 } & CardColTimelineProps<D, C>;
 
 const SingleColumn = <D, C extends readonly string[]>({ state, getColColors, column, ...rest }: CommonProps<D, C>) => {
-  const { data, loading, isAllSelected, handleSelectAll } = state;
+  const { data, loading, isAllSelected, handleSelectAll, columnDef } = state;
   const colors = getColColors(column);
   const isDataLoading = loading[column];
+  const isInitialLoaded = data && data?.[column] && columnDef?.length > 0;
 
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   return (
@@ -37,11 +39,11 @@ const SingleColumn = <D, C extends readonly string[]>({ state, getColColors, col
           {column}
         </label>
       </div>
-      <div className="h-[calc(100vh-200px)] flex-grow " ref={setContainer}>
-        {data && data?.[column] ? (
+      <div className={cn('h-[calc(100vh-270px)] min-h-[400px] flex-grow ', isInitialLoaded ? '' : 'overflow-hidden')} ref={setContainer}>
+        {isInitialLoaded ? (
           <Column column={column} container={container} getColColors={getColColors} state={state} colors={colors} {...rest} />
         ) : (
-          <div>Loading...</div>
+          <CardColTimelineLoader />
         )}
       </div>
     </div>

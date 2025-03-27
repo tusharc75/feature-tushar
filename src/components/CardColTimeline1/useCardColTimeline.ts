@@ -15,16 +15,16 @@ const getInitialState = <D, C extends readonly string[]>(): UseCardColState<D, C
     columnDef: [],
     filterQuery: '',
     refreshSignal: false,
-    defaultVisibleRows: 3
+    defaultVisibleRows: 3,
+    order: null,
+    visible: null
   };
 };
 
 const reducer = <D, C extends readonly string[]>(state: UseCardColState<D, C>, action: UseCardColActions<D, C>) => {
   switch (action.type) {
-    case 'setStateData': {
-      // console.log(state, action.payload, 'data' in action.payload);
+    case 'setStateData':
       return { ...state, ...action.payload } as UseCardColState<D, C>;
-    }
     case 'setData':
       return { ...state, data: action.payload } as UseCardColState<D, C>;
     case 'setColumns':
@@ -35,8 +35,38 @@ const reducer = <D, C extends readonly string[]>(state: UseCardColState<D, C>, a
       return { ...state, selectedRecordsObj: action.payload } as UseCardColState<D, C>;
     case 'setLoading':
       return { ...state, loading: action.payload } as UseCardColState<D, C>;
-    case 'setColumnDef':
-      return { ...state, columnDef: action.payload } as UseCardColState<D, C>;
+    case 'setColumnDef': {
+      const payload = {
+        ...state,
+        columnDef: action.payload
+      } as UseCardColState<D, C>;
+      if (action.payload?.length) {
+        payload['visible'] = action.payload?.reduce(
+          (acc, curr) => {
+            const key = curr.id || curr.accessor;
+            if (acc[key] === false) {
+              acc[key] = false;
+            } else {
+              acc[key] = true;
+            }
+            return acc;
+          },
+          { ...(state.visible || {}) }
+        );
+        const order = [...(state.order || [])];
+        const newColumns = action.payload
+          .map((d) => d.id || d.accessor)
+          .filter((c) => {
+            if (order.includes(c)) {
+              return false;
+            }
+            return true;
+          });
+        order.push(...newColumns);
+        payload['order'] = order;
+      }
+      return payload;
+    }
     case 'setRefreshSignal':
       return { ...state, refreshSignal: action.payload } as UseCardColState<D, C>;
     case 'setDefaultVisibleRows':
@@ -45,7 +75,7 @@ const reducer = <D, C extends readonly string[]>(state: UseCardColState<D, C>, a
       return { ...state, limit: action.payload } as UseCardColState<D, C>;
   }
 };
-let initialCache: any = { data: {}, page: {}, loading: {}, count: {}, selectedRecordsObj: {} };
+let initialCacheCopy: any = { data: {}, page: {}, loading: {}, count: {}, selectedRecordsObj: {} };
 
 export const useCardColTimeline = <D, C extends readonly string[]>({
   columns,
@@ -59,58 +89,8 @@ export const useCardColTimeline = <D, C extends readonly string[]>({
   const firstRender = useRef(true);
   const cache = useRef({ data: {}, page: {}, loading: {}, count: {}, selectedRecordsObj: {} });
 
-  const initialize = useCallback(() => {
-    const selectedRecordsObj = {};
-    const data = {};
-    const count = {};
-    const page = {};
-    const loading = {};
-    for (const column of columns) {
-      selectedRecordsObj[column] = {};
-      data[column] = null;
-      count[column] = null;
-      page[column] = 0;
-      loading[column] = null;
-    }
-    const payload = {
-      visibleColumns: initialVisibleColumns,
-      columns: columns,
-      selectedRecordsObj,
-      data,
-      count,
-      page,
-      loading
-    };
-    cache.current = {
-      selectedRecordsObj,
-      data: payload.data,
-      page: payload.page,
-      loading: payload.loading,
-      count: payload.count
-    };
-    initialCache = cache.current;
-    if (columnDef) {
-      payload['columnDef'] = columnDef;
-    }
-    setState({
-      type: 'setStateData',
-      payload
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [columnDef, columns]);
-
   const resetCache = () => {
-    cache.current = initialCache;
-  };
-
-  const setStateCache = () => {
-    cache.current = {
-      count: state.count,
-      data: state.data,
-      loading: state.loading,
-      page: state.page,
-      selectedRecordsObj: state.selectedRecordsObj
-    };
+    cache.current = initialCacheCopy;
   };
 
   const setData = useCallback(
@@ -197,6 +177,13 @@ export const useCardColTimeline = <D, C extends readonly string[]>({
     [state.selectedRecordsObj, state.data]
   );
 
+  const setOrderAndVisibility = useCallback(
+    ({ order = state.order, visible = state.visible }: { order: string[]; visible: Record<string, boolean> }) => {
+      setState({ type: 'setStateData', payload: { order, visible } });
+    },
+    [state.order, state.visible]
+  );
+
   const setLoading = ({ column, loading }: { column: UseCardColState<D, C>['columns'][number]; loading: boolean }) => {
     setState({ type: 'setLoading', payload: { ...state.loading, [column]: loading } });
   };
@@ -209,12 +196,16 @@ export const useCardColTimeline = <D, C extends readonly string[]>({
   const setColumnDef = useCallback((payload: UseCardColState<D, C>['columnDef']) => {
     setState({ type: 'setColumnDef', payload });
   }, []);
-  const setFilterQuery = useCallback((payload: UseCardColState<D, C>['filterQuery']) => {
-    setState({
-      type: 'setStateData',
-      payload: { filterQuery: payload, selectedRecordsObj: {} }
-    });
-  }, []);
+  const setFilterQuery = useCallback(
+    (payload: UseCardColState<D, C>['filterQuery']) => {
+      setState({
+        type: 'setStateData',
+        payload: { filterQuery: payload, selectedRecordsObj: {}, refreshSignal: !state.refreshSignal }
+      });
+    },
+    [state.refreshSignal]
+  );
+
   const refreshAllColumns = useCallback(() => {
     setState({ type: 'setRefreshSignal', payload: !state.refreshSignal });
   }, [state.refreshSignal]);
@@ -258,17 +249,94 @@ export const useCardColTimeline = <D, C extends readonly string[]>({
       setState({ type: 'setStateData', payload: cache.current });
     } catch (error) {
       console.error(error);
+    } finally {
+      firstRender.current = false;
     }
   };
 
-  const fetchAllInitialColumnData = (cancelToken: CancelToken) => {
-    for (const column of state.visibleColumns) {
+  const fetchAllInitialColumnData = (cancelToken: CancelToken, columns = state.visibleColumns, refreshData = false) => {
+    for (const column of columns) {
       fetchSingleColumnInitialData(column, cancelToken);
     }
   };
 
+  const fetchNewColumnsData = (cancelToken: CancelToken, columns: C) => {
+    cache.current = { ...cache.current, data: state.data };
+    for (const column of columns) {
+      if (!cache.current.data[column]) {
+        fetchSingleColumnInitialData(column, cancelToken);
+      }
+    }
+  };
+
+  const initialize = useCallback(
+    (cancelToken: CancelToken) => {
+      const selectedRecordsObj = {},
+        data = {},
+        count = {},
+        page = {},
+        loading = {},
+        order = [],
+        visible = {};
+
+      for (const column of columns) {
+        selectedRecordsObj[column] = {};
+        data[column] = null;
+        count[column] = null;
+        page[column] = 0;
+        loading[column] = null;
+      }
+      const payload = {
+        visibleColumns: initialVisibleColumns,
+        columns: columns,
+        selectedRecordsObj,
+        data,
+        count,
+        page,
+        loading
+      };
+      cache.current = {
+        selectedRecordsObj,
+        data: payload.data,
+        page: payload.page,
+        loading: payload.loading,
+        count: payload.count
+      };
+      initialCacheCopy = cache.current;
+      if (columnDef) {
+        payload['columnDef'] = columnDef;
+        columnDef?.forEach((col) => {
+          const cellId = col.id || col.accessor;
+          order.push(cellId);
+          visible[cellId] = true;
+        });
+        payload['order'] = order;
+        payload['visible'] = visible;
+      }
+      setState({
+        type: 'setStateData',
+        payload
+      });
+      fetchAllInitialColumnData(cancelToken, initialVisibleColumns);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [columnDef, columns]
+  );
+
+  // Initial data fetch and set initial state
   useEffect(() => {
-    if (Object.keys(cache.current.data).length === 0) return;
+    const tokenSource = axios.CancelToken.source();
+    if (columnDef?.length > 0 && columns?.length > 0) {
+      initialize(tokenSource.token);
+    }
+    return () => {
+      tokenSource.cancel();
+    };
+  }, [columnDef, columns, initialize]);
+
+  // Reset Cache
+  useEffect(() => {
+    if (Object.keys(cache.current.data).length === 0 || firstRender.current) return;
     const condition = state.visibleColumns?.every((c) => {
       if (cache.current.data[c] && state.data[c]) {
         return true;
@@ -278,16 +346,15 @@ export const useCardColTimeline = <D, C extends readonly string[]>({
     });
     if (condition) {
       resetCache();
-    } else {
     }
   }, [state.data, state.visibleColumns]);
 
   // fetch data only for new columns
   useEffect(() => {
     const tokenSource = axios.CancelToken.source();
-    firstRender.current = false;
+    if (firstRender.current) return;
     if (state.visibleColumns.length > 0) {
-      fetchAllInitialColumnData(tokenSource.token);
+      fetchNewColumnsData(tokenSource.token, state.visibleColumns as any);
     }
     return () => {
       tokenSource.cancel();
@@ -298,9 +365,7 @@ export const useCardColTimeline = <D, C extends readonly string[]>({
   // fetch data only on refesh signal
   useEffect(() => {
     const tokenSource = axios.CancelToken.source();
-    console.log('hi', firstRender.current);
     if (firstRender.current) return;
-
     if (state.visibleColumns.length > 0) {
       setState({
         type: 'setStateData',
@@ -308,16 +373,11 @@ export const useCardColTimeline = <D, C extends readonly string[]>({
       });
       fetchAllInitialColumnData(tokenSource.token);
     }
-
     return () => {
       tokenSource.cancel();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.refreshSignal]);
-
-  useEffect(() => {
-    initialize();
-  }, [initialize]);
 
   const selectedRecords = useMemo(() => {
     const selectedRows: string[] = [];
@@ -334,7 +394,7 @@ export const useCardColTimeline = <D, C extends readonly string[]>({
     (column: UseCardColState<D, C>['columns'][number]) => {
       const prevSelectedRecords = { ...state.selectedRecordsObj[column] };
       const ids = Object.keys(prevSelectedRecords);
-      return ids.length === state.data?.[column]?.length;
+      return ids.length === state.data?.[column]?.length && ids.length > 0;
     },
     [state.data, state.selectedRecordsObj]
   );
@@ -358,6 +418,7 @@ export const useCardColTimeline = <D, C extends readonly string[]>({
     fetchSingleColumn,
     isAllSelected,
     setState,
-    resetSelection
+    resetSelection,
+    setOrderAndVisibility
   };
 };

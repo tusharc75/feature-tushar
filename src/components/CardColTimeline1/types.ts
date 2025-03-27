@@ -14,6 +14,8 @@ export type UseCardColState<D, C extends readonly string[]> = {
   filterQuery: string;
   refreshSignal: boolean;
   defaultVisibleRows: number;
+  order: string[] | null;
+  visible: Record<string, boolean>;
 };
 
 export type UseCardColActions<D, C extends readonly string[]> =
@@ -41,9 +43,9 @@ export type ColumnColor = {
 };
 
 export type UseCardColTimelineProps<D, C extends readonly string[]> = {
-  columns: UseCardColState<D, C>['columns'];
-  initialVisibleColumns: UseCardColState<D, C>['visibleColumns'];
-  columnDef?: UseCardColState<D, C>['visibleColumns'];
+  columns: C;
+  initialVisibleColumns: C[number][];
+  columnDef?: TColType[];
   fetchSingleColumn: (props: FetchSingleColumnProps<D, C>) => Promise<FetchSingleColumnReturnType<D>>;
   keyGetter: (data: D) => string;
 };
@@ -75,6 +77,7 @@ export type UseCardColTimeline<D, C extends readonly string[]> = {
   fetchSingleColumn: (props: FetchSingleColumnProps<D, C>) => Promise<FetchSingleColumnReturnType<D>>;
   keyGetter: (data: D) => string;
   resetSelection: () => void;
+  setOrderAndVisibility: ({ order, visible }: { order: string[]; visible: Record<string, boolean> }) => void;
 } & UseCardColState<D, C>;
 
 export type CardColTimelineProps<D, C extends readonly string[]> = {

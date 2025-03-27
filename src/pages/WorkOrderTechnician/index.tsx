@@ -71,7 +71,7 @@ const WorkOrderTechnician = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const resetSelectedRecords = () => {
-    state.resetSelection();
+    cardState.resetSelection();
     tableDispatch({ type: 'selection', selectedRecords: [] });
   };
 
@@ -104,7 +104,7 @@ const WorkOrderTechnician = () => {
     }
   }, []);
 
-  const state = useCardColTimeline({
+  const cardState = useCardColTimeline({
     fetchSingleColumn: fetchSingleColumnData,
     columns: WORKORDER_TECHNICIAN_SERVICE_STATUS,
     initialVisibleColumns: selectedServiceStatus,
@@ -113,14 +113,18 @@ const WorkOrderTechnician = () => {
   });
 
   useEffect(() => {
-    state.setColumnDef(columnsDef);
+    cardState.setColumnDef(columnsDef);
   }, [columnsDef]);
 
   useEffect(() => {
-    state.setVisibleColumns(selectedServiceStatus);
+    cardState.setOrderAndVisibility({ order: tableState.columnOrder, visible: tableState.visibleColumns });
+  }, [tableState.columnOrder, tableState.visibleColumns]);
+
+  useEffect(() => {
+    cardState.setVisibleColumns(selectedServiceStatus);
   }, [selectedServiceStatus]);
 
-  const selectedRecords = useMemo(() => [...tableSelectedRecords, ...state.selectedRecords], [tableSelectedRecords, state.selectedRecords]);
+  const selectedRecords = useMemo(() => [...tableSelectedRecords, ...cardState.selectedRecords], [tableSelectedRecords, cardState.selectedRecords]);
 
   const {
     state: {
@@ -379,7 +383,7 @@ const WorkOrderTechnician = () => {
 
   const onClickRefreshIcon = () => {
     if (viewType === 'card-view') {
-      state.refreshAllColumns();
+      cardState.refreshAllColumns();
     }
     if (viewType === 'table-view') {
       gridViewRef?.current?.refreshGrid();
@@ -409,7 +413,7 @@ const WorkOrderTechnician = () => {
       });
   };
 
-  const newActionButtonProps: NewActionButtonProps<string> = useMemo(() => {
+  const newActionButtonProps: NewActionButtonProps<string, any> = useMemo(() => {
     const items = {
       disabled: selectedRecords?.length === 0,
       items: [
@@ -542,13 +546,7 @@ const WorkOrderTechnician = () => {
 
         {viewType === 'card-view' && (
           <div className="pt-2">
-            <CardView
-              state={state}
-              setSelectedService={setSelectedService}
-              setServiceOpen={setServiceOpen}
-              columnsDef={columnsDef}
-              filterQuery={filterQuery}
-            />
+            <CardView state={cardState} setSelectedService={setSelectedService} setServiceOpen={setServiceOpen} filterQuery={filterQuery} />
           </div>
         )}
         {viewType === 'table-view' && (
@@ -560,6 +558,7 @@ const WorkOrderTechnician = () => {
               tableHead={
                 <DetailsPageHeader
                   isAddButtonVisible={false}
+                  className="flex-grow"
                   isActionButtonVisible={false}
                   isNewActionButtonVisible={selectedRecords.length > 0}
                   newActionButtonProps={newActionButtonProps}
