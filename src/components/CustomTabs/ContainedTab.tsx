@@ -54,7 +54,7 @@ export const ContainedTab = <D,>({
       onClick={handleClick}
       className={cn(
         ' block min-w-fit flex-grow rounded-md px-5 py-1 text-sm font-medium',
-        '',
+        'text-[rgba(0,0,0,0.75)] dark:text-[white]',
         isActive ? 'bg-[--dark-primary,white]' : '',
         className
       )}
