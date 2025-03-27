@@ -542,7 +542,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           Object.assign(element, calValues);
           material.push(element);
         });
-        let priceData: any = await getPricingConditions(fieldTicketData, material, PRICING_SETUP_TYPE.rent);
+        let priceData: any = await getPricingConditions(sidebarResource.fieldTicket, fieldTicketData, material, PRICING_SETUP_TYPE.rent);
         AddMaterial(material, priceData);
       }
     }

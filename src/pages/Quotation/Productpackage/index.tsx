@@ -423,7 +423,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     });
 
     const conditionType = quotationData.type === QUOTATION_TYPE.salesOrder ? PRICING_SETUP_TYPE.price : PRICING_SETUP_TYPE.rent;
-    let priceData: any = await getPricingConditions(quotationData, material, conditionType);
+    let priceData: any = await getPricingConditions(sidebarResource.quotation, quotationData, material, conditionType);
     if (priceData) {
       material.forEach((element) => {
         const calValues = getPricingValue(element, priceData, quotationData?.currency, allFields);
