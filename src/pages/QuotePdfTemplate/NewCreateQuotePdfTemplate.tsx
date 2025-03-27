@@ -754,7 +754,6 @@ export default function NewCreateQuotePdfTemplate() {
                       helperText="Value must be between 5 to 20"
                     />
                   </div>
-
                   <div className="flex justify-between items-center mt-1">
                     <div className="flex gap-2">
                       <FormControlLabel
@@ -818,6 +817,16 @@ export default function NewCreateQuotePdfTemplate() {
                         }
                         label="Show Table Total At Bottom"
                       />
+
+                    </div>
+                    {allFields?.length && id && id !== '0' && !isClone && (
+                      <ThemeButton onClick={() => setVariableDialog(true)}>
+                        Variables
+                      </ThemeButton>
+                    )}
+                  </div>
+                  <div className="flex justify-between items-center mt-2">
+                    <div className="flex gap-2">
                       <TextField
                         variant="outlined"
                         label={'Table Font Size'}
@@ -880,13 +889,7 @@ export default function NewCreateQuotePdfTemplate() {
                         }}
                       />
                     </div>
-                    {allFields?.length && id && id !== '0' && !isClone && (
-                      <ThemeButton onClick={() => setVariableDialog(true)}>
-                        Variables
-                      </ThemeButton>
-                    )}
                   </div>
-
                   <Grid size={{ xs: 12 }} className="mt-4">
                     <Box className={classes.tinyMCEContainer}>
                       <Typography className={classes.headingLabel} variant="h5" component="h5">
