@@ -2,17 +2,18 @@ import { DndContext, DragOverlay } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Close, DragIndicator } from '@mui/icons-material';
+import { Close, DragIndicator, VisibilityOffOutlined, VisibilityOutlined } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
 import { startCase } from 'lodash';
 import { memo, useCallback, useMemo } from 'react';
+import { DEFAULT_DATA_ROWS_VISIBLE } from 'src/components/CardColTimeline1';
 import { ToggleSidebar } from 'src/components/CustomReactTable/ArrangeView/ArrangeViewDialog/Sidebar';
 import { ContentProps, RenderListItemProps } from 'src/components/CustomReactTable/ArrangeView/ArrangeViewDialog/types';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { cn } from 'src/constants/helpers';
 import { useDndSensors } from 'src/hooks';
 
-const Content = memo(({ state, values, setFieldValue }: ContentProps) => {
+const Content = memo(({ state, values, setFieldValue, from }: ContentProps) => {
   const sensors = useDndSensors();
   const { sortedColumns, isSidebarOpen, activeItem, setIsSidebarOpen, onDragEnd, onDragStart, isMobile, toggleSidebar } = state;
 
@@ -55,6 +56,7 @@ const Content = memo(({ state, values, setFieldValue }: ContentProps) => {
               const key = column.id ?? column.accessor;
               return (
                 <RenderListItem
+                  from={from}
                   key={column.accessor}
                   column={column}
                   index={index}
@@ -88,13 +90,13 @@ const Content = memo(({ state, values, setFieldValue }: ContentProps) => {
 export default Content;
 
 const RenderListItem = memo(
-  ({ column, index, handleRemoveItem = () => {}, hidden }: RenderListItemProps) => {
+  ({ column, index, handleRemoveItem = () => {}, hidden, from = 'table' }: RenderListItemProps) => {
     const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
       id: column.accessor,
       data: {
         type: 'Column',
         index,
-        props: { column, index, hidden }
+        props: { column, index, hidden, from: 'table' }
       },
       disabled: column.lockPosition || hidden
     });
@@ -131,10 +133,20 @@ const RenderListItem = memo(
                   <DragIndicator fontSize="small" />
                 </IconButton>
               </HtmlTooltip>
+
               <h6 className={cn('line-clamp-1 select-none text-sm font-medium leading-4', column.lockPosition ? 'text-gray-500' : '')} id={key}>
                 {column.Header || startCase(key)}
               </h6>
             </div>
+            {from === 'card' && (
+              <HtmlTooltip title={index < DEFAULT_DATA_ROWS_VISIBLE + 1 ? 'This will be visible' : 'This will be hidden'}>
+                {index < DEFAULT_DATA_ROWS_VISIBLE + 1 ? (
+                  <VisibilityOutlined fontSize="small" />
+                ) : (
+                  <VisibilityOffOutlined fontSize="small" color="disabled" />
+                )}
+              </HtmlTooltip>
+            )}
             <IconButton disabled={column.disabled} sx={{ ml: 'auto' }} size="small" onClick={() => handleRemoveItem(key)}>
               <Close fontSize="small" />
             </IconButton>
