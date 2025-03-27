@@ -2946,7 +2946,7 @@ export const COLOUR_MASTER_CLASSES = {
     borderColor: '#FFE4C0'
   },
   transferAsset: {
-    background: 'bg-[hsl(0,100%,96%)] dark:bg-[hsl(0,80%,50%)]',
+    background: 'bg-[hsl(0,8%,18% )] dark:bg-[hsl(0,80%,50%)]',
     borderColor: 'border-[#FFA0A0]'
   },
   bulkAsset: {
