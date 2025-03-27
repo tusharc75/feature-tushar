@@ -555,15 +555,10 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
           }}
           onSuccess={(d) => {
-            handleAdd([
-              {
-                ...d,
-                unitMain: d?.unit,
-              }
-            ]);
+            handleAdd([{ ...d, unitMain: d?.unit, pricingMethodMain: d?.pricingMethodMain }]);
           }}
           isRedirectToDetailPage={false}
-          openFrom=""
+          openFrom="serializedAsset"
         />
       )}
     </Fragment>
