@@ -6,6 +6,23 @@
 
 @layer muiReset;
 
+@layer utilities {
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background-color: var(--button-ripple-color, rgba(0, 0, 0, 0.3));
+    transform: scale(0);
+    animation: ripple-animation 0.6s linear;
+  }
+
+  @keyframes ripple-animation {
+    to {
+      transform: scale(4);
+      opacity: 0;
+    }
+  }
+}
+
 @layer components {
   .hide-scrollbar {
     -ms-overflow-style: none;
@@ -74,6 +91,7 @@
   --colorProject: yellow;
   --new_theme_color: #0f9fa9;
   --new-theme-color: #0f9fa9;
+  --new-theme-color-hsl: 184 84% 36%;
   --new-theme-color-hover: #0daeb9;
   --new-theme-color-disabled: #45949a;
   --new-theme-secondary-color: #ffc955;

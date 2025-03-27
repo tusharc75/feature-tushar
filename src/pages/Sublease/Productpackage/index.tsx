@@ -28,6 +28,7 @@ import { getPricingConditions, getPricingValue } from 'src/components/PricingCon
 import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 import { useData } from 'src/StateProvider/Provider';
 import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
+import CreateProduct from 'src/components/Product/CreateProduct';
 
 const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchData, renderedFrom, allowedToEdit, stepFullScreen }) => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -260,7 +261,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     rows.forEach((d) => {
       const element: any = {};
       element.materialId = d._id;
-      element.type = addExistingProductDialog.type;
+      element.type = addExistingProductDialog.type === 'newProduct' ? MATERIAL_TYPE.product : addExistingProductDialog.type;
       element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
       element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
       element.qty = d.qty ? parseFloat(d.qty) : 1;
@@ -278,7 +279,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       material.push(element);
     });
 
-    let priceData: any = await getPricingConditions(subleaseData, material, PRICING_SETUP_TYPE.rent);
+    let priceData: any = await getPricingConditions(sidebarResource.sublease, subleaseData, material, PRICING_SETUP_TYPE.rent);
     if (priceData) {
       material.forEach((element) => {
         const calValues = getPricingValue(element, priceData, subleaseData?.currency, allFields);
@@ -397,6 +398,15 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
             {`Add Existing ${resources?.packages?.titlePlural}`}
           </MenuItem>
         }
+        {permissions?.product?.isCreate && (
+          <MenuItem
+            onClick={() => {
+              setAddExistingProductDialog({ open: true, type: 'newProduct', parentId: null });
+            }}
+          >
+            Create New Product
+          </MenuItem>
+        )}
       </>
     );
   };
@@ -537,6 +547,18 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           }}
           packageType={PACKAGE_TYPE.product}
           isSubmitting={isSubmitting}
+        />
+      )}
+      {addExistingProductDialog.open && addExistingProductDialog.type === 'newProduct' && (
+        <CreateProduct
+          handleClose={() => {
+            setAddExistingProductDialog({ open: false, type: '', parentId: null });
+          }}
+          onSuccess={(d) => {
+            handleAdd([{ ...d, unitMain: d?.unit, pricingMethodMain: d?.pricingMethodMain }]);
+          }}
+          isRedirectToDetailPage={false}
+          openFrom="serializedAsset"
         />
       )}
     </Fragment>

@@ -69,11 +69,11 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                 : element.competencyDetail.competencyName
             }`;
           element.description = `${element.materialType === MATERIAL_TYPE.product
-            ? element.productDetail?.productDescription
+            ? element?.productDetail?.productDescription || ''
             : element.materialType === MATERIAL_TYPE.service
-              ? element.serviceDetail?.serviceDescription
+              ? element?.serviceDetail?.serviceDescription || ''
               : element.materialType === MATERIAL_TYPE.package
-                ? element.packageDetail?.packageDescription
+                ? element?.packageDetail?.packageDescription || ''
                 : ''
             }`;
           element.materialType = startCase(element.materialType);

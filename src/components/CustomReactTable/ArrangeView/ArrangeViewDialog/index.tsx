@@ -19,6 +19,7 @@ const formSchema = object().shape({
 
 const ArrangeViewDialog1 = ({
   columns,
+  from = 'table',
   data,
   expander,
   getAllSavedViews,
@@ -92,7 +93,7 @@ const ArrangeViewDialog1 = ({
             <HeadInputs errors={errors} setFieldValue={setFieldValue} state={state} touched={touched} values={values} />
             <div className={cn('grid overflow-hidden  rounded-lg border', isMobile ? 'relative' : 'grid-cols-[var(--sidebar-width)1fr]')}>
               <Sidebar state={state} values={values} setFieldValue={setFieldValue} />
-              <Content state={state} values={values} setFieldValue={setFieldValue} />
+              <Content state={state} values={values} setFieldValue={setFieldValue} from={from} />
             </div>
           </CustomDialogContent>
           <div className="flex justify-between px-[--px] py-[--py] pt-0">

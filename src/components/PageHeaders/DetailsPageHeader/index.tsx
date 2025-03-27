@@ -29,7 +29,7 @@ type DetailsPageHeaderProps = {
   leftSideContents?: ReactNode;
   rightSideContents?: ReactNode;
   hasXpadding?: boolean;
-  newActionButtonProps?: NewActionButtonProps<any>;
+  newActionButtonProps?: NewActionButtonProps<any, any>;
   hasYpadding?: boolean;
   className?: string;
   rightSideContentsAfterAction?: ReactNode;
