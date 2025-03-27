@@ -1,3 +1,4 @@
+import { CheckCircle, CheckCircleOutline, RadioButtonUnchecked } from '@mui/icons-material';
 import { Box, Checkbox } from '@mui/material';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
@@ -16,7 +17,7 @@ type CommonProps<D, C extends readonly string[]> = {
 } & CardColTimelineProps<D, C>;
 
 const SingleColumn = <D, C extends readonly string[]>({ state, getColColors, column, ...rest }: CommonProps<D, C>) => {
-  const { data, loading, isAllSelected, handleSelectAll, columnDef } = state;
+  const { data, loading, isAllSelected, handleSelectAll, columnDef, selectedRecordsObj } = state;
   const colors = getColColors(column);
   const isDataLoading = loading[column];
   const isInitialLoaded = data && data?.[column] && columnDef?.length > 0;
@@ -24,7 +25,7 @@ const SingleColumn = <D, C extends readonly string[]>({ state, getColColors, col
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   return (
     <div className="min-w-[min(90%,350px)] max-w-[350px] flex-shrink-0 snap-start ">
-      <div className={cn('head mb-2 rounded-md px-2 py-[5px]', colors.background, colors.color)}>
+      <div className={cn('head mb-2 rounded-md px-[11px] py-[5px]', colors.background, colors.color)}>
         <Checkbox
           size="small"
           id={`${column}-select-all`}
@@ -33,6 +34,10 @@ const SingleColumn = <D, C extends readonly string[]>({ state, getColColors, col
             e.stopPropagation();
             handleSelectAll(column);
           }}
+          indeterminate={!isAllSelected(column) && Object.keys(selectedRecordsObj[column]).length > 0}
+          icon={<RadioButtonUnchecked />}
+          indeterminateIcon={<CheckCircleOutline />}
+          checkedIcon={<CheckCircle />}
           disabled={isDataLoading || data?.[column]?.length === 0}
         />
         <label htmlFor={`${column}-select-all`} className="cursor-pointer text-[15px] font-bold">
@@ -148,7 +153,7 @@ const SingleCard = <D, C extends readonly string[]>({
     <div ref={rowRef} className="p-[8px] pb-1">
       <button
         className={cn(
-          `relative flex w-full flex-col rounded-md bg-[--dark-primary,white] px-3 py-2 text-left shadow-md outline-none [--left-gutter:20px] dark:bg-[var(--dark-secondary)]`,
+          `relative flex w-full flex-col rounded-md bg-[--dark-primary,white] px-3 py-2 text-left shadow-md outline-none [--left-gutter:20px] dark:bg-[var(--dark-secondary)] dark:text-white`,
           typeof cardOnClick === 'function'
             ? 'cursor-pointer outline-0 outline-[--new-theme-color] focus-visible:shadow-lg focus-visible:outline-2'
             : '',
@@ -164,14 +169,18 @@ const SingleCard = <D, C extends readonly string[]>({
         tabIndex={typeof cardOnClick === 'function' ? 0 : undefined}
       >
         <div className="flex w-full items-center justify-between border-b">
-          <div className="flex">
+          <div className="flex items-center">
             <Checkbox
+              sx={{ ml: '-8px' }}
               size="small"
               checked={selectedRecordsObj?.[column]?.[keyGetter(rowData)] || false}
               onClick={(e) => {
                 e.stopPropagation();
                 handleSelect(keyGetter(rowData), column);
               }}
+              icon={<RadioButtonUnchecked />}
+              indeterminateIcon={<CheckCircleOutline />}
+              checkedIcon={<CheckCircle />}
             />
             {primaryField && (
               <div className="line-clamp-1">
@@ -186,8 +195,10 @@ const SingleCard = <D, C extends readonly string[]>({
         </div>
         <div className="w-full p-2">
           {defaultDisplay?.map((d) => (
-            <div className="line-clamp-1">
-              <h6 className="line-clamp-1 text-[8px] font-medium text-[var(--dark-secondary-text,#8b8b8b)]">{d.Header}:</h6>
+            <div className="flex items-center justify-between gap-2">
+              <h6 className="line-clamp-1 max-w-[110px] flex-shrink-0 text-[8px] font-medium text-[var(--dark-secondary-text,#8b8b8b)]">
+                {d.Header}:
+              </h6>
               <h4 className="quote-name line-clamp-1 [&>*]:[font-weight:700_!important] [&_*:not(.flex)]:line-clamp-1  [&_*]:[font-size:12px_!important] [&_*]:[white-space:unset_!important]">
                 {renderCell(d, rowData)}
               </h4>

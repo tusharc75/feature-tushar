@@ -1,6 +1,7 @@
 import axios, { CancelToken } from 'axios';
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { UseCardColActions, UseCardColState, UseCardColTimelineProps } from 'src/components/CardColTimeline1/types';
+import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
 
 const getInitialState = <D, C extends readonly string[]>(): UseCardColState<D, C> => {
   return {
@@ -194,7 +195,8 @@ export const useCardColTimeline = <D, C extends readonly string[]>({
     setState({ type: 'setDefaultVisibleRows', payload });
   }, []);
   const setColumnDef = useCallback((payload: UseCardColState<D, C>['columnDef']) => {
-    setState({ type: 'setColumnDef', payload });
+    const preparedColumnDef = prepareColumnDef(payload);
+    setState({ type: 'setColumnDef', payload: preparedColumnDef });
   }, []);
   const setFilterQuery = useCallback(
     (payload: UseCardColState<D, C>['filterQuery']) => {
@@ -304,7 +306,7 @@ export const useCardColTimeline = <D, C extends readonly string[]>({
       };
       initialCacheCopy = cache.current;
       if (columnDef) {
-        payload['columnDef'] = columnDef;
+        payload['columnDef'] = prepareColumnDef(columnDef);
         columnDef?.forEach((col) => {
           const cellId = col.id || col.accessor;
           order.push(cellId);
@@ -421,4 +423,12 @@ export const useCardColTimeline = <D, C extends readonly string[]>({
     resetSelection,
     setOrderAndVisibility
   };
+};
+const prepareColumnDef = (columnDef: TColType[]) => {
+  return columnDef?.map((c) => ({
+    ...c,
+    id: c.accessor || c.id,
+    size: c.width || c.size || 200,
+    width: c.width || c.size || 200
+  }));
 };

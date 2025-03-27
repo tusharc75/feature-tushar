@@ -506,48 +506,51 @@ const WorkOrderTechnician = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         {viewType === 'card-view' && (
-          <div className="header-panel pb-0 pt-0">
-            <DetailsPageHeader
-              isAddButtonVisible={false}
-              isActionButtonVisible={false}
-              isNewActionButtonVisible={selectedRecords.length > 0}
-              newActionButtonProps={newActionButtonProps}
-              actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
-              leftSideContents={
-                <div className="flex items-center gap-2">
-                  <ThemeButton
-                    mobileTooltip="Apply Filters"
-                    startIcon={<BiFilterAlt className="-ml-1 mr-1 mt-[1px]" />}
-                    iconForMobile={<BiFilterAlt />}
-                    onClick={() => {
-                      setShowFilter(true);
-                    }}
-                  >
-                    Show Filters
-                  </ThemeButton>
-                  <DisplayFilterChip
-                    filterTerm={filterTerm}
-                    resourceColumns={FIELD_TO_FILTER}
-                    deepFilters={[]}
-                    filterByIds={filterByIds}
-                    fetchResourceData={(deepFilter, filterById) => {
-                      handleApplyFilter(filterById);
-                    }}
-                    setDeepFilters={null}
-                    setFilterByIds={setFilterByIds}
-                  />
-                </div>
+          <>
+            <CardView
+              renderedFrom={renderedFrom}
+              headerSlot={
+                <DetailsPageHeader
+                  isAddButtonVisible={false}
+                  isActionButtonVisible={false}
+                  isNewActionButtonVisible={selectedRecords.length > 0}
+                  newActionButtonProps={newActionButtonProps}
+                  actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
+                  leftSideContents={
+                    <div className="flex items-center gap-2">
+                      <ThemeButton
+                        mobileTooltip="Apply Filters"
+                        startIcon={<BiFilterAlt className="-ml-1 mr-1 mt-[1px]" />}
+                        iconForMobile={<BiFilterAlt />}
+                        onClick={() => {
+                          setShowFilter(true);
+                        }}
+                      >
+                        Show Filters
+                      </ThemeButton>
+                      <DisplayFilterChip
+                        filterTerm={filterTerm}
+                        resourceColumns={FIELD_TO_FILTER}
+                        deepFilters={[]}
+                        filterByIds={filterByIds}
+                        fetchResourceData={(deepFilter, filterById) => {
+                          handleApplyFilter(filterById);
+                        }}
+                        setDeepFilters={null}
+                        setFilterByIds={setFilterByIds}
+                      />
+                    </div>
+                  }
+                  hasXpadding={false}
+                  hasYpadding={false}
+                />
               }
-              hasXpadding={false}
-              hasYpadding={false}
+              state={cardState}
+              setSelectedService={setSelectedService}
+              setServiceOpen={setServiceOpen}
+              filterQuery={filterQuery}
             />
-          </div>
-        )}
-
-        {viewType === 'card-view' && (
-          <div className="pt-2">
-            <CardView state={cardState} setSelectedService={setSelectedService} setServiceOpen={setServiceOpen} filterQuery={filterQuery} />
-          </div>
+          </>
         )}
         {viewType === 'table-view' && (
           <div className="">

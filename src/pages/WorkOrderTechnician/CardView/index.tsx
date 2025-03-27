@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import CardColTimeline from 'src/components/CardColTimeline1';
 import { workOrderColormap } from 'src/constants/helpers';
 
-const CardView = ({ filterQuery, setSelectedService, setServiceOpen, state }) => {
+const CardView = ({ filterQuery, setSelectedService, setServiceOpen, state, headerSlot, renderedFrom }) => {
   const { setFilterQuery } = state;
 
   useEffect(() => {
@@ -21,6 +21,8 @@ const CardView = ({ filterQuery, setSelectedService, setServiceOpen, state }) =>
   return (
     <>
       <CardColTimeline
+        renderedFrom={renderedFrom}
+        headerSlot={headerSlot}
         getColColors={(colName) => workOrderColormap[colName]}
         state={state}
         passFailStatus={true}

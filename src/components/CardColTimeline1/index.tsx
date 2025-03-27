@@ -1,15 +1,22 @@
 import { useMemo } from 'react';
 import SingleColumn from 'src/components/CardColTimeline1/SingleColumn';
 import { CardColTimelineProps } from 'src/components/CardColTimeline1/types';
+import ArrangeView from 'src/components/CustomReactTable/ArrangeView';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
-
 export * from 'src/components/CardColTimeline1/types';
 export * from 'src/components/CardColTimeline1/useCardColTimeline';
 
-export const DEFAULT_DATA_ROWS_VISIBLE = 3;
+export const DEFAULT_DATA_ROWS_VISIBLE = 4;
 
-const CardColTimeline = <D, C extends readonly string[]>({ state, getColColors, cardOnClick, ...rest }: CardColTimelineProps<D, C>) => {
-  const { columns, visibleColumns, columnDef, visible, order } = state;
+const CardColTimeline = <D, C extends readonly string[]>({
+  state,
+  getColColors,
+  cardOnClick,
+  headerSlot,
+  renderedFrom,
+  ...rest
+}: { headerSlot?: React.ReactElement; renderedFrom: string } & CardColTimelineProps<D, C>) => {
+  const { columns, visibleColumns, columnDef, visible, order, setOrderAndVisibility } = state;
 
   const sortedHidedColumnDef = useMemo(() => {
     return columnDef
@@ -43,24 +50,39 @@ const CardColTimeline = <D, C extends readonly string[]>({ state, getColColors, 
   }, [otherFields]);
 
   return (
-    <div className="flex snap-x snap-mandatory gap-[10px] overflow-auto pb-4 md:scroll-px-[24px]">
-      {columns.map((c) => {
-        if (!visibleColumns.includes(c)) return null;
-        return (
-          <SingleColumn
-            key={c}
-            state={state}
-            column={c}
-            getColColors={getColColors}
-            cardOnClick={cardOnClick}
-            primaryField={primaryField}
-            actionField={actionField}
-            defaultDisplay={defaultDisplay}
-            {...rest}
+    <>
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <div className="flex-grow">{headerSlot}</div>
+        {columnDef && (
+          <ArrangeView
+            from="card"
+            columns={columnDef}
+            expander={false}
+            hideSelection={true}
+            renderedFrom={renderedFrom}
+            setOrderAndVisibility={setOrderAndVisibility}
           />
-        );
-      })}
-    </div>
+        )}
+      </div>
+      <div className="flex snap-x snap-mandatory gap-[10px] overflow-auto pb-4 md:scroll-px-[24px]">
+        {columns.map((c) => {
+          if (!visibleColumns.includes(c)) return null;
+          return (
+            <SingleColumn
+              key={c}
+              state={state}
+              column={c}
+              getColColors={getColColors}
+              cardOnClick={cardOnClick}
+              primaryField={primaryField}
+              actionField={actionField}
+              defaultDisplay={defaultDisplay}
+              {...rest}
+            />
+          );
+        })}
+      </div>
+    </>
   );
 };
 

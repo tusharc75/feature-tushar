@@ -25,12 +25,12 @@ const CardColTimelineLoader = () => {
             </div>
             <div className="w-full p-2">
               {[...Array(DEFAULT_DATA_ROWS_VISIBLE).keys()]?.map((d) => (
-                <div className="line-clamp-1">
+                <div className="flex items-center justify-between gap-2">
                   <h6 className="line-clamp-1 text-[8px] font-medium text-[var(--dark-secondary-text,#8b8b8b)]">
-                    <Skeleton width={getRandomNumber(100, 200)} />:
+                    <Skeleton width={getRandomNumber(70, 100)} />:
                   </h6>
                   <h4 className="quote-name line-clamp-1 [&>*]:[font-weight:700_!important] [&_*:not(.flex)]:line-clamp-1  [&_*]:[font-size:12px_!important] [&_*]:[white-space:unset_!important]">
-                    <Skeleton width={getRandomNumber(200, 300)} />
+                    <Skeleton width={getRandomNumber(100, 150)} />
                   </h4>
                 </div>
               ))}
