@@ -52,7 +52,8 @@ const Filters = ({
             c.fieldData.type === 'multiSelect' ||
             c.fieldData.type === 'date' ||
             c.fieldData.type === 'checkBox' ||
-            c.fieldData.type === 'singleLine')
+            c.fieldData.type === 'singleLine' ||
+            c.fieldData.type === 'lookUpDisplay')
       )
       ?.map((d) => ({ ...d?.fieldData }));
     return [...colum?.filter((f) => f?.required), ...colum?.filter((f) => !f?.required)];
@@ -150,11 +151,11 @@ const Filters = ({
           isMobile && isSidebarOpen ? 'overflow-hidden' : 'overflow-y-auto'
         )}
       >
-        {selectedField && selectedField?.type === 'singleLine' ? (
+        {selectedField && ['singleLine', 'lookUpDisplay']?.includes(selectedField?.type) ? (
           <SingleLine
             key={selectedField._id || selectedField.fieldName}
             fieldData={selectedField}
-            allFields={[]}
+            allFields={options}
             deepFilters={deepFilters}
             setDeepFilters={setDeepFilters}
             filterTerm={filterTerm}
