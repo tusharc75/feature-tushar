@@ -5,7 +5,8 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        link: 'var(--link)'
+        link: 'var(--link)',
+        'new-theme-color': 'hsl(184, 84%, 36%)'
       },
       typography: {
         DEFAULT: {

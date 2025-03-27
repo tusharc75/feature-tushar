@@ -52,8 +52,8 @@ export const ContainedTab = <D,>({
       aria-selected={isActive}
       onClick={handleClick}
       className={cn(
-        'block min-w-fit flex-grow rounded-md px-4 py-1 text-sm font-medium',
-        '[--button-ripple-color:rgba(0,0,0,0.2)] dark:[--button-ripple-color:rgba(255,255,255,0.3)]',
+        ' block min-w-fit flex-grow rounded-md px-4 py-1 text-sm font-medium',
+        '',
         isActive ? 'bg-[--dark-primary,white]' : '',
         className
       )}
