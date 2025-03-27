@@ -94,7 +94,15 @@ export const PreviewDialog = ({
         data.columns
           ?.map((e) => {
             const col = allColumn.find((col) => col.fieldName === e.name);
-            if (col) return { ...col, ...(e?.width ? { width: e.width } : {}), ...(e?.customLabel ? { customLabel: e.customLabel } : {}), ...(e?.showBelowRow ? { showBelowRow: e.showBelowRow } : {}), ...(e?.alignment ? { alignment: e.alignment } : {}) };
+            if (col)
+              return {
+                ...col,
+                ...(e?.width ? { width: e.width } : {}),
+                ...(e?.customLabel ? { customLabel: e.customLabel } : {}),
+                ...(e?.showBelowRow ? { showBelowRow: e.showBelowRow } : {}),
+                ...(e?.alignment ? { alignment: e.alignment } : {}),
+                ...(e?.fontWeight ? { fontWeight: e.fontWeight } : {})
+              };
           })
           .filter((col) => col !== undefined)
       );
@@ -122,11 +130,14 @@ export const PreviewDialog = ({
     }
     for (const col of visibleColumns) {
       const column = selectedView?.columns?.find((e) => e?.name === col?.fieldName);
-      if (!column ||
+      if (
+        !column ||
         (column?.customLabel || null) !== (col?.customLabel || null) ||
         (column?.width || null) !== (col?.width || null) ||
         (column?.showBelowRow || null) !== (col?.showBelowRow || null) ||
-        (column?.alignment || null) !== (col?.alignment || null)) {
+        (column?.alignment || null) !== (col?.alignment || null) ||
+        (column?.fontWeight || null) !== (col?.fontWeight || null)
+      ) {
         return false;
       }
     }

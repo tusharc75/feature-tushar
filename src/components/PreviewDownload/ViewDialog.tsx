@@ -41,7 +41,8 @@ export const ViewDialog = ({ columns, resource, handleSucess, handleClose, viewD
         width: c.width,
         customLabel: c.customLabel,
         showBelowRow: c?.showBelowRow,
-        alignment: c?.alignment
+        alignment: c?.alignment,
+        fontWeight: c?.fontWeight
       })) || [],
       ...(sortBy && orderBy ? { sortBy: sortBy?.fieldName, orderBy } : { sortBy: '', orderBy: '' })
     };
