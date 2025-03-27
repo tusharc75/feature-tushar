@@ -65,7 +65,6 @@ const ArrangeView = ({
   const oldSerializedSizes = useRef(JSON.stringify(getCurrentColumnSizes(table)));
   const walkmeInstance = useGetWalkmeInstance();
   const { loading } = state || { loading: false };
-  console.log({ renderedFrom, dispatchTable, state, columns, hideSelection, expander, appliedView, table });
 
   const { gridMetaData, setGridMetaData } = useGridMetaData();
   const { isOffline } = useContext(CustomOfflineContext);

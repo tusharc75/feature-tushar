@@ -2892,6 +2892,117 @@ export const COLOUR_MASTER = {
   }
 };
 
+export const COLOUR_MASTER_CLASSES = {
+  rentalJob: {
+    background: 'bg-[#E6E8F5] dark:bg-[#404145]',
+    borderColor: 'border-[#9789F0] dark:border-[#9789F0]'
+  },
+  cancelledRentalJob: {
+    background: '#00FF00',
+    borderColor: '#999999'
+  },
+  closedRentalJob: {
+    background: '#4BB543',
+    borderColor: '#999999'
+  },
+  repairJob: {
+    background: '#c3d5e6',
+    borderColor: '#6c89a6'
+  },
+  closedRepairJob: {
+    background: '#4BB543',
+    borderColor: '#999999'
+  },
+  package: {
+    background: '#acdce6',
+    borderColor: '#81afb8'
+  },
+  product: {
+    background: '#E2F8FF',
+    borderColor: '#8BCBDF'
+  },
+  service: {
+    background: '#FFF7D9',
+    borderColor: '#FDD33E'
+  },
+  assets: {
+    background: '#EDFFE1',
+    borderColor: '#86DB71'
+  },
+  lostAssets: {
+    background: 'var(--error-bg)',
+    borderColor: '#db765c'
+  },
+  scrapAssets: {
+    background: '#ff9980',
+    borderColor: '#db765c'
+  },
+  purchaseOrder: {
+    background: '#E6E8F5',
+    borderColor: '#9789F0'
+  },
+  sublease: {
+    background: '#FFE4C0',
+    borderColor: '#FFE4C0'
+  },
+  transferAsset: {
+    background: 'bg-[hsl(0,100%,96%)] dark:bg-[hsl(0,80%,50%)]',
+    borderColor: 'border-[#FFA0A0]'
+  },
+  bulkAsset: {
+    background: '#FFA500',
+    borderColor: '#6c89a6'
+  },
+  loadingTicket: {
+    background: '#e6c6e6',
+    borderColor: '#b38fb3'
+  },
+  deliveredLoadingTicket: {
+    background: '#e6c6e6',
+    borderColor: '#b38fb3'
+  },
+  accepted: {
+    background: '#EDFFE1',
+    borderColor: '#86DB71'
+  },
+  rejected: {
+    background: '#FFEAEA',
+    borderColor: '#FFA0A0'
+  },
+  skipped: {
+    background: '#ffd65b',
+    borderColor: 'grey'
+  },
+  receivingTicket: {
+    background: '#EDFFE1',
+    borderColor: '#86DB71'
+  },
+  deliveredReceivingTicket: {
+    background: '#cfdb7f',
+    borderColor: '#aeb86e'
+  },
+  returnTicket: {
+    background: '#ff9980',
+    borderColor: '#db765c'
+  },
+  deliveredReturnTicket: {
+    background: '#ff9980',
+    borderColor: '#db765c'
+  },
+  replaceAssetColor: {
+    background: 'var(--replaceAsset-bg)',
+    borderColor: 'var(--replaceAsset-bg)'
+  },
+  preWork: {
+    background: 'rgba(254, 249, 230, 1)',
+    borderColor: '#C0C0C0'
+  },
+  postWork: {
+    background: 'rgba(222, 249, 255, 1)',
+    borderColor: 'green'
+  }
+};
+
 export const leadTimeStatusDropdown = ['Production', 'Supplier', 'Assemble', 'Freight', 'Customer'];
 
 export const QUOTATION_STATUS = {
@@ -3216,7 +3327,7 @@ export const SERIALIZED_PACKAGES_STATUS = {
 
 export const PACKAGE_TYPE = {
   product: 'Product',
-  service: 'Service',
+  service: 'Service'
 };
 
 export const convertMsToTime = (milliseconds: any) => {
