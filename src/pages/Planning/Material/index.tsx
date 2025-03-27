@@ -21,7 +21,7 @@ import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
-import { ASSET_STATUS, CHILD_RESOURCE, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
+import { ASSET_STATUS, CHILD_RESOURCE, MATERIAL_TYPE, PACKAGE_TYPE, sidebarResource } from 'src/constants/helpers';
 import MaterialDialog from './materialDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
@@ -86,7 +86,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === MATERIAL_TYPE.package
-                  ? row.original?.packageDetail?.packageType === 'Product'
+                  ? row.original?.packageDetail?.packageType === PACKAGE_TYPE.product
                     ? '(Product)'
                     : '(Service)'
                   : row.original.type === MATERIAL_TYPE.service

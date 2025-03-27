@@ -28,6 +28,7 @@ import {
   DELIVERY_TICKET_TYPE,
   INVENTORY_OWNER_TYPE,
   MATERIAL_TYPE,
+  PACKAGE_TYPE,
   RENTAL_INTERNAL_ASSET_STATUS,
   TRANSFER_ASSET_STATUS,
   deliveryTicket,
@@ -131,7 +132,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
+                  ? row.original?.packageDetail.packageType === PACKAGE_TYPE.product
                     ? '(Product)'
                     : '(Service)'
                   : row.original.type === 'service'

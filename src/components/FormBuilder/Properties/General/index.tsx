@@ -342,6 +342,7 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
                   onChange={(e) => {
                     setFieldValue('isFormula', e.target.checked);
                     setFieldValue('inputFields', []);
+                    setFieldValue('counterFieldInputFields', []);
                     setFieldValue('formula', '');
                   }}
                   color="primary"

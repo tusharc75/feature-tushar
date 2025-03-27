@@ -23,7 +23,7 @@ import NoDataCell from '../Helpers/NoDataCell';
 import routes from '../Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { FiExternalLink } from 'react-icons/fi';
-import { AiOutlineFileExclamation } from "react-icons/ai";
+import { AiOutlineFileExclamation } from 'react-icons/ai';
 
 const renderedFrom = 'import-export';
 
@@ -37,7 +37,8 @@ const ImportExportDialog = ({
   api,
   apiUrl = null,
   additionalParams,
-  refresh
+  refresh,
+  additionalFormData = null
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -149,7 +150,7 @@ const ImportExportDialog = ({
         Cell: ({ row }) => (
           <>
             {row?.original?.status === IMPORT_EXPORT_STATUS.inProgress && <CircularProgress size={20} aria-disabled />}
-            {row?.original?.importFileName &&
+            {row?.original?.importFileName && (
               <HtmlTooltip title={'Download Imported File'}>
                 <IconButton
                   size="small"
@@ -161,11 +162,16 @@ const ImportExportDialog = ({
                   <GetApp color={'primary'} fontSize="small" />
                 </IconButton>
               </HtmlTooltip>
-            }
+            )}
             {row?.original?.fileName &&
-              ((type === IMPORT_EXPORT_TYPE.export && [IMPORT_EXPORT_STATUS.completed, IMPORT_EXPORT_STATUS.partialComplete]?.includes(row?.original?.status)) ||
+              ((type === IMPORT_EXPORT_TYPE.export &&
+                [IMPORT_EXPORT_STATUS.completed, IMPORT_EXPORT_STATUS.partialComplete]?.includes(row?.original?.status)) ||
                 (type === IMPORT_EXPORT_TYPE.import && row?.original?.status === IMPORT_EXPORT_STATUS.error)) && (
-                <HtmlTooltip title={type === IMPORT_EXPORT_TYPE.import && row?.original?.status === IMPORT_EXPORT_STATUS.error ? 'Download Error File' : 'Download'}>
+                <HtmlTooltip
+                  title={
+                    type === IMPORT_EXPORT_TYPE.import && row?.original?.status === IMPORT_EXPORT_STATUS.error ? 'Download Error File' : 'Download'
+                  }
+                >
                   <IconButton
                     size="small"
                     aria-label="Delete"
@@ -173,10 +179,12 @@ const ImportExportDialog = ({
                       handleDownloadFile(row?.original?._id);
                     }}
                   >
-                    {type === IMPORT_EXPORT_TYPE.import && row?.original?.status === IMPORT_EXPORT_STATUS.error
-                      ? <AiOutlineFileExclamation size={20} style={{ color: "red" }} /> :
+                    {type === IMPORT_EXPORT_TYPE.import && row?.original?.status === IMPORT_EXPORT_STATUS.error ? (
+                      <AiOutlineFileExclamation size={20} style={{ color: 'red' }} />
+                    ) : (
                       <GetApp color={'primary'} fontSize="small" />
-                    } </IconButton>
+                    )}{' '}
+                  </IconButton>
                 </HtmlTooltip>
               )}
           </>
@@ -188,9 +196,9 @@ const ImportExportDialog = ({
 
   const handleDownloadFile = (fileId, importFileName = false) => {
     setDownloading({ loading: true, type: 'file' });
-    let api = `/import-export/download-file/${fileId}`
+    let api = `/import-export/download-file/${fileId}`;
     if (importFileName) {
-      api += `?importFileName=1`
+      api += `?importFileName=1`;
     }
     axiosInstance()
       .get(api, { responseType: 'arraybuffer' })
@@ -242,6 +250,11 @@ const ImportExportDialog = ({
       let formData = new FormData();
       formData.append('file', file);
 
+      if (additionalFormData) {
+        Object.keys(additionalFormData)?.map((_key) => {
+          formData.append(_key, additionalFormData[_key]);
+        });
+      }
       let importApi = `${api}/import`;
 
       if (additionalParams) {

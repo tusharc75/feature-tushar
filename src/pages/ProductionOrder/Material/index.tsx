@@ -21,7 +21,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { CHILD_RESOURCE, MATERIAL_TYPE, PRODUCTION_ORDER_STATUS, asyncForEach, productionOrder, sidebarResource } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, PACKAGE_TYPE, PRODUCTION_ORDER_STATUS, asyncForEach, productionOrder, sidebarResource } from '../../../constants/helpers';
 import MaterialDialog from './MaterialDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
@@ -543,7 +543,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
             handleAdd(rows);
           }}
           isSubmitting={isSubmitting}
-          packageType={'product'}
+          packageType={PACKAGE_TYPE.product}
         />
       )}
       {materialEdit.open && (

@@ -3214,6 +3214,11 @@ export const SERIALIZED_PACKAGES_STATUS = {
   customerPossession: 'Customer Possession'
 };
 
+export const PACKAGE_TYPE = {
+  product: 'Product',
+  service: 'Service',
+};
+
 export const convertMsToTime = (milliseconds: any) => {
   function padTo2Digits(num) {
     num = num - Math.floor(num) !== 0 ? num.toFixed(1) : num;
@@ -3333,7 +3338,8 @@ export const ATTACHMENT_TYPE = {
 
 export const FILE_PROCESS_STATUS = {
   processing: 'Processing',
-  completed: 'Completed'
+  completed: 'Completed',
+  fail: 'Fail'
 } as const;
 
 export const convertBlobToBase64 = async (blobUrl) => {

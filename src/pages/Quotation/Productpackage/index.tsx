@@ -26,6 +26,7 @@ import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import {
   CHILD_RESOURCE,
   MATERIAL_TYPE,
+  PACKAGE_TYPE,
   PRICING_SETUP_TYPE,
   QUOTATION_TYPE,
   SERVICE_TYPE,
@@ -127,7 +128,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === MATERIAL_TYPE.package
-                  ? row.original?.packageDetail.packageType === 'Product'
+                  ? row.original?.packageDetail.packageType === PACKAGE_TYPE.product
                     ? '(Product)'
                     : '(Service)'
                   : row.original.type === MATERIAL_TYPE.service

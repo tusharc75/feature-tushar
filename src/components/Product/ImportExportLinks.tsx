@@ -8,11 +8,12 @@ import { DownloadIcon, ExportIcon, ImportIcon } from 'src/assets/svg/svgIcons';
 import { CustomImport } from 'src/components/productBuilder/CustomImport';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import { downloadExcel } from '../../constants/helpers';
+import { downloadExcel, IMPORT_EXPORT_TYPE } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import SelectionDialog from './SelectionDialog';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { ExpandMore } from '@mui/icons-material';
+import ImportExportDialog from 'src/components/AsynImportExportMenu/ImportExportDialog';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -42,20 +43,21 @@ export default function ImportExportLinks({
   ids = [],
   permission,
   module,
+  resource = null,
   api,
   refrenceId,
   onSuccessfulImport,
   recordsToExport = 0,
   exportSelectedRecords = null,
   isExportAllOrSomeFeature = false,
-  onExportToExcelSuccess = () => { },
+  onExportToExcelSuccess = () => {},
   total = 0,
   additionalParams = null,
   extraImportExportLinks = [],
   inverted = false,
   small = false,
   isCustomImport = false,
-  onSuccessCustomImport = () => { },
+  onSuccessCustomImport = () => {},
   currency = 'USD'
 }) {
   const classes = useStyles();
@@ -67,19 +69,12 @@ export default function ImportExportLinks({
   const [anchorExtraEl, setAnchorExtraEl] = useState(null);
   const [customImportDialog, setCustomImportDialog] = useState(false);
 
-  const [imptExptDnldMenuDta, setImptExptDnldMenuDta] = useState({ anchorEl: null, action: null, open: false });
+  const [openAsyncImpExpDialog, setOpenAsyncImpExpDialog] = useState({ open: false, type: null, importData: null });
+  const [refresh, setRefresh] = useState(false);
 
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
-
-  const handleOpenMenu = (e, action) => {
-    setImptExptDnldMenuDta({ action, anchorEl: e.currentTarget, open: true });
-  };
-
-  const handleCloseMenu = () => {
-    setImptExptDnldMenuDta({ anchorEl: null, action: null, open: false });
-  };
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -220,10 +215,24 @@ export default function ImportExportLinks({
         responseType: 'arraybuffer'
       })
       .then((response) => {
-        const fileName = response.headers['content-disposition'].split('filename=')[1];
-        downloadExcel(response.data, fileName);
-        if (recordsToExport > 0) {
-          onExportToExcelSuccess();
+        if (module === resources?.product?.titlePlural && resource) {
+          setRefresh(!refresh);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: 'Export to excel added in queue successfully.'
+          });
+        } else {
+          const fileName = response.headers['content-disposition'].split('filename=')[1];
+          downloadExcel(response.data, fileName);
+          if (recordsToExport > 0) {
+            onExportToExcelSuccess();
+          }
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: 'Exported to excel successfully.'
+          });
         }
       })
       .catch((error) => {
@@ -242,106 +251,6 @@ export default function ImportExportLinks({
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  };
-
-  const RenderButtonMenu = () => {
-    return (
-      <Menu
-        id="button-menu"
-        anchorEl={imptExptDnldMenuDta.anchorEl}
-        keepMounted
-        open={true}
-        onClose={handleCloseMenu}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right'
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right'
-        }}
-      >
-        {permission?.isCreate && imptExptDnldMenuDta.action === 'import' && (
-          <MenuItem
-            onClick={() => {
-              setIsSelection(true);
-              setIsUploadDialog(true);
-              handleCloseMenu();
-            }}
-          >
-            <label htmlFor="importFromExcel">{api === 'product' ? `Product Import` : `Import from Excel`}</label>
-          </MenuItem>
-        )}
-        {imptExptDnldMenuDta.action === 'export' && (
-          <MenuItem
-            onClick={() => {
-              exportToExcel();
-              handleCloseMenu();
-            }}
-          >
-            {api === 'product' ? `Product Export` : `Export to Excel`}
-          </MenuItem>
-        )}
-        {imptExptDnldMenuDta.action === 'download' && (
-          <MenuItem
-            onClick={() => {
-              setIsSelection(true);
-              handleCloseMenu();
-            }}
-          >
-            {api === 'product' ? `Product Template` : ` Download Template`}
-          </MenuItem>
-        )}
-        {extraImportExportLinks?.map((d, idx) => {
-          if (d.type === 'import' && imptExptDnldMenuDta.action === 'import') {
-            return (
-              <MenuItem key={d.title}>
-                <input
-                  onClick={(e: any) => (e.target.value = null)}
-                  id={`${d.title}-${idx + 1}`.replace(/\s+/g, '')}
-                  name={`${d.title}-${idx + 1}`.replace(/\s+/g, '')}
-                  onChange={(e) => {
-                    uploadExtraData(e, d.api);
-                  }}
-                  accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                  style={{
-                    opacity: '0',
-                    position: 'absolute',
-                    zIndex: -1
-                  }}
-                  type="file"
-                />
-                <label htmlFor={`${d.title}-${idx + 1}`.replace(/\s+/g, '')}>{d.title}</label>
-              </MenuItem>
-            );
-          } else if (d.type === 'export' && imptExptDnldMenuDta.action === 'export') {
-            return (
-              <MenuItem
-                key={d.title}
-                onClick={() => {
-                  exportToExcel(d.api);
-                  handleCloseMenu();
-                }}
-              >
-                {d.title}
-              </MenuItem>
-            );
-          } else if (imptExptDnldMenuDta.action === 'download' && d.type === 'download') {
-            return (
-              <MenuItem
-                key={d.title}
-                onClick={() => {
-                  exportToExcel(d.api);
-                  handleCloseMenu();
-                }}
-              >
-                {d.title}
-              </MenuItem>
-            );
-          }
-        })}
-      </Menu>
-    );
   };
 
   const handleDownloadTemplate = () => {
@@ -378,36 +287,31 @@ export default function ImportExportLinks({
     >
       {!isCustomImport ? (
         <div className={classes.linksContainer}>
-          {permission?.isCreate &&
-            (permissions?.productCategory?.isRead ? (
+          {ImportInput}
+          {permission?.isCreate && (
+            <>
               <label
+                htmlFor={permissions?.productCategory?.isRead || (module === resources?.product?.titlePlural && resource) ? '' : 'importFromExcel'}
                 onClick={(e) => {
-                  if (api === 'product') {
-                    handleOpenMenu(e, 'import');
-                  } else {
+                  if (permissions?.productCategory?.isRead) {
                     setIsSelection(true);
                     setIsUploadDialog(true);
                     handleClose();
+                  } else if (module === resources?.product?.titlePlural && resource) {
+                    setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.import, importData: null });
                   }
                 }}
-                htmlFor={api === 'product' ? '' : 'importFromExcel'}
                 className={`new-headerbox-button-v1 ${small ? 'small' : ''}`}
               >
-                Import from Excel
+                <span>Import from Excel</span>
                 <ImportIcon />
               </label>
-            ) : (
-              <>
-                {ImportInput}
-                <label htmlFor="importFromExcel" className={`new-headerbox-button-v1 ${small ? 'small' : ''}`}>
-                  <span>Import from Excel</span>
-                </label>
-              </>
-            ))}
+            </>
+          )}
           <label
             onClick={(e) => {
-              if (api === 'product') {
-                handleOpenMenu(e, 'export');
+              if (module === resources?.product?.titlePlural && resource) {
+                setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.export, importData: null });
               } else {
                 exportToExcel();
               }
@@ -420,14 +324,10 @@ export default function ImportExportLinks({
           </label>
           <label
             onClick={(e) => {
-              if (api === 'product') {
-                handleOpenMenu(e, 'download');
+              if (permissions?.productCategory?.isRead) {
+                setIsSelection(true);
               } else {
-                if (permissions?.productCategory?.isRead) {
-                  setIsSelection(true);
-                } else {
-                  handleDownloadTemplate();
-                }
+                handleDownloadTemplate();
               }
             }}
             className={`new-headerbox-button-v1 ${small ? 'small' : ''}`}
@@ -435,7 +335,7 @@ export default function ImportExportLinks({
             Download Template
             <DownloadIcon />
           </label>
-          {extraImportExportLinks?.length > 0 && api !== 'product' && (
+          {extraImportExportLinks?.length > 0 && (
             <>
               <Menu
                 id="import-export-extra-links"
@@ -499,7 +399,7 @@ export default function ImportExportLinks({
         <ThemeButton
           onClick={(e) => handleClick(e)}
           endIcon={<ExpandMore />}
-          mobileTooltip='Import/Export'
+          mobileTooltip="Import/Export"
           iconForMobile={<MdImportExport size={20} />}
         >
           Import/Export
@@ -615,8 +515,16 @@ export default function ImportExportLinks({
       </Menu>
       {isSelection && (
         <SelectionDialog
-          uploadData={uploadData}
+          uploadData={(file, _data) => {
+            if (module === resources?.product?.titlePlural && resource) {
+              setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.import, importData: { ..._data, refrenceId: refrenceId } });
+            } else {
+              uploadData(file, _data);
+            }
+          }}
           isUpload={isUpladDialog}
+          module={module}
+          resource={resource}
           refrenceId={refrenceId}
           handleClose={() => {
             setIsSelection(false);
@@ -637,7 +545,25 @@ export default function ImportExportLinks({
           currency={currency}
         />
       )}
-      {imptExptDnldMenuDta.open && <RenderButtonMenu />}
+      {openAsyncImpExpDialog.open && (
+        <ImportExportDialog
+          handleClose={() => {
+            setOpenAsyncImpExpDialog({ open: false, type: null, importData: null });
+            setAnchorEl(null);
+          }}
+          type={openAsyncImpExpDialog.type}
+          resource={resource}
+          subResource={null}
+          referenceId={null}
+          handleExport={() => {
+            exportToExcel();
+          }}
+          refresh={refresh}
+          api={api}
+          additionalParams={additionalParams}
+          additionalFormData={openAsyncImpExpDialog.importData}
+        />
+      )}
     </div>
   );
 }
