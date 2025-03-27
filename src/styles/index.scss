@@ -10,7 +10,7 @@
   .ripple {
     position: absolute;
     border-radius: 50%;
-    background-color: var(--button-ripple-color, rgba(0, 0, 0, 0.3));
+    background-color: var(--button-ripple-color, rgba(0, 0, 0, 0.1));
     transform: scale(0);
     animation: ripple-animation 0.6s linear;
   }
