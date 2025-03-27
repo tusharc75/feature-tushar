@@ -56,10 +56,16 @@ const PricingConditionsDialog = ({ pricingConditionId, onClose, onSuccess, isUpd
               toastConfig.setToastConfig(error);
             });
         } else {
-          let initialData = {
-            ...getObjKeys('', fieldsDataForCreate),
-            currency: user.user?.brandCurrency || ''
-          };
+          const initialData = getObjKeys('', fieldsDataForCreate)
+          if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
+            initialData['currency'] = user.user?.brandCurrency;
+          }
+          if (fieldsDataForCreate?.some((e) => e.fieldName === 'startDate')) {
+            initialData['startDate'] = '';
+          }
+          if (fieldsDataForCreate?.some((e) => e.fieldName === 'endDate')) {
+            initialData['endDate'] = '';
+          }
           setInitialData({
             fields: fieldsDataForCreate,
             values: initialData
