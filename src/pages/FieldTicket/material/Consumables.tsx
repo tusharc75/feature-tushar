@@ -17,7 +17,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { flattenArray } from 'src/constants/columns';
 import Autocomplete from '@mui/material/Autocomplete';
-import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { TabPanel } from 'src/components/CustomTabs';
 import Technicians from './Technicians';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
@@ -38,6 +38,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
 import AddQuotationDataDialog from './AddQuotationDataDialog';
+import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
 
 const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, stepFullScreen, fetchData: fetchFieldTicketData, refreshChild, resourcePolicy }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Consumables`;
@@ -692,10 +693,10 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
           />
         </Box>
       )}
-      <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
-        <CustomTab value={0} label={'Products/Consumables'} id={'products-consumables-tab'} />
-        {!isOffline && <CustomTab value={1} label={'Technicians'} id={'technicians-tab'} />}
-      </CustomTabs>
+      <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
+        <ContainedTab value={0} label={'Products/Consumables'} id={'products-consumables-tab'} />
+        {!isOffline && <ContainedTab value={1} label={'Technicians'} id={'technicians-tab'} />}
+      </ContainedTabs>
 
       <TabPanel value={tabValue} index={0}>
         <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>

@@ -158,6 +158,22 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     [resources?.product?.titlePlural, resources?.warehouse?.titlePlural]
   );
 
+  const EMPLOYEE_MASTER_FILTERS = useMemo(
+    () => [
+      {
+        label: resources?.employeeMaster?.titleSingular,
+        value: 'Employee Master',
+        key: 'technician'
+      },
+      {
+        label: resources?.warehouse?.titlePlural,
+        value: 'Warehouse',
+        key: 'warehouse'
+      }
+    ],
+    [resources?.product?.titlePlural, resources?.warehouse?.titlePlural]
+  );
+
   const RENTAL_JOB_FILTERS = useMemo(
     () => [
       {
@@ -207,7 +223,9 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const [isDataFetching, setIsDataFetching] = useState(false);
 
   useEffect(() => {
-    let lookupResource = [...FILTERS, ...ASSET_FILTERS, ...PRODUCT_FILTERS, ...RENTAL_JOB_FILTERS]?.map((e) => e.value)?.toString();
+    const lookupResource = [
+      ...new Set([...FILTERS, ...ASSET_FILTERS, ...PRODUCT_FILTERS, ...EMPLOYEE_MASTER_FILTERS, ...RENTAL_JOB_FILTERS]?.map((e) => e.value))
+    ]?.toString();
     if (lookupResource) {
       setLookupLoading(true);
       axiosInstance()
@@ -246,6 +264,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
           setFilters(ASSET_FILTERS);
         } else if (selectedResource.resource === sidebarResource.product) {
           setFilters(PRODUCT_FILTERS);
+        } else if (selectedResource.resource === sidebarResource.employeeMaster) {
+          setFilters(EMPLOYEE_MASTER_FILTERS);
         } else if (selectedResource.resource === sidebarResource.rentalManagement) {
           setFilters([...FILTERS, ...RENTAL_JOB_FILTERS]);
         } else {
@@ -261,6 +281,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       setSelectedFilters(ASSET_FILTERS);
     } else if (selectedResource?.resource === sidebarResource.product) {
       setSelectedFilters(PRODUCT_FILTERS);
+    } else if (selectedResource?.resource === sidebarResource.employeeMaster) {
+      setSelectedFilters(EMPLOYEE_MASTER_FILTERS);
     }
     setSelectedLookUpResourceData(null);
   }, [selectedResource]);
@@ -375,7 +397,10 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 }
               }
             }
-            let title = d[selectedResource.fieldName];
+            let title =
+              selectedResource.resource === sidebarResource.employeeMaster
+                ? d[selectedResource.fieldName]?.optionLabel
+                : d[selectedResource.fieldName];
             let start = new Date(d[selectedResource.start]);
             let end = new Date(d[selectedResource.end]);
             let fulfillStatus = d?.fulfillStatus;
@@ -706,7 +731,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               size="small"
               renderInput={(params) => <TextField {...params} label="Select Resource" size="small" variant="outlined" />}
             />
-            {![sidebarResource.serializedAsset, sidebarResource.product].includes(selectedResource?.resource) && (
+            {![sidebarResource.serializedAsset, sidebarResource.product, sidebarResource.employeeMaster].includes(selectedResource?.resource) && (
               <Autocomplete
                 multiple
                 options={filters}
@@ -738,7 +763,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 }}
               />
             )}
-            {[sidebarResource.serializedAsset, sidebarResource.product].includes(selectedResource?.resource) &&
+            {[sidebarResource.serializedAsset, sidebarResource.product, sidebarResource.employeeMaster].includes(selectedResource?.resource) &&
               selectedFilters?.map((filtered) => {
                 return (
                   <RenderFilter
@@ -752,7 +777,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               })}
           </div>
           <Box display="flex" flexDirection="row" className="gap-1" ml={1} mt={2}>
-            {![sidebarResource.serializedAsset, sidebarResource.product].includes(selectedResource?.resource) &&
+            {![sidebarResource.serializedAsset, sidebarResource.product, sidebarResource.employeeMaster].includes(selectedResource?.resource) &&
               selectedFilters?.map((filtered) => {
                 return (
                   <RenderFilter

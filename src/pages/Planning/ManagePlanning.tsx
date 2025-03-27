@@ -47,6 +47,11 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
         axiosInstance()
           .get(`${routes?.planning?.path}/${id}`)
           .then(({ data: { data } }) => {
+            fieldsDataForUpdate?.forEach((e) => {
+              if (!data?.canDelete && ['type', 'customerAccount']?.includes(e?.fieldName)) {
+                e.isUneditable = true;
+              }
+            });
             let fields = fieldsDataForUpdate;
             let tempData = data;
             if (isClone) {
@@ -164,12 +169,13 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${id
-                  ? isClone
-                    ? `Clone - ${cloneHeading}`
-                    : `Update ${initialData.values?.planningNumber ? `(${initialData.values?.planningNumber})` : ''}`
-                  : `Create ${resources?.planning?.titleSingular}`
-                  }`}
+                title={`${
+                  id
+                    ? isClone
+                      ? `Clone - ${cloneHeading}`
+                      : `Update ${initialData.values?.planningNumber ? `(${initialData.values?.planningNumber})` : ''}`
+                    : `Create ${resources?.planning?.titleSingular}`
+                }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -195,16 +201,11 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
-                  buttonType='transparent'
+                  buttonType="transparent"
                 >
                   Cancel
                 </ThemeButton>
-                <ThemeButton
-                  onClick={submitForm}
-                  disabled={loading || submitting}
-                  isLoading={submitting}
-                  buttonType='theme'
-                >
+                <ThemeButton onClick={submitForm} disabled={loading || submitting} isLoading={submitting} buttonType="theme">
                   Save
                 </ThemeButton>
               </CustomDialogFooter>
