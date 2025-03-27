@@ -6,7 +6,6 @@ import useArrangeView from 'src/components/CustomReactTable/ArrangeView/ArrangeV
 
 export type ArrangeViewDialogProps = {
   onClose: () => void;
-  from?: 'table' | 'card';
   data: GridViewSavedData | null;
   getAllSavedViews: () => void;
   renderedFrom: string;
@@ -25,7 +24,6 @@ export type SidebarProps = {
 };
 export type ContentProps = {
   state: UseArrangeView;
-  from?: 'table' | 'card';
   values: FormSchema;
   setFieldValue: SetFieldValue;
 };
@@ -34,7 +32,6 @@ export type RenderListItemProps = {
   index: number;
   handleRemoveItem: (colName: string) => void;
   hidden?: boolean;
-  from?: 'table' | 'card';
 };
 export type HeadInputProps = {
   state: UseArrangeView;

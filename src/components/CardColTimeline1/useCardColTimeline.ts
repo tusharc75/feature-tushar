@@ -1,6 +1,6 @@
 import axios, { CancelToken } from 'axios';
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
-import { UseCardColActions, UseCardColState, UseCardColTimelineProps } from 'src/components/CardColTimeline1/types';
+import { SelectedView, UseCardColActions, UseCardColState, UseCardColTimelineProps } from 'src/components/CardColTimeline1/types';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
 
 const getInitialState = <D, C extends readonly string[]>(): UseCardColState<D, C> => {
@@ -18,7 +18,8 @@ const getInitialState = <D, C extends readonly string[]>(): UseCardColState<D, C
     refreshSignal: false,
     defaultVisibleRows: 3,
     order: null,
-    visible: null
+    visible: null,
+    selectedView: null
   };
 };
 
@@ -36,36 +37,14 @@ const reducer = <D, C extends readonly string[]>(state: UseCardColState<D, C>, a
       return { ...state, selectedRecordsObj: action.payload } as UseCardColState<D, C>;
     case 'setLoading':
       return { ...state, loading: action.payload } as UseCardColState<D, C>;
+    case 'setSelectedView':
+      return { ...state, selectedView: action.payload };
     case 'setColumnDef': {
       const payload = {
         ...state,
         columnDef: action.payload
       } as UseCardColState<D, C>;
-      if (action.payload?.length) {
-        payload['visible'] = action.payload?.reduce(
-          (acc, curr) => {
-            const key = curr.id || curr.accessor;
-            if (acc[key] === false) {
-              acc[key] = false;
-            } else {
-              acc[key] = true;
-            }
-            return acc;
-          },
-          { ...(state.visible || {}) }
-        );
-        const order = [...(state.order || [])];
-        const newColumns = action.payload
-          .map((d) => d.id || d.accessor)
-          .filter((c) => {
-            if (order.includes(c)) {
-              return false;
-            }
-            return true;
-          });
-        order.push(...newColumns);
-        payload['order'] = order;
-      }
+
       return payload;
     }
     case 'setRefreshSignal':
@@ -185,6 +164,10 @@ export const useCardColTimeline = <D, C extends readonly string[]>({
     [state.order, state.visible]
   );
 
+  const setSelectedView = useCallback((payload: UseCardColState<D, C>['selectedView']) => {
+    setState({ type: 'setSelectedView', payload });
+  }, []);
+
   const setLoading = ({ column, loading }: { column: UseCardColState<D, C>['columns'][number]; loading: boolean }) => {
     setState({ type: 'setLoading', payload: { ...state.loading, [column]: loading } });
   };
@@ -277,9 +260,7 @@ export const useCardColTimeline = <D, C extends readonly string[]>({
         data = {},
         count = {},
         page = {},
-        loading = {},
-        order = [],
-        visible = {};
+        loading = {};
 
       for (const column of columns) {
         selectedRecordsObj[column] = {};
@@ -307,13 +288,6 @@ export const useCardColTimeline = <D, C extends readonly string[]>({
       initialCacheCopy = cache.current;
       if (columnDef) {
         payload['columnDef'] = prepareColumnDef(columnDef);
-        columnDef?.forEach((col) => {
-          const cellId = col.id || col.accessor;
-          order.push(cellId);
-          visible[cellId] = true;
-        });
-        payload['order'] = order;
-        payload['visible'] = visible;
       }
       setState({
         type: 'setStateData',
@@ -421,7 +395,8 @@ export const useCardColTimeline = <D, C extends readonly string[]>({
     isAllSelected,
     setState,
     resetSelection,
-    setOrderAndVisibility
+    setOrderAndVisibility,
+    setSelectedView
   };
 };
 const prepareColumnDef = (columnDef: TColType[]) => {

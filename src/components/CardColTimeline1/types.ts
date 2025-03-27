@@ -1,5 +1,19 @@
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
 import { CancelToken } from 'axios';
+import { GridViewSavedData } from 'src/components/CustomReactTable/ArrangeView';
+
+export type SelectedView =
+  | GridViewSavedData
+  | {
+      _id: string;
+      hide: string[];
+      order: string[];
+      sizes: {
+        [key: string]: number;
+      };
+      name?: string;
+      id?: string;
+    };
 
 export type UseCardColState<D, C extends readonly string[]> = {
   data: Partial<Record<C[number], D[]>>;
@@ -16,6 +30,7 @@ export type UseCardColState<D, C extends readonly string[]> = {
   defaultVisibleRows: number;
   order: string[] | null;
   visible: Record<string, boolean>;
+  selectedView: SelectedView | null;
 };
 
 export type UseCardColActions<D, C extends readonly string[]> =
@@ -28,6 +43,7 @@ export type UseCardColActions<D, C extends readonly string[]> =
   | { type: 'setLoading'; payload: UseCardColState<D, C>['loading'] }
   | { type: 'setRefreshSignal'; payload: UseCardColState<D, C>['refreshSignal'] }
   | { type: 'setDefaultVisibleRows'; payload: UseCardColState<D, C>['defaultVisibleRows'] }
+  | { type: 'setSelectedView'; payload: UseCardColState<D, C>['selectedView'] }
   | { type: 'setLimit'; payload: UseCardColState<D, C>['limit'] };
 
 export type FetchSingleColumnReturnType<D> = {
@@ -77,7 +93,8 @@ export type UseCardColTimeline<D, C extends readonly string[]> = {
   fetchSingleColumn: (props: FetchSingleColumnProps<D, C>) => Promise<FetchSingleColumnReturnType<D>>;
   keyGetter: (data: D) => string;
   resetSelection: () => void;
-  setOrderAndVisibility: ({ order, visible }: { order: string[]; visible: Record<string, boolean> }) => void;
+  setOrderAndVisibility: (props: { order: string[]; visible: Record<string, boolean> }) => void;
+  setSelectedView: (payload: UseCardColState<D, C>['selectedView']) => void;
 } & UseCardColState<D, C>;
 
 export type CardColTimelineProps<D, C extends readonly string[]> = {

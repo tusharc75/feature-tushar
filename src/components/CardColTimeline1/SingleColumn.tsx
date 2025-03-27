@@ -1,12 +1,13 @@
 import { CheckCircle, CheckCircleOutline, RadioButtonUnchecked } from '@mui/icons-material';
 import { Box, Checkbox } from '@mui/material';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
 import { VariableSizeList as List, ListChildComponentProps } from 'react-window';
 import InfiniteLoader from 'react-window-infinite-loader';
 import CardColTimelineLoader from 'src/components/CardColTimeline1/CardColTimelineLoader';
 import { CardColTimelineProps, ColumnColor } from 'src/components/CardColTimeline1/types';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import NoDataCell, { NoDataCellImpl } from 'src/components/Helpers/NoDataCell';
 import { cn, WORKORDER_SERVICE_STEP_STATUS } from 'src/constants/helpers';
 
 type CommonProps<D, C extends readonly string[]> = {
@@ -34,7 +35,7 @@ const SingleColumn = <D, C extends readonly string[]>({ state, getColColors, col
             e.stopPropagation();
             handleSelectAll(column);
           }}
-          indeterminate={!isAllSelected(column) && Object.keys(selectedRecordsObj[column]).length > 0}
+          indeterminate={!isAllSelected(column) && selectedRecordsObj[column] && Object.keys(selectedRecordsObj[column]).length > 0}
           icon={<RadioButtonUnchecked />}
           indeterminateIcon={<CheckCircleOutline />}
           checkedIcon={<CheckCircle />}
@@ -184,8 +185,7 @@ const SingleCard = <D, C extends readonly string[]>({
             />
             {primaryField && (
               <div className="line-clamp-1">
-                <h6 className="line-clamp-1 text-[8px] font-medium text-[var(--dark-secondary-text,#8b8b8b)]">{primaryField.Header}:</h6>
-                <h4 className="quote-name line-clamp-1 [&>*]:[font-weight:700_!important] [&_*:not(.flex)]:line-clamp-1  [&_*]:[font-size:12px_!important] [&_*]:[white-space:unset_!important]">
+                <h4 className="quote-name line-clamp-1 [&>*]:![font-weight:700] [&_*:not(.flex)]:line-clamp-1  [&_*]:![font-size:15px] [&_*]:[white-space:unset_!important]">
                   {renderCell(primaryField, rowData)}
                 </h4>
               </div>
@@ -193,17 +193,23 @@ const SingleCard = <D, C extends readonly string[]>({
           </div>
           {passFailStatus ? <RenderStatusIcon stepStatus={rowData[passFailAccessor]} /> : null}
         </div>
-        <div className="w-full p-2">
-          {defaultDisplay?.map((d) => (
-            <div className="flex items-center justify-between gap-2">
-              <h6 className="line-clamp-1 max-w-[110px] flex-shrink-0 text-[8px] font-medium text-[var(--dark-secondary-text,#8b8b8b)]">
-                {d.Header}:
-              </h6>
-              <h4 className="quote-name line-clamp-1 [&>*]:[font-weight:700_!important] [&_*:not(.flex)]:line-clamp-1  [&_*]:[font-size:12px_!important] [&_*]:[white-space:unset_!important]">
-                {renderCell(d, rowData)}
-              </h4>
-            </div>
-          ))}
+        <div className="w-full p-[8px] pb-0">
+          {defaultDisplay?.map((d) => {
+            const cell = renderCell(d, rowData);
+            return (
+              <div className="flex items-center justify-between gap-2 leading-[24px] [&:has(.no-data-cell)]:hidden">
+                <h6
+                  className="line-clamp-1 max-w-[14ch] flex-shrink-0 text-[13px] font-semibold !text-[rgba(0,0,0,0.87)] dark:!text-[white] "
+                  title={d.Header}
+                >
+                  {d.Header}:
+                </h6>
+                <div className="quote-name line-clamp-1 [&>*]:![font-weight:400] [&_*:not(.flex)]:line-clamp-1 [&_*]:!text-[rgba(0,0,0,0.87)] [&_*]:![font-size:13px] [&_*]:![white-space:unset] dark:[&_*]:!text-[white] [&_h5]:![font-weight:400]">
+                  {cell}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </button>
     </div>
@@ -230,6 +236,33 @@ const RenderStatusIcon = ({ stepStatus }: { stepStatus: string }) => {
     </>
   );
 };
+
+type NodeTree = {
+  type: string;
+  children?: NodeTree[];
+};
+
+function findOriginalComponent(nodeTree: NodeTree, originalComponent: string): boolean {
+  if (!nodeTree) {
+    return false;
+  }
+
+  // Check if the current node is the original component
+  if (nodeTree.type === originalComponent) {
+    return true;
+  }
+
+  // Check the children of the current node
+  if (nodeTree.children && nodeTree.children.length > 0) {
+    for (const child of nodeTree.children) {
+      if (findOriginalComponent(child, originalComponent)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
 
 const renderCell = (col, data) => {
   switch (true) {

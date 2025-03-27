@@ -16,7 +16,7 @@ const CardColTimeline = <D, C extends readonly string[]>({
   renderedFrom,
   ...rest
 }: { headerSlot?: React.ReactElement; renderedFrom: string } & CardColTimelineProps<D, C>) => {
-  const { columns, visibleColumns, columnDef, visible, order, setOrderAndVisibility } = state;
+  const { columns, visibleColumns, columnDef, visible, order, setOrderAndVisibility, selectedView, setSelectedView } = state;
 
   const sortedHidedColumnDef = useMemo(() => {
     return columnDef
@@ -46,8 +46,12 @@ const CardColTimeline = <D, C extends readonly string[]>({
     [sortedHidedColumnDef, primaryField]
   );
   const defaultDisplay: TColType[] = useMemo(() => {
-    return otherFields?.slice(0, DEFAULT_DATA_ROWS_VISIBLE) || [];
-  }, [otherFields]);
+    if (selectedView) {
+      return otherFields;
+    } else {
+      return otherFields?.slice(0, DEFAULT_DATA_ROWS_VISIBLE) || [];
+    }
+  }, [otherFields, selectedView]);
 
   return (
     <>
@@ -55,12 +59,12 @@ const CardColTimeline = <D, C extends readonly string[]>({
         <div className="flex-grow">{headerSlot}</div>
         {columnDef && (
           <ArrangeView
-            from="card"
             columns={columnDef}
             expander={false}
             hideSelection={true}
             renderedFrom={renderedFrom}
             setOrderAndVisibility={setOrderAndVisibility}
+            setCardSelectedView={setSelectedView}
           />
         )}
       </div>
