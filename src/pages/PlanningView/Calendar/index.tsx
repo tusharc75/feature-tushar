@@ -161,12 +161,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const EMPLOYEE_MASTER_FILTERS = useMemo(
     () => [
       {
-        label: 'Refrence Type',
-        value: 'Employee Master Refrence',
-        key: 'refrenceType',
-        custom: true
-      },
-      {
         label: resources?.employeeMaster?.titleSingular,
         value: 'Employee Master',
         key: 'technician'
@@ -230,62 +224,14 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   useEffect(() => {
     const lookupResource = [
-      ...new Set(
-        [...FILTERS, ...ASSET_FILTERS, ...PRODUCT_FILTERS, ...EMPLOYEE_MASTER_FILTERS, ...RENTAL_JOB_FILTERS]
-          ?.filter((r: any) => !r?.custom)
-          ?.map((e) => e.value)
-      )
+      ...new Set([...FILTERS, ...ASSET_FILTERS, ...PRODUCT_FILTERS, ...EMPLOYEE_MASTER_FILTERS, ...RENTAL_JOB_FILTERS]?.map((e) => e.value))
     ]?.toString();
     if (lookupResource) {
       setLookupLoading(true);
       axiosInstance()
         .get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
         .then(({ data: { data } }) => {
-          setLookUpResource({
-            ...data,
-            ['Employee Master Refrence']: [
-              ...(permissions?.fieldTicket?.isRead
-                ? [
-                    {
-                      optionLabel: resources?.fieldTicket?.titleSingular,
-                      optionValue: sidebarResource.fieldTicket,
-                      default: false,
-                      order: 0
-                    }
-                  ]
-                : []),
-              ...(permissions?.workOrder?.isRead
-                ? [
-                    {
-                      optionLabel: resources?.workOrder?.titleSingular,
-                      optionValue: sidebarResource.workOrder,
-                      default: false,
-                      order: 1
-                    }
-                  ]
-                : []),
-              ...(permissions?.rentalManagement?.isRead
-                ? [
-                    {
-                      optionLabel: resources?.rentalManagement?.titleSingular,
-                      optionValue: sidebarResource.rentalManagement,
-                      default: false,
-                      order: 2
-                    }
-                  ]
-                : []),
-              ...(permissions?.fieldServiceOrder?.isRead
-                ? [
-                    {
-                      optionLabel: resources?.fieldServiceOrder?.titleSingular,
-                      optionValue: sidebarResource.fieldServiceOrder,
-                      default: false,
-                      order: 3
-                    }
-                  ]
-                : [])
-            ]
-          });
+          setLookUpResource(data);
           setLookupLoading(false);
         })
         .catch((error) => {
