@@ -36,7 +36,6 @@ const RippleButton = ({ children, className, onClick, ...rest }: { children: Rea
       }}
       className={cn(
         'relative cursor-pointer overflow-hidden bg-transparent outline-none transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-[--new-theme-color] dark:text-[white]',
-        'dark:[--button-ripple-color:rgba(255,255,255,0.3)]',
         className
       )}
       {...rest}
