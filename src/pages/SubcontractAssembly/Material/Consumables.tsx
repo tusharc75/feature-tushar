@@ -353,7 +353,7 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
           />
         </Box>
       )}
-      <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
+      <ContainedTabs value={tabValue} onChange={handleMainTabChange} className="mb-4">
         <ContainedTab value={0} label={'Products/Consumables'} />
       </ContainedTabs>
       <TabPanel value={tabValue} index={0}>
