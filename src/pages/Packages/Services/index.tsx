@@ -7,7 +7,7 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
+import { TabPanel } from 'src/components/CustomTabs';
 import DeleteIcon from '@mui/icons-material/Delete';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
@@ -19,6 +19,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { PACKAGE_TYPE, packages, prepareDataForGrid, sidebarResource, WORK_ORDER_TYPE, WORK_ORDER_TYPE_LABEL } from 'src/constants/helpers';
+import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
 
 const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = false }) => {
   const renderedFrom = `${camelCase(sidebarResource?.packages)}_service'}`;
@@ -274,13 +275,13 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
     <Box>
       {permissions?.assemblyOrder?.isRead && (
         <>
-          <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
-            <CustomTab value={0} label={`Individual`} />
-            <CustomTab value={1} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.assemblyOrder]} />
-            <CustomTab value={2} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.preInspectionOrder]} />
-            <CustomTab value={3} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.postInspectionOrder]} />
-            <CustomTab value={4} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.disassemblyOrder]} />
-          </CustomTabs>
+          <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
+            <ContainedTab value={0} label={`Individual`} />
+            <ContainedTab value={1} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.assemblyOrder]} />
+            <ContainedTab value={2} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.preInspectionOrder]} />
+            <ContainedTab value={3} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.postInspectionOrder]} />
+            <ContainedTab value={4} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.disassemblyOrder]} />
+          </ContainedTabs>
         </>
       )}
       <DetailsPageHeader

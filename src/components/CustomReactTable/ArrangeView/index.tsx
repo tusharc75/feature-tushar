@@ -17,6 +17,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
+import { SelectedView } from 'src/components/CardColTimeline1';
 
 export type GridViewSavedData = {
   _id: string;
@@ -39,7 +40,6 @@ export type CreatedBy = {
 
 type ArrangeViewProps = {
   renderedFrom: string;
-  from?: 'table' | 'card';
   dispatchTable?: Dispatch<TActios>;
   state?: TInitialState;
   columns: any[];
@@ -47,12 +47,12 @@ type ArrangeViewProps = {
   expander: boolean;
   appliedView?: { hide: string[]; order: string[]; sizes: { [key: string]: number }; name?: string; id?: string };
   table?: Table<any>;
-  setOrderAndVisibility?: ({ order, visible }: { order: string[]; visible: Record<string, boolean> }) => void;
+  setOrderAndVisibility?: (props: { order: string[]; visible: Record<string, boolean> }) => void;
+  setCardSelectedView?: (payload: SelectedView) => void;
 };
 
 const ArrangeView = ({
   renderedFrom,
-  from = 'table',
   dispatchTable,
   state,
   columns,
@@ -60,7 +60,8 @@ const ArrangeView = ({
   expander,
   appliedView,
   table,
-  setOrderAndVisibility
+  setOrderAndVisibility,
+  setCardSelectedView
 }: ArrangeViewProps) => {
   const oldSerializedSizes = useRef(JSON.stringify(getCurrentColumnSizes(table)));
   const walkmeInstance = useGetWalkmeInstance();
@@ -116,6 +117,12 @@ const ArrangeView = ({
 
     setGridMetaData(newData);
   };
+
+  useEffect(() => {
+    if (typeof setCardSelectedView === 'function') {
+      setCardSelectedView(selected || null);
+    }
+  }, [selected]);
 
   useEffect(() => {
     if (appliedView) {
@@ -318,7 +325,6 @@ const ArrangeView = ({
       </Menu>
       {editCreateDialogData.open && (
         <ArrangeViewDialog
-          from={from}
           onClose={closeEditCreateModal}
           renderedFrom={renderedFrom}
           data={editCreateDialogData.data}

@@ -176,6 +176,7 @@ export default function NewCreateQuotePdfTemplate() {
     const initialValues = {
       landscape: false,
       hideAmountTotalSection: false,
+      tableTotalAtBottom: false,
       tableFontSize: '',
       belowTableTotalFontSize: '',
       pdfFontSize: '',
@@ -234,6 +235,7 @@ export default function NewCreateQuotePdfTemplate() {
         setIsLandscapChecked(tempPdfTemplate?.landscape);
         initialValues.landscape = tempPdfTemplate?.landscape;
         initialValues.hideAmountTotalSection = tempPdfTemplate?.hideAmountTotalSection;
+        initialValues.tableTotalAtBottom = tempPdfTemplate?.tableTotalAtBottom;
         initialValues.tableFontSize = tempPdfTemplate?.tableFontSize;
         initialValues.belowTableTotalFontSize = tempPdfTemplate?.belowTableTotalFontSize;
         initialValues.pdfFontSize = tempPdfTemplate?.pdfFontSize;
@@ -266,6 +268,7 @@ export default function NewCreateQuotePdfTemplate() {
           setIsLandscapChecked(data?.landscape);
           initialValues.landscape = data?.landscape;
           initialValues.hideAmountTotalSection = data?.hideAmountTotalSection;
+          initialValues.tableTotalAtBottom = data?.tableTotalAtBottom;
           initialValues.tableFontSize = data?.tableFontSize;
           initialValues.belowTableTotalFontSize = data?.belowTableTotalFontSize;
           initialValues.pdfFontSize = data?.pdfFontSize;
@@ -389,6 +392,7 @@ export default function NewCreateQuotePdfTemplate() {
           collaborator: values?.collaborator,
           landscape: values?.landscape,
           hideAmountTotalSection: values?.hideAmountTotalSection,
+          tableTotalAtBottom: values?.tableTotalAtBottom,
           tableFontSize: parseInt(values?.tableFontSize),
           belowTableTotalFontSize: parseInt(values?.belowTableTotalFontSize),
           pdfFontSize: parseInt(values?.pdfFontSize),
@@ -440,6 +444,7 @@ export default function NewCreateQuotePdfTemplate() {
           collaborator: values?.collaborator,
           landscape: values?.landscape,
           hideAmountTotalSection: values?.hideAmountTotalSection,
+          tableTotalAtBottom: values?.tableTotalAtBottom,
           tableFontSize: parseInt(values?.tableFontSize),
           belowTableTotalFontSize: parseInt(values?.belowTableTotalFontSize),
           pdfFontSize: parseInt(values?.pdfFontSize),
@@ -798,6 +803,21 @@ export default function NewCreateQuotePdfTemplate() {
                         }
                         label="Hide Amount Total Section"
                       />
+                      <FormControlLabel
+                        disabled={!isClone && !hasPermissionToUpdate}
+                        value={values['tableTotalAtBottom']}
+                        control={
+                          <Checkbox
+                            name="tableTotalAtBottom"
+                            checked={values['tableTotalAtBottom']}
+                            onChange={(e) => {
+                              setFieldValue('tableTotalAtBottom', e.target.checked);
+                            }}
+                            color="primary"
+                          />
+                        }
+                        label="Show Table Total At Bottom"
+                      />
                       <TextField
                         variant="outlined"
                         label={'Table Font Size'}
@@ -851,7 +871,7 @@ export default function NewCreateQuotePdfTemplate() {
                           if (parseInt(e.target.value.trimStart())) {
                             setFieldValue('tableFontSize', parseInt(e.target.value.trimStart()));
                             setFieldValue('belowTableTotalFontSize', parseInt(e.target.value.trimStart()));
-                          }                          
+                          }
                         }}
                         slotProps={{
                           input: {

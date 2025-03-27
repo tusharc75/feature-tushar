@@ -23,13 +23,14 @@ import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import Autocomplete from '@mui/material/Autocomplete';
-import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { TabPanel } from 'src/components/CustomTabs';
 import EditIcon from '@mui/icons-material/Edit';
 import { camelCase } from 'lodash';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import MaterialDialog from 'src/pages/SubcontractAssembly/Material/MaterialDialog';
+import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
 
 const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, material, fetchMaterial, stepFullScreen, productFields }) => {
   const renderedFrom = `${camelCase(sidebarResource?.subcontractAssembly)}_Consumables`;
@@ -352,9 +353,9 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
           />
         </Box>
       )}
-      <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
-        <CustomTab value={0} label={'Products/Consumables'} />
-      </CustomTabs>
+      <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
+        <ContainedTab value={0} label={'Products/Consumables'} />
+      </ContainedTabs>
       <TabPanel value={tabValue} index={0}>
         <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
           <DetailsPageHeader
