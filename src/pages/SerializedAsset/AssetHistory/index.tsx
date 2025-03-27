@@ -19,7 +19,6 @@ import DurationFilter from 'src/components/DurationFilter';
 import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { camelCase, cloneDeep, uniq } from 'lodash';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import { Visibility } from '@mui/icons-material';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import RentalAssetHistoryDialog from 'src/pages/SerializedAsset/AssetHistory/RentalAssetHistoryDialog';
@@ -169,9 +168,9 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
             <div>
               {row.original.reference ? (
                 row.original.type === 'Loading Ticket' ||
-                row.original.type === 'Receiving Ticket' ||
-                row.original.type === 'Return Ticket' ||
-                row.original.type === 'Delivery Ticket' ? (
+                  row.original.type === 'Receiving Ticket' ||
+                  row.original.type === 'Return Ticket' ||
+                  row.original.type === 'Delivery Ticket' ? (
                   <Link
                     className="link"
                     title={row.original.reference}
@@ -454,9 +453,9 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
           Cell: ({ row }) => (
             <div>
               {reservedStatusField?.length &&
-              row?.original?.referenceData?.rentalJob &&
-              row?.original?.referenceData?.status !== DELIVERY_TICKET_STATUS.cancelled &&
-              row?.original?.status === ASSET_STATUS.inUse ? (
+                row?.original?.referenceData?.rentalJob &&
+                row?.original?.referenceData?.status !== DELIVERY_TICKET_STATUS.cancelled &&
+                row?.original?.status === ASSET_STATUS.inUse ? (
                 <HtmlTooltip title="Rental Asset Data History">
                   <IconButton size="small" onClick={() => setRentalAssetHistory({ open: true, rentalJob: row?.original?.referenceData?.rentalJob })}>
                     <Visibility color="primary" fontSize="small" />
@@ -579,8 +578,8 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
           permissions={permissions?.history}
           module={'Asset History'}
           api={`/history/inventory/${id}`}
-          afterImportCompleted={() => {}}
-          onExportToExcelSuccess={() => {}}
+          afterImportCompleted={() => { }}
+          onExportToExcelSuccess={() => { }}
           additionalParams={getQueryString()}
           onlyExport={true}
         />
