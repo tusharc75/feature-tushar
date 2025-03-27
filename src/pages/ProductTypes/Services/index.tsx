@@ -7,7 +7,6 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -17,6 +16,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { MATERIAL_TYPE, packages, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
 
 const ServiceTable = ({ resource, referenceId, workOrderResourceTabs, allowedToEdit, fullHeight = false }) => {
   const renderedFrom = `${camelCase(resource)}_service'}`;
@@ -232,11 +232,11 @@ const ServiceTable = ({ resource, referenceId, workOrderResourceTabs, allowedToE
   return (
     <Box>
       {workOrderResourceTabs?.length ? (
-        <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
+        <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
           {workOrderResourceTabs?.map((res, index) =>
-            permissions?.[camelCase(res)]?.isRead ? <CustomTab key={res} value={index} label={resources?.[camelCase(res)]?.titleSingular} /> : null
+            permissions?.[camelCase(res)]?.isRead ? <ContainedTab key={res} value={index} label={resources?.[camelCase(res)]?.titleSingular} /> : null
           )}
-        </CustomTabs>
+        </ContainedTabs>
       ) : null}
       <DetailsPageHeader
         isAddButtonVisible={allowedToEdit}
