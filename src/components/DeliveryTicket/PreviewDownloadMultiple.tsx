@@ -51,7 +51,8 @@ function PreviewDownloadMultiple({ referenceIds }) {
           width: e?.width,
           customLabel: e?.customLabel,
           showBelowRow: e?.showBelowRow,
-          alignment: e?.alignment
+          alignment: e?.alignment,
+          fontWeight: e?.fontWeight
         };
       })
     );

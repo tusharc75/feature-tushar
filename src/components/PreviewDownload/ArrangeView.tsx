@@ -80,6 +80,14 @@ export default function ArrangeView({ columns, setColumns }) {
     );
   };
 
+  const setColumnFontWeight = (id, value) => {
+    setColumn(
+      column.map((c) => {
+        return c.id === id ? { ...c, fontWeight: value } : c;
+      })
+    );
+  };
+
   const onDragStart = (event: DragStartEvent) => {
     if (!event?.active) return;
     setActiveItem(event.active.data.current?.props);
@@ -95,7 +103,8 @@ export default function ArrangeView({ columns, setColumns }) {
           width: e.width,
           customLabel: e?.customLabel,
           showBelowRow: e?.showBelowRow,
-          alignment: e?.alignment
+          alignment: e?.alignment,
+          fontWeight: e?.fontWeight
         };
       })
     );
@@ -148,7 +157,7 @@ export default function ArrangeView({ columns, setColumns }) {
               <div className="sticky -top-2 z-10 flex flex-wrap bg-[var(--dark-primary,white)] pb-4 pt-2">
                 <p className=" flex select-none items-center gap-1 text-[12px] font-semibold text-gray-500">
                   <Info fontSize="small" />
-                  Drag and drop to arrange, enter the width as a percentage, custom label for change table header, and alignment for text position.
+                  Drag and drop to arrange, enter the width as a percentage, custom label for change table header, alignment for text position and font weight for bold text.
                 </p>
               </div>
               <SortableContext items={column?.map((c) => c.id) || []}>
@@ -174,6 +183,10 @@ export default function ArrangeView({ columns, setColumns }) {
                       showBelowRow={col.showBelowRow}
                       setShowBelowRow={(v) => {
                         setColumnShowBelowRow(col.id, v);
+                      }}
+                      fontWeight={col?.fontWeight}
+                      setFontWeight={(w) => {
+                        setColumnFontWeight(col.id, w);
                       }}
                     />
                   ))}
@@ -210,6 +223,8 @@ interface ItemProps {
   setAlignment: (alignment: string) => void;
   showBelowRow: boolean;
   setShowBelowRow: (value: boolean) => void;
+  fontWeight: string;
+  setFontWeight: (weight: string) => void;
 }
 
 const RenderListItem = ({
@@ -224,6 +239,8 @@ const RenderListItem = ({
   setAlignment,
   showBelowRow = false,
   setShowBelowRow,
+  fontWeight= null,
+  setFontWeight
 }: ItemProps) => {
   const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
     id,
@@ -254,16 +271,30 @@ const RenderListItem = ({
           <DragIndicator />
         </ListItemIcon>
         <ListItemText primary={fieldLabel} />
-        <div className="grid grid-cols-[1fr_1fr_1fr_1fr] items-center gap-2 max-sm:col-span-2 max-sm:ml-[28px]">
+        <div className="grid grid-cols-[1fr_1fr_1fr_1fr_1fr] items-center gap-2 max-sm:col-span-2 max-sm:ml-[28px]">
           <TextField
             variant="outlined"
             margin="none"
             size="small"
             placeholder="Custom Label"
+            label="Custom Label"
             fullWidth
             value={customLabel}
             onChange={(e) => {
               setCustomLabel(e?.target?.value);
+            }}
+          />
+          <Autocomplete
+            size="small"
+            fullWidth
+            options={["bold"]}
+            getOptionLabel={(option) => startCase(option)}
+            value={fontWeight}
+            renderInput={(params) => (
+              <TextField {...params} placeholder="Font Weight" variant="outlined" margin="none" label="Font Weight" />
+            )}
+            onChange={(_, newValue) => {
+              setFontWeight(newValue);
             }}
           />
           <Autocomplete
