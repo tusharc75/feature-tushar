@@ -176,7 +176,7 @@ const SingleCard = <D, C extends readonly string[]>({
         )}
         onClick={(e) => {
           e.stopPropagation();
-          e.preventDefault();
+          if (['BUTTON', 'A', 'INPUT'].includes(e.currentTarget.tagName)) return;
           if (cardOnClick) {
             cardOnClick(rowData);
           }
@@ -211,12 +211,12 @@ const SingleCard = <D, C extends readonly string[]>({
           {defaultDisplay?.map((d) => {
             const cell = renderCell(d, rowData);
             return (
-              <div className="flex items-center justify-between gap-2 leading-[24px] [&:has(.no-data-cell)]:hidden">
+              <div className="mb-[2px] flex items-center justify-between gap-2 [&:has(.no-data-cell)]:hidden">
                 <h6
                   className="line-clamp-1 max-w-[14ch] flex-shrink-0 text-[13px] font-semibold !text-[rgba(0,0,0,0.87)] dark:!text-[white] "
                   title={d.Header}
                 >
-                  {d.Header}:
+                  {d.Header}
                 </h6>
                 <div className="quote-name line-clamp-1 [&>*]:![font-weight:400] [&_*:not(.flex)]:line-clamp-1 [&_*]:!text-[rgba(0,0,0,0.87)] [&_*]:![font-size:13px] [&_*]:![white-space:unset] dark:[&_*]:!text-[white] [&_h5]:![font-weight:400]">
                   {cell}
