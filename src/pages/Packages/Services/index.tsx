@@ -9,6 +9,7 @@ import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceD
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { TabPanel } from 'src/components/CustomTabs';
 import DeleteIcon from '@mui/icons-material/Delete';
+import DescriptionIcon from '@mui/icons-material/Description';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
@@ -18,8 +19,18 @@ import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { PACKAGE_TYPE, packages, prepareDataForGrid, sidebarResource, WORK_ORDER_TYPE, WORK_ORDER_TYPE_LABEL } from 'src/constants/helpers';
+import {
+  ACTIVITY_RESOURCE,
+  ATTACHMENT_TYPE,
+  PACKAGE_TYPE,
+  packages,
+  prepareDataForGrid,
+  sidebarResource,
+  WORK_ORDER_TYPE,
+  WORK_ORDER_TYPE_LABEL
+} from 'src/constants/helpers';
 import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 
 const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = false }) => {
   const renderedFrom = `${camelCase(sidebarResource?.packages)}_service'}`;
@@ -41,6 +52,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
   const [tabValue, setTabValue] = useState(0);
   const [selectedResource, setSelectedResource] = useState('');
   const [deleteRecord, setDeleteRecord] = useState(null);
+  const [showDiagramDialog, setShowDiagramDialog] = useState({ open: false, _id: null, label: '' });
 
   useEffect(() => {
     fetchGridColumns();
@@ -105,6 +117,17 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
       canDrag: false,
       Cell: ({ row }) => (
         <>
+          <HtmlTooltip title="Drawings">
+            <IconButton
+              size="small"
+              aria-label="Drawings"
+              onClick={(e) => {
+                setShowDiagramDialog({ open: true, _id: row?.original?._id, label: row?.original?.serviceName });
+              }}
+            >
+              <DescriptionIcon fontSize="small" color="primary" />
+            </IconButton>
+          </HtmlTooltip>
           <HtmlTooltip title="Delete">
             <IconButton
               size="small"
@@ -146,7 +169,8 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
   const removeServices = () => {
     setRemovingServices(true);
     let ids = deleteRecord?.map((d) => d._id);
-    axiosInstance().put(`${packages.api}/${packageId}/services/remove`, { ids: ids, type: selectedResource })
+    axiosInstance()
+      .put(`${packages.api}/${packageId}/services/remove`, { ids: ids, type: selectedResource })
       .then(() => {
         setRemovingServices(false);
         setShowServiceConfirmBox(false);
@@ -344,6 +368,18 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
           handleClose={() => setArrangeView(false)}
           handleSubmit={handleArrangeUpdate}
           loading={isAssigning}
+        />
+      )}
+      {showDiagramDialog.open && (
+        <DiagramDialog
+          referenceId={packageId}
+          uniqueId={showDiagramDialog?._id}
+          referenceLabel={showDiagramDialog.label}
+          resource={ACTIVITY_RESOURCE.packages}
+          handleClose={() => {
+            setShowDiagramDialog({ open: false, _id: null, label: '' });
+          }}
+          attachmentType={ATTACHMENT_TYPE.drawing}
         />
       )}
     </Box>
