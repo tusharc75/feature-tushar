@@ -46,11 +46,28 @@ type Columns = typeof WORKORDER_TECHNICIAN_SERVICE_STATUS;
 type ViewType = 'card-view' | 'table-view';
 
 const renderedFrom = camelCase(sidebarResource?.workOrderTechnician);
+const defaultVisibleRows = [
+  'workOrderNumber',
+  'createDate',
+  'estimateCompleteDate',
+  'serializedAsset',
+  'repairOrder',
+  'assemblyOrder',
+  'productionOrder'
+];
+
+const keyGetter = (d: any) => d?.['_id'] as string;
 
 const WorkOrderTechnician = () => {
+  const {
+    state: {
+      permissions,
+      resources,
+      user: { user }
+    }
+  }: any = useData();
   const { generateColumns } = useColumns();
   const toastConfig = useContext(CustomToastContext);
-
   const { state: tableState, dispatch: tableDispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords: tableSelectedRecords } = tableState;
   const gridViewRef = useRef<GridViewRef>();
@@ -76,38 +93,41 @@ const WorkOrderTechnician = () => {
     tableDispatch({ type: 'selection', selectedRecords: [] });
   };
 
-  const fetchSingleColumnData = useCallback(async ({ column, filterQuery, limit, page, cancelToken }: FetchSingleColumnProps<any, Columns>) => {
-    const api = `/work-order-technician?page=${page}&status=${column}&limit=${limit}${filterQuery}`;
-    try {
-      const response = await axiosInstance().get(api, { cancelToken });
-      const {
-        data: { data, count }
-      } = response;
-      let rows = data.map((u) => {
-        let finalObject: any = prepareDataForGrid(u, user);
-        let workOrderDetailData: any = prepareDataForGrid(u?.workOrderDetail, user);
-        finalObject['serviceName'] = u?.service?.serviceName;
-        finalObject['serviceId'] = u?.service?._id;
-        finalObject['customServiceStatus'] = u?.status;
-        finalObject['workOrderId'] = u?.workOrderDetail?._id;
-        const matchedTempMaterial = workOrderDetailData?.tempMaterial?.find((t) => t?.materialId === u?.service?._id);
-        finalObject['uniqueId'] = matchedTempMaterial?._id;
-        delete workOrderDetailData?._id;
-        delete workOrderDetailData?.id;
-        return { ...finalObject, ...workOrderDetailData };
-      });
-      return { data: rows, count } as { data: any; count: number };
-    } catch (error) {
-      throw error;
-    }
-  }, []);
+  const fetchSingleColumnData = useCallback(
+    async ({ column, filterQuery, limit, page, cancelToken }: FetchSingleColumnProps<any, Columns>) => {
+      const api = `/work-order-technician?page=${page}&status=${column}&limit=${limit}${filterQuery}`;
+      try {
+        const response = await axiosInstance().get(api, { cancelToken });
+        const {
+          data: { data, count }
+        } = response;
+        let rows = data.map((u) => {
+          let finalObject: any = prepareDataForGrid(u, user);
+          let workOrderDetailData: any = prepareDataForGrid(u?.workOrderDetail, user);
+          finalObject['serviceName'] = u?.service?.serviceName;
+          finalObject['serviceId'] = u?.service?._id;
+          finalObject['customServiceStatus'] = u?.status;
+          finalObject['workOrderId'] = u?.workOrderDetail?._id;
+          const matchedTempMaterial = workOrderDetailData?.tempMaterial?.find((t) => t?.materialId === u?.service?._id);
+          finalObject['uniqueId'] = matchedTempMaterial?._id;
+          delete workOrderDetailData?._id;
+          delete workOrderDetailData?.id;
+          return { ...finalObject, ...workOrderDetailData };
+        });
+        return { data: rows, count } as { data: any; count: number };
+      } catch (error) {
+        throw error;
+      }
+    },
+    [user]
+  );
 
   const cardState = useCardColTimeline({
     fetchSingleColumn: fetchSingleColumnData,
     columns: WORKORDER_TECHNICIAN_SERVICE_STATUS,
     initialVisibleColumns: selectedServiceStatus,
     columnDef: columnsDef,
-    keyGetter: (d) => d['_id'] as string
+    keyGetter
   });
 
   useEffect(() => {
@@ -123,16 +143,6 @@ const WorkOrderTechnician = () => {
   }, [selectedServiceStatus]);
 
   const selectedRecords = useMemo(() => [...tableSelectedRecords, ...cardState.selectedRecords], [tableSelectedRecords, cardState.selectedRecords]);
-
-  const {
-    state: {
-      permissions,
-      resources,
-      user: { user }
-    }
-  }: any = useData();
-
-  const ref: any = useRef();
 
   const fetchGridColumns = async (cancelToken: CancelToken) => {
     try {
@@ -186,6 +196,7 @@ const WorkOrderTechnician = () => {
           Header: 'Work Order Number',
           disableFilters: true,
           disableSortBy: true,
+          defaultVisible: true,
           Cell: ({ row }) => (
             <div className="flex items-center gap-1">
               <p title={row?.original?.workOrderNumber}>{row?.original?.workOrderNumber}</p>
@@ -226,7 +237,13 @@ const WorkOrderTechnician = () => {
             )
         }
       ];
-      const finalColumns = [...extraColumns.slice(0, 2), ...columns, ...extraColumns.slice(2), ActionsRenderer];
+      const finalColumns = [...extraColumns.slice(0, 2), ...columns, ...extraColumns.slice(2), ActionsRenderer].map((c) => {
+        const id = c.id || c.accessor;
+        if (defaultVisibleRows.includes(id)) {
+          return { ...c, defaultVisible: true };
+        }
+        return c;
+      });
       setColumnsDef(finalColumns);
     } catch (error) {
       console.error(error);
@@ -418,7 +435,7 @@ const WorkOrderTechnician = () => {
         {
           disabled:
             selectedRecords?.length &&
-              selectedRecords?.filter((s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length ===
+            selectedRecords?.filter((s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length ===
               selectedRecords?.length
               ? false
               : true,

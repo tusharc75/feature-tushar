@@ -75,7 +75,7 @@ export type FetchSingleColumnProps<D, C extends readonly string[]> = {
 };
 
 export type UseCardColTimeline<D, C extends readonly string[]> = {
-  selectedRecords: string[];
+  selectedRecords: D[];
   handleFetchSingleColumnWrapper: (column: UseCardColState<D, C>['columns'][number], page?: number) => Promise<void>;
   setData: (props: { column: UseCardColState<D, C>['columns'][number]; data: D[]; page: number; count?: number; pushData?: boolean }) => void;
   setColumns: (payload: C) => void;
