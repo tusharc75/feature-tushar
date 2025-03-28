@@ -460,7 +460,10 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
               addButtonProps={{ onClick: () => setTechnicianDialog(true), id: 'add-technician' }}
               isActionButtonVisible={true}
               actionButtonMenuItems={actionButtonMenuItems()}
-              actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
+              actionButtonProps={{
+                disabled: !Boolean(selectedRecords?.length),
+              }}
+              addButtonText='Assign'
               hasXpadding
             />
           </>

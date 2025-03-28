@@ -2311,7 +2311,7 @@ const ReceivingTicket = ({
   return (
     <>
       {serviceData?.length > 0 && (
-        <ContainedTabs value={tabValue} onChange={handleMainTabChange} className="mb-0" >
+        <ContainedTabs value={tabValue} onChange={handleMainTabChange} >
           <ContainedTab value={0} label={'Assets/Products'} />
           <ContainedTab value={1} label={'Services'} />
         </ContainedTabs>
