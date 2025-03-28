@@ -49,6 +49,10 @@ const CardColTimeline = <D, C extends readonly string[]>({
     if (selectedView) {
       return otherFields;
     } else {
+      const defaultVisibleRows = otherFields?.filter((f) => f.defaultVisible === true);
+      if (defaultVisibleRows && defaultVisibleRows.length) {
+        return defaultVisibleRows;
+      }
       return otherFields?.slice(0, DEFAULT_DATA_ROWS_VISIBLE) || [];
     }
   }, [otherFields, selectedView]);

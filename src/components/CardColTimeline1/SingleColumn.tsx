@@ -1,5 +1,5 @@
 import { CheckCircle, CheckCircleOutline, RadioButtonUnchecked } from '@mui/icons-material';
-import { Box, Checkbox } from '@mui/material';
+import { Box, Checkbox, CircularProgress } from '@mui/material';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
 import { VariableSizeList as List, ListChildComponentProps } from 'react-window';
@@ -64,9 +64,14 @@ const Column = <D, C extends readonly string[]>({
   colors,
   ...rest
 }: { container: HTMLDivElement | null; colors: ColumnColor } & CommonProps<D, C>) => {
-  const { data, count, handleFetchSingleColumnWrapper, page } = state;
+  const [initialized, setInitialized] = useState(false);
+  const { data, count, handleFetchSingleColumnWrapper, page, loading } = state;
   const listRef = useRef<List>(null);
   const infiniteLoaderRef = useRef<InfiniteLoader>(null);
+
+  useEffect(() => {
+    setInitialized(true);
+  }, []);
 
   const sizeMap = useRef({});
   const setSize = useCallback((index, size) => {
@@ -74,13 +79,14 @@ const Column = <D, C extends readonly string[]>({
     listRef.current?.resetAfterIndex(index);
   }, []);
   const getSize = (index) => sizeMap.current[index] || 50;
-  const loadMoreItems = useCallback(() => {
-    handleFetchSingleColumnWrapper(column, page[column] + 1);
-  }, [column, handleFetchSingleColumnWrapper, page]);
-
   const hasNextPage = !data[column]?.length || !count[column] ? false : data[column]?.length < count[column];
   const isItemLoaded = (index: number) => !hasNextPage || index < data[column].length;
   const itemCount = hasNextPage ? data[column]?.length + 1 || 0 : data[column]?.length || 0;
+
+  const loadMoreItems = useCallback(() => {
+    if (!initialized || loading[column] || !hasNextPage) return;
+    handleFetchSingleColumnWrapper(column, page[column] + 1);
+  }, [initialized, loading, column, hasNextPage, handleFetchSingleColumnWrapper, page]);
 
   return (
     <InfiniteLoader isItemLoaded={isItemLoaded} ref={infiniteLoaderRef} itemCount={itemCount} loadMoreItems={() => loadMoreItems()}>
@@ -101,17 +107,23 @@ const Column = <D, C extends readonly string[]>({
         >
           {({ data, index, style, ...restOfVirutalProps }) => (
             <li style={style} className="list-none">
-              <SingleCard
-                state={state}
-                column={column}
-                colors={colors}
-                data={data}
-                index={index}
-                setSize={setSize}
-                key={index}
-                {...rest}
-                {...restOfVirutalProps}
-              />
+              {index === data?.length && loading[column] ? (
+                <div className="mt-2 flex items-center justify-center text-black/85 dark:text-[white]">
+                  <CircularProgress size={25} />
+                </div>
+              ) : (
+                <SingleCard
+                  state={state}
+                  column={column}
+                  colors={colors}
+                  data={data}
+                  index={index}
+                  setSize={setSize}
+                  key={index}
+                  {...rest}
+                  {...restOfVirutalProps}
+                />
+              )}
             </li>
           )}
         </List>
@@ -136,6 +148,7 @@ const SingleCard = <D, C extends readonly string[]>({
   passFailAccessor,
   colors,
   column,
+
   passFailStatus,
   actionField,
   defaultDisplay,
@@ -146,8 +159,10 @@ const SingleCard = <D, C extends readonly string[]>({
   const rowData = data[index];
 
   useEffect(() => {
-    setSize(index, rowRef.current.getBoundingClientRect().height);
+    setSize(index, rowRef.current?.getBoundingClientRect().height);
   }, [setSize, index]);
+
+  if (!rowData) return null;
 
   return (
     <div ref={rowRef} className="p-[8px] pb-1">
@@ -184,7 +199,7 @@ const SingleCard = <D, C extends readonly string[]>({
             />
             {primaryField && (
               <div className="line-clamp-1">
-                <h4 className="quote-name line-clamp-1 [&>*]:![font-weight:700] [&_*:not(.flex)]:line-clamp-1  [&_*]:![font-size:15px] [&_*]:[white-space:unset_!important]">
+                <h4 className="quote-name line-clamp-1 [&>*]:![font-weight:700] [&>div>*+*]:flex-shrink-0 [&>div]:!flex [&>div]:min-w-0 [&>div]:items-center [&_*:not(.flex)]:line-clamp-1 [&_*]:![font-size:15px] [&_*]:[white-space:unset_!important]">
                   {renderCell(primaryField, rowData)}
                 </h4>
               </div>
