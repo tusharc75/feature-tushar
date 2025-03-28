@@ -1,9 +1,10 @@
 import { CheckCircle, CheckCircleOutline, RadioButtonUnchecked } from '@mui/icons-material';
-import { Box, Checkbox, CircularProgress } from '@mui/material';
+import { Box, Checkbox, CircularProgress, Skeleton } from '@mui/material';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
 import { VariableSizeList as List, ListChildComponentProps } from 'react-window';
 import InfiniteLoader from 'react-window-infinite-loader';
+import { getRandomNumber } from 'src/components/AiChatbox/utils';
 import CardColTimelineLoader from 'src/components/CardColTimeline1/CardColTimelineLoader';
 import { CardColTimelineProps, ColumnColor } from 'src/components/CardColTimeline1/types';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -17,7 +18,7 @@ type CommonProps<D, C extends readonly string[]> = {
 } & CardColTimelineProps<D, C>;
 
 const SingleColumn = <D, C extends readonly string[]>({ state, getColColors, column, ...rest }: CommonProps<D, C>) => {
-  const { data, loading, isAllSelected, handleSelectAll, columnDef, selectedRecordsObj } = state;
+  const { data, loading, isAllSelected, handleSelectAll, columnDef, selectedRecordsObj, count } = state;
   const colors = getColColors(column);
   const isDataLoading = loading[column];
   const isInitialLoaded = data && data?.[column] && columnDef?.length > 0;
@@ -25,7 +26,7 @@ const SingleColumn = <D, C extends readonly string[]>({ state, getColColors, col
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   return (
     <div className="min-w-[min(90%,350px)] max-w-[350px] flex-shrink-0 snap-start ">
-      <div className={cn('head mb-2 rounded-md px-[11px] py-[5px]', colors.background, colors.color)}>
+      <div className={cn('head mb-2 flex items-center rounded-md px-[11px] py-[5px]', colors.background, colors.color)}>
         <Checkbox
           size="small"
           id={`${column}-select-all`}
@@ -40,8 +41,8 @@ const SingleColumn = <D, C extends readonly string[]>({ state, getColColors, col
           checkedIcon={<CheckCircle />}
           disabled={isDataLoading || data?.[column]?.length === 0}
         />
-        <label htmlFor={`${column}-select-all`} className="cursor-pointer text-[15px] font-bold">
-          {column}
+        <label htmlFor={`${column}-select-all`} className="flex cursor-pointer text-[15px] font-bold">
+          {column} ({count[column] ? count[column] : <Skeleton width={getRandomNumber(20, 50)} />})
         </label>
       </div>
       <div className={cn('h-[calc(100vh-270px)] min-h-[400px] flex-grow ', isInitialLoaded ? '' : 'overflow-hidden')} ref={setContainer}>
