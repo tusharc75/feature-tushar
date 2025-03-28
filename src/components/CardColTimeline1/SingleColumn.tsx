@@ -176,8 +176,16 @@ const SingleCard = <D, C extends readonly string[]>({
         )}
         onClick={(e) => {
           e.stopPropagation();
-          if (['BUTTON', 'A', 'INPUT'].includes(e.currentTarget.tagName)) return;
-          if (cardOnClick) {
+          const target = e.target as HTMLElement;
+          const isInsideButton = target?.closest?.('button');
+          if (isInsideButton !== e.currentTarget) {
+            return;
+          }
+          const isInsideAnchor = target?.closest?.('a');
+          if (isInsideAnchor) {
+            return;
+          }
+          if (typeof cardOnClick === 'function') {
             cardOnClick(rowData);
           }
         }}
