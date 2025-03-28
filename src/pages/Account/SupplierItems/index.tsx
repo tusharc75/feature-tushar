@@ -194,7 +194,7 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
           additionalParams={``}
         />
       </Box>
-      <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
+      <ContainedTabs value={tabValue} onChange={handleMainTabChange} className="mb-4">
         <ContainedTab value={0} label={'Product Category'} />
         <ContainedTab value={1} label={'Products'} />
         <ContainedTab value={2} label={'Assets'} />

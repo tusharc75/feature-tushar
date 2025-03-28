@@ -829,7 +829,7 @@ const Services = ({
             />
           </Box>
           <Box mt={3}>
-            <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
+            <ContainedTabs value={tabValue} onChange={handleMainTabChange} className="mb-4">
               <ContainedTab value={0} label={'Technicians'} />
             </ContainedTabs>
             <TabPanel value={tabValue} index={0}>
