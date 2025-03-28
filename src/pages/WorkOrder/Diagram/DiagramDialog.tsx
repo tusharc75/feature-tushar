@@ -47,7 +47,7 @@ const DiagramDialog = ({ handleClose, referenceId, referenceLabel = '', uniqueId
           handleClose();
         }}
         showRequiredLabel={false}
-        title={attachmentType ? attachmentType : `Attachments - ${referenceLabel}`}
+        title={attachmentType ? `${attachmentType} ${referenceLabel && ` - ${referenceLabel}`}` : `Attachments - ${referenceLabel}`}
       ></CustomDialogHeader>
       <CustomDialogContent isFooterPresent={false}>
         {!loading ? (

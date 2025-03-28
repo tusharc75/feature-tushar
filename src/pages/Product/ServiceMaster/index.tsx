@@ -158,14 +158,14 @@ const ServiceMaster = (props: Props) => {
       },
       ...(serviceColumns && serviceColumns?.some((column) => column?.fieldData?.fieldName === 'frequency')
         ? [
-            {
-              accessor: 'frequency',
-              Header: 'Frequency',
-              width: 150,
-              minWidth: 150,
-              Cell: ({ row }) => (row.original?.frequency ? <p>{row.original?.frequency}</p> : <NoDataCell />)
-            }
-          ]
+          {
+            accessor: 'frequency',
+            Header: 'Frequency',
+            width: 150,
+            minWidth: 150,
+            Cell: ({ row }) => (row.original?.frequency ? <p>{row.original?.frequency}</p> : <NoDataCell />)
+          }
+        ]
         : []),
       {
         accessor: 'stepName',
@@ -581,7 +581,7 @@ const ServiceMaster = (props: Props) => {
 
   return (
     <Fragment>
-      <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
+      <ContainedTabs value={tabValue} onChange={handleMainTabChange} className="mb-2">
         <ContainedTab value={0} label={'Normal'} />
         <ContainedTab value={1} label={'Conditional'} />
       </ContainedTabs>
