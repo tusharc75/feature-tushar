@@ -57,6 +57,7 @@ export type TColType = {
   dataListId?: undefined | string;
   width?: number;
   customContentExpanded: boolean;
+  defaultVisible?: boolean;
 } & ColumnDef<any>;
 
 const DebouncedInput = React.forwardRef(

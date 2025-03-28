@@ -356,15 +356,18 @@ export const useCardColTimeline = <D, C extends readonly string[]>({
   }, [state.refreshSignal]);
 
   const selectedRecords = useMemo(() => {
-    const selectedRows: string[] = [];
+    const selectedRows: D[] = [];
     columns.forEach((c) => {
-      const data = state.selectedRecordsObj[c];
-      if (data) {
-        selectedRows.push(...Object.keys(data));
+      if (state.selectedRecordsObj?.[c]) {
+        const selectedIds = Object.keys(state.selectedRecordsObj?.[c]) || [];
+        const selectedData = state.data[c]?.filter((d) => selectedIds.includes(keyGetter(d as D))) as D[];
+        if (selectedData) {
+          selectedRows.push(...selectedData);
+        }
       }
     });
     return selectedRows;
-  }, [columns, state.selectedRecordsObj]);
+  }, [columns, state.selectedRecordsObj, state.data]);
 
   const isAllSelected = useCallback(
     (column: UseCardColState<D, C>['columns'][number]) => {
