@@ -13,13 +13,14 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import DetailsPage from 'src/components/Shared/DetailsPage';
-import { ACTIVITY_RESOURCE, MATERIAL_TYPE, packages } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, ATTACHMENT_TYPE, MATERIAL_TYPE, packages } from 'src/constants/helpers';
 import ManagePackageDialog from './ManagePackageDialog';
 import Packages from './Packages';
 import Products from './Products';
 import Services from './Services';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import LeadTime from 'src/components/LeadTime';
+import Diagram from 'src/pages/WorkOrder/Diagram';
 
 const PackageDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -127,15 +128,20 @@ const PackageDetails = () => {
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
-          <CustomTab value={1}>{!permissions?.assemblyOrder?.isRead && !permissions?.disassemblyOrder?.isRead ? 'Individual ' : ''}Services</CustomTab>
-          <CustomTab value={2}>{!permissions?.assemblyOrder?.isRead && !permissions?.disassemblyOrder?.isRead ? 'Individual ' : ''}Products</CustomTab>
+          <CustomTab value={1}>
+            {!permissions?.assemblyOrder?.isRead && !permissions?.disassemblyOrder?.isRead ? 'Individual ' : ''}Services
+          </CustomTab>
+          <CustomTab value={2}>
+            {!permissions?.assemblyOrder?.isRead && !permissions?.disassemblyOrder?.isRead ? 'Individual ' : ''}Products
+          </CustomTab>
           <CustomTab value={3}>{`Sub ${resources?.packages?.titlePlural}`}</CustomTab>
+          <CustomTab value={4}>Drawings</CustomTab>
         </CustomTabs>
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, sm: 12, md: 12 }}>
             <TabPanel value={tabValue} index={0}>
               <DetailsPage data={packageData} fields={packageFields} />
-              {user?.user?.brandPolicy?.leadTime &&
+              {user?.user?.brandPolicy?.leadTime && (
                 <Box mb={2} mt={2}>
                   <Grid container spacing={2}>
                     <Grid size={{ xs: 12, sm: 6, md: 6 }}>
@@ -143,7 +149,7 @@ const PackageDetails = () => {
                     </Grid>
                   </Grid>
                 </Box>
-              }
+              )}
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
               {tabValue === 1 && <Services packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} />}
@@ -153,6 +159,9 @@ const PackageDetails = () => {
             </TabPanel>
             <TabPanel value={tabValue} index={3}>
               {tabValue === 3 && <Packages packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} />}
+            </TabPanel>
+            <TabPanel value={tabValue} index={4}>
+              <Diagram resource={ACTIVITY_RESOURCE.packages} referenceId={id} attachmentType={ATTACHMENT_TYPE.drawing} />
             </TabPanel>
           </Grid>
         </Grid>

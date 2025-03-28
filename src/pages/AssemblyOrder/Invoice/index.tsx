@@ -1,5 +1,4 @@
 import { Box, IconButton } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FiExternalLink } from 'react-icons/fi';
@@ -9,6 +8,7 @@ import CustomReactTable, { useColumns, useTableReducer } from 'src/components/Cu
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { CHILD_RESOURCE, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
@@ -48,7 +48,9 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (row.original['type'] ? <h5>{`${getMaterialLabel(row.original?.type)}`}</h5> : <NoDataCell />),
-        accessorFn: (original) => { return getMaterialLabel(original?.type) }
+        accessorFn: (original) => {
+          return getMaterialLabel(original?.type);
+        }
       },
       {
         accessor: 'detail',
@@ -87,7 +89,7 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
         Cell: ({ row }) => {
           return row.original['description'] ? <h5 className="text-truncate">{row.original.description}</h5> : <NoDataCell />;
         }
-      },
+      }
     ];
     coloum = [...coloum, ...newColumns];
     coloum.push({
@@ -114,7 +116,7 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
           <NoDataCell />
         );
       }
-    })
+    });
     coloum.push({
       accessor: 'serializedPackage',
       Header: 'Serialized Package Number',
@@ -139,7 +141,7 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
           <NoDataCell />
         );
       }
-    })
+    });
     setColumns(coloum);
   };
 
@@ -177,14 +179,21 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
       _subRow.detail =
-        _subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName
-          : _subRow?.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceName
-            : _subRow?.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageName
+        _subRow.type === MATERIAL_TYPE.product
+          ? _subRow.productDetail?.productName
+          : _subRow?.type === MATERIAL_TYPE.service
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow?.type === MATERIAL_TYPE.package
+              ? _subRow?.packageDetail?.packageName
               : '';
-      _subRow.description = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription :
-        _subRow?.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageDescription :
-          _subRow?.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceDescription
-            : '';
+      _subRow.description =
+        _subRow.type === MATERIAL_TYPE.product
+          ? _subRow?.productDetail?.productDescription
+          : _subRow?.type === MATERIAL_TYPE.package
+            ? _subRow?.packageDetail?.packageDescription
+            : _subRow?.type === MATERIAL_TYPE.service
+              ? _subRow?.serviceDetail?.serviceDescription
+              : '';
       _subRow.qty = _subRow.qty || 1;
       _subRow.serializedPackageId = _subRow?.serializedPackage?.optionValue;
       _subRow.serializedPackage = _subRow?.serializedPackage?.optionLabel;
@@ -195,47 +204,47 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
     return subRows;
   };
 
+  const rightSideContents = () => {
+    return (
+      <>
+        <PreviewDownload
+          fileName={`${resources?.assemblyOrder?.titlePlural}-${assemblyOrderData?.assemblyOrderNumber}`}
+          resource={sidebarResource.assemblyOrder}
+          referenceId={assemblyOrderData._id}
+          referenceLabel={assemblyOrderData?.assemblyOrderNumber}
+          columns={columns}
+          isSendEmail={true}
+          isAsyncDownload={true}
+        />
+      </>
+    );
+  };
+
   return (
     <>
-      <Box display="flex" justifyContent="space-between" m={1}>
-        <Box display="flex" alignItems="center" gap="8px">
-          <PreviewDownload
-            fileName={`${resources?.assemblyOrder?.titlePlural}-${assemblyOrderData?.assemblyOrderNumber}`}
-            resource={sidebarResource.assemblyOrder}
-            referenceId={assemblyOrderData._id}
-            referenceLabel={assemblyOrderData?.assemblyOrderNumber}
-            columns={columns}
-            isSendEmail={true}
-            isAsyncDownload={true}
-          />
+      <DetailsPageHeader isAddButtonVisible={false} isActionButtonVisible={false} hasXpadding rightSideContents={rightSideContents()} />
+      {columns ? (
+        <>
+          <Box zIndex={5} width={'100%'}>
+            <CustomReactTable
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
+              columns={columns}
+              state={state}
+              dispatch={dispatch}
+              renderedFrom={renderedFrom}
+              refreshGrid={fetchData}
+              hideSelection={true}
+              hideAction={true}
+              isClientSideGrid={true}
+              expander={true}
+            />
+          </Box>
+        </>
+      ) : (
+        <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
-      </Box>
-      <Grid container spacing={2}>
-        <Grid size={{ xs: 12, sm: 12, md: 12 }}>
-          {columns ? (
-            <>
-              <Box zIndex={5} width={'100%'}>
-                <CustomReactTable
-                  height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
-                  columns={columns}
-                  state={state}
-                  dispatch={dispatch}
-                  renderedFrom={renderedFrom}
-                  refreshGrid={fetchData}
-                  hideSelection={true}
-                  hideAction={true}
-                  isClientSideGrid={true}
-                  expander={true}
-                />
-              </Box>
-            </>
-          ) : (
-            <Box p={2} height={500}>
-              <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>
-          )}
-        </Grid>
-      </Grid>
+      )}
     </>
   );
 };

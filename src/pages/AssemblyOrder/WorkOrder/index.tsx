@@ -80,7 +80,7 @@ const WorkOrder = ({
   const [arrangeView, setArrangeView] = useState(false);
   const [attachmentsDialog, setAttachmentsDialog] = useState({ open: false, workOrderId: null, uniqueServiceId: null, serviceName: null });
   const [openSerializedPackageDialog, setOpenSerializedPackageDialog] = useState({ open: false, ids: [] });
-  const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, workOrder: null });
+  const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, data: null });
 
   const { generateColumns, getMaterialLabel } = useColumns();
 
@@ -291,36 +291,36 @@ const WorkOrder = ({
         return (
           <>
             {row.original.type === MATERIAL_TYPE.package && row.original?.workOrderId && (
-              <>
-                <HtmlTooltip title="Auto Complete Work Order">
-                  <IconButton
-                    size="small"
-                    aria-label="Details"
-                    onClick={() => {
-                      setAutoCompleteData([row.original]);
-                      setCompleteConfirmBox(true);
-                    }}
-                    disabled={row?.original?.canAutoCompleteWorkOrder ? false : true}
-                  >
-                    {row.original['workOrderStatus'] === WORK_ORDER_STATUS.completed ? (
-                      <CheckCircle className="text-[var(--chip-color-completed)] [font-size:19px_!important] dark:text-green-400" />
-                    ) : (
-                      <AutoCompleteWorkOrder size={20} className={`${row?.original?.canAutoCompleteWorkOrder ? 'text-[var(--primary-text)]' : ''}`} />
-                    )}
-                  </IconButton>
-                </HtmlTooltip>
-                <HtmlTooltip title="Drawings">
-                  <IconButton
-                    size="small"
-                    aria-label="Details"
-                    onClick={() => {
-                      setShowDrawingDialog({ open: true, workOrder: row.original?.workOrder?._id });
-                    }}
-                  >
-                    <DescriptionIcon fontSize="small" color={'primary'} />
-                  </IconButton>
-                </HtmlTooltip>
-              </>
+              <HtmlTooltip title="Auto Complete Work Order">
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    setAutoCompleteData([row.original]);
+                    setCompleteConfirmBox(true);
+                  }}
+                  disabled={row?.original?.canAutoCompleteWorkOrder ? false : true}
+                >
+                  {row.original['workOrderStatus'] === WORK_ORDER_STATUS.completed ? (
+                    <CheckCircle className="text-[var(--chip-color-completed)] [font-size:19px_!important] dark:text-green-400" />
+                  ) : (
+                    <AutoCompleteWorkOrder size={20} className={`${row?.original?.canAutoCompleteWorkOrder ? 'text-[var(--primary-text)]' : ''}`} />
+                  )}
+                </IconButton>
+              </HtmlTooltip>
+            )}
+            {[MATERIAL_TYPE.package, MATERIAL_TYPE.service]?.includes(row.original.type) && row.original?.workOrderId && (
+              <HtmlTooltip title="Drawings">
+                <IconButton
+                  size="small"
+                  aria-label="Drawings"
+                  onClick={() => {
+                    setShowDrawingDialog({ open: true, data: row?.original });
+                  }}
+                >
+                  <DescriptionIcon fontSize="small" color={'primary'} />
+                </IconButton>
+              </HtmlTooltip>
             )}
             <HtmlTooltip
               title={
@@ -753,7 +753,7 @@ const WorkOrder = ({
         }
         actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
         hasXpadding
-        rightSideContents={nextStep ? rightSideContents() : null}
+        rightSideContents={rightSideContents()}
       />
       {columns ? (
         <>
@@ -960,12 +960,14 @@ const WorkOrder = ({
       )}
       {showDrawingDialog.open && (
         <DiagramDialog
-          referenceId={showDrawingDialog.workOrder}
+          referenceId={showDrawingDialog?.data?.workOrder?._id}
           handleClose={() => {
-            setShowDrawingDialog({ open: false, workOrder: null });
+            setShowDrawingDialog({ open: false, data: null });
           }}
+          referenceLabel={showDrawingDialog?.data?.detail}
+          uniqueId={showDrawingDialog?.data?.type === MATERIAL_TYPE.service ? showDrawingDialog?.data?._id : null}
           resource={ACTIVITY_RESOURCE.workOrder}
-          attachmentType={ATTACHMENT_TYPE.drawing}
+          attachmentType={showDrawingDialog?.data?.type === MATERIAL_TYPE.package ? ATTACHMENT_TYPE.drawing : null}
         />
       )}
     </>
@@ -1098,8 +1100,8 @@ const ActionButtonMenuItems = ({
         }}
         disabled={
           selectedRecords?.length &&
-            selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || checkParentProduct([d], d?.parentId)) &&
-            selectedRecords?.every((d) => d.workOrderId === selectedRecords[0]?.workOrderId)
+          selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || checkParentProduct([d], d?.parentId)) &&
+          selectedRecords?.every((d) => d.workOrderId === selectedRecords[0]?.workOrderId)
             ? false
             : true
         }
@@ -1113,8 +1115,8 @@ const ActionButtonMenuItems = ({
         }}
         disabled={
           checkUniqWorkOrderType() &&
-            selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.package)?.length > 0 &&
-            selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.package).every((e) => e?.canAutoCompleteWorkOrder)
+          selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.package)?.length > 0 &&
+          selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.package).every((e) => e?.canAutoCompleteWorkOrder)
             ? false
             : true
         }
@@ -1124,8 +1126,8 @@ const ActionButtonMenuItems = ({
       <MenuItem
         disabled={
           checkUniqWorkOrder() &&
-            (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
-              selectedRecords?.filter((e) => checkParentProduct([e], e?.parentId))?.length === 1)
+          (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
+            selectedRecords?.filter((e) => checkParentProduct([e], e?.parentId))?.length === 1)
             ? false
             : true
         }
