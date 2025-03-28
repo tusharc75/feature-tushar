@@ -46,11 +46,14 @@ type Columns = typeof WORKORDER_TECHNICIAN_SERVICE_STATUS;
 type ViewType = 'card-view' | 'table-view';
 
 const renderedFrom = camelCase(sidebarResource?.workOrderTechnician);
+
 const defaultVisibleRows = [
   'workOrderNumber',
   'createDate',
   'estimateCompleteDate',
   'serializedAsset',
+  'product',
+  'package',
   'repairOrder',
   'assemblyOrder',
   'productionOrder'
@@ -435,7 +438,7 @@ const WorkOrderTechnician = () => {
         {
           disabled:
             selectedRecords?.length &&
-            selectedRecords?.filter((s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length ===
+              selectedRecords?.filter((s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length ===
               selectedRecords?.length
               ? false
               : true,
