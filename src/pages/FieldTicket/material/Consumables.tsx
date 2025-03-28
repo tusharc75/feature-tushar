@@ -693,11 +693,10 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
           />
         </Box>
       )}
-      <ContainedTabs value={tabValue} onChange={handleMainTabChange} className="mb-4">
+      <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
         <ContainedTab value={0} label={'Products/Consumables'} id={'products-consumables-tab'} />
         {!isOffline && <ContainedTab value={1} label={'Technicians'} id={'technicians-tab'} />}
       </ContainedTabs>
-
       <TabPanel value={tabValue} index={0}>
         <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
           {allowedToEdit && (
