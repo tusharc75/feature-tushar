@@ -491,7 +491,7 @@ const WorkOrder = ({
 
   const handleDelete = async () => {
     setDeleting(true);
-    if (deleteData?.some((e) => [MATERIAL_TYPE.service]?.includes(e.type) || (MATERIAL_TYPE.product === e.type && e.parentId))) {
+    if (deleteData?.some((e) => [MATERIAL_TYPE.service, MATERIAL_TYPE.product]?.includes(e.type))) {
       const records: any = [];
       deleteData?.forEach((data) => {
         const index = records?.findIndex((d) => d?.workOrder === data?.workOrderId);
