@@ -42,7 +42,7 @@ const SingleColumn = <D, C extends readonly string[]>({ state, getColColors, col
           disabled={isDataLoading || data?.[column]?.length === 0}
         />
         <label htmlFor={`${column}-select-all`} className="flex cursor-pointer text-[15px] font-bold">
-          {column} ({count[column] ? count[column] : <Skeleton width={getRandomNumber(20, 50)} />})
+          {column} ({count[column] || count[column] === 0 ? count[column] : <Skeleton width={getRandomNumber(20, 50)} />})
         </label>
       </div>
       <div className={cn('h-[calc(100vh-270px)] min-h-[400px] flex-grow ', isInitialLoaded ? '' : 'overflow-hidden')} ref={setContainer}>
