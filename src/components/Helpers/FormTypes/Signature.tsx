@@ -15,6 +15,8 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ErrorType, useDropZone } from 'src/hooks';
 import axiosInstance from 'src/axios/axiosInstance';
+import UndoIcon from '@mui/icons-material/Undo';
+import RedoIcon from '@mui/icons-material/Redo';
 
 const UseCamera = ({ handleToggleMode, usePad, setPicture, picture, isFullScreen }) => {
   const [cameraCount, setCameraCount] = useState(0);
@@ -174,7 +176,7 @@ const SignatureDialog = ({ onSave, open, close }) => {
     if (strokes.length === 0) return;
     const currentStrokes = [...strokes];
     const removedStroke = currentStrokes.pop();
-    setRedoStack(prev => [...prev, removedStroke]);
+    setRedoStack((prev) => [...prev, removedStroke]);
     setStrokes(currentStrokes);
     signCanvas.current?.fromData(currentStrokes);
     const picture = signCanvas.current?.getTrimmedCanvas().toDataURL('image/png');
@@ -251,6 +253,18 @@ const SignatureDialog = ({ onSave, open, close }) => {
         showRequiredLabel={false}
       />
       <CustomDialogContent className="px-[15px]">
+        <div className="mt-2 flex justify-end gap-2">
+          <HtmlTooltip title="Undo">
+            <IconButton onClick={handleUndo} disabled={strokes.length === 0 || uploading} color={uploading ? 'default' : 'primary'} size="small">
+              <UndoIcon />
+            </IconButton>
+          </HtmlTooltip>
+          <HtmlTooltip title="Redo">
+            <IconButton onClick={handleRedo} disabled={redoStack.length === 0 || uploading} color={uploading ? 'default' : 'primary'} size="small">
+              <RedoIcon />
+            </IconButton>
+          </HtmlTooltip>
+        </div>
         <input
           type="file"
           className="sr-only"
@@ -310,12 +324,6 @@ const SignatureDialog = ({ onSave, open, close }) => {
         </HtmlTooltip>
         <ThemeButton buttonType="theme" onClick={handleToggleMode} startIcon={usePad ? <CameraAlt /> : <FaSignature />}>
           {usePad ? 'Use Camera' : 'Use Sign Pad'}
-        </ThemeButton>
-        <ThemeButton buttonType="theme" onClick={handleUndo} disabled={strokes.length === 0 || uploading}>
-          Undo
-        </ThemeButton>
-        <ThemeButton buttonType="theme" onClick={handleRedo} disabled={redoStack.length === 0 || uploading}>
-          Redo
         </ThemeButton>
         <ThemeButton buttonType="theme" onClick={close} disabled={uploading}>
           Close
