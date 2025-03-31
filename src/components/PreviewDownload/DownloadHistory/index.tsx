@@ -33,7 +33,7 @@ const DownloadHistory = ({ referenceId, resource, loadingType }) => {
         if (data?.length && data?.find((e) => e.status === FILE_PROCESS_STATUS.processing)) {
           apiCallInterval = setInterval(async () => {
             await fetchData();
-          }, 30000);
+          }, 5000);
         }
       })
       .catch((err) => {
