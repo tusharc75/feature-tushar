@@ -111,8 +111,7 @@ const WorkOrderTechnician = () => {
           finalObject['serviceId'] = u?.service?._id;
           finalObject['customServiceStatus'] = u?.status;
           finalObject['workOrderId'] = u?.workOrderDetail?._id;
-          const matchedTempMaterial = workOrderDetailData?.tempMaterial?.find((t) => t?.materialId === u?.service?._id);
-          finalObject['uniqueId'] = matchedTempMaterial?._id;
+          finalObject['uniqueId'] = u?._id;
           delete workOrderDetailData?._id;
           delete workOrderDetailData?.id;
           return { ...finalObject, ...workOrderDetailData };
@@ -413,9 +412,9 @@ const WorkOrderTechnician = () => {
     const data = selectedRecords
       ?.filter((s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)
       ?.map((_s) => ({
-        workOrder: _s?.workOrderDetail?._id,
+        workOrder: _s?.workOrderId,
         service: _s?.materialId,
-        uniqueId: _s?._id,
+        uniqueId: _s?.uniqueId,
         status: WORKORDER_SERVICE_STATUS.completed
       }));
     axiosInstance()

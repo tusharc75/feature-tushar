@@ -689,7 +689,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
               dispatch({ type: 'update', data: [] });
               setSelectedServiceOption(value);
             }}
-            renderInput={(params) => <TextField {...params} label={'Select Service'} variant="outlined" />}
+            renderInput={(params) => <TextField {...params} label={'Service'} variant="outlined" />}
           />
         </Box>
       )}

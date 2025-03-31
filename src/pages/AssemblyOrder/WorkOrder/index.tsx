@@ -73,7 +73,7 @@ const WorkOrder = ({
   const [completeConfirmBox, setCompleteConfirmBox] = useState(false);
   const [isCompleting, setCompleting] = useState(false);
   const [addServicesDialog, setAddServicesDialog] = useState({ open: false, new: false });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setSubmitting] = useState(false);
   const [userAssignDialog, setUserAssignDialog] = useState({ open: false, assignedUsers: [] });
   const [workStationAssignDialog, setWorkStationAssignDialog] = useState({ open: false, assignedWorkStations: [] });
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, ids: [], data: null });
@@ -635,7 +635,7 @@ const WorkOrder = ({
   };
 
   const handleAddService = (ids) => {
-    setIsSubmitting(true);
+    setSubmitting(true);
     const allWorkOrders = selectedRecords?.filter((r) => r?.workOrderId)?.map((e) => e.workOrderId);
     const data: any = {};
     data.serviceIds = ids;
@@ -645,16 +645,16 @@ const WorkOrder = ({
       .then(() => {
         setAddServicesDialog({ open: false, new: false });
         fetchData();
-        setIsSubmitting(false);
+        setSubmitting(false);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
-        setIsSubmitting(false);
+        setSubmitting(false);
       });
   };
 
   const handleAddConsumables = (rows, records = []) => {
-    setIsSubmitting(true);
+    setSubmitting(true);
     const data: any = [];
     let workOrderId = '';
     const _package = records?.find((s) => s.type === MATERIAL_TYPE.package);
@@ -696,11 +696,11 @@ const WorkOrder = ({
           message: data.message
         });
         fetchData();
-        setIsSubmitting(false);
+        setSubmitting(false);
         setConsumablesDialog({ open: false, ids: [], data: null });
       })
       .catch((error) => {
-        setIsSubmitting(false);
+        setSubmitting(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -742,6 +742,27 @@ const WorkOrder = ({
     );
   };
 
+  const updateWorkOrdetStatus = () => {
+    setSubmitting(true);
+    const ids = selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.package && e?.status === WORK_ORDER_STATUS.draft)?.map((e) => e?.workOrderId);
+    const data: any = { status: WORK_ORDER_STATUS.new, ids: ids };
+    axiosInstance()
+      .put(`${workOrder.api}/update-multiple-status`, data)
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchData();
+        setSubmitting(false);
+      })
+      .catch((error) => {
+        setSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   return (
     <>
       {isAutoCreating && (
@@ -771,7 +792,8 @@ const WorkOrder = ({
               dataRows,
               setConsumablesDialog,
               setArrangeView,
-              setShowDrawingDialog
+              setShowDrawingDialog,
+              updateWorkOrdetStatus
             }}
           />
         }
@@ -992,7 +1014,8 @@ const ActionButtonMenuItems = ({
   dataRows,
   setConsumablesDialog,
   setArrangeView,
-  setShowDrawingDialog
+  setShowDrawingDialog,
+  updateWorkOrdetStatus
 }) => {
   const checkUniqWorkOrderType = () => {
     if (selectedRecords.length === 0) {
@@ -1099,14 +1122,22 @@ const ActionButtonMenuItems = ({
         }}
         disabled={
           selectedRecords?.length &&
-          selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || checkParentProduct([d], d?.parentId)) &&
-          selectedRecords?.every((d) => d.workOrderId === selectedRecords[0]?.workOrderId)
+            selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || checkParentProduct([d], d?.parentId)) &&
+            selectedRecords?.every((d) => d.workOrderId === selectedRecords[0]?.workOrderId)
             ? false
             : true
         }
       >
         Arrange Services
       </MenuItem>
+      {selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.package && e?.status === WORK_ORDER_STATUS.draft)?.length > 0 &&
+        <MenuItem
+          onClick={() => {
+            updateWorkOrdetStatus()
+          }}
+        >
+          Ready to Build
+        </MenuItem>}
       <MenuItem
         onClick={() => {
           setAutoCompleteData(selectedRecords?.filter((e) => e?.canAutoCompleteWorkOrder));
@@ -1114,8 +1145,8 @@ const ActionButtonMenuItems = ({
         }}
         disabled={
           checkUniqWorkOrderType() &&
-          selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.package)?.length > 0 &&
-          selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.package).every((e) => e?.canAutoCompleteWorkOrder)
+            selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.package)?.length > 0 &&
+            selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.package).every((e) => e?.canAutoCompleteWorkOrder)
             ? false
             : true
         }
@@ -1125,8 +1156,8 @@ const ActionButtonMenuItems = ({
       <MenuItem
         disabled={
           checkUniqWorkOrder() &&
-          (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
-            selectedRecords?.filter((e) => checkParentProduct([e], e?.parentId))?.length === 1)
+            (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
+              selectedRecords?.filter((e) => checkParentProduct([e], e?.parentId))?.length === 1)
             ? false
             : true
         }

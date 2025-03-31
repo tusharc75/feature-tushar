@@ -110,7 +110,7 @@ const ViewServiceStepDataDialog = ({ servicesData, stepsData, handleClose, selec
             }
           }}
           renderInput={(params) => (
-            <TextField {...params} margin="dense" size="small" variant="outlined" label="Select Service" placeholder="Select Service" name="service" />
+            <TextField {...params} margin="dense" size="small" variant="outlined" label="Service" placeholder="Service" name="service" />
           )}
         />
         <Box className="pt-3 " style={{ overflowY: 'auto', height: 'calc(100% - 70px)' }}>
