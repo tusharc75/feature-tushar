@@ -4,7 +4,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import Consumables from './';
 import { CustomDialogTransition } from 'src/constants/helpers';
 
-const ConsumablesDialog = ({ onSuccess, handleClose, workOrderData, service, uniqueId, stepId, serviceName }) => {
+const ConsumablesDialog = ({ onSuccess, handleClose, workOrderData, service, uniqueId, stepId, serviceName, hideServiceFilter }) => {
   return (
     <Dialog
       fullWidth
@@ -30,6 +30,7 @@ const ConsumablesDialog = ({ onSuccess, handleClose, workOrderData, service, uni
           stepId={stepId}
           serviceName={serviceName}
           workOrderData={workOrderData}
+          hideServiceFilter={hideServiceFilter}
         />
       </CustomDialogContent>
     </Dialog>
