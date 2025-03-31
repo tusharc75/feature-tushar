@@ -36,12 +36,12 @@ import AssignTechniciansDialog from 'src/pages/WorkOrder/Service/AssignTechnicia
 import AssignWorkStationDialog from 'src/pages/WorkOrder/Service/AssignWorkStationDialog';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
-import AttachmentDialog from 'src/pages/WorkOrder/Service/AttachmentDialog';
 import PackageNumberDialog from 'src/pages/AssemblyOrder/WorkOrder/PackageNumberDialog';
 import DescriptionIcon from '@mui/icons-material/Description';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import PreviewDownload from 'src/components/PreviewDownload';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -283,8 +283,8 @@ const WorkOrder = ({
     coloum.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 100,
-      width: 100,
+      minWidth: 130,
+      width: 130,
       sticky: 'right',
       Cell: ({ row }) => {
         return (
@@ -308,6 +308,31 @@ const WorkOrder = ({
                 </IconButton>
               </HtmlTooltip>
             )}
+            {row?.original?.workOrderId &&
+              [MATERIAL_TYPE.service, MATERIAL_TYPE.package]?.includes(row?.original?.type) &&
+              !user?.user?.brandPolicy?.workOrderConsumableHide && (
+                <HtmlTooltip title="Add Products/Consumables">
+                  <IconButton
+                    size="small"
+                    aria-label="Add Products/Consumables"
+                    onClick={() => {
+                      var ids = [];
+                      if (row?.original?.type === MATERIAL_TYPE.package) {
+                        ids = flattenArray(dataRows)
+                          ?.filter((e) => e?.workOrderId === row?.original?.workOrderId && e?.type === MATERIAL_TYPE.product)
+                          ?.map((e) => e.materialId);
+                      } else {
+                        ids = flattenArray(dataRows)
+                          ?.filter((e) => row?.original?._id === e?.parentId)
+                          ?.map((e) => e.materialId);
+                      }
+                      setConsumablesDialog({ open: true, ids: ids, data: [row?.original] });
+                    }}
+                  >
+                    <AddCircleOutlineIcon fontSize="small" color={'primary'} />
+                  </IconButton>
+                </HtmlTooltip>
+              )}
             {[MATERIAL_TYPE.package, MATERIAL_TYPE.service]?.includes(row.original.type) && row.original?.workOrderId && (
               <HtmlTooltip title="Drawings">
                 <IconButton
@@ -632,9 +657,9 @@ const WorkOrder = ({
     setIsSubmitting(true);
     const data: any = [];
     let workOrderId = '';
-    const product = records?.find((s) => s.type === MATERIAL_TYPE.product);
-    if (product) {
-      workOrderId = product?.workOrderId;
+    const _package = records?.find((s) => s.type === MATERIAL_TYPE.package);
+    if (_package) {
+      workOrderId = _package?.workOrderId;
       rows?.forEach((e) => {
         data.push({
           product: e._id,
@@ -1045,16 +1070,16 @@ const ActionButtonMenuItems = ({
       {!user?.user?.brandPolicy?.workOrderConsumableHide && (
         <MenuItem
           disabled={
-            selectedRecords?.filter((d) => [MATERIAL_TYPE.product, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 && checkUniqWorkOrder()
+            selectedRecords?.filter((d) => [MATERIAL_TYPE.package, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 && checkUniqWorkOrder()
               ? false
               : true
           }
           onClick={() => {
             var ids = [];
-            if (selectedRecords?.find((e) => e.type === MATERIAL_TYPE.product)) {
-              const product = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.product);
+            if (selectedRecords?.find((e) => e.type === MATERIAL_TYPE.package)) {
+              const packages = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.package);
               ids = flattenArray(dataRows)
-                ?.filter((e) => e?.workOrderId === product?.workOrderId)
+                ?.filter((e) => e?.workOrderId === packages?.workOrderId)
                 ?.map((e) => e.materialId);
             } else {
               const serviceIds = selectedRecords?.filter((d) => d?.type === MATERIAL_TYPE.service)?.map((e) => e._id);
