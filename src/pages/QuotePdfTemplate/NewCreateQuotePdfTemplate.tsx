@@ -26,6 +26,7 @@ import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 import { camelCase, isEqual, startCase } from 'lodash';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import VariablesDialog from './Variables';
+import FormTypes from 'src/components/Helpers/FormTypes';
 
 const defaultProductColumns = 7;
 
@@ -180,6 +181,8 @@ export default function NewCreateQuotePdfTemplate() {
       tableFontSize: '',
       belowTableTotalFontSize: '',
       pdfFontSize: '',
+      tableHeaderBackgroundColor: '',
+      tableHeaderFontColor: '',
       productColumns: defaultProductColumns,
       name: '',
       pageNumberInFooter: false,
@@ -239,6 +242,8 @@ export default function NewCreateQuotePdfTemplate() {
         initialValues.tableFontSize = tempPdfTemplate?.tableFontSize;
         initialValues.belowTableTotalFontSize = tempPdfTemplate?.belowTableTotalFontSize;
         initialValues.pdfFontSize = tempPdfTemplate?.pdfFontSize;
+        initialValues.tableHeaderBackgroundColor = tempPdfTemplate?.tableHeaderBackgroundColor;
+        initialValues.tableHeaderFontColor = tempPdfTemplate?.tableHeaderFontColor;
         initialValues.productColumns = tempPdfTemplate?.productColumns;
         initialValues.name = tempPdfTemplate?.name;
         initialValues.pageNumberInFooter = tempPdfTemplate?.pageNumberInFooter;
@@ -272,6 +277,8 @@ export default function NewCreateQuotePdfTemplate() {
           initialValues.tableFontSize = data?.tableFontSize;
           initialValues.belowTableTotalFontSize = data?.belowTableTotalFontSize;
           initialValues.pdfFontSize = data?.pdfFontSize;
+          initialValues.tableHeaderBackgroundColor = data?.tableHeaderBackgroundColor;
+          initialValues.tableHeaderFontColor = data?.tableHeaderFontColor;
           initialValues.productColumns = data?.productColumns;
           initialValues.name = !isClone ? data?.name : '';
           initialValues.pageNumberInFooter = data?.pageNumberInFooter;
@@ -396,6 +403,8 @@ export default function NewCreateQuotePdfTemplate() {
           tableFontSize: parseInt(values?.tableFontSize),
           belowTableTotalFontSize: parseInt(values?.belowTableTotalFontSize),
           pdfFontSize: parseInt(values?.pdfFontSize),
+          tableHeaderBackgroundColor: values?.tableHeaderBackgroundColor,
+          tableHeaderFontColor: values?.tableHeaderFontColor,
           productColumns: parseInt(values?.productColumns)
         })
         .then(({ data: { data, message } }) => {
@@ -448,6 +457,8 @@ export default function NewCreateQuotePdfTemplate() {
           tableFontSize: parseInt(values?.tableFontSize),
           belowTableTotalFontSize: parseInt(values?.belowTableTotalFontSize),
           pdfFontSize: parseInt(values?.pdfFontSize),
+          tableHeaderBackgroundColor: values?.tableHeaderBackgroundColor,
+          tableHeaderFontColor: values?.tableHeaderFontColor,
           productColumns: parseInt(values?.productColumns)
         })
         .then(({ data: { data, message } }) => {
@@ -887,6 +898,34 @@ export default function NewCreateQuotePdfTemplate() {
                             endAdornment: 'pt'
                           }
                         }}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center mt-2">
+                    <div className="flex gap-8">
+                      <FormTypes
+                        values={values}
+                        errors={errors}
+                        touched={touched}
+                        label={'Table Header Background Color'}
+                        name={'tableHeaderBackgroundColor'}
+                        type={'colorPicker'}
+                        setFieldValue={(name, value) => {
+                          setFieldValue(name, value);
+                        }}
+                        isTooltip={false}
+                      />
+                       <FormTypes
+                        values={values}
+                        errors={errors}
+                        touched={touched}
+                        label={'Table Header Font Color'}
+                        name={'tableHeaderFontColor'}
+                        type={'colorPicker'}
+                        setFieldValue={(name, value) => {
+                          setFieldValue(name, value);
+                        }}
+                        isTooltip={false}
                       />
                     </div>
                   </div>
