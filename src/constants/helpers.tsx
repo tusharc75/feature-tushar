@@ -4,7 +4,7 @@ import { TransitionProps } from '@mui/material/transitions';
 import { GoogleMapProps } from '@react-google-maps/api';
 import clsx, { ClassValue } from 'clsx';
 import dayjs, { Dayjs } from 'dayjs';
-import { camelCase, cloneDeep, indexOf, isArray, isString, lowerFirst, orderBy, sortBy, uniqBy } from 'lodash';
+import { camelCase, cloneDeep, indexOf, isArray, isEmpty, isString, lowerFirst, orderBy, sortBy, uniqBy } from 'lodash';
 import mimeDb from 'mime-db';
 import React from 'react';
 import { PiCaretCircleDoubleRight } from 'react-icons/pi';
@@ -3429,6 +3429,28 @@ export const GenerateResourceLineNumber = (fields) => {
     }
   }
   return lineNumber;
+};
+
+export const handleRefrenceData = (data, fields) => {
+  const obj: any = {};
+  if (!isEmpty(data)) {
+    Object.keys(data)?.forEach((_key) => {
+      const field = fields?.find((f) => f?.fieldName === _key);
+      const lookUpDependentOnFields = fields?.filter((f) => f?.lookupDependentOn === field?.fieldName);
+      if (lookUpDependentOnFields?.length > 0) {
+        lookUpDependentOnFields?.forEach((f) => {
+          const option = field?.option?.find((o) => o?.optionValue === data[_key]);
+          if (!data[f?.fieldName] && option && option[f?.lookupDependentOnField]?.length === 1) {
+            obj[f?.fieldName] = option[f?.lookupDependentOnField][0];
+          }
+        });
+      }
+      if (field) {
+        obj[_key] = data[_key];
+      }
+    });
+  }
+  return obj;
 };
 
 export const ROLE_TIER = {

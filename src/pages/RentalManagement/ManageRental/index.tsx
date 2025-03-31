@@ -2,7 +2,7 @@ import { Box } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import Dialog from '@mui/material/Dialog';
 import { Form, Formik } from 'formik';
-import { isEqual } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
@@ -20,6 +20,7 @@ import {
   GenerateResourceLineNumber,
   getObjKeys,
   getObjKeysWithValues,
+  handleRefrenceData,
   RENTAL_STATUS,
   rentalManagement,
   setFieldsInAscendingOrder,
@@ -131,13 +132,8 @@ const ManageRentalManagementDialog = ({
           initialData['estimateEndDate'] = null;
         }
         initialData['rentalJobName'] = GenerateResourceLineNumber(fieldsDataForCreate);
-        if (referenceData) {
-          Object.keys(referenceData).forEach((_key) => {
-            if (fieldsDataForCreate?.some((e) => e.fieldName === _key)) {
-              initialData[_key] = referenceData[_key];
-            }
-          });
-        }
+        const _referenceData = handleRefrenceData(referenceData, fieldsDataForCreate);
+        initialData = { ...initialData, ..._referenceData };
         setRentalData({
           fields: fieldsDataForCreate,
           initialValues: initialData
@@ -397,8 +393,8 @@ const ManageRentalManagementDialog = ({
                                         imageOrFileUploadCompletePercentage={
                                           ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                             ? (completePercentage) => {
-                                              setUploadingImageOrFileProgress(completePercentage);
-                                            }
+                                                setUploadingImageOrFileProgress(completePercentage);
+                                              }
                                             : null
                                         }
                                         fields={rentalData.fields}
