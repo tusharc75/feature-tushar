@@ -93,14 +93,14 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
     ];
     coloum = [...coloum, ...newColumns];
     coloum.push({
-      accessor: 'workOrder',
+      accessor: 'workOrderNumber',
       Header: 'Work Order',
       width: 200,
       show: false,
       Cell: ({ row }) => {
-        return row.original?.workOrder ? (
+        return row.original?.workOrderNumber ? (
           <div className="flex items-center gap-2">
-            <h5 className="text-truncate">{row.original?.workOrder}</h5>{' '}
+            <h5 className="text-truncate">{row.original?.workOrderNumber}</h5>{' '}
             <Box>
               <IconButton
                 size="small"
@@ -166,7 +166,7 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
       parent.serializedPackageId = parent?.serializedPackage?.optionValue;
       parent.serializedPackage = parent?.serializedPackage?.optionLabel;
       parent.workOrderId = parent?.workOrder?._id;
-      parent.workOrder = parent?.workOrder?.workOrderNumber;
+      parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
       parent.subRows = generateNestedData(data, parent);
     });
 
@@ -198,7 +198,7 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
       _subRow.serializedPackageId = _subRow?.serializedPackage?.optionValue;
       _subRow.serializedPackage = _subRow?.serializedPackage?.optionLabel;
       _subRow.workOrderId = _subRow?.workOrder?._id;
-      _subRow.workOrder = _subRow?.workOrder?.workOrderNumber;
+      _subRow.workOrderNumber = _subRow?.workOrder?.workOrderNumber;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
