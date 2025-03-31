@@ -246,7 +246,14 @@ export const useCardColTimeline = <D, C extends readonly string[]>({
   };
 
   const fetchNewColumnsData = (cancelToken: CancelToken, columns: C) => {
-    cache.current = { ...cache.current, data: state.data };
+    cache.current = {
+      ...cache.current,
+      data: state.data,
+      count: state.count,
+      page: state.page,
+      loading: state.loading,
+      selectedRecordsObj: state.selectedRecordsObj
+    };
     for (const column of columns) {
       if (!cache.current.data[column]) {
         fetchSingleColumnInitialData(column, cancelToken);
