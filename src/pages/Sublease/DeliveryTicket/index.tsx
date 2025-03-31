@@ -145,35 +145,35 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
       },
       ...(ticketType === DELIVERY_TICKET_TYPE.receiving
         ? [
-            {
-              accessor: `ReceivingTicket`,
-              Header: `Receiving Ticket`,
-              width: 200,
-              Cell: ({ row }) =>
-                row?.original[`ReceivingTicket`] ? (
-                  <div className="flex items-center gap-2">
-                    <p className="text-truncate">{row?.original[`ReceivingTicket`]}</p>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.deliveryTicketDetail.path}/${row.original[`ReceivingTicketId`]}`);
-                      }}
-                    >
-                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                    </IconButton>
-                  </div>
-                ) : (
-                  <NoDataCell />
-                )
-            },
-            {
-              accessor: `ReceivingTicketStatus`,
-              Header: `Receiving Ticket Status`,
-              width: 200,
-              Cell: ({ row }) =>
-                row?.original[`ReceivingTicketStatus`] ? <p className="text-truncate">{row?.original[`ReceivingTicketStatus`]}</p> : <NoDataCell />
-            }
-          ]
+          {
+            accessor: `ReceivingTicket`,
+            Header: `Receiving Ticket`,
+            width: 200,
+            Cell: ({ row }) =>
+              row?.original[`ReceivingTicket`] ? (
+                <div className="flex items-center gap-2">
+                  <p className="text-truncate">{row?.original[`ReceivingTicket`]}</p>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.deliveryTicketDetail.path}/${row.original[`ReceivingTicketId`]}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                </div>
+              ) : (
+                <NoDataCell />
+              )
+          },
+          {
+            accessor: `ReceivingTicketStatus`,
+            Header: `Receiving Ticket Status`,
+            width: 200,
+            Cell: ({ row }) =>
+              row?.original[`ReceivingTicketStatus`] ? <p className="text-truncate">{row?.original[`ReceivingTicketStatus`]}</p> : <NoDataCell />
+          }
+        ]
         : [])
     ];
     coloum = [...coloum];
@@ -385,7 +385,7 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
             }
           }}
         >
-          {ticketType === DELIVERY_TICKET_TYPE.loading ? 'Delivered to Plant' : 'Received at Plant'}
+          {ticketType === DELIVERY_TICKET_TYPE.loading ? `Delivered to ${resources?.warehouse?.titleSingular}` : `Received at ${resources?.warehouse?.titleSingular}`}
         </MenuItem>
       </>
     );

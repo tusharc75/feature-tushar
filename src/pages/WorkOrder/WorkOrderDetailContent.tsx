@@ -542,6 +542,14 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       )
     },
     {
+      id: 'Ready-to-Build',
+      type: 'menuItem',
+      tooltip: '',
+      isVisible: allowedToEdit && workOrderData?.status === WORK_ORDER_STATUS.draft,
+      children: 'Ready to Build',
+      onClick: () => updateStatus(WORK_ORDER_STATUS.new)
+    },
+    {
       id: 'Edit',
       type: 'menuItem',
       tooltip: 'Edit Work Order',
@@ -584,7 +592,6 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       />
     </Box>
   }
-
   return (
     <Box className="main-container-v1">
       {resource === sidebarResource.workOrder && (
@@ -708,6 +715,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
               serviceName={null}
               materialSubType={MATERIAL_SUB_TYPE.consumable}
               workOrderData={workOrderData}
+              defaultServiceUniqueId={defaultSelectedService}
               serialNumberRequired={resourceData?.policy?.consumablesSerialNumberRequired}
             />
           )}
@@ -735,6 +743,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
               uniqueId={null}
               stepId={null}
               serviceName={null}
+              defaultServiceUniqueId={defaultSelectedService}
               materialSubType={MATERIAL_SUB_TYPE.bom}
               workOrderData={workOrderData}
               serialNumberRequired={resourceData?.policy?.consumablesSerialNumberRequired}
