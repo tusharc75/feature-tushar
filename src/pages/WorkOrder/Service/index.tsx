@@ -1,7 +1,6 @@
 import { Add, ExpandMore, LowPriority } from '@mui/icons-material';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import { Box, Menu, MenuItem, useMediaQuery } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 import { isArray, reverse } from 'lodash';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -32,7 +31,6 @@ import ConsumablesDialog from '../Consumables/ConsumablesDialog';
 import Quotation from '../Quotation';
 import AssignUserDialog from './AssignTechniciansDialog';
 import AssignWorkStationDialog from './AssignWorkStationDialog';
-import AttachmentDialog from './AttachmentDialog';
 import Comments from './Comments';
 import CompleteDialog from './CompleteDialog';
 import Logs from './Logs';
@@ -87,7 +85,6 @@ const Service = ({
   const prevOrder = useRef(0);
 
   const [isSubmitting, setSubmitting] = useState(false);
-
   const [reviseQuotation, setReviseQuotation] = useState(false);
   const [openProperties, setOpenProperties] = useState(false);
 
