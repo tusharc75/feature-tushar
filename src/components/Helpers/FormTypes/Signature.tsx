@@ -137,6 +137,8 @@ const SignatureDialog = ({ onSave, open, close }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
   const [uploading, setUploading] = useState<boolean>(false);
+  const [strokes, setStrokes] = useState<any[]>([]);
+  const [redoStack, setRedoStack] = useState<any[]>([]);
 
   const handleShowDropDownError = (error: ErrorType) => {
     const fileNames = Object.keys(error);
@@ -159,10 +161,36 @@ const SignatureDialog = ({ onSave, open, close }) => {
   const handleEnd = () => {
     if (!signCanvas.current?.isEmpty()) {
       const picture = signCanvas.current?.getTrimmedCanvas().toDataURL('image/png');
+      const data = signCanvas.current?.toData();
       setPicture(picture);
+      setStrokes(data);
+      setRedoStack([]);
     } else {
       setToastConfig({ open: true, type: 'warning', message: 'Signature cannot be empty!' });
     }
+  };
+
+  const handleUndo = () => {
+    if (strokes.length === 0) return;
+    const currentStrokes = [...strokes];
+    const removedStroke = currentStrokes.pop();
+    setRedoStack(prev => [...prev, removedStroke]);
+    setStrokes(currentStrokes);
+    signCanvas.current?.fromData(currentStrokes);
+    const picture = signCanvas.current?.getTrimmedCanvas().toDataURL('image/png');
+    setPicture(picture);
+  };
+
+  const handleRedo = () => {
+    if (redoStack.length === 0) return;
+    const newRedoStack = [...redoStack];
+    const strokeToRestore = newRedoStack.pop();
+    const newStrokes = [...strokes, strokeToRestore];
+    setStrokes(newStrokes);
+    setRedoStack(newRedoStack);
+    signCanvas.current?.fromData(newStrokes);
+    const picture = signCanvas.current?.getTrimmedCanvas().toDataURL('image/png');
+    setPicture(picture);
   };
 
   const handleDrop = (files: File[]) => {
@@ -201,9 +229,12 @@ const SignatureDialog = ({ onSave, open, close }) => {
     clearAllData();
     setUsePad((prev) => !prev);
   };
+
   const clearAllData = () => {
     setPicture('');
     setUploadedFile(null);
+    setStrokes([]);
+    setRedoStack([]);
     signCanvas.current?.clear();
   };
 
@@ -279,6 +310,12 @@ const SignatureDialog = ({ onSave, open, close }) => {
         </HtmlTooltip>
         <ThemeButton buttonType="theme" onClick={handleToggleMode} startIcon={usePad ? <CameraAlt /> : <FaSignature />}>
           {usePad ? 'Use Camera' : 'Use Sign Pad'}
+        </ThemeButton>
+        <ThemeButton buttonType="theme" onClick={handleUndo} disabled={strokes.length === 0 || uploading}>
+          Undo
+        </ThemeButton>
+        <ThemeButton buttonType="theme" onClick={handleRedo} disabled={redoStack.length === 0 || uploading}>
+          Redo
         </ThemeButton>
         <ThemeButton buttonType="theme" onClick={close} disabled={uploading}>
           Close
