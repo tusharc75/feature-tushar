@@ -45,7 +45,8 @@ export default function ManageAttachment({
   showManimizeMaximize,
   parentFolder = null,
   type = 'file',
-  attachmentType = null
+  attachmentType = null,
+  handleAddWorkOrderServiceAttachment = null
 }) {
   const [initialValues, setInitialValues] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -129,40 +130,44 @@ export default function ManageAttachment({
     }
     setLoading(true);
     if (type === 'file') {
-      if (attachmentId && !isClone) {
-        axiosInstance()
-          .put(`/attachment/${attachmentId}`, request)
-          .then(({ data }) => {
-            toastConfig.setToastConfig({
-              open: true,
-              type: 'success',
-              message: data.message
-            });
-            setLoading(false);
-            handleClose();
-            if (fetchData) fetchData();
-          })
-          .catch((error) => {
-            setLoading(false);
-            toastConfig.setToastConfig(error);
-          });
+      if (handleAddWorkOrderServiceAttachment) {
+        handleAddWorkOrderServiceAttachment(request, setLoading);
       } else {
-        axiosInstance()
-          .post(`/attachment`, request)
-          .then(({ data }) => {
-            toastConfig.setToastConfig({
-              open: true,
-              type: 'success',
-              message: data.message
+        if (attachmentId && !isClone) {
+          axiosInstance()
+            .put(`/attachment/${attachmentId}`, request)
+            .then(({ data }) => {
+              toastConfig.setToastConfig({
+                open: true,
+                type: 'success',
+                message: data.message
+              });
+              setLoading(false);
+              handleClose();
+              if (fetchData) fetchData();
+            })
+            .catch((error) => {
+              setLoading(false);
+              toastConfig.setToastConfig(error);
             });
-            setLoading(false);
-            handleClose();
-            if (fetchData) fetchData();
-          })
-          .catch((error) => {
-            setLoading(false);
-            toastConfig.setToastConfig(error);
-          });
+        } else {
+          axiosInstance()
+            .post(`/attachment`, request)
+            .then(({ data }) => {
+              toastConfig.setToastConfig({
+                open: true,
+                type: 'success',
+                message: data.message
+              });
+              setLoading(false);
+              handleClose();
+              if (fetchData) fetchData();
+            })
+            .catch((error) => {
+              setLoading(false);
+              toastConfig.setToastConfig(error);
+            });
+        }
       }
     } else {
       if (attachmentId && !isClone) {

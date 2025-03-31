@@ -16,7 +16,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { ACTIVITY_RESOURCE, CustomDialogTransition, WORK_ORDER_TYPE } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, CustomDialogTransition, WORK_ORDER_TYPE, workOrder } from 'src/constants/helpers';
 import PdfPreview from './ShowPdf/PdfPreview';
 import ViewImage from './ViewImage';
 import { getFileIcon, getFileNameWithExtension } from './utils';
@@ -28,10 +28,13 @@ const Diagram = ({
   resource,
   referenceId,
   uniqueId = null,
+  stepId = null,
   currentVersion = null,
   resourceData = null,
   disableEdit = false,
-  attachmentType = null
+  attachmentType = null,
+  referenceLabel = '',
+  isAddWorkOrderServiceAttachment = false
 }) => {
   const toastConfig = useContext(CustomToastContext);
 
@@ -53,7 +56,14 @@ const Diagram = ({
       query = `${query}&attachmentType=${attachmentType}`;
     }
     if (uniqueId) {
-      query = `${query}&uniqueId=${uniqueId}`;
+      if (isAddWorkOrderServiceAttachment) {
+        query = `${query}&uniqueServiceId=${uniqueId}`;
+      } else {
+        query = `${query}&uniqueId=${uniqueId}`;
+      }
+    }
+    if (stepId) {
+      query = `${query}&stepId=${stepId}`;
     }
     if (currentVersion) {
       query = `${query}&version=${currentVersion}`;
@@ -177,6 +187,34 @@ const Diagram = ({
     return relatedTo;
   };
 
+  const handleAddWorkOrderServiceAttachment = (request, setLoading) => {
+    let data = {
+      name: request?.name,
+      attachmentType: request?.attachmentType,
+      file: request?.file,
+      workOrderId: referenceId,
+      serviceName: referenceLabel,
+      ...(uniqueId && { uniqueServiceId: uniqueId }),
+      ...(stepId && { stepId: stepId })
+    };
+    axiosInstance()
+      .post(`${workOrder.api}/step/attachment`, data)
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchData();
+        setAttachemntDialog({ open: false, id: null, isClone: false });
+        setFullScreen(false);
+        setLoading(false);
+      })
+      .catch((error) => {
+        setLoading(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
 
   return (
     <Box>
@@ -203,10 +241,11 @@ const Diagram = ({
                   return (
                     <div key={file._id} className="rounded-md border shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${expended[file?._id]
-                          ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
-                          : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
-                          }`}
+                        className={`head flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${
+                          expended[file?._id]
+                            ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
+                            : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
+                        }`}
                         onClick={() => {
                           setExpended((prev) => ({
                             ...prev,
@@ -383,6 +422,7 @@ const Diagram = ({
             showManimizeMaximize={true}
             fetchData={fetchData}
             attachmentType={attachmentType}
+            handleAddWorkOrderServiceAttachment={isAddWorkOrderServiceAttachment ? handleAddWorkOrderServiceAttachment : null}
           />
         </Dialog>
       )}

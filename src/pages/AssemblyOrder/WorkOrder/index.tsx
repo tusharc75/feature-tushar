@@ -78,7 +78,6 @@ const WorkOrder = ({
   const [workStationAssignDialog, setWorkStationAssignDialog] = useState({ open: false, assignedWorkStations: [] });
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, ids: [], data: null });
   const [arrangeView, setArrangeView] = useState(false);
-  const [attachmentsDialog, setAttachmentsDialog] = useState({ open: false, workOrderId: null, uniqueServiceId: null, serviceName: null });
   const [openSerializedPackageDialog, setOpenSerializedPackageDialog] = useState({ open: false, ids: [] });
   const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, data: null });
 
@@ -747,7 +746,7 @@ const WorkOrder = ({
               dataRows,
               setConsumablesDialog,
               setArrangeView,
-              setAttachmentsDialog
+              setShowDrawingDialog
             }}
           />
         }
@@ -932,32 +931,6 @@ const WorkOrder = ({
           loading={false}
         />
       )}
-      {attachmentsDialog.open && (
-        <AttachmentDialog
-          workOrderId={attachmentsDialog.workOrderId}
-          uniqueServiceId={attachmentsDialog.uniqueServiceId}
-          stepId={null}
-          stepName={attachmentsDialog.serviceName}
-          serviceName={attachmentsDialog.serviceName}
-          handleClose={() => {
-            setAttachmentsDialog({
-              open: false,
-              workOrderId: null,
-              uniqueServiceId: null,
-              serviceName: null
-            });
-          }}
-          handleSuccess={() => {
-            fetchData();
-            setAttachmentsDialog({
-              open: false,
-              workOrderId: null,
-              uniqueServiceId: null,
-              serviceName: null
-            });
-          }}
-        />
-      )}
       {showDrawingDialog.open && (
         <DiagramDialog
           referenceId={showDrawingDialog?.data?.workOrder?._id}
@@ -965,9 +938,10 @@ const WorkOrder = ({
             setShowDrawingDialog({ open: false, data: null });
           }}
           referenceLabel={showDrawingDialog?.data?.detail}
-          uniqueId={showDrawingDialog?.data?.type === MATERIAL_TYPE.service ? showDrawingDialog?.data?._id : null}
+          uniqueId={showDrawingDialog?.data?.type === MATERIAL_TYPE.service ? showDrawingDialog?.data?.uniqueId : null}
           resource={ACTIVITY_RESOURCE.workOrder}
           attachmentType={showDrawingDialog?.data?.type === MATERIAL_TYPE.package ? ATTACHMENT_TYPE.drawing : null}
+          isAddWorkOrderServiceAttachment={showDrawingDialog?.data?.type === MATERIAL_TYPE.service ? true : false}
         />
       )}
     </>
@@ -993,7 +967,7 @@ const ActionButtonMenuItems = ({
   dataRows,
   setConsumablesDialog,
   setArrangeView,
-  setAttachmentsDialog
+  setShowDrawingDialog
 }) => {
   const checkUniqWorkOrderType = () => {
     if (selectedRecords.length === 0) {
@@ -1134,20 +1108,10 @@ const ActionButtonMenuItems = ({
         onClick={() => {
           const parentProduct = selectedRecords?.find((e) => checkParentProduct([e], e?.parentId));
           if (parentProduct) {
-            setAttachmentsDialog({
-              open: true,
-              workOrderId: parentProduct?.workOrderId,
-              uniqueServiceId: null,
-              serviceName: parentProduct?.workOrderNumber
-            });
+            setShowDrawingDialog({ open: true, data: parentProduct });
           } else {
             const service = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.service);
-            setAttachmentsDialog({
-              open: true,
-              workOrderId: service?.workOrderId,
-              uniqueServiceId: service?.uniqueId,
-              serviceName: service?.serviceDetail?.serviceName
-            });
+            setShowDrawingDialog({ open: true, data: service });
           }
         }}
       >

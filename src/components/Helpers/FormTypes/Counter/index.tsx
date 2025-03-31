@@ -112,10 +112,10 @@ const Counter = ({ label, values, name, setFieldValue, fieldData, touched, error
       fieldData,
       fields,
       { ...values, [name]: updatedValues },
-      fieldName,
+      name,
       '',
       '',
-      value,
+      updatedValues,
     );
 
     for (var x in result2) {

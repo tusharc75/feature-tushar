@@ -14,6 +14,7 @@ import ArrangeView from 'src/components/Helpers/ArrangeView';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import {
+  ACTIVITY_RESOURCE,
   MATERIAL_TYPE,
   QUOTATION_STATUS,
   WORKORDER_SERVICE_STATUS,
@@ -39,6 +40,7 @@ import RenderService, { ServicesButtons } from './RenderServices';
 import Steps from './Steps';
 import StepsInOtherServices from './StepsInOtherService';
 import ViewServiceStepDataDialog from './ViewServiceStepDataDialog';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 
 const Service = ({
   workOrderId,
@@ -208,11 +210,14 @@ const Service = ({
       }
       setServiceSteps(services);
       if (![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.deleted, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)) {
-        if ((workOrderData?.canComplete &&
-          !services.filter((e) => e.type === MATERIAL_TYPE.service)
-            ?.every((e) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(e.status))) ||
+        if (
+          (workOrderData?.canComplete &&
+            !services
+              .filter((e) => e.type === MATERIAL_TYPE.service)
+              ?.every((e) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(e.status))) ||
           (!workOrderData?.canComplete &&
-            services.filter((e) => e.type === MATERIAL_TYPE.service)
+            services
+              .filter((e) => e.type === MATERIAL_TYPE.service)
               ?.every((e) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(e.status)))
         ) {
           fetchWorkOrderData();
@@ -703,8 +708,8 @@ const Service = ({
                 <MenuItem
                   disabled={
                     [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                      isAllowedToServiceEdit &&
-                      selectedService?.clickable
+                    isAllowedToServiceEdit &&
+                    selectedService?.clickable
                       ? false
                       : true
                   }
@@ -720,8 +725,8 @@ const Service = ({
                 <MenuItem
                   disabled={
                     allowedToEdit &&
-                      ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
-                      !completed
+                    ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
+                    !completed
                       ? false
                       : true
                   }
@@ -776,8 +781,8 @@ const Service = ({
               <MenuItem
                 disabled={
                   isAllowedToServiceEdit &&
-                    [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                    selectedService?.clickable
+                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                  selectedService?.clickable
                     ? false
                     : true
                 }
@@ -791,8 +796,8 @@ const Service = ({
               <MenuItem
                 disabled={
                   isAllowedToServiceEdit &&
-                    [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                    selectedService?.clickable
+                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                  selectedService?.clickable
                     ? false
                     : true
                 }
@@ -1016,21 +1021,21 @@ const Service = ({
           uniqueId={selectedService?.uniqueId}
         />
       )}
+
       {attchmentsDialog.open && (
-        <AttachmentDialog
-          workOrderId={workOrderId}
-          uniqueServiceId={attchmentsDialog.uniqueServiceId}
-          stepId={attchmentsDialog.stepId}
-          serviceName={attchmentsDialog.serviceName}
-          stepName={attchmentsDialog.stepName}
+        <DiagramDialog
+          referenceId={workOrderId}
           handleClose={() => {
             setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
           }}
-          handleSuccess={() => {
-            setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
-          }}
+          referenceLabel={attchmentsDialog.serviceName}
+          uniqueId={attchmentsDialog.uniqueServiceId}
+          stepId={attchmentsDialog.stepId}
+          resource={ACTIVITY_RESOURCE.workOrder}
+          isAddWorkOrderServiceAttachment={true}
         />
       )}
+
       {showManagePurchaseOrder && (
         <ManagePurchaseOrder
           isClone={false}
