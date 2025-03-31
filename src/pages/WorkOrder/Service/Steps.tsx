@@ -303,9 +303,9 @@ const Steps = ({
             ? false
             : ele?.fields?.some((_f) => _f?.required)
               ? ele?.fields
-                ?.filter((_f) => _f?.required)
-                ?.map((f) => f?.fieldName)
-                ?.every((_fieldName) => stepSubmitedData?.find((s) => s.stepId === ele?._id)[_fieldName])
+                  ?.filter((_f) => _f?.required)
+                  ?.map((f) => f?.fieldName)
+                  ?.every((_fieldName) => stepSubmitedData?.find((s) => s.stepId === ele?._id)[_fieldName])
                 ? true
                 : false
               : true
@@ -612,24 +612,30 @@ const Steps = ({
         const result = data?.data;
         if (type === WORKORDER_SERVICE_STEP_STATUS.passed && result?.isPassAddon && result?.passAddon?.length) {
           if (resource === sidebarResource.workOrderTechnician) {
-            handleAddService(result?.passAddon?.map((e) => e._id), step);
+            handleAddService(
+              result?.passAddon?.map((e) => e._id),
+              step
+            );
           } else {
             setAddServiceConfirmation({
               open: true,
               status: WORKORDER_SERVICE_STEP_STATUS.passed,
               services: result?.passAddon,
-              step: step,
+              step: step
             });
           }
         } else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isFailAddon && result?.failAddon?.length) {
           if (resource === sidebarResource.workOrderTechnician) {
-            handleAddService(result?.failAddon?.map((e) => e._id), step);
+            handleAddService(
+              result?.failAddon?.map((e) => e._id),
+              step
+            );
           } else {
             setAddServiceConfirmation({
               open: true,
               status: WORKORDER_SERVICE_STEP_STATUS.failed,
               services: result?.failAddon,
-              step: step,
+              step: step
             });
           }
         }
@@ -640,43 +646,51 @@ const Steps = ({
           setAddNewStep({ open: true, clone: false, cloneStepData: null });
         }
 
-        const alertMsg: any = []
+        const alertMsg: any = [];
         if (WORKORDER_SERVICE_STEP_STATUS.passed === type && result?.isJumpStepPass && result?.jumpStepsPass?.length) {
           if (resource === sidebarResource.workOrder) {
-            alertMsg.push(`As per the logic applied on this step, we will skip few steps in this service.`)
+            alertMsg.push(`As per the logic applied on this step, we will skip few steps in this service.`);
           }
         } else if (WORKORDER_SERVICE_STEP_STATUS.failed === type && result?.isJumpStepFail && result?.jumpStepsFail?.length) {
           if (resource === sidebarResource.workOrder) {
-            alertMsg.push(`As per the logic applied on this step, we will skip few steps in this service.`)
+            alertMsg.push(`As per the logic applied on this step, we will skip few steps in this service.`);
           }
         } else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isQuoteRevisionOnFail) {
           if (resource === sidebarResource.workOrder) {
-            alertMsg.push(`Step fail requires Quotation Revision.`)
+            alertMsg.push(`Step fail requires Quotation Revision.`);
           }
         } else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isReturnToStepOnFail && result?.returnToStepOnFail) {
           if (resource === sidebarResource.workOrder) {
             const returnStep = serviceDetails?.steps?.find((e) => e._id === result?.returnToStepOnFail) || {};
-            alertMsg.push(`As per the logic applied on this step, we need to return to step ${returnStep?.stepName || ''}.`)
+            alertMsg.push(`As per the logic applied on this step, we need to return to step ${returnStep?.stepName || ''}.`);
           }
         } else if (WORKORDER_SERVICE_STEP_STATUS.passed === type && result?.isSkipServiceOnPass && result?.skipServiceOnPass?.length) {
           if (resource === sidebarResource.workOrder) {
-            alertMsg.push(`As per the logic applied on this step, ${result?.skipServiceOnPass?.map((e) => e?.serviceName || '')?.toString()} service(s) has been skipped.`)
+            alertMsg.push(
+              `As per the logic applied on this step, ${result?.skipServiceOnPass?.map((e) => e?.serviceName || '')?.toString()} service(s) has been skipped.`
+            );
           }
         } else if (WORKORDER_SERVICE_STEP_STATUS.failed === type && result?.isSkipServiceOnFail && result?.skipServiceOnFail?.length) {
           if (resource === sidebarResource.workOrder) {
-            alertMsg.push(`As per the logic applied on this step, ${result?.skipServiceOnFail?.map((e) => e?.serviceName || '')?.toString()} service(s) has been skipped.`)
+            alertMsg.push(
+              `As per the logic applied on this step, ${result?.skipServiceOnFail?.map((e) => e?.serviceName || '')?.toString()} service(s) has been skipped.`
+            );
           }
         } else if (WORKORDER_SERVICE_STEP_STATUS.passed === type && result?.isReperformServicesOnPass && result?.reperformServicesOnPass?.length) {
           if (resource === sidebarResource.workOrder) {
-            alertMsg.push(`As per the logic applied on this step, ${result?.reperformServicesOnPass?.map((e) => e?.serviceName || '')?.toString()} service(s) need to be re-performed.`)
+            alertMsg.push(
+              `As per the logic applied on this step, ${result?.reperformServicesOnPass?.map((e) => e?.serviceName || '')?.toString()} service(s) need to be re-performed.`
+            );
           }
         } else if (WORKORDER_SERVICE_STEP_STATUS.failed === type && result?.isReperformServicesOnFail && result?.reperformServicesOnFail?.length) {
           if (resource === sidebarResource.workOrder) {
-            alertMsg.push(`As per the logic applied on this step, ${result?.reperformServicesOnFail?.map((e) => e?.serviceName || '')?.toString()} service(s) need to be re-performed.`)
+            alertMsg.push(
+              `As per the logic applied on this step, ${result?.reperformServicesOnFail?.map((e) => e?.serviceName || '')?.toString()} service(s) need to be re-performed.`
+            );
           }
         }
         if (alertMsg?.length) {
-          setAlertMessages({ open: true, message: alertMsg })
+          setAlertMessages({ open: true, message: alertMsg });
         }
         toastConfig.setToastConfig({
           open: true,
@@ -946,9 +960,9 @@ const Steps = ({
               <ThemeButton
                 disabled={
                   allowedToEdit &&
-                    ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                      selectedService?.status
-                    )
+                  ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                    selectedService?.status
+                  )
                     ? false
                     : true
                 }
@@ -968,9 +982,9 @@ const Steps = ({
           <ThemeButton
             disabled={
               allowedToEdit &&
-                ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                  selectedService?.status
-                )
+              ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                selectedService?.status
+              )
                 ? false
                 : true
             }
@@ -999,7 +1013,7 @@ const Steps = ({
         <MenuItem
           disabled={
             (allowedToEdit &&
-              serviceDetails?.steps?.filter((d) => selectedSteps?.includes(d?._id))?.every((element) => element?.isAllowToCheck === true)
+            serviceDetails?.steps?.filter((d) => selectedSteps?.includes(d?._id))?.every((element) => element?.isAllowToCheck === true)
               ? false
               : true) || selectedSteps.length === 0
           }
@@ -1058,9 +1072,9 @@ const Steps = ({
                     },
                     disabled:
                       allowedToEdit &&
-                        ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                          selectedService?.status
-                        )
+                      ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                        selectedService?.status
+                      )
                         ? false
                         : true,
                     placement: 'right'
@@ -1076,8 +1090,9 @@ const Steps = ({
               </div>
             </div>
             <div
-              className={`w-full ${minHeightClass ? minHeightClass : 'h-[calc(100vh-278px)] '
-                } overflow-y-auto max-[767px]:h-[calc(100vh-364px)] max-[600px]:h-[calc(100vh-368px)]`}
+              className={`w-full ${
+                minHeightClass ? minHeightClass : 'h-[calc(100vh-278px)] '
+              } overflow-y-auto max-[767px]:h-[calc(100vh-364px)] max-[600px]:h-[calc(100vh-368px)]`}
             >
               {serviceDetails?.steps?.map((step, index) => {
                 const { stepData, isStepValid } = getFields(step);
@@ -1090,8 +1105,9 @@ const Steps = ({
                     key={step._id}
                     border={1}
                     borderColor={'var(--common-border-color)'}
-                    className={`${classes.accordionHeading}  ${classes.white} ${!stepData?.status ? '' : 'cursor-pointer'
-                      } transition-all duration-500 ${selectedStep?._id === step._id && fieldDialog ? 'bg[var(--accordion-summary-bg,_#ecfdf7)]' : ''}`}
+                    className={`${classes.accordionHeading}  ${classes.white} ${
+                      !stepData?.status ? '' : 'cursor-pointer'
+                    } transition-all duration-500 ${selectedStep?._id === step._id && fieldDialog ? 'bg[var(--accordion-summary-bg,_#ecfdf7)]' : ''}`}
                   >
                     <div className="flex gap-2">
                       {allowedToEdit && serviceDetails?.steps?.some((e) => e?.isAllowToCheck) ? (
@@ -1194,12 +1210,12 @@ const Steps = ({
                                     <DeleteOutline
                                       color={
                                         allowedToEdit &&
-                                          ![
-                                            WORKORDER_SERVICE_STEP_STATUS.passed,
-                                            WORKORDER_SERVICE_STEP_STATUS.failed,
-                                            WORKORDER_SERVICE_STEP_STATUS.completed,
-                                            WORKORDER_SERVICE_STEP_STATUS.skipped
-                                          ].includes(stepData?.passFailStatus)
+                                        ![
+                                          WORKORDER_SERVICE_STEP_STATUS.passed,
+                                          WORKORDER_SERVICE_STEP_STATUS.failed,
+                                          WORKORDER_SERVICE_STEP_STATUS.completed,
+                                          WORKORDER_SERVICE_STEP_STATUS.skipped
+                                        ].includes(stepData?.passFailStatus)
                                           ? 'error'
                                           : 'disabled'
                                       }
@@ -1330,10 +1346,10 @@ const Steps = ({
                               ) : null
                             ) : null}
                             {stepData?.status &&
-                              step?.isAllowToPerform &&
-                              ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
-                              // ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
-                              isStepsAllowToPerform ? (
+                            step?.isAllowToPerform &&
+                            ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
+                            // ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
+                            isStepsAllowToPerform ? (
                               [
                                 WORKORDER_SERVICE_STEP_STATUS.passed,
                                 WORKORDER_SERVICE_STEP_STATUS.failed,
@@ -1446,12 +1462,12 @@ const Steps = ({
                               <DeleteOutline
                                 color={
                                   allowedToEdit &&
-                                    ![
-                                      WORKORDER_SERVICE_STEP_STATUS.passed,
-                                      WORKORDER_SERVICE_STEP_STATUS.failed,
-                                      WORKORDER_SERVICE_STEP_STATUS.completed,
-                                      WORKORDER_SERVICE_STEP_STATUS.skipped
-                                    ].includes(stepData?.passFailStatus)
+                                  ![
+                                    WORKORDER_SERVICE_STEP_STATUS.passed,
+                                    WORKORDER_SERVICE_STEP_STATUS.failed,
+                                    WORKORDER_SERVICE_STEP_STATUS.completed,
+                                    WORKORDER_SERVICE_STEP_STATUS.skipped
+                                  ].includes(stepData?.passFailStatus)
                                     ? 'error'
                                     : 'disabled'
                                 }
@@ -1542,16 +1558,16 @@ const Steps = ({
                     }}
                     disabled={
                       getFields(selectedStep).canSkip &&
-                        isStepsAllowToPerform &&
-                        ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                          selectedService?.status
-                        ) &&
-                        ![
-                          WORKORDER_SERVICE_STEP_STATUS.skipped,
-                          WORKORDER_SERVICE_STEP_STATUS.completed,
-                          WORKORDER_SERVICE_STEP_STATUS.end,
-                          WORKORDER_SERVICE_STEP_STATUS.passed
-                        ]?.includes(getFields(selectedStep)?.stepData?.status)
+                      isStepsAllowToPerform &&
+                      ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                        selectedService?.status
+                      ) &&
+                      ![
+                        WORKORDER_SERVICE_STEP_STATUS.skipped,
+                        WORKORDER_SERVICE_STEP_STATUS.completed,
+                        WORKORDER_SERVICE_STEP_STATUS.end,
+                        WORKORDER_SERVICE_STEP_STATUS.passed
+                      ]?.includes(getFields(selectedStep)?.stepData?.status)
                         ? false
                         : true
                     }
@@ -1668,20 +1684,24 @@ const Steps = ({
                   setAddServiceConfirmation({ open: false, services: [], status: '', step: null });
                 }}
                 onOk={() => {
-                  handleAddService(addServiceConfirmation.services?.map((e) => e._id), addServiceConfirmation.step);
+                  handleAddService(
+                    addServiceConfirmation.services?.map((e) => e._id),
+                    addServiceConfirmation.step
+                  );
                   setAddServiceConfirmation({ open: false, services: [], status: '', step: null });
                 }}
               />
             )}
-            {alertMessages.open &&
+            {alertMessages.open && (
               <CustomMessageDialog
                 open={alertMessages.open}
                 errorMessages={alertMessages.message}
                 onClose={() => {
-                  setAlertMessages({ open: false, message: [] })
+                  setAlertMessages({ open: false, message: [] });
                 }}
                 title={'Message'}
-              />}
+              />
+            )}
             {viewStep.open && (
               <StepDialog
                 handleClose={() => {
@@ -1701,18 +1721,16 @@ const Steps = ({
               />
             )}
             {attchmentsDialog.open && (
-              <AttachmentDialog
-                workOrderId={workOrderId}
-                uniqueServiceId={attchmentsDialog.uniqueServiceId}
-                stepId={attchmentsDialog.stepId}
-                serviceName={attchmentsDialog.serviceName}
-                stepName={attchmentsDialog.stepName}
+              <DiagramDialog
+                referenceId={workOrderId}
                 handleClose={() => {
                   setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
                 }}
-                handleSuccess={() => {
-                  setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
-                }}
+                referenceLabel={attchmentsDialog.serviceName}
+                uniqueId={attchmentsDialog.uniqueServiceId}
+                stepId={attchmentsDialog.stepId}
+                resource={ACTIVITY_RESOURCE.workOrder}
+                isAddWorkOrderServiceAttachment={true}
               />
             )}
             {consumablesDialog.open && (
@@ -1837,9 +1855,9 @@ const Steps = ({
                 <ThemeButton
                   disabled={
                     allowedToEdit &&
-                      ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                        selectedService?.status
-                      )
+                    ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                      selectedService?.status
+                    )
                       ? false
                       : true
                   }

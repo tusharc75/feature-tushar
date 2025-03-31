@@ -9,7 +9,16 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-const DiagramDialog = ({ handleClose, referenceId, referenceLabel = '', uniqueId = null, resource, attachmentType = null }) => {
+const DiagramDialog = ({
+  handleClose,
+  referenceId,
+  referenceLabel = '',
+  uniqueId = null,
+  stepId = null,
+  resource,
+  attachmentType = null,
+  isAddWorkOrderServiceAttachment = false
+}) => {
   const toastConfig = useContext(CustomToastContext);
   const [resourceData, setResourceData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -55,9 +64,12 @@ const DiagramDialog = ({ handleClose, referenceId, referenceLabel = '', uniqueId
             resource={resource}
             referenceId={referenceId}
             uniqueId={uniqueId}
+            stepId={stepId}
             currentVersion={resource === ACTIVITY_RESOURCE.workOrder ? resourceData?.currentVersion : null}
             resourceData={resourceData}
             attachmentType={attachmentType}
+            referenceLabel={referenceLabel}
+            isAddWorkOrderServiceAttachment={isAddWorkOrderServiceAttachment}
           />
         ) : (
           <Grid container spacing={2}>
