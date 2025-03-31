@@ -28,7 +28,6 @@ import HistoryIcon from '@mui/icons-material/History';
 import { useData } from 'src/StateProvider/Provider';
 import History from '../../ProductInventory/LedgerHistory';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
-import { BiChevronDown } from 'react-icons/bi';
 import UpdateProductDialog from './UpdateProductDialog';
 import EditIcon from '@mui/icons-material/Edit';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -50,7 +49,9 @@ const Consumables = ({
   serviceName,
   materialSubType = MATERIAL_SUB_TYPE.consumable,
   workOrderData,
-  serialNumberRequired = false
+  serialNumberRequired = false,
+  hideServiceFilter = false,
+  defaultServiceUniqueId = null
 }) => {
   let renderedFrom = `${camelCase(sidebarResource?.workOrder)}_consumable`;
 
@@ -156,8 +157,8 @@ const Consumables = ({
             return row.original[e?.fieldName] ? (
               <div className="flex items-center gap-2">
                 {hasChildFields &&
-                allowedToEdit &&
-                ![MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(row?.original?.type) ? (
+                  allowedToEdit &&
+                  ![MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(row?.original?.type) ? (
                   <p
                     className={'link text-truncate'}
                     onClick={() => {
@@ -262,24 +263,24 @@ const Consumables = ({
       },
       ...(user?.user?.brandPolicy?.workOrderConsumableRequest && !user?.user?.brandPolicy?.workOrderConsumableConsumeHide
         ? [
-            {
-              accessor: 'requestedQty',
-              Header: 'Requested Qty',
-              width: 150,
-              Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
-            }
-          ]
+          {
+            accessor: 'requestedQty',
+            Header: 'Requested Qty',
+            width: 150,
+            Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
+          }
+        ]
         : []),
       ...(!user?.user?.brandPolicy?.workOrderConsumableConsumeHide
         ? [
-            {
-              accessor: 'consumedQty',
-              Header: 'Consumed Qty',
-              primaryField: true,
-              width: 150,
-              Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
-            }
-          ]
+          {
+            accessor: 'consumedQty',
+            Header: 'Consumed Qty',
+            primaryField: true,
+            width: 150,
+            Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
+          }
+        ]
         : [])
     ];
     extracolumns.push({
@@ -384,16 +385,15 @@ const Consumables = ({
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
-
     var query = ``;
     if (service && uniqueId) {
       query = query + `?service=${service}&uniqueId=${uniqueId}`;
     }
-    if (selectedService) {
-      query = query + `?service=${selectedService?.optionValue}`;
-    }
     if (stepId) {
       query = query + `&stepId=${stepId}`;
+    }
+    if (selectedService) {
+      query = `?service=${selectedService?.optionValue}&uniqueId=${selectedService?.uniqueId}`;
     }
     axiosInstance()
       .get(`${workOrder.api}/${workOrderId}/consumable${query}`)
@@ -440,7 +440,11 @@ const Consumables = ({
       data: { data }
     }: any = await axiosInstance().get(`${workOrder.api}/${workOrderId}/detail`);
     if (data?.services?.length) {
-      setServiceOption(data?.services?.map((s) => ({ optionLabel: s?.serviceName, optionValue: s?._id })));
+      const serviceData = data?.services?.map((s) => ({ optionLabel: s?.serviceName, optionValue: s?._id, uniqueId: s?.uniqueId }));
+      setServiceOption(serviceData);
+      if (defaultServiceUniqueId && serviceData?.find((e) => e.uniqueId === defaultServiceUniqueId)) {
+        setSelectedService(serviceData?.find((e) => e.uniqueId === defaultServiceUniqueId))
+      }
     }
   };
 
@@ -497,7 +501,7 @@ const Consumables = ({
   const createNewVersionQuote = async (quoteId, quoteVersionId) => {
     axiosInstance()
       .post(`/quotation/clone-version/${quoteId}/${quoteVersionId}`)
-      .then(() => {})
+      .then(() => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -606,7 +610,7 @@ const Consumables = ({
           <ThemeButton
             disabled={
               selectedRecords?.length &&
-              selectedRecords?.every((r) => !r?.serializedProduct && !r?.hideSelection && r?.type === MATERIAL_TYPE.product)
+                selectedRecords?.every((r) => !r?.serializedProduct && !r?.hideSelection && r?.type === MATERIAL_TYPE.product)
                 ? false
                 : true
             }
@@ -631,7 +635,7 @@ const Consumables = ({
           className="max-w-[300px]"
           options={serviceOption}
           getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
-          isOptionEqualToValue={(option: any, val) => option.optionValue === val}
+          isOptionEqualToValue={(option: any, val) => option.uniqueId === val}
           value={selectedService}
           onChange={(e, val) => {
             setSelectedService(val);
@@ -642,8 +646,8 @@ const Consumables = ({
               margin="dense"
               size="small"
               name="service"
-              placeholder={'Select Service'}
-              label={'Select Service'}
+              placeholder={'Service'}
+              label={'Service'}
               variant="outlined"
               fullWidth
               className="m-0"
@@ -700,7 +704,7 @@ const Consumables = ({
       <DetailsPageHeader
         isAddButtonVisible={true}
         addButtonMenuItems={addButtonMenuItems()}
-        leftSideContents={leftSideContents()}
+        leftSideContents={!hideServiceFilter ? leftSideContents() : null}
         rightSideContents={rightSideContents()}
         isActionButtonVisible={true}
         actionButtonMenuItems={actionButtonMenuItems()}
