@@ -29,36 +29,19 @@ const Counter = ({ label, values, name, setFieldValue, fieldData, touched, error
       }
       setFieldValue(name, newData);
 
-      // for resetting fields which are dependent on counter sub fields for their values
-      if (fields?.length) {
-        for (const field of fields) {
-          let breakFlag = false;
-          const { counterFieldInputFields } = field || {};
-          if (!counterFieldInputFields?.length) continue;
-
-          for (const counterField of counterFieldInputFields) {
-            const hasMatchingSubField = fieldData?.subFields?.some((f) => f?.fieldName === counterField);
-            if (hasMatchingSubField) {
-              const result = handleAutoCalculation(
-                fieldData,
-                fields,
-                newData,
-                counterField,
-                '',
-                '',
-                ''
-              );
-              Object.entries(result).forEach(([key, value]) => {
-                setFieldValue(key, value);
-              });
-              breakFlag = true;
-              break;
-            }
-          }
-          if (breakFlag) {
-            break;
-          }
-        }
+      // for updating fields which are dependent on counter sub fields for their values
+      const result = handleAutoCalculation(
+        fieldData,
+        fields,
+        { ...values, [name]: newData },
+        name,
+        '',
+        '',
+        newData,
+      );
+  
+      for (var x in result) {
+        setFieldValue(x, result[x]);
       }
     },
     [fieldData?.subFields, name, setFieldValue, values]
