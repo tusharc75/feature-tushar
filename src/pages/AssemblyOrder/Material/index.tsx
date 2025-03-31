@@ -351,8 +351,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
           : {})
       });
     });
-    axiosInstance()
-      .put(`${routes.assemblyOrder.path}/material/${assemblyOrderData._id}`, { material: data })
+    axiosInstance().put(`${routes.assemblyOrder.path}/material/${assemblyOrderData._id}`, { material: data })
       .then(({ data }) => {
         dispatch({ type: 'selection', selectedRecords: [] });
         setUpdating(false);
