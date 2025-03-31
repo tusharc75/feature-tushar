@@ -564,7 +564,7 @@ const ContactDetailsPage = (props) => {
               >
                 <CustomTab value={0} label={'Details'} />
                 <CustomTab value={1} label={'Org Charts'} />
-                {contactResource === 'customerContact' && permissions?.productInventory && <CustomTab value={2} label={'Plants'} />}
+                {contactResource === 'customerContact' && permissions?.productInventory && <CustomTab value={2} label={resources?.warehouse?.titlePlural} />}
               </CustomTabs>
               <TabPanel value={currentTabIndex} index={0}>
                 {showAtLast ? (

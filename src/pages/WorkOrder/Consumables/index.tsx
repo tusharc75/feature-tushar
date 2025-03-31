@@ -16,7 +16,7 @@ import {
 } from 'src/constants/helpers';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { IconButton, Menu, MenuItem } from '@mui/material';
+import { Autocomplete, IconButton, Menu, MenuItem, TextField } from '@mui/material';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -39,6 +39,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import AssignSerialNumbersDialog from 'src/components/AssignRolesDialog/AssignSerialNumbersDialog';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 
 const Consumables = ({
   isCreate,
@@ -70,8 +71,8 @@ const Consumables = ({
   const [assignAssetDialog, setAssignAssetDialog] = useState(false);
   const [assignSerialNumbersDialog, setAssignSerialNumbersDialog] = useState(false);
   const [serialNumbers, setSerialNumbers] = useState([]);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const open = Boolean(anchorEl);
+  const [serviceOption, setServiceOption] = useState([]);
+  const [selectedService, setSelectedService] = useState(null);
 
   const {
     state: { user, permissions, resources }
@@ -95,9 +96,12 @@ const Consumables = ({
     }
     setConsumeRequest(allowRequest);
     fetchColumns();
-    fetchData();
     fetchRepairOrderData();
   }, [allowedToEdit, workOrderId]);
+
+  useEffect(() => {
+    fetchData();
+  }, [allowedToEdit, workOrderId, selectedService]);
 
   const handleUpdate = async (row: any) => {
     setUpdating(true);
@@ -152,8 +156,8 @@ const Consumables = ({
             return row.original[e?.fieldName] ? (
               <div className="flex items-center gap-2">
                 {hasChildFields &&
-                  allowedToEdit &&
-                  ![MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(row?.original?.type) ? (
+                allowedToEdit &&
+                ![MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(row?.original?.type) ? (
                   <p
                     className={'link text-truncate'}
                     onClick={() => {
@@ -258,24 +262,24 @@ const Consumables = ({
       },
       ...(user?.user?.brandPolicy?.workOrderConsumableRequest && !user?.user?.brandPolicy?.workOrderConsumableConsumeHide
         ? [
-          {
-            accessor: 'requestedQty',
-            Header: 'Requested Qty',
-            width: 150,
-            Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
-          }
-        ]
+            {
+              accessor: 'requestedQty',
+              Header: 'Requested Qty',
+              width: 150,
+              Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
+            }
+          ]
         : []),
       ...(!user?.user?.brandPolicy?.workOrderConsumableConsumeHide
         ? [
-          {
-            accessor: 'consumedQty',
-            Header: 'Consumed Qty',
-            primaryField: true,
-            width: 150,
-            Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
-          }
-        ]
+            {
+              accessor: 'consumedQty',
+              Header: 'Consumed Qty',
+              primaryField: true,
+              width: 150,
+              Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
+            }
+          ]
         : [])
     ];
     extracolumns.push({
@@ -385,6 +389,9 @@ const Consumables = ({
     if (service && uniqueId) {
       query = query + `?service=${service}&uniqueId=${uniqueId}`;
     }
+    if (selectedService) {
+      query = query + `?service=${selectedService?.optionValue}`;
+    }
     if (stepId) {
       query = query + `&stepId=${stepId}`;
     }
@@ -427,6 +434,19 @@ const Consumables = ({
         toastConfig.setToastConfig(error);
       });
   };
+
+  const fetchServices = async () => {
+    const {
+      data: { data }
+    }: any = await axiosInstance().get(`${workOrder.api}/${workOrderId}/detail`);
+    if (data?.services?.length) {
+      setServiceOption(data?.services?.map((s) => ({ optionLabel: s?.serviceName, optionValue: s?._id })));
+    }
+  };
+
+  useEffect(() => {
+    fetchServices();
+  }, []);
 
   const generateNestedData = (material, parent, parentIndex) => {
     const subRows: any = material
@@ -477,7 +497,7 @@ const Consumables = ({
   const createNewVersionQuote = async (quoteId, quoteVersionId) => {
     axiosInstance()
       .post(`/quotation/clone-version/${quoteId}/${quoteVersionId}`)
-      .then(() => { })
+      .then(() => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -552,117 +572,141 @@ const Consumables = ({
       });
   };
 
-  const handleClickAction = (event) => {
-    setAnchorEl(event.currentTarget);
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setConsumablesDialog(true);
+          }}
+        >
+          {materialSubType === MATERIAL_SUB_TYPE.bom ? `Add BOM` : `Add Products/Consumables`}
+        </MenuItem>
+      </>
+    );
   };
 
-  const handleCloseAction = () => {
-    setAnchorEl(null);
+  const rightSideContents = () => {
+    return (
+      <>
+        {isCreate && (
+          <ImportExportMenu
+            permissions={permissions?.workOrder}
+            module="consumables"
+            api={`${workOrder.api}/${workOrderId}/consumable`}
+            afterImportCompleted={() => {
+              fetchData();
+            }}
+            isExportAllOrSomeFeature={true}
+            ids={[]}
+            additionalParams={`workOrderIds=${JSON.stringify([workOrderId])}`}
+          />
+        )}
+        {!user?.user?.brandPolicy?.workOrderConsumableConsumeHide && (
+          <ThemeButton
+            disabled={
+              selectedRecords?.length &&
+              selectedRecords?.every((r) => !r?.serializedProduct && !r?.hideSelection && r?.type === MATERIAL_TYPE.product)
+                ? false
+                : true
+            }
+            onClick={() => setOpenConsumablesQtyDialog(true)}
+            buttonType="theme"
+          >
+            {consumeRequest ? 'Request ' : 'Consume '}{' '}
+            {selectedRecords?.filter((e) => !e?.hideSelection && !e?.serializedProduct && e?.type === MATERIAL_TYPE.product).length > 0
+              ? '(' + selectedRecords?.filter((e) => !e?.hideSelection && !e?.serializedProduct && e?.type === MATERIAL_TYPE.product).length + ')'
+              : ''}
+          </ThemeButton>
+        )}
+      </>
+    );
+  };
+
+  const leftSideContents = () => {
+    return (
+      <>
+        <Autocomplete
+          fullWidth
+          className="max-w-[300px]"
+          options={serviceOption}
+          getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+          isOptionEqualToValue={(option: any, val) => option.optionValue === val}
+          value={selectedService}
+          onChange={(e, val) => {
+            setSelectedService(val);
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              margin="dense"
+              size="small"
+              name="service"
+              placeholder={'Select Service'}
+              label={'Select Service'}
+              variant="outlined"
+              fullWidth
+              className="m-0"
+            />
+          )}
+        />
+      </>
+    );
+  };
+
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={
+            selectedRecords?.filter((s) => s?.serializedProduct && s?.type === MATERIAL_TYPE.product && s?.qty - (s?.assignedAssetQty || 0) > 0)
+              ?.length > 0
+              ? false
+              : true
+          }
+          onClick={() => {
+            setAssignAssetDialog(true);
+          }}
+        >
+          Assign {resources?.serializedAsset?.titlePlural}
+        </MenuItem>
+        <MenuItem
+          disabled={
+            selectedRecords?.filter((s) => s?.serializedProduct && s?.type === MATERIAL_TYPE.product && s?.qty - (s?.assignedAssetQty || 0) > 0)
+              ?.length > 0
+              ? false
+              : true
+          }
+          onClick={() => {
+            setAssignSerialNumbersDialog(true);
+          }}
+        >
+          Assign Serial Numbers
+        </MenuItem>
+        <MenuItem
+          disabled={!selectedRecords?.some((s) => s?.canDelete)}
+          onClick={() => {
+            handleDelete(selectedRecords?.filter((s) => s?.canDelete));
+          }}
+        >
+          Delete
+        </MenuItem>
+      </>
+    );
   };
 
   return (
     <>
-      {allowedToEdit && (
-        <Box className="mb-3 flex flex-wrap justify-between gap-2">
-          {isCreate && permissions?.product?.isRead && (
-            <ThemeButton buttonType="theme" onClick={() => setConsumablesDialog(true)}>
-              {materialSubType === MATERIAL_SUB_TYPE.bom ? `Add BOM` : `Add Products/Consumables`}
-            </ThemeButton>
-          )}
-          <Box display="flex" ml={'auto'}>
-            <Box ml={1}></Box>
-            {isCreate &&
-              <ImportExportMenu
-                permissions={permissions?.workOrder}
-                module="consumables"
-                api={`${workOrder.api}/${workOrderId}/consumable`}
-                afterImportCompleted={() => {
-                  fetchData();
-                }}
-                isExportAllOrSomeFeature={true}
-                ids={[]}
-                additionalParams={`workOrderIds=${JSON.stringify([workOrderId])}`}
-              />
-            }
-            <Box ml={1}></Box>
-            {!user?.user?.brandPolicy?.workOrderConsumableConsumeHide && (
-              <ThemeButton
-                disabled={
-                  selectedRecords?.length &&
-                    selectedRecords?.every((r) => !r?.serializedProduct && !r?.hideSelection && r?.type === MATERIAL_TYPE.product)
-                    ? false
-                    : true
-                }
-                onClick={() => setOpenConsumablesQtyDialog(true)}
-                buttonType="theme"
-              >
-                {consumeRequest ? 'Request ' : 'Consume '}{' '}
-                {selectedRecords?.filter((e) => !e?.hideSelection && !e?.serializedProduct && e?.type === MATERIAL_TYPE.product).length > 0
-                  ? '(' + selectedRecords?.filter((e) => !e?.hideSelection && !e?.serializedProduct && e?.type === MATERIAL_TYPE.product).length + ')'
-                  : ''}
-              </ThemeButton>
-            )}
-            <Box ml={1}></Box>
-            <ThemeButton
-              mobileTooltip="Actions"
-              buttonType="yellow"
-              iconForMobile={<BiChevronDown />}
-              onClick={handleClickAction}
-              disabled={selectedRecords?.length ? false : true}
-              endIcon={<BiChevronDown />}
-            >
-              Actions
-            </ThemeButton>
-            <Menu
-              anchorEl={anchorEl}
-              open={open}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              onClose={handleCloseAction}
-            >
-              <MenuItem
-                disabled={
-                  selectedRecords?.filter((s) => s?.serializedProduct && s?.type === MATERIAL_TYPE.product && s?.qty - (s?.assignedAssetQty || 0) > 0)
-                    ?.length > 0
-                    ? false
-                    : true
-                }
-                onClick={() => {
-                  setAssignAssetDialog(true);
-                  handleCloseAction();
-                }}
-              >
-                Assign {resources?.serializedAsset?.titlePlural}
-              </MenuItem>
-              <MenuItem
-                disabled={
-                  selectedRecords?.filter((s) => s?.serializedProduct && s?.type === MATERIAL_TYPE.product && s?.qty - (s?.assignedAssetQty || 0) > 0)
-                    ?.length > 0
-                    ? false
-                    : true
-                }
-                onClick={() => {
-                  setAssignSerialNumbersDialog(true);
-                  handleCloseAction();
-                }}
-              >
-                Assign Serial Numbers
-              </MenuItem>
-              <MenuItem
-                disabled={!selectedRecords?.some((s) => s?.canDelete)}
-                onClick={() => {
-                  handleDelete(selectedRecords?.filter((s) => s?.canDelete));
-                  handleCloseAction();
-                }}
-              >
-                Delete
-              </MenuItem>
-            </Menu>
-          </Box>
-        </Box>
-      )}
+      <DetailsPageHeader
+        isAddButtonVisible={true}
+        addButtonMenuItems={addButtonMenuItems()}
+        leftSideContents={leftSideContents()}
+        rightSideContents={rightSideContents()}
+        isActionButtonVisible={true}
+        actionButtonMenuItems={actionButtonMenuItems()}
+        actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+        hasXpadding
+      />
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, md: 12, sm: 12 }}>
           {columns ? (

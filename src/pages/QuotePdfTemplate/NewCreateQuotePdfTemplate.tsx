@@ -851,6 +851,7 @@ export default function NewCreateQuotePdfTemplate() {
                         onChange={(e) => {
                           setFieldValue('tableFontSize', parseInt(e.target.value.trimStart()));
                         }}
+                        sx={{ width: 220 }}
                         slotProps={{
                           input: {
                             endAdornment: 'pt'
@@ -859,11 +860,12 @@ export default function NewCreateQuotePdfTemplate() {
                       />
                       <TextField
                         variant="outlined"
-                        label={'Below Table Total Font Size'}
+                        label={'Table Total Font Size'}
                         name="belowTableTotalFontSize"
                         type="number"
                         margin="none"
                         size={'small'}
+                        sx={{ width: 220 }}
                         value={values['belowTableTotalFontSize']}
                         error={touched['belowTableTotalFontSize'] && Boolean(errors['belowTableTotalFontSize'])}
                         helperText={touched['belowTableTotalFontSize'] && errors['belowTableTotalFontSize']}
@@ -886,12 +888,9 @@ export default function NewCreateQuotePdfTemplate() {
                         value={values['pdfFontSize']}
                         error={touched['pdfFontSize'] && Boolean(errors['pdfFontSize'])}
                         helperText={touched['pdfFontSize'] && errors['pdfFontSize']}
+                        sx={{ width: 220 }}
                         onChange={(e) => {
                           setFieldValue('pdfFontSize', parseInt(e.target.value.trimStart()));
-                          if (parseInt(e.target.value.trimStart())) {
-                            setFieldValue('tableFontSize', parseInt(e.target.value.trimStart()));
-                            setFieldValue('belowTableTotalFontSize', parseInt(e.target.value.trimStart()));
-                          }
                         }}
                         slotProps={{
                           input: {

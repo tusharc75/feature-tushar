@@ -62,7 +62,7 @@ const NonSerializedAssetProductInventory = ({ onSuccess, onClose, productId, pro
       fullWidth
     >
       <CustomDialogHeader
-        title={'Assign Plants'}
+        title={`Assign ${resources?.warehouse?.titlePlural}`}
         onClose={onClose}
         isMinimized={!fullScreen}
         onMinimizeMaximize={() => {

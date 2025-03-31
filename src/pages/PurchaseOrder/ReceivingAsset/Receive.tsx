@@ -28,7 +28,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
   const [fullScreen, setFullScreen] = useState(true);
 
   const {
-    state: { user, selectedEntity }
+    state: { user, resources }
   }: any = useData();
 
   const [warehouseOptions, setwareHouseOptions] = useState(null);
@@ -148,7 +148,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
           errors.assetQuantity = 'should be greater';
         }
         if (tempProduct && !d.warehouse) {
-          errors.warehouse = 'Plant is required';
+          errors.warehouse = `${resources?.warehouse?.titleSingular} is required`;
         }
         if (user?.user?.brandPolicy?.storageLocation) {
           if (tempProduct && !d.storageLocation) {
@@ -342,9 +342,9 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
                                           {...params}
                                           variant="outlined"
                                           name="warehouse"
-                                          label="Plant"
+                                          label={resources?.warehouse?.titleSingular}
                                           error={validate([data]).warehouse}
-                                          helperText={validate([data]).warehouse ? 'Plant is required' : ''}
+                                          helperText={validate([data]).warehouse ? `${resources?.warehouse?.titleSingular} is required` : ''}
                                           required
                                         />
                                       )}
