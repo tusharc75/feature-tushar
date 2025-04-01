@@ -158,17 +158,23 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
     return () => fabricCanvas.dispose();
   }, [data]);
 
-  useEffect(() => {
+  const updateDrawingColor = (color) => {
     if (canvas && (isDrawingMode || isHighlighterMode)) {
       if (isHighlighterMode) {
-        const rgbaColor = fabric.Color.fromHex(brushColor).setAlpha(0.2).toRgba();
+        const rgbaColor = fabric.Color.fromHex(color).setAlpha(0.2).toRgba();
         canvas.freeDrawingBrush.color = rgbaColor;
       } else if (isDrawingMode) {
-        canvas.freeDrawingBrush.color = brushColor;
+        canvas.freeDrawingBrush.color = color;
       }
       canvas.renderAll();
     }
-  }, [brushColor, canvas, isDrawingMode, isHighlighterMode]);
+  };
+
+  const handleBrushColorChange = (event) => {
+    const newColor = event.target.value;
+    setBrushColor(newColor);
+    updateDrawingColor(newColor);
+  };
 
   const loadImage = (fabricCanvas) => {
     if (canvasRef.current) {
@@ -575,7 +581,7 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
                   <input
                     type="color"
                     value={canvas?.freeDrawingBrush?.color || '#000000'}
-                    onChange={(e) => setBrushColor(e.target.value)}
+                    onChange={handleBrushColorChange}
                     style={{ marginLeft: '10px' }}
                   />
                 </FormControl>
