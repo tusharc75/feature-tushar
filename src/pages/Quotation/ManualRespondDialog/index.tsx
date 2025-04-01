@@ -107,6 +107,12 @@ const ManualReponseDialog = ({ quotationId, versionId, setNextStep = null, setCu
                 error={Boolean(commentError)}
                 helperText={Boolean(commentError) && commentError}
                 required={selectedOption === 'Reject'}
+                sx={{
+                  '& .MuiInputBase-root textarea': {
+                    resize: 'vertical',
+                    overflow: 'auto',
+                  },
+                }}
               />
             </Box>
           )}

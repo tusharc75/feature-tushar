@@ -2669,6 +2669,12 @@ const ReceivingTicket = ({
                   onChange={(e) => {
                     setStatusToUpdate((prevState) => ({ ...prevState, message: e.target.value }));
                   }}
+                  sx={{
+                    '& .MuiInputBase-root textarea': {
+                      resize: 'vertical',
+                      overflow: 'auto',
+                    },
+                  }}
                 />
               )}
             </Box>

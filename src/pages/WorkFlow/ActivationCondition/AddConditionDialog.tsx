@@ -213,6 +213,12 @@ const ConditionDialog = ({ onClose, data, fields, activationCondition, onSuccess
                         }}
                         error={touched['fieldValue'] && Boolean(errors['fieldValue'])}
                         helperText={touched['fieldValue'] && errors['fieldValue']}
+                        sx={{
+                          '& .MuiInputBase-root textarea': {
+                            resize: 'vertical',
+                            overflow: 'auto',
+                          },
+                        }}
                       />
                     ))}
                 </Box>
