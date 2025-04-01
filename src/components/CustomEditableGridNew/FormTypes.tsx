@@ -102,6 +102,12 @@ const FormTypes = (props) => {
       error={Boolean(errors[`${values._id}_${name}`])}
       helperText={Boolean(errors[`${values._id}_${name}`]) && errors[`${values._id}_${name}`]}
       onChange={onChange ? onChange : (e) => handleChange(name, e.target.value)}
+      sx={{
+        '& .MuiInputBase-root textarea': {
+          resize: 'vertical',
+          overflow: 'auto',
+        },
+      }}
     />
   ) : fieldData?.type === 'dropDown' ? (
     <Autocomplete

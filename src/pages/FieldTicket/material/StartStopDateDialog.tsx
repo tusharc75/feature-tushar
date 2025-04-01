@@ -119,6 +119,12 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
                       onChange={(e) => {
                         setFieldValue('notes', e.target.value);
                       }}
+                      sx={{
+                        '& .MuiInputBase-root textarea': {
+                          resize: 'vertical',
+                          overflow: 'auto',
+                        },
+                      }}
                     />
                   </Grid>
                 </Grid>

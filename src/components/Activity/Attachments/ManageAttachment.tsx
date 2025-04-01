@@ -46,7 +46,7 @@ export default function ManageAttachment({
   parentFolder = null,
   type = 'file',
   attachmentType = null,
-  handleAddWorkOrderServiceAttachment = null
+  customhandleAdd = null
 }) {
   const [initialValues, setInitialValues] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -130,8 +130,8 @@ export default function ManageAttachment({
     }
     setLoading(true);
     if (type === 'file') {
-      if (handleAddWorkOrderServiceAttachment) {
-        handleAddWorkOrderServiceAttachment(request, setLoading);
+      if (customhandleAdd) {
+        customhandleAdd(request, setLoading);
       } else {
         if (attachmentId && !isClone) {
           axiosInstance()

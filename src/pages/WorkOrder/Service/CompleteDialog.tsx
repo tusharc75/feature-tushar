@@ -39,6 +39,12 @@ const CompleteDialog = ({ handleClose, serviceName, updateStatus, comment, setCo
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               variant="outlined"
+              sx={{
+                '& .MuiInputBase-root textarea': {
+                  resize: 'vertical',
+                  overflow: 'auto',
+                },
+              }}
             />
           </Box>
         </Box>

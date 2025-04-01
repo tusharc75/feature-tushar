@@ -39,6 +39,12 @@ export default function QCcomment({ onClose, onSubmit, type }) {
           onChange={(e) => {
             setComment(e.target.value);
           }}
+          sx={{
+            '& .MuiInputBase-root textarea': {
+              resize: 'vertical',
+              overflow: 'auto',
+            },
+          }}
         />
       </CustomDialogContent>
       <CustomDialogFooter>

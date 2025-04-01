@@ -391,6 +391,12 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                   value={comment}
                   onChange={handleChange}
                   variant="outlined"
+                  sx={{
+                    '& .MuiInputBase-root textarea': {
+                      resize: 'vertical',
+                      overflow: 'auto',
+                    },
+                  }}
                 />
               </Box>
             </CustomDialogContent>
