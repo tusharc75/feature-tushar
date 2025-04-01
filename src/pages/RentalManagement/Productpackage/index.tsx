@@ -333,19 +333,17 @@ const Productpackage = ({
                 <EditIcon fontSize="small" color={isOffline || !allowedToEdit || quotationApproved ? 'disabled' : 'primary'} />
               </IconButton>
             </HtmlTooltip>
-            {row?.original?.type === MATERIAL_TYPE.package &&
-              <HtmlTooltip title="Attachments">
-                <IconButton
-                  size="small"
-                  aria-label="Attachment"
-                  onClick={(e) => {
-                    setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.detail });
-                  }}
-                >
-                  <AttachFileIcon fontSize="small" color='primary' />
-                </IconButton>
-              </HtmlTooltip>
-            }
+            <HtmlTooltip title="Attachments">
+              <IconButton
+                size="small"
+                aria-label="Attachment"
+                onClick={(e) => {
+                  setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.detail });
+                }}
+              >
+                <AttachFileIcon fontSize="small" color='primary' />
+              </IconButton>
+            </HtmlTooltip>
             {allowedToEdit || !quotationApproved ? (
               !row.original.canDelete ? (
                 <HtmlTooltip
