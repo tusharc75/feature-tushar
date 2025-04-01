@@ -1,12 +1,12 @@
-import { ArrowBackIos, ArrowForwardIos, DeleteOutline, FormatQuote, Message, MoreHoriz, People } from '@mui/icons-material';
+import { ArrowBackIos, ArrowForwardIos, FormatQuote, Message, MoreHoriz, People } from '@mui/icons-material';
 import ApartmentIcon from '@mui/icons-material/Apartment';
 import { Chip, IconButton } from '@mui/material';
 import React, { useState } from 'react';
 import { MdKeyboardDoubleArrowUp } from 'react-icons/md';
-import { PostWorkIcon, PreWorkIcon, WorkStations } from 'src/assets/svg/svgIcons';
+import { PostWorkIcon, PreWorkIcon } from 'src/assets/svg/svgIcons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton, ThemeButtonProps } from 'src/components/Helpers/Buttons';
-import { WORKORDER_SERVICE_STATUS, cn, getChipColor, sidebarResource } from 'src/constants/helpers';
+import { cn, getChipColor } from 'src/constants/helpers';
 import { RenderStatusIcon } from '../index';
 import RenderTotalTime from './RenderTotalTime';
 import useTab from './useTab';
@@ -316,23 +316,6 @@ const RenderServices = ({
                           <MoreHoriz />
                         </IconButton>
                       </HtmlTooltip>
-                      {resource === sidebarResource.workOrder && (
-                        <HtmlTooltip enterTouchDelay={0} title="Delete" placement="top" arrow>
-                          <IconButton
-                            size="small"
-                            color="inherit"
-                            aria-label="delete"
-                            disabled={allowedToEdit && data?.status === WORKORDER_SERVICE_STATUS.pending && !completed ? false : true}
-                            onClick={() => {
-                              setShowConfirmBox(true);
-                            }}
-                          >
-                            <DeleteOutline
-                              color={allowedToEdit && data?.status === WORKORDER_SERVICE_STATUS.pending && !completed ? "error" : "disabled"}
-                              style={{ fontSize: '18px' }} />
-                          </IconButton>
-                        </HtmlTooltip>
-                      )}
                     </div>
                   )}
                 </>
