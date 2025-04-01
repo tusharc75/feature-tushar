@@ -1472,6 +1472,10 @@ export const displayDate = (date) => {
   return date ? dayjs.utc(date).tz().format(dateFormat) : date;
 };
 
+export const formatDate = (date: Date | string, format: string) => {
+  return date ? dayjs.utc(date).tz().format(format) : date;
+};
+
 export const displayDateTime = (date, format = null) => {
   format = format ? format : dateTimeFormat;
   return date ? dayjs.utc(date).tz().format(format) : date;
